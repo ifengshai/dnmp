@@ -38,7 +38,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
-                        {field: 'entry_user_name', title: __('Entry_user_id'),operate:false},
+                        {field: 'entry_user_name', title: __('Entry_user_id')},
+                        {field: 'all_user_name', title: __('all_user_id'), visible:false},
                         {field: 'title', title: __('Title'),cellStyle: formatTableUnit,operate:'LIKE'},
                         {
                             field: 'content',

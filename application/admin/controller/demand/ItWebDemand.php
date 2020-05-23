@@ -79,6 +79,19 @@ class ItWebDemand extends Backend
             if ($filter['Allgroup_sel'] == 4) {
                 $smap['test_group'] = 1;
             }
+
+            if ($filter['entry_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                if (!empty($id)){
+                    $smap['entry_user_id'] = $id;
+                }else{
+                    $smap['entry_user_id'] =  trim($filter['entry_user_name']);
+                }
+                unset($filter['entry_user_name']);
+                unset($smap['nickname']);
+            }
             $meWhere = '';
             //我的
             if(isset($filter['me_task'])){
@@ -112,6 +125,20 @@ class ItWebDemand extends Backend
                 unset($filter['none_complete']);
             }
 
+            $user_map='';
+            if ($filter['all_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $admin_user['nickname'] = ['like', '%' . trim($filter['all_user_name']) . '%'];
+                $id = $admin->where($admin_user)->value('id');
+                if (!empty($id)){
+                    $user_map = "FIND_IN_SET({$id},web_designer_user_id) or FIND_IN_SET({$id},phper_user_id) or FIND_IN_SET({$id},app_user_id) ";
+                }else{
+                    $user_map="web_designer_user_id =  '".trim($filter['all_user_name'])."'";
+                }
+                unset($filter['all_user_name']);
+                unset($admin_user['nickname']);
+            }
+
 
 
             if(isset($filter['Allgroup_sel'])){
@@ -123,6 +150,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($user_map)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -132,6 +160,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($user_map)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)

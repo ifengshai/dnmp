@@ -134,19 +134,14 @@ class Index extends Backend
                 } else {
                     $v['label'] = 0;
                 }
-
+                $smap = [];
                 $smap['parent_id'] = $v['entity_id'];
-                $smap['country_id'] = 'US';
                 $smap['address_type'] = 'shipping';
-                $count = Db::connect($db)
+                $country_id = Db::connect($db)
                     ->table('sales_flat_order_address')
                     ->where($smap)
-                    ->count(1);
-                if ($count > 0) {
-                    $v['country_label'] = 1;   
-                } else {
-                    $v['country_label'] = 0;
-                }
+                    ->value('country_id');
+                $v['country_id'] = $country_id;
             }
             unset($v);
 
@@ -593,21 +588,50 @@ class Index extends Backend
     {
         //根据传的标签切换对应站点数据库
         $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
+        switch ($label) {
+            case 1:
+                $db = 'database.db_zeelool';
+                $model = $this->zeelool;
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                $model = $this->voogueme;
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                $model = $this->nihao;
+                break;
+            case 4:
+                $db = 'database.db_weseeoptical';
+                $model = $this->weseeoptical;
+                break;
+            case 5:
+                $db = 'database.db_meeloog';
+                $model = $this->meeloog;
+                break;
+            default:
+                return false;
+                break;
         }
         ob_start();
         $entity_ids = rtrim(input('id_params'), ',');
+
         if ($entity_ids) {
-            $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
+
+            //判断是否为美国且 非商业快递
+            $smap['parent_id'] = ['in', $entity_ids];
+            $smap['country_id'] = ['not in', ['US', 'PR']];
+            $smap['address_type'] = 'shipping';
+            $count = Db::connect($db)
+                ->table('sales_flat_order_address')
+                ->where($smap)
+                ->count(1);
+            if ($count > 0) {
+                return $this->error('存在非美国的订单', url('index?ref=addtabs&label=' . $label));
+            }
+
+
+            $processing_order_querySql = "select sfo.shipping_description,sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
@@ -625,9 +649,29 @@ table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1
 table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
+
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)'
+            ];
+
             $file_content = '';
             $temp_increment_id = 0;
             foreach ($processing_order_list as $processing_key => $processing_value) {
+                if (in_array($processing_value['shipping_description'], $arr)) {
+                    return $this->error('存在商业快递的订单', url('index?ref=addtabs&label=' . $label));
+                }
+
                 if ($temp_increment_id != $processing_value['increment_id']) {
                     $temp_increment_id = $processing_value['increment_id'];
 

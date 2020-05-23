@@ -97,6 +97,18 @@ class Nihao extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            //任务分类id搜索
+            if ($filter['category_id']) {
+                $swhere = [];
+                $swhere['problem_type_id'] = $filter['category_id'];
+                $swhere['work_type'] = $filter['p_id'];
+                $swhere['work_platform'] = 1;
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['category_id']);
+                unset($filter['p_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             //SKU搜索
             if ($filter['sku']) {

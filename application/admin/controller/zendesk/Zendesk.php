@@ -904,7 +904,7 @@ DOC;
      */
     public function asycTicketsUpdate()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = $this->model->where(['status' => ['in','1,2'],'type' => 1])->column('ticket_id');
         foreach($ticketIds as $ticketId){
             (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
             echo $ticketId."\r\n";
@@ -912,7 +912,7 @@ DOC;
     }
     public function asycTicketsVooguemeUpdate()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        $ticketIds = $this->model->where(['status' => ['in','1,2'],'type' => 2])->column('ticket_id');
         foreach($ticketIds as $ticketId){
             (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
             echo $ticketId."\r\n";

@@ -1,17 +1,14 @@
 <?php
 
-namespace app\admin\model\itemmanage;
+namespace app\admin\model;
 
 use think\Model;
 
-
-class Itempresell extends Model
+class OrderNode extends Model
 {
-
-    protected $connection = 'database.db_stock';
     // 表名
-    protected $name = 'item_presell';
-    
+    protected $name = 'order_node';
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -21,17 +18,8 @@ class Itempresell extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
-    
+    protected $append = [];
 
     
-
-
-
-
-
-
 
 }

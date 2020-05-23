@@ -113,11 +113,11 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="form-inline" data-toggle="cxselect" data-selects="pid,c_id,category_id">
-                <select class="pid form-control" name="pid" data-url="ajax/cxselect" ></select>
+                <select class="pid form-control" name="pid" data-url="ajax/cxselect">
+                </select>
                 <select style="width:80px;" class="c_id form-control" name="c_id" data-url="ajax/cxselect" data-query-name="pid"></select>
-                <select style="width:80px;" class="category_id form-control" name="category_id" data-url="ajax/cxselect" data-query-name="c_id"></select>
-                <input type="hidden" class="operate" data-name="category_id" value="=" />
-                <input type="hidden" class="operate" data-name="c_id" value="=" />
+                <input type="hidden" class="operate" name="category_id" data-name="category_id" value="" />
+                <input type="hidden" class="operate" name="p_id" data-name="p_id" value="" />
             </div>
         </div>
     </div>

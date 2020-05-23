@@ -42,6 +42,9 @@ class WholesaleCustomer extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+/*            case 6:
+                $db = 'database.db_weseeoptical';
+                break;*/
             default:
                 return 0;
                 break;

@@ -243,6 +243,11 @@ class Notice extends Controller
                 $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
 
             }
+            //如果没有分配人
+            if(!$ticket->assignee_id){
+                $updateData['assignee_id'] = '';
+                $updateData['assign_id'] = '';
+            }
             //更新rating,如果存在的话
             if(!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;

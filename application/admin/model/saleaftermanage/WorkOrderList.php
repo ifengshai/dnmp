@@ -136,13 +136,16 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.order_currency_code,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
+        $result['base_grand_total'] = $orderInfo['base_grand_total'];
+        $result['grand_total']    = $orderInfo['grand_total'];
+        $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
         $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
     }
@@ -256,16 +259,16 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://www.zeelool.com/';
+                $url = config('url.zeelool_url');
                 break;
             case 2:
-                $url = 'https://pc.voogueme.com/';
+                $url = config('url.voogueme_url');
                 break;
             case 3:
-                $url = 'https://www.nihaooptical.com/';
+                $url = config('url.nihao_url');
                 break;
             case 5:
-                $url = 'https://www.weseeoptical.com/';
+                $url = config('url.wesee_url');
                 break;
             default:
                 return false;
