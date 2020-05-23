@@ -308,17 +308,18 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $type['type'] = 1;
+            $where_arr['type'] = 1;
+            $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->sampleworkorder
                 ->where($where)
-                ->where($type)
+                ->where($where_arr)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->sampleworkorder
                 ->where($where)
-                ->where($type)
+                ->where($where_arr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -419,8 +420,6 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                //更新状态
-                $workorder['status'] = $params['status'];
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
                 //处理商品
@@ -464,5 +463,119 @@ class Sample extends Backend
 
 
         return $this->view->fetch();
+    }
+    /**
+     * 入库详情
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:38:27 
+     * @param [type] $ids
+     * @return void
+     */
+    public function sample_workorder_detail($ids = null)
+    {
+        $row = $this->sampleworkorder->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $workorder['status'] = $params['workorder_status'];
+                $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
+                $this->success();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+
+        //获取入库商品信息
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
+        $product_arr = array();
+        foreach ($product_list as $key=>$value){
+            $product_arr[] =  $value['sku'].'_'.$value['stock'].'_'.$value['location_id'];
+            $product_list[$key]['location'] = $this->samplelocation->where('id',$value['location_id'])->value('location');
+        }
+        $product_str = implode(',',$product_arr);
+        $this->assign('product_str', $product_str);
+        $this->assign('product_list', $product_list);
+
+        return $this->view->fetch();
+    }
+    /**
+     * 入库删除
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 16:48:44 
+     * @param string $ids
+     * @return void
+     */
+    public function sample_workorder_del($ids = "")
+    {
+        if ($ids) {
+            $pk = $this->sampleworkorder->getPk();
+            $adminIds = $this->getDataLimitAdminIds();
+            if (is_array($adminIds)) {
+                $this->sampleworkorder->where($this->dataLimitField, 'in', $adminIds);
+            }
+            $list = $this->sampleworkorder->where($pk, 'in', $ids)->select();
+
+            $count = 0;
+            Db::startTrans();
+            try {
+                if (!empty($this->sampleworkorder)) {
+                    $fieldArr = $this->sampleworkorder->getTableFields();
+                    if (in_array('is_del', $fieldArr)) {
+                        $this->sampleworkorder->where($pk, 'in', $ids)->update(['is_del' => 2]);
+                        $count = 1;
+                    } else {
+                        foreach ($list as $k => $v) {
+                            $count += $v->delete();
+                        }
+                    }
+                } else {
+                    foreach ($list as $k => $v) {
+                        $count += $v->delete();
+                    }
+                }
+
+                Db::commit();
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            if ($count) {
+                $this->success();
+            } else {
+                $this->error(__('No rows were deleted'));
+            }
+        }
+        $this->error(__('Parameter %s can not be empty', 'ids'));
+    }
+    /**
+     * 入库取消
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 16:13:54 
+     * @param [type] $ids
+     * @return void
+     */
+    public function sample_workorder_cancel($ids = null){
+        $workorder['status'] = 5;
+        $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
+        $this->success();
     }
 }

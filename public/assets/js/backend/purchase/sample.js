@@ -111,6 +111,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             buttons: [
                                 {
+                                    name: 'check',
+                                    text: __('审核'),
+                                    title: __('审核'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_workorder_detail',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                                {
                                     name: 'edit',
                                     text: __('编辑'),
                                     title: __('编辑'),
@@ -135,7 +147,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
+                                        if(row.status_id < 3){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: __('取消'),
+                                    title: __('取消'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_workorder_cancel',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status_id < 3){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                             ],
@@ -178,6 +210,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         sample_workorder_edit: function () {
             Controller.api.bindevent();
         },
+        sample_workorder_detail: function () {
+            Controller.api.bindevent();
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -217,9 +252,33 @@ function del_add_tr(sku,stock,location_id){
     var product_str = product_list_arr.join(',');
     $("#product_list_data").val(product_str);
 }
+/**
+ * 库位添加保存草稿
+ */
 function save(){
     $('#status').val(1);
 }
+/**
+ * 库位添加保存审核
+ */
 function check(){
     $('#status').val(2);
+}
+/**
+ * 入库审核通过
+ */
+function workorder_check_pass(){
+    $("#workorder_status").val(3);
+}
+/**
+ * 入库审核拒绝
+ */
+function workorder_check_refuse(){
+    $("#workorder_status").val(4);
+}
+/**
+ * 入库审核取消
+ */
+function workorder_check_cancel(){
+    $("#workorder_status").val(5);
 }
