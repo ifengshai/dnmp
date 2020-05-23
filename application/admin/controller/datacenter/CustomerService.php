@@ -48,23 +48,24 @@ class CustomerService extends Backend
         $start = date('Y-m-d', strtotime('-7 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
-        $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];        
+        $workload_map['create_time'] = ['between', [date('Y-m-d'.'00:00:00',time()), date('Y-m-d'.'00:00:00',time()+3600*24)]];        
+        $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 23:59:59', strtotime('-1 day'))]]; 
         $customerReply = $this->workload_info($workload_map,$start,$end,1);
         if(!empty($customerReply)){
             unset($customerReply['handleNum']);
             $replyArr = [];
             foreach ($customerReply as $ok =>$ov) {
                 if (array_key_exists($ov['due_id'], $infoOne)) {
-                    $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['assign_id']];
+                    $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['due_id'],$yesterStart,$end);
+                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id']])->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
                 }
-                if (array_key_exists($ov['create_user_id'], $infoTwo)) {
-                    $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['assign_id']];
+                if (array_key_exists($ov['due_id'], $infoTwo)) {
+                    $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['due_id'],$yesterStart,$end);
+                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id']])->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
                 }                
