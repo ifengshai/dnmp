@@ -855,6 +855,7 @@ class CustomerService extends Backend
      */
     public function workload_info($map,$start,$end,$platform)
     {
+        
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
         //根据筛选时间求出客服部门下面所有有数据人员

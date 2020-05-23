@@ -1,7 +1,7 @@
 <?php
 
 namespace app\admin\model;
-
+use think\Cache;
 use think\Model;
 use think\Db;
 
@@ -30,10 +30,14 @@ class WorkloadStatistics extends Model
      */
     public function getyesterdayData($type=1)
     {
+        $arr = Cache::get('WorkloadStatistics_getyesterdayData_'.$type);
+        if($arr){
+            return $arr;
+        }
         $map['create_date'] = date("Y-m-d", strtotime("-1 day"));
         if($type<10){
             $where['platform'] = $type;
-            return $this->where($map)->where($where)->find();
+            $arr = $this->where($map)->where($where)->find();
         }else{
             $info = $this->where($map)->select();
             if(!empty($info)){
@@ -51,9 +55,10 @@ class WorkloadStatistics extends Model
                 $arr['reply_num']      = 0;
                 $arr['waiting_num']    = 0;
                 $arr['pending_num']    = 0;                
-            }
-            return $arr;
+            } 
         }
+        Cache::set('WorkloadStatistics_getyesterdayData_'.$type, $arr, 7200);
+        return $arr;
         
     }
     /**
@@ -66,6 +71,10 @@ class WorkloadStatistics extends Model
      */
     public function gettodayData($type=1)
     {
+        $arr = Cache::get('WorkloadStatistics_gettodayData_'.$type);
+        if($arr){
+            return $arr;
+        }
         if($type<10){
             $where['type'] = $type;
         }
@@ -93,6 +102,7 @@ class WorkloadStatistics extends Model
         $data['reply_num']      = $reply_num;
         $data['waiting_num']    = $waiting_num;
         $data['pending_num']    = $pending_num;
+        Cache::set('WorkloadStatistics_gettodayData_'.$type, $data, 7200);
         return $data;
     }    
     /**
@@ -105,6 +115,10 @@ class WorkloadStatistics extends Model
      */
     public function getSevenData($type=1)
     {
+        $arr = Cache::get('WorkloadStatistics_getSevenData_'.$type);
+        if($arr){
+            return $arr;
+        }
         $stime = date("Y-m-d", strtotime("-7 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
@@ -128,6 +142,7 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
+        Cache::set('WorkloadStatistics_getSevenData_'.$type, $arr, 7200);
         return $arr;        
     }
     /**
@@ -140,6 +155,10 @@ class WorkloadStatistics extends Model
      */
     public function getthirdData($type)
     {
+        $arr = Cache::get('WorkloadStatistics_getthirdData_'.$type);
+        if($arr){
+            return $arr;
+        }
         $stime = date("Y-m-d", strtotime("-30 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
@@ -163,6 +182,7 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
+        Cache::set('WorkloadStatistics_getthirdData_'.$type, $arr, 7200);
         return $arr;
     }
     /**
@@ -175,6 +195,10 @@ class WorkloadStatistics extends Model
      */
     public function gettwoTimeData($starttime,$endtime,$type)
     {
+        $arr = Cache::get('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)));
+        if($arr){
+            return $arr;
+        }
         if(empty($starttime) || empty($endtime)){
             return [];
         }
@@ -199,22 +223,8 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
+        Cache::set('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)), $arr, 7200);
         return $arr;        
     }
 
-    /**
-     * 统计30天订单量
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/18 14:34:01 
-     * @return void
-     */
-    public function get30daysNum()
-    {
-        $stime = date("Y-m-d", strtotime("-30 day"));
-        $etime = date("Y-m-d", strtotime("-1 day"));
-        $map['create_date'] = ['between', [$stime, $etime]];
-        return $this->where($map)->sum('all_sales_num');
-    }
 }
