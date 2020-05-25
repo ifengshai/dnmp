@@ -72,6 +72,9 @@ class CustomerService extends Backend
                 }                
             }            
         }
+		echo '<pre>';
+		dump($replyArr);
+		exit;
         //工作量概况end
 
         //工单统计信息
