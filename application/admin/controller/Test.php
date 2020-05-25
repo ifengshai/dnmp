@@ -1404,12 +1404,16 @@ class Test extends Backend
         $result = $this->worklist->where($where)->column('platform_order');
 
         if(!$result){
-            return false;
+            echo 1;
+            exit;
         }
         $info = $model->name('sales_flat_order')->where('base_grand_total','in',$result)->field('increment_id,base_grand_total')->select();
         if(!$info){
-            return false;
+            echo 2;
+            exit;
         }
+        dump($info);
+        exit;
         foreach($info as $v){
             $this->worklist->where(['work_platform'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
         }
