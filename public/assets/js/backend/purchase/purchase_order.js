@@ -94,7 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                {
+                               /*  {
                                     name: 'submitAudit',
                                     text: '提交审核',
                                     title: __('提交审核'),
@@ -120,7 +120,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             return false;
                                         }
                                     },
-                                },
+                                }, */
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -216,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         }
                                     }
                                 },
-                                {
+                                /* {
                                     name: 'check',
                                     text: '去质检',
                                     title: __('质检'),
@@ -235,7 +235,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             return false;
                                         }
                                     }
-                                }
+                                } */
 
                             ], formatter: Table.api.formatter.operate
                         }
