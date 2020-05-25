@@ -898,7 +898,7 @@ class Test extends Backend
         custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
         custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
         ';
-        $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
+        $map['a.created_at'] = ['>=', '2020-05-25 16:20:00'];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
         $zeelool_data = $this->zeelool->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
