@@ -51,6 +51,9 @@ class CustomerService extends Backend
         $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00',time()), date('Y-m-d 00:00:00',time()+3600*24)]];        
         $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00',time())]]; 
         $customerReply = $this->workload_info($workload_map,$start,$end,1);
+		echo '<pre>';
+		dump($customerReply);
+		exit;
         if(!empty($customerReply)){
             unset($customerReply['handleNum']);
             $replyArr = [];
