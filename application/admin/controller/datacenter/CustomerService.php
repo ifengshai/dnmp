@@ -516,6 +516,7 @@ class CustomerService extends Backend
             $where['is_public'] = 1;
             //平台
             $where['platform'] = 1;
+            $where['due_id']   =['neq',0]; 
             //客服处理量
             $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
             $customerReply = collection($customerReply)->toArray();
