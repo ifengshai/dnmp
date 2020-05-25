@@ -1407,13 +1407,11 @@ class Test extends Backend
             echo 1;
             exit;
         }
-        $info = $model->name('sales_flat_order')->where('base_grand_total','in',$result)->field('increment_id,base_grand_total')->select();
+        $info = $model->name('sales_flat_order')->where('increment_id','in',$result)->field('increment_id,base_grand_total')->select();
         if(!$info){
             echo 2;
             exit;
         }
-        dump($info);
-        exit;
         foreach($info as $v){
             $this->worklist->where(['work_platform'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
         }
