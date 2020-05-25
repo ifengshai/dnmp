@@ -526,9 +526,9 @@ class CustomerService extends Backend
                 $handleNum = 0;
                 foreach ($customerReply as $k => $v) {
                     //客服分组
-                    if (in_array($v['due_id'], $kefumanage[95])) {
+                    if (in_array($v['due_id'], $kefumanage[95]) ||(95 == $v['due_id'])) {
                         $customerReply[$k]['group'] = 'B组';
-                    } elseif (in_array($v['due_id'], $kefumanage[117])) {
+                    } elseif (in_array($v['due_id'], $kefumanage[117]) || (117 == $v['due_id'])) {
                         $customerReply[$k]['group'] = 'A组';
                     } else {
                         $customerReply[$k]['group'] = '未知';
@@ -728,9 +728,9 @@ class CustomerService extends Backend
                 $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
                 foreach ($workList as $k => $v) {
                     //客服分组
-                    if (in_array($v['create_user_id'], $kefumanage[95])) {
+                    if (in_array($v['create_user_id'], $kefumanage[95]) ||(95 == $v['create_user_id'])) {
                         $workList[$k]['group'] = 'B组';
-                    } elseif (in_array($v['create_user_id'], $kefumanage[117])) {
+                    } elseif (in_array($v['create_user_id'], $kefumanage[117]) ||(117 == $v['create_user_id'])) {
                         $workList[$k]['group'] = 'A组';
                     } else {
                         $workList[$k]['group'] = '未知';
@@ -880,9 +880,9 @@ class CustomerService extends Backend
             $handleNum = 0;
             foreach ($customerReply as $k => $v) {
                 //客服分组
-                if (in_array($v['due_id'], $kefumanage[95])) {
+                if (in_array($v['due_id'], $kefumanage[95]) || (95 == $v['due_id'])) {
                     $customerReply[$k]['group'] = 'B组';
-                } elseif (in_array($v['due_id'], $kefumanage[117])) {
+                } elseif (in_array($v['due_id'], $kefumanage[117]) ||(117 == $v['due_id'])) {
                     $customerReply[$k]['group'] = 'A组';
                 } else {
                     $customerReply[$k]['group'] = '未知';
@@ -927,9 +927,9 @@ class CustomerService extends Backend
             $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
             foreach ($workList as $k => $v) {
                 //客服分组
-                if (in_array($v['create_user_id'], $kefumanage[95])) {
+                if (in_array($v['create_user_id'], $kefumanage[95]) || (95 == $v['create_user_id'])) {
                     $workList[$k]['group'] = 'B组';
-                } elseif (in_array($v['create_user_id'], $kefumanage[117])) {
+                } elseif (in_array($v['create_user_id'], $kefumanage[117]) || ($v['create_user_id'] == 117)) {
                     $workList[$k]['group'] = 'A组';
                 } else {
                     $workList[$k]['group'] = '未知';
