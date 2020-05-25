@@ -817,7 +817,7 @@ class CustomerService extends Backend
             }
         }
         $result  = Admin::where('id', 'in', $arr)->column('id,nickname');
-        $result[1]  = 'Admin';
+        //$result[1]  = 'Admin';
         $result[75] = '王伟';
         return $result;
     }
@@ -836,11 +836,13 @@ class CustomerService extends Backend
         if(1 ==$type){
             foreach ($kefumanage[117] as $v) {
                     $arr[] = $v;
-            }   
+            }
+            $arr[] = 117;   
         }elseif(2 == $type){
             foreach ($kefumanage[95] as $v) {
                     $arr[] = $v;
             }
+            $arr[] = 95;
         }
         // $result[1]  = 'Admin';
         // $result[75] = '王伟'; 
