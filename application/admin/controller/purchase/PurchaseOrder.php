@@ -424,7 +424,7 @@ class PurchaseOrder extends Backend
                                     }
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                 }
-                       
+
                                 $this->batch_item->allowField(true)->saveAll($list);
                             }
                         }
@@ -874,6 +874,7 @@ class PurchaseOrder extends Backend
 
         $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
+        $new_product = new \app\admin\model\NewProduct();
         foreach ($data as $k => $v) {
             //匹配SKU
             if ($v['skuid']) {
@@ -881,8 +882,15 @@ class PurchaseOrder extends Backend
 
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
+            
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+            }
+
+            //判断sku是否为选品库SKU
+            $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
+            if ($count > 0) {
+                $this->model->where('id', $v['purchase_id'])->update(['is_new_product' => 1]);
             }
         }
 
@@ -934,6 +942,7 @@ class PurchaseOrder extends Backend
             $data[$i] = Alibaba::getOrderList($i, $params)['result'];
             sleep(1);
         }
+        $new_product = new \app\admin\model\NewProduct();
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -983,10 +992,6 @@ class PurchaseOrder extends Backend
                     //1688用户配置id
                     $userIDs = config('1688user');
                     $list['create_person'] = $userIDs[$v['baseInfo']['buyerSubID']] ?? '任萍';
-                    //采购02账号 默认都为新品
-                    if ($v['baseInfo']['buyerSubID'] == 2201224483475) {
-                        $list['is_new_product'] = 1;
-                    }
                     $jsonDate = $v['baseInfo']['createTime'];
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
@@ -1038,6 +1043,7 @@ class PurchaseOrder extends Backend
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];
+                    $kval = 0;
                     foreach ($v['productItems'] as  $key => $val) {
                         //添加商品数据
                         $params[$key]['purchase_id'] = $result->id;
@@ -1055,6 +1061,16 @@ class PurchaseOrder extends Backend
                             $params[$key]['sku'] = (new SupplierSku())->getSkuData($val['skuID']);
                             $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val['skuID']);
                         }
+
+                        //判断sku是否为选品库SKU
+                        $count = $new_product->where(['sku' => $params[$key]['sku'], 'item_status' => 1, 'is_del' => 1])->count();
+                        if ($count > 0) {
+                            $kval = 1;
+                        }
+                    }
+                    //修改为选品采购单
+                    if ($kval == 1) {
+                        $this->model->where('id', $result->id)->update(['is_new_product' => 1]);
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }

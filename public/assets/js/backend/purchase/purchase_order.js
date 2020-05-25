@@ -216,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         }
                                     }
                                 },
-                                {
+                                /* {
                                     name: 'check',
                                     text: '去质检',
                                     title: __('质检'),
@@ -235,7 +235,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             return false;
                                         }
                                     }
-                                }
+                                } */
 
                             ], formatter: Table.api.formatter.operate
                         }
