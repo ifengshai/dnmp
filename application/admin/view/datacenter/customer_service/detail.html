@@ -282,7 +282,7 @@ table.altrowstable tr:nth-child(even){
                                 {foreach name="step" item="vo" key="k"}
                                 <tr>
                                     <td>{$vo}</td>
-                                    <td>{$step_data[$k]}</td>
+                                    <td>{$step_data.step[$k]}</td>
                                     <td>占比</td>
                                     {if $step_four_total gt 0 }
                                     <td>{:round($step_data.step[$k]/$step_four_total*100,2)}%</td>
