@@ -115,6 +115,17 @@ class SelfApi extends Api
             'update_time' => date('Y-m-d H:i:s'),
         ], ['order_id' => $order_id, 'site' => $site]);
 
+        $count = (new OrderNodeDetail())->where([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'site' => $site,
+            'order_node' => 0,
+            'node_type' => 1
+        ])->count();
+        if ($count > 0) {
+            $this->error('已存在', [], 400);
+        }
+
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
