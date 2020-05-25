@@ -868,6 +868,7 @@ class CustomerService extends Backend
         //$end   = date('Y-m-d');
         //$map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
         $where['is_public'] = 1;
+        $where['due_id']    = ['neq',0]; 
         //平台
         if($platform<10){
             $where['platform'] = $platform;
