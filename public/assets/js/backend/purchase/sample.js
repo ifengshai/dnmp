@@ -1,6 +1,7 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
     var product_arrlist = [];
     var product_editarrlist = [];
+    var lend_arrlist = [];
     var Controller = {
         sample_index: function () {
             // 初始化表格参数配置
@@ -218,12 +219,144 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
             })
         },
+        sample_lendlog_index: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                extend: {
+                    index_url: 'purchase/sample/sample_lendlog_index' + location.search,
+                    add_url: 'purchase/sample/sample_lendlog_add',
+                    edit_url: 'purchase/sample/sample_lendlog_edit',
+                    del_url: 'purchase/sample/sample_lendlog_del',
+                    multi_url: 'purchase/sample/sample_lendlog_multi',
+                    table: 'purchase_sample_lendlog',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {checkbox: true},
+                        {field: 'id', title: __('借出单号'),operate:false},
+                        {field: 'status', title: __('状态'),searchList: {"1": __('待审核'), "2": __('已借出'), "3": __('已拒绝'), "4": __('已归还'), "5": __('已取消')}},
+                        {field: 'create_user', title: __('申请人')},
+                        {field: 'createtime', title: __('申请时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {
+                            field: 'buttons',
+                            width: "120px",
+                            operate:false,
+                            title: __('操作'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: __('详情'),
+                                    title: __('详情'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_lendlog_detail',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: __('编辑'),
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_lendlog_edit',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status_id < 3){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'check_pass',
+                                    text: __('审核通过'),
+                                    title: __('审核通过'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_lendlog_check_pass',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'check_refuse',
+                                    text: __('审核拒绝'),
+                                    title: __('审核拒绝'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'purchase/sample/sample_lendlog_check_refuse',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+            /**
+             * 批量审核通过
+             */
+            $(document).on('click', '.btn-check-pass', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+            /**
+             * 批量审核拒绝
+             */
+            $(document).on('click', '.btn-check-refuse', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+            /**
+             * 批量审核取消
+             */
+            $(document).on('click', '.btn-check-cancel', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 5 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+        },
         sample_location_add: function () {
             Controller.api.bindevent();
         },
         sample_workorder_add: function () {
             Controller.api.bindevent();
-
             $(document).on('click', "#add_entry_product", function () {
                 var location_id = $('#location').val();
                 if(isNaN(parseInt(location_id))){
@@ -234,19 +367,149 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 var sku = $("#sku").val();
                 var stock = $("#stock").val();
-
-                product_arrlist.push(sku+'_'+stock+'_'+location_id);
-                var product_str = product_arrlist.join(',');
-                $("#product_list_data").val(product_str);
-                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+stock+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_add_tr("'+sku+'")> Ｘ </a></td></tr>';
+                var str = sku+'_'+stock+'_'+location_id;
+                var arr = [],
+                    sku_arr = []
+                if ($("#product_list_data").val()) {
+                    arr = $("#product_list_data").val().split(',')
+                    sku_arr = $("#sku_arr").val().split(',')
+                    if($.inArray(sku, sku_arr) != -1){
+                        layer.alert('sku不能重复');
+                        return false;
+                    }
+                    arr.push(str)
+                    sku_arr.push(sku)
+                } else {
+                    arr.push(str)
+                    sku_arr.push(sku)
+                }
+                $("#sku_arr").val(sku_arr.join(','));
+                $("#product_list_data").val(arr.join(','));
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+stock+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_add_tr("'+sku+'","'+stock+'","'+location_id+'")> Ｘ </a></td></tr>';
                 $('#product_data').append(add_str);
             });
+        },
+        sample_lendlog_add: function () {
+            Controller.api.bindevent();
+
+            $(document).on('change', "#sku", function () {
+                var sku = $("#sku option:selected").text();
+                var location = $('#sku').val();
+                if(location.length == 0){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                $("#location").html(location);
+            });
+            $(document).on('click', "#add_entry_product", function () {
+                var sku = $("#sku option:selected").text();
+                var location = $('#sku').val();
+                if(location.length == 0){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                $("#location").html(location);
+
+                var arr = $("#product_list_data").val().split(','),
+                    sku_arr = $("#sku_arr").val().split(',')
+                if($.inArray(sku, sku_arr) != -1){
+                    layer.alert('sku不能重复');
+                    return false;
+                }
+                sku_arr.push(sku)
+                arr.push(sku+'_'+$("#lend_num").val())
+                /* if ($("#product_list_data").val()) {
+                    arr = $("#product_list_data").val().split(',')
+                    sku_arr = $("#sku_arr").val().split(',')
+                    if($.inArray(sku, sku_arr) != -1){
+                        layer.alert('sku不能重复');
+                        return false;
+                    }
+                    sku_arr.push(sku)
+                    arr.push(sku+'_'+$("#lend_num").val())
+                } else {
+                    sku_arr.push(sku)
+                    arr.push(sku+'_'+$("#lend_num").val())
+                } */
+                $("#sku_arr").val(sku_arr.join(','));
+                $("#product_list_data").val(arr.join(','));
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> Ｘ </a></td></tr>';
+                $('#product_data').append(add_str);
+            });
+
         },
         sample_location_edit: function () {
             Controller.api.bindevent();
         },
         sample_workorder_edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', "#add_product", function () {
+                var location_id = $('#location').val();
+                if(isNaN(parseInt(location_id))){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                var location = $("#location option:selected").text();
+
+                var sku = $("#sku").val();
+                var stock = $("#stock").val();
+
+                var arr = [],
+                    str = sku+'_'+stock+'_'+location_id,
+                    sku_arr = []
+                if ($("#product_list_data").val()) {
+                    arr = $("#product_list_data").val().split(',')
+                    sku_arr = $("#sku_arr").val().split(',')
+                    if($.inArray(sku, sku_arr) != -1){
+                        layer.alert('sku不能重复');
+                        return false;
+                    }
+                    sku_arr.push(sku)
+                    arr.push(str)
+                } else {
+                    sku_arr.push(sku)
+                    arr.push(str)
+                }
+                $("#sku_arr").val(sku_arr.join(','));
+                $("#product_list_data").val(arr.join(','));
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+stock+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_add_tr("'+sku+'","'+stock+'","'+location_id+'")> Ｘ </a></td></tr>';
+                $('#product_data').append(add_str);
+            });
+        },
+        sample_lendlog_edit: function () {
+            Controller.api.bindevent();
+            $(document).on('change', "#sku", function () {
+                var sku = $("#sku option:selected").text();
+                var location = $('#sku').val();
+                if(location.length == 0){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                $("#location").html(location);
+            });
+            $(document).on('click', "#add_entry_product", function () {
+                var sku = $("#sku option:selected").text();
+                var location = $('#sku').val();
+                if(location.length == 0){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                $("#location").html(location);
+
+                var arr = [],
+                    sku_arr = $("#sku_arr").val().split(',')
+                if($.inArray(sku, sku_arr) != -1){
+                    layer.alert('sku不能重复');
+                    return false;
+                }
+                arr = $("#product_list_data").val().split(',')
+                sku_arr.push(sku)
+                arr.push(sku+'_'+$("#lend_num").val())
+                $("#sku_arr").val(sku_arr.join(','));
+                $("#product_list_data").val(arr.join(','));
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> Ｘ </a></td></tr>';
+                $('#product_data').append(add_str);
+            });
         },
         sample_workorder_detail: function () {
             Controller.api.bindevent();
@@ -254,41 +517,43 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-                $(document).on('click', "#add_product", function () {
-                    var location_id = $('#location').val();
-                    if(isNaN(parseInt(location_id))){
-                        layer.alert('无效的选择');
-                        return false;
-                    }
-                    var location = $("#location option:selected").text();
-
-                    var sku = $("#sku").val();
-                    var stock = $("#stock").val();
-
-                    var product_data = $("#product_list_data").val();
-                    if(product_data.length == 0){
-                        product_data = sku+'_'+stock+'_'+location_id;
-                    }else{
-                        product_data = product_data+','+sku+'_'+stock+'_'+location_id;
-                    }
-                    $("#product_list_data").val(product_data);
-                    var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+stock+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_add_tr("'+sku+'")> Ｘ </a></td></tr>';
-                    $('#product_data').append(add_str);
-                });
             }
         }
     };
     return Controller;
 });
-
+/**
+ * 入库删除
+ * @param {sku} sku 
+ * @param {库存} stock 
+ * @param {库位id} location_id 
+ */
 function del_add_tr(sku,stock,location_id){
     $(".del_"+sku).remove();
-    var product_list_str = $("#product_list_data").val();
-    var product_list_arr = product_list_str.split(',');
+
+    var arr = $("#product_list_data").val().split(',');
     var str = sku+'_'+stock+'_'+location_id;
-    product_list_arr.splice($.inArray(str,product_list_arr),1);
-    var product_str = product_list_arr.join(',');
-    $("#product_list_data").val(product_str);
+    var sku_arr = $("#sku_arr").val().split(',');
+    sku_arr.splice($.inArray(sku, sku_arr),1)
+    arr.splice($.inArray(str, arr),1)
+    $("#sku_arr").val(sku_arr.join(','));
+    $("#product_list_data").val(arr.join(','));
+}
+/**
+ * 借出记录删除
+ * @param {sku} sku 
+ * @param {借出数量} lend_num 
+ */
+function del_lend_tr(sku,lend_num){
+    $(".del_"+sku).remove();
+    var arr = $("#product_list_data").val().split(',');
+    var str = sku+'_'+lend_num;
+    var sku_arr = $("#sku_arr").val().split(',');    
+    sku_arr.splice($.inArray(sku, sku_arr),1)
+    arr.splice($.inArray(str, arr),1)
+    $("#sku_arr").val(sku_arr.join(','))
+    $("#product_list_data").val(arr.join(','))
+    
 }
 /**
  * 库位添加保存草稿

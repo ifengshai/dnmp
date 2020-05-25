@@ -28,6 +28,7 @@ class Sample extends Backend
         $this->sample = new \app\admin\model\purchase\Sample;
         $this->samplelocation = new \app\admin\model\purchase\SampleLocation;
         $this->sampleworkorder = new \app\admin\model\purchase\SampleWorkorder;
+        $this->samplelendlog = new \app\admin\model\purchase\SampleLendlog;
         $this->item = new \app\admin\model\itemmanage\Item;
 
     }
@@ -373,9 +374,9 @@ class Sample extends Backend
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder);
                 $parent_id = $this->sampleworkorder->id;
-                $product_data = explode(',',$params['product_list_data']);
+                $product_data = array_filter(explode(',',$params['product_list_data']));
                 foreach ($product_data as $key=>$value){
-                    $info = explode('_',$value);
+                    $info = array_filter(explode('_',$value));
                     $workorder_item['parent_id'] = $parent_id;
                     $workorder_item['sku'] = $info[0];
                     $workorder_item['stock'] = $info[1];
@@ -424,10 +425,10 @@ class Sample extends Backend
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
                 //处理商品
                 Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->delete();
-                $product_data = explode(',',$params['product_list_data']);
+                $product_data = array_filter(explode(',',$params['product_list_data']));
                 foreach ($product_data as $key=>$value){
                     $workorder_item = array();
-                    $info = explode('_',$value);
+                    $info = array_filter(explode('_',$value));
                     $workorder_item['parent_id'] = $ids;
                     $workorder_item['sku'] = $info[0];
                     $workorder_item['stock'] = $info[1];
@@ -455,10 +456,13 @@ class Sample extends Backend
         $product_arr = array();
         foreach ($product_list as $key=>$value){
             $product_arr[] =  $value['sku'].'_'.$value['stock'].'_'.$value['location_id'];
+            $sku_arr[] = $value['sku'];
             $product_list[$key]['location'] = $this->samplelocation->where('id',$value['location_id'])->value('location');
         }
         $product_str = implode(',',$product_arr);
+        $sku_str = implode(',',$sku_arr);
         $this->assign('product_str', $product_str);
+        $this->assign('sku_str', $sku_str);
         $this->assign('product_list', $product_list);
 
 
@@ -610,5 +614,189 @@ class Sample extends Backend
             $this->sampleworkorder->where($where)->update(['status'=>$status]);
             $this->success();
         }
+    }
+    /**
+     * 借出记录列表
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/25 09:49:12 
+     * @return void
+     */
+    public function sample_lendlog_index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->samplelendlog
+                ->where($where)
+                ->where($where_arr)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->samplelendlog
+                ->where($where)
+                ->where($where_arr)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            foreach ($list as $key=>$value){
+                $list[$key]['status_id'] = $value['status'];
+                if($value['status'] == 1){
+                    $list[$key]['status'] = '待审核';
+                }elseif($value['status'] == 2){
+                    $list[$key]['status'] = '已借出';
+                }elseif($value['status'] == 3){
+                    $list[$key]['status'] = '已拒绝';
+                }elseif($value['status'] == 4){
+                    $list[$key]['status'] = '已归还';
+                }elseif($value['status'] == 5){
+                    $list[$key]['status'] = '已取消';
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    /**
+     * 借出记录申请
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/25 17:02:44 
+     * @return void
+     */
+    public function sample_lendlog_add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                //生成入库主表数据
+                $lendlog['status'] = 1;
+                $lendlog['create_user'] = session('admin.nickname');
+                $lendlog['createtime'] = date('Y-m-d H:i:s',time());
+                $this->samplelendlog->save($lendlog);
+                $log_id = $this->samplelendlog->id;
+                $product_data = array_filter(explode(',',$params['product_list_data']));
+                foreach ($product_data as $key=>$value){
+                    $info = array_filter(explode('_',$value));
+                    $lendlog_item['log_id'] = $log_id;
+                    $lendlog_item['sku'] = $info[0];
+                    $lendlog_item['lend_num'] = $info[1];
+                    Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
+                }
+                $this->success();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        //获取样品间商品列表
+        $sku_data = $this->sample->getlenddata();
+        $this->assign('sku_data', $sku_data);
+
+        return $this->view->fetch();
+    }
+    /**
+     * 借出记录详情
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/25 17:02:58 
+     * @return void
+     */
+    public function sample_lendlog_detail($ids = null){
+        $row = $this->samplelendlog->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $this->view->assign("row", $row);
+
+        //获取样品借出商品信息
+        $product_list = Db::name('purchase_sample_lendlog_item')->field('sku,lend_num')->where('log_id',$ids)->order('id asc')->select();
+        foreach ($product_list as $key=>$value){
+            $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
+            $product_list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
+        }
+        $this->assign('product_list', $product_list);
+
+        return $this->view->fetch();
+    }
+    /**
+     * 借出记录编辑
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/25 17:23:40 
+     * @param [type] $ids
+     * @return void
+     */
+    public function sample_lendlog_edit($ids = null){
+        $row = $this->samplelendlog->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                //处理商品
+                Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->delete();
+                $product_data = array_filter(explode(',',$params['product_list_data']));
+                foreach ($product_data as $key=>$value){
+                    $lendlog_item = array();
+                    $info = array_filter(explode('_',$value));
+                    $lendlog_item['log_id'] = $ids;
+                    $lendlog_item['sku'] = $info[0];
+                    $lendlog_item['lend_num'] = $info[1];
+                    Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
+                }
+                $this->success();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+
+        //获取样品间商品列表
+        $sku_data = $this->sample->getlenddata();
+        $this->assign('sku_data', $sku_data);
+
+        //获取样品借出商品信息
+        $product_list = Db::name('purchase_sample_lendlog_item')->field('sku,lend_num')->where('log_id',$ids)->order('id asc')->select();
+        $sku_arr = array();
+        foreach ($product_list as $key=>$value){
+            $sku_arr[] = $value['sku'];
+            $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
+            $product_list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
+        }
+        $sku_str = implode(',',$sku_arr);
+        $this->assign('sku_str',$sku_str);
+        $this->assign('product_list', $product_list);
+
+        return $this->view->fetch();
     }
 }
