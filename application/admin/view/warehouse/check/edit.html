@@ -1,9 +1,5 @@
 <style>
-    .caigou {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
+     .caigou {
         padding: 10px;
         width: 100%;
         margin-bottom: 10px;
@@ -17,6 +13,7 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         text-align: center;
+
     }
 
     .caigou #caigou-table tr {
@@ -53,71 +50,66 @@
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div class='caigou'>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">质检单号:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-check_order_number" class="form-control" name="row[check_order_number]"
-                    value="{$row.check_order_number}" readonly type="text">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">质检类型:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[type]" class="form-control type" disabled>
-                    <option value="1" {:$row['type']==1 ? 'selected' : '' }>采购质检</option>
-                    <option value="2" {:$row['type']==2 ? 'selected' : '' }>退货质检</option>
-                </select>
-            </div>
-        </div>
-      
-        <div class="form-group order_number {:$row['order_return_id'] ? '' : 'hidden'}">
-            <label class="control-label col-xs-12 col-sm-2">退货单:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[order_return_id]" class="form-control order_return_id" disabled>
-                    <option value="">请选择</option>
-                    {foreach $order_return_data as $k => $v}
-                    <option value="{$k}" {:$row['order_return_id']==$k ? 'selected' : '' }>{$v}</option>
-                    {/foreach}
-                </select>
-            </div>
-        </div>
-        
 
-       
-        <div class="form-group purchase_id_number {:$row['purchase_id'] ? '' : 'hidden'}">
-            <label class="control-label col-xs-12 col-sm-2">采购单:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id" disabled>
-                    <option value="">请选择</option>
-                    {foreach $purchase_data as $k => $v}
-                    <option value="{$k}" {:$row['purchase_id']==$k ? 'selected' : '' }>{$v}</option>
-                    {/foreach}
-                </select>
-            </div>
-        </div>
-       
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">供应商:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true' required>
-                    <option value="">请选择</option>
-                    {foreach $supplier as $k => $v}
-                    <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
-                    {/foreach}
-                </select>
-
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">备注:</label>
-            <div class="col-xs-12 col-sm-8">
-                <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
-                    cols="50">{$row.remark}</textarea>
-            </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">质检单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-check_order_number" class="form-control" name="row[check_order_number]"
+            value="{$row.check_order_number}" readonly type="text">
         </div>
 
+        <label class="control-label col-xs-12 col-sm-2">采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="" class="form-control purchase_id" disabled>
+                
+                <option value="{$purchase_data.id}" {:$row['purchase_id']==$purchase_data['id'] ? 'selected' : '' }>{$purchase_data.purchase_number}</option>
+               
+            </select>
+        </div>
+     
     </div>
+
+    <div class="form-group">
+       
+        <label class="control-label col-xs-12 col-sm-2">供应商:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true' required>
+                <option value="">请选择</option>
+                {foreach $supplier as $k => $v}
+                <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
+                {/foreach}
+            </select>
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">采购批次:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="" class="form-control batch_id" disabled>
+                <option value="">请选择</option>
+                {foreach $batch_data as $k => $v}
+                <option value="{$v.id}" {:$row['batch_id']==$v['id'] ? 'selected' : '' }>{$v.batch}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+    
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-3">
+            <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
+                cols="50">{$row.remark}</textarea>
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">是否错发:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  class="form-control batch_type" name="batch_type">
+                <option value="">请选择</option>
+                <option value="0" {:$row['error_type'] == 0 ? 'selected' : ''}>否</option>
+                <option value="1" {:$row['error_type'] == 1 ? 'selected' : ''}>是</option>
+            </select>
+        </div>
+    </div>
+    <input  class="form-control" id="error_type" name="row[error_type]" type="hidden" value="{$row.error_type}">
     <style>
         .plupload-preview li {
             width: 80px;
@@ -128,9 +120,9 @@
     <div class='caigou'>
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
-            <div id="toolbar" class="toolbar {:$row['type'] == 1 ? '' : 'hidden'}" >
+            <!-- <div id="toolbar" class="toolbar {:$row['type'] == 1 ? '' : 'hidden'}" >
                 <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
+            </div> -->
             <table id="caigou-table">
                 <tr>
                     <th>SKU</th>
@@ -155,12 +147,12 @@
                     <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" type="hidden"
                         value="{$v.id}">
                     <td>
-                        <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="{$v.sku}">
+                        <input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="{$v.sku}">
                     </td>
                     {if $row['type'] == 1}
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" type="text"
                             value="{$v.supplier_sku}"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" readonly name="purchase_num[]"
                             type="text" value="{$v.purchase_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control check_num" readonly name="check_num[]" type="text"
                             value="{$v.check_num}"></td>
@@ -204,12 +196,13 @@
 
     </div>
 
-
+    <input type='hidden' name="row[status]" class="status" value="{$row.status}">
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
