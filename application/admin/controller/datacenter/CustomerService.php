@@ -897,6 +897,7 @@ class CustomerService extends Backend
                     $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'],$start,$end);
                     $handleNum+=$v['counter'];                    
             }
+            $customerReply['handleNum'] += $handleNum;
         }
         return $customerReply ? $customerReply : false;
     }
