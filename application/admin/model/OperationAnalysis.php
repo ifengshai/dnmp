@@ -389,8 +389,15 @@ class OperationAnalysis extends Model
         $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new']);
         $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer']);
         $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer']);
-        $arr['today_shoppingcart_conversion']               = @round(($zeelool_data['today_shoppingcart_conversion'] + $voogueme_data['today_shoppingcart_conversion'] + $nihao_data['today_shoppingcart_conversion'] + $meeloog_data['today_shoppingcart_conversion'])/4,2);
-        $arr['today_shoppingcart_newconversion']            = @round(($zeelool_data['today_shoppingcart_newconversion'] + $voogueme_data['today_shoppingcart_newconversion'] + $nihao_data['today_shoppingcart_newconversion'] + $meeloog_data['today_shoppingcart_newconversion'])/4,2);
+       if($arr['today_shoppingcart_total']>0){
+         $arr['today_shoppingcart_conversion']              = round($arr['today_order_success']/$arr['today_shoppingcart_total']*100,2);
+         $arr['today_shoppingcart_newconversion']           = round($arr['today_order_success']/$arr['today_shoppingcart_new']*100,2);
+        }else{
+         $arr['today_shoppingcart_conversion']              = 0;
+         $arr['today_shoppingcart_newconversion']           = 0;
+       }
+        //$arr['today_shoppingcart_conversion']               = @round(($zeelool_data['today_shoppingcart_conversion'] + $voogueme_data['today_shoppingcart_conversion'] + $nihao_data['today_shoppingcart_conversion'] + $meeloog_data['today_shoppingcart_conversion'])/4,2);
+        //$arr['today_shoppingcart_newconversion']            = @round(($zeelool_data['today_shoppingcart_newconversion'] + $voogueme_data['today_shoppingcart_newconversion'] + $nihao_data['today_shoppingcart_newconversion'] + $meeloog_data['today_shoppingcart_newconversion'])/4,2);
         //保留2位小数点
         // $arr['yesterday_unit_price']                        = round($arr['yesterday_unit_price']/3,2);
         // $arr['pastsevenday_unit_price']                     = round($arr['pastsevenday_unit_price']/3,2);
