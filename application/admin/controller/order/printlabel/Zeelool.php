@@ -121,7 +121,7 @@ class Zeelool extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-          
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
@@ -248,48 +248,81 @@ class Zeelool extends Backend
     {
         $entity_ids = input('id_params/a');
         $label = input('label');
-        if ($entity_ids) {
-            //多数据库
-            $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label_new'] = 1;
-            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person_new'] =  session('admin.nickname');
-            $this->model->startTrans();
-            try {
-                $result = $this->model->where($map)->update($data);
-                $this->model->commit();
-            } catch (PDOException $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            }
-            if ($result) {
-                //操作日志
-                $params['type'] = 1;
-                $params['num'] = count($entity_ids);
-                $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 1;
-                (new OrderLog())->setOrderLog($params);
+        if (!$entity_ids) {
+            $this->error('缺少参数');
+        }
 
-                //用来判断是否从_list列表页进来
-                if ($label == 'list') {
-                    //订单号
-                    $map['entity_id'] = ['in', $entity_ids];
-                    $list = $this->model
-                        ->where($map)
-                        ->select();
-                    $list = collection($list)->toArray();
-                } else {
-                    $list = 'success';
-                }
-                return $this->success('标记成功!', '', $list, 200);
-            } else {
-                return $this->error('失败', '', 'error', 0);
+        //多数据库
+        $map['entity_id'] = ['in', $entity_ids];
+        $data['custom_print_label_new'] = 1;
+        $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+        $data['custom_print_label_person_new'] =  session('admin.nickname');
+        $this->model->startTrans();
+        try {
+            $result = $this->model->where($map)->update($data);
+            $this->model->commit();
+        } catch (PDOException $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if (false !== $result) {
+            //操作日志
+            $params['type'] = 1;
+            $params['num'] = count($entity_ids);
+            $params['order_ids'] = implode(',', $entity_ids);
+            $params['site'] = 1;
+            (new OrderLog())->setOrderLog($params);
+
+            $map['entity_id'] = ['in', $entity_ids];
+            $res = $this->model->field('entity_id,increment_id')->where($map)->select();
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($res as $k => $v) {
+                $data['site'] = 1;
+                $data['order_id'] = $v['entity_id'];
+                $data['order_number'] = $v['increment_id'];
+                $data['update_time'] = date('Y-m-d H:i:s');
+                //打标签
+                $list[$k]['order_node'] = 1;
+                $list[$k]['node_type'] = 2; //配镜架
+                $list[$k]['content'] = 'Order is under processing';
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 1;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                $data['order_node'] = 1;
+                $data['node_type'] = 2;
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
             }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
+
+            //用来判断是否从_list列表页进来
+            if ($label == 'list') {
+                //订单号
+                $map['entity_id'] = ['in', $entity_ids];
+                $list = $this->model
+                    ->where($map)
+                    ->select();
+                $list = collection($list)->toArray();
+            } else {
+                $list = 'success';
+            }
+            return $this->success('标记成功!', '', $list, 200);
+        } else {
+            return $this->error('失败', '', 'error', 0);
         }
     }
+
 
     /**
      * 配镜架 配镜片 加工 质检通过
@@ -303,11 +336,11 @@ class Zeelool extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
-        if (!$res) {
+        $order_res = $this->model->field('entity_id,increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
-        foreach ($res as $v) {
+        foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
@@ -321,7 +354,7 @@ class Zeelool extends Backend
         }
 
         //判断订单是否存在未处理完成的工单
-        $arr = array_column($res, 'increment_id');
+        $arr = array_column($order_res, 'increment_id');
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
@@ -592,10 +625,74 @@ class Zeelool extends Backend
             $this->error($e->getMessage());
         }
         if (false !== $result) {
+            //添加日志
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
             $params['site'] = 1;
             (new OrderLog())->setOrderLog($params);
+
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($order_res as $k => $v) {
+                $data['site'] = 1;
+                $data['order_id'] = $v['entity_id'];
+                $data['order_number'] = $v['increment_id'];
+                $data['update_time'] = date('Y-m-d H:i:s');
+
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 1;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                //配镜架
+                if ($status == 1) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 3; //配镜架
+                    $list[$k]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+                  
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                }
+
+                //配镜片
+                if ($status == 2) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 4; //配镜片
+                    $list[$k]['content'] = 'Lenses production completed, waiting for customizing';
+                  
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                }
+
+                //加工
+                if ($status == 3) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 5; //加工
+                    $list[$k]['content'] = 'Customizing completed, waiting for Quality Inspection';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                }
+
+                //质检
+                if ($status == 4) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 6; //加工
+                    $list[$k]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                }
+
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+            }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
 
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
@@ -1002,7 +1099,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1160,7 +1257,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->order('sfoi.order_id desc')
             ->select();
-       
+
         $resultList = collection($resultList)->toArray();
 
         $resultList = $this->qty_order_check($resultList);
@@ -1305,7 +1402,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1554,7 +1651,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add']*1 != 0 && $final_print['od_add']*1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1677,6 +1774,4 @@ EOF;
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
     }
-
-    
 }
