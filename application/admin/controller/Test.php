@@ -1379,10 +1379,40 @@ class Test extends Backend
     }
     public function update_base_grand_total()
     {
+        $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
         $platform = $this->request->get('platform');
+        switch ($platform) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
+                break;
+            default:
+                $model = false;
+                break;
+        }
         $where['work_platform'] = $platform;
         $where['base_grand_total'] = 0;
-        $result = Db::name('work_order_list')->where($where)->field('platform_order')->select();
-        
+        //求出所有没有订单金额的工单
+        $result = $this->worklist->where($where)->column('platform_order');
+
+        if(!$result){
+            return false;
+        }
+        $info = $model->name('sales_flat_order')->where('base_grand_total','in',$result)->field('increment_id,base_grand_total')->select();
+        if(!$info){
+            return false;
+        }
+        foreach($info as $v){
+            $this->worklist->where(['work_platform'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
+        }
+
     }
 }
