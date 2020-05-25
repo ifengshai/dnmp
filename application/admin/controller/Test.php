@@ -1377,4 +1377,12 @@ class Test extends Backend
         }
         echo 'ok';
     }
+    public function update_base_grand_total()
+    {
+        $platform = $this->request->get('platform');
+        $where['work_platform'] = $platform;
+        $where['base_grand_total'] = 0;
+        $result = Db::name('work_order_list')->where($where)->field('platform_order')->select();
+        
+    }
 }
