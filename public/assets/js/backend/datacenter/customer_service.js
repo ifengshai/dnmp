@@ -18,8 +18,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 downLoadTitle: '图表',
                 type: 'pie',               
             };
-            var time_one = $('#order_platform_one').val();
-            var time_two = $('#order_platform_two').val();
+            var time_one = $('#create_time_one').val() ? $('#create_time_one').val() :'';
+            //console.log(time_one);
+            var time_two = $('#create_time_two').val() ? $('#create_time_two').val() :'';
+            //console.log(time_two);
             var platform = 1;
             var options1 = {
                 type: 'post',
@@ -102,6 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             //首页工单问题类型统计
             $(document).on('click', '.echart1-btn', function () {
                 var create_time = $('#create_time_one').val();
+                console.log(create_time);
                 if (!create_time) {
                     Toastr.error('请先选择时间范围');
                     return false;
