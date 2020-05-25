@@ -1413,7 +1413,7 @@ class Test extends Backend
             exit;
         }
         foreach($info as $v){
-            $this->worklist->where(['work_platform'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
+            $this->worklist->where(['platform_order'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
         }
 
     }
