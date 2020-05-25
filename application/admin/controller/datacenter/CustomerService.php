@@ -806,7 +806,7 @@ class CustomerService extends Backend
      * @since 2020/05/19 15:59:10
      * @return void
      */
-    private function customers()
+    public function customers()
     {
         $kefumanage = config('workorder.kefumanage');
         $arr = [];
@@ -829,7 +829,7 @@ class CustomerService extends Backend
      * @since 2020/05/20 16:36:20 
      * @return void
      */
-    private function customers_by_group($type)
+    public function customers_by_group($type)
     {
         $kefumanage = config('workorder.kefumanage');
         $arr = [];
