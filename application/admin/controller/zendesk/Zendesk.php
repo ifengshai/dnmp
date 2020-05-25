@@ -807,25 +807,27 @@ DOC;
 
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
-        $now = $this->model->where('assign_id',$admin_id)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
+        $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
         if($now){
             $this->error("请先处理完成已分配的工单");
         }
         //判断今天是否完成工作量
-        $tasks = ZendeskTasks::whereTime('create_time', 'today')
-            ->where(['admin_id' => $admin_id])
-            ->select();
-        foreach($tasks as $task){
-            if($task->surplus_count > 0){
-                $this->error("请先完成今天的任务量再进行申请");
-            }
-        }
-        $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
-        $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
-        foreach($tickets as $ticket){
-            $task = ZendeskTasks::whereTime('create_time', 'today')
-                ->where(['admin_id' => $admin_id, 'type' => $ticket->getType()])
+        /* $tasks = ZendeskTasks::whereTime('create_time', 'today')
+            ->where(['admin_id' => 114])
+            ->find();
+        $tasks = $tasks->toArray();
+        if($task['surplus_count'] > 0){
+            $this->error("请先完成今天的任务量再进行申请");
+        } */
+        //获取用户assignee_id 以及对应站点
+        $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['admin_id' => $admin_id])
                 ->find();
+
+        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=''")];
+        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select();
+
+        foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
             $this->model->where('id',$ticket->id)->update([
                 'assign_id' => $admin_id,
@@ -837,6 +839,24 @@ DOC;
             $task->apply_count = $task->apply_count + 1;
             $task->save();
         }
+        /* $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
+        $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
+
+        foreach($tickets as $ticket){
+            $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['admin_id' => $admin_id,'type' => $ticket->type])
+                ->find();
+            //修改zendesk的assign_id,assign_time
+            $this->model->where('id',$ticket->id)->update([
+                'assign_id' => $admin_id,
+                'assignee_id' => $task->assignee_id,
+                'assign_time' => date('Y-m-d H:i:s', time()),
+            ]);
+            //分配数目+1
+            $task->complete_apply_count = $task->complete_apply_count + 1;
+            $task->apply_count = $task->apply_count + 1;
+            $task->save();
+        } */
     }
     /**
      * 申请分配修改
