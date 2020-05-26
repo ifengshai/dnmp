@@ -1150,6 +1150,13 @@ class Test extends Backend
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
             ->where($map)->select();
         foreach ($zeelool_data as $key => $v) {
+            
+            $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+
+
             $list = [];
             $k = 0;
             //下单
@@ -1362,7 +1369,6 @@ class Test extends Backend
             $data['track_number'] = $v['track_number'];
 
 
-            $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
             if ($count > 0) {
                 Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
             } else {
