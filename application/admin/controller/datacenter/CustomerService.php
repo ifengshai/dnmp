@@ -435,7 +435,7 @@ class CustomerService extends Backend
             }
             $worklistOne = $this->workload_info($mapOne,$timeOne[0],$timeOne[3],$platform);
             if (!empty($mapTwo)) {
-                $worklistTwo = $this->workload_info($mapOne,$timeTwo[0],$timeTwo[3],$platform);
+                $worklistTwo = $this->workload_info($mapTwo,$timeTwo[0],$timeTwo[3],$platform);
             }
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
@@ -897,7 +897,7 @@ class CustomerService extends Backend
                     $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'],$start,$end);
                     $handleNum+=$v['counter'];                    
             }
-            $customerReply['handleNum'] += $handleNum;
+            $customerReply['handleNum'] = $handleNum;
         }
         return $customerReply ? $customerReply : false;
     }
