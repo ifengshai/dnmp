@@ -43,6 +43,26 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             }
             EchartObj.api.ajax(options1, chartOptions1);
             EchartObj.api.ajax(options3, chartOptions3);
+                        //点击重置按钮
+            $(document).on('click', '.btn-workload-time', function () {
+                $('#workload_time').val('');
+                // $('#customer_email').attr({ "value": "" });
+                // $('#customer_name').attr({ "value": "" });
+                // $('#customer_phone').attr({ "value": "" });
+                // $('#track_number').attr({ "value": "" });
+            });
+            $(document).on('click','.btn-create_time_one',function(){
+                $('#create_time_one').val('');
+            });
+            $(document).on('click','.btn-create_time_two',function(){
+                $("#create_time_two").val('');
+            });
+            $(document).on('click','.btn-create_time_workorder',function(){
+                $("#create_time_workorder").val('');
+            });
+            $(document).on('click','.btn-create_time_warehouse',function(){
+                $("#create_time_warehouse").val('');
+            });
             //首页概况统计
             $(document).on('click','#workload-btn',function(){
                 var create_time = $('#workload_time').val();
