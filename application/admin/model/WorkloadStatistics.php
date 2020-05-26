@@ -76,25 +76,27 @@ class WorkloadStatistics extends Model
         //     return $arr;
         // }
         if($type<10){
-            $where['type'] = $type;
+            $where['type']  = $whereComments['platform'] = $type;
         }
         //zendesk
         
         $zendesk_model = Db::name('zendesk');
+        $zendesk_comments = Db::name('zendesk_comments');
         $zendesk_model->query("set time_zone='+8:00'");
+        $zendesk_comments->query("set time_zone='+8:00'");
         //zendesk_comments
         //$zendesk_comments = Db::name('zendesk_comments');
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00");
         $etime = date("Y-m-d 23:59:59");
-        $map['create_time'] = $date['c.create_time'] = $update['update_time'] =  ['between', [$stime, $etime]];
+        $map['create_time']  = $update['update_time'] =  ['between', [$stime, $etime]];
         //获取昨天待处理的open、new量
         $wait_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->count("*");
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
         //获取昨天已回复量
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->where($whereComments)->count('*');;
         //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
-        $reply_num  = $zendesk_model->alias('z')->join('fa_zendesk_comments c','z.id=c.zid')->where($date)->where(['is_public'=>1])->count("*");
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->where(['is_hide'=>1])->count("*");
         //获取昨天的pendding量

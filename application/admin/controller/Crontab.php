@@ -4036,10 +4036,12 @@ order by sfoi.item_id asc limit 1000";
         if (!$platform) {
             return false;
         }
-        $where['type'] = $platform;
+        $where['type'] = $whereComments['platform'] = $platform;
         //zendesk
         $zendesk_model = Db::name('zendesk');
+        $zendesk_comments = Db::name('zendesk_comments');
         $zendesk_model->query("set time_zone='+8:00'");
+        $zendesk_comments->query("set time_zone='+8:00'");
         //zendesk_comments
         //$zendesk_comments = Db::name('zendesk_comments');
         //计算前一天的销量
@@ -4051,8 +4053,7 @@ order by sfoi.item_id asc limit 1000";
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
         //获取昨天已回复量
-        //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
-        $reply_num  = $zendesk_model->alias('z')->join('fa_zendesk_comments c','z.id=c.zid')->where($date)->where(['is_public'=>1])->count("*");
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->where($whereComments)->count('*');
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->where(['is_hide'=>1])->count("*");
         //获取昨天的pendding量

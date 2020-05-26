@@ -147,6 +147,7 @@ class CustomerService extends Backend
             $params = $this->request->param();
             $time = explode(' ', $params['time']);
             $map['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $today = date('Y-m-d');
             $platform = $params['platform'];
             //1.今天数据
             $todayData = $this->workload->gettodayData($platform);
@@ -155,8 +156,13 @@ class CustomerService extends Backend
             //过去7天数据
             $servenData = $this->workload->getSevenData($platform);
             //过去30天数据
-            $thirdData = $this->workload->getthirdData($platform);            
-            $info = $this->workload->gettwoTimeData($time[0],$time[3],$platform);
+            $thirdData = $this->workload->getthirdData($platform);
+            if($today == $time[0]){
+                $info = $this->workload->gettodayData($platform);
+            }else{
+                $info = $this->workload->gettwoTimeData($time[0],$time[3],$platform);
+            }
+            
             $data = [
                 'todayData' => $todayData,
                 'yesterdayData' => $yesterdayData,
