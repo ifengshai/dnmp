@@ -26,17 +26,8 @@ class LogisticsInfo extends Model
      */
     public function addLogisticsInfo($params)
     {
-        //查询物流汇总表是否已存在此关联单号记录
-        $res = $this->where('order_number', $params['order_number'])->find();
-        if ($res) {
-            $list['id'] = $res['id'];
-            
-            $this->where($list)->update(['logistics_number' => $params['logistics_number']]);
-
-        } else {
-            $params['createtime'] = date('Y-m-d H:i:s', time());
-            $params['create_person'] = session('admin.nickname');
-            $this->allowField(true)->isUpdate(false)->data($params)->save();
-        }
+        $params['createtime'] = date('Y-m-d H:i:s', time());
+        $params['create_person'] = session('admin.nickname');
+        return $this->allowField(true)->isUpdate(false)->data($params)->save();
     }
 }

@@ -94,33 +94,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                               /*  {
-                                    name: 'submitAudit',
-                                    text: '提交审核',
-                                    title: __('提交审核'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: 'purchase/purchase_order/audit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 0) {
-                                            return false;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                }, */
+                                /*  {
+                                     name: 'submitAudit',
+                                     text: '提交审核',
+                                     title: __('提交审核'),
+                                     classname: 'btn btn-xs btn-success btn-ajax',
+                                     icon: 'fa fa-leaf',
+                                     url: 'purchase/purchase_order/audit',
+                                     confirm: '确认提交审核吗',
+                                     success: function (data, ret) {
+                                         Layer.alert(ret.msg);
+                                         $(".btn-refresh").trigger("click");
+                                         //如果需要阻止成功提示，则必须使用return false;
+                                         //return false;
+                                     },
+                                     error: function (data, ret) {
+                                         Layer.alert(ret.msg);
+                                         return false;
+                                     },
+                                     visible: function (row) {
+                                         //返回true时按钮显示,返回false隐藏
+                                         if (row.purchase_status == 0) {
+                                             return false;
+                                         } else {
+                                             return false;
+                                         }
+                                     },
+                                 }, */
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -398,7 +398,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     '            <th>到货数量</td>\n' +
                     '        </tr>\n';
                 var els = $('.purchase-table').find('.sku');
-               
+
                 for (var i = 0, j = els.length; i < j; i++) {
                     var sku = els[i].value;
                     html += '<tr>\n' +
@@ -546,7 +546,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().remove();
                 z--;
             })
-            
+
             $(document).on('click', '.btn-addplus', function () {
                 // var content = $('#arrival-content').html();
                 // $('#arrival_div').append(content);
@@ -563,7 +563,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     '            <th>到货数量</td>\n' +
                     '        </tr>\n';
                 var els = $('.purchase-table').find('.sku');
-               
+
                 for (var i = 0, j = els.length; i < j; i++) {
                     var sku = els[i].value;
                     html += '<tr>\n' +
@@ -745,7 +745,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             Controller.api.bindevent();
             $(document).on('click', '.btn-add', function () {
                 var shtml = $('#logistics_div').html();
-                $('#logistics_content').append(shtml);
+                $(this).parent().next().append(shtml);
+            })
+
+            $(document).on('click', '.btn-add-batch', function () {
+                var batch_id = $(this).parent().next('.batch_id').val();
+                var shtml = '<div class="form-group">' +
+                    '<label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>' +
+                    '<div class="col-xs-12 col-sm-3">' +
+                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">' +
+                    '</div>' +
+                    '<label class="control-label col-xs-12 col-sm-2">物流单号:</label>' +
+                    '<div class="col-xs-12 col-sm-3">' +
+                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text">' +
+                    '</div>' +
+                    '<a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>' +
+                    '</div>';
+                $(this).parent().next().next().append(shtml);
             })
 
             $(document).on('click', '.btn-del', function () {

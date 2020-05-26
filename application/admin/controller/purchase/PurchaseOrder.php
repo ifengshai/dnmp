@@ -525,6 +525,11 @@ class PurchaseOrder extends Backend
         $ids = explode(',', $ids);
         if (count($ids) > 1) {
             $row = $this->model->where(['id' => ['in', $ids]])->select();
+            foreach ($row as $v) {
+                if ($v['is_batch'] == 1) {
+                    $this->error(__('分批到货采购单只能单选'));
+                }
+            }
         } else {
             $row = $this->model->get($ids);
             if (!$row) {
@@ -539,8 +544,6 @@ class PurchaseOrder extends Backend
         }
         if ($this->request->isPost()) {
             $params = input('post.');
-
-            dump($params);die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -555,30 +558,44 @@ class PurchaseOrder extends Backend
                     $params['is_add_logistics'] = 1;
                     $params['purchase_status'] = 6; //待收货
                     $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
-
-                    //添加快递100订阅推送服务
-                    // $logistics_company_no = explode(',', trim($params['logistics_company_no']));
-                    // $logistics_number = explode(',', trim($params['logistics_number']));
-                    // Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], implode(',', $ids));
-
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
-                    if (count($ids) > 1) {
-                        foreach ($row as $k => $v) {
-                            $list['logistics_number'] = $params['logistics_number'];
-                            $list['type'] = 1;
-                            $list['order_number'] = $v['purchase_number'];
-                            $list['purchase_id'] = $v['id'];
-                            $logistics->addLogisticsInfo($list);
+                    $logistics_company_no = $params['logistics_company_no'];
+                    $logistics_number = $params['logistics_number'];
+                    if ($params['batch_id']) {
+                        foreach ($logistics_company_no as $k => $v) {
+                            foreach($v as $key => $val) {
+                                if (!$val) {
+                                    continue;
+                                }
+                                $list['logistics_number'] = $logistics_number[$k][$key];
+                                $list['logistics_company_no'] = $val;
+                                $list['type'] = 1;
+                                $list['order_number'] = $row['purchase_number'];
+                                $list['purchase_id'] = $row['id'];
+                                $list['batch_id'] = $k;
+                                $logistics->addLogisticsInfo($list);
+                            }
                         }
                     } else {
-                        $list['logistics_number'] = $params['logistics_number'];
-                        $list['type'] = 1;
-                        $list['order_number'] = $row['purchase_number'];
-                        $list['purchase_id'] = $row['id'];
-                        $logistics->addLogisticsInfo($list);
+                        if (count($ids) > 1) {
+                            foreach ($row as $k => $v) {
+                                $list['logistics_number'] = $params['logistics_number'];
+                                $list['logistics_company_no'] = $params['logistics_company_no'];
+                                $list['type'] = 1;
+                                $list['order_number'] = $v['purchase_number'];
+                                $list['purchase_id'] = $v['id'];
+                                $logistics->addLogisticsInfo($list);
+                            }
+                        } else {
+                            $list['logistics_number'] = $params['logistics_number'];
+                            $list['logistics_company_no'] = $params['logistics_company_no'];
+                            $list['type'] = 1;
+                            $list['order_number'] = $row['purchase_number'];
+                            $list['purchase_id'] = $row['id'];
+                            $logistics->addLogisticsInfo($list);
+                        }
                     }
-
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -600,6 +617,13 @@ class PurchaseOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
+        //判断是否为分批到货
+        if ($row['is_batch'] == 1) {
+            //查询分批数据
+            $batch = new \app\admin\model\purchase\PurchaseBatch();
+            $batch_data = $batch->where('purchase_id', $row['id'])->select();
+            $this->view->assign("batch_data", $batch_data);
+        }
         return $this->view->fetch();
     }
 
@@ -884,7 +908,7 @@ class PurchaseOrder extends Backend
 
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
-            
+
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
             }
