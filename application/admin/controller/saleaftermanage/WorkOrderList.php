@@ -136,6 +136,17 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
+            //筛选措施
+            if($filter['measure_choose_id']){
+                $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+                if(!empty($map['id'])){
+                    $newWorkIds = array_intersect($workIds,$measuerWorkIds);
+                    $map['id']  = ['in',$newWorkIds];
+                }else{
+                    $map['id']  = ['in',$measuerWorkIds];
+                }
+                unset($filter['measure_choose_id']);               
+            }
 
             $this->request->get(['filter' => json_encode($filter)]);
 
@@ -2019,8 +2030,18 @@ EOF;
         return array_merge(config('workorder.warehouse_problem_type'), config('workorder.customer_problem_type'));
     }
 
-
-
+    /**
+     * 措施筛选下拉列表
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/26 14:01:15 
+     * @return void
+     */
+    public function getMeasureContent()
+    {
+        return config('workorder.step');
+    }
     /**
      * 工单备注
      */
