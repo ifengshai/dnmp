@@ -4039,6 +4039,7 @@ order by sfoi.item_id asc limit 1000";
         $where['type'] = $platform;
         //zendesk
         $zendesk_model = Db::name('zendesk');
+        $zendesk_model->query("set time_zone='+8:00'");
         //zendesk_comments
         //$zendesk_comments = Db::name('zendesk_comments');
         //计算前一天的销量
