@@ -265,7 +265,7 @@ order by sfoi.item_id asc limit 1000";
              * 1、渐进镜 Progressive
              * 2、偏光镜 镜片类型包含Polarized
              * 3、染色镜 镜片类型包含Lens with Color Tint
-             * 4、当cyl<=-4或cyl>=4
+             * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
              */
 
             if ($final_params['prescription_type'] == 'Progressive') {
