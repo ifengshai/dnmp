@@ -75,8 +75,8 @@ class CustomerService extends Backend
         //工作量概况end
 
         //工单统计信息
-        $map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
-
+        //$map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        $map['complete_time']   = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         $workList = $this->works_info([],$map);
         if(!empty($workList)){
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);

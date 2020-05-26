@@ -71,10 +71,10 @@ class WorkloadStatistics extends Model
      */
     public function gettodayData($type=1)
     {
-        $arr = Cache::get('WorkloadStatistics_gettodayData_'.$type);
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_gettodayData_'.$type);
+        // if($arr){
+        //     return $arr;
+        // }
         if($type<10){
             $where['type'] = $type;
         }
@@ -102,7 +102,7 @@ class WorkloadStatistics extends Model
         $data['reply_num']      = $reply_num;
         $data['waiting_num']    = $waiting_num;
         $data['pending_num']    = $pending_num;
-        Cache::set('WorkloadStatistics_gettodayData_'.$type, $data, 7200);
+       // Cache::set('WorkloadStatistics_gettodayData_'.$type, $data, 7200);
         return $data;
     }    
     /**
