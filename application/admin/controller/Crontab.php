@@ -72,7 +72,7 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly') {
                     $label[] = 1; //仅镜架
                 } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
@@ -173,18 +173,18 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
             // dump($product_options);
-            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['lens_data_name'], 0, 100);
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
-            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
             $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
-            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['lens_data_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
@@ -234,13 +234,20 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
             $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
 
-            if ($final_params['os_add'] && $final_params['od_add']) {
-                $items[$order_item_key]['os_add'] = $final_params['os_add'];
-                $items[$order_item_key]['od_add'] = $final_params['od_add'];
-            } else {
-                $items[$order_item_key]['total_add'] = $final_params['os_add'];
-            }
 
+            //判断双ADD还是单ADD
+			if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
+				//如果新处方add 对调 因为旧处方add左右眼颠倒
+				$items[$order_item_key]['os_add'] = $lens_params['os_add'];
+				$items[$order_item_key]['od_add'] = $lens_params['od_add'];
+			} else {
+				if ($items[$order_item_key]['od_add'] && $lens_params['od_add']*1 != 0) {
+					$items[$order_item_key]['total_add'] = $lens_params['od_add'];
+				} else {
+					$items[$order_item_key]['total_add'] = $lens_params['os_add'];
+				}
+            }
+            
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
@@ -265,7 +272,7 @@ order by sfoi.item_id asc limit 1000";
              * 1、渐进镜 Progressive
              * 2、偏光镜 镜片类型包含Polarized
              * 3、染色镜 镜片类型包含Lens with Color Tint
-             * 4、当cyl<=-4或cyl>=4
+             * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
              */
 
             if ($final_params['prescription_type'] == 'Progressive') {
@@ -277,6 +284,10 @@ order by sfoi.item_id asc limit 1000";
             }
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
