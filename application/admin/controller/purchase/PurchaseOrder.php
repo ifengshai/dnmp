@@ -555,9 +555,9 @@ class PurchaseOrder extends Backend
                     $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
 
                     //添加快递100订阅推送服务
-                    $logistics_company_no = explode(',', trim($params['logistics_company_no']));
-                    $logistics_number = explode(',', trim($params['logistics_number']));
-                    Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], implode(',', $ids));
+                    // $logistics_company_no = explode(',', trim($params['logistics_company_no']));
+                    // $logistics_number = explode(',', trim($params['logistics_number']));
+                    // Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], implode(',', $ids));
 
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
