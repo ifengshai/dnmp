@@ -31,6 +31,7 @@
     .desc{
         display: flex;
         margin: 10px 0 ;
+        border-bottom: 1px solid #ddd;
     }
     .desc textarea{
         margin: 0 10px 10px;
@@ -40,6 +41,13 @@
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div>
+        入库单号：{$location_number}
+    </div>
+    <div class="desc">
+        <label>备注：</label>
+        <textarea name="row[description]" id="description" cols="30" rows="6"></textarea>
+    </div>
     <div id="add_entry_product"><span>add</span></div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
@@ -47,48 +55,42 @@
             <select name="sku" id="sku" class="form-control selectpicker" data-live-search="true">
                 <option value="">请输入</option>
                 {foreach name="sku_data" item="vo"}}
-                <option value="{$vo.location}" >{$vo.sku}</option>
+                <option value="{$vo.location}">{$vo.sku}</option>
                 {/foreach}
             </select>
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('借出数量')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('出库数量')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="lend_num" class="form-control" name="row[lend_num]" type="text">
+            <input id="stock" data-rule="required" class="form-control" name="row[stock]" type="text">
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">库位:</label>
+    <div class="form-group ">
+        <label class="control-label col-xs-12 col-sm-2">库位号:</label>
         <div class="col-xs-12 col-sm-8" style="margin-top: 7px;">
             <span id="location"></span>
         </div>
     </div>
-    <input type="hidden" name="row[product_list_data]" id="product_list_data" value="{$product_str}">
-    <input type="hidden" id="sku_arr" value="{$sku_str}">
+    <input type="hidden" name="row[product_list_data]" id="product_list_data" value="">
+    <input type="hidden" id="sku_arr" value="">
     <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
         <thead>
         <tr role="row">
             <th style="width: 150px;">SKU</th>
-            <th style="width: 150px;">借出数量</th>
-            <th style="width: 150px;">库位</th>
+            <th style="width: 150px;">出库数量</th>
+            <th style="width: 150px;">库位号</th>
             <th style="width: 150px;">删除</th>
         </thead>
         <tbody id="product_data">
-            {volist name="product_list" id="vo"}
-            <tr role="row" class="odd del_{$vo.sku}">
-                <td>{$vo.sku}</td>
-                <td>{$vo.lend_num}</td>
-                <td>{$vo.location}</td>
-                <td id="del"><a href="javascript:;" onclick=del_lend_tr("{$vo.sku}",{$vo.lend_num})> Ｘ </a></td>
-            </tr>
-            {/volist}
         </tbody>
     </table>
+    <input type="hidden" value="" id="status" name="row[status]">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('保存')}</button>
+            <button type="submit" onclick="save()" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" onclick="check()" class="btn btn-success btn-embossed disabled">{:__('提交审核')}</button>
         </div>
     </div>
 </form>

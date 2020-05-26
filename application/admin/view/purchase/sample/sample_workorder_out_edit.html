@@ -6,7 +6,7 @@
     .col-sm-2 {
         width:30%
     }
-    #add_entry_product{
+    #add_product{
         width: 73px;
         height: 31px;
         line-height: 31px;
@@ -31,6 +31,7 @@
     .desc{
         display: flex;
         margin: 10px 0 ;
+        border-bottom: 1px solid #ddd;
     }
     .desc textarea{
         margin: 0 10px 10px;
@@ -40,7 +41,14 @@
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div id="add_entry_product"><span>add</span></div>
+    <div>
+        入库单号：{$row.location_number}
+    </div>
+    <div class="desc">
+        <label>备注：</label>
+        <textarea name="row[description]" id="description" cols="30" rows="6">{$row.description}</textarea>
+    </div>
+    <div id="add_product"><span>add</span></div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
         <div class="col-xs-12 col-sm-8">
@@ -53,13 +61,13 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('借出数量')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('出库数量')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="lend_num" class="form-control" name="row[lend_num]" type="text">
+            <input id="stock" class="form-control" name="row[stock]" type="text">
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">库位:</label>
+    <div class="form-group ">
+        <label class="control-label col-xs-12 col-sm-2">库位号:</label>
         <div class="col-xs-12 col-sm-8" style="margin-top: 7px;">
             <span id="location"></span>
         </div>
@@ -70,25 +78,25 @@
         <thead>
         <tr role="row">
             <th style="width: 150px;">SKU</th>
-            <th style="width: 150px;">借出数量</th>
-            <th style="width: 150px;">库位</th>
+            <th style="width: 150px;">库存</th>
+            <th style="width: 150px;">出库数量</th>
             <th style="width: 150px;">删除</th>
         </thead>
         <tbody id="product_data">
-            {volist name="product_list" id="vo"}
-            <tr role="row" class="odd del_{$vo.sku}">
-                <td>{$vo.sku}</td>
-                <td>{$vo.lend_num}</td>
-                <td>{$vo.location}</td>
-                <td id="del"><a href="javascript:;" onclick=del_lend_tr("{$vo.sku}",{$vo.lend_num})> Ｘ </a></td>
-            </tr>
-            {/volist}
+        {volist name="product_list" id="vo"}
+        <tr role="row" class="odd del_{$vo.sku}">
+            <td>{$vo.sku}</td>
+            <td>{$vo.stock}</td>
+            <td>{$vo.location}</td>
+            <td id="del"><a href="javascript:;" onclick=del_add_tr("{$vo.sku}",{$vo.stock})> Ｘ </a></td>
+        </tr>
+        {/volist}
         </tbody>
     </table>
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('保存')}</button>
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
         </div>
     </div>
 </form>
