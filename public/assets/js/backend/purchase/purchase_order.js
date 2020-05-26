@@ -743,6 +743,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         logistics: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-add', function () {
+                var shtml = $('#logistics_div').html();
+                $('#logistics_content').append(shtml);
+            })
+
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().remove();
+            })
         },
         remark: function () {
             Controller.api.bindevent();
