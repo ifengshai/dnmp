@@ -254,7 +254,7 @@ class CustomerService extends Backend
         $where['is_check'] = 1;
         $where['work_type'] = 1;
         $where['work_status'] = ['lt',2];
-        $where['work_status'] = ['neq',7];
+        //$where['work_status'] = ['neq',7];
         //求出主管的超时时间
         $time_out = config('workorder.manage_time_out');
         $workList = $this->model->where($map)->where($where)->field('assign_user_id,submit_time,check_time')->select();
@@ -305,7 +305,7 @@ class CustomerService extends Backend
         $where['is_check'] = 1;
         $where['work_type'] = 1;
         $where['work_status'] = ['lt',2];
-        $where['work_status'] = ['neq',7];
+        //$where['work_status'] = ['neq',7];
         //求出措施的超时时间
         $time_out = config('workorder.step_time_out');
         $workMeasure = $this->model->where($map)->where($where)->alias('w')->join('work_order_measure m','w.id=m.work_id')->field('w.check_time,m.operation_time,m.measure_choose_id')->select();
