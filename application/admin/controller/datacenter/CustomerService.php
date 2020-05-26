@@ -253,7 +253,8 @@ class CustomerService extends Backend
     {
         $where['is_check'] = 1;
         $where['work_type'] = 1;
-        $where['work_status'] = ['lt',2];
+        $where['work_status'] = ['in',[2,3,4,5,6]];
+        //$where['work_status'] = ['lt',2];
         //$where['work_status'] = ['neq',7];
         //求出主管的超时时间
         $time_out = config('workorder.manage_time_out');
@@ -304,7 +305,8 @@ class CustomerService extends Backend
     {
         $where['is_check'] = 1;
         $where['work_type'] = 1;
-        $where['work_status'] = ['lt',2];
+        //where('id','not in',[1,5,8]);
+        $where['work_status'] = ['in',[2,3,4,5,6]];
         //$where['work_status'] = ['neq',7];
         //求出措施的超时时间
         $time_out = config('workorder.step_time_out');
@@ -370,7 +372,8 @@ class CustomerService extends Backend
     public function warehouse_handle($map,$warehouse_problem_type)
     {
         $where['work_type'] = 2;
-        $where['work_status'] = ['lt',2];
+        $where['work_status'] = ['in',[2,3,4,5,6]];
+        //$where['work_status'] = ['lt',2];
         //求出主管的超时时间
         $time_out = config('workorder.warehouse_time_out');
         $workList = $this->model->where($map)->where($where)->field('problem_type_id,check_time,complete_time')->select();
