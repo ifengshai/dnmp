@@ -1674,4 +1674,9 @@ class Test extends Backend
         $arr = unserialize($str);
         dump($arr);die;
     }
+    public function ceshi(){
+        $stime = date("Y-m-d 00:00:00");
+        $etime = date("Y-m-d 23:59:59");
+        $time  = 123;
+    }
 }
