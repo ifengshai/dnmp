@@ -51,7 +51,7 @@ class CustomerService extends Backend
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
         $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d 00:00:00', time()+3600*24)]];
         $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
-        $customerReply = $this->workload_info($workload_map, $start, $end, 1);
+        $customerReply = $this->workload_info($workload_map, $start, $end, 10);
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
             $replyArr = [];
@@ -85,7 +85,8 @@ class CustomerService extends Backend
 
         //工单统计信息
         //$map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
-        $map['complete_time']   = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+        $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+        $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info([], $map);
         if (!empty($workList)) {
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
@@ -821,6 +822,10 @@ class CustomerService extends Backend
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'workList', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
         }
+        //客服数据
+        $customer_type = config('workorder.customer_type');
+        $customer_category = config('workorder.customer_category');
+        $this->view->assign(compact('customer_type','customer_category'));
         return $this->view->fetch();
     }
     /**

@@ -137,7 +137,25 @@ table.altrowstable tr:nth-child(even){
                                     <input type="hidden" class="form-control operate" name="two_time-operate" data-name="two_time" value="RANGE" readonly="">
                                     <input type="text" autocomplete="off" class="form-control datetimerange" name="two_time"  placeholder="创建时间" id="two_time" value="" data-index="14">
                                 </div>
-                            </div>                            
+                            </div>
+                            <div class="form-group" style="margin-left:1px;">
+                                <label class="control-label col-xs-1 col-sm-1">员工分组:</label>
+                                <div class="col-xs-2">
+                                    <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+                                        {foreach name="customer_type" item="vo"}
+                                        <option value="{$key}" selected="selected">{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                                <label class="control-label col-xs-1 col-sm-1">员工分类:</label>
+                                <div class="col-xs-2">
+                                    <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+                                        {foreach name="customer_category" item="vo"}
+                                        <option value="{$key}" selected="selected">{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>                                                        
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
                                     <input type="submit" class="btn btn-success" value="提交"> 

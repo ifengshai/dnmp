@@ -389,7 +389,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
         workstatistics:function()
         {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Form.api.bindevent($("form[role=form]"));
+            Form.api.bindevent($("form[role=form1]"));
             //点击对比时间段显示第二个时间输入框
             $("#contrast").change(function() { 
                 if($("#contrast").is(':checked')){
