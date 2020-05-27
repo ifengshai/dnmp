@@ -78,6 +78,7 @@ class WorkloadStatistics extends Model
         if($type<10){
             $where['type']  = $whereComments['platform'] = $type;
         }
+            //$where['is_admin'] = 1;
         //zendesk
         
         $zendesk_model = Db::name('zendesk');
