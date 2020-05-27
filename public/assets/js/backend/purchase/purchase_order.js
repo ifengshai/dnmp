@@ -45,7 +45,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: false },
                         { field: 'purchase_remark', title: __('采购备注'), formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
@@ -94,33 +93,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                /*  {
-                                     name: 'submitAudit',
-                                     text: '提交审核',
-                                     title: __('提交审核'),
-                                     classname: 'btn btn-xs btn-success btn-ajax',
-                                     icon: 'fa fa-leaf',
-                                     url: 'purchase/purchase_order/audit',
-                                     confirm: '确认提交审核吗',
-                                     success: function (data, ret) {
-                                         Layer.alert(ret.msg);
-                                         $(".btn-refresh").trigger("click");
-                                         //如果需要阻止成功提示，则必须使用return false;
-                                         //return false;
-                                     },
-                                     error: function (data, ret) {
-                                         Layer.alert(ret.msg);
-                                         return false;
-                                     },
-                                     visible: function (row) {
-                                         //返回true时按钮显示,返回false隐藏
-                                         if (row.purchase_status == 0) {
-                                             return false;
-                                         } else {
-                                             return false;
-                                         }
-                                     },
-                                 }, */
+                             
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -175,25 +148,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         } else {
                                             return false;
                                         }
-                                    }
-                                },
-                                {
-                                    name: 'detail',
-                                    text: '录入物流单号',
-                                    title: '录入物流单号',
-                                    classname: 'btn btn-xs  btn-success  btn-dialog',
-                                    icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/logistics',
-                                    extend: 'data-area = \'["50%","60%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if ((row.purchase_status == 2 || row.purchase_status == 6) && row.purchase_type == 1) {
-                                            return true;
-                                        }
-                                        return false;
                                     }
                                 },
                                 {

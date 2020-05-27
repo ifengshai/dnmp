@@ -42,13 +42,6 @@
         border-bottom-color: transparent;
     }
 
-    .nav-tabs>li>a {
-        margin-right: 2px;
-        line-height: 1.42857143;
-        border: 1px solid transparent;
-        border-radius: 3px 3px 0 0;
-    }
-
     .nav>li>a {
         position: relative;
         display: block;
@@ -58,8 +51,6 @@
     .panel-heading {
         padding: 15px;
         padding-bottom: 0;
-        background: #e8edf0;
-        border-color: #e8edf0;
         position: relative;
     }
 
@@ -74,9 +65,9 @@
 <div class="panel-heading">
     {:build_heading()}
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
-        <li><a href="{:url('detail')}?id={$id}">采购单信息</a></li>
-        <li><a href="{:url('checkDetail')}?id={$id}">质检信息</a></li>
-        <li class="active"><a href="{:url('logisticsDetail')}?id={$id}">物流信息</a></li>
+        <li><a href="{:url('detail')}?id={$id}&dialog=1">采购单信息</a></li>
+        <li><a href="{:url('checkDetail')}?id={$id}&dialog=1">质检信息</a></li>
+        <li class="active"><a href="{:url('logisticsDetail')}?id={$id}&dialog=1">物流信息</a></li>
     </ul>
 </div>
 

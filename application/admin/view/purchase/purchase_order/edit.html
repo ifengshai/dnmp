@@ -279,7 +279,7 @@
             {foreach $batch as $k => $v}
             <input class="form-control" name="batch_id[]" value="{$v.id}" readonly type="hidden">
             <div class="list" style="margin-top:20px;">
-                <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
+                <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> 批次预计到货时间：</label>
                 <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
                     <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
                         data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text"

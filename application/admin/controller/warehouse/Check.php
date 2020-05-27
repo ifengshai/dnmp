@@ -214,12 +214,11 @@ class Check extends Backend
             $logisticsinfo = new \app\admin\model\warehouse\LogisticsInfo;
             $info = $logisticsinfo->get($ids);
             $this->assign('info', $info);
-        }
-   
 
-        //查询分批数据
-        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $purchase_id)->select();
-        $this->assign('batch', $batch);
+            //查询分批数据
+            $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $info->purchase_id)->select();
+            $this->assign('batch', $batch);
+        }
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
@@ -230,12 +229,7 @@ class Check extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
-
-        //查询退货单
-        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-        $orderReturnData = $orderReturn->getOrderReturnData();
-        $this->assign('order_return_data', $orderReturnData);
-
+        
         //质检单
         $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('check_order_number', $check_order_number);
@@ -386,22 +380,22 @@ class Check extends Backend
             }
         }
 
-         //查询此采购单分批
-         $batch = new \app\admin\model\purchase\PurchaseBatch();
-         $batch_data = $batch->where('purchase_id', $row['purchase_id'])->select();
-         $this->assign('batch_data', $batch_data);
- 
-         //查询供应商
-         $supplier = new \app\admin\model\purchase\Supplier;
-         $data = $supplier->getSupplierData();
-         $this->assign('supplier', $data);
- 
-         //查询采购单
-         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-         $purchase_data = $purchase->where('id', $row['purchase_id'])->find();
-         $this->assign('purchase_data', $purchase_data);
+        //查询此采购单分批
+        $batch = new \app\admin\model\purchase\PurchaseBatch();
+        $batch_data = $batch->where('purchase_id', $row['purchase_id'])->select();
+        $this->assign('batch_data', $batch_data);
 
-       
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $data = $supplier->getSupplierData();
+        $this->assign('supplier', $data);
+
+        //查询采购单
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_data = $purchase->where('id', $row['purchase_id'])->find();
+        $this->assign('purchase_data', $purchase_data);
+
+
         //查询质检单商品信息
         $check_item = new \app\admin\model\warehouse\CheckItem;
         $map['check_id'] = $ids;
@@ -515,7 +509,7 @@ class Check extends Backend
             foreach ($item as $k => $v) {
                 $item[$k]['check_num'] = @$check_item[$v['sku']]['check_num'] ?? 0;
             }
-           
+
             if ($item) {
                 $this->success('', '', $item);
             } else {

@@ -60,7 +60,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         }
                                         return true;
                                     }
-                                }], formatter: Table.api.formatter.operate
+                                },
+                                {
+                                    name: 'signin',
+                                    text: __('签收'),
+                                    title: __('签收'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'warehouse/logistics_info/signin',
+                                    confirm: '确定要签收吗',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+                            
+                            ], formatter: Table.api.formatter.operate
                         }
                     ]
                 ]

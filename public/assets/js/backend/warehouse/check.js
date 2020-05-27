@@ -260,14 +260,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             })
      
             var purchase_id = $('.purchase_id').val();
-            if (purchase_id) {
+            var batch_id = $('.batch_id').val();
+            if (purchase_id && !batch_id) {
                 $('.purchase_id').change();
             }
+
+            if (batch_id) {
+                $('.batch_id').change();
+            }
+
             //移除
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
             })
-
+            
         },
         add_return_order: function () {
             Controller.api.bindevent();
@@ -525,14 +531,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             if ($('.supplier.selectpicker option').length > 1) {
                                 $(".supplier").selectpicker('val', data.supplier_id);//默认选中
                             }
-                            var html = '';
-                            if (data.batch) {
-                                for (var i in data.batch) {
-                                    html +='<option value="' + data.batch[i].id + '">' + data.batch[i].batch + '</option>';
+
+                            var batch_id = $('.batch_id').val();
+                            console.log(batch_id);
+                            if (!batch_id) {
+                                var html = '';
+                                if (data.batch ) {
+                                    for (var i in data.batch) {
+                                        html +='<option value="' + data.batch[i].id + '">' + data.batch[i].batch + '</option>';
+                                    }
                                 }
+                                // $('.batch_id').append(html);
+                                console.log(123);
                             }
-                            $('.batch_id').append(html);
-                            //console.log(data.id);
+
+                      
                             //循环展示商品信息
                             if (data.item) {
                                 var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';

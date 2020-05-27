@@ -82,9 +82,9 @@
 <div class="panel-heading">
     {:build_heading()}
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
-        <li class="active"><a href="{:url('detail')}?id={$row.id}">采购单信息</a></li>
-        <li ><a href="{:url('checkDetail')}?id={$row.id}">质检信息</a></li>
-        <li ><a href="{:url('logisticsDetail')}?id={$row.id}">物流信息</a></li>
+        <li class="active"><a href="{:url('detail')}?id={$row.id}&dialog=1">采购单信息</a></li>
+        <li ><a href="{:url('checkDetail')}?id={$row.id}&dialog=1">质检信息</a></li>
+        <li ><a href="{:url('logisticsDetail')}?id={$row.id}&dialog=1">物流信息</a></li>
     </ul>
 </div>
 
@@ -98,7 +98,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.purchase_name}"
+            <input id="c-purchase_name" class="form-control" readonly name="row[purchase_name]" value="{$row.purchase_name}"
                 type="text">
         </div>
     </div>
@@ -106,12 +106,12 @@
         <label class="control-label col-xs-12 col-sm-2">到货时间:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
+                data-date-format="YYYY-MM-DD HH:mm:ss" readonly data-use-current="true" name="row[arrival_time]" type="text"
                 value="{$row.arrival_time}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">大货/现货:</label>
         <div class="col-xs-12 col-sm-3">
-            <select name="row[type]" class="form-control">
+            <select name="row[type]" class="form-control" disabled>
                 <option value="">请选择</option>
                 <option value="1" {:$row['type']==1 ? 'selected' : '' }>现货</option>
                 <option value="2" {:$row['type']==2 ? 'selected' : '' }>大货</option>
@@ -121,7 +121,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
+            <textarea id="c-purchase_remark" class="form-control " readonly rows="5" name="row[purchase_remark]"
                 cols="50">{$row.purchase_remark}</textarea>
         </div>
     </div>
@@ -133,7 +133,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同编号:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[contract_id]" class="form-control contract_id selectpicker" required
+                <select name="row[contract_id]" class="form-control contract_id selectpicker" disabled required
                     data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $contract_data as $k => $v}
@@ -157,7 +157,7 @@
             <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-delivery_time" readonly class="form-control datetimepicker delivery_time"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_time]" type="text"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" readonly name="row[delivery_time]" type="text"
                     value="{$row.delivery_time}">
             </div>
         </div>
@@ -166,7 +166,7 @@
             <label class="control-label col-xs-12 col-sm-2">合同有效期:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-contract_time" readonly class="form-control datetimepicker contract_time"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="" type="text"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" readonly name="" type="text"
                     value="{:date('Y-m-d H:i:s')}">
             </div>
             <label class="control-label col-xs-12 col-sm-2">合同附件:</label>
@@ -202,7 +202,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-3">
 
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required'
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" disabled data-rule='required'
                     data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
@@ -240,18 +240,18 @@
                     <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}"
                         type="hidden">
                     <td>
-                        <input id="c-purchase_remark" class="form-control sku" {:$row['contract_id'] ? 'readonly' : '' }
+                        <input id="c-purchase_remark" class="form-control sku" readonly {:$row['contract_id'] ? 'readonly' : '' }
                             name="sku[]" value="{$v.sku}" type="text">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
                             value="{$v.product_name}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control supplier_sku" name="supplier_sku[]"
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
                             value="{$v.supplier_sku}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" {:$row['contract_id']
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" readonly {:$row['contract_id']
                             ? 'readonly' : '' } name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_price" {:$row['contract_id']
+                    <td><input id="c-purchase_remark" class="form-control purchase_price" readonly {:$row['contract_id']
                             ? 'readonly' : '' } name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" readonly
+                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" readonly
                             value="{$v.purchase_total}" type="text"></td>
                     <!-- <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> -->
                 </tr>
@@ -269,7 +269,7 @@
 
             <label class="control-label col-xs-12 col-sm-2">运费:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-purchase_freight" class="form-control freight" step="0.01" name="row[purchase_freight]"
+                <input id="c-purchase_freight" class="form-control freight" readonly step="0.01" name="row[purchase_freight]"
                     type="number" value="{$row.purchase_freight}">
             </div>
         </div>
@@ -282,7 +282,7 @@
             </div>
             <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[settlement_method]" class="form-control settlement_method">
+                <select name="row[settlement_method]" class="form-control settlement_method" disabled>
                     <option value="1" {:$row['settlement_method']==1 ? 'selected' : '' }>先付款</option>
                     <option value="2" {:$row['settlement_method']==2 ? 'selected' : '' }>货到付款</option>
                     <option value="3" {:$row['settlement_method']==3 ? 'selected' : '' }>付定金，货到付款</option>
@@ -295,13 +295,13 @@
 
             <label class="control-label col-xs-12 col-sm-2">定金金额:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-deposit_amount" class="form-control deposit_amount" step="0.01" name="row[deposit_amount]"
+                <input id="c-deposit_amount" class="form-control deposit_amount" readonly step="0.01" name="row[deposit_amount]"
                     type="number" value="{$row.deposit_amount}">
             </div>
 
             <label class="control-label col-xs-12 col-sm-2">尾款金额:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-final_amount" class="form-control final_amount" step="0.01" name="row[final_amount]"
+                <input id="c-final_amount" class="form-control final_amount" readonly step="0.01" name="row[final_amount]"
                     type="number" value="{$row.final_amount}">
             </div>
 
@@ -319,10 +319,11 @@
             {foreach $batch as $k => $v}
             <input class="form-control" name="batch_id[]" value="{$v.id}" readonly type="hidden">
             <div class="list" style="margin-top:20px;">
-                <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
+                
+                <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> 批次预计到货时间：</label>
                 <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
                     <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text"
+                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" readonly type="text"
                         value="{$v->arrival_time}">
 
                 </div>
@@ -341,7 +342,7 @@
                             <input id="c-purchase_remark" class="form-control" name="batch_sku[{$k}][]" value="{$val.sku}" readonly type="text">
                         </td>
 
-                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" name="arrival_num[{$k}][]"
+                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" readonly name="arrival_num[{$k}][]"
                                 type="text"></td>
 
                     </tr>

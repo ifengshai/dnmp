@@ -86,8 +86,8 @@
         <div class="col-xs-12 col-sm-3">
             <select name="row[batch_id]" class="form-control batch_id">
                 <option value="">请选择</option>
-                {if $batch_data}
-                {foreach $batch_data as $k => $v}
+                {if $batch}
+                {foreach $batch as $k => $v}
                 <option value="{$v.id}" {:$info['batch_id']==$v['id'] ? 'selected' : '' }>{$v.batch}</option>
                 {/foreach}
                 {/if}

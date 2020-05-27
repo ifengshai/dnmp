@@ -527,15 +527,30 @@ class PurchaseOrder extends Backend
             $row = $this->model->where(['id' => ['in', $ids]])->select();
             foreach ($row as $v) {
                 if ($v['is_batch'] == 1) {
-                    $this->error(__('分批到货采购单只能单选'));
+                    $this->error(__('分批到货采购单只能单选'), url('index'));
+                }
+
+                if (!in_array($v['purchase_status'], [2, 5, 6, 9])) {
+                    $this->error(__('此状态不能录入物流单号'), url('index'));
                 }
             }
         } else {
             $row = $this->model->get($ids);
             if (!$row) {
-                $this->error(__('No Results were found'));
+                $this->error(__('No Results were found'), url('index'));
             }
+
+            if (!in_array($row['purchase_status'], [2, 5, 6, 9])) {
+                $this->error(__('此状态不能录入物流单号'), url('index'));
+            }
+
+            $logistics = new \app\admin\model\LogisticsInfo();
+            $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
+            $logistics_data = collection($logistics_data)->toArray();
+            dump($logistics_data);die;
+            $this->view->assign("logistics_data", $logistics_data);
         }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -564,7 +579,7 @@ class PurchaseOrder extends Backend
                     $logistics_number = $params['logistics_number'];
                     if ($params['batch_id']) {
                         foreach ($logistics_company_no as $k => $v) {
-                            foreach($v as $key => $val) {
+                            foreach ($v as $key => $val) {
                                 if (!$val) {
                                     continue;
                                 }
@@ -634,6 +649,7 @@ class PurchaseOrder extends Backend
             $batch_data = $batch->where('purchase_id', $row['id'])->select();
             $this->view->assign("batch_data", $batch_data);
         }
+
         return $this->view->fetch();
     }
 
