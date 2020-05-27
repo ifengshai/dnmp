@@ -1652,8 +1652,8 @@ EOF;
                             $os_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                             $od_add = "";
                         } else {
-                            $os_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
-                            $od_add = "";
+                            $od_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
+                            $os_add = "";
                         }
                     }
                 } else {
