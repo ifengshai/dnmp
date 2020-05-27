@@ -1649,8 +1649,8 @@ EOF;
                         $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                     } else {
                         if ($final_print['os_add'] && $final_print['os_add'] * 1 != 0) {
-                            $os_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
-                            $od_add = "";
+                            $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                            $os_add = "";
                         } else {
                             $od_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
                             $os_add = "";
