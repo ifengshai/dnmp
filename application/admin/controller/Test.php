@@ -54,7 +54,8 @@ class Test extends Backend
         $order_shipment = Db::connect('database.db_zeelool')
             ->table('sales_flat_shipment_track')
             ->field('entity_id,track_number,title,updated_at,order_id')
-            ->where('created_at', '>=', '2020-04-01 00:00:00')
+            ->where('created_at', '>=', '2020-3-31 00:00:00')
+            ->where('handle', '=', '1')
             ->select();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
@@ -488,7 +489,7 @@ class Test extends Backend
             }
         }
     }
-    //DHL 匹配规则有问题
+    //DHL
     public function dhl_data($data, $add)
     {
         $trackdetail = array_reverse($data['z1']);
@@ -765,7 +766,6 @@ class Test extends Backend
             ->table('sales_flat_shipment_track')
             ->field('entity_id,order_id,track_number,title,updated_at')
             ->where('created_at', '>=', '2020-03-31 00:00:00')
-            ->where('handle', '=', '0')
             ->select();
 
         foreach ($order_shipment as $k => $v) {
