@@ -151,11 +151,11 @@ class CustomerService extends Backend
 				//create_user_id
                  if(array_key_exists($vh['create_user_id'],$infoOne)){
 					$thisWorkArr[$vh['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$vh['counter']];
-					$thisWorkArr['one']['create_num']           += $thisWorkArr[$v['create_user_id']]['create_num'];
+					$thisWorkArr['one']['create_num']           += $thisWorkArr[$vh['create_user_id']]['create_num'];
                  }
 				 if(array_key_exists($vh['create_user_id'],$infoTwo)){
 					$thisWorkArr[$vh['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$vh['counter']];
-					$thisWorkArr['two']['create_num']           += $thisWorkArr[$v['create_user_id']]['create_num'];					 
+					$thisWorkArr['two']['create_num']           += $thisWorkArr[$vh['create_user_id']]['create_num'];					 
 				 }
              }
          }		
