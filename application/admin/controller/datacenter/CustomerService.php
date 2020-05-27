@@ -85,12 +85,21 @@ class CustomerService extends Backend
 
         //工单统计信息
         //$map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        //本月工单创建量
+        // $thisMonthWorkOrderNum = $this->getThisMonthWorkOrderNum();
+        // if(!empty($thisMonthWorkOrderNum)){
+        //     foreach($thisMonthWorkOrderNum as $k =>$v){
+        //         if(array_key_exists($v['create_user_id'],$infoOne)){
+
+        //         }
+        //     }
+        // }
         $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info([], $map);
         if (!empty($workList)) {
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
-            $workArr = [];
+            $workArr = $oneResult = [];
             $workArr['one']['create_num'] = $workArr['one']['counter'] = $workArr['one']['base_grand_total'] =$workArr['one']['coupon'] = $workArr['one']['refund_num'] = $workArr['one']['replacement_num'] = $workArr['one']['total_refund_money'] =0;
             $workArr['two']['create_num'] = $workArr['two']['counter'] = $workArr['two']['base_grand_total'] =$workArr['two']['coupon'] = $workArr['two']['refund_num'] = $workArr['two']['replacement_num'] = $workArr['two']['total_refund_money'] =0;
             foreach ($workList as $ok =>$ov) {
@@ -905,6 +914,20 @@ class CustomerService extends Backend
         // $result[75] = '王伟';
         $result  = Admin::where('id', 'in', $arr)->column('id,nickname');
         return $result;
+    }
+    /**
+     * 获取本月工单创建量
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/27 18:46:56 
+     * @return void
+     */
+    public function getThisMonthWorkOrderNum()
+    {
+        $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        $where['create_user_id'] = ['neq',0];
+        return $this->model->where($map_create)->where($where)->field('count(*) as counter,create_user_id')->group('create_user_id')->select();
     }
     /**
      * 获取工作量信息
