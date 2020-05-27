@@ -51,22 +51,12 @@ class Test extends Backend
      */
     public function track_shipment_num()
     {
-        $order_shipment = Db::connect('database.db_zeelool')
-            ->table('sales_flat_shipment_track')
-            ->field('entity_id,track_number,title,updated_at,order_id')
-            ->where('created_at', '>=', '2020-3-31 00:00:00')
-            ->where('handle', '=', '1')
-            ->limit(10)
-            ->select();
-        dump($order_shipment);
         $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
-        $ma['handle'] = 1;
+        $map['b.handle'] = 1;
         $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
-            ->where($map)->limit(10)->select();
+            ->where($map)->select();
         $order_shipment = collection($order_shipment)->toArray();
-        dump($order_shipment);
-        die;
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
