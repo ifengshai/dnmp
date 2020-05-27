@@ -1665,7 +1665,7 @@ class Test extends Backend
     {
         $data = $this->ordernode->where('shipment_type', 2)->select();
         foreach($data as $k => $v) {
-            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id',$v['order_id'])->value('shipment_type');
+            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id',$v['order_id'])->value('title');
             $this->ordernode->where('id', $v['id'])->update(['shipment_type' => $shipment_type]);
             echo $k . '\n';
         }
