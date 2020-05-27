@@ -31,6 +31,7 @@ class Check extends Backend
         $this->model = new \app\admin\model\warehouse\Check;
         $this->check_item = new \app\admin\model\warehouse\CheckItem;
         $this->purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $this->batch = new \app\admin\model\purchase\PurchaseBatch();
     }
 
     /**
@@ -214,7 +215,11 @@ class Check extends Backend
             $info = $logisticsinfo->get($ids);
             $this->assign('info', $info);
         }
+   
 
+        //查询分批数据
+        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $purchase_id)->select();
+        $this->assign('batch', $batch);
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
