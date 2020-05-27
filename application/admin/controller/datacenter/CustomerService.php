@@ -143,9 +143,9 @@ class CustomerService extends Backend
         if(!empty($thisMonthWorkOrderNum)){
 			$workArr['one']['create_num'] =	$workArr['two']['create_num'] = 0;
 			$thisMonthWorkOrderNum = collection($thisMonthWorkOrderNum)->toArray();
-/* 			dump($thisMonthWorkOrderNum);
+			dump($thisMonthWorkOrderNum);
 			dump($infoOne);
-			exit; */
+			exit;
 			foreach($thisMonthWorkOrderNum as $kh =>$vh){
                  if(array_key_exists($vh['create_user_id'],$infoOne)){
 					$workArr[$vh['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$vh['counter']];
