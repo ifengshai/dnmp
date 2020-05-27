@@ -55,8 +55,141 @@ class ItDemandReport extends Backend
 
         return $this->view->fetch();
     }
+    /**
+     * 网站统计任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:11:21 
+     * @return void
+     */
+    public function web_score_statistics(){
+        $stime = date("Y-m-d 00:00:00", strtotime("-6 month"));
+        $etime = date('Y-m-d H:i:s', time());
+        $smap['create_time'] = ['between', [$stime, $etime]];
+        $task_item_smap['itWebTask.createtime'] = ['between', [$stime, $etime]];
+        $task_smap['createtime'] = ['between', [$stime, $etime]];
 
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $web_designer_user_arr = config('demand.' . 'web_designer_user');
+        $phper_user_arr = config('demand.' . 'phper_user');
+        $app_user_arr = config('demand.' . 'app_user');
+        $test_user_arr = config('demand.' . 'test_user');
 
+        $list = $this->model
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取近六个月的需求与bug
+
+        $task_item_list = $this->itWebTaskItem
+            ->with("itWebTask")
+            ->where('is_del', 1)
+            ->where($task_item_smap)
+            ->select();
+
+        $task_item_list = collection($task_item_list)->toArray();//获取近六个月的开发任务
+
+        $web_user_total = $this->PersonalJobNum($web_designer_user_arr,'web_designer_user_id','前端',$list,$task_item_list);
+        $php_user_total = $this->PersonalJobNum($phper_user_arr,'phper_user_id','后端',$list,$task_item_list);
+        $app_user_total = $this->PersonalJobNum($app_user_arr,'app_user_id','APP',$list,$task_item_list);
+        $test_user_total =$this->PersonalJobNum($test_user_arr,'test_user_id','测试',$list,$task_item_list);
+        $personal_total=array_merge($web_user_total,$php_user_total,$app_user_total,$test_user_total);
+        dump($personal_total);exit;
+    }
+    /**
+     * 获取复杂度
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 16:07:57 
+     * @return void
+     */
+    public function getcomplexity($usertype){
+        $complexity = '';
+        switch ($usertype)
+        {
+            case 'web_designer_user_id':
+                $complexity = 'web_designer_complexity' ;
+                break;  
+            case 'phper_user_id':
+                $complexity = 'phper_complexity' ;
+                break;
+            case 'app_user_id':
+                $complexity = 'app_complexity' ;
+                break;
+            case 'test_user_id':
+                $complexity = 'test_complexity' ;
+                break;
+        }
+        return $complexity;
+    }
+    /**
+     * 获取每个人的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function PersonalJobNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        $bug_total = 0;      //bug总量
+        $demand_total = 0;   //需求总量
+        $task_total = 0;     //开发总量
+        $score_total = 0;    //总量
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        if ($v['type'] == 1) {
+                            $bug_total++;
+                            $score_total++;
+                        } elseif ($v['type'] == 2) {
+                            $complexity = $this->getcomplexity($field_name);
+                            if($v[$complexity] == 1){
+                                $demand_total++;
+                                $score_total++;
+                            }elseif($v[$complexity] == 2){
+                                $demand_total += 3;
+                                $score_total += 3;
+                            }
+                            elseif($v[$complexity] == 3){
+                                $demand_total += 5;
+                                $score_total += 5;
+                            }   
+                        }
+                    }
+                }
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        if($v['type'] == 1){
+                            $task_total += 10;
+                            $score_total += 10;
+                        }elseif($v['type'] == 2){
+                            $task_total += 20;
+                            $score_total += 20;
+                        }else{
+                            $task_total += 30;
+                            $score_total += 30;
+                        }
+                    }
+                }
+                $web_user[$i]['bug_total'] = $bug_total;
+                $web_user[$i]['demand_total'] = $demand_total;
+                $web_user[$i]['task_total'] = $task_total;
+                $web_user[$i]['score_total'] = $score_total;
+                $i++;
+            }
+        }
+        return $web_user;
+    }
     /*
      * 取出配置文件的数据，
      * $user_id string 数据格式以逗号分隔
@@ -480,6 +613,5 @@ class ItDemandReport extends Backend
     }
 
     */
-
 
 }
