@@ -582,6 +582,16 @@ class PurchaseOrder extends Backend
                         dump($logistics_number);die;
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
+                                foreach ($logistics_company_no as $key => $val) {
+                                    $list['logistics_number'] = $logistics_number[$key];
+                                    $list['logistics_company_no'] = $val;
+                                    $list['type'] = 1;
+                                    $list['order_number'] = $row['purchase_number'];
+                                    $list['purchase_id'] = $row['id'];
+                                    $list['batch_id'] = $k;
+                                    $logistics->addLogisticsInfo($list);
+                                }
+
                                 $list['logistics_number'] = $params['logistics_number'];
                                 $list['logistics_company_no'] = $params['logistics_company_no'];
                                 $list['type'] = 1;
@@ -590,6 +600,15 @@ class PurchaseOrder extends Backend
                                 $logistics->addLogisticsInfo($list);
                             }
                         } else {
+                            foreach ($logistics_company_no as $k => $v) {
+                                $list['logistics_number'] = $logistics_number[$k][$key];
+                                $list['logistics_company_no'] = $val;
+                                $list['type'] = 1;
+                                $list['order_number'] = $row['purchase_number'];
+                                $list['purchase_id'] = $row['id'];
+                                $list['batch_id'] = $k;
+                                $logistics->addLogisticsInfo($list);
+                            }
                             $list['logistics_number'] = $params['logistics_number'];
                             $list['logistics_company_no'] = $params['logistics_company_no'];
                             $list['type'] = 1;
