@@ -56,7 +56,7 @@ class Test extends Backend
         $map['b.handle'] = 1;
         $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
-            ->where($map)->select();
+            ->where($map)->order('a.entity_id asc')->select();
         $order_shipment = collection($order_shipment)->toArray();
         $trackingConnector = new TrackingConnector($this->apiKey);
 
@@ -107,8 +107,8 @@ class Test extends Backend
                     $this->fedex_data($trackdata, $add);
                 }
             }
-            echo $v['order_id'] . ':' . $v['track_number'] . "\n";
-            usleep(300000);
+            echo $k . ':' . $v['order_id'] . "\n";
+            usleep(200000);
         }
         exit;
     }
