@@ -32,6 +32,7 @@ class Test extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->user = new \app\admin\model\Admin();
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
+        $this->ordernode = new \app\admin\model\OrderNode();
     }
 
 
@@ -1656,6 +1657,17 @@ class Test extends Backend
         }
         foreach ($info as $v) {
             $this->worklist->where(['platform_order' => $v['increment_id']])->update(['base_grand_total' => $v['base_grand_total']]);
+        }
+    }
+
+
+    public function tempprocess()
+    {
+        $data = $this->ordernode->where('shipment_type', 2)->select();
+        foreach($data as $k => $v) {
+            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id',$v['order_id'])->value('title');
+            $this->ordernode->where('id', $v['id'])->update(['shipment_type' => $shipment_type]);
+            echo $k . '\n';
         }
     }
 
