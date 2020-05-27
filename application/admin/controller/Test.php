@@ -16,10 +16,10 @@ class Test extends Backend
     protected $str2 = 'Delivered to Air Transport.';
     protected $str3 = 'In Transit to Next Facility.';
     protected $str4 = 'Arrived in the Final Destination Country.';
-    protected $str30 = '到达待取';
-    protected $str35 = '投递失败';
-    protected $str40 = '成功签收';
-    protected $str50 = '可能异常';
+    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.';//到达待取
+    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.';//投递失败
+    protected $str40 = 'Delivered successfully.';//投递成功
+    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.';//可能异常
 
     public function _initialize()
     {
@@ -108,7 +108,7 @@ class Test extends Backend
                 }
             }
             echo $v['order_id'] . ':' . $v['track_number'] . "\n";
-            sleep(1);
+            usleep(300000);
         }
         exit;
     }
