@@ -30,7 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','echartsobj'], functio
                         },
                         formatter: function (param) { //格式化提示信息
                             console.log(param);
-                            return param[0].seriesName + '：' + param[0].value + '<br>' + param[1].seriesName + '：' + param[1].value +'<br>' + param[2].seriesName + '：' + param[2].value +'<br>';
+                            return param[0].seriesName + '：' + param[0].value + '<br>' + param[1].seriesName + '：' + param[1].value +'<br>' + param[2].seriesName + '：' + param[2].value +'<br>'+ param[3].seriesName + '：' + param[3].value +'<br>';
                         }
                     },
                     yAxis: [

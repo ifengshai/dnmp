@@ -29,58 +29,136 @@ class ItDemandReport extends Backend
         $month_first = date("Y-m-01",time());//本月第一天
         $month_last = date('Y-m-d', strtotime("$month_first +1 month -1 day"));//本月最后一天
 
+        $month_01 = date('Y-m', strtotime('-1 month'));//上月
         $month_first_01 = date('Y-m-01', strtotime('-1 month'));//上月第一天
         $month_last_01 = date('Y-m-t', strtotime('-1 month'));//上月最后一天
 
-        $month_first_02 = date('Y-m-01', strtotime('-2 month'));//上月第一天
-        $month_last_02 = date('Y-m-t', strtotime('-2 month'));//上月最后一天
+        $month_02 = date('Y-m', strtotime('-2 month'));
+        $month_first_02 = date('Y-m-01', strtotime('-2 month'));//第一天
+        $month_last_02 = date('Y-m-t', strtotime('-2 month'));//最后一天
+
+        $month_03 = date('Y-m', strtotime('-3 month'));
+        $month_first_03 = date('Y-m-01', strtotime('-3 month'));//第一天
+        $month_last_03 = date('Y-m-t', strtotime('-3 month'));//最后一天
+
+        $month_04 = date('Y-m', strtotime('-4 month'));
+        $month_first_04 = date('Y-m-01', strtotime('-4 month'));//第一天
+        $month_last_04 = date('Y-m-t', strtotime('-4 month'));//最后一天
+
+        $month_05 = date('Y-m', strtotime('-5 month'));
+        $month_first_05 = date('Y-m-01', strtotime('-5 month'));//第一天
+        $month_last_05 = date('Y-m-t', strtotime('-5 month'));//最后一天
         
-        dump($month_first);
-        dump($month_last);
-        dump($month_first_01);
-        dump($month_last_01);
-        dump($month_first_02);
-        dump($month_last_02);
-        $task_list = $this->itWebTask
-            ->where('is_del', 1)
-            ->whereTime('createtime', 'between', [$month_first, $month_last])
-            ->select();
-            $task_list = collection($task_list)->toArray();
-            dump($task_list);
+
+        
+       
+
+        
 
         if ($this->request->isAjax()) {
             
-            //网站组--目标--start
-            /**
-             * 短期任务：10个
-             * 中期任务：20个
-             * 长期任务：30个
-             */
-            
-
-
+            //网站组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
+            $task_month = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->sum('type')*10;//本月
+            $task_month_01 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->sum('type')*10;
+            $task_month_02 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->sum('type')*10;
+            $task_month_03 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_03, $month_last_03])->sum('type')*10;
+            $task_month_04 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_04, $month_last_04])->sum('type')*10;
+            $task_month_05 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_05, $month_last_05])->sum('type')*10;
             //网站组--目标--end
+
+            //网站组--BUG(普通：1个,小概率：2个)--start
+            $bug0_month = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first, $month_last])->count();
+            $bug1_month = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*2;
+            $bug_month = $bug0_month+$bug1_month;
+    
+            $bug0_month_01 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count();
+            $bug1_month_01 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*2;
+            $bug_month_01 = $bug0_month_01+$bug1_month_01;
+    
+            $bug0_month_02 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count();
+            $bug1_month_02 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*2;
+            $bug_month_02 = $bug0_month_02+$bug1_month_02;
+    
+            $bug0_month_03 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_03, $month_last_03])->count();
+            $bug1_month_03 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_03, $month_last_03])->count()*2;
+            $bug_month_03 = $bug0_month_03+$bug1_month_03;
+    
+            $bug0_month_04 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_04, $month_last_04])->count();
+            $bug1_month_04 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_04, $month_last_04])->count()*2;
+            $bug_month_04 = $bug0_month_04+$bug1_month_04;
+    
+            $bug0_month_05 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count();
+            $bug1_month_05 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count()*2;
+            $bug_month_05 = $bug0_month_05+$bug1_month_05;
+            //网站组--BUG--end
+
+            //网站组--需求(普通：1个,中等：3个,复杂：5个)--start
+            $demand1_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first, $month_last])->count();
+            $demand2_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*3;
+            $demand3_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*5;
+            $demand_month = $demand1_month+$demand2_month+$demand3_month;
+    
+            $demand1_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count();
+            $demand2_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*3;
+            $demand3_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*5;
+            $demand_month_01 = $demand1_month_01+$demand2_month_01+$demand3_month_01;
+    
+            $demand1_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count();
+            $demand2_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*3;
+            $demand3_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*5;
+            $demand_month_02 = $demand1_month_02+$demand2_month_02+$demand3_month_02;
+    
+            $demand1_month_03 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_03, $month_last_03])->count();
+            $demand2_month_03 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_03, $month_last_03])->count()*3;
+            $demand3_month_03 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_03, $month_last_03])->count()*5;
+            $demand_month_03 = $demand1_month_03+$demand2_month_03+$demand3_month_03;
+    
+            $demand1_month_04 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_04, $month_last_04])->count();
+            $demand2_month_04 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_04, $month_last_04])->count()*3;
+            $demand3_month_04 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_04, $month_last_04])->count()*5;
+            $demand_month_04 = $demand1_month_04+$demand2_month_04+$demand3_month_04;
+    
+            $demand1_month_05 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count();
+            $demand2_month_05 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count()*3;
+            $demand3_month_05 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count()*5;
+            $demand_month_05 = $demand1_month_05+$demand2_month_05+$demand3_month_05;
+            //网站组--需求--end
+
+            //合计--start
+            $all = $task_month+$bug_month+$demand_month;
+            $all_01 = $task_month_01+$bug_month_01+$demand_month_01;
+            $all_02 = $task_month_02+$bug_month_02+$demand_month_02;
+            $all_03 = $task_month_03+$bug_month_03+$demand_month_03;
+            $all_04 = $task_month_04+$bug_month_04+$demand_month_04;
+            $all_05 = $task_month_05+$bug_month_05+$demand_month_05;
+            //合计--end
+
             $json['columnData'] = [
                 [
-                    'name'=> '直接访问',
+                    'name'=> '开发',
                     'type'=>'bar',
-                    'data'=> [320, 332, 301, 334, 390, 330, 320]
+                    'data'=> [$task_month_05, $task_month_04, $task_month_03, $task_month_02, $task_month_01, $task_month]
                 ],
                 [
-                    'name'=> '邮件营销',
+                    'name'=> 'BUG',
                     'type'=>'bar',
-                    'data'=>  [120, 132, 101, 134, 90, 230, 210]
+                    'data'=>  [$bug_month_05, $bug_month_04, $bug_month_03, $bug_month_02, $bug_month_01, $bug_month]
                 ],
                 [
-                    'name'=> '联盟广告',
+                    'name'=> '需求',
                     'type'=>'bar',
-                    'data'=> [220, 182, 191, 234, 290, 330, 310]
+                    'data'=> [$demand_month_05, $demand_month_04, $demand_month_03, $demand_month_02, $demand_month_01, $demand_month]
+                ],
+                [
+                    'name'=> '合计',
+                    'type'=>'bar',
+                    'data'=> [$all_05, $all_04, $all_03, $all_02, $all_01, $all]
                 ],
  
             ];
 
-            $json['xColumnName'] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-            $json['column'] = ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'];
+            $json['xColumnName'] = [$month_05, $month_04, $month_03, $month_02, $month_01, '本月'];
+            //$json['column'] = ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'];
             return json(['code' => 1, 'data' => $json]);
             
         }
