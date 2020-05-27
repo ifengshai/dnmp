@@ -289,7 +289,7 @@ table.altrowstable tr:nth-child(even){
                         {foreach name="infoOne" item="vo" key='k'}
                          <tr>
                             <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $thisWorkArr[$k]['create_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
                             <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
                             <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
                             <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
@@ -315,7 +315,7 @@ table.altrowstable tr:nth-child(even){
                          {/foreach}
                          <tr>
                             <td style="text-align: center; vertical-align: middle;">合计</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $thisWorkArr['one']['create_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['create_num'];?></td>
                             <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['counter'];?></td>
                             <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['base_grand_total'],2);?></td>
                             <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['coupon'],2);?></td>
@@ -365,7 +365,7 @@ table.altrowstable tr:nth-child(even){
                             {foreach name="infoTwo" item="vo" key='k'}
                              <tr>
                                 <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $thisWorkArr[$k]['create_num'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
@@ -391,7 +391,7 @@ table.altrowstable tr:nth-child(even){
                              {/foreach}
                              <tr>
                                 <td style="text-align: center; vertical-align: middle;">合计</td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $thisWorkArr['two']['create_num'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['create_num'];?></td>
                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['counter'];?></td>
                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['base_grand_total'],2);?></td>
                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['coupon'],2);?></td>

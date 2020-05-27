@@ -141,21 +141,19 @@ class CustomerService extends Backend
         }
         $thisMonthWorkOrderNum = $this->getThisMonthWorkOrderNum();
         if(!empty($thisMonthWorkOrderNum)){
-			$thisWorkArr = [];
-			$thisWorkArr['one']['create_num'] =	$thisWorkArr['two']['create_num'] = 0;
+			$workArr['one']['create_num'] =	$workArr['two']['create_num'] = 0;
 			$thisMonthWorkOrderNum = collection($thisMonthWorkOrderNum)->toArray();
 /* 			dump($thisMonthWorkOrderNum);
 			dump($infoOne);
 			exit; */
-			foreach($thisMonthWorkOrderNum as $kh =>$vh){
-				//create_user_id
-                 if(array_key_exists($vh['create_user_id'],$infoOne)){
-					$thisWorkArr[$vh['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$vh['counter']];
-					$thisWorkArr['one']['create_num']           += $thisWorkArr[$vh['create_user_id']]['create_num'];
+			foreach($thisMonthWorkOrderNum as $k =>$v){
+                 if(array_key_exists($v['create_user_id'],$infoOne)){
+					$workArr[$v['create_user_id']]['create_num'] = $v['counter'];
+					$workArr['one']['create_num']           += $workArr[$v['create_user_id']]['create_num'];
                  }
-				 if(array_key_exists($vh['create_user_id'],$infoTwo)){
-					$thisWorkArr[$vh['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$vh['counter']];
-					$thisWorkArr['two']['create_num']           += $thisWorkArr[$vh['create_user_id']]['create_num'];					 
+				 if(array_key_exists($v['create_user_id'],$infoTwo)){
+					$workArr[$v['create_user_id']]['create_num'] = $v['counter'];
+					$workArr['two']['create_num']           += $workArr[$v['create_user_id']]['create_num'];					 
 				 }
              }
          }		
@@ -200,8 +198,7 @@ class CustomerService extends Backend
             'yesterdayData',
             'servenData',
             'thirdData',
-            'replyArr',
-			'thisWorkArr'
+            'replyArr'
         ));
         return $this->view->fetch();
     }
