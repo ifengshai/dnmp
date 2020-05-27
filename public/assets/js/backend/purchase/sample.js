@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'purchase/sample/sample_index' + location.search,
-                    add_url: 'purchase/sample/sample_add',
+                    add_url: 'purchase/sample/sample_import_xls',
                     edit_url: 'purchase/sample/sample_edit',
                     del_url: 'purchase/sample/sample_del',
                     multi_url: 'purchase/sample/multi',
@@ -32,9 +32,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'location', title: __('库位号'),operate:false},
                         {field: 'stock', title: __('留样库存'),operate:false},
                         {field: 'is_lend', title: __('是否借出'),searchList: {"1": __('是'), "0": __('否')}},
-                        {field: 'is_lend_num', title: __('借出数量'),operate:false},
+                        {field: 'lend_num', title: __('借出数量'),operate:false},
                     ]
                 ]
+            });
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+                    url: 'purchase/sample/sample_import_xls',
+                    data: { file: data.url },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+
+                });
             });
 
             // 为表格绑定事件
@@ -192,7 +204,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-pass', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setstatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -204,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-refuse', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setstatus',
                     data: { ids: ids, status: 4 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -216,7 +228,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-cancel', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setstatus',
                     data: { ids: ids, status: 5 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -340,7 +352,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-pass', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setstatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -352,7 +364,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-refuse', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setstatus',
                     data: { ids: ids, status: 4 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -364,7 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-cancel', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_out_setstatus',
                     data: { ids: ids, status: 5 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -500,7 +512,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-pass', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_lendlog_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_lendlog_setstatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -512,7 +524,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-check-refuse', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/sample/sample_lendlog_setStatus',
+                    url: Config.moduleurl + '/purchase/sample/sample_lendlog_setstatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');

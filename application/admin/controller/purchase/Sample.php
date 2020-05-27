@@ -79,6 +79,185 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+    public function sample_import_xls(){
+        set_time_limit(0);
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['日期', '订单号', 'SKU', '眼球', 'SPH', 'CYL', 'AXI', 'ADD', '镜片', '处方类型'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            //模板文件不正确
+            if ($allRow > 1000) {
+                throw new Exception("表格行数过大");
+            }
+
+            //模板文件不正确
+            if ($listName !== array_filter($fields)) {
+                throw new Exception("模板文件不正确！！");
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null(trim($val)) ? 0 : trim($val);
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+
+        /*********************镜片出库计算逻辑***********************/
+        /**
+         * 镜片扣减逻辑
+         * SHP,CYL都是“-” 直接带入扣减库存
+         * 若SPH为+，CYL为- 直接带入扣减库存，若SPH为“-”CYL为“+”则 sph=SPH+CYL,cyl变正负号，用新得到的sph,cyl扣减库存
+         * 若带有ADD，sph=SPH+ADD,用新sph带入上面正负号判断里判断
+         */
+        //补充第二列订单号
+        foreach ($data as $k => $v) {
+            if (!$v[1]) {
+                $data[$k][0] = $data[$k - 1][0];
+                $data[$k][1] = $data[$k - 1][1];
+                $data[$k][2] = $data[$k - 1][2];
+                if (!$v[7]) {
+                    $data[$k][7] = $data[$k - 1][7];
+                }
+                $data[$k][8] = $data[$k - 1][8];
+                $data[$k][9] = $data[$k - 1][9];
+            }
+        }
+
+        foreach ($data as $k => $v) {
+            $lens_type = trim($v[8]);
+            //如果ADD为真  sph = sph + ADD;
+            $sph = $v[4];
+            $cyl = $v[5];
+            if ($sph) {
+                $sph = $sph * 1;
+                if ($v[7]) {
+                    $sph = $sph + $v[7] * 1;
+                }
+                
+                //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
+                if ($cyl && $cyl * 1 > 0) {
+                    $sph = $sph + $cyl * 1;
+                    $cyl = '-' . number_format($cyl * 1, 2);
+                } else {
+                    if ($cyl) {
+                        $cyl = number_format($cyl * 1, 2);
+                    } 
+                }
+                
+                if ($sph > 0) {
+                    $sph = '+' . number_format($sph, 2);
+                } else {
+                    $sph = number_format($sph, 2);
+                }
+            }
+
+            if (!$cyl || $cyl * 1 == 0) {
+                $cyl = '+0.00';
+            }
+            if (!$sph || $sph * 1 == 0) {
+                $sph = '+0.00';
+            }
+
+            if ($lens_type) {
+
+                //扣减库存
+                $map['sph'] = trim($sph);
+                $map['cyl'] = trim($cyl);
+                $map['lens_type'] = ['like', '%' . $lens_type . '%'];
+                $res = $this->model->where($map)->setDec('stock_num');
+
+                //生成出库单
+                if ($res) {
+                    $params[$k]['num'] = 1;
+                } else {
+                    $params[$k]['num'] = 0;
+                }
+                //查询镜片单价
+                $price = $this->model->where($map)->value('price');
+                $params[$k]['lens_type'] = $lens_type;
+                $params[$k]['sph'] = trim($sph);
+                $params[$k]['cyl'] = trim($cyl);
+                $params[$k]['createtime'] = date('Y-m-d H:i:s', time());
+                $params[$k]['create_person'] = session('admin.nickname');
+                $params[$k]['price'] = $price * $params[$k]['num'];
+                $params[$k]['order_number'] = $v[1];
+                $params[$k]['sku'] = trim($v[2]);
+                $params[$k]['eye_type'] = $v[3];
+                $params[$k]['order_sph'] = trim($v[4]);
+                $params[$k]['order_cyl'] = trim($v[5]);
+                $params[$k]['order_date'] = $v[0];
+                $params[$k]['axi'] = $v[6];
+                $params[$k]['add'] = trim($v[7]);
+                $params[$k]['order_lens_type'] = $v[8];
+                $params[$k]['prescription_type'] = $v[9];
+            }
+        }
+
+        $this->outorder->saveAll($params);
+        /*********************end***********************/
+        $this->success('导入成功！！');
+    }
     /**
      * 库位列表
      *
@@ -601,7 +780,7 @@ class Sample extends Backend
      * @since 2020/05/23 17:26:57 
      * @return void
      */
-    public function sample_workorder_setStatus($ids = null){
+    public function sample_workorder_setstatus($ids = null){
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
@@ -899,7 +1078,7 @@ class Sample extends Backend
      * @since 2020/05/23 17:26:57 
      * @return void
      */
-    public function sample_workorder_out_setStatus($ids = null){
+    public function sample_workorder_out_setstatus($ids = null){
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
@@ -1219,7 +1398,7 @@ class Sample extends Backend
      * @since 2020/05/26 11:52:38 
      * @return void
      */
-    public function sample_lendlog_setStatus($ids = null){
+    public function sample_lendlog_setstatus($ids = null){
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
