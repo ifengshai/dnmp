@@ -55,14 +55,19 @@ class CustomerService extends Backend
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
             $replyArr = [];
+            $replyArr['one']['yester_num'] = $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
+            $replyArr['two']['yester_num'] = $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             foreach ($customerReply as $ok =>$ov) {
-                if (array_key_exists($ov['due_id'], $infoOne)) {
+                if (array_key_exists($ov['due_id'], $infoOne)) { 
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
                     $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                    $replyArr['one']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    $replyArr['one']['counter']          += $replyArr[$ov['due_id']]['counter'];
+                    $replyArr['one']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
                 if (array_key_exists($ov['due_id'], $infoTwo)) {
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
@@ -70,6 +75,9 @@ class CustomerService extends Backend
                     $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                    $replyArr['two']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    $replyArr['two']['counter']          += $replyArr[$ov['due_id']]['counter'];
+                    $replyArr['two']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
             }
         }
@@ -82,6 +90,8 @@ class CustomerService extends Backend
         if (!empty($workList)) {
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
             $workArr = [];
+            $workArr['one']['create_num'] = $workArr['one']['counter'] = $workArr['one']['base_grand_total'] =$workArr['one']['coupon'] = $workArr['one']['refund_num'] = $workArr['one']['replacement_num'] = $workArr['one']['total_refund_money'] =0;
+            $workArr['two']['create_num'] = $workArr['two']['counter'] = $workArr['two']['base_grand_total'] =$workArr['two']['coupon'] = $workArr['two']['refund_num'] = $workArr['two']['replacement_num'] = $workArr['two']['total_refund_money'] =0;
             foreach ($workList as $ok =>$ov) {
                 if (array_key_exists($ov['create_user_id'], $infoOne)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoOne[$ov['create_user_id']];
@@ -92,6 +102,13 @@ class CustomerService extends Backend
                     $workArr[$ov['create_user_id']]['refund_num'] = $ov['refund_num'];
                     $workArr[$ov['create_user_id']]['replacement_num'] = $ov['replacement_num'];
                     $workArr[$ov['create_user_id']]['total_refund_money'] = $ov['total_refund_money'];
+                    $workArr['one']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
+                    $workArr['one']['counter']              += $workArr[$ov['create_user_id']]['counter'];
+                    $workArr['one']['base_grand_total']     += $workArr[$ov['create_user_id']]['base_grand_total'];
+                    $workArr['one']['coupon']               += $workArr[$ov['create_user_id']]['coupon'];
+                    $workArr['one']['refund_num']           += $workArr[$ov['create_user_id']]['refund_num'];
+                    $workArr['one']['replacement_num']      += $workArr[$ov['create_user_id']]['replacement_num'];
+                    $workArr['one']['total_refund_money']   += $workArr[$ov['create_user_id']]['total_refund_money'];
                 }
                 if (array_key_exists($ov['create_user_id'], $infoTwo)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoTwo[$ov['create_user_id']];
@@ -102,6 +119,13 @@ class CustomerService extends Backend
                     $workArr[$ov['create_user_id']]['refund_num'] = $ov['refund_num'];
                     $workArr[$ov['create_user_id']]['replacement_num'] = $ov['replacement_num'];
                     $workArr[$ov['create_user_id']]['total_refund_money'] = $ov['total_refund_money'];
+                    $workArr['two']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
+                    $workArr['two']['counter']              += $workArr[$ov['create_user_id']]['counter'];
+                    $workArr['two']['base_grand_total']     += $workArr[$ov['create_user_id']]['base_grand_total'];
+                    $workArr['two']['coupon']               += $workArr[$ov['create_user_id']]['coupon'];
+                    $workArr['two']['refund_num']           += $workArr[$ov['create_user_id']]['refund_num'];
+                    $workArr['two']['replacement_num']      += $workArr[$ov['create_user_id']]['replacement_num'];
+                    $workArr['two']['total_refund_money']   += $workArr[$ov['create_user_id']]['total_refund_money'];
                 }
             }
         }
