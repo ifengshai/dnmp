@@ -4037,7 +4037,7 @@ order by sfoi.item_id asc limit 1000";
             return false;
         }
         $where['type'] = $whereComments['platform'] = $platform;
-        $whereComments['due_id']    = ['neq',0];
+        $whereComments['author_id']    = ['neq','382940274852'];
         $whereComments['is_admin']  = 1;
         //zendesk
         $zendesk_model = Db::name('zendesk');

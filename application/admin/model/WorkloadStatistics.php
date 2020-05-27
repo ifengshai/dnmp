@@ -80,7 +80,7 @@ class WorkloadStatistics extends Model
         }
             //$where['is_admin'] = 1;
         //zendesk
-        $whereComments['due_id']    = ['neq',0];
+        $whereComments['author_id']    = ['neq','382940274852'];
         $zendesk_model = Db::name('zendesk');
         $zendesk_comments = Db::name('zendesk_comments');
         $zendesk_model->query("set time_zone='+8:00'");
@@ -96,7 +96,7 @@ class WorkloadStatistics extends Model
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
         //获取昨天已回复量
-        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1,'is_admin'=>1])->where($whereComments)->count('*');;
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1,'is_admin'=>1])->where($whereComments)->count("*");
         //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where(['assign_id'=>0])->where($update)->count("*");
