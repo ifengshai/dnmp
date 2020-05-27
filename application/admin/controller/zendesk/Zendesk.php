@@ -82,9 +82,7 @@ class Zendesk extends Backend
                         if(!$update_time){
                             $this->error('请选择更新时间');
                         }
-                        $map['zendesk.status'] = ['in', [1, 2]];
-                        $time = explode(' ', $update_time);
-                        $map['zendesk.update_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];                        
+                        $map['zendesk.status'] = ['in', [1, 2]];                      
                         break;
                     case 3:
                         //获取public =1 is_admin=1的zid列表

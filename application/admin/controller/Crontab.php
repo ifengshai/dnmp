@@ -4049,7 +4049,7 @@ order by sfoi.item_id asc limit 1000";
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['create_time'] = $date['c.create_time'] = $update['update_time'] =  ['between', [$stime, $etime]];
+        $map['create_time'] = $date['c.create_time'] = $update['zendesk_update_time'] =  ['between', [$stime, $etime]];
         //获取昨天待处理的open、new量
         $wait_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->count("*");
         //获取昨天新增的open、new量
