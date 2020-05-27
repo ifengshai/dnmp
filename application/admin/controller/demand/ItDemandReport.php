@@ -13,6 +13,7 @@ class ItDemandReport extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
         $this->itWebTaskItem = new \app\admin\model\demand\ItWebTaskItem;
+        $this->itWebTask = new \app\admin\model\demand\ItWebTask;
     }
 
 
@@ -25,9 +26,40 @@ class ItDemandReport extends Backend
      * @since 2020/05/23 15:53:16 
      */
     public function statistical(){
+        $month_first = date("Y-m-01",time());//本月第一天
+        $month_last = date('Y-m-d', strtotime("$month_first +1 month -1 day"));//本月最后一天
+
+        $month_first_01 = date('Y-m-01', strtotime('-1 month'));//上月第一天
+        $month_last_01 = date('Y-m-t', strtotime('-1 month'));//上月最后一天
+
+        $month_first_02 = date('Y-m-01', strtotime('-2 month'));//上月第一天
+        $month_last_02 = date('Y-m-t', strtotime('-2 month'));//上月最后一天
+        
+        dump($month_first);
+        dump($month_last);
+        dump($month_first_01);
+        dump($month_last_01);
+        dump($month_first_02);
+        dump($month_last_02);
+        $task_list = $this->itWebTask
+            ->where('is_del', 1)
+            ->whereTime('createtime', 'between', [$month_first, $month_last])
+            ->select();
+            $task_list = collection($task_list)->toArray();
+            dump($task_list);
 
         if ($this->request->isAjax()) {
             
+            //网站组--目标--start
+            /**
+             * 短期任务：10个
+             * 中期任务：20个
+             * 长期任务：30个
+             */
+            
+
+
+            //网站组--目标--end
             $json['columnData'] = [
                 [
                     'name'=> '直接访问',
