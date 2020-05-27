@@ -97,22 +97,22 @@ class CustomerService extends Backend
         $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info([], $map);
+		$workArr  = [];
         if (!empty($workList)) {
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
-            $workArr = $oneResult = [];
-            $workArr['one']['create_num'] = $workArr['one']['counter'] = $workArr['one']['base_grand_total'] =$workArr['one']['coupon'] = $workArr['one']['refund_num'] = $workArr['one']['replacement_num'] = $workArr['one']['total_refund_money'] =0;
-            $workArr['two']['create_num'] = $workArr['two']['counter'] = $workArr['two']['base_grand_total'] =$workArr['two']['coupon'] = $workArr['two']['refund_num'] = $workArr['two']['replacement_num'] = $workArr['two']['total_refund_money'] =0;
+             $workArr['one']['counter'] = $workArr['one']['base_grand_total'] =$workArr['one']['coupon'] = $workArr['one']['refund_num'] = $workArr['one']['replacement_num'] = $workArr['one']['total_refund_money'] =0;
+             $workArr['two']['counter'] = $workArr['two']['base_grand_total'] =$workArr['two']['coupon'] = $workArr['two']['refund_num'] = $workArr['two']['replacement_num'] = $workArr['two']['total_refund_money'] =0;
             foreach ($workList as $ok =>$ov) {
                 if (array_key_exists($ov['create_user_id'], $infoOne)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoOne[$ov['create_user_id']];
-                    $workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id', $ov['create_user_id'])->count('*');
+                    //$workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id', $ov['create_user_id'])->count('*');
                     $workArr[$ov['create_user_id']]['counter']   = $ov['counter'];
                     $workArr[$ov['create_user_id']]['base_grand_total'] = $ov['base_grand_total'];
                     $workArr[$ov['create_user_id']]['coupon']    = $ov['coupon'];
                     $workArr[$ov['create_user_id']]['refund_num'] = $ov['refund_num'];
                     $workArr[$ov['create_user_id']]['replacement_num'] = $ov['replacement_num'];
                     $workArr[$ov['create_user_id']]['total_refund_money'] = $ov['total_refund_money'];
-                    $workArr['one']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
+                    //$workArr['one']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
                     $workArr['one']['counter']              += $workArr[$ov['create_user_id']]['counter'];
                     $workArr['one']['base_grand_total']     += $workArr[$ov['create_user_id']]['base_grand_total'];
                     $workArr['one']['coupon']               += $workArr[$ov['create_user_id']]['coupon'];
@@ -122,14 +122,14 @@ class CustomerService extends Backend
                 }
                 if (array_key_exists($ov['create_user_id'], $infoTwo)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoTwo[$ov['create_user_id']];
-                    $workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id', $ov['create_user_id'])->count('*');
+                    //$workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id', $ov['create_user_id'])->count('*');
                     $workArr[$ov['create_user_id']]['counter']   = $ov['counter'];
                     $workArr[$ov['create_user_id']]['base_grand_total'] = $ov['base_grand_total'];
                     $workArr[$ov['create_user_id']]['coupon']    = $ov['coupon'];
                     $workArr[$ov['create_user_id']]['refund_num'] = $ov['refund_num'];
                     $workArr[$ov['create_user_id']]['replacement_num'] = $ov['replacement_num'];
                     $workArr[$ov['create_user_id']]['total_refund_money'] = $ov['total_refund_money'];
-                    $workArr['two']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
+                    //$workArr['two']['create_num']           += $workArr[$ov['create_user_id']]['create_num'];
                     $workArr['two']['counter']              += $workArr[$ov['create_user_id']]['counter'];
                     $workArr['two']['base_grand_total']     += $workArr[$ov['create_user_id']]['base_grand_total'];
                     $workArr['two']['coupon']               += $workArr[$ov['create_user_id']]['coupon'];
@@ -139,6 +139,20 @@ class CustomerService extends Backend
                 }
             }
         }
+        $thisMonthWorkOrderNum = $this->getThisMonthWorkOrderNum();
+        if(!empty($thisMonthWorkOrderNum)){
+			$workArr['one']['create_num'] =	$workArr['two']['create_num'] = 0;
+			foreach($thisMonthWorkOrderNum as $k =>$v){
+                 if(array_key_exists($v['create_user_id'],$infoOne)){
+					$workArr[$v['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$v['counter']];
+					$workArr['one']['create_num']           += $workArr[$v['create_user_id']]['create_num'];
+                 }
+				 if(array_key_exists($v['create_user_id'],$infoTwo)){
+					$workArr[$v['create_user_id']]['create_num'] = $thisMonthWorkOrderNum[$v['counter']];
+					$workArr['two']['create_num']           += $workArr[$v['create_user_id']]['create_num'];					 
+				 }
+             }
+         }		
         //工单处理概况信息start
         //1.求出三个审批人
         $kefumanage = config('workorder.kefumanage');
