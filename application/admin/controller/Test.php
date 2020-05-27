@@ -762,11 +762,10 @@ class Test extends Backend
      */
     public function reg_shipment()
     {
-        $order_shipment = Db::connect('database.db_voogueme')
+        $order_shipment = Db::connect('database.db_nihao')
             ->table('sales_flat_shipment_track')
             ->field('entity_id,order_id,track_number,title,updated_at')
             ->where('created_at', '>=', '2020-03-31 00:00:00')
-            ->where('handle', '=', '0')
             ->select();
 
         foreach ($order_shipment as $k => $v) {
@@ -790,7 +789,7 @@ class Test extends Backend
             //请求接口更改物流表状态
             $order_ids = implode(',',array_column($val, 'order_id'));
             $params['ids'] = $order_ids;
-            $params['site'] = 2;
+            $params['site'] = 3;
             $res = $this->setLogisticsStatus($params);
             if ($res->status !== 200) {
                 echo '更新失败:'.$order_ids . "\n";
