@@ -167,7 +167,7 @@ table.altrowstable tr:nth-child(even){
                             {if $workOrderNum gt 0 }
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    退款订单比：<span style="color: red;" id="totalPayInfo">{:round($refundMoneyNum/$workOrderNum,2)}</span>
+                                    退款订单比：<span style="color: red;" id="totalPayInfo">{:round($refundMoneyNum/$workOrderNum*100,2)}%</span>
                                 </span>
                             </div>
                             {else/}
@@ -185,7 +185,7 @@ table.altrowstable tr:nth-child(even){
                             {if $totalOrderMoney gt 0 }
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{:round($refundMoney/$totalOrderMoney,2)}</span>
+                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{:round($refundMoney/$totalOrderMoney*100,2)}%</span>
                                 </span>
                             </div>
                             {else/}
