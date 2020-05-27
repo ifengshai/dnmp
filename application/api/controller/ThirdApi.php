@@ -41,16 +41,297 @@ class ThirdApi extends Api
             $add['order_number'] = $order_node['order_number'];
             $add['shipment_type'] = $order_node['shipment_type'];
             $add['track_number'] = $track_arr['data']['number'];
-            if(stripos($order_node['shipment_type'], 'Post') !== false){
-                $this->china_post_data($track_arr['data']['track'],$add);
+
+            if (stripos($order_node['shipment_type'], 'Post') !== false) {
+                $this->china_post_data($track_arr['data']['track'], $add);
             }
-            if(stripos($order_node['shipment_type'],'DHL') !== false){
-                $this->dhl_data($track_arr['data']['track'],$add);
+
+            if (stripos($order_node['shipment_type'], 'DHL') !== false) {
+                $this->dhl_data($track_arr['data']['track'], $add);
             }
-            if(stripos($order_node['shipment_type'],'yanwen') !== false){
-                $this->yanwen_data($track_arr['data']['track'],$add);
+
+            if (stripos($order_node['shipment_type'], 'yanwen') !== false) {
+                $this->yanwen_data($track_arr['data']['track'], $add);
+            }
+
+            if (stripos($order_node['shipment_type'], 'USPS') !== false) {
+                $this->usps_data($track_arr['data']['track'], $add);
+            }
+
+            if (stripos($order_node['shipment_type'], 'fede') !== false) {
+                $this->fedex_data($track_arr['data']['track'], $add);
             }
         }
+    }
+    //fedex
+    public function fedex_data($data, $add)
+    {
+        $trackdetail = array_reverse($data['z1']);
+        $time = '';
+        $all_num = count($trackdetail);
+        //注册和推送之间的物流差别处理，暂时使用start
+        $already_count = Db::name('order_node_courier')->where('track_number', $add['track_number'])->count();
+        $cha_count = $all_num-$already_count;
+        if($cha_count == 1){
+            $trackdetail = array();
+            $trackdetail = array('0'=>$data['z0']);
+        }elseif($cha_count < 1){
+            $trackdetail = array();
+        }else{
+            //删除原来的数据
+            Db::name('order_node_courier')->where('track_number', $add['track_number'])->delete();
+        }
+        //注册和推送之间的物流差别处理，暂时使用end
+        if(!empty($trackdetail)){
+            foreach ($trackdetail as $k => $v) {
+                $add['create_time'] = $v['a'];
+                $add['content'] = $v['z'];
+                $add['courier_status'] = $data['e'];
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+    
+                $order_node_detail['order_node'] = 3;
+                $order_node_detail['create_time'] = $v['a'];
+    
+                $order_node_detail['handle_user_id'] = 0;
+                $order_node_detail['handle_user_name'] = 'system';
+                $order_node_detail['site'] = $add['site'];
+                $order_node_detail['order_id'] = $add['order_id'];
+                $order_node_detail['order_number'] = $add['order_number'];
+                $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['track_number'] = $add['track_number'];
+    
+                if (stripos($v['z'], 'Shipment information sent to FedEx') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
+                        $update_order_node['order_node'] = 3;
+                        $update_order_node['node_type'] = 8;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['node_type'] = 8;
+                        $order_node_detail['content'] = $this->str1;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if (stripos($v['z'], 'BEIJING CN, In transit') !== false || stripos($v['z'], 'GUANGZHOU CN, In transit') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {
+                            //如果本快递已经签收，则直接插入运输中的数据，并直接把状态更变为运输中
+                            $update_order_node['node_type'] = 10;
+                            $update_order_node['update_time'] = $v['a'];
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                            $order_node_detail['node_type'] = 9;
+                            $order_node_detail['content'] = $this->str2;
+                            $order_node_detail['create_time'] = $v['a'];
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $order_node_detail['node_type'] = 10;
+                            $order_node_detail['content'] = $this->str3;
+                            $order_node_detail['create_time'] = date('Y-m-d H:i', strtotime(($v['a'] . " +3 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        } else {
+                            $update_order_node['node_type'] = 9;
+                            $update_order_node['update_time'] = $v['a'];
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                            $order_node_detail['node_type'] = 9;
+                            $order_node_detail['content'] = $this->str2;
+                            $order_node_detail['create_time'] = $v['a'];
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " +3 day")));
+                        }
+                    }
+                }
+    
+                if (stripos($v['z'], 'Arrived at FedEx location') !== false || stripos($v['z'], 'Departed FedEx location') !== false || stripos($v['z'], 'clearance') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
+                        $update_order_node['node_type'] = 11;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['node_type'] = 10;
+                        $order_node_detail['content'] = $this->str3;
+                        $order_node_detail['create_time'] = $time;
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        $time = '';
+    
+                        $order_node_detail['node_type'] = 11;
+                        $order_node_detail['content'] = $this->str4;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
+                        $update_order_node['node_type'] = 11;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['node_type'] = 11;
+                        $order_node_detail['content'] = $this->str4;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if ($all_num - 1 == $k) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        $update_order_node['order_node'] = 4;
+                        $update_order_node['node_type'] = $data['e'];
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['order_node'] = 4;
+                        $order_node_detail['node_type'] = $data['e'];
+                        switch ($data['e']) {
+                            case 30:
+                                $order_node_detail['content'] = $this->str30;
+                                break;
+                            case 35:
+                                $order_node_detail['content'] = $this->str35;
+                                break;
+                            case 40:
+                                $order_node_detail['content'] = $this->str40;
+                                break;
+                            case 50:
+                                $order_node_detail['content'] = $this->str50;
+                                break;
+                        }
+    
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+            }
+        }
+    }
+
+    //usps
+    public function usps_data($data, $add)
+    {
+        $trackdetail = array_reverse($data['z1']);
+        $time = '';
+        $all_num = count($trackdetail);
+         //注册和推送之间的物流差别处理，暂时使用start
+         $already_count = Db::name('order_node_courier')->where('track_number', $add['track_number'])->count();
+         $cha_count = $all_num-$already_count;
+         if($cha_count == 1){
+             $trackdetail = array();
+             $trackdetail = array('0'=>$data['z0']);
+         }elseif($cha_count < 1){
+             $trackdetail = array();
+         }else{
+             //删除原来的数据
+             Db::name('order_node_courier')->where('track_number', $add['track_number'])->delete();
+         }
+         //注册和推送之间的物流差别处理，暂时使用end
+         if(!empty($trackdetail)){
+            foreach ($trackdetail as $k => $v) {
+                $add['create_time'] = $v['a'];
+                $add['content'] = $v['z'];
+                $add['courier_status'] = $data['e'];
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+    
+                $order_node_detail['order_node'] = 3;
+                $order_node_detail['create_time'] = $v['a'];
+    
+                $order_node_detail['handle_user_id'] = 0;
+                $order_node_detail['handle_user_name'] = 'system';
+                $order_node_detail['site'] = $add['site'];
+                $order_node_detail['order_id'] = $add['order_id'];
+                $order_node_detail['order_number'] = $add['order_number'];
+                $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['track_number'] = $add['track_number'];
+    
+                if (stripos($v['z'], 'Picked Up') !== false || stripos($v['z'], 'Shipping Partner Facility') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
+                        $update_order_node['order_node'] = 3;
+                        $update_order_node['node_type'] = 8;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['node_type'] = 8;
+                        $order_node_detail['content'] = $this->str1;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if (stripos($v['z'], 'Delivered to Air Transport') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        $update_order_node['node_type'] = 9;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                        $order_node_detail['node_type'] = 9;
+                        $order_node_detail['content'] = $this->str2;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if (stripos($v['z'], 'In Transit to Next Facility') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
+                        $update_order_node['node_type'] = 10;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                        $order_node_detail['node_type'] = 10;
+                        $order_node_detail['content'] = $this->str3;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if (stripos($v['z'], 'Arrived in the Final Destination Country') !== false) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
+                        $update_order_node['node_type'] = 11;
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['node_type'] = 11;
+                        $order_node_detail['content'] = $this->str4;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+    
+                if ($all_num - 1 == $k) {
+                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        $update_order_node['order_node'] = 4;
+                        $update_order_node['node_type'] = $data['e'];
+                        $update_order_node['update_time'] = $v['a'];
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
+                        $order_node_detail['order_node'] = 4;
+                        $order_node_detail['node_type'] = $data['e'];
+                        switch ($data['e']) {
+                            case 30:
+                                $order_node_detail['content'] = $this->str30;
+                                break;
+                            case 35:
+                                $order_node_detail['content'] = $this->str35;
+                                break;
+                            case 40:
+                                $order_node_detail['content'] = $this->str40;
+                                break;
+                            case 50:
+                                $order_node_detail['content'] = $this->str50;
+                                break;
+                        }
+    
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+                }
+            }
+         }
     }
     //燕文专线 匹配规则有问题
     public function yanwen_data($data,$add){
@@ -72,15 +353,15 @@ class ThirdApi extends Api
         }
         //注册和推送之间的物流差别处理，暂时使用end
         if(!empty($trackdetail)){
-            foreach ($trackdetail as $k => $v){
+            foreach ($trackdetail as $k => $v) {
                 $add['create_time'] = $v['a'];
                 $add['content'] = $v['z'];
                 $add['courier_status'] = $data['e'];
-                Db::name('order_node_courier')->insert($add);//插入物流日志表
-
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+    
                 $order_node_detail['order_node'] = 3;
                 $order_node_detail['create_time'] = $v['a'];
-
+    
                 $order_node_detail['handle_user_id'] = 0;
                 $order_node_detail['handle_user_name'] = 'system';
                 $order_node_detail['site'] = $add['site'];
@@ -88,91 +369,91 @@ class ThirdApi extends Api
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
-
+    
                 if (stripos($v['z'], 'Picked up') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7){
+                    if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-
+    
                 if (stripos($v['z'], 'Last mile') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8){
-                        if($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {
                             //如果本快递已经签收，则直接插入运输中的数据，并直接把状态更变为运输中
                             $update_order_node['node_type'] = 10;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
                             $order_node_detail['node_type'] = 10;
                             $order_node_detail['content'] = $this->str3;
-                            $order_node_detail['create_time'] = date('Y-m-d H:i',strtotime(($v['a']." +5 day")));
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-                        }else{
+                            $order_node_detail['create_time'] = date('Y-m-d H:i', strtotime(($v['a'] . " +5 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        } else {
                             $update_order_node['node_type'] = 9;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
-                            $time = date('Y-m-d H:i',strtotime(($v['a']." +5 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " +5 day")));
                         }
                     }
                 }
-
+    
                 if (stripos($v['z'], 'Shipping information received by') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
                         $order_node_detail['create_time'] = $time;
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         $time = '';
-
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-
-                if($all_num-1 == $k){
+    
+                if ($all_num - 1 == $k) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
                         $update_order_node['order_node'] = 4;
                         $update_order_node['node_type'] = $data['e'];
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
                         switch ($data['e']) {
@@ -189,9 +470,9 @@ class ThirdApi extends Api
                                 $order_node_detail['content'] = $this->str50;
                                 break;
                         }
-
+    
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
             }
@@ -217,15 +498,15 @@ class ThirdApi extends Api
         }
         //注册和推送之间的物流差别处理，暂时使用end
         if(!empty($trackdetail)){
-            foreach ($trackdetail as $k => $v){
+            foreach ($trackdetail as $k => $v) {
                 $add['create_time'] = $v['a'];
                 $add['content'] = $v['z'];
                 $add['courier_status'] = $data['e'];
-                Db::name('order_node_courier')->insert($add);//插入物流日志表
-
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+    
                 $order_node_detail['order_node'] = 3;
                 $order_node_detail['create_time'] = $v['a'];
-
+    
                 $order_node_detail['handle_user_id'] = 0;
                 $order_node_detail['handle_user_name'] = 'system';
                 $order_node_detail['site'] = $add['site'];
@@ -233,94 +514,94 @@ class ThirdApi extends Api
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
-
-                if($data['e'] != 0){
-                    if ($k == 1) {//第二条作为上网
+    
+                if ($data['e'] != 0) {
+                    if ($k == 1) { //第二条作为上网
                         $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                        if($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7){
+                        if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 8;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                             $order_node_detail['node_type'] = 8;
                             $order_node_detail['content'] = $this->str1;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         }
                     }
                 }
-
-
-                if (stripos($v['z'], '已交航空公司运输') !== false) {
+    
+    
+                if (stripos($v['z'], 'Departed Facility') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8){
-                        if($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {
                             //如果本快递已经签收，则直接插入运输中的数据，并直接把状态更变为运输中
                             $update_order_node['node_type'] = 10;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
                             $order_node_detail['node_type'] = 10;
                             $order_node_detail['content'] = $this->str3;
-                            $order_node_detail['create_time'] = date('Y-m-d H:i',strtotime(($v['a']." +3 day")));
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-                        }else{
+                            $order_node_detail['create_time'] = date('Y-m-d H:i', strtotime(($v['a'] . " +3 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        } else {
                             $update_order_node['node_type'] = 9;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
-                            $time = date('Y-m-d H:i',strtotime(($v['a']." +3 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " +3 day")));
                         }
                     }
                 }
-
-                if (stripos($v['z'], '已到达寄达地') !== false) {
+    
+                if (stripos($v['z'], 'Customs status updated') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
                         $order_node_detail['create_time'] = $time;
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         $time = '';
-
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-
-                if($all_num-1 == $k){
+    
+                if ($all_num - 1 == $k) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
                         $update_order_node['order_node'] = 4;
                         $update_order_node['node_type'] = $data['e'];
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
                         switch ($data['e']) {
@@ -337,9 +618,9 @@ class ThirdApi extends Api
                                 $order_node_detail['content'] = $this->str50;
                                 break;
                         }
-
+    
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
             }
@@ -366,15 +647,15 @@ class ThirdApi extends Api
         }
         //注册和推送之间的物流差别处理，暂时使用end
         if(!empty($trackdetail)){
-            foreach ($trackdetail as $k => $v){
+            foreach ($trackdetail as $k => $v) {
                 $add['create_time'] = $v['a'];
                 $add['content'] = $v['z'];
                 $add['courier_status'] = $data['e'];
-                Db::name('order_node_courier')->insert($add);//插入物流日志表
-
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+    
                 $order_node_detail['order_node'] = 3;
                 $order_node_detail['create_time'] = $v['a'];
-
+    
                 $order_node_detail['handle_user_id'] = 0;
                 $order_node_detail['handle_user_name'] = 'system';
                 $order_node_detail['site'] = $add['site'];
@@ -382,91 +663,91 @@ class ThirdApi extends Api
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
-
+    
                 if (stripos($v['z'], '已收件，揽投员') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7){
+                    if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-
+    
                 if (stripos($v['z'], '已交航空公司运输') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8){
-                        if($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {
                             //如果本快递已经签收，则直接插入运输中的数据，并直接把状态更变为运输中
                             $update_order_node['node_type'] = 10;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
                             $order_node_detail['node_type'] = 10;
                             $order_node_detail['content'] = $this->str3;
-                            $order_node_detail['create_time'] = date('Y-m-d H:i',strtotime(($v['a']." +7 day")));
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-                        }else{
+                            $order_node_detail['create_time'] = date('Y-m-d H:i', strtotime(($v['a'] . " +7 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        } else {
                             $update_order_node['node_type'] = 9;
                             $update_order_node['update_time'] = $v['a'];
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                             $order_node_detail['node_type'] = 9;
                             $order_node_detail['content'] = $this->str2;
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
-
-                            $time = date('Y-m-d H:i',strtotime(($v['a']." +7 day")));
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " +7 day")));
                         }
                     }
                 }
-
+    
                 if (stripos($v['z'], '已到达寄达地') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
                         $order_node_detail['create_time'] = $time;
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         $time = '';
-
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
                         $update_order_node['node_type'] = 11;
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['node_type'] = 11;
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-
-                if($all_num-1 == $k){
+    
+                if ($all_num - 1 == $k) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11){
+                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
                         $update_order_node['order_node'] = 4;
                         $update_order_node['node_type'] = $data['e'];
                         $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node);//更新主表状态
-
+                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+    
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
                         switch ($data['e']) {
@@ -483,9 +764,9 @@ class ThirdApi extends Api
                                 $order_node_detail['content'] = $this->str50;
                                 break;
                         }
-
+    
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail);//插入节点字表
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
             }
