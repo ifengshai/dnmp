@@ -34,13 +34,13 @@ class CustomerService extends Backend
         $infoTwo = $this->customers_by_group(2);
         //总览数据start
         //1.今天数据
-        $todayData = $this->workload->gettodayData(1);
+        $todayData = $this->workload->gettodayData(10);
         //昨天数据
-        $yesterdayData = $this->workload->getyesterdayData(1);
+        $yesterdayData = $this->workload->getyesterdayData(10);
         //过去7天数据
-        $servenData = $this->workload->getSevenData(1);
+        $servenData = $this->workload->getSevenData(10);
         //过去30天数据
-        $thirdData = $this->workload->getthirdData(1);
+        $thirdData = $this->workload->getthirdData(10);
 
         //总览数据end
 
