@@ -200,7 +200,8 @@ class CustomerService extends Backend
             'yesterdayData',
             'servenData',
             'thirdData',
-            'replyArr'
+            'replyArr',
+			'thisWorkArr'
         ));
         return $this->view->fetch();
     }
