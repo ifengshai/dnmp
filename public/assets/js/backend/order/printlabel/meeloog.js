@@ -355,11 +355,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             //移除所有
                             table.bootstrapTable("removeAll");
                             for (var i in newdata) {
-                                newdata[i].custom_is_delivery_new = data[i].custom_is_delivery_new;
-                                newdata[i].custom_is_match_frame_new = data[i].custom_is_match_frame_new;
-                                newdata[i].custom_is_match_lens_new = data[i].custom_is_match_lens_new;
-                                newdata[i].custom_is_send_factory_new = data[i].custom_is_send_factory_new;
-                                newdata[i].custom_print_label_new = data[i].custom_print_label_new;
+                                newdata[i].custom_is_delivery = data[i].custom_is_delivery;
+                                newdata[i].custom_is_match_frame = data[i].custom_is_match_frame;
+                                newdata[i].custom_is_match_lens = data[i].custom_is_match_lens;
+                                newdata[i].custom_is_send_factory = data[i].custom_is_send_factory;
+                                newdata[i].custom_print_label = data[i].custom_print_label;
                             }
                             //追加
                             table.bootstrapTable("append", newdata);
@@ -400,11 +400,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             for (var i in newdata) {
                                 for (var k in row) {
                                     if (row[k].entity_id == newdata[i].entity_id) {
-                                        newdata[i].custom_is_delivery_new = row[k].custom_is_delivery_new;
-                                        newdata[i].custom_is_match_frame_new = row[k].custom_is_match_frame_new;
-                                        newdata[i].custom_is_match_lens_new = row[k].custom_is_match_lens_new;
-                                        newdata[i].custom_is_send_factory_new = row[k].custom_is_send_factory_new;
-                                        newdata[i].custom_print_label_new = row[k].custom_print_label_new;
+                                        newdata[i].custom_is_delivery = row[k].custom_is_delivery;
+                                        newdata[i].custom_is_match_frame = row[k].custom_is_match_frame;
+                                        newdata[i].custom_is_match_lens = row[k].custom_is_match_lens;
+                                        newdata[i].custom_is_send_factory = row[k].custom_is_send_factory;
+                                        newdata[i].custom_print_label = row[k].custom_print_label;
                                     }
                                 }
                             }
