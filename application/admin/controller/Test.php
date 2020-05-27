@@ -12,10 +12,10 @@ class Test extends Backend
 {
     protected $noNeedLogin = ['*'];
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
-    protected $str1 = '上网';
-    protected $str2 = '交航';
-    protected $str3 = '运输中';
-    protected $str4 = '到达目的地';
+    protected $str1 = 'Arrived Shipping Partner Facility, Awaiting Item.';
+    protected $str2 = 'Delivered to Air Transport.';
+    protected $str3 = 'In Transit to Next Facility.';
+    protected $str4 = 'Arrived in the Final Destination Country.';
     protected $str30 = '到达待取';
     protected $str35 = '投递失败';
     protected $str40 = '成功签收';
