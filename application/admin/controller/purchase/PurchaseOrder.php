@@ -578,6 +578,8 @@ class PurchaseOrder extends Backend
                             }
                         }
                     } else {
+                        dump($logistics_company_no);
+                        dump($logistics_number);die;
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
                                 $list['logistics_number'] = $params['logistics_number'];
