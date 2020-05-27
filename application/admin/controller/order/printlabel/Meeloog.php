@@ -293,7 +293,7 @@ class Meeloog extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        $res = $this->model->field('increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
@@ -325,30 +325,30 @@ class Meeloog extends Backend
         switch ($status) {
             case 1:
                 //配镜架
-                $data['custom_is_match_frame_new'] = 1;
-                $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_frame_person_new'] = session('admin.nickname');
+                $data['custom_is_match_frame'] = 1;
+                $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_frame_person'] = session('admin.nickname');
                 $params['type'] = 2;
                 break;
             case 2:
                 //配镜片
-                $data['custom_is_match_lens_new'] = 1;
-                $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_lens_person_new'] = session('admin.nickname');
+                $data['custom_is_match_lens'] = 1;
+                $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_lens_person'] = session('admin.nickname');
                 $params['type'] = 3;
                 break;
             case 3:
                 //移送加工
-                $data['custom_is_send_factory_new'] = 1;
-                $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_factory_person_new'] = session('admin.nickname');
+                $data['custom_is_send_factory'] = 1;
+                $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_factory_person'] = session('admin.nickname');
                 $params['type'] = 4;
                 break;
             case 4:
                 //质检通过
-                $data['custom_is_delivery_new'] = 1;
-                $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                $data['custom_is_delivery'] = 1;
+                $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_delivery_person'] = session('admin.nickname');
                 $params['type'] = 5;
                 break;
             default:
