@@ -61,8 +61,8 @@ class Test extends Backend
         dump($order_shipment);
         $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
         $ma['handle'] = 1;
-        $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id')
-            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id','left')
+        $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
             ->where($map)->limit(10)->select();
         $order_shipment = collection($order_shipment)->toArray();
         dump($order_shipment);
@@ -70,12 +70,6 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
-            $order_num = Db::connect('database.db_zeelool')
-                ->table('sales_flat_order')
-                ->field('increment_id')
-                ->where('entity_id', '=', $v['order_id'])
-                ->find();
-
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
             $carrier = $this->getCarrier($title);
@@ -95,7 +89,7 @@ class Test extends Backend
 
             $add['site'] = 1;
             $add['order_id'] = $v['order_id'];
-            $add['order_number'] = $order_num['increment_id'];
+            $add['order_number'] = $v['increment_id'];
             $add['shipment_type'] = $v['title'];
             $add['track_number'] = $v['track_number'];
 
