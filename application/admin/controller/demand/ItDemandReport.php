@@ -96,8 +96,14 @@ class ItDemandReport extends Backend
      * @return void
      */
     public function web_score_statistics(){
-        $stime = date("Y-m-d 00:00:00", strtotime("-6 month"));
-        $etime = date('Y-m-d H:i:s', time());
+        $month = input('month');
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+        }else{
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+        }
         $smap['create_time'] = ['between', [$stime, $etime]];
         $task_item_smap['itWebTask.createtime'] = ['between', [$stime, $etime]];
         $task_smap['createtime'] = ['between', [$stime, $etime]];
@@ -114,7 +120,7 @@ class ItDemandReport extends Backend
             ->where($smap)
             ->select();
 
-        $list = collection($list)->toArray();//获取近六个月的需求与bug
+        $list = collection($list)->toArray();//获取一个月的需求与bug
 
         $task_item_list = $this->itWebTaskItem
             ->with("itWebTask")
@@ -122,7 +128,7 @@ class ItDemandReport extends Backend
             ->where($task_item_smap)
             ->select();
 
-        $task_item_list = collection($task_item_list)->toArray();//获取近六个月的开发任务
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
 
         $web_user_total = $this->PersonalJobNum($web_designer_user_arr,'web_designer_user_id','前端',$list,$task_item_list);
         $php_user_total = $this->PersonalJobNum($phper_user_arr,'phper_user_id','后端',$list,$task_item_list);
@@ -132,7 +138,55 @@ class ItDemandReport extends Backend
         dump($personal_total);exit;
     }
     /**
-     * 获取复杂度
+     * 网站统计逾期任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 17:55:38 
+     * @return void
+     */
+    public function web_outtime_statistics(){
+        $month = input('month');
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+        }else{
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+        }
+        $smap['create_time'] = ['between', [$stime, $etime]];
+        $task_item_smap['itWebTask.createtime'] = ['between', [$stime, $etime]];
+        $task_smap['createtime'] = ['between', [$stime, $etime]];
+
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $web_designer_user_arr = config('demand.' . 'web_designer_user');
+        $phper_user_arr = config('demand.' . 'phper_user');
+        $app_user_arr = config('demand.' . 'app_user');
+
+        $list = $this->model
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取一个月的需求与bug
+
+        $task_item_list = $this->itWebTaskItem
+            ->with("itWebTask")
+            ->where('is_del', 1)
+            ->where($task_item_smap)
+            ->select();
+
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
+
+        $web_user_total = $this->PersonalOuttimeNum($web_designer_user_arr,'web_designer_user_id','前端',$list,$task_item_list);
+        $php_user_total = $this->PersonalOuttimeNum($phper_user_arr,'phper_user_id','后端',$list,$task_item_list);
+        $app_user_total = $this->PersonalOuttimeNum($app_user_arr,'app_user_id','APP',$list,$task_item_list);
+        $personal_total=array_merge($web_user_total,$php_user_total,$app_user_total);
+        dump($personal_total);exit;
+    }
+    /**
+     * 获取复杂度/时间
      *
      * @Description
      * @author mjj
@@ -140,23 +194,30 @@ class ItDemandReport extends Backend
      * @return void
      */
     public function getcomplexity($usertype){
-        $complexity = '';
+        $arr = array();
         switch ($usertype)
         {
             case 'web_designer_user_id':
-                $complexity = 'web_designer_complexity' ;
+                $arr['complexity'] = 'web_designer_complexity' ;
+                $arr['completetime'] = 'web_designer_finish_time' ;
+                $arr['experttetime'] = 'web_designer_expect_time' ;
                 break;  
             case 'phper_user_id':
-                $complexity = 'phper_complexity' ;
+                $arr['complexity'] = 'phper_complexity' ;
+                $arr['completetime'] = 'phper_finish_time' ;
+                $arr['experttetime'] = 'phper_expect_time' ;
                 break;
             case 'app_user_id':
-                $complexity = 'app_complexity' ;
+                $arr['complexity'] = 'app_complexity' ;
+                $arr['completetime'] = 'app_finish_time' ;
+                $arr['experttetime'] = 'app_expect_time' ;
                 break;
             case 'test_user_id':
-                $complexity = 'test_complexity' ;
+                $arr['complexity'] = 'test_complexity' ;
+                $arr['completetime'] = 'test_finish_time' ;
                 break;
         }
-        return $complexity;
+        return $arr;
     }
     /**
      * 获取每个人的工作量
@@ -169,31 +230,43 @@ class ItDemandReport extends Backend
     public function PersonalJobNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
         $web_user = array();
         $i = 0;
-        $bug_total = 0;      //bug总量
-        $demand_total = 0;   //需求总量
-        $task_total = 0;     //开发总量
-        $score_total = 0;    //总量
         foreach ($user_arr as $uk => $uv) {
             if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_total = 0;      //bug总量
+                $demand_num = 0;   //需求总数量
+                $demand_total = 0;   //需求总量
+                $task_num = 0;     //开发总数量
+                $task_total = 0;     //开发总量
+                $score_num = 0;    //总数量
+                $score_total = 0;    //总量
                 $web_user[$i]['user_name'] = $uv;
                 $web_user[$i]['user_id'] = $uk;
                 $web_user[$i]['group_name'] = $group_name;
                 foreach ($demand_list as $k => $v) {
                     if (in_array($uk, explode(',', $v[$field_name]))) {
                         if ($v['type'] == 1) {
+                            $bug_num++;
                             $bug_total++;
+                            $score_num++;
                             $score_total++;
                         } elseif ($v['type'] == 2) {
-                            $complexity = $this->getcomplexity($field_name);
+                            $complexity = $this->getcomplexity($field_name)['complexity'];
                             if($v[$complexity] == 1){
+                                $demand_num++;
                                 $demand_total++;
+                                $score_num++;
                                 $score_total++;
                             }elseif($v[$complexity] == 2){
+                                $demand_num++;
                                 $demand_total += 3;
+                                $score_num++;
                                 $score_total += 3;
                             }
                             elseif($v[$complexity] == 3){
+                                $demand_num++;
                                 $demand_total += 5;
+                                $score_num++;
                                 $score_total += 5;
                             }   
                         }
@@ -201,21 +274,124 @@ class ItDemandReport extends Backend
                 }
                 foreach ($item_list as $k => $v) {
                     if ($v['person_in_charge'] == $uk) {
-                        if($v['type'] == 1){
+                        if($v['it_web_task']['type'] == 1){
+                            $task_num++;
                             $task_total += 10;
+                            $score_num++;
                             $score_total += 10;
-                        }elseif($v['type'] == 2){
+                        }elseif($v['it_web_task']['type'] == 2){
+                            $task_num++;
                             $task_total += 20;
+                            $score_num++;
                             $score_total += 20;
                         }else{
+                            $task_num++;
                             $task_total += 30;
+                            $score_num++;
                             $score_total += 30;
                         }
                     }
+                    
                 }
+                $web_user[$i]['bug_num'] = $bug_num;
                 $web_user[$i]['bug_total'] = $bug_total;
+                $web_user[$i]['demand_num'] = $demand_num;
                 $web_user[$i]['demand_total'] = $demand_total;
+                $web_user[$i]['task_num'] = $task_num;
                 $web_user[$i]['task_total'] = $task_total;
+                $web_user[$i]['score_num'] = $score_num;
+                $web_user[$i]['score_total'] = $score_total;
+                $i++;
+            }
+        }
+        return $web_user;
+    }
+     /**
+     * 获取每个人逾期的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function PersonalOuttimeNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_total = 0;      //bug逾期总量
+                $demand_num = 0;   //需求总数量
+                $demand_total = 0;   //需求逾期总量
+                $task_num = 0;     //开发总数量
+                $task_total = 0;     //开发逾期总量
+                $score_num = 0;    //总数量
+                $score_total = 0;    //总逾期量
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        $arr = $this->getcomplexity($field_name);
+                        if ($v['type'] == 1) {
+                            $bug_date = $v['create_time'];
+                            $createtime = date('Y-m-d H:i:s',strtotime("$bug_date+1day"));
+                            if($createtime > $arr['completetime']){
+                                $bug_num++;
+                                $score_total++;
+                            }
+                            $bug_total++;
+                            $score_num++;
+                        } elseif ($v['type'] == 2) {
+                            $complexity = $arr['complexity'];
+                            if($v[$complexity] == 1){
+                                $demand_num++;
+                                $demand_total++;
+                                $score_num++;
+                                $score_total++;
+                            }elseif($v[$complexity] == 2){
+                                $demand_num++;
+                                $demand_total += 3;
+                                $score_num++;
+                                $score_total += 3;
+                            }
+                            elseif($v[$complexity] == 3){
+                                $demand_num++;
+                                $demand_total += 5;
+                                $score_num++;
+                                $score_total += 5;
+                            }   
+                        }
+                    }
+                }
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        if($v['it_web_task']['type'] == 1){
+                            $task_num++;
+                            $task_total += 10;
+                            $score_num++;
+                            $score_total += 10;
+                        }elseif($v['it_web_task']['type'] == 2){
+                            $task_num++;
+                            $task_total += 20;
+                            $score_num++;
+                            $score_total += 20;
+                        }else{
+                            $task_num++;
+                            $task_total += 30;
+                            $score_num++;
+                            $score_total += 30;
+                        }
+                    }
+                    
+                }
+                $web_user[$i]['bug_num'] = $bug_num;
+                $web_user[$i]['bug_total'] = $bug_total;
+                $web_user[$i]['demand_num'] = $demand_num;
+                $web_user[$i]['demand_total'] = $demand_total;
+                $web_user[$i]['task_num'] = $task_num;
+                $web_user[$i]['task_total'] = $task_total;
+                $web_user[$i]['score_num'] = $score_num;
                 $web_user[$i]['score_total'] = $score_total;
                 $i++;
             }
