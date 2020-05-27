@@ -35,14 +35,14 @@ class Test extends Backend
     }
 
 
-    public function tongbu_zendesk(){
+    public function tongbu_zendesk()
+    {
         $zend = Db::name('zendesk')->field('id,type')->select();
-        foreach($zend as $k => $v){
+        foreach ($zend as $k => $v) {
             $update['platform'] = $v['type'];
-            Db::name('zendesk_comments')->where('zid', $v['id'])->update($update); 
+            Db::name('zendesk_comments')->where('zid', $v['id'])->update($update);
             echo $v['id'] . "\n";
         }
-        
     }
 
     /**
@@ -56,8 +56,17 @@ class Test extends Backend
             ->field('entity_id,track_number,title,updated_at,order_id')
             ->where('created_at', '>=', '2020-3-31 00:00:00')
             ->where('handle', '=', '1')
+            ->limit(10)
             ->select();
-
+        dump($order_shipment);
+        $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
+        $ma['handle'] = 1;
+        $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id')
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id','left')
+            ->where($map)->limit(10)->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        dump($order_shipment);
+        die;
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
@@ -83,7 +92,7 @@ class Test extends Backend
                 /* 'number' => '74890988318620573173', //Fedex
                 'carrier' => '100003' */
             ]]);
-            
+
             $add['site'] = 1;
             $add['order_id'] = $v['order_id'];
             $add['order_number'] = $order_num['increment_id'];
@@ -92,7 +101,7 @@ class Test extends Backend
 
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-                
+
                 if (stripos($v['title'], 'Post') !== false) {
                     $this->china_post_data($trackdata, $add);
                 }
@@ -113,7 +122,7 @@ class Test extends Backend
                     $this->fedex_data($trackdata, $add);
                 }
             }
-            echo $v['order_id'].':'. $v['track_number'] . "\n";
+            echo $v['order_id'] . ':' . $v['track_number'] . "\n";
             sleep(1);
         }
         exit;
@@ -787,12 +796,12 @@ class Test extends Backend
             $aa = $trackingConnector->registerMulti($val);
 
             //请求接口更改物流表状态
-            $order_ids = implode(',',array_column($val, 'order_id'));
+            $order_ids = implode(',', array_column($val, 'order_id'));
             $params['ids'] = $order_ids;
             $params['site'] = 3;
             $res = $this->setLogisticsStatus($params);
             if ($res->status !== 200) {
-                echo '更新失败:'.$order_ids . "\n";
+                echo '更新失败:' . $order_ids . "\n";
             }
             $order_ids = array();
 
@@ -898,7 +907,7 @@ class Test extends Backend
         custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
         custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
         ';
-        $map['a.created_at'] = ['>=', '2020-05-25 16:20:00'];
+        $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
         $zeelool_data = $this->zeelool->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
@@ -1150,7 +1159,7 @@ class Test extends Backend
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
             ->where($map)->select();
         foreach ($zeelool_data as $key => $v) {
-            
+
             $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
             if ($count > 0) {
                 continue;
@@ -1652,19 +1661,18 @@ class Test extends Backend
         //求出所有没有订单金额的工单
         $result = $this->worklist->where($where)->column('platform_order');
 
-        if(!$result){
+        if (!$result) {
             echo 1;
             exit;
         }
-        $info = $model->name('sales_flat_order')->where('increment_id','in',$result)->field('increment_id,base_grand_total')->select();
-        if(!$info){
+        $info = $model->name('sales_flat_order')->where('increment_id', 'in', $result)->field('increment_id,base_grand_total')->select();
+        if (!$info) {
             echo 2;
             exit;
         }
-        foreach($info as $v){
-            $this->worklist->where(['platform_order'=>$v['increment_id']])->update(['base_grand_total'=>$v['base_grand_total']]);
+        foreach ($info as $v) {
+            $this->worklist->where(['platform_order' => $v['increment_id']])->update(['base_grand_total' => $v['base_grand_total']]);
         }
-
     }
 
     public function demo()
@@ -1672,9 +1680,11 @@ class Test extends Backend
         $str = 'a:2:{s:15:"info_buyRequest";a:7:{s:7:"product";s:4:"1237";s:8:"form_key";s:16:"L6dCoq3Glj4zVImc";s:3:"qty";i:1;s:7:"options";a:1:{i:1137;s:4:"1489";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:29:{s:19:"frame_regural_price";d:28.949999999999999;s:11:"frame_price";d:28.949999999999999;s:12:"prescription";s:339:"min_pd=54&max_pd=78&progressive_bifocal=62&customer_rx=0&prescription_type=Progressive&pd=&pd_r=30.0&pd_l=30.0&pdcheck=on&od_sph=-0.50&od_cyl=-0.75&od_axis=125&os_add=1.75&os_sph=0.00&os_cyl=-0.75&os_axis=60&od_pv=0.00&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_pv_r=0.00&os_bd_r=&year=1968&savePrescription=on&save=Prescription1%28Progressive%29";s:11:"lenstype_id";N;s:13:"lenstype_name";N;s:18:"lenstype_data_name";N;s:21:"lenstype_regual_price";d:0;s:14:"lenstype_price";d:0;s:19:"lenstype_base_price";i:0;s:7:"lens_id";N;s:9:"lens_name";N;s:14:"lens_data_name";N;s:10:"lens_index";N;s:17:"lens_regual_price";d:0;s:10:"lens_price";d:0;s:15:"lens_base_price";i:0;s:8:"color_id";s:0:"";s:10:"color_name";s:0:"";s:15:"color_data_name";N;s:18:"color_regual_price";d:0;s:11:"color_price";d:0;s:16:"color_base_price";i:0;s:10:"coating_id";s:9:"coating_2";s:12:"coating_name";N;s:13:"coating_price";d:5;s:18:"coating_base_price";d:5;s:3:"rid";s:1:"0";s:4:"lens";d:5;s:5:"total";d:33.950000000000003;}s:11:"reset_count";b:1;}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"White";s:11:"print_value";s:5:"White";s:9:"option_id";s:4:"1137";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"1489";s:11:"custom_view";b:0;}}}';
         $str1 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3410";s:8:"form_key";s:16:"1xAFB996YzQgwr4k";s:3:"qty";i:1;s:7:"options";a:1:{i:3342;s:4:"4038";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:29:{s:19:"frame_regural_price";d:26.949999999999999;s:11:"frame_price";d:26.949999999999999;s:12:"prescription";s:261:"prescription_type=SingleVision&od_sph=-1.25&od_cyl=0.75&od_axis=90&os_sph=-1.25&os_cyl=1.50&os_axis=90&pdcheck=on&pd_r=30.00&pd_l=31.50&pd=&os_add=0.00&od_add=0.00&prismcheck=&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=";s:11:"lenstype_id";s:10:"lenstype_4";s:13:"lenstype_name";s:19:"Blue Light Blocking";s:18:"lenstype_data_name";s:19:"Blue Light Blocking";s:21:"lenstype_regual_price";i:20;s:14:"lenstype_price";d:20;s:19:"lenstype_base_price";d:20;s:7:"lens_id";s:13:"refractive_11";s:9:"lens_name";s:9:"Recommend";s:14:"lens_data_name";s:24:"1.61 Blue Light Blocking";s:10:"lens_index";s:4:"1.61";s:17:"lens_regual_price";i:10;s:10:"lens_price";d:10;s:15:"lens_base_price";d:10;s:8:"color_id";s:0:"";s:10:"color_name";N;s:15:"color_data_name";N;s:18:"color_regual_price";N;s:11:"color_price";i:0;s:16:"color_base_price";N;s:10:"coating_id";s:0:"";s:12:"coating_name";N;s:13:"coating_price";i:0;s:18:"coating_base_price";N;s:3:"rid";N;s:4:"lens";d:30;s:5:"total";d:56.950000000000003;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3342";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"4038";s:11:"custom_view";b:0;}}}';
         $arr = unserialize($str);
-        dump($arr);die;
+        dump($arr);
+        die;
     }
-    public function ceshi(){
+    public function ceshi()
+    {
         $stime = date("Y-m-d 00:00:00");
         $etime = date("Y-m-d 23:59:59");
         $time  = 123;
