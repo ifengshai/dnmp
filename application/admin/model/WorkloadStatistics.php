@@ -78,6 +78,7 @@ class WorkloadStatistics extends Model
         if($type<10){
             $where['type']  = $whereComments['platform'] = $type;
         }
+            //$where['is_admin'] = 1;
         //zendesk
         
         $zendesk_model = Db::name('zendesk');
@@ -95,7 +96,7 @@ class WorkloadStatistics extends Model
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
         //获取昨天已回复量
-        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->where($whereComments)->count('*');;
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1,'is_admin'=>1])->where($whereComments)->count('*');;
         //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->where(['is_hide'=>1])->count("*");
