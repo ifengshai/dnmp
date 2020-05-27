@@ -117,14 +117,10 @@ table.altrowstable tr:nth-child(even){
                                         <label class="control-label col-xs-4">工单平台</label>
                                         <div class="col-xs-8">
                                             <select  id="order_platform_workload" data-rule="required" class="form-control" name="order_platform">
+												<option value="10" selected="selected">全部</option>
 												{foreach name="orderPlatformList" item="vo"}
-                                                {if $key == $platform}
-                                                <option value="{$key}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$key}">{$vo}</option>
-                                                {/if}
+                                                <option value="{$key}" {if $platform == $key}selected="selected"{/if} >{$vo}</option>
                                                 {/foreach}
-                                                <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
                                             </select>
                                         </div>
                                     </div>                                                                 
