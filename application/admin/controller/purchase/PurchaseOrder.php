@@ -547,7 +547,7 @@ class PurchaseOrder extends Backend
             $logistics = new \app\admin\model\LogisticsInfo();
             $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
             $logistics_data = collection($logistics_data)->toArray();
-           
+
             $this->view->assign("logistics_data", $logistics_data);
         }
 
@@ -577,18 +577,25 @@ class PurchaseOrder extends Backend
                     $logistics = new \app\admin\model\LogisticsInfo();
                     $logistics_company_no = $params['logistics_company_no'];
                     $logistics_number = $params['logistics_number'];
+                    $logistics_ids = $params['logistics_ids'];
+                    
                     if ($params['batch_id']) {
                         foreach ($logistics_company_no as $k => $v) {
                             foreach ($v as $key => $val) {
+                                $list = [];
                                 if (!$val) {
                                     continue;
                                 }
+                                if ($logistics_ids[$k][$key]) {
+                                    $list['id'] = $logistics_ids[$k][$key];
+                                } else {
+                                    $list['order_number'] = $row['purchase_number'];
+                                    $list['purchase_id'] = $row['id'];
+                                    $list['type'] = 1;
+                                    $list['batch_id'] = $k;
+                                }
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
-                                $list['type'] = 1;
-                                $list['order_number'] = $row['purchase_number'];
-                                $list['purchase_id'] = $row['id'];
-                                $list['batch_id'] = $k;
                                 $logistics->addLogisticsInfo($list);
                             }
                         }
@@ -596,6 +603,7 @@ class PurchaseOrder extends Backend
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
                                 foreach ($logistics_company_no as $key => $val) {
+                                    $list = [];
                                     if (!$val) {
                                         continue;
                                     }
@@ -612,16 +620,20 @@ class PurchaseOrder extends Backend
                                 if (!$v) {
                                     continue;
                                 }
+                                $list = [];
+                                if ($logistics_ids[$k]) {
+                                    $list['id'] = $logistics_ids[$k];
+                                } else {
+                                    $list['order_number'] = $row['purchase_number'];
+                                    $list['purchase_id'] = $row['id'];
+                                    $list['type'] = 1;
+                                }
                                 $list['logistics_number'] = $logistics_number[$k];
                                 $list['logistics_company_no'] = $v;
-                                $list['type'] = 1;
-                                $list['order_number'] = $row['purchase_number'];
-                                $list['purchase_id'] = $row['id'];
                                 $logistics->addLogisticsInfo($list);
                             }
                         }
                     }
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();

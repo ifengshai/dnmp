@@ -12,6 +12,7 @@
       
         {foreach $logistics_data as $val}
         {if $val['batch_id'] == $v['id']}
+        <input type="hidden" name="logistics_ids[{$v.id}][]" class="logistics_ids" value="{$val.id}"/>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
@@ -36,20 +37,23 @@
     </div>
 
     <div class='logistics_content'>
+        {foreach $logistics_data as $val}
+        <input type="hidden" name="logistics_ids[]" class="logistics_ids" value="{$val.id}"/>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value=""
+                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="{$val.logistics_company_no}"
                     type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
             </div>
             <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text">
+                <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text" value="{$val.logistics_number}">
 
 
             </div>
 
         </div>
+        {/foreach}
     </div>
     {/if}
 
