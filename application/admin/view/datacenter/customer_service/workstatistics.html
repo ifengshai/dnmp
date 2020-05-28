@@ -142,8 +142,8 @@ table.altrowstable tr:nth-child(even){
                                 <label class="control-label col-xs-1 col-sm-1">员工分组:</label>
                                 <div class="col-xs-2">
                                     <select  id="c-order_platform" class="form-control" name="customer_type">
-                                        {foreach name="customer_type" item="vo"}
-                                        <option value="{$key}">{$vo}</option>
+                                        {foreach name="customer_type" item="vo" key=}
+                                        <option value="{$key}"{if $customerType == $key}selected="selected"{/if}>{$vo}</option>
                                         {/foreach}
                                     </select>
                                 </div>
@@ -151,7 +151,7 @@ table.altrowstable tr:nth-child(even){
                                 <div class="col-xs-2">
                                     <select  id="c-order_platform" class="form-control" name="customer_category">
                                         {foreach name="customer_category" item="vo"}
-                                        <option value="{$key}">{$vo}</option>
+                                        <option value="{$key}" {if $customerCategory == $key}selected="selected"{/if}>{$vo}</option>
                                         {/foreach}
                                     </select>
                                 </div>
@@ -259,10 +259,10 @@ table.altrowstable tr:nth-child(even){
                       {/if}
                   </tr>
                   {/foreach}
-                  {elseif isset($info) && $type==3 /}
-                  {foreach name="info" item="vo" key="k"}
+                  {elseif isset($workArr) && $type==3 /}
+                  {foreach name="workArr" item="vo" key="k"}
                   <tr>
-                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo}</td>   
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$workArr[$k]['create_user_name']}</td>   
                       <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$workArr[$k]['group']}</td>  
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['counter'];?></td>   
