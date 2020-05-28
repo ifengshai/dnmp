@@ -861,7 +861,7 @@ class CustomerService extends Backend
 				}
 				if(!empty($workList)){
 					foreach($workList as $wk =>$wv){
-						if($v['id'] == $wv['id']){
+						if($v['id'] == $wv['create_user_id']){
 							$allCustomers[$k]['counter'] = $wv['counter'];
 							$allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
 							$allCustomers[$k]['refund_num'] = $wv['refund_num'];
