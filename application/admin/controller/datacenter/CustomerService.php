@@ -1200,8 +1200,8 @@ class CustomerService extends Backend
             $allCustomers['replacementNum']  = $replacementNum;
             $allCustomers['refundMoneyNum']  = $refundMoneyNum;
             $allCustomers['refundMoney']     = $refundMoney;
-        }
-        return $allCustomers ? $allCustomers : false;
+        
+			return $allCustomers ? $allCustomers : false;
     }
     /**
      * 工单问题措施详情
