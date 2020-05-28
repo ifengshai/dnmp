@@ -1042,7 +1042,7 @@ class CustomerService extends Backend
         }
         if(!empty($category)){
             foreach($category as $k=>$v){
-                $category_arr[] = $k;
+                $category_arr[] = $v;
             }
         }
         if(count($type_arr)>0 && count($category_arr)==0){
