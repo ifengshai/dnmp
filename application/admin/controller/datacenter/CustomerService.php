@@ -687,9 +687,13 @@ class CustomerService extends Backend
             if (10 !=$params['order_platform']) {
                 $where['work_platform'] = $params['order_platform'];
             }
-            $worklistOne = $this->works_info($where, $mapOne);
+            //员工分组
+            $customer_type = $params['customer_type'];
+            //员工分类
+            $customer_category = $params['customer_category'];
+            $worklistOne = $this->works_info($where, $mapOne,$customer_type,$customer_category);
             if (!empty($mapTwo)) {
-                $worklistTwo = $this->works_info($where, $mapTwo);
+                $worklistTwo = $this->works_info($where, $mapTwo,$customer_type,$customer_category);
             }
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
@@ -778,7 +782,13 @@ class CustomerService extends Backend
             }
             
             $orderPlatformList = config('workorder.platform');
-            $this->view->assign(compact('orderPlatformList', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
+            $this->view->assign(
+                [
+                    'customerType'=>$customer_type,
+                    'customerCategory'=>$customer_category
+                ]
+            );
+            $this->view->assign(compact('orderPlatformList', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney','type','category'));
         } else {
             //默认显示
             //根据筛选时间求出客服部门下面所有有数据人员
@@ -1007,10 +1017,42 @@ class CustomerService extends Backend
      * @since 2020/05/15 16:42:47
      * @return void
      */
-    public function works_info($where, $map)
+    public function works_info($where, $map,$customer_type=0,$customer_category=0)
     {
         $where['work_type'] = 1;
         $where['work_status'] = 6;
+        //A组员工
+        if(1 == $customer_type){
+            $type = $this->customers_by_group(1);
+        //B组员工      
+        }elseif(2 == $customer_type){
+            $type = $this->customers_by_group(2);
+        }
+        $type_arr = $category_arr = [];
+        if(!empty($type)){
+            foreach($type as $k =>$v){
+                $type_arr[] = $k;
+            }   
+        }
+        //正式员工
+        if(1 == $customer_category){
+            $category = $this->getCustomerFormal(1);
+        }elseif(2 == $customer_category){ //非正式员工
+            $category = $this->getCustomerFormal(2);
+        }
+        if(!empty($category)){
+            foreach($category as $k=>$v){
+                $category_arr[] = $k;
+            }
+        }
+        if(count($type_arr)>0 && count($category_arr)==0){
+            $where['create_user_id'] = ['in',$type_arr];
+        }elseif(count($type_arr)>0 && count($category_arr)>0){
+            $final_arr = array_intersect($type_arr,$category_arr);
+            $where['create_user_id'] = ['in',$final_arr];
+        }elseif(count($type_arr) == 0 && count($category_arr)>0){
+            $where['create_user_id'] = ['in',$category_arr];
+        }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
         $where['replacement_order'] = ['neq',''];
@@ -1529,5 +1571,45 @@ class CustomerService extends Backend
             $data['step'] =  $step;
             $this->success('', '', $data);
         }
+    }
+    /**
+     * 获取正式与非正式员工
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/28 11:19:33 
+     * @return void
+     */
+    public function getCustomerFormal($type=1)
+    {
+        $kefumanage = config('workorder.kefumanage');
+        $arr = $info = [];
+        foreach ($kefumanage as $k=> $v) {
+            $arr[] = $k;
+            foreach ($v as $val) {
+                $arr[] = $val;
+            }
+        }
+        $arr[] =75;
+        $result  = Admin::where('id', 'in', $arr)->column('id,createtime');
+        //区分员工时限
+        $time_out = config('workorder.customer_category_time');
+        if(!empty($result)){
+            if(1 == $type){
+                foreach($result as $k =>$v){
+                    if(($v+$time_out)< strtotime("now")){
+                        $info[] = $k;
+                    }
+                }
+            }elseif(2 == $type){
+                foreach($result as $k =>$v){
+                    if(($v+$time_out)>= strtotime("now")){
+                        $info[] = $k;
+                    }
+                }    
+            }
+        }
+        return $info ? $info : [];
+
     }
 }
