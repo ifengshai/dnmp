@@ -1134,13 +1134,31 @@ class CustomerService extends Backend
             }
         }
         if(count($type_arr)>0 && count($category_arr)==0){
+			//求出筛选的人
+			$filterPerson  = $type_arr;
             $where['create_user_id'] = ['in',$type_arr];
         }elseif(count($type_arr)>0 && count($category_arr)>0){
-            $final_arr = array_intersect($type_arr,$category_arr);
-            $where['create_user_id'] = ['in',$final_arr];
+            $filterPerson = array_intersect($type_arr,$category_arr);
+            $where['create_user_id'] = ['in',$filterPerson];
         }elseif(count($type_arr) == 0 && count($category_arr)>0){
+			$filterPerson = $category_arr;
             $where['create_user_id'] = ['in',$category_arr];
         }
+		//整个客服部门人员
+		$arrCustomers = $this->newCustomers();
+		$allCustomers = []
+		if(isset($filterPerson)){
+			foreach($arrCustomers $k =>$v){
+				if(in_array($v['id'],$filterPerson){
+					$allCustomers[$k]['id'] = $v['id'];
+					$allCustomers[$k]['nickname'] = $v['nickname'];
+					$allCustomers[$k]['group'] = $v['group'];
+				}
+			}			
+		}else{
+			$allCustomers = $arrCustomers;
+		}
+
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
         $where['replacement_order'] = ['neq',''];
@@ -1154,8 +1172,7 @@ class CustomerService extends Backend
                 $couponArr[$rv['create_user_id']] = $rv['coupon'];
             }
         }
-			//整个客服部门人员
-			$allCustomers = $this->newCustomers();
+
 			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
 			foreach($allCustomers as $k =>$v){
 				if (is_array($replacementArr)) {
