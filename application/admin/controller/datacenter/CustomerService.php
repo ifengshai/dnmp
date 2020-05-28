@@ -1146,7 +1146,7 @@ class CustomerService extends Backend
         }
 		//整个客服部门人员
 		$arrCustomers = $this->newCustomers();
-		$allCustomers = []
+		$allCustomers = [];
 		if(isset($filterPerson)){
 			foreach($arrCustomers $k =>$v){
 				if(in_array($v['id'],$filterPerson){
