@@ -132,8 +132,10 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['third_name'];
             $items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
             $items[$item_key]['coatiing_name']  = $product_options['info_buyRequest']['tmplens']['four_name'];
+            $items[$item_key]['coatiing_price']  = $product_options['info_buyRequest']['tmplens']['four_price'];
             $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
             $items[$item_key]['index_id']  = $product_options['info_buyRequest']['tmplens']['third_id'];
+            $items[$item_key]['index_price']  = $product_options['info_buyRequest']['tmplens']['lens_price'];
                                                 
 			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true) ?? [];
 			
