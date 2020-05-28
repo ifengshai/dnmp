@@ -1148,7 +1148,7 @@ class CustomerService extends Backend
 		$arrCustomers = $this->newCustomers();
 		$allCustomers = [];
 		if(isset($filterPerson)){
-			foreach($arrCustomers $k =>$v){
+			foreach($arrCustomers as $k =>$v){
 				if(in_array($v['id'],$filterPerson){
 					$allCustomers[$k]['id'] = $v['id'];
 					$allCustomers[$k]['nickname'] = $v['nickname'];
