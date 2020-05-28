@@ -54,6 +54,7 @@ class CustomerService extends Backend
         $customerReply = $this->workload_info($workload_map, $start, $end, 10);
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
+            unset($customerReply['noQualifyDay']);
             $replyArr = [];
             $replyArr['one']['yester_num'] = $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
             $replyArr['two']['yester_num'] = $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
@@ -512,14 +513,19 @@ class CustomerService extends Backend
                 $timeTwo = explode(' ', $params['two_time']);
                 $mapTwo['create_time'] = ['between', [$timeTwo[0] . ' ' . $timeTwo[1], $timeTwo[3] . ' ' . $timeTwo[4]]];
             }
-            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform);
+            //员工分组
+            $customer_type = $params['customer_type'];
+            //员工分类
+            $customer_category = $params['customer_category'];
+            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform,$customer_type,$customer_category);
             if (!empty($mapTwo)) {
-                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform);
+                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform,$customer_type,$customer_category);
             }
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
                 //取出总数
                 $handleNum          = $worklistOne['handleNum'];
+                $noQualifyDay       = $worklistOne['noQualifyDay'];
                 if ($timeOne) {
                     $start = $timeOne[0];
                     $end   = $timeOne[3];
@@ -529,6 +535,7 @@ class CustomerService extends Backend
                 }
                 //销毁变量
                 unset($worklistOne['handleNum']);
+                unset($worklistOne['noQualifyDay']);
                 $this->view->assign([
                     'type'=>2,
                     'customerReply'  => $worklistOne,
@@ -539,6 +546,7 @@ class CustomerService extends Backend
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
                 $handleNum       = $worklistOne['handleNum'] + $worklistTwo['handleNum'];
+                $noQualifyDay    = $worklistOne['noQualifyDay'] + $worklistTwo['noQualifyDay']; 
                 if ($timeOne) {
                     $startOne = $timeOne[0];
                     $endOne   = $timeOne[3];
@@ -550,6 +558,7 @@ class CustomerService extends Backend
                 $endTwo   = $timeTwo[3];
                 //销毁变量
                 unset($worklistOne['handleNum'],$worklistTwo['handleNum']);
+                unset($worklistOne['noQualifyDay'],$worklistTwo['noQualifyDay']);
                 $info = $this->customers();
                 $workArr = [];
                 foreach ($worklistOne as $ok =>$ov) {
@@ -583,8 +592,14 @@ class CustomerService extends Backend
                      'workArr'      => $workArr
                      ]);
             }
+            $this->view->assign(
+                [
+                    'customerType'=>$customer_type,
+                    'customerCategory'=>$customer_category
+                ]
+            );
             $orderPlatformList = config('workorder.platform');
-            $this->view->assign(compact('orderPlatformList', 'handleNum'));
+            $this->view->assign(compact('orderPlatformList', 'handleNum','noQualifyDay'));
         } else {
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             //默认显示
@@ -603,7 +618,7 @@ class CustomerService extends Backend
             $info = $this->customers();
             $kefumanage = config('workorder.kefumanage');
             if (!empty($customerReply)) {
-                $handleNum = 0;
+                $handleNum = $noQualifiyDay =  0;
                 foreach ($customerReply as $k => $v) {
                     //客服分组
                     if (in_array($v['due_id'], $kefumanage[95]) ||(95 == $v['due_id'])) {
@@ -618,12 +633,17 @@ class CustomerService extends Backend
                     }
                     $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                     $handleNum+=$v['counter'];
+                    $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
                 }
             }
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
-            $this->view->assign(compact('orderPlatformList', 'customerReply', 'start', 'end', 'handleNum'));
+            $this->view->assign(compact('orderPlatformList', 'customerReply', 'start', 'end', 'handleNum','noQualifiyDay'));
         }
+        //客服数据
+        $customer_type = config('workorder.customer_type');
+        $customer_category = config('workorder.customer_category');
+        $this->view->assign(compact('customer_type','customer_category'));
         return $this->view->fetch();
     }
     /**
@@ -965,7 +985,7 @@ class CustomerService extends Backend
      * @since 2020/05/23 15:49:44
      * @return void
      */
-    public function workload_info($map, $start, $end, $platform)
+    public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0)
     {
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
@@ -975,21 +995,53 @@ class CustomerService extends Backend
         //$map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
         $where['is_public'] = 1;
         $where['is_admin']  = 1;
-        $where['due_id']    = ['neq',0];
-        $where['author_id'] = ['neq','382940274852'];
+        //$where['due_id']    = ['neq',0];
+        //$where['author_id'] = ['neq','382940274852'];
         //平台
         if ($platform<10) {
             $where['platform'] = $platform;
         }
-        
+        if(1 == $customer_type){
+            $type = $this->customers_by_group(1);
+        //B组员工      
+        }elseif(2 == $customer_type){
+            $type = $this->customers_by_group(2);
+        }
+        $type_arr = $category_arr = [];
+        if(!empty($type)){
+            foreach($type as $k =>$v){
+                $type_arr[] = $k;
+            }   
+        }
+        //正式员工
+        if(1 == $customer_category){
+            $category = $this->getCustomerFormal(1);
+        }elseif(2 == $customer_category){ //非正式员工
+            $category = $this->getCustomerFormal(2);
+        }
+        if(!empty($category)){
+            foreach($category as $k=>$v){
+                $category_arr[] = $v;
+            }
+        }
+        if(count($type_arr)>0 && count($category_arr)==0){
+            $where['due_id'] = ['in',$type_arr];
+        }elseif(count($type_arr)>0 && count($category_arr)>0){
+            $final_arr = array_intersect($type_arr,$category_arr);
+            $where['due_id'] = ['in',$final_arr];
+        }elseif(count($type_arr) == 0 && count($category_arr)>0){
+            $where['due_id'] = ['in',$category_arr];
+        }else{
+            $where['due_id'] = ['neq',0];
+        }                
         //客服处理量
-        $customerReply = $this->zendeskComments->where($where)->where('due_id','neq','382940274852')->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
+        $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
         $customerReply = collection($customerReply)->toArray();
         //客服分组
         $info = $this->customers();
         $kefumanage = config('workorder.kefumanage');
         if (!empty($customerReply)) {
-            $handleNum = 0;
+            $handleNum = $noQualifyDay = 0;
             foreach ($customerReply as $k => $v) {
                 //客服分组
                 if (in_array($v['due_id'], $kefumanage[95]) || (95 == $v['due_id'])) {
@@ -1004,8 +1056,10 @@ class CustomerService extends Backend
                 }
                 $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                 $handleNum+=$v['counter'];
+                $noQualifyDay += $customerReply[$k]['no_qualified_day'];
             }
             $customerReply['handleNum'] = $handleNum;
+            $customerReply['noQualifyDay'] = $noQualifyDay;
         }
         return $customerReply ? $customerReply : false;
     }
