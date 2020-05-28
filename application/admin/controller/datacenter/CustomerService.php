@@ -447,7 +447,7 @@ class CustomerService extends Backend
     public function warehouse_handle($map, $warehouse_problem_type)
     {
         $where['work_type'] = 2;
-        $where['work_status'] = ['in',[2,3,4,5,6]];
+        $where['work_status'] = ['in',[3,6]];
         //$where['work_status'] = ['lt',2];
         //求出主管的超时时间
         $time_out = config('workorder.warehouse_time_out');
