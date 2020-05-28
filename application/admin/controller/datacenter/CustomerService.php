@@ -1119,6 +1119,7 @@ class CustomerService extends Backend
 			$filterPerson = $category_arr;
             $where['create_user_id'] = ['in',$category_arr];
         }
+		return $filterPerson;
 		//整个客服部门人员
 		$arrCustomers = $this->newCustomers();
 		$allCustomers = [];
