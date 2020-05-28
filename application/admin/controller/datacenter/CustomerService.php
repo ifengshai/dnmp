@@ -772,7 +772,8 @@ class CustomerService extends Backend
                      'platform'     => $platform
                      ]);
             }
-            
+            dump($workListOne);
+			exit;
             $orderPlatformList = config('workorder.platform');
             $this->view->assign(
                 [
