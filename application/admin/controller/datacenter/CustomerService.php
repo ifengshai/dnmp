@@ -755,7 +755,9 @@ class CustomerService extends Backend
                 }
                 $startTwo = $timeTwo[0];
                 $endTwo   = $timeTwo[3];
-                 
+                dump($workListOne);
+				dump($workListTwo);
+				exit;	
                 //销毁变量
                 unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
                 unset($worklistTwo['workOrderNum'],$worklistTwo['totalOrderMoney'],$worklistTwo['replacementNum'],$worklistTwo['refundMoneyNum'],$worklistTwo['refundMoney']);
