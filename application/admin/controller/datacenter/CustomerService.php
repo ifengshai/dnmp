@@ -689,14 +689,6 @@ class CustomerService extends Backend
             }
             //员工分组
             $customer_type = $params['customer_type'];
-            //A组
-            if(1 == $customer_type){
-                $info = $this->customers_by_group(1);
-            }elseif(2 == $customer_type){
-                $info = $this->customers_by_group(2);
-            }else{
-                $info = $this->customers();
-            }
             //员工分类
             $customer_category = $params['customer_category'];
             $worklistOne = $this->works_info($where, $mapOne,$customer_type,$customer_category);
@@ -747,6 +739,7 @@ class CustomerService extends Backend
                 //销毁变量
                 unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
                 unset($worklistTwo['workOrderNum'],$worklistTwo['totalOrderMoney'],$worklistTwo['replacementNum'],$worklistTwo['refundMoneyNum'],$worklistTwo['refundMoney']);
+                $info = $this->customers();
                 $workArr = [];
                 foreach ($worklistOne as $ok =>$ov) {
                     if (array_key_exists($ov['create_user_id'], $info)) {
