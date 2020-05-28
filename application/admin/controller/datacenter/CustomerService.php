@@ -759,32 +759,6 @@ class CustomerService extends Backend
                 //销毁变量
                 unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
                 unset($worklistTwo['workOrderNum'],$worklistTwo['totalOrderMoney'],$worklistTwo['replacementNum'],$worklistTwo['refundMoneyNum'],$worklistTwo['refundMoney']);
-                $info = $this->customers();
-                $workArr = [];
-                foreach ($worklistOne as $ok =>$ov) {
-                    if (array_key_exists($ov['create_user_id'], $info)) {
-                        $workArr[$ov['create_user_id']]['create_user_name'] = $info[$ov['create_user_id']];
-                        $workArr[$ov['create_user_id']]['group']            = $ov['group'];
-                        $workArr[$ov['create_user_id']]['one']['counter']   = $ov['counter'];
-                        $workArr[$ov['create_user_id']]['one']['base_grand_total'] = $ov['base_grand_total'];
-                        $workArr[$ov['create_user_id']]['one']['coupon']    = $ov['coupon'];
-                        $workArr[$ov['create_user_id']]['one']['refund_num'] = $ov['refund_num'];
-                        $workArr[$ov['create_user_id']]['one']['replacement_num'] = $ov['replacement_num'];
-                        $workArr[$ov['create_user_id']]['one']['total_refund_money'] = $ov['total_refund_money'];
-                    }
-                }
-                foreach ($worklistTwo as $tk =>$tv) {
-                    if (array_key_exists($tv['create_user_id'], $info)) {
-                        $workArr[$tv['create_user_id']]['create_user_name'] = $info[$tv['create_user_id']];
-                        $workArr[$tv['create_user_id']]['group']            = $tv['group'];
-                        $workArr[$tv['create_user_id']]['two']['counter']   = $tv['counter'];
-                        $workArr[$tv['create_user_id']]['two']['base_grand_total'] = $tv['base_grand_total'];
-                        $workArr[$tv['create_user_id']]['two']['coupon']    = $tv['coupon'];
-                        $workArr[$tv['create_user_id']]['two']['refund_num'] = $tv['refund_num'];
-                        $workArr[$tv['create_user_id']]['two']['replacement_num'] = $tv['replacement_num'];
-                        $workArr[$tv['create_user_id']]['two']['total_refund_money'] = $tv['total_refund_money'];
-                    }
-                }
                 $this->view->assign([
                      'type'         =>3,
                      'workListOne'  => $worklistOne,
@@ -795,9 +769,7 @@ class CustomerService extends Backend
                      'endTwo'       => $endTwo,
                      'startTwo'     => $startTwo,
                      'endTwo'       => $endTwo,
-                     'platform'     => $platform,
-                     'info'         => $info,
-                     'workArr'      => $workArr
+                     'platform'     => $platform
                      ]);
             }
             
