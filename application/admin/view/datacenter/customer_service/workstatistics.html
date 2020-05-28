@@ -259,10 +259,10 @@ table.altrowstable tr:nth-child(even){
                       {/if}
                   </tr>
                   {/foreach}
-                  {elseif isset($workArr) && $type==3 /}
-                  {foreach name="workArr" item="vo" key="k"}
+                  {elseif isset($info) && $type==3 /}
+                  {foreach name="info" item="vo" key="k"}
                   <tr>
-                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$workArr[$k]['create_user_name']}</td>   
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo}</td>   
                       <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$workArr[$k]['group']}</td>  
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['counter'];?></td>   
