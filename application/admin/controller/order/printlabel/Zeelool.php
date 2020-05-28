@@ -1100,7 +1100,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['os_add'] && $value['od_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+            $value['os_add'] = urldecode($value['os_add']);
+            $value['od_add'] = urldecode($value['od_add']);
+            if ($value['os_add'] && $value['os_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
@@ -1737,6 +1739,9 @@ EOF;
 
                     //处方类型
                     $final_print['prescription_type'] = $final_print['prescription_type'] ?: 'Frame Only';
+
+                    $final_print['os_add'] = urldecode($final_print['os_add']);
+                    $final_print['od_add'] = urldecode($final_print['od_add']);
 
                     //处理ADD
                     if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {

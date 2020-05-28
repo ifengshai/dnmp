@@ -184,6 +184,8 @@ class ZeeloolPrescriptionDetailHelper
 
 			$items[$item_key]['information'] = str_replace("+", " ", urldecode(urldecode($product_options['info_buyRequest']['tmplens']['information'])));
 
+			$items[$item_key]['os_add'] = urldecode($items[$item_key]['os_add']);
+            $items[$item_key]['od_add'] = urldecode($items[$item_key]['od_add']);
 			//判断双ADD还是单ADD
 			if ($items[$item_key]['os_add'] && $items[$item_key]['od_add'] && $items[$item_key]['os_add'] * 1 != 0 && $items[$item_key]['od_add'] * 1 != 0) {
 				//如果新处方add 对调 因为旧处方add左右眼颠倒
