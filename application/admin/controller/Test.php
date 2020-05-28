@@ -113,6 +113,7 @@ class Test extends Backend
             echo $k . ':' . $v['order_id'] . "\n";
             usleep(200000);
         }
+        echo 'ok';
         exit;
     }
 
