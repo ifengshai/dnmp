@@ -712,6 +712,8 @@ class CustomerService extends Backend
             //员工分类
             $customer_category = $params['customer_category'];
             $worklistOne = $this->works_info($where, $mapOne,$customer_type,$customer_category);
+			dump($workListOne);
+			exit;
             if (!empty($mapTwo)) {
                 $worklistTwo = $this->works_info($where, $mapTwo,$customer_type,$customer_category);
             }
