@@ -712,8 +712,6 @@ class CustomerService extends Backend
             //员工分类
             $customer_category = $params['customer_category'];
             $worklistOne = $this->works_info($where, $mapOne,$customer_type,$customer_category);
-			dump($workListOne);
-			exit;
             if (!empty($mapTwo)) {
                 $worklistTwo = $this->works_info($where, $mapTwo,$customer_type,$customer_category);
             }
@@ -774,8 +772,6 @@ class CustomerService extends Backend
                      'platform'     => $platform
                      ]);
             }
-            dump($workListOne);
-			exit;
             $orderPlatformList = config('workorder.platform');
             $this->view->assign(
                 [
@@ -1133,7 +1129,6 @@ class CustomerService extends Backend
 		}else{
 			$allCustomers = $arrCustomers;
 		}
-		return 1111; 
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
         $where['replacement_order'] = ['neq',''];
