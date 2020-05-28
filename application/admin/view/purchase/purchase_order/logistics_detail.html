@@ -74,13 +74,41 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div id="supplier-lab">
         <p style="font-size: 16px;text-align: center;"><b>供应商物流信息</b></p>
-        {if $row.purchase_type == 1}
         {foreach name='data' item='vo'}
+        {if $vo}
+        {if $vo['logisticsTrace']}
+        {foreach $vo['logisticsTrace'] as $val}
         <div class='caigou'>
 
             <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2" >承运公司:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
+
+                <label class="control-label col-xs-12 col-sm-2">1688订单号:</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$val['orderId']}</label>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
+                <label class="control-label col-xs-12 col-sm-2"
+                    style="text-align: left;">{$val['logisticsBillNo']}</label>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 80%;">
+                    {foreach  $val['logisticsSteps'] as $vi}
+                    <p>{$vi['acceptTime']} {$vi['remark']}</p>
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+        {/foreach}
+        
+        {else/}
+        <div class='caigou'>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">承运公司:</label>
+                <label class="control-label col-xs-12 col-sm-2"
+                    style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
@@ -91,7 +119,7 @@
                 <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">
                     {if $vo['state'] == 0}
                     在途
-                    {elseif $vo['state'] == 1} 
+                    {elseif $vo['state'] == 1}
                     揽收
                     {elseif $vo['state'] == 2}
                     疑难
@@ -112,31 +140,18 @@
                 <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
                 <div class="col-xs-12 col-sm-8" style="width: 80%;">
                     {foreach name="vo.data" item="vi"}
-                        <p>{$vi.ftime} {$vi.context}</p>
+                    <p>{$vi.ftime} {$vi.context}</p>
                     {/foreach}
                 </div>
             </div>
         </div>
-        {/foreach}
-        {else/}
-        <div class='caigou'>
-           
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$data->logisticsBillNo}</label>
-            </div>
-            
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
-                <div class="col-xs-12 col-sm-8" style="width: 80%;">
-                    {foreach name="data->logisticsSteps" item="vi"}
-                        <p>{$vi->acceptTime} {$vi->remark}</p>
-                    {/foreach}
-                </div>
-            </div>
-        </div>
-
         {/if}
+        {/if}
+        {/foreach}
+
+
+
+
 
     </div>
 
@@ -146,8 +161,9 @@
         <div class='caigou'>
 
             <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2" >承运公司:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
+                <label class="control-label col-xs-12 col-sm-2">承运公司:</label>
+                <label class="control-label col-xs-12 col-sm-2"
+                    style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
@@ -155,32 +171,32 @@
             </div>
 
             <div class="form-group">
-                    <label class="control-label col-xs-12 col-sm-2">物流状态:</label>
-                    <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">
-                        {if $vo['state'] == 0}
-                        在途
-                        {elseif $vo['state'] == 1} 
-                        揽收
-                        {elseif $vo['state'] == 2}
-                        疑难
-                        {elseif $vo['state'] == 3}
-                        签收
-                        {elseif $vo['state'] == 4}
-                        退签
-                        {elseif $vo['state'] == 5}
-                        派件
-                        {elseif $vo['state'] == 6}
-                        退回
-                        {elseif $vo['state'] == 7}
-                        转投
-                        {/if}
-                    </label>
-                </div>
+                <label class="control-label col-xs-12 col-sm-2">物流状态:</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">
+                    {if $vo['state'] == 0}
+                    在途
+                    {elseif $vo['state'] == 1}
+                    揽收
+                    {elseif $vo['state'] == 2}
+                    疑难
+                    {elseif $vo['state'] == 3}
+                    签收
+                    {elseif $vo['state'] == 4}
+                    退签
+                    {elseif $vo['state'] == 5}
+                    派件
+                    {elseif $vo['state'] == 6}
+                    退回
+                    {elseif $vo['state'] == 7}
+                    转投
+                    {/if}
+                </label>
+            </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
                 <div class="col-xs-12 col-sm-8" style="width: 80%;">
                     {foreach name="vo.data" item="vi"}
-                        <p>{$vi.ftime} {$vi.context}</p>
+                    <p>{$vi.ftime} {$vi.context}</p>
                     {/foreach}
                 </div>
             </div>

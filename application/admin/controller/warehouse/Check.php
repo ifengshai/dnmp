@@ -654,6 +654,7 @@ class Check extends Backend
 
             //查询质检单
             $where['a.id'] = ['in', $ids];
+            $where['a.status'] = 2;
             $where['b.unqualified_num'] = ['>', 0];
             $res = $this->model->alias('a')->field('b.check_id,b.id,a.purchase_id,c.purchase_num,c.purchase_price,c.purchase_total,b.supplier_sku,b.sku,b.unqualified_num,b.remark')->where($where)
                 ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')

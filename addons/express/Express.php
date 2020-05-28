@@ -74,7 +74,7 @@ class Express extends Addons
         if ($rs) {
             return $rs;
         } else {
-            exception($app->getError());
+            return [];
         }
     }
 }

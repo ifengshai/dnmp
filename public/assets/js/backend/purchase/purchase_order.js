@@ -48,8 +48,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款' },
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success', 8: 'success', 9: 'success', 10: 'success' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款', 9: '部分签收', 10: '已完成' },
                             addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
@@ -93,7 +93,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                             
+
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -826,6 +826,141 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+        },
+        process: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'purchase/purchase_order/process' + location.search,
+                    table: 'check_order',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'check.createtime',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'check_order_number', title: __('质检单号'), operate: 'like' },
+                        { field: 'purchaseorder.purchase_number', title: __('采购单号'), operate: 'like' },
+                        { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
+                        { field: 'supplier.supplier_name', title: __('供应商'), operate: 'like' },
+                        { field: 'remark', title: __('质检备注'), formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
+                       
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                               
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/check/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+                              
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+
+            //批量生成退销单
+            $(document).on('click', '.btn-matching', function () {
+                var ids = Table.api.selectedids(table);
+
+                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["60%", "60%"] });
+
+            });
+
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+
+            });
+
+
         },
         api: {
             bindevent: function () {

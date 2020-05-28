@@ -578,7 +578,7 @@ class PurchaseOrder extends Backend
                     $logistics_company_no = $params['logistics_company_no'];
                     $logistics_number = $params['logistics_number'];
                     $logistics_ids = $params['logistics_ids'];
-                    
+
                     if ($params['batch_id']) {
                         foreach ($logistics_company_no as $k => $v) {
                             foreach ($v as $key => $val) {
@@ -795,32 +795,30 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $data = [];
-        //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
-        if ($row['purchase_type'] == 2) {
-            $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
-            $data = Cache::get($cacheIndex);
-            if (!$data) {
-                $data = Alibaba::getLogisticsMsg($row['purchase_number']);
-                // 记录缓存, 时效1小时
-                Cache::set($cacheIndex, $data, 3600);
-            }
-            $data = $data->logisticsTrace[0];
-        } else {
-            if ($row['logistics_number']) {
-                $arr = explode(',', $row['logistics_number']);
-                //物流公司编码
-                $company = explode(',', $row['logistics_company_no']);
-                foreach ($arr as $k => $v) {
-                    try {
-                        $param['express_id'] = trim($v);
-                        $param['code'] = trim($company[$k]);
-                        $data[$k] = Hook::listen('express_query', $param)[0];
-                    } catch (\Exception $e) {
-                        $this->error($e->getMessage());
-                    }
+
+        //查询物流信息表快递数据
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $list = $logistics->where(['purchase_id' => $id])->select();
+        $list = collection($list)->toArray();
+        if (!$list) {
+            $this->error(__('No Results were found'));
+        }
+
+        $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
+        $data = Cache::get($cacheIndex);
+        if (!$data) {
+            foreach ($list as $k => $v) {
+                //来源快递100
+                if ($v['source'] == 1) {
+                    $param['express_id'] = $v['logistics_number'];
+                    $param['code'] = $v['logistics_company_no'];
+                    $data[$k] = Hook::listen('express_query', $param)[0];
+                } elseif ($v['source'] == 2) { //来源1688
+                    $data[$k] = Alibaba::getLogisticsMsg($v['order_number']);
                 }
             }
+            // 记录缓存, 时效1小时
+            Cache::set($cacheIndex, $data, 3600);
         }
 
         //采购单退销物流信息
@@ -1359,6 +1357,62 @@ class PurchaseOrder extends Backend
 
 
     }
+
+
+    /**
+     * 查看
+     */
+    public function process()
+    {
+        $this->model = new \app\admin\model\warehouse\Check;
+        $this->check_item = new \app\admin\model\warehouse\CheckItem;
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->check_item->where($smap)->column('check_id');
+                $map['check.id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //是否存在需要退回产品
+            $smap['unqualified_num'] = ['>', 0];
+            $ids = $this->check_item->where($smap)->column('check_id');
+            $map['check.id'] = ['in', $ids];
+            $map['check.is_return'] = 0;
+            $map['check.status'] = 2;
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->with(['purchaseorder', 'supplier'])
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            $list = $this->model
+                ->with(['purchaseorder', 'supplier'])
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
 
     /**
      * 批量导出xls

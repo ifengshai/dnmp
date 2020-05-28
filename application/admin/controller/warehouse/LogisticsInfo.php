@@ -22,6 +22,7 @@ class LogisticsInfo extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\LogisticsInfo;
+        $this->purchase = new \app\admin\model\purchase\PurchaseOrder();
     }
 
     /**
@@ -40,12 +41,26 @@ class LogisticsInfo extends Backend
      */
     public function signin($ids = null)
     {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
         if (!$ids) {
-           $this->error('缺少参数！！');     
+            $this->error('缺少参数！！');
         }
         if ($this->request->isAjax()) {
-            $res = $this->model->save(['status' => 1],['id' => $ids]);
+            $res = $this->model->save(['status' => 1], ['id' => $ids]);
             if (false !== $res) {
+                //签收成功时更改采购单签收状态
+                $count = $this->model->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
+                if ($count > 0) {
+                    $data['purchase_status'] = 9;
+                } else {
+                    $data['purchase_status'] = 7;
+                }
+                $this->purchase->save($data, ['id' => $row['purchase_id']]);
+                
                 $this->success('签收成功');
             } else {
                 $this->error('签收失败');
