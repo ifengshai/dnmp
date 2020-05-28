@@ -379,7 +379,7 @@ class CustomerService extends Backend
      */
     public function workorder_handle_right($map, $step)
     {
-        $where['is_check'] = 1;
+        //$where['is_check'] = 1;
         $where['work_type'] = 1;
         //where('id','not in',[1,5,8]);
         $where['work_status'] = ['in',[3,6]];
