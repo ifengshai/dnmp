@@ -715,7 +715,6 @@ class CustomerService extends Backend
                     'end'       => $end,
                     'platform'  => $platform
                     ]);
-                $this->view->assign(compact('workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));    
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
                 $workOrderNum       = $worklistOne['workOrderNum'] + $worklistTwo['workOrderNum'];
@@ -776,10 +775,10 @@ class CustomerService extends Backend
                      'info'         => $info,
                      'workArr'      => $workArr
                      ]);
-                $this->view->assign(compact('workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));     
             }
+            
             $orderPlatformList = config('workorder.platform');
-            $this->view->assign(compact('orderPlatformList'));
+            $this->view->assign(compact('orderPlatformList', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
         } else {
             //默认显示
             //根据筛选时间求出客服部门下面所有有数据人员
