@@ -382,7 +382,7 @@ class CustomerService extends Backend
         $where['is_check'] = 1;
         $where['work_type'] = 1;
         //where('id','not in',[1,5,8]);
-        $where['work_status'] = ['in',[2,3,4,5,6]];
+        $where['work_status'] = ['in',[3,6]];
         //$where['work_status'] = ['neq',7];
         //求出措施的超时时间
         $time_out = config('workorder.step_time_out');
