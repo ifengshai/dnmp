@@ -61,6 +61,9 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
+            if ($v['order_id'] < 324253) {
+                continue;
+            }
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
             $carrier = $this->getCarrier($title);
@@ -112,6 +115,74 @@ class Test extends Backend
         }
         exit;
     }
+
+     /**
+     * 批量 获取物流明细
+     * 莫删除
+     */
+    public function track_shipment_num_v()
+    {
+        $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
+        $map['b.handle'] = 1;
+        $order_shipment = $this->voogueme->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
+            ->where($map)->order('a.entity_id asc')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /*'number' => 'UF105842059YP', //燕文
+                'carrier' => '190012'*/
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+            ]]);
+
+            $add['site'] = 2;
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $v['increment_id'];
+            $add['shipment_type'] = $v['title'];
+            $add['track_number'] = $v['track_number'];
+
+            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+
+                if (stripos($v['title'], 'Post') !== false) {
+                    $this->china_post_data($trackdata, $add);
+                }
+
+                if (stripos($v['title'], 'DHL') !== false) {
+                    $this->dhl_data($trackdata, $add);
+                }
+
+                if (stripos($v['title'], 'yanwen') !== false) {
+                    $this->yanwen_data($trackdata, $add);
+                }
+
+                if (stripos($v['title'], 'USPS') !== false) {
+                    $this->usps_data($trackdata, $add);
+                }
+
+                if (stripos($v['title'], 'fede') !== false) {
+                    $this->fedex_data($trackdata, $add);
+                }
+            }
+            echo $k . ':' . $v['order_id'] . "\n";
+            usleep(200000);
+        }
+        exit;
+    }
+
     //fedex
     public function fedex_data($data, $add)
     {

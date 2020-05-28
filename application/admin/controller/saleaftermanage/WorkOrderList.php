@@ -35,7 +35,7 @@ use app\api\controller\Ding;
  */
 class WorkOrderList extends Backend
 {
-
+    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
@@ -137,15 +137,15 @@ class WorkOrderList extends Backend
                 unset($filter['recept_person']);
             }
             //筛选措施
-            if($filter['measure_choose_id']){
+            if ($filter['measure_choose_id']) {
                 $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
-                if(!empty($map['id'])){
-                    $newWorkIds = array_intersect($workIds,$measuerWorkIds);
-                    $map['id']  = ['in',$newWorkIds];
-                }else{
-                    $map['id']  = ['in',$measuerWorkIds];
+                if (!empty($map['id'])) {
+                    $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                    $map['id']  = ['in', $newWorkIds];
+                } else {
+                    $map['id']  = ['in', $measuerWorkIds];
                 }
-                unset($filter['measure_choose_id']);               
+                unset($filter['measure_choose_id']);
             }
 
             $this->request->get(['filter' => json_encode($filter)]);
@@ -1999,7 +1999,7 @@ EOF;
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
 
-        
+
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
