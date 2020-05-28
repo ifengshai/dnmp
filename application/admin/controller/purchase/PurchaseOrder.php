@@ -547,7 +547,7 @@ class PurchaseOrder extends Backend
             $logistics = new \app\admin\model\LogisticsInfo();
             $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
             $logistics_data = collection($logistics_data)->toArray();
-            dump($logistics_data);die;
+           
             $this->view->assign("logistics_data", $logistics_data);
         }
 
