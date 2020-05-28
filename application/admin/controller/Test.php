@@ -132,6 +132,10 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
+            if ($k <= 20001) {
+                continue;
+            }
+
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
             $carrier = $this->getCarrier($title);
@@ -181,6 +185,7 @@ class Test extends Backend
             echo $k . ':' . $v['order_id'] . "\n";
             usleep(200000);
         }
+        echo 'ok';
         exit;
     }
 
