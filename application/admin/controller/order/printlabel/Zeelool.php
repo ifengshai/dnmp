@@ -1249,7 +1249,79 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '100099417';
+        $str = '400249002
+        400249006
+        400249014
+        400249028
+        400249033
+        400249031
+        400249034
+        400249037
+        400249039
+        400249042
+        400249043
+        400249047
+        400249050
+        400249065
+        400249066
+        100116789
+        100116790
+        400249119
+        400249155
+        400206077
+        400249191
+        100116820
+        100116822
+        400249209
+        100116166
+        400249145
+        100116722
+        400249233
+        100115190
+        400249275
+        100116876
+        400245670
+        400249327
+        100116917
+        400249350
+        100114933
+        100116957
+        400249477
+        100116976
+        400249499
+        400249514
+        400249546
+        400249279
+        400249574
+        400249582
+        400249259
+        400249595
+        400247989
+        400249683
+        500003416
+        400249716
+        400249746
+        400249748
+        400249781
+        400249802
+        400249804
+        400249891
+        400249892
+        400249915
+        100117187
+        400250050
+        400250061
+        400250066
+        400190342
+        400250073
+        400250110
+        400250161
+        100117268
+        400229980
+        100115252
+        400250280
+        100117299
+        ';
         $str = explode('
         ', $str);
 
@@ -1270,16 +1342,31 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
-
             $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
-            $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
-            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            //新处方
+            if ($value['is_new_version'] == 1) {
+                //镀膜
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
+                //镜片类型
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
+                }
+            } else {
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+                }
+            }
+
+
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
@@ -1292,22 +1379,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                     }
                 }
             }
-
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
-            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
-            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
-            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-
-            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
-            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
-            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
-            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-
-            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
-            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
-            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
-            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
 
             //斜视值
             if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
@@ -1325,10 +1396,28 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             //用户留言
             $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
 
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
+            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
+            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
+            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
+
+            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
+            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
+            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
+            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
+
+            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
+            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
+            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
+
+
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
             $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+            $finalResult[$key]['is_new_version'] = $value['is_new_version'];
         }
 
         $spreadsheet = new Spreadsheet();
@@ -1358,11 +1447,15 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
         //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $itemArr = $item->where('platform_type', 1)->cache(3600)->column('id', 'platform_sku');
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
 
         foreach ($finalResult as $key => $value) {
+            //网站SKU转换仓库SKU
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -1394,29 +1487,41 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$value['sku']]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
-                // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+            if ($value['os_add'] && $value['od_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+                //新处方版本
+                if ($value['is_new_version'] == 1) {
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
+                } else {
+                    // 旧处方 双ADD值时，左右眼互换 
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+                }
             } else {
-                //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+
+                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                    //数值在上一行合并有效，数值在下一行合并后为空
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                    $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+                } else {
+                    //数值在上一行合并有效，数值在下一行合并后为空
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                    $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+                }
             }
 
             if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
@@ -1486,8 +1591,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
 
-
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
 
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
@@ -1501,18 +1606,14 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 ],
             ],
         ];
+
+
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        //水平垂直居中   
-        // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        // //自动换行
-        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $spreadsheet->setActiveSheetIndex(0);
@@ -1537,14 +1638,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-        // exit;
-        // $filePath = env('runtime_path')."temp/".time().microtime(true).".tmp";
-        // $writer->save($filePath);
-        $writer->save('php://output');
-        // $writer->save('file.xlsx');
 
-        // readfile($filePath);
-        // unlink($filePath);
+        $writer->save('php://output');
     }
 
 
