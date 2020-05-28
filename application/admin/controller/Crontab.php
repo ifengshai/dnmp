@@ -173,18 +173,37 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
             // dump($product_options);
-            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['lens_data_name'], 0, 100);
+
+            if ($product_options['info_buyRequest']['tmplens']['coating_name']) {
+                $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
+            } else {
+                $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            }
+
+            if ($product_options['info_buyRequest']['tmplens']['lens_data_name']) {
+                $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['lens_data_name'], 0, 100);
+            } else {
+                $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            }
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
-            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
+            if ($product_options['info_buyRequest']['tmplens']['lens_base_price']) {
+                $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            } else {
+                $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            }
+
+            if ($product_options['info_buyRequest']['tmplens']['coating_base_price']) {
+                $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
+            } else {
+                $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            }
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
             $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['lens_data_name'];
-            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] =  $final_params['index_type'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'] ?: $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
@@ -236,18 +255,18 @@ order by sfoi.item_id asc limit 1000";
 
 
             //判断双ADD还是单ADD
-			if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
-				//如果新处方add 对调 因为旧处方add左右眼颠倒
-				$items[$order_item_key]['os_add'] = $lens_params['os_add'];
-				$items[$order_item_key]['od_add'] = $lens_params['od_add'];
-			} else {
-				if ($items[$order_item_key]['od_add'] && $lens_params['od_add']*1 != 0) {
-					$items[$order_item_key]['total_add'] = $lens_params['od_add'];
-				} else {
-					$items[$order_item_key]['total_add'] = $lens_params['os_add'];
-				}
+            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
+                //如果新处方add 对调 因为旧处方add左右眼颠倒
+                $items[$order_item_key]['os_add'] = $lens_params['os_add'];
+                $items[$order_item_key]['od_add'] = $lens_params['od_add'];
+            } else {
+                if ($items[$order_item_key]['od_add'] && $lens_params['od_add'] * 1 != 0) {
+                    $items[$order_item_key]['total_add'] = $lens_params['od_add'];
+                } else {
+                    $items[$order_item_key]['total_add'] = $lens_params['os_add'];
+                }
             }
-            
+
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
@@ -653,7 +672,7 @@ order by sfoi.item_id asc limit 1000";
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if ($final_params['od_cyl'] ) {
+            if ($final_params['od_cyl']) {
                 $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
                 if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
@@ -1581,7 +1600,7 @@ order by sfoi.item_id asc limit 1000";
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
         $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $meeloog_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");        
+        $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -1590,37 +1609,37 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
-        if($zeelool_count>0){
-            $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);  
-        }else{
+        if ($zeelool_count > 0) {
+            $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);
+        } else {
             $zeelool_unit_price = 0;
         }
-        
+
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
         $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车更新数
         $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车转化率
-        if($zeelool_shoppingcart_total>0){
+        if ($zeelool_shoppingcart_total > 0) {
             $zeelool_shoppingcart_conversion = round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
-        }else{
+        } else {
             $zeelool_shoppingcart_conversion = 0;
         }
         //zeelool购物车更新转化率
-        if($zeelool_shoppingcart_update_total>0){
-            $zeelool_shoppingcart_update_conversion = round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);            
-        }else{
+        if ($zeelool_shoppingcart_update_total > 0) {
+            $zeelool_shoppingcart_update_conversion = round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
+        } else {
             $zeelool_shoppingcart_update_conversion = 0;
         }
-        
+
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //voogueme客单价
-        if($voogueme_count>0){
+        if ($voogueme_count > 0) {
             $voogueme_unit_price = round(($voogueme_total / $voogueme_count), 2);
-        }else{
+        } else {
             $voogueme_unit_price = 0;
         }
         //voogueme购物车数
@@ -1628,76 +1647,77 @@ order by sfoi.item_id asc limit 1000";
         //voogueme购物车更新数
         $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车转化率
-        if($voogueme_shoppingcart_total>0){
+        if ($voogueme_shoppingcart_total > 0) {
             $voogueme_shoppingcart_conversion = round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
-        }else{
+        } else {
             $voogueme_shoppingcart_conversion = 0;
         }
         //voogueme购物车更新转化率
-        if($voogueme_shoppingcart_update_total>0){
+        if ($voogueme_shoppingcart_update_total > 0) {
             $voogueme_shoppingcart_update_conversion = round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
-        }else{
+        } else {
             $voogueme_shoppingcart_update_conversion = 0;
         }
-        
+
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
         $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //nihao客单价
-        if($nihao_count>0){
+        if ($nihao_count > 0) {
             $nihao_unit_price = round(($nihao_total / $nihao_count), 2);
-        }else{
+        } else {
             $nihao_unit_price = 0;
         }
-        
+
         //nihao购物车数
         $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao站购物车更新数
         $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao购物车转化率
-        if($nihao_shoppingcart_total>0){
+        if ($nihao_shoppingcart_total > 0) {
             $nihao_shoppingcart_conversion = round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
-        }else{
+        } else {
             $nihao_shoppingcart_conversion = 0;
         }
-        
+
         //nihao站购物车更新转化率
-        if($nihao_shoppingcart_update_total>0){
+        if ($nihao_shoppingcart_update_total > 0) {
             $nihao_shoppingcart_update_conversion = round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
-        }else{
+        } else {
             $nihao_shoppingcart_update_conversion = 0;
         }
-        
+
         //nihao注册用户数
-        $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
+        $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
+        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //meeloog客单价
-        if($meeloog_count>0){
+        if ($meeloog_count > 0) {
             $meeloog_unit_price = round(($meeloog_total / $meeloog_count), 2);
-        }else{
+        } else {
             $meeloog_unit_price = 0;
         }
-        
+
         //meeloog购物车数
         $meeloog_shoppingcart_total = $meeloog_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //meeloog购物车更新数
         $meeloog_shoppingcart_update_total = $meeloog_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //meeloog购物车转化率
-        if($meeloog_shoppingcart_total>0){
+        if ($meeloog_shoppingcart_total > 0) {
             $meeloog_shoppingcart_conversion = round(($meeloog_count / $meeloog_shoppingcart_total) * 100, 2);
-        }else{
+        } else {
             $meeloog_shoppingcart_conversion = 0;
         }
 
         //meeloog购物车更新转化率
-        if($meeloog_shoppingcart_update_total>0){
+        if ($meeloog_shoppingcart_update_total > 0) {
             $meeloog_shoppingcart_update_conversion = round(($meeloog_count / $meeloog_shoppingcart_update_total) * 100, 2);
-        }else{
+        } else {
             $meeloog_shoppingcart_update_conversion = 0;
         }
-        
+
         //meeloog注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
 
@@ -1740,7 +1760,7 @@ order by sfoi.item_id asc limit 1000";
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
         $data['meeloog_shoppingcart_update_conversion']     = $meeloog_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion ) / 4, 2);
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion) / 4, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -4011,7 +4031,7 @@ order by sfoi.item_id asc limit 1000";
                 Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
                     'stock' => $res[$v['sku']],
                     'type'  => 2
-                    ]);
+                ]);
             }
             //从无到有
             if ($v['type'] == 2 && $res[$v['sku']] > 0) {
@@ -4026,7 +4046,7 @@ order by sfoi.item_id asc limit 1000";
                 ]);
             }
         }
-    
+
         Db::table('fa_goods_stock_change')->insertAll(array_values($info));
     }
     public function get_workload_data()
@@ -4037,7 +4057,7 @@ order by sfoi.item_id asc limit 1000";
             return false;
         }
         $where['type'] = $whereComments['platform'] = $platform;
-        $whereComments['author_id']    = ['neq','382940274852'];
+        $whereComments['author_id']    = ['neq', '382940274852'];
         $whereComments['is_admin']  = 1;
         //zendesk
         $zendesk_model = Db::name('zendesk');
@@ -4051,15 +4071,15 @@ order by sfoi.item_id asc limit 1000";
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['create_time'] = $date['c.create_time'] = $update['zendesk_update_time'] =  ['between', [$stime, $etime]];
         //获取昨天待处理的open、new量
-        $wait_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->count("*");
+        $wait_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->count("*");
         //获取昨天新增的open、new量
-        $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
+        $increment_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
         //获取昨天已回复量
-        $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->where($whereComments)->count('*');
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public' => 1])->where($whereComments)->count('*');
         //获取昨天待分配的open、new量
-        $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where(['assign_id'=>0])->where($update)->count("*");
+        $waiting_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where(['assign_id' => 0])->where($update)->count("*");
         //获取昨天的pendding量
-        $pending_num = $zendesk_model->where($where)->where(['status' => ['eq','3'],'channel' => ['neq','voice']])->where($update)->count("*");
+        $pending_num = $zendesk_model->where($where)->where(['status' => ['eq', '3'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
         $data['platform']       = $platform;
         $data['wait_num']       = $wait_num;
         $data['increment_num']  = $increment_num;
