@@ -121,7 +121,7 @@ class Test extends Backend
      * 批量 获取物流明细
      * 莫删除
      */
-    public function track_shipment_num_v()
+    public function track_shipment_num_n()
     {
         $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
         $map['b.handle'] = 1;
@@ -132,6 +132,7 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
+          
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
             $carrier = $this->getCarrier($title);
@@ -149,7 +150,7 @@ class Test extends Backend
                 'carrier' => '100003' */
             ]]);
 
-            $add['site'] = 2;
+            $add['site'] = 3;
             $add['order_id'] = $v['order_id'];
             $add['order_number'] = $v['increment_id'];
             $add['shipment_type'] = $v['title'];
@@ -181,6 +182,7 @@ class Test extends Backend
             echo $k . ':' . $v['order_id'] . "\n";
             usleep(200000);
         }
+        echo 'ok';
         exit;
     }
 
