@@ -734,7 +734,7 @@ class CustomerService extends Backend
                 unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
                 $this->view->assign([
                     'type'=>2,
-                    'workList'  => $worklistOne,
+                    'allCustomers'  => $worklistOne,
                     'start'     => $start,
                     'end'       => $end,
                     'platform'  => $platform
@@ -875,39 +875,6 @@ class CustomerService extends Backend
 					}
 				}
 			}
-/*             if (!empty($workList)) {
-                
-                foreach ($workList as $k => $v) {
-                    if (is_array($replacementArr)) {
-                        //客服的补发订单数
-                        if (array_key_exists($v['create_user_id'], $replacementArr)) {
-                            $workList[$k]['replacement_num'] = $replacementArr[$v['create_user_id']];
-                            //优惠券发放量
-                            $workList[$k]['coupon']          = $couponArr[$v['create_user_id']];
-                            //累计补发单数
-                            $replacementNum += $replacementArr[$v['create_user_id']];
-                        } else {
-                            $workList[$k]['replacement_num'] = 0;
-                            $workList[$k]['coupon'] = 0;
-                        }
-                    } else {
-                        $workList[$k]['replacement_num'] = 0;
-                        $workList[$k]['coupon'] = 0;
-                    }
-                    
-                    //累计退款金额
-                    $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map);
-                    if (0<$workList[$k]['total_refund_money']) {
-                        $refundMoney += $workList[$k]['total_refund_money'];
-                    }
-                    //累计工单完成量
-                    $workOrderNum += $v['counter'];
-                    //累计订单总金额
-                    $totalOrderMoney += $v['base_grand_total'];
-                    //累计退款单数
-                    $refundMoneyNum += $v['refund_num'];
-                }
-            } */
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
@@ -1187,57 +1154,54 @@ class CustomerService extends Backend
                 $couponArr[$rv['create_user_id']] = $rv['coupon'];
             }
         }
-        //客服分组
-        $kefumanage = config('workorder.kefumanage');
-        if (!empty($workList)) {
-            $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
-            foreach ($workList as $k => $v) {
-                //客服分组
-                if (in_array($v['create_user_id'], $kefumanage[95]) || (95 == $v['create_user_id'])) {
-                    $workList[$k]['group'] = 'B组';
-                } elseif (in_array($v['create_user_id'], $kefumanage[117]) || ($v['create_user_id'] == 117)) {
-                    $workList[$k]['group'] = 'A组';
-                } else {
-                    $workList[$k]['group'] = '未知';
-                }
-                //如果存在补发单数数组
-                if (is_array($replacementArr)) {
-                    //客服的补发订单数
-                    if (array_key_exists($v['create_user_id'], $replacementArr)) {
-                        $workList[$k]['replacement_num'] = $replacementArr[$v['create_user_id']];
-                        //优惠券发放量
-                        $workList[$k]['coupon']          = $couponArr[$v['create_user_id']];
-                        //累计补发单数
-                        $replacementNum += $replacementArr[$v['create_user_id']];
-                    } else {
-                        $workList[$k]['replacement_num'] = 0;
-                        //优惠券发放量
-                        $workList[$k]['coupon']          = 0;
-                    }
-                } else { //如果不存在补发单数的数组
-                    $workList[$k]['replacement_num'] = 0;
-                    $workList[$k]['coupon']          = 0;
-                }
-
-                //累计退款金额
-                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map);
-                if (0<$workList[$k]['total_refund_money']) {
-                    $refundMoney += $workList[$k]['total_refund_money'];
-                }
-                //累计工单完成量
-                $workOrderNum += $v['counter'];
-                //累计订单总金额
-                $totalOrderMoney += $v['base_grand_total'];
-                //累计退款单数
-                $refundMoneyNum += $v['refund_num'];
-            }
-            $workList['workOrderNum']    = $workOrderNum;
-            $workList['totalOrderMoney'] = $totalOrderMoney;
-            $workList['replacementNum']  = $replacementNum;
-            $workList['refundMoneyNum']  = $refundMoneyNum;
-            $workList['refundMoney']     = $refundMoney;
+			//整个客服部门人员
+			$allCustomers = $this->newCustomers();
+			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+			foreach($allCustomers as $k =>$v){
+				if (is_array($replacementArr)) {
+					//客服的补发订单数
+					if (array_key_exists($v['id'], $replacementArr)) {
+						$allCustomers[$k]['replacement_num'] = $replacementArr[$v['id']];
+						//优惠券发放量
+						$allCustomers[$k]['coupon']          = $couponArr[$v['id']];
+						//累计补发单数
+						$replacementNum += $replacementArr[$v['id']];
+					} else {
+						$allCustomers[$k]['replacement_num'] = 0;
+						$allCustomers[$k]['coupon'] = 0;
+					}
+				} else {
+					$allCustomers[$k]['replacement_num'] = 0;
+					$allCustomers[$k]['coupon'] = 0;
+				}
+				//累计退款金额
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				if (0<$allCustomers[$k]['total_refund_money']) {
+					$refundMoney += $allCustomers[$k]['total_refund_money'];
+				}
+				if(!empty($workList)){
+					foreach($workList as $wk =>$wv){
+						if($v['id'] == $wv['create_user_id']){
+							$allCustomers[$k]['counter'] = $wv['counter'];
+							$allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
+							$allCustomers[$k]['refund_num'] = $wv['refund_num'];
+							//累计工单完成量
+							$workOrderNum += $wv['counter'];
+							//累计订单总金额
+							$totalOrderMoney += $wv['base_grand_total'];
+							//累计退款单数
+							$refundMoneyNum += $wv['refund_num'];
+						}
+					}
+				}
+			}		
+            $allCustomers['workOrderNum']    = $workOrderNum;
+            $allCustomers['totalOrderMoney'] = $totalOrderMoney;
+            $allCustomers['replacementNum']  = $replacementNum;
+            $allCustomers['refundMoneyNum']  = $refundMoneyNum;
+            $allCustomers['refundMoney']     = $refundMoney;
         }
-        return $workList ? $workList : false;
+        return $allCustomers ? $allCustomers : false;
     }
     /**
      * 工单问题措施详情
