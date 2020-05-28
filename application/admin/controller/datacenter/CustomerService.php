@@ -1133,7 +1133,7 @@ class CustomerService extends Backend
 		}else{
 			$allCustomers = $arrCustomers;
 		}
-		return $allCustomers; 
+		return 1111; 
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
         $where['replacement_order'] = ['neq',''];
