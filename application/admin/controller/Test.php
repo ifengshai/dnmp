@@ -61,7 +61,7 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
-            if ($v['order_id'] < 324253) {
+            if ($k < 38805) {
                 continue;
             }
             $title = strtolower(str_replace(' ', '-', $v['title']));
