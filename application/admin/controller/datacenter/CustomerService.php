@@ -833,18 +833,51 @@ class CustomerService extends Backend
                 }
             }
             //客服分组
-            $kefumanage = config('workorder.kefumanage');
-            if (!empty($workList)) {
-                $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+            //$kefumanage = config('workorder.kefumanage');
+			//整个客服部门人员
+			$allCustomers = $this->newCustomers();
+			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+			foreach($allCustomers as $k =>$v){
+				if (is_array($replacementArr)) {
+					//客服的补发订单数
+					if (array_key_exists($v['id'], $replacementArr)) {
+						$allCustomers[$k]['replacement_num'] = $replacementArr[$v['id']];
+						//优惠券发放量
+						$allCustomers[$k]['coupon']          = $couponArr[$v['id']];
+						//累计补发单数
+						$replacementNum += $replacementArr[$v['id']];
+					} else {
+						$allCustomers[$k]['replacement_num'] = 0;
+						$allCustomers[$k]['coupon'] = 0;
+					}
+				} else {
+					$allCustomers[$k]['replacement_num'] = 0;
+					$allCustomers[$k]['coupon'] = 0;
+				}
+				//累计退款金额
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				if (0<$allCustomers[$k]['total_refund_money']) {
+					$refundMoney += $allCustomers[$k]['total_refund_money'];
+				}
+				if(!empty($workList)){
+					foreach($workList as $wk =>$wv){
+						if($v['id'] == $wv['id']){
+							$allCustomers[$k]['counter'] = $wv['counter'];
+							$allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
+							$allCustomers[$k]['refund_num'] = $wv['refund_num'];
+							//累计工单完成量
+							$workOrderNum += $wv['counter'];
+							//累计订单总金额
+							$totalOrderMoney += $wv['base_grand_total'];
+							//累计退款单数
+							$refundMoneyNum += $wv['refund_num'];
+						}
+					}
+				}
+			}
+/*             if (!empty($workList)) {
+                
                 foreach ($workList as $k => $v) {
-                    //客服分组
-                    if (in_array($v['create_user_id'], $kefumanage[95]) ||(95 == $v['create_user_id'])) {
-                        $workList[$k]['group'] = 'B组';
-                    } elseif (in_array($v['create_user_id'], $kefumanage[117]) ||(117 == $v['create_user_id'])) {
-                        $workList[$k]['group'] = 'A组';
-                    } else {
-                        $workList[$k]['group'] = '未知';
-                    }
                     if (is_array($replacementArr)) {
                         //客服的补发订单数
                         if (array_key_exists($v['create_user_id'], $replacementArr)) {
@@ -874,10 +907,10 @@ class CustomerService extends Backend
                     //累计退款单数
                     $refundMoneyNum += $v['refund_num'];
                 }
-            }
+            } */
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
-            $this->view->assign(compact('orderPlatformList', 'workList', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
+            $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
         }
         //客服数据
         $customer_type = config('workorder.customer_type');
@@ -935,6 +968,40 @@ class CustomerService extends Backend
         $result[75] = '王伟';
         return $result;
     }
+	/**
+     * 获取客服人员信息(全部)新
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/28 15:59:10
+     * @return void
+     */
+	public function newCustomers()
+	{
+        $kefumanage = config('workorder.kefumanage');
+        $arr = [];
+        foreach ($kefumanage as $k=> $v) {
+            $arr[] = $k;
+            foreach ($v as $val) {
+                $arr[] = $val;
+            }
+        }
+		$arr[] = 75;
+        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
+		if(!empty($result)){
+			$result = collection($result)->toArray();
+			foreach($result as $k =>$v){
+					if(in_array($v['id'],$kefumanage[95]) || (95 == $v['id'])){
+						$result[$k]['group'] = 'B组';
+					}elseif(in_array($v['id'], $kefumanage[117]) ||(117 == $v['id'])){
+						$result[$k]['group'] = 'A组';
+					}else{
+						$result[$k]['group'] = '未知';	
+					}				
+			}
+		}
+        return $result;		
+	}
     /**
      * 获取客服人员信息分组
      *
