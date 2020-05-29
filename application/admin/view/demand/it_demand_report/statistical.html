@@ -1,3 +1,151 @@
+<style>
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+</style>
+<input type="hidden" id="web_type" value="{$type}">
+<div class="panel-heading">
+    {:build_heading()}
+    <ul class="nav nav-tabs">
+        <li class="{:$type == 'web' ? 'active' : ''}"><a href="{:url('/demand/it_demand_report/statistical')}?month={$month}&type=web">网站</a>
+        <li class="{:$type == 'develop' ? 'active' : ''}"><a href="{:url('/demand/it_demand_report/statistical')}?month={$month}&type=develop">开发</a>
+        </li>
+    </ul>
+</div>
 <div class="form-group" id="echart" style="width: 1500px;height: 500px;border: 1px;">
     
 </div>
+{if $type=='web'}
+<table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+    <thead>
+        <tr role="row">
+            <th colspan="9" style="width: 150px;text-align: center;background-color:rgb(242, 248, 248)!important">站任务统计</th>
+        </tr>
+        <tr role="row">
+            <th style="width: 150px;"></th>
+            <th style="width: 150px;">zeelool</th>
+            <th style="width: 150px;">voogueme</th>
+            <th style="width: 150px;">nihao</th>
+            <th style="width: 150px;">wesee</th>
+            <th style="width: 150px;">others</th>
+        </tr>
+    </thead>
+    <tbody>
+        {volist name="sum_total" id="v"}
+        <tr role="row" class="odd">
+            <td>{$v.date}</td>
+            <td>{$v.total1}</td>
+            <td>{$v.total2}</td>
+            <td>{$v.total3}</td>
+            <td>{$v.total4}</td>
+            <td>{$v.total5}</td>
+        </tr>        
+        {/volist}
+    </tbody>
+</table>
+{/if}
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs">
+            {foreach $date_arr as $key=>$it } 
+                <li class="{:$month == $key ? 'active' : ''}"><a href="{:url('/demand/it_demand_report/statistical')}?month={$key}&type={$type}">{$it}</a>
+                </li>
+            {/foreach}
+        </ul>
+    </div>
+
+    <div class="panel-body">
+        <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+            <thead>
+                <tr role="row">
+                    <th colspan="9" style="width: 150px;text-align: center;background-color:rgb(242, 248, 248)!important">需求统计</th>
+                </tr>
+                <tr role="row">
+                    <th style="width: 150px;">姓名</th>
+                    <th style="width: 150px;">岗位</th>
+                    <th style="width: 150px;">需求原始总量</th>
+                    <th style="width: 150px;">需求累积总量</th>
+                    <th style="width: 150px;">BUG总量</th>
+                    <th style="width: 150px;">BUG累积总量</th>
+                    <th style="width: 150px;">开发总量</th>
+                    <th style="width: 150px;">开发累积总量</th>
+                    <th style="width: 150px;">本月任务总量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {volist name="web_score_statistics" id="vo"}
+                <tr role="row" class="odd">
+                    <td>{$vo.user_name}</td>
+                    <td>{$vo.group_name}</td>
+                    <td>{$vo.demand_num}</td>
+                    <td>{$vo.demand_total}</td>
+                    <td>{$vo.bug_num}</td>
+                    <td>{$vo.bug_total}</td>
+                    <td>{$vo.task_num}</td>
+                    <td>{$vo.task_total}</td>
+                    <td>{$vo.score_total}</td>
+                </tr>
+                {/volist}
+            </tbody>
+        </table>
+        <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+            <thead>
+            <tr role="row">
+                <th colspan="8" style="width: 150px;text-align: center;background-color:rgb(242, 248, 248)!important">逾期统计</th>
+            </tr>
+            <tr role="row">
+                <th style="width: 150px;">姓名</th>
+                <th style="width: 150px;">岗位</th>
+                <th style="width: 150px;">需求原始总量</th>
+                <th style="width: 150px;">需求逾期数量</th>
+                <th style="width: 150px;">BUG总量</th>
+                <th style="width: 150px;">BUG逾期数量</th>
+                <th style="width: 150px;">开发任务总量</th>
+                <th style="width: 150px;">开发任务逾期数量</th>
+            </thead>
+            <tbody>
+            {volist name="web_outtime_statistics" id="val"}
+            <tr role="row" class="odd">
+                <td>{$val.user_name}</td>
+                <td>{$val.group_name}</td>
+                <td>{$val.demand_num}</td>
+                <td>{$val.demand_person_num}</td>
+                <td>{$val.bug_num}</td>
+                <td>{$val.bug_person_num}</td>
+                <td>{$val.task_num}</td>
+                <td>{$val.task_person_num}</td>
+            </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </div>

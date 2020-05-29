@@ -49,12 +49,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','echartsobj'], functio
                     ],
                 }
             };
-     
+            var web_type=$("#web_type").val();
             var options = {
                 type: 'post',
                 url: 'demand/it_demand_report/statistical',
                 data: {
-                   
+                    web_type:web_type
                 }
             }
             EchartObj.api.ajax(options, chartOptions)
