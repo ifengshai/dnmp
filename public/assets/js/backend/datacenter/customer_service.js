@@ -526,6 +526,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(".statistics").on('click',function(){
                 var value = $(this).data("value");
                 if(value>0){
+                    $(".problem-counter li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     var time = $('#create_time').val();
                     var platform = $('#c-order_platform').val();  
                     var chartOptions = {
@@ -586,6 +588,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(".statisticsTwo").on('click',function(){
                 var value = $(this).data("value");
                 if(value>0){
+                    $(".step-type li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     $("#second-level").html('');
                     //异步获取第二个tab数据
                     Backend.api.ajax({
@@ -610,6 +614,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(document).on('click', '.statisticsThree', function(e){
                 var value = $(this).data("value");
                 if(value>0){
+                    $("#second-level li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     var time = $('#create_time').val();
                     var platform = $('#c-order_platform').val();  
                     var chartOptions = {
