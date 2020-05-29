@@ -63,7 +63,7 @@
             <select name="row[purchase_id]" class="form-control purchase_id selectpicker" data-live-search='true' style="height: 100px!important;">
                 <option value="">请选择</option>
                 {foreach $purchase_data as $k => $v}
-                <option value="{$k}" {:$purchase_id == $k ? 'selected' : ''} {:$info['purchase_id'] == $k ? 'selected' : ''}>{$v}</option>
+                <option value="{$k}" {:$purchase_id == $k ? 'selected' : ''} {:$info.purchase_id == $k ? 'selected' : ''}>{$v}</option>
                 {/foreach}
             </select>
         </div>
