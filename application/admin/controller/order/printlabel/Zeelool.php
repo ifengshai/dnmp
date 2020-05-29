@@ -1103,9 +1103,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $value['os_add'] = urldecode($value['os_add']);
             $value['od_add'] = urldecode($value['od_add']);
 
-            dump($value['os_add']);
-            dump($value['od_add']);
-            if ($value['os_add'] && $value['os_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+            if ($value['os_add'] && $value['os_add'] && (float)($value['os_add']) * 1 != 0 && (float)($value['od_add']) * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
