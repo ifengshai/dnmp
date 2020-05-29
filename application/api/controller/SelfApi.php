@@ -349,7 +349,7 @@ class SelfApi extends Api
                 $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
             }
         }
-        $this->success('成功',$order_node_data,200);
+        $this->success('成功',$order_data,200);
     }
 
     /**
