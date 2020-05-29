@@ -236,22 +236,30 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">退款金额比(%)</th>
              </tr>
              </thead>
-                    {if isset($workList) && $type!=3 }
-                    {foreach name="workList" item="vo" key="k"}
+                    {if isset($allCustomers) && $type!=3 }
+                    {foreach name="allCustomers" item="vo" key="k"}
                   <tr>
-                      <td style="text-align: center; vertical-align: middle;">{$vo.create_user_name}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
                       <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
                       {if !empty($start) && !empty($end)}
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
                       {/if}  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>                     
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
+					  {if $vo.counter gt 0}	
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($vo.replacement_num/$vo.counter*100,2)}</td>
+					  {else/}
+					  <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+					  {/if}
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$vo.coupon}</td>
                       <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
+					  {if $vo.counter gt 0}
                       <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
-                      <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
+                      {else/}
+					  <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+					  {/if}
+					  <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
                       {if $vo.base_grand_total gt 0}
                       <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($vo.total_refund_money/$vo.base_grand_total*100,2)}</td>
                       {else/}
@@ -259,54 +267,54 @@ table.altrowstable tr:nth-child(even){
                       {/if}
                   </tr>
                   {/foreach}
-                  {elseif isset($workArr) && $type==3 /}
-                  {foreach name="workArr" item="vo" key="k"}
+                  {elseif isset($worklistOne) && $type==3 /}
+                  {foreach name="worklistOne" item="vo" key="k"}
                   <tr>
-                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$workArr[$k]['create_user_name']}</td>   
-                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$workArr[$k]['group']}</td>  
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>   
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group}</td>  
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
-                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['counter'];?></td>   
-                      <td style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['base_grand_total'],2);?></td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['replacement_num'],2);?></td>
-                      {if $workArr[$k]['one']['counter'] gt 0 }   
-                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['one']['replacement_num']/$workArr[$k]['one']['counter']*100,2);?></td>
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>   
+                      <td style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
+                      {if $vo.counter gt 0 }   
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($vo.replacement_num/$vo.counter*100,2)}</td>
                       {else/}
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                       {/if}
-                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['coupon'],2);?></td>
-                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['refund_num'],2);?></td>
-                      {if $workArr[$k]['one']['counter'] gt 0}    
-                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['one']['refund_num']/$workArr[$k]['one']['counter']*100,2);?></td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.coupon}</td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
+                      {if $vo.counter gt 0}    
+                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
                       {else/}
                       <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
                       {/if}
-                      <td id='today_register_customer'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['total_refund_money'],2);?></td>
-                      {if $workArr[$k]['one']['base_grand_total'] gt 0}  
-                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['total_refund_money']/$workArr[$k]['one']['base_grand_total']*100,2);?></td>
+                      <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
+                      {if $vo.base_grand_total gt 0}  
+                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($vo.total_refund_money/$vo.base_grand_total*100,2)}</td>
                       {else/}
                       <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
                       {/if}
                   </tr>
                   <tr> 
                     <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td>  
-                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['two']['counter'];?></td>   
-                    <td style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['base_grand_total'],2);?></td>
-                    <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['replacement_num'],2);?></td>
-                    {if $workArr[$k]['two']['counter'] gt 0 }   
-                    <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['two']['replacement_num']/$workArr[$k]['two']['counter']*100,2);?></td>
+                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workListTwo[$k]['counter'];?></td>   
+                    <td style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['base_grand_total'],2);?></td>
+                    <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['replacement_num'],2);?></td>
+                    {if $workListTwo[$k]['counter'] gt 0 }   
+                    <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['replacement_num']/$workListTwo[$k]['counter']*100,2);?></td>
                     {else/}
                     <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                     {/if}
-                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['coupon'],2);?></td>
-                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['refund_num'],2);?></td>
-                    {if $workArr[$k]['two']['counter'] gt 0}    
-                    <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['two']['refund_num']/$workArr[$k]['two']['counter']*100,2);?></td>
+                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['coupon'],2);?></td>
+                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['refund_num'],2);?></td>
+                    {if $workListTwo[$k]['counter'] gt 0}    
+                    <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workListTwo[$k]['refund_num']/$workListTwo[$k]['counter']*100,2);?></td>
                     {else/}
                     <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
                     {/if}
-                    <td id='today_register_customer'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['total_refund_money'],2);?></td>
-                    {if $workArr[$k]['two']['base_grand_total'] gt 0}  
-                    <td id='today_sign_customer' style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['total_refund_money']/$workArr[$k]['two']['base_grand_total']*100,2);?></td>
+                    <td id='today_register_customer'     style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['total_refund_money'],2);?></td>
+                    {if $workListTwo[$k]['base_grand_total'] gt 0}  
+                    <td id='today_sign_customer' style="text-align: center; vertical-align: middle;"><?php echo round($workListTwo[$k]['total_refund_money']/$workListTwo[$k]['base_grand_total']*100,2);?></td>
                     {else/}
                     <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
                     {/if}
