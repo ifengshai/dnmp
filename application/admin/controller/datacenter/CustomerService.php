@@ -97,7 +97,7 @@ class CustomerService extends Backend
         // }
         $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
-        $workList = $this->works_info([], $map);
+        $workList = $this->works_info_original([], $map);
 		$workArr  = [];
         if (!empty($workList)) {
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
@@ -1192,6 +1192,119 @@ class CustomerService extends Backend
         
 			return $allCustomers ? $allCustomers : false;
     }
+    /**
+     * 原先的 works_info
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/29 09:03:55 
+     * @param [type] $where
+     * @param [type] $map
+     * @param integer $customer_type
+     * @param integer $customer_category
+     * @return void
+     */
+    public function works_info_original($where, $map,$customer_type=0,$customer_category=0)
+    {
+        $where['work_type'] = 1;
+        $where['work_status'] = 6;
+        //A组员工
+        if(1 == $customer_type){
+            $type = $this->customers_by_group(1);
+        //B组员工      
+        }elseif(2 == $customer_type){
+            $type = $this->customers_by_group(2);
+        }
+        $type_arr = $category_arr = [];
+        if(!empty($type)){
+            foreach($type as $k =>$v){
+                $type_arr[] = $k;
+            }   
+        }
+        //正式员工
+        if(1 == $customer_category){
+            $category = $this->getCustomerFormal(1);
+        }elseif(2 == $customer_category){ //非正式员工
+            $category = $this->getCustomerFormal(2);
+        }
+        if(!empty($category)){
+            foreach($category as $k=>$v){
+                $category_arr[] = $v;
+            }
+        }
+        if(count($type_arr)>0 && count($category_arr)==0){
+            $where['create_user_id'] = ['in',$type_arr];
+        }elseif(count($type_arr)>0 && count($category_arr)>0){
+            $final_arr = array_intersect($type_arr,$category_arr);
+            $where['create_user_id'] = ['in',$final_arr];
+        }elseif(count($type_arr) == 0 && count($category_arr)>0){
+            $where['create_user_id'] = ['in',$category_arr];
+        }
+        $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
+        sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+        $where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        $workList = collection($workList)->toArray();
+        $replacementOrder = collection($replacementOrder)->toArray();
+        if (!empty($replacementOrder)) {
+            $replacementArr = [];
+            foreach ($replacementOrder as $rk => $rv) {
+                $replacementArr[$rv['create_user_id']] = $rv['counter'];
+                $couponArr[$rv['create_user_id']] = $rv['coupon'];
+            }
+        }
+        //客服分组
+        $kefumanage = config('workorder.kefumanage');
+        if (!empty($workList)) {
+            $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+            foreach ($workList as $k => $v) {
+                //客服分组
+                if (in_array($v['create_user_id'], $kefumanage[95]) || (95 == $v['create_user_id'])) {
+                    $workList[$k]['group'] = 'B组';
+                } elseif (in_array($v['create_user_id'], $kefumanage[117]) || ($v['create_user_id'] == 117)) {
+                    $workList[$k]['group'] = 'A组';
+                } else {
+                    $workList[$k]['group'] = '未知';
+                }
+                //如果存在补发单数数组
+                if (is_array($replacementArr)) {
+                    //客服的补发订单数
+                    if (array_key_exists($v['create_user_id'], $replacementArr)) {
+                        $workList[$k]['replacement_num'] = $replacementArr[$v['create_user_id']];
+                        //优惠券发放量
+                        $workList[$k]['coupon']          = $couponArr[$v['create_user_id']];
+                        //累计补发单数
+                        $replacementNum += $replacementArr[$v['create_user_id']];
+                    } else {
+                        $workList[$k]['replacement_num'] = 0;
+                        //优惠券发放量
+                        $workList[$k]['coupon']          = 0;
+                    }
+                } else { //如果不存在补发单数的数组
+                    $workList[$k]['replacement_num'] = 0;
+                    $workList[$k]['coupon']          = 0;
+                }
+
+                //累计退款金额
+                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map);
+                if (0<$workList[$k]['total_refund_money']) {
+                    $refundMoney += $workList[$k]['total_refund_money'];
+                }
+                //累计工单完成量
+                $workOrderNum += $v['counter'];
+                //累计订单总金额
+                $totalOrderMoney += $v['base_grand_total'];
+                //累计退款单数
+                $refundMoneyNum += $v['refund_num'];
+            }
+            $workList['workOrderNum']    = $workOrderNum;
+            $workList['totalOrderMoney'] = $totalOrderMoney;
+            $workList['replacementNum']  = $replacementNum;
+            $workList['refundMoneyNum']  = $refundMoneyNum;
+            $workList['refundMoney']     = $refundMoney;
+        }
+        return $workList ? $workList : false;
+    }    
     /**
      * 工单问题措施详情
      *
