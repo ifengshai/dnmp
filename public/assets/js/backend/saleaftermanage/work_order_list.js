@@ -2026,6 +2026,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             color_id: color_id
                         }
                     }, function (data, ret) {
+                        console.log(data);
                         var prescription_div = that.parents('.panel-body');
                         var color_type;
                         for (var i = 0; i < data.length; i++) {
