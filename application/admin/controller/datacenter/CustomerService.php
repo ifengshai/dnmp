@@ -95,8 +95,8 @@ class CustomerService extends Backend
         //         }
         //     }
         // }
-        $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
-        $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        //$map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+        $map_measure['w.create_time'] = $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info_original([], $map);
 		$workArr  = [];
         if (!empty($workList)) {
