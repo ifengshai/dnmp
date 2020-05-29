@@ -890,7 +890,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (prescription.hasOwnProperty("pd")) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                }else if(prescription.hasOwnProperty("pd_r") && prescription.hasOwnProperty("pd_l")){
+                }else if(prescription.pd_r !='' && prescription.pd_l !=''){
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                     prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
                 }else{
@@ -1417,7 +1417,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (prescription.hasOwnProperty("pd")) {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                    }else if(prescription.hasOwnProperty("pd_r") && prescription.hasOwnProperty("pd_l")){
+                    }else if(prescription.pd_r !='' && prescription.pd_l !=''){
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                         prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
                     } else {
