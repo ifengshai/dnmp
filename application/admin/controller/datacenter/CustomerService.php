@@ -615,30 +615,46 @@ class CustomerService extends Backend
             $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
             $customerReply = collection($customerReply)->toArray();
             //客服分组
-            $info = $this->customers();
-            $kefumanage = config('workorder.kefumanage');
-            if (!empty($customerReply)) {
+            //$info = $this->customers();
+            //整个客服部门人员
+            $allCustomers = $this->newCustomers();
+            if(!empty($allCustomers)){
                 $handleNum = $noQualifiyDay =  0;
-                foreach ($customerReply as $k => $v) {
-                    //客服分组
-                    if (in_array($v['due_id'], $kefumanage[95]) ||(95 == $v['due_id'])) {
-                        $customerReply[$k]['group'] = 'B组';
-                    } elseif (in_array($v['due_id'], $kefumanage[117]) || (117 == $v['due_id'])) {
-                        $customerReply[$k]['group'] = 'A组';
-                    } else {
-                        $customerReply[$k]['group'] = '未知';
+                foreach($allCustomers as $k => $v){
+                    if(!empty($customerReply)){
+                        foreach($customerReply as $ck => $cv){
+                            if($v['id'] == $cv['due_id']){
+                                $allCustomers[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($cv['due_id'], $start, $end);
+                                $handleNum+=$v['counter'];
+                                $noQualifiyDay += $allCustomers[$k]['no_qualified_day'];
+                            }
+                        }
                     }
-                    if (array_key_exists($v['due_id'], $info)) {
-                        $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
-                    }
-                    $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
-                    $handleNum+=$v['counter'];
-                    $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
-                }
+                } 
             }
+            // $kefumanage = config('workorder.kefumanage');
+            // if (!empty($customerReply)) {
+            //     $handleNum = $noQualifiyDay =  0;
+            //     foreach ($customerReply as $k => $v) {
+            //         //客服分组
+            //         if (in_array($v['due_id'], $kefumanage[95]) ||(95 == $v['due_id'])) {
+            //             $customerReply[$k]['group'] = 'B组';
+            //         } elseif (in_array($v['due_id'], $kefumanage[117]) || (117 == $v['due_id'])) {
+            //             $customerReply[$k]['group'] = 'A组';
+            //         } else {
+            //             $customerReply[$k]['group'] = '未知';
+            //         }
+            //         if (array_key_exists($v['due_id'], $info)) {
+            //             $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
+            //         }
+            //         $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
+            //         $handleNum+=$v['counter'];
+            //         $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
+            //     }
+            // }
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
-            $this->view->assign(compact('orderPlatformList', 'customerReply', 'start', 'end', 'handleNum','noQualifiyDay'));
+            $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'handleNum','noQualifiyDay'));
         }
         //客服数据
         $customer_type = config('workorder.customer_type');
