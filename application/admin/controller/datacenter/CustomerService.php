@@ -624,8 +624,9 @@ class CustomerService extends Backend
                     if(!empty($customerReply)){
                         foreach($customerReply as $ck => $cv){
                             if($v['id'] == $cv['due_id']){
+                                $allCustomers[$k]['counter'] = $cv['counter'];
                                 $allCustomers[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($cv['due_id'], $start, $end);
-                                $handleNum+=$v['counter'];
+                                $handleNum+=$cv['counter'];
                                 $noQualifiyDay += $allCustomers[$k]['no_qualified_day'];
                             }
                         }
