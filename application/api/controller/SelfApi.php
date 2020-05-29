@@ -303,7 +303,7 @@ class SelfApi extends Api
     {
         //校验参数
         $order_number = $this->request->request('order_number'); //订单号
-        $other_order_number = $this->request->request('other_order_number'); //其他订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
         $order_node = $this->request->request('order_node'); //订单节点
         
