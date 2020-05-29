@@ -49,26 +49,6 @@
         <textarea name="row[description]" id="description" cols="30" rows="6"></textarea>
     </div>
     <div id="add_entry_product"><span>add</span></div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="sku" data-rule="required" class="form-control" name="row[sku]" type="text">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('库存')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="stock" data-rule="required" class="form-control" name="row[stock]" type="text">
-        </div>
-    </div>
-    <div class="form-group ">
-        <label class="control-label col-xs-12 col-sm-2">库位号:</label>
-        <div class="col-xs-12 col-sm-8">
-            {:Form::select('', $location_data, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'title'=>"请选择",'id'=>'location']) }
-        </div>
-    </div>
-    <input type="hidden" name="row[product_list_data]" id="product_list_data" value="">
-    <input type="hidden" id="sku_arr" value="">
     <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
         <thead>
         <tr role="row">
@@ -87,5 +67,13 @@
             <button type="submit" onclick="save()" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
             <button type="submit" onclick="check()" class="btn btn-success btn-embossed disabled">{:__('提交审核')}</button>
         </div>
+    </div>
+
+    <div style="display: none;">
+        <select id="select_location">
+            {foreach $location_data as $k => $v}
+            <option value="{$k}">{$v}</option>
+            {/foreach}
+        </select>
     </div>
 </form>
