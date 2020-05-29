@@ -12,11 +12,27 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 targetId: 'echart1',
                 downLoadTitle: '图表',
                 type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
             };
             var chartOptions3 = {
                 targetId: 'echart3',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var time_one = $('#create_time_one').val() ? $('#create_time_one').val() :'';
             //console.log(time_one);
@@ -132,7 +148,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 var chartOptions3 = {
                     targetId: 'echart1',
                     downLoadTitle: '图表',
-                    type: 'pie',               
+                    type: 'pie',
+                    pie: {
+                        tooltip: { //提示框组件。
+                            trigger: 'item',
+                            formatter: function (param) {
+                                return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            }
+                        },
+                    }               
                 };
                 var platform = $('#order_platform_one').val();                
                 var options3 = {
@@ -408,21 +432,53 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 targetId: 'echart1',
                 downLoadTitle: '图表',
                 type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
             };
             var chartOptions2 = {
                 targetId: 'echart2',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var chartOptions3 = {
                 targetId: 'echart3',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var chartOptions4 = {
                 targetId: 'echart4',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };                                   
             var time = $('#create_time').val();
             var platform = $('#c-order_platform').val();           
@@ -476,6 +532,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
                     };
                     var options = {
                         type: 'post',
@@ -552,6 +616,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         targetId: 'echart4',
                         downLoadTitle: '图表',
                         type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
                     };
                     var options = {
                         type: 'post',
