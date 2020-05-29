@@ -1998,13 +1998,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             prescription_type: prescription_type
                         }
                     }, function (data, ret) {
-                        //console.log(data);
+                        console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
-                        //console.log(lens_type);
+                        console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         prescription_div.find('#color_type').val('');
                         $('.selectpicker ').selectpicker('refresh');
@@ -2027,7 +2027,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             color_id: color_id
                         }
                     }, function (data, ret) {
-                        //console.log(data);
+                        console.log(data);
                         var prescription_div = that.parents('.panel-body');
                         var color_type;
                         for (var i = 0; i < data.length; i++) {
