@@ -857,7 +857,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('change', '#prescription_select', function () {
                 var val = $(this).val();
                 var prescription = prescriptions[val];
-                console.log(prescription);
+                //console.log(prescription);
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                 prescription_div.find('input').val('');
                 prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
@@ -1717,7 +1717,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         if (Config.measureList) {
                             var checkIDss = Config.measureList;//措施列表赋值给checkID
-                            console.log(checkIDss);
+                            //console.log(checkIDss);
                             for (var m = 0; m < checkIDss.length; m++) {
                                 $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
                                 var node = $('.step' + checkIDss[m]);
@@ -1998,13 +1998,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             prescription_type: prescription_type
                         }
                     }, function (data, ret) {
-                        console.log(data);
+                        //console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
-                        console.log(lens_type);
+                        //console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         prescription_div.find('#color_type').val('');
                         $('.selectpicker ').selectpicker('refresh');
@@ -2027,7 +2027,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             color_id: color_id
                         }
                     }, function (data, ret) {
-                        console.log(data);
+                        //console.log(data);
                         var prescription_div = that.parents('.panel-body');
                         var color_type;
                         for (var i = 0; i < data.length; i++) {
