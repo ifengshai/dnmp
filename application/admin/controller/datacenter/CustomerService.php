@@ -740,6 +740,9 @@ class CustomerService extends Backend
                     'platform'  => $platform
                     ]);
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
+                dump($worklistOne);
+                dump($worklistTwo);
+                exit;
                 //取出总数
                 $workOrderNum       = $worklistOne['workOrderNum'] + $worklistTwo['workOrderNum'];
                 $totalOrderMoney    = $worklistOne['totalOrderMoney'] + $worklistTwo['totalOrderMoney'];
