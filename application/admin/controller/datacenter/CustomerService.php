@@ -51,7 +51,7 @@ class CustomerService extends Backend
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
         $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d 00:00:00', time()+3600*24)]];
         $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
-        $customerReply = $this->workload_info($workload_map, $start, $end, 10);
+        $customerReply = $this->workload_info_original($workload_map, $start, $end, 10);
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
             unset($customerReply['noQualifyDay']);
@@ -538,7 +538,7 @@ class CustomerService extends Backend
                 unset($worklistOne['noQualifyDay']);
                 $this->view->assign([
                     'type'=>2,
-                    'customerReply'  => $worklistOne,
+                    'allCustomers'  => $worklistOne,
                     'start'     => $start,
                     'end'       => $end,
                     'platform'  => $platform
@@ -633,26 +633,6 @@ class CustomerService extends Backend
                     }
                 } 
             }
-            // $kefumanage = config('workorder.kefumanage');
-            // if (!empty($customerReply)) {
-            //     $handleNum = $noQualifiyDay =  0;
-            //     foreach ($customerReply as $k => $v) {
-            //         //客服分组
-            //         if (in_array($v['due_id'], $kefumanage[95]) ||(95 == $v['due_id'])) {
-            //             $customerReply[$k]['group'] = 'B组';
-            //         } elseif (in_array($v['due_id'], $kefumanage[117]) || (117 == $v['due_id'])) {
-            //             $customerReply[$k]['group'] = 'A组';
-            //         } else {
-            //             $customerReply[$k]['group'] = '未知';
-            //         }
-            //         if (array_key_exists($v['due_id'], $info)) {
-            //             $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
-            //         }
-            //         $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
-            //         $handleNum+=$v['counter'];
-            //         $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
-            //     }
-            // }
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'handleNum','noQualifiyDay'));
@@ -1007,6 +987,108 @@ class CustomerService extends Backend
      * @return void
      */
     public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0)
+    {
+        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        //默认显示
+        //根据筛选时间求出客服部门下面所有有数据人员
+        //$start = date('Y-m-d', strtotime('-30 day'));
+        //$end   = date('Y-m-d');
+        //$map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+        $where['is_public'] = 1;
+        $where['is_admin']  = 1;
+        //$where['due_id']    = ['neq',0];
+        //$where['author_id'] = ['neq','382940274852'];
+        //平台
+        if ($platform<10) {
+            $where['platform'] = $platform;
+        }
+        if(1 == $customer_type){
+            $type = $this->customers_by_group(1);
+        //B组员工      
+        }elseif(2 == $customer_type){
+            $type = $this->customers_by_group(2);
+        }
+        $type_arr = $category_arr = [];
+        if(!empty($type)){
+            foreach($type as $k =>$v){
+                $type_arr[] = $k;
+            }   
+        }
+        //正式员工
+        if(1 == $customer_category){
+            $category = $this->getCustomerFormal(1);
+        }elseif(2 == $customer_category){ //非正式员工
+            $category = $this->getCustomerFormal(2);
+        }
+        if(!empty($category)){
+            foreach($category as $k=>$v){
+                $category_arr[] = $v;
+            }
+        }
+        if(count($type_arr)>0 && count($category_arr)==0){
+            $filterPerson  = $type_arr;
+            $where['due_id'] = ['in',$type_arr];
+        }elseif(count($type_arr)>0 && count($category_arr)>0){
+            $filterPerson = array_intersect($type_arr,$category_arr);
+            $where['due_id'] = ['in',$filterPerson];
+        }elseif(count($type_arr) == 0 && count($category_arr)>0){
+            $filterPerson = $category_arr;
+            $where['due_id'] = ['in',$category_arr];
+        }else{
+            $where['due_id'] = ['neq',0];
+        }
+		//整个客服部门人员
+		$arrCustomers = $this->newCustomers();
+		$allCustomers = [];
+		if(isset($filterPerson)){
+			foreach($arrCustomers as $k =>$v){
+				if(in_array($v['id'],$filterPerson)){
+					$allCustomers[$k]['id'] = $v['id'];
+					$allCustomers[$k]['nickname'] = $v['nickname'];
+					$allCustomers[$k]['group'] = $v['group'];
+				}
+			}			
+		}else{
+			$allCustomers = $arrCustomers;
+        }
+                                
+        //客服处理量
+        $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
+        $customerReply = collection($customerReply)->toArray();
+        if(!empty($allCustomers)){
+            $handleNum = $noQualifiyDay =  0;
+            foreach($allCustomers as $k => $v){
+                if(!empty($customerReply)){
+                    foreach($customerReply as $ck => $cv){
+                        if($v['id'] == $cv['due_id']){
+                            $allCustomers[$k]['counter'] = $cv['counter'];
+                            $allCustomers[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($cv['due_id'], $start, $end);
+                            $handleNum+=$cv['counter'];
+                            $noQualifiyDay += $allCustomers[$k]['no_qualified_day'];
+                        }
+                    }
+                }
+            }
+            $allCustomers['handleNum'] = $handleNum;
+            $allCustomers['noQualifyDay'] = $noQualifiyDay; 
+        }
+        return $allCustomers ? $allCustomers : false;
+    }
+    /**
+     * 原先的workload_info 
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/29 10:13:28 
+     * @param [type] $map
+     * @param [type] $start
+     * @param [type] $end
+     * @param [type] $platform
+     * @param integer $customer_type
+     * @param integer $customer_category
+     * @return void
+     */
+    public function workload_info_original($map, $start, $end, $platform,$customer_type=0,$customer_category=0)
     {
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
