@@ -153,8 +153,8 @@ class ItDemandReport extends Backend
             date('Y-m', strtotime('-1 month')),
             date('Y-m', strtotime('-2 month')),
         );
-        $month = input('month');
-        $type = input('type');
+        $month = input('month') ? input('month') : 0;
+        $type = input('type') ? input('type') : 'web';
         if($type == 'web'){
             $web_score_statistics = $this->web_score_statistics($month);
             $web_outtime_statistics = $this->web_outtime_statistics($month);
