@@ -229,7 +229,7 @@ class Check extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
-        
+
         //质检单
         $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('check_order_number', $check_order_number);
@@ -581,12 +581,28 @@ class Check extends Backend
                         $purchase_data['check_status'] = $check_status;
                         $purchase->where(['id' => $v['purchase_id']])->update($purchase_data);
                     }
+                }
 
-                    //退货质检
-                    if ($v['order_return_id']) {
-                        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-                        $orderReturn->where(['id' => $v['order_return_id']])->update(['quality_status' => 1]);
+                //查询明细表有样品的数据
+                $checkItem = new \app\admin\model\warehouse\CheckItem();
+                $sampleworkorder = new \app\admin\model\purchase\SampleWorkorder();
+                $list = $checkItem->where(['check_id' => ['in', $ids], 'sample_num' => ['>', 0]])->select();
+                if ($list) {
+                    $location_number = 'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //生成入库主表数据
+                    $workorder['location_number'] = $location_number;
+                    $workorder['status'] = 1;
+                    $workorder['create_user'] = session('admin.nickname');
+                    $workorder['createtime'] = date('Y-m-d H:i:s', time());
+                    $workorder['type'] = 1;
+                    $workorder['description'] = '质检入库';
+                    $sampleworkorder->save($workorder);
+                    foreach ($list as $k => $v) {
+                        $workorder_item[$k]['parent_id'] = $sampleworkorder->id;
+                        $workorder_item[$k]['sku'] = $v['sku'];
+                        $workorder_item[$k]['stock'] = $v['sample_num'];
                     }
+                    Db::name('purchase_sample_workorder_item')->insertAll($workorder_item);
                 }
             }
 
