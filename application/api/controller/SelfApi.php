@@ -302,13 +302,13 @@ class SelfApi extends Api
     public function query_order_node()
     {
         //校验参数
-        $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number'); //其他订单号
         $site = $this->request->request('site'); //站点
         $order_node = $this->request->request('order_node'); //订单节点
-
-        if (!$order_id && !$order_number) {
-            $this->error(__('缺少订单id或订单号参数'), [], 400);
+        
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
         }
 
         if (!$site) {
@@ -319,9 +319,6 @@ class SelfApi extends Api
             $this->error(__('缺少节点参数'), [], 400);
         }
 
-        if($order_id){
-            $where['order_id'] = $order_id;
-        }
         if($order_number){
             $where['order_number'] = $order_number;
         }
@@ -335,9 +332,24 @@ class SelfApi extends Api
         }
         
         $order_node_data = (new OrderNodeDetail())->where($where)->select();
-        $order_node_data = collection($order_node_data)->toArray();
-        
-        $this->success('成功',$order_node_data,200);
+        $order_data['order_data'] = collection($order_node_data)->toArray();
+
+        if($other_order_number){
+            $orther_where['site'] = $site;
+            if($order_node != 5){
+                if($order_node == 3){
+                    $orther_where['order_node'] = ['in', ['3', '4']];
+                }else{
+                    $orther_where['order_node'] = $order_node;
+                }
+            }
+            foreach($other_order_number as $val){
+                $orther_where['order_number'] = $val;
+                $orther_order_node_data = (new OrderNodeDetail())->where($orther_where)->select();
+                $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
+            }
+        }
+        $this->success('成功',$order_data,200);
     }
 
     /**

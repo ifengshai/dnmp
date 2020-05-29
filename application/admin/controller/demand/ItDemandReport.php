@@ -577,12 +577,12 @@ class ItDemandReport extends Backend
                             $bug_num++;
                             $bug_date = $v['create_time'];
                             $createtime = date('Y-m-d H:i:s',strtotime("$bug_date+1day"));
-                            if($createtime < $arr['completetime']){
+                            if($createtime < $v[$arr['completetime']]){
                                 $bug_person_num++;
                             }
                         } elseif ($v['type'] == 2) {
                             $demand_num++;
-                            if($arr['experttetime']<$arr['completetime']){
+                            if($v[$arr['experttetime']]<$v[$arr['completetime']]){
                                 $demand_person_num++;
                             } 
                         }

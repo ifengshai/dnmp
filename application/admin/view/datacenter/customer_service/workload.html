@@ -195,10 +195,10 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">差评占比</th> -->
              </tr>
              </thead>
-                    {if isset($customerReply) && $type!=3}
-                    {foreach name="customerReply" item="vo" key="k"}
+                    {if isset($allCustomers) && $type!=3}
+                    {foreach name="allCustomers" item="vo" key="k"}
                   <tr>
-                      <td style="text-align: center; vertical-align: middle;">{$vo.create_user_name}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
                       <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start}:{$end}</td>
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
@@ -207,19 +207,19 @@ table.altrowstable tr:nth-child(even){
                       <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td> -->
                   </tr>
                   {/foreach}
-                  {elseif isset($workArr) && $type==3 /}
-                  {foreach name="workArr" item="vo" key="k"}
+                  {elseif isset($worklistOne) && $type==3 /}
+                  {foreach name="worklistOne" item="vo" key="k"}
                   <tr>
-                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$workArr[$k]['create_user_name']}</td>   
-                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$workArr[$k]['group']}</td>  
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['nickname']}</td>   
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['group']}</td>  
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
-                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['counter'];?></td>   
-                      <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['no_qualified_day'];?></td>
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistOne[$k]['counter'];?></td>   
+                      <td style="text-align: center; vertical-align: middle;"><?php echo $worklistOne[$k]['no_qualified_day'];?></td>
                   </tr>
                   <tr> 
                     <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td>  
-                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['two']['counter'];?></td>   
-                    <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['two']['no_qualified_day'];?></td>
+                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistTwo[$k]['counter'];?></td>   
+                    <td style="text-align: center; vertical-align: middle;"><?php echo $worklistTwo[$k]['no_qualified_day'];?></td>
                 </tr>                  
                   {/foreach}                  
                   {/if}				 
