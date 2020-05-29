@@ -72,11 +72,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') === false)) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && !$v['options_color'])) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') !== false)) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') !== false)) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -234,7 +234,7 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
             $items[$order_item_key]['index_type'] = $final_params['index_type'];
             $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
-            $items[$order_item_key]['options_color'] = $product_options['options'][0]['value'];
+            $items[$order_item_key]['options_color'] = $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
 
             $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
             $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;

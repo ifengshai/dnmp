@@ -1803,8 +1803,8 @@ EOF;
                 }
 
                 //如果为太阳镜 拼接颜色
-                if ($final_print['index_type'] == 'Sunglasses Frameonly') {
-                    $final_print['index_type'] .= '-' . $product_options['options'][0]['value'];
+                if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                    $finalResult['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
                 }
 
                 //处理PD值
