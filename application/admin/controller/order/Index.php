@@ -126,7 +126,8 @@ class Index extends Backend
                 'Express Shipping (5-8Days)',
                 'Express Shipping (3-5 Business Days)',
                 'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)'
+                'Business Express(7-12 Days)',
+                'Business express(7-12 business days)'
             ];
             foreach ($list as &$v) {
                 if (in_array($v['shipping_description'], $arr)) {
