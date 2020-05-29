@@ -298,12 +298,10 @@ class Zendesk extends Model
                 $targetAccount = ZendeskAgents::where(['count' => ['>',0]])
                     ->column('admin_id');
                 //判断当前用户是否在targetAccount中
-                $preTicket = [];
-                if(in_array(session('admin.id'),$targetAccount)){
-                    $preTicket = Zendesk::where(['assign_id' => session('admin.id'), 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']]])->order('id', 'desc')
+                //$preTicket = [];
+                $preTicket = Zendesk::where(['assign_id' => ['in',$targetAccount], 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']],'email' => $ticket->email])->order('id', 'desc')
                         ->limit(1)
                         ->find();
-                }
                 if (!$preTicket) {
                     //无老用户，则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -318,9 +316,9 @@ class Zendesk extends Model
                         ->find();
                 }
 
-                if(!$assign_id){
+                if(!$ticket->assignee_id || $ticket->assignee_id == 382940274852){
                     //最后一条回复的zendesk用户id
-                    $commentAuthorId = ZendeskComments::where(['ticket_id' => $ticket->id,'is_admin' => 1])->order('id desc')->value('author_id');
+                    $commentAuthorId = ZendeskComments::where(['ticket_id' => $ticket->ticket_id,'is_admin' => 1,'author_id' => ['neq',382940274852]])->order('id desc')->value('author_id');
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
                             'assignee_id' => $commentAuthorId,

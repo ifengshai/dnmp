@@ -1,0 +1,328 @@
+<style>
+    .content{
+        max-width:100%;
+    }
+    .echart-style td{
+        width:60px;
+    }
+</style>
+
+<style type="text/css">
+table.altrowstable {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
+table.altrowstable tr:nth-child(odd){
+    background:#E9F1F4;
+    background: #F5F5F5;
+}
+table.altrowstable tr:nth-child(even){
+    background: #fff;
+    background: #eee;
+}
+    .caigou-table {
+        width: 30%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        float: left;
+        margin-left: 30px;
+        background-color: #c3dde0;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 180px;
+    }   
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id = "form1" action="{:url('/admin/datacenter/customer_service/workstatistics')}" class="form-commonsearch form-horizontal" role="form1" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div class="col-xs-12 col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">工单平台</label>
+                                        <div class="col-xs-8">
+                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+												{foreach name="orderPlatformList" item="vo"}
+                                                {if $key == $platform}
+                                                <option value="{$key}" selected="selected">{$vo}</option>
+                                                {else}
+                                                <option value="{$key}">{$vo}</option>
+                                                {/if}
+                                                {/foreach}
+                                                <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                            </select>
+                                        </div>
+                                    </div>                                                                 
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-1 col-sm-1">时间:</label>
+                                <div class="col-xs-2">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="one_time" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="one_time"  placeholder="创建时间" id="one_time" value="" data-index="14">
+                                </div>
+                                <label class="control-label col-xs-1 col-sm-1"><input id="contrast" name="row[contrast]" type="checkbox" value="0"/>对比时间段:</label>
+                                <div id="two-time-node" class="col-xs-2" style="display:none">
+                                    <input type="hidden" class="form-control operate" name="two_time-operate" data-name="two_time" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="two_time"  placeholder="创建时间" id="two_time" value="" data-index="14">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-left:1px;">
+                                <label class="control-label col-xs-1 col-sm-1">员工分组:</label>
+                                <div class="col-xs-2">
+                                    <select  id="c-order_platform" class="form-control" name="customer_type">
+                                        {foreach name="customer_type" item="vo" key=}
+                                        <option value="{$key}"{if $customerType == $key}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                                <label class="control-label col-xs-1 col-sm-1">员工分类:</label>
+                                <div class="col-xs-2">
+                                    <select  id="c-order_platform" class="form-control" name="customer_category">
+                                        {foreach name="customer_category" item="vo"}
+                                        <option value="{$key}" {if $customerCategory == $key}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>                                                        
+                            <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <div class="col-sm-8 col-xs-offset-4">
+                                    <input type="submit" class="btn btn-success" value="提交"> 
+                                    <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                            </div>                                                            
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    工单完成量：<span style="color: red;" id="totalPayInfo">{$workOrderNum}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div" style="width: 20%;">
+                                <span class="extend">
+                                    订单总金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$totalOrderMoney}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    补发单数：<span style="color: red;" id="totalPayInfo">{$replacementNum}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款单数：<span style="color: red;" id="totalPayInfo">{$refundMoneyNum}</span>
+                                </span>
+                            </div>
+                            {if $workOrderNum gt 0 }
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款订单比：<span style="color: red;" id="totalPayInfo">{:round($refundMoneyNum/$workOrderNum*100,2)}%</span>
+                                </span>
+                            </div>
+                            {else/}
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款订单比：<span style="color: red;" id="totalPayInfo">0</span>
+                                </span>
+                            </div>                            
+                            {/if}                            
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$refundMoney}</span>
+                                </span>
+                            </div>
+                            {if $totalOrderMoney gt 0 }
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{:round($refundMoney/$totalOrderMoney*100,2)}%</span>
+                                </span>
+                            </div>
+                            {else/}
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">0</span>
+                                </span>
+                            </div>                            
+                            {/if}                                                                                                                                                                         
+                        </div>
+                    </form>
+                </div>
+                <table id="order-info-list" class="altrowstable"
+                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                width="100%">
+             <thead>                    
+             <tr>
+                 <th style="text-align: center; vertical-align: middle;">姓名</th>
+                 <th style="text-align: center; vertical-align: middle;">分组</th>
+                 <th style="text-align: center; vertical-align: middle;">日期</th>               
+                 <th style="text-align: center; vertical-align: middle;">工单完成量</th>
+                 <th style="text-align: center; vertical-align: middle;">订单总金额($)</th>
+                 <th style="text-align: center; vertical-align: middle;">补发单数</th>
+                 <th style="text-align: center; vertical-align: middle;">补发比(%)</th>
+                 <th style="text-align: center; vertical-align: middle;">优惠券发放量</th>
+                 <th style="text-align: center; vertical-align: middle;">退款单数</th>
+                 <th style="text-align: center; vertical-align: middle;">退款订单比(%)</th>
+                 <th style="text-align: center; vertical-align: middle;">累计退款金额（$）</th>
+                 <th style="text-align: center; vertical-align: middle;">退款金额比(%)</th>
+             </tr>
+             </thead>
+                    {if isset($allCustomers) && $type!=3 }
+                    {foreach name="allCustomers" item="vo" key="k"}
+                  <tr>
+                      <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
+                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
+                      {if !empty($start) && !empty($end)}
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
+                      {/if}  
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
+                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
+					  {if $vo.counter gt 0}	
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($vo.replacement_num/$vo.counter*100,2)}</td>
+					  {else/}
+					  <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+					  {/if}
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$vo.coupon}</td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
+					  {if $vo.counter gt 0}
+                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
+                      {else/}
+					  <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+					  {/if}
+					  <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
+                      {if $vo.base_grand_total gt 0}
+                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($vo.total_refund_money/$vo.base_grand_total*100,2)}</td>
+                      {else/}
+                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>                      
+                      {/if}
+                  </tr>
+                  {/foreach}
+                  {elseif isset($worklistOne) && $type==3 /}
+                  {foreach name="worklistOne" item="vo" key="k"}
+                  <tr>
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>   
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group}</td>  
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>   
+                      <td style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
+                      {if $vo.counter gt 0 }   
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($vo.replacement_num/$vo.counter*100,2)}</td>
+                      {else/}
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+                      {/if}
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.coupon}</td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
+                      {if $vo.counter gt 0}    
+                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
+                      {else/}
+                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+                      {/if}
+                      <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
+                      {if $vo.base_grand_total gt 0}  
+                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($vo.total_refund_money/$vo.base_grand_total*100,2)}</td>
+                      {else/}
+                      <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
+                      {/if}
+                  </tr>
+                  <tr> 
+                    <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td>  
+                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistTwo[$k]['counter'];?></td>   
+                    <td style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['base_grand_total'],2);?></td>
+                    <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['replacement_num'],2);?></td>
+                    {if $worklistTwo[$k]['counter'] gt 0 }   
+                    <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['replacement_num']/$worklistTwo[$k]['counter']*100,2);?></td>
+                    {else/}
+                    <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+                    {/if}
+                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['coupon'],2);?></td>
+                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['refund_num'],2);?></td>
+                    {if $worklistTwo[$k]['counter'] gt 0}    
+                    <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['refund_num']/$worklistTwo[$k]['counter']*100,2);?></td>
+                    {else/}
+                    <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+                    {/if}
+                    <td id='today_register_customer'     style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['total_refund_money'],2);?></td>
+                    {if $worklistTwo[$k]['base_grand_total'] gt 0}  
+                    <td id='today_sign_customer' style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['total_refund_money']/$worklistTwo[$k]['base_grand_total']*100,2);?></td>
+                    {else/}
+                    <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
+                    {/if}
+                </tr>                  
+                  {/foreach}
+                  {/if}				 
+                </table>                
+            </div>                                   
+        </div>     		
+	</div>
+</div>

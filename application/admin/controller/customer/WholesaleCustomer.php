@@ -148,21 +148,21 @@ class WholesaleCustomer extends Backend
                     if ($email_is_only >0){
                         $this->error(__('此邮箱已存在,请勿重复录入', ''));
                     }
-                    $result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
+                    /*$result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
                     if (isset($result) && $result != 0) {
                         $params['is_order'] = 2;
                     } else {
                         $params['is_order'] = 1;
-                    }
+                    }*/
                     $params['create_user_id'] = session('admin.id');
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
                     $params['create_time'] = date('Y-m-d H:i:s');
-                    if (!empty($params['logo_images'])) { //有上传图片则 是否logo为有
+                    /*if (!empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 2;
                     }else{
                         $params['is_logo'] = 1;
-                    }
+                    }*/
 
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
@@ -221,20 +221,20 @@ class WholesaleCustomer extends Backend
                         $this->error(__('此邮箱已存在,请勿重复录入', ''));
                     }
 
-                    $result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
+                    /*$result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
                     if (isset($result) && $result != 0) {
                         $params['is_order'] = 2;
                     } else {
                         $params['is_order'] = 1;
-                    }
+                    }*/
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
 
-                    if (empty($params['logo_images'])) { //有上传图片则 是否logo为有
+                    /*if (empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 1;
                     } else {
                         $params['is_logo'] = 2;
-                    }
+                    }*/
 
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
@@ -480,7 +480,7 @@ class WholesaleCustomer extends Backend
     public function checkIsType($value = '')
     {
         if (empty($value)) {
-            return null;
+            return 1;
         } elseif ($value == '是') {
             return 2;
         } elseif ($value == '否') {

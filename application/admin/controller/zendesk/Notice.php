@@ -172,6 +172,7 @@ class Notice extends Controller
                     'attachments' => json($attachments),
                     'is_created' => 1,
                     'due_id' => $due_id ? $due_id : 0,
+                    'platform'=>$type,
                     'attachments' => join(',',$attachments)
                 ]);
             }
@@ -242,6 +243,11 @@ class Notice extends Controller
                 $updateData['assignee_id'] = $ticket->assignee_id;
                 $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
 
+            }
+            //如果没有分配人
+            if(!$ticket->assignee_id){
+                $updateData['assignee_id'] = '';
+                $updateData['assign_id'] = '';
             }
             //更新rating,如果存在的话
             if(!$zendesk->rating && $ticket->satisfaction_rating) {
@@ -338,7 +344,8 @@ class Notice extends Controller
                         'is_admin' => $admin_id ? 1 : 0,
                         'attachments' => join(',', $attachments),
                         'is_created' => 2,
-                        'due_id' => $due_id ? $due_id : 0
+                        'due_id' => $due_id ? $due_id : 0,
+                        'platform'=>$type,
                     ]);
                 }
             }
