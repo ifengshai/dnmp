@@ -2004,6 +2004,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
+                        console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         prescription_div.find('#color_type').val('');
                         $('.selectpicker ').selectpicker('refresh');
