@@ -214,7 +214,6 @@ class Check extends Backend
             $logisticsinfo = new \app\admin\model\warehouse\LogisticsInfo;
             $info = $logisticsinfo->get($ids);
             $this->assign('info', $info);
-
             //查询分批数据
             $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $info->purchase_id)->select();
             $this->assign('batch', $batch);
@@ -484,9 +483,10 @@ class Check extends Backend
             $id = input('id');
             $batch = new \app\admin\model\purchase\PurchaseBatch();
             $item = $batch->alias('a')->where('a.id', $id)
-                ->field('b.sku,b.arrival_num,c.supplier_sku,c.purchase_num,a.purchase_id')
+                ->field('b.sku,b.arrival_num,c.supplier_sku,c.purchase_num,a.purchase_id,d.supplier_id')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
                 ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=a.purchase_id and b.sku=c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'd.id=a.purchase_id')
                 ->select();
             //查询质检数量
             $skus = array_column($item, 'sku');

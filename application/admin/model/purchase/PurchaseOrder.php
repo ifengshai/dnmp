@@ -32,7 +32,7 @@ class PurchaseOrder extends Model
      */
     public function getPurchaseData()
     {
-        $where['purchase_status'] = ['in', [6, 7]];
+        $where['purchase_status'] = ['in', [6, 7, 9]];
         $where['is_del'] = 1;
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
@@ -352,7 +352,7 @@ class PurchaseOrder extends Model
         }
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
-        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('a.create_person')->column('sum(b.purchase_num)','a.create_person');
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('a.create_person')->column('sum(b.purchase_num)', 'a.create_person');
     }
 
     /**
@@ -372,7 +372,7 @@ class PurchaseOrder extends Model
         }
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
-        return $this->where($where)->group('create_person')->column('count(1)','create_person');
+        return $this->where($where)->group('create_person')->column('count(1)', 'create_person');
     }
 
     /**
@@ -389,18 +389,18 @@ class PurchaseOrder extends Model
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         $list = $this->alias('a')
-        ->where($where)
-        ->field('sum(b.purchase_num) as num,sku')
-        ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-        ->group('sku')
-        ->order('num desc')
-        ->limit(30)
-        ->select();
+            ->where($where)
+            ->field('sum(b.purchase_num) as num,sku')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->group('sku')
+            ->order('num desc')
+            ->limit(30)
+            ->select();
         $list = collection($list)->toArray();
         //查询SKU分类名称
         $item = new \app\admin\model\itemmanage\Item();
         $skuCategoryName = $item->getSkuCategoryName();
-        foreach($list as &$v) {
+        foreach ($list as &$v) {
             $v['category_name'] = $skuCategoryName[$v['sku']];
         }
         unset($v);
