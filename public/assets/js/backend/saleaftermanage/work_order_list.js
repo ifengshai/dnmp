@@ -1998,6 +1998,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             prescription_type: prescription_type
                         }
                     }, function (data, ret) {
+                        console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
