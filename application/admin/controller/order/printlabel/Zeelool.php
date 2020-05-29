@@ -965,6 +965,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             }
 
+            //如果为太阳镜 拼接颜色
+            if ($finalResult[$key]['index_type'] == 'Sunglasses Frameonly') {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['options'][0]['value'];
+            }
 
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
@@ -1103,7 +1107,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $value['os_add'] = urldecode($value['os_add']);
             $value['od_add'] = urldecode($value['od_add']);
 
-            if ($value['os_add'] && $value['os_add'] && (float)($value['os_add']) * 1 != 0 && (float)($value['od_add']) * 1 != 0) {
+            if ($value['os_add'] && $value['os_add'] && (float) ($value['os_add']) * 1 != 0 && (float) ($value['od_add']) * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
@@ -1809,7 +1813,10 @@ EOF;
                     }
                 }
 
-
+                //如果为太阳镜 拼接颜色
+                if ($final_print['index_type'] == 'Sunglasses Frameonly') {
+                    $final_print['index_type'] .= '-' . $product_options['options'][0]['value'];
+                }
 
                 //处理PD值
                 if ($final_print['pdcheck'] == 'on' && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
