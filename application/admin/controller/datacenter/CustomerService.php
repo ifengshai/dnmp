@@ -559,37 +559,17 @@ class CustomerService extends Backend
                 //销毁变量
                 unset($worklistOne['handleNum'],$worklistTwo['handleNum']);
                 unset($worklistOne['noQualifyDay'],$worklistTwo['noQualifyDay']);
-                $info = $this->customers();
-                $workArr = [];
-                foreach ($worklistOne as $ok =>$ov) {
-                    if (array_key_exists($ov['due_id'], $info)) {
-                        $workArr[$ov['due_id']]['create_user_name'] = $info[$ov['create_user_id']];
-                        $workArr[$ov['due_id']]['group']            = $ov['group'];
-                        $workArr[$ov['due_id']]['one']['counter']   = $ov['counter'];
-                        $workArr[$ov['due_id']]['one']['no_qualified_day'] = $ov['no_qualified_day'];
-                    }
-                }
-                foreach ($worklistTwo as $tk =>$tv) {
-                    if (array_key_exists($tv['due_id'], $info)) {
-                        $workArr[$tv['due_id']]['create_user_name'] = $info[$tv['create_user_id']];
-                        $workArr[$tv['due_id']]['group']            = $tv['group'];
-                        $workArr[$tv['due_id']]['two']['counter']   = $tv['counter'];
-                        $workArr[$tv['due_id']]['two']['no_qualified_day'] = $tv['no_qualified_day'];
-                    }
-                }
                 $this->view->assign([
                      'type'         =>3,
-                     'workListOne'  => $worklistOne,
-                     'workListTwo'  => $worklistTwo,
+                     'worklistOne'  => $worklistOne,
+                     'worklistTwo'  => $worklistTwo,
                      'startOne'     => $startOne,
                      'endOne'       => $endOne,
                      'startTwo'     => $startTwo,
                      'endTwo'       => $endTwo,
                      'startTwo'     => $startTwo,
                      'endTwo'       => $endTwo,
-                     'platform'     => $platform,
-                     'info'         => $info,
-                     'workArr'      => $workArr
+                     'platform'     => $platform
                      ]);
             }
             $this->view->assign(
