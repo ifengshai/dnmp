@@ -155,6 +155,10 @@ class ZeeloolPrescriptionDetailHelper
 				} 
 			}
 			$items[$item_key]['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+			//如果为太阳镜 拼接颜色
+			if ($items[$item_key]['index_type'] == 'Sunglasses Frameonly') {
+				$items[$item_key]['index_type'] .= '-' . $product_options['options'][0]['value'];
+			}
 			//添加color-name 参数	
 			$items[$item_key]['color_name']  = isset($product_options['info_buyRequest']['tmplens']['color_data_name']) ? $product_options['info_buyRequest']['tmplens']['color_data_name'] : '';
 			$items[$item_key]['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
@@ -184,6 +188,8 @@ class ZeeloolPrescriptionDetailHelper
 
 			$items[$item_key]['information'] = str_replace("+", " ", urldecode(urldecode($product_options['info_buyRequest']['tmplens']['information'])));
 
+			$items[$item_key]['os_add'] = urldecode($items[$item_key]['os_add']);
+			$items[$item_key]['od_add'] = urldecode($items[$item_key]['od_add']);
 			//判断双ADD还是单ADD
 			if ($items[$item_key]['os_add'] && $items[$item_key]['od_add'] && $items[$item_key]['os_add'] * 1 != 0 && $items[$item_key]['od_add'] * 1 != 0) {
 				//如果新处方add 对调 因为旧处方add左右眼颠倒

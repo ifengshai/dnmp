@@ -121,7 +121,7 @@ class Zeelool extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-          
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
@@ -248,48 +248,81 @@ class Zeelool extends Backend
     {
         $entity_ids = input('id_params/a');
         $label = input('label');
-        if ($entity_ids) {
-            //多数据库
-            $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label_new'] = 1;
-            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person_new'] =  session('admin.nickname');
-            $this->model->startTrans();
-            try {
-                $result = $this->model->where($map)->update($data);
-                $this->model->commit();
-            } catch (PDOException $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            }
-            if ($result) {
-                //操作日志
-                $params['type'] = 1;
-                $params['num'] = count($entity_ids);
-                $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 1;
-                (new OrderLog())->setOrderLog($params);
+        if (!$entity_ids) {
+            $this->error('缺少参数');
+        }
 
-                //用来判断是否从_list列表页进来
-                if ($label == 'list') {
-                    //订单号
-                    $map['entity_id'] = ['in', $entity_ids];
-                    $list = $this->model
-                        ->where($map)
-                        ->select();
-                    $list = collection($list)->toArray();
-                } else {
-                    $list = 'success';
-                }
-                return $this->success('标记成功!', '', $list, 200);
-            } else {
-                return $this->error('失败', '', 'error', 0);
+        //多数据库
+        $map['entity_id'] = ['in', $entity_ids];
+        $data['custom_print_label_new'] = 1;
+        $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+        $data['custom_print_label_person_new'] =  session('admin.nickname');
+        $this->model->startTrans();
+        try {
+            $result = $this->model->where($map)->update($data);
+            $this->model->commit();
+        } catch (PDOException $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if (false !== $result) {
+            //操作日志
+            $params['type'] = 1;
+            $params['num'] = count($entity_ids);
+            $params['order_ids'] = implode(',', $entity_ids);
+            $params['site'] = 1;
+            (new OrderLog())->setOrderLog($params);
+
+            $map['entity_id'] = ['in', $entity_ids];
+            $res = $this->model->field('entity_id,increment_id')->where($map)->select();
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($res as $k => $v) {
+                $data['site'] = 1;
+                $data['order_id'] = $v['entity_id'];
+                $data['order_number'] = $v['increment_id'];
+                $data['update_time'] = date('Y-m-d H:i:s');
+                //打标签
+                $list[$k]['order_node'] = 1;
+                $list[$k]['node_type'] = 2; //配镜架
+                $list[$k]['content'] = 'Order is under processing';
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 1;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                $data['order_node'] = 1;
+                $data['node_type'] = 2;
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
             }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
+
+            //用来判断是否从_list列表页进来
+            if ($label == 'list') {
+                //订单号
+                $map['entity_id'] = ['in', $entity_ids];
+                $list = $this->model
+                    ->where($map)
+                    ->select();
+                $list = collection($list)->toArray();
+            } else {
+                $list = 'success';
+            }
+            return $this->success('标记成功!', '', $list, 200);
+        } else {
+            return $this->error('失败', '', 'error', 0);
         }
     }
+
 
     /**
      * 配镜架 配镜片 加工 质检通过
@@ -303,11 +336,11 @@ class Zeelool extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
-        if (!$res) {
+        $order_res = $this->model->field('entity_id,increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
-        foreach ($res as $v) {
+        foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
@@ -321,7 +354,7 @@ class Zeelool extends Backend
         }
 
         //判断订单是否存在未处理完成的工单
-        $arr = array_column($res, 'increment_id');
+        $arr = array_column($order_res, 'increment_id');
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
@@ -592,10 +625,74 @@ class Zeelool extends Backend
             $this->error($e->getMessage());
         }
         if (false !== $result) {
+            //添加日志
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
             $params['site'] = 1;
             (new OrderLog())->setOrderLog($params);
+
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($order_res as $k => $v) {
+                $data['site'] = 1;
+                $data['order_id'] = $v['entity_id'];
+                $data['order_number'] = $v['increment_id'];
+                $data['update_time'] = date('Y-m-d H:i:s');
+
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 1;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                //配镜架
+                if ($status == 1) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 3; //配镜架
+                    $list[$k]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                }
+
+                //配镜片
+                if ($status == 2) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 4; //配镜片
+                    $list[$k]['content'] = 'Lenses production completed, waiting for customizing';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                }
+
+                //加工
+                if ($status == 3) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 5; //加工
+                    $list[$k]['content'] = 'Customizing completed, waiting for Quality Inspection';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                }
+
+                //质检
+                if ($status == 4) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 6; //加工
+                    $list[$k]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                }
+
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+            }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
 
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
@@ -868,6 +965,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             }
 
+            //如果为太阳镜 拼接颜色
+            if ($finalResult[$key]['index_type'] == 'Sunglasses Frameonly') {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['options'][0]['value'];
+            }
 
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
@@ -994,16 +1095,19 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph']*1 : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph']*1 : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl']*1 : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl']*1 : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['os_add'] && $value['od_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+            $value['os_add'] = urldecode($value['os_add']);
+            $value['od_add'] = urldecode($value['od_add']);
+
+            if ($value['os_add'] && $value['os_add'] && (float) ($value['os_add']) * 1 != 0 && (float) ($value['od_add']) * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
@@ -1152,7 +1256,79 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '100099417';
+        $str = '400249002
+        400249006
+        400249014
+        400249028
+        400249033
+        400249031
+        400249034
+        400249037
+        400249039
+        400249042
+        400249043
+        400249047
+        400249050
+        400249065
+        400249066
+        100116789
+        100116790
+        400249119
+        400249155
+        400206077
+        400249191
+        100116820
+        100116822
+        400249209
+        100116166
+        400249145
+        100116722
+        400249233
+        100115190
+        400249275
+        100116876
+        400245670
+        400249327
+        100116917
+        400249350
+        100114933
+        100116957
+        400249477
+        100116976
+        400249499
+        400249514
+        400249546
+        400249279
+        400249574
+        400249582
+        400249259
+        400249595
+        400247989
+        400249683
+        500003416
+        400249716
+        400249746
+        400249748
+        400249781
+        400249802
+        400249804
+        400249891
+        400249892
+        400249915
+        100117187
+        400250050
+        400250061
+        400250066
+        400190342
+        400250073
+        400250110
+        400250161
+        100117268
+        400229980
+        100115252
+        400250280
+        100117299
+        ';
         $str = explode('
         ', $str);
 
@@ -1167,22 +1343,37 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->order('sfoi.order_id desc')
             ->select();
-       
+
         $resultList = collection($resultList)->toArray();
 
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
-
             $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
-            $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
-            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            //新处方
+            if ($value['is_new_version'] == 1) {
+                //镀膜
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
+                //镜片类型
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
+                }
+            } else {
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+                }
+            }
+
+
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
@@ -1195,22 +1386,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                     }
                 }
             }
-
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
-            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
-            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
-            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-
-            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
-            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
-            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
-            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-
-            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
-            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
-            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
-            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
 
             //斜视值
             if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
@@ -1228,10 +1403,28 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             //用户留言
             $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
 
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
+            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
+            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
+            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
+
+            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
+            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
+            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
+            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
+
+            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
+            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
+            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
+
+
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
             $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+            $finalResult[$key]['is_new_version'] = $value['is_new_version'];
         }
 
         $spreadsheet = new Spreadsheet();
@@ -1261,11 +1454,15 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
         //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $itemArr = $item->where('platform_type', 1)->cache(3600)->column('id', 'platform_sku');
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
 
         foreach ($finalResult as $key => $value) {
+            //网站SKU转换仓库SKU
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -1297,29 +1494,41 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$value['sku']]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
-                // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+            if ($value['os_add'] && $value['od_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+                //新处方版本
+                if ($value['is_new_version'] == 1) {
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
+                } else {
+                    // 旧处方 双ADD值时，左右眼互换 
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+                }
             } else {
-                //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+
+                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                    //数值在上一行合并有效，数值在下一行合并后为空
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                    $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+                } else {
+                    //数值在上一行合并有效，数值在下一行合并后为空
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                    $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+                }
             }
 
             if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
@@ -1389,8 +1598,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
 
-
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
 
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
@@ -1404,18 +1613,14 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 ],
             ],
         ];
+
+
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        //水平垂直居中   
-        // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        // //自动换行
-        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $spreadsheet->setActiveSheetIndex(0);
@@ -1440,14 +1645,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-        // exit;
-        // $filePath = env('runtime_path')."temp/".time().microtime(true).".tmp";
-        // $writer->save($filePath);
-        $writer->save('php://output');
-        // $writer->save('file.xlsx');
 
-        // readfile($filePath);
-        // unlink($filePath);
+        $writer->save('php://output');
     }
 
 
@@ -1546,14 +1745,17 @@ EOF;
                     //处方类型
                     $final_print['prescription_type'] = $final_print['prescription_type'] ?: 'Frame Only';
 
+                    $final_print['os_add'] = urldecode($final_print['os_add']);
+                    $final_print['od_add'] = urldecode($final_print['od_add']);
+
                     //处理ADD
                     if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
                         $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                     } else {
                         if ($final_print['os_add'] && $final_print['os_add'] * 1 != 0) {
-                            $os_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
-                            $od_add = "";
+                            $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                            $os_add = "";
                         } else {
                             $od_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
                             $os_add = "";
@@ -1600,7 +1802,7 @@ EOF;
 
 
                     //处理ADD  当ReadingGlasses时 是 双ADD值 双ADD值时，左右眼互换
-                    if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                    if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
                         // echo '双ADD值';
                         $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1611,7 +1813,10 @@ EOF;
                     }
                 }
 
-
+                //如果为太阳镜 拼接颜色
+                if ($final_print['index_type'] == 'Sunglasses Frameonly') {
+                    $final_print['index_type'] .= '-' . $product_options['options'][0]['value'];
+                }
 
                 //处理PD值
                 if ($final_print['pdcheck'] == 'on' && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
@@ -1723,6 +1928,4 @@ EOF;
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
     }
-
-    
 }

@@ -480,7 +480,7 @@ class WholesaleCustomer extends Backend
     public function checkIsType($value = '')
     {
         if (empty($value)) {
-            return null;
+            return 1;
         } elseif ($value == '是') {
             return 2;
         } elseif ($value == '否') {

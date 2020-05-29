@@ -5,6 +5,7 @@ namespace app\api\controller;
 use app\common\controller\Api;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
+use app\admin\model\OrderNodeCourier;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
@@ -206,7 +207,7 @@ class SelfApi extends Api
         (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
-            'content' => 'Your order has been created.',
+            'content' => 'Leave warehouse, Waiting for being picked up.',
             'site' => $site,
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
@@ -287,5 +288,108 @@ class SelfApi extends Api
         $trackingConnector = new TrackingConnector($this->apiKey);
         $track = $trackingConnector->registerMulti($params);
         return $track;
+    }
+
+
+
+    /**
+     * 获取订单节点流程
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/28 13:50:49 
+     */
+    public function query_order_node()
+    {
+        //校验参数
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
+        $order_node = $this->request->request('order_node'); //订单节点
+        
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if (!$order_node) {
+            $this->error(__('缺少节点参数'), [], 400);
+        }
+
+        if($order_number){
+            $where['order_number'] = $order_number;
+        }
+        $where['site'] = $site;
+        if($order_node != 5){
+            if($order_node == 3){
+                $where['order_node'] = ['in', ['3', '4']];
+            }else{
+                $where['order_node'] = $order_node;
+            }
+        }
+        
+        $order_node_data = (new OrderNodeDetail())->where($where)->select();
+        $order_data['order_data'] = collection($order_node_data)->toArray();
+
+        if($other_order_number){
+            $orther_where['site'] = $site;
+            if($order_node != 5){
+                if($order_node == 3){
+                    $orther_where['order_node'] = ['in', ['3', '4']];
+                }else{
+                    $orther_where['order_node'] = $order_node;
+                }
+            }
+            foreach($other_order_number as $val){
+                $orther_where['order_number'] = $val;
+                $orther_order_node_data = (new OrderNodeDetail())->where($orther_where)->select();
+                $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
+            }
+        }
+        $this->success('成功',$order_data,200);
+    }
+
+    /**
+     * 获取订单物流明细
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/28 15:00:07 
+     */
+    public function query_track()
+    {
+        //校验参数
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $track_number = $this->request->request('track_number'); //快递单号
+        $site = $this->request->request('site'); //站点
+
+        if (!$order_id && !$order_number && !$track_number) {
+            $this->error(__('缺少订单id或订单号或运单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if($order_id){
+            $where['order_id'] = $order_id;
+        }
+        if($order_number){
+            $where['order_number'] = $order_number;
+        }
+        if($track_number){
+            $where['track_number'] = $track_number;
+        }
+
+        $where['site'] = $site;
+        
+        $order_track_data = (new OrderNodeCourier())->where($where)->select();
+        $order_track_data = collection($order_track_data)->toArray();
+        
+        $this->success('成功',$order_track_data,200);
     }
 }

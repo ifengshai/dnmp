@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -32,6 +32,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                             formatter: Table.api.formatter.status
                         },
                         { field: 'order_number', title: __('关联单号') },
+                        { field: 'batch_id', title: __('关联批次ID') },
+                        {
+                            field: 'status', title: __('签收状态'), custom: { 1: 'success',  0: 'danger' },
+                            searchList: { 1: '已签收', 0: '未签收' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('创建人') },
                         {
@@ -54,7 +60,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                         }
                                         return true;
                                     }
-                                }], formatter: Table.api.formatter.operate
+                                },
+                                {
+                                    name: 'signin',
+                                    text: __('签收'),
+                                    title: __('签收'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'warehouse/logistics_info/signin',
+                                    confirm: '确定要签收吗',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+                            
+                            ], formatter: Table.api.formatter.operate
                         }
                     ]
                 ]

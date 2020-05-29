@@ -112,7 +112,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             //判断搜索时的条件
             $('.form-commonsearch .btn-success').on('click',function(){
                 var status_type = $('.form-commonsearch').find('select[name="status_type"]').val();
-                var create_time = $('#update_time').val();
+                var create_time = $('#zendesk_update_time').val();
                 if(status_type == 2 && !create_time){
                     Toastr.error('请选择更新时间');
                     return false;

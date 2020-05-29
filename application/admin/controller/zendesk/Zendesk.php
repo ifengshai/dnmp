@@ -78,11 +78,11 @@ class Zendesk extends Backend
                         $map['zendesk.status'] = ['in', [1, 2]];
                         break;
                     case 2:
-                        $update_time = $filter['update_time'] ?? '';
+                        $update_time = $filter['zendesk_update_time'] ?? '';
                         if(!$update_time){
                             $this->error('请选择更新时间');
                         }
-                        $map['zendesk.status'] = ['in', [1, 2]];
+                        $map['zendesk.status'] = ['in', [1, 2]];                      
                         break;
                     case 3:
                         //获取public =1 is_admin=1的zid列表
@@ -125,7 +125,6 @@ class Zendesk extends Backend
                 ->where($andWhere)
                 ->where('channel','in',['email','web','chat'])
                 ->count();
-
 
             $list = $this->model
                 ->with(['admin'])

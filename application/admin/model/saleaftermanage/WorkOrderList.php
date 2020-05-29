@@ -869,8 +869,10 @@ class WorkOrderList extends Model
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
-                        //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                        if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) {
+                        //承接人是自己并且是优惠券、补价、积分，承接默认完成
+                        /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
+                        //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
+                        if (in_array($measure_choose_id, [8, 9, 10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);

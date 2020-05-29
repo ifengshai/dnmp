@@ -258,11 +258,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 
                         { field: 'total_qty_ordered', title: __('SKU数量'), operate: false, formatter: Controller.api.formatter.int_format },
-                        { field: 'custom_print_label_new', title: __('打印标签'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_match_frame_new', title: __('配镜架'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_match_lens_new', title: __('配镜片'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_send_factory_new', title: __('加工'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_delivery_new', title: __('质检'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_print_label', title: __('打印标签'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_send_factory', title: __('加工'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_delivery', title: __('质检'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
 
                         {
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
@@ -355,11 +355,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             //移除所有
                             table.bootstrapTable("removeAll");
                             for (var i in newdata) {
-                                newdata[i].custom_is_delivery_new = data[i].custom_is_delivery_new;
-                                newdata[i].custom_is_match_frame_new = data[i].custom_is_match_frame_new;
-                                newdata[i].custom_is_match_lens_new = data[i].custom_is_match_lens_new;
-                                newdata[i].custom_is_send_factory_new = data[i].custom_is_send_factory_new;
-                                newdata[i].custom_print_label_new = data[i].custom_print_label_new;
+                                newdata[i].custom_is_delivery = data[i].custom_is_delivery;
+                                newdata[i].custom_is_match_frame = data[i].custom_is_match_frame;
+                                newdata[i].custom_is_match_lens = data[i].custom_is_match_lens;
+                                newdata[i].custom_is_send_factory = data[i].custom_is_send_factory;
+                                newdata[i].custom_print_label = data[i].custom_print_label;
                             }
                             //追加
                             table.bootstrapTable("append", newdata);
@@ -400,11 +400,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             for (var i in newdata) {
                                 for (var k in row) {
                                     if (row[k].entity_id == newdata[i].entity_id) {
-                                        newdata[i].custom_is_delivery_new = row[k].custom_is_delivery_new;
-                                        newdata[i].custom_is_match_frame_new = row[k].custom_is_match_frame_new;
-                                        newdata[i].custom_is_match_lens_new = row[k].custom_is_match_lens_new;
-                                        newdata[i].custom_is_send_factory_new = row[k].custom_is_send_factory_new;
-                                        newdata[i].custom_print_label_new = row[k].custom_print_label_new;
+                                        newdata[i].custom_is_delivery = row[k].custom_is_delivery;
+                                        newdata[i].custom_is_match_frame = row[k].custom_is_match_frame;
+                                        newdata[i].custom_is_match_lens = row[k].custom_is_match_lens;
+                                        newdata[i].custom_is_send_factory = row[k].custom_is_send_factory;
+                                        newdata[i].custom_print_label = row[k].custom_print_label;
                                     }
                                 }
                             }
