@@ -125,7 +125,7 @@ class Test extends Backend
     {
         $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
         $map['b.handle'] = 1;
-        $order_shipment = $this->voogueme->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
+        $order_shipment = $this->nihao->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
             ->where($map)->order('a.entity_id asc')->select();
         $order_shipment = collection($order_shipment)->toArray();
