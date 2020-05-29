@@ -5,6 +5,7 @@ namespace app\api\controller;
 use app\common\controller\Api;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
+use app\admin\model\OrderNodeCourier;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
@@ -34,10 +35,9 @@ class SelfApi extends Api
     public function create_order()
     {
         //校验参数
-        $order_id = $this->request->request('order_id');
-        $order_number = $this->request->request('order_number');
-        $site = $this->request->request('site');
-        $create_time = $this->request->request('create_time');
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -50,14 +50,11 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        if (!$create_time) {
-            $this->error(__('缺少创建时间参数'), [], 400);
-        }
         $res_node = (new OrderNode())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
             'site' => $site,
-            'create_time' => $create_time,
+            'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 0,
             'node_type' => 0,
             'update_time' => date('Y-m-d H:i:s'),
@@ -68,9 +65,76 @@ class SelfApi extends Api
             'order_id' => $order_id,
             'content' => 'Your order has been created.',
             'site' => $site,
-            'create_time' => $create_time,
+            'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 0,
             'node_type' => 0
+        ]);
+        if (false !== $res_node && false !== $res_node_detail) {
+            $this->success('创建成功', [], 200);
+        } else {
+            $this->error('创建失败', [], 400);
+        }
+    }
+
+    /**
+     * 订单支付成功节点 订单号 站点 时间
+     * @Description
+     * @author wpl
+     * @since 2020/05/18 14:22:06 
+     * @return void
+     */
+    public function order_pay()
+    {
+        //校验参数
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
+        $status = $this->request->request('status'); //站点
+        if (!$order_id) {
+            $this->error(__('缺少订单id参数'), [], 400);
+        }
+
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if (!$status) {
+            $this->error(__('缺少状态参数'), [], 400);
+        }
+
+        if (!in_array($status, ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+            $this->error(__('非支付成功状态'), [], 400);
+        }
+
+        $res_node = (new OrderNode())->save([
+            'order_node' => 0,
+            'node_type' => 1,
+            'update_time' => date('Y-m-d H:i:s'),
+        ], ['order_id' => $order_id, 'site' => $site]);
+
+        $count = (new OrderNodeDetail())->where([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'site' => $site,
+            'order_node' => 0,
+            'node_type' => 1
+        ])->count();
+        if ($count > 0) {
+            $this->error('已存在', [], 400);
+        }
+
+        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'content' => 'Your payment has been successful.',
+            'site' => $site,
+            'create_time' => date('Y-m-d H:i:s'),
+            'order_node' => 0,
+            'node_type' => 1
         ]);
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
@@ -90,9 +154,9 @@ class SelfApi extends Api
     public function order_delivery()
     {
         //校验参数
-        $order_id = $this->request->request('order_id');
-        $order_number = $this->request->request('order_number');
-        $site = $this->request->request('site');
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -114,12 +178,6 @@ class SelfApi extends Api
                 break;
             case 3:
                 $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
                 break;
             default:
                 return false;
@@ -149,7 +207,7 @@ class SelfApi extends Api
         (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
-            'content' => 'Your order has been created.',
+            'content' => 'Leave warehouse, Waiting for being picked up.',
             'site' => $site,
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
@@ -168,13 +226,6 @@ class SelfApi extends Api
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
 
-        //请求接口更改物流表状态
-        $params['ids'] = $order_id;
-        $params['site'] = $site;
-        $res = $this->setLogisticsStatus($params);
-        if ($res->status !== 200) {
-            $this->error('更改物流状态失败', $res, $res->status);
-        }
         $this->success('提交成功', [], 200);
     }
 
@@ -224,41 +275,6 @@ class SelfApi extends Api
     }
 
     /**
-     * 更新物流表状态
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/05/18 18:16:48 
-     * @return void
-     */
-    protected function setLogisticsStatus($params)
-    {
-        switch ($params['site']) {
-            case 1:
-                $url = config('url.zeelool_url');
-                break;
-            case 2:
-                $url = config('url.voogueme_url');
-                break;
-            case 3:
-                $url = config('url.nihao_url');
-                break;
-            default:
-                return false;
-                break;
-        }
-        unset($params['site']);
-        $url = $url . 'magic/order/logistics';
-        $client = new Client(['verify' => false]);
-        //请求URL
-        $response = $client->request('POST', $url, array('form_params' => $params));
-        $body = $response->getBody();
-        $stringBody = (string) $body;
-        $res = json_decode($stringBody);
-        return $res;
-    }
-
-    /**
      * 注册17track
      *
      * @Description
@@ -272,5 +288,108 @@ class SelfApi extends Api
         $trackingConnector = new TrackingConnector($this->apiKey);
         $track = $trackingConnector->registerMulti($params);
         return $track;
+    }
+
+
+
+    /**
+     * 获取订单节点流程
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/28 13:50:49 
+     */
+    public function query_order_node()
+    {
+        //校验参数
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
+        $order_node = $this->request->request('order_node'); //订单节点
+        
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if (!$order_node) {
+            $this->error(__('缺少节点参数'), [], 400);
+        }
+
+        if($order_number){
+            $where['order_number'] = $order_number;
+        }
+        $where['site'] = $site;
+        if($order_node != 5){
+            if($order_node == 3){
+                $where['order_node'] = ['in', ['3', '4']];
+            }else{
+                $where['order_node'] = $order_node;
+            }
+        }
+        
+        $order_node_data = (new OrderNodeDetail())->where($where)->select();
+        $order_data['order_data'] = collection($order_node_data)->toArray();
+
+        if($other_order_number){
+            $orther_where['site'] = $site;
+            if($order_node != 5){
+                if($order_node == 3){
+                    $orther_where['order_node'] = ['in', ['3', '4']];
+                }else{
+                    $orther_where['order_node'] = $order_node;
+                }
+            }
+            foreach($other_order_number as $val){
+                $orther_where['order_number'] = $val;
+                $orther_order_node_data = (new OrderNodeDetail())->where($orther_where)->select();
+                $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
+            }
+        }
+        $this->success('成功',$order_data,200);
+    }
+
+    /**
+     * 获取订单物流明细
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/28 15:00:07 
+     */
+    public function query_track()
+    {
+        //校验参数
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $track_number = $this->request->request('track_number'); //快递单号
+        $site = $this->request->request('site'); //站点
+
+        if (!$order_id && !$order_number && !$track_number) {
+            $this->error(__('缺少订单id或订单号或运单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if($order_id){
+            $where['order_id'] = $order_id;
+        }
+        if($order_number){
+            $where['order_number'] = $order_number;
+        }
+        if($track_number){
+            $where['track_number'] = $track_number;
+        }
+
+        $where['site'] = $site;
+        
+        $order_track_data = (new OrderNodeCourier())->where($where)->select();
+        $order_track_data = collection($order_track_data)->toArray();
+        
+        $this->success('成功',$order_track_data,200);
     }
 }

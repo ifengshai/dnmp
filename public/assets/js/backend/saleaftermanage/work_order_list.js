@@ -64,7 +64,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
                             align: 'left',
-                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent'),
+                            visible: false
+                        },
+                        {
+                            field: 'measure_choose_id',
+                            title: __('措施'),
+                            align: 'left',
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getMeasureContent')
                         },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_refund', title: __('是否有退款'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
@@ -224,7 +231,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 1 && row.create_user_id == Config.userid) {//操作权限
+                                        if (row.work_status == 1) {//操作权限
                                             return true;
                                         } else {
                                             return false;
@@ -850,7 +857,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('change', '#prescription_select', function () {
                 var val = $(this).val();
                 var prescription = prescriptions[val];
-
+                console.log(prescription);
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                 prescription_div.find('input').val('');
                 prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
@@ -1991,11 +1998,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             prescription_type: prescription_type
                         }
                     }, function (data, ret) {
+                        console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
+                        console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         prescription_div.find('#color_type').val('');
                         $('.selectpicker ').selectpicker('refresh');
@@ -2018,6 +2027,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             color_id: color_id
                         }
                     }, function (data, ret) {
+                        console.log(data);
                         var prescription_div = that.parents('.panel-body');
                         var color_type;
                         for (var i = 0; i < data.length; i++) {

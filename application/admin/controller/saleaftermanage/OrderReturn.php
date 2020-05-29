@@ -312,7 +312,8 @@ class OrderReturn extends Backend
             //获取运单号
             $track_number   = trim($request->post('track_number'));
             if ($order_platform < 1) {
-                return $this->error('请选择正确的订单平台');
+                
+                return json(['code' => 0,'msg' => '请选择正确的订单平台']);
             }
             if ($customer_name) {
                 $customer_name = explode(' ', $customer_name);
@@ -320,7 +321,8 @@ class OrderReturn extends Backend
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
             if (!$customer) {
-                $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
+                return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
+                // $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
@@ -496,18 +498,21 @@ class OrderReturn extends Backend
             }
             //上传订单平台
             $this->view->assign('order_platform', $order_platform);
+            $this->view->engine->layout(false);
+            $html = $this->view->fetch('test');
+            return json(['code' => 1,'data' => $html]);
         }
-        $serviceArr = config('search.platform');
-        $sessionId  = session('admin.id');
-        foreach ($serviceArr as $key => $kv) {
-            if (in_array($sessionId, $kv)) {
-                $default = $key;
-            }
-        }
-        //默认的客服分组值
-        if ($default) {
-            $this->view->assign("default", $default);
-        }
+        // $serviceArr = config('search.platform');
+        // $sessionId  = session('admin.id');
+        // foreach ($serviceArr as $key => $kv) {
+        //     if (in_array($sessionId, $kv)) {
+        //         $default = $key;
+        //     }
+        // }
+        // //默认的客服分组值
+        // if ($default) {
+        //     $this->view->assign("default", $default);
+        // }
         $this->view->assign("order_platform", $order_platform);
         $this->view->assign("customer_email", $customer_email);
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
