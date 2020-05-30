@@ -42,14 +42,12 @@ class Crontab extends Backend
      */
     public function zeelool_order_custom_order_temp()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type =1 and created_at between '2020-05-29 00:00:00' and '2020-05-30 23:00:00' order by entity_id desc limit 50";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type =1 and created_at between '2020-05-29 00:00:00' and '2020-05-30 23:00:00' order by entity_id desc limit 1000";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
             exit;
         }
-
-        dump($order_entity_id_list);
 
         /**
          * 1：仅镜架
@@ -70,7 +68,6 @@ class Crontab extends Backend
             if (!$items) {
                 continue;
             }
-            dump($items);
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
@@ -82,9 +79,7 @@ class Crontab extends Backend
                     $label[] = 3; //定制含处方
                 }
             }
-            dump($label);
-
-
+           
             //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
             if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
                 $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
@@ -194,9 +189,9 @@ class Crontab extends Backend
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && !$v['options_color'])) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
