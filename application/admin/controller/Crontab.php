@@ -42,7 +42,7 @@ class Crontab extends Backend
      */
     public function zeelool_order_custom_order_temp()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type =1 and created_at between '2020-05-29 00:00:00' and '2020-05-30 23:00:00' order by entity_id asc limit 10";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type =1 and created_at between '2020-05-29 00:00:00' and '2020-05-30 23:00:00' order by entity_id asc limit 50";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
