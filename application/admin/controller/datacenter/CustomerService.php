@@ -45,7 +45,7 @@ class CustomerService extends Backend
         //总览数据end
 
         //工作量概况start
-        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        //$this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         $start = date('Y-m-d', strtotime('-1 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
@@ -56,46 +56,50 @@ class CustomerService extends Backend
             unset($customerReply['handleNum']);
             unset($customerReply['noQualifyDay']);
             $replyArr = [];
-            $replyArr['one']['yester_num'] = $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
-            $replyArr['two']['yester_num'] = $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
-            $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+            $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
+            $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
+            //$this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             foreach ($customerReply as $ok =>$ov) {
                 if (array_key_exists($ov['due_id'], $infoOne)) { 
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
+                    //$replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    $replyArr['one']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    //$replyArr['one']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
                     $replyArr['one']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['one']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
                 if (array_key_exists($ov['due_id'], $infoTwo)) {
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
+                    //$replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    $replyArr['two']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    //$replyArr['two']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
                     $replyArr['two']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['two']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
             }
         }
+		$yesterdayWorkload = $this->getyesterdayWorkloadNum();
+		if(!empty($yesterdayWorkload)){
+			$replyArr['one']['yester_num'] = $replyArr['two']['yester_num'] =0;
+			$yesterdayWorkload = collection($yesterdayWorkload)->toArray();
+			foreach($yesterdayWorkload as $k =>$v){
+				 if(array_key_exists($v['due_id'],$infoOne)){
+					$replyArr[$v['due_id']]['yester_num'] = $v['counter'];
+					$replyArr['one']['yester_num']        += $replyArr[$v['due_id']]['yester_num'];
+                 }
+				 if(array_key_exists($v['due_id'],$infoTwo)){
+					$replyArr[$v['due_id']]['yester_num'] = $v['counter'];
+					$replyArr['two']['yester_num']        += $replyArr[$v['due_id']]['yester_num'];					 
+				 }
+			}
+		}
         //工作量概况end
 
         //工单统计信息
-        //$map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
-        //本月工单创建量
-        // $thisMonthWorkOrderNum = $this->getThisMonthWorkOrderNum();
-        // if(!empty($thisMonthWorkOrderNum)){
-        //     foreach($thisMonthWorkOrderNum as $k =>$v){
-        //         if(array_key_exists($v['create_user_id'],$infoOne)){
-
-        //         }
-        //     }
-        // }
-        //$map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         $map_measure['w.create_time'] = $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info_original([], $map);
 		$workArr  = [];
@@ -144,9 +148,6 @@ class CustomerService extends Backend
         if(!empty($thisMonthWorkOrderNum)){
 			$workArr['one']['create_num'] =	$workArr['two']['create_num'] = 0;
 			$thisMonthWorkOrderNum = collection($thisMonthWorkOrderNum)->toArray();
-/* 			dump($thisMonthWorkOrderNum);
-			dump($infoOne);
-			exit; */
 			foreach($thisMonthWorkOrderNum as $k =>$v){
                  if(array_key_exists($v['create_user_id'],$infoOne)){
 					$workArr[$v['create_user_id']]['create_num'] = $v['counter'];
@@ -958,6 +959,14 @@ class CustomerService extends Backend
         $where['create_user_id'] = ['neq',0];
         return $this->model->where($map_create)->where($where)->field('count(*) as counter,create_user_id')->group('create_user_id')->select();
     }
+	public function getyesterdayWorkloadNum(){
+		$where['is_public'] = 1;
+		$where['is_admin']  = 1;
+		$where['author_id'] = ['neq','382940274852'];
+        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
+		return $this->zendeskComments->where($where)->where($workload)->field('count(*) as counter,due_id')->group('due_id')->select();		
+	}
     /**
      * 获取工作量信息
      *
