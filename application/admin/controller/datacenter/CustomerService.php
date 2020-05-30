@@ -85,6 +85,7 @@ class CustomerService extends Backend
 		$yesterdayWorkload = $this->getyesterdayWorkloadNum();
 		if(!empty($yesterdayWorkload)){
 			$replyArr['one']['yester_num'] = $replyArr['two']['yester_num'] =0;
+			$yesterdayWorkload = collection($yesterdayWorkload)->toArray();
 			foreach($yesterdayWorkload as $k =>$v){
 				 if(array_key_exists($v['due_id'],$infoOne)){
 					$replyArr[$v['due_id']]['yester_num'] = $v['counter'];
