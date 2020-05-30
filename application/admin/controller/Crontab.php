@@ -49,6 +49,8 @@ class Crontab extends Backend
             exit;
         }
 
+        dump($order_entity_id_list);
+
         /**
          * 1：仅镜架
          * 2：仅现货处方镜
@@ -68,7 +70,7 @@ class Crontab extends Backend
             if (!$items) {
                 continue;
             }
-
+            dump($items);
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
