@@ -17,6 +17,12 @@ class ItWebTask extends Backend
 {
 
     /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['deleteItem'];
+
+    /**
      * ItWebTask模型对象
      * @var \app\admin\model\demand\ItWebTask
      */
@@ -133,7 +139,7 @@ class ItWebTask extends Backend
                     array_walk($group_type, 'trim_value');
                     array_walk($person_in_charge, 'trim_value');
                     array_walk($title, 'trim_value');
-             
+
                     if (count(array_filter($group_type)) < 1 || count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
                         $this->error('请先分配任务');
                     }
@@ -281,13 +287,35 @@ class ItWebTask extends Backend
 
 
     /**
+     * 删除子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/01 14:02:31 
+     * @return void
+     */
+    public function deleteItem()
+    {
+        if ($this->request->isAjax()) {
+            $id = input('id');
+            $res = $this->itWebTaskItem->destroy($id);
+            if ($res) {
+                $this->success();
+            } else {
+                $this->error();
+            }
+        }
+    }
+
+
+    /**
      * 逻辑删除
      * */
     public function del($ids = "")
     {
         if ($this->request->isAjax()) {
             $data['is_del'] =  2;
-            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            $res = $this->model->allowField(true)->save($data, ['id' => input('ids')]);
             if ($res) {
                 $this->success('成功');
             } else {
@@ -349,13 +377,13 @@ class ItWebTask extends Backend
             $id = input('id');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->itWebTaskItem
-//                ->where($where)
+                //                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->itWebTaskItem
-//                ->where($where)
+                //                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -451,7 +479,7 @@ class ItWebTask extends Backend
         //如果不存在则修改主记录完成 并更新时间
         if ($num == 0) {
             $list['is_complete'] = 1;
-             $list['complete_date'] = date('Y-m-d H:i:s', time());
+            $list['complete_date'] = date('Y-m-d H:i:s', time());
             $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
         }
         if ($res !== false) {
@@ -481,7 +509,7 @@ class ItWebTask extends Backend
             if (!$res) {
                 throw new Exception("修改失败");
             }
-          /*  //查询同记录下是否还存在未测试通过的数据
+            /*  //查询同记录下是否还存在未测试通过的数据
             $itWebTaskInfo = $this->itWebTaskItem->get($ids);
             $map['task_id'] = $itWebTaskInfo['task_id'];
             $map['is_test_adopt'] = 0;
@@ -652,30 +680,28 @@ class ItWebTask extends Backend
     public function problem_detail($ids = null)
     {
 
-        if($this->request->isPost()) {
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if ($params['opt_type']==1){
-                    $data['is_complete']=1;
+                if ($params['opt_type'] == 1) {
+                    $data['is_complete'] = 1;
                     $where['id'] = $params['id'];
                     $res = $this->testRecordModel->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
-
                     } else {
                         $this->error('失败');
                     }
-                }elseif ($params['opt_type']==2){
+                } elseif ($params['opt_type'] == 2) {
 
-                    $data['is_del']=2;
-                    $where['id']=$params['id'];
-                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                    $data['is_del'] = 2;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
                     } else {
                         $this->error('失败');
                     }
-
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -826,6 +852,4 @@ class ItWebTask extends Backend
             $this->error('操作失败！！');
         }
     }
-
-
 }

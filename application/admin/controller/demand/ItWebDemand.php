@@ -139,8 +139,13 @@ class ItWebDemand extends Backend
                 unset($admin_user['nickname']);
             }
 
-
-
+            //测试负责人筛选
+            $testuser = array();
+            if ($filter['test_user_id_arr']) {
+                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
+                unset($filter['test_user_id_arr']);
+            }
+            
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -151,16 +156,17 @@ class ItWebDemand extends Backend
                 ->where($smap)
                 ->where($meWhere)
                 ->where($user_map)
+                ->where($testuser)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
                 ->where($user_map)
+                ->where($testuser)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -351,6 +357,12 @@ class ItWebDemand extends Backend
                 $meWhere="status !=7";
                 unset($filter['none_complete']);
             }
+            //测试负责人筛选
+            $testuser = array();
+            if ($filter['test_user_id_arr']) {
+                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
+                unset($filter['test_user_id_arr']);
+            }
 
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
@@ -361,6 +373,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($testuser)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -370,6 +383,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($testuser)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)

@@ -577,8 +577,6 @@ class PurchaseOrder extends Backend
     }
 
 
-
-
     /**
      * 删除合同里商品信息
      */
