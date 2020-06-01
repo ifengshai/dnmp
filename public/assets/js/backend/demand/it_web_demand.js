@@ -116,7 +116,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
-                            operate: false,
+                            operate: 'in',
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -131,6 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             },
                         },
+                        {field: 'create_time', title: __('create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         /*{field: 'all_finish_time', title: __('时间节点'), operate:'RANGE', addclass:'datetimerange',operate:false},*/
 
                         {
@@ -620,7 +622,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
-                            operate: false,
+                            operate: 'in',
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -635,6 +638,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             },
                         },
+                        {field: 'create_time', title: __('create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'is_small_probability',
                             title: __('is_small_probability'),
