@@ -591,6 +591,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     $(".step-type li").siblings('li').removeClass('active');
                     $(this).parent().addClass('active');
                     $("#second-level").html('');
+                    $("#warehouse").val(value)
                     //异步获取第二个tab数据
                     Backend.api.ajax({
                         url:'datacenter/customer_service/get_problem_by_classify',
@@ -612,6 +613,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             });
             //根据选择的问题类型查找对应的数据
             $(document).on('click', '.statisticsThree', function(e){
+                var problem = $("#warehouse").val();
                 var value = $(this).data("value");
                 if(value>0){
                     $("#second-level li").siblings('li').removeClass('active');
@@ -637,7 +639,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         data: {
                             'time': time,
                             'platform': platform,
-                            'value':value
+                            'value':value,
+                            'problem':problem
                         }
                    };
                    EchartObj.api.ajax(options, chartOptions);
@@ -647,7 +650,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         data:{
                             value:value,
                             time:time,
-                            platform:platform
+                            platform:platform,
+                            problem:problem
                         }
                     }, function(data, ret){
                     $("#caigou-table4 tr").remove();

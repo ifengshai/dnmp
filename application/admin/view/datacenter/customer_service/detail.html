@@ -178,6 +178,16 @@ table.altrowstable tr:nth-child(even){
                                 <td>0</td>
                                 {/if}
                             </tr>
+                            <tr>
+                                <td>仓库问题</td>
+                                <td>{$data.problem_type[4]}</td>
+                                <td>占比</td>
+                                {if $problem_type_total gt 0}
+                                <td>{:round($data.problem_type[4]/$problem_type_total*100,2)}%</td>
+                                {else/}
+                                <td>0</td>
+                                {/if}
+                            </tr>                            
                         </table>
                     </div>
                 </div>
@@ -249,6 +259,7 @@ table.altrowstable tr:nth-child(even){
                     <div style="float: left;width:100%;">
                                 <label for="create_time" class="control-label col-xs-1"
                                 style="font-weight: bold;width: 150px;margin-top:20px;">问题措施比统计</label>
+                                    <input type="hidden" id="warehouse" name="warehouse" value="0"/>
                                     <ul class="nav nav-tabs step-type" style="float:left;clear:both;" >
                                         <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
                                         {foreach name="problem_type" item="vo" key="k"}
