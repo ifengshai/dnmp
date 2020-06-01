@@ -1713,10 +1713,10 @@ class CustomerService extends Backend
      */
     public function get_workorder_data($platform, $map)
     {
-        // $arr = Cache::get('CustomerService_get_workorder_data_'.$platform.md5(serialize($map)));
-        // if ($arr) {
-        //     return $arr;
-        // }
+        $arr = Cache::get('CustomerService_get_workorder_data_'.$platform.md5(serialize($map)));
+        if ($arr) {
+            return $arr;
+        }
         if ($platform<10) {
             $where['work_platform'] = $warehouse['work_platform']= $platform;
         }
@@ -1759,10 +1759,10 @@ class CustomerService extends Backend
      */
     public function get_problem_type_data($platform, $map, $problem_type)
     {
-        // $arr = Cache::get('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)));
-        // if ($arr) {
-        //     return $arr;
-        // }
+        $arr = Cache::get('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)));
+        if ($arr) {
+            return $arr;
+        }
         if ($platform<10) {
             $where['work_platform'] = $warehouse['work_platform'] = $platform;
         }
@@ -1799,7 +1799,7 @@ class CustomerService extends Backend
      */
     public function get_problem_step_data($platform, $map, $problem_id,$problem=1)
     {
-        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)));
+        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)));
         if ($arr) {
             return $arr;
         }
@@ -1819,7 +1819,7 @@ class CustomerService extends Backend
         foreach ($step_arr as $k =>$v) {
             $info['step'][]  = $this->step->where($where_step)->where('work_id', 'in', $result)->where('measure_choose_id', $k)->count('id');
         }
-        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)), $info, 7200);
+        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)), $info, 7200);
         return $info;
     }
     /**
