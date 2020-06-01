@@ -94,6 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 return all_user_name;
                             },
                         },
+                        { field: 'assign_user_id', title: __('直接审核人'), searchList: { 75: '王伟', 95: '白青青', 117: '韩雨薇' }, formatter: Table.api.formatter.status ,visible:false},
                         {
                             field: 'after_user_id',
                             title: __('recept_user'),

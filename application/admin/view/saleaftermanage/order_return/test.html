@@ -81,10 +81,8 @@
             <li>{$orderInfoList.shipping_description}</li>
             <li>{$orderInfoList.created_at}</li>
             <li class="option">
-                <button type="button" class="addOrder"
-                    data-id="{$orderInfoList.increment_id}">增加工单</button>
-                <button type="button" class='machiningBtn'
-                    data-id="{$orderInfoList.increment_id}">配货记录</button>
+                <button type="button" class="addOrder" data-id="{$orderInfoList.increment_id}">增加工单</button>
+                <button type="button" class='machiningBtn' data-id="{$orderInfoList.increment_id}">配货记录</button>
                 <button class="detail-btn" type="button">展开详情</button>
             </li>
 
@@ -98,6 +96,7 @@
                             <th>Lens</th>
                             <th>Prescription Type</th>
                             <th>Frame Price</th>
+                            <th>Lens Type Price</th>
                             <th>Lens Price</th>
                             <th>Original price</th>
                             <th>Discount</th>
@@ -116,9 +115,13 @@
                             <td class="lens-wrap-td">
                                 {if $itemInfoList.index_type || $itemInfoList.coatiing_name}
                                 <ul class="lens-wrap">
-                                    <li>
-                                        <span class="name">{$itemInfoList.index_type}</span> <span
-                                            class="price">{$itemInfoList.index_price}</span> </li>
+                                    <li style="display:block;">
+                                        <span class="name">{$itemInfoList.lenstype_data_name}</span>
+                                        <span class="price">{$itemInfoList.lenstype_base_price}</span> 
+                                        <span class="name">{$itemInfoList.index_type}</span>
+                                        <span class="price">{$itemInfoList.index_price}</span> 
+
+                                    </li>
                                     <li>
                                         <span class="name">{$itemInfoList.coatiing_name}</span>
                                         <span>{$itemInfoList.coatiing_price}</span>
@@ -198,6 +201,7 @@
                                 </table>
                             </td>
                             <td>{:round($itemInfoList.frame_price,2)}</td>
+                            <td>{:round($itemInfoList.lenstype_base_price,2)}</td>
                             <td>{:round($itemInfoList.index_price,2)}</td>
                             <td>{:round($itemInfoList.original_price,2)}</td>
                             <td>{:round($itemInfoList.discount_amount,2)}</td>
@@ -292,8 +296,7 @@
                                 <td>{$workorder.problem_type_content}</td>
                                 <td>
                                     <ul>
-                                        <li><span
-                                                class="name">工单创建人:</span><span>{$workorder.create_user_name}</span>
+                                        <li><span class="name">工单创建人:</span><span>{$workorder.create_user_name}</span>
                                         </li>
                                         <li><span
                                                 class="name">实际审核人:</span><span>{$workorder.operation_user_name}</span>
@@ -342,9 +345,8 @@
                                 </td>
                                 <td>
                                     <a href="{:url('saleaftermanage/work_order_list/index')}?work_id={$workorder.id}"
-                                        class="btn btn-primary btn-xs btn-click btn-addtabs"
-                                        data-table-id="table" data-field-index="11" data-row-index="0"
-                                        data-button-index="3" title="售后工单列表"><i
+                                        class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
+                                        data-field-index="11" data-row-index="0" data-button-index="3" title="售后工单列表"><i
                                             class="fa fa-list"></i>查看</a>
                                 </td>
 
@@ -482,9 +484,8 @@
             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_time}</td>
             <td style="text-align: center; vertical-align: middle;"><a
                     href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}"
-                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
-                    data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i
-                        class="fa fa-list"></i>查看</a></td>
+                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11"
+                    data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
         </tr>
         {/foreach}
     </table>
@@ -541,9 +542,8 @@
             <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_time}</td>
             <td style="text-align: center; vertical-align: middle;"><a
                     href="{:url('saleaftermanage/sale_after_task/index')}?task_number={$saleTaskList.task_number}"
-                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
-                    data-field-index="11" data-row-index="0" data-button-index="3" title="售后任务"><i
-                        class="fa fa-list"></i>查看</a></td>
+                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11"
+                    data-row-index="0" data-button-index="3" title="售后任务"><i class="fa fa-list"></i>查看</a></td>
         </tr>
         {/foreach}
     </table>

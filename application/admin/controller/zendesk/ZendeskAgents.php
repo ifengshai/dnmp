@@ -95,6 +95,10 @@ class ZendeskAgents extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $result = $this->model->allowField(true)->save($params);
+                    if($result){
+                        //is_used变为2
+                        ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -106,13 +110,7 @@ class ZendeskAgents extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
-                    //is_used变为2
-                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
-                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
@@ -149,6 +147,11 @@ class ZendeskAgents extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $result = $row->allowField(true)->save($params);
+                    if ($result) {
+                        //is_used变为2
+                        ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
+                        ZendeskAccount::where('account_id',$agent_id)->setField('is_used',1);
+                    } 
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -160,14 +163,7 @@ class ZendeskAgents extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
-                    //is_used变为2
-                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
-                    ZendeskAccount::where('account_id',$agent_id)->setField('is_used',1);
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were updated'));
-                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }

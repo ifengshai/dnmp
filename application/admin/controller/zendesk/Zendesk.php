@@ -327,7 +327,7 @@ class Zendesk extends Backend
             'template_platform' => $type,
             'template_permission' => 1,
             'is_active' => 1])
-            ->whereOr(['template_permission' => 2,'is_active' => 1, 'create_person' => session('admin.id')])
+            ->whereOr('template_permission=2 and is_active =1 and create_person = '. session('admin.id'))
             ->order('used_time desc,template_category desc,id desc')
             ->select();
 

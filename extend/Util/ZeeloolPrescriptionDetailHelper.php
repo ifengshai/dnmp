@@ -177,6 +177,8 @@ class ZeeloolPrescriptionDetailHelper
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
 			$items[$item_key]['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['color_id'] = $product_options['info_buyRequest']['tmplens']['color_id'];
+			$items[$item_key]['lenstype_data_name'] = $product_options['info_buyRequest']['tmplens']['lenstype_data_name'];
+			$items[$item_key]['lenstype_base_price'] = $product_options['info_buyRequest']['tmplens']['lenstype_base_price'];
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
 			$prescription_params = explode("&", $prescription_params);
