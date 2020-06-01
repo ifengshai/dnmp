@@ -1759,4 +1759,21 @@ class Test extends Backend
         $etime = date("Y-m-d 23:59:59");
         $time  = 123;
     }
+    /**
+     * 批量更改zendesk的is_used字段
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/01 10:18:25 
+     * @return void
+     */
+    public function modify_zendesk_used(){
+        $account = Db('zendesk_account')->select();
+        foreach($account as $key=>$value){
+            $is_exist = Db('zendesk_agents')->where('agent_id',$value['account_id'])->value('id');
+            $is_used = $is_exist ? 2 : 1;
+            Db('zendesk_account')->where('account_id',$value['account_id'])->update(['is_used'=>$is_used]);
+            echo $value['id']."\n";
+        }
+    }
 }
