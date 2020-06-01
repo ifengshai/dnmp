@@ -539,7 +539,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> Ｘ </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -576,7 +576,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 arr.push(sku+'_'+$("#stock").val())
                 $("#sku_arr").val(sku_arr.join(','));
                 $("#product_list_data").val(arr.join(','));
-                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#stock").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#stock").val()+'")> Ｘ </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#stock").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#stock").val()+'")> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -615,7 +615,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 arr.push(sku+'_'+$("#lend_num").val())
                 $("#sku_arr").val(sku_arr.join(','));
                 $("#product_list_data").val(arr.join(','));
-                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> Ｘ </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
 
@@ -628,45 +628,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', "#add_product", function () {
                 var number = $("#product_data > tr").length;
                 var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> Ｘ </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
         sample_workorder_out_edit: function () {
             Controller.api.bindevent();
-            $(document).on('change', "#sku", function () {
-                var sku = $("#sku option:selected").text();
-                var location = $('#sku').val();
-                if(location.length == 0){
-                    layer.alert('无效的选择');
-                    return false;
-                }
-                $("#location").html(location);
+            $("body").on('change', ".sku_arr", function () {
+                $(this).parents('tr').find(".location").html($(this).find("option:selected").attr('data-id'))
             });
             $(document).on('click', "#add_product", function () {
-                var sku = $("#sku option:selected").text();
-                var location = $('#sku').val();
-                if(location.length == 0){
-                    layer.alert('无效的选择');
-                    return false;
-                }
-                $("#location").html(location);
-
-                var arr = [],
-                    sku_arr = []
-                if($("#product_list_data").val()){
-                    arr = $("#product_list_data").val().split(',')
-                    sku_arr = $("#sku_arr").val().split(',')
-                    if($.inArray(sku, sku_arr) != -1){
-                        layer.alert('sku不能重复');
-                        return false;
-                    }
-                }
-                sku_arr.push(sku)
-                arr.push(sku+'_'+$("#stock").val())
-                $("#sku_arr").val(sku_arr.join(','));
-                $("#product_list_data").val(arr.join(','));
-                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#stock").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#stock").val()+'")> Ｘ </a></td></tr>';
+                var number = $("#product_data > tr").length;
+                var sku_arr = $("#sku_info").html();
+                console.log(sku_arr);
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -704,7 +679,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 arr.push(sku+'_'+$("#lend_num").val())
                 $("#sku_arr").val(sku_arr.join(','));
                 $("#product_list_data").val(arr.join(','));
-                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> Ｘ </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+sku+'"><td>'+sku+'</td><td>'+$("#lend_num").val()+'</td><td>'+location+'</td><td id="del"><a href="javascript:;" onclick=del_lend_tr("'+sku+'","'+$("#lend_num").val()+'")> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -722,6 +697,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     };
     return Controller;
 });
+function select_sku(key){
+    
+}
 /**
  * 入库删除
  * @param {key} key 
