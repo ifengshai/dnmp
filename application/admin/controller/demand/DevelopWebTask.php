@@ -15,6 +15,12 @@ use think\exception\ValidateException;
  */
 class DevelopWebTask extends Backend
 {
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['deleteItem'];
     
     /**
      * DevelopWebTask模型对象
@@ -28,15 +34,14 @@ class DevelopWebTask extends Backend
         $this->model = new \app\admin\model\demand\DevelopWebTask;
         $this->itWebTaskItem = new \app\admin\model\demand\DevelopWebTaskItem();
         $this->testRecord = new \app\admin\model\demand\DevelopTestRecord();
-
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
+
 
     /**
      * 查看
@@ -127,7 +132,7 @@ class DevelopWebTask extends Backend
                     array_walk($person_in_charge, 'trim_value');
                     array_walk($title, 'trim_value');
                     array_walk($type, 'trim_value');
-                   
+
                     if (count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
                         $this->error('请先分配任务');
                     }
@@ -271,7 +276,7 @@ class DevelopWebTask extends Backend
     {
         if ($this->request->isAjax()) {
             $data['is_del'] =  2;
-            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            $res = $this->model->allowField(true)->save($data, ['id' => input('ids')]);
             if ($res) {
                 $this->success('成功');
             } else {
@@ -280,6 +285,26 @@ class DevelopWebTask extends Backend
         }
     }
 
+    /**
+     * 删除子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/01 14:02:31 
+     * @return void
+     */
+    public function deleteItem()
+    {
+        if ($this->request->isAjax()) {
+            $id = input('id');
+            $res = $this->itWebTaskItem->destroy($id);
+            if ($res) {
+                $this->success();
+            } else {
+                $this->error();
+            }
+        }
+    }
 
 
     /**
@@ -453,7 +478,7 @@ class DevelopWebTask extends Backend
             if (!$res) {
                 throw new Exception("修改失败");
             }
-/*            //查询同记录下是否还存在未测试通过的数据
+            /*            //查询同记录下是否还存在未测试通过的数据
             $itWebTaskInfo = $this->itWebTaskItem->get($ids);
             $map['task_id'] = $itWebTaskInfo['task_id'];
             $map['is_test_adopt'] = 0;
@@ -494,7 +519,7 @@ class DevelopWebTask extends Backend
      */
     public function test_info($ids = null)
     {
-       /* $row = $this->itWebTaskItem->get($ids);
+        /* $row = $this->itWebTaskItem->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -607,30 +632,28 @@ class DevelopWebTask extends Backend
     public function problem_detail($ids = null)
     {
 
-        if($this->request->isPost()) {
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if ($params['opt_type']==1){
-                    $data['is_complete']=1;
+                if ($params['opt_type'] == 1) {
+                    $data['is_complete'] = 1;
                     $where['id'] = $params['id'];
                     $res = $this->testRecord->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
-
                     } else {
                         $this->error('失败');
                     }
-                }elseif ($params['opt_type']==2){
+                } elseif ($params['opt_type'] == 2) {
 
-                    $data['is_del']=2;
-                    $where['id']=$params['id'];
-                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                    $data['is_del'] = 2;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
                     } else {
                         $this->error('失败');
                     }
-
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
