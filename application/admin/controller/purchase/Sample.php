@@ -916,6 +916,15 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                $sku_arr = array_column($params['goods'],'sku');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
+                //判断数据中是否有空值
+                if(in_array('',$sku_arr)){
+                    $this->error(__('商品信息不能为空', ''));
+                }
                 //生成出库主表数据
                 $workorder['location_number'] = $location_number;
                 $workorder['status'] = $params['status'];
@@ -925,13 +934,11 @@ class Sample extends Backend
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder);
                 $parent_id = $this->sampleworkorder->id;
-                $product_data = array_filter(explode(',',$params['product_list_data']));
-                foreach ($product_data as $key=>$value){
-                    $info = array_filter(explode('_',$value));
+                foreach ($params['goods'] as $key=>$value){
                     $workorder_item['parent_id'] = $parent_id;
-                    $workorder_item['sku'] = $info[0];
-                    $workorder_item['stock'] = $info[1];
-                    $workorder_item['location_id'] = $this->sample->where('sku',$info[0])->value('location_id');
+                    $workorder_item['sku'] = $value['sku'];
+                    $workorder_item['stock'] = $value['stock'];
+                    $workorder_item['location_id'] = $this->sample->where('sku',$value['sku'])->value('location_id');
                     Db::name('purchase_sample_workorder_item')->insert($workorder_item);
                 }
                 $this->success();
