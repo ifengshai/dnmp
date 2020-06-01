@@ -96,6 +96,7 @@
                             <th>Lens</th>
                             <th>Prescription Type</th>
                             <th>Frame Price</th>
+                            <th>Lens Type Price</th>
                             <th>Lens Price</th>
                             <th>Original price</th>
                             <th>Discount</th>
@@ -200,10 +201,8 @@
                                 </table>
                             </td>
                             <td>{:round($itemInfoList.frame_price,2)}</td>
-                            <td>
-                                {:round($itemInfoList.lenstype_base_price,2)}<br>
-                                {:round($itemInfoList.index_price,2)}
-                            </td>
+                            <td>{:round($itemInfoList.lenstype_base_price,2)}</td>
+                            <td>{:round($itemInfoList.index_price,2)}</td>
                             <td>{:round($itemInfoList.original_price,2)}</td>
                             <td>{:round($itemInfoList.discount_amount,2)}</td>
                             <td>{:round($itemInfoList.total,2)}</td>
