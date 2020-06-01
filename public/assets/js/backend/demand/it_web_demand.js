@@ -438,7 +438,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 4){
+                                        if(row.status <= 4){
                                             if(row.demand_del){//操作权限
                                                 return true;
                                             }
