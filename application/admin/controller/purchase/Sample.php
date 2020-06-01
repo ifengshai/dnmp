@@ -972,20 +972,38 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                $sku_arr = array_column($params['goods'],'sku');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
+                //判断数据中是否有空值
+                if(in_array('',$sku_arr)){
+                    $this->error(__('商品信息不能为空', ''));
+                }
+                //获取该入库单下的商品sku，并将不在该列表的数据进行删除
+                $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id'=>$ids])->column('sku');
+                $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
+                Db('purchase_sample_workorder_item')->where('sku','in',$diff_sku_arr)->where('parent_id',$ids)->delete();
+                //处理商品
+                foreach ($params['goods'] as $key=>$value){
+                    $is_exist = Db::name('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->value('id');
+                    if($is_exist){
+                        //更新
+                        Db::name('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->update(['stock'=>$value['stock']]);
+                    }else{
+                        //插入
+                        $workorder_item = array();
+                        $workorder_item['parent_id'] = $ids;
+                        $workorder_item['sku'] = $value['sku'];
+                        $workorder_item['stock'] = $value['stock'];
+                        $workorder_item['location_id'] = $this->sample->where('sku',$value['sku'])->value('location_id');
+                        Db::name('purchase_sample_workorder_item')->insert($workorder_item);
+                    }
+                }
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
-                //处理商品
-                Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->delete();
-                $product_data = array_filter(explode(',',$params['product_list_data']));
-                foreach ($product_data as $key=>$value){
-                    $workorder_item = array();
-                    $info = array_filter(explode('_',$value));
-                    $workorder_item['parent_id'] = $ids;
-                    $workorder_item['sku'] = $info[0];
-                    $workorder_item['stock'] = $info[1];
-                    $workorder_item['location_id'] = $this->sample->where('sku',$info[0])->value('location_id');
-                    Db::name('purchase_sample_workorder_item')->insert($workorder_item);
-                }
+
                 $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
