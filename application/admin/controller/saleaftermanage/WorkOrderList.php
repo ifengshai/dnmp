@@ -286,13 +286,11 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
-                    //更换镜框判断是否有库存
+                    //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
-                        if (count(array_filter($skus)) < 1) {
-                            throw new Exception("SKU不能为空");
-                        }
+                        if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
@@ -309,12 +307,8 @@ class WorkOrderList extends Backend
                         }
 
                         foreach ($originalSkus as $key => $originalSku) {
-                            if (!$originalSku) {
-                                exception('sku不能为空');
-                            }
-                            if (!$originalNums[$key]) {
-                                exception('数量必须大于0');
-                            }
+                            if (!$originalSku) exception('sku不能为空');
+                            if (!$originalNums[$key]) exception('数量必须大于0');
                             $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
                         }
                     }
@@ -365,6 +359,7 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
+
                         foreach (config('workorder.check_coupon') as $v) {
                             if ($v['id'] == $params['coupon_id']) {
                                 $params['coupon_describe'] = $v['desc'];
@@ -512,6 +507,7 @@ class WorkOrderList extends Backend
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
                                     $appointList[$key]['recept_person'] = session('admin.nickname');
                                 } else {
+
                                     $appointList[$key]['recept_group_id'] = $appoint_group[$key];
                                     $appointList[$key]['recept_person_id'] = $val;
                                     $appointList[$key]['recept_person'] = $appoint_users[$key];
@@ -602,14 +598,14 @@ class WorkOrderList extends Backend
                 //查询用户id对应姓名
                 $admin = new \app\admin\model\Admin();
                 $users = $admin->where('status', 'normal')->column('nickname', 'id');
-                $this->assignconfig('users', $users); //返回用户
+                $this->assignconfig('users', $users); //返回用户            
                 $this->view->assign('skus', $arrSkus);
             }
 
             if (1 == $row->work_type) { //判断工单类型，客服工单
                 $this->view->assign('work_type', 1);
                 $this->assignconfig('work_type', 1);
-                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
             } else { //仓库工单
                 $this->view->assign('work_type', 2);
                 $this->assignconfig('work_type', 2);
@@ -640,7 +636,7 @@ class WorkOrderList extends Backend
             if (!empty($checkIsWarehouse)) {
                 $this->view->assign('work_type', 2);
                 $this->assignconfig('work_type', 2);
-                $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+                $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型   
             } else {
                 $this->view->assign('work_type', 1);
                 $this->assignconfig('work_type', 1);
@@ -671,7 +667,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/16 10:59:53
+     * @since 2020/04/16 10:59:53 
      * @param [type] $skus sku数组
      * @param [type] $siteType 站点类型
      * @return void
@@ -706,7 +702,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author lsw
-     * @since 2020/04/14 15:00:19
+     * @since 2020/04/14 15:00:19 
      * @param [type] $ids
      * @return void
      */
@@ -753,9 +749,7 @@ class WorkOrderList extends Backend
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
-                        if (count(array_filter($skus)) < 1) {
-                            throw new Exception("SKU不能为空");
-                        }
+                        if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
@@ -771,12 +765,8 @@ class WorkOrderList extends Backend
                         }
 
                         foreach ($originalSkus as $key => $originalSku) {
-                            if (!$originalSku) {
-                                exception('sku不能为空');
-                            }
-                            if (!$originalNums[$key]) {
-                                exception('数量必须大于0');
-                            }
+                            if (!$originalSku) exception('sku不能为空');
+                            if (!$originalNums[$key]) exception('数量必须大于0');
                             $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
                         }
                     }
@@ -946,6 +936,7 @@ class WorkOrderList extends Backend
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
                                     $appointList[$key]['recept_person'] = session('admin.nickname');
                                 } else {
+
                                     $appointList[$key]['recept_group_id'] = $appoint_group[$key];
                                     $appointList[$key]['recept_person_id'] = $val;
                                     $appointList[$key]['recept_person'] = $appoint_users[$key];
@@ -1005,6 +996,7 @@ class WorkOrderList extends Backend
                     }
                     //经手人
                     if ($row->work_type == 2 && $row->work_status == 3) {
+
                         Ding::cc_ding($row->after_user_id, '', '工单ID:' . $row->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                     }
 
@@ -1049,7 +1041,7 @@ class WorkOrderList extends Backend
             //查询用户id对应姓名
             $admin = new \app\admin\model\Admin();
             $users = $admin->where('status', 'normal')->column('nickname', 'id');
-            $this->assignconfig('users', $users); //返回用户
+            $this->assignconfig('users', $users); //返回用户            
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -1070,7 +1062,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/10 15:41:09
+     * @since 2020/04/10 15:41:09 
      * @return void
      */
     public function get_sku_list()
@@ -1218,7 +1210,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author lsw
-     * @since 2020/04/13 17:28:49
+     * @since 2020/04/13 17:28:49 
      * @return void
      */
     public function ajax_get_order($ordertype = null, $order_number = null)
@@ -1258,7 +1250,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author lsw
-     * @since 2020/04/16 10:29:02
+     * @since 2020/04/16 10:29:02 
      * @return void
      */
     public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null, $change_type = null)
@@ -1326,7 +1318,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author lsw
-     * @since 2020/04/16 15:33:36
+     * @since 2020/04/16 15:33:36 
      * @param [type] $ids
      * @return void
      */
@@ -1395,7 +1387,7 @@ class WorkOrderList extends Backend
             //查询用户id对应姓名
             $admin = new \app\admin\model\Admin();
             $users = $admin->where('status', 'normal')->column('nickname', 'id');
-            $this->assignconfig('users', $users); //返回用户
+            $this->assignconfig('users', $users); //返回用户            
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -1468,7 +1460,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author lsw
-     * @since 2020/04/16 16:49:21
+     * @since 2020/04/16 16:49:21 
      * @param [type] $work_id
      * @param [type] $order_number
      * @param [type] $change_type
@@ -1557,7 +1549,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/17 17:16:55
+     * @since 2020/04/17 17:16:55 
      * @return void
      */
     public function setStatus($ids = null)
@@ -1585,7 +1577,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/16 16:29:30
+     * @since 2020/04/16 16:29:30 
      * @param [type] $ids
      * @return void
      */
@@ -1632,7 +1624,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/21 14:06:32
+     * @since 2020/04/21 14:06:32 
      * @return void
      */
     public function couponList()
@@ -1674,7 +1666,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/21 14:06:32
+     * @since 2020/04/21 14:06:32 
      * @return void
      */
     public function integralList()
@@ -1716,7 +1708,7 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/22 17:23:47
+     * @since 2020/04/22 17:23:47 
      * @return void
      */
     public function batch_print_label()
@@ -1769,7 +1761,7 @@ EOF;
                 $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "workorder" . DS . "$date";
                 if (!file_exists($dir)) {
                     mkdir($dir, 0777, true);
-                // echo '创建文件夹$dir成功';
+                    // echo '创建文件夹$dir成功';
                 } else {
                     // echo '需创建的文件夹$dir已经存在';
                 }
@@ -1929,7 +1921,7 @@ EOF;
      *
      * @Description
      * @author wpl
-     * @since 2020/04/22 17:24:01
+     * @since 2020/04/22 17:24:01 
      * @param [type] $origin_order_item
      * @return void
      */
@@ -1956,7 +1948,7 @@ EOF;
      *
      * @Description
      * @author wpl
-     * @since 2020/04/22 17:24:23
+     * @since 2020/04/22 17:24:23 
      * @param [type] $array
      * @param [type] $field
      * @param string $sort
@@ -1978,7 +1970,7 @@ EOF;
      *
      * @Description
      * @author lsw
-     * @since 2020/04/24 09:30:03
+     * @since 2020/04/24 09:30:03 
      * @param array $receptInfo
      * @return void
      */
@@ -2043,7 +2035,7 @@ EOF;
      *
      * @Description
      * @author lsw
-     * @since 2020/05/26 14:01:15
+     * @since 2020/05/26 14:01:15 
      * @return void
      */
     public function getMeasureContent()
@@ -2111,7 +2103,7 @@ EOF;
      *
      * @Description
      * @author lsw
-     * @since 2020/04/30 09:34:48
+     * @since 2020/04/30 09:34:48 
      * @return void
      */
     public function batch_export_xls()
@@ -2312,6 +2304,7 @@ EOF;
             }
             //承接
             if (array_key_exists($value['id'], $receptInfo)) {
+
                 $value['result'] = $receptInfo[$value['id']];
                 $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['result']);
             } else {
@@ -2391,8 +2384,7 @@ EOF;
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
-        $savename = '工单数据' . date("YmdHis", time());
-        ;
+        $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
         // if (!$spreadsheet) return false;
