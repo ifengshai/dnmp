@@ -855,7 +855,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //这里可以获取从服务端获取的JSON数据
                 //这里我们手动设置底部的值
                 //console.log(data.total_money);
-                $("#total-money").text(Math.round(data.return_money * 100)/100);
+                $("#total-money").text(Math.round(data.total_money * 100)/100);
                 $("#return-money").text(Math.round(data.return_money * 100) / 100);
 
             });
