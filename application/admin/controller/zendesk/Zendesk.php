@@ -25,7 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
 
     public function _initialize()
     {
@@ -1005,10 +1005,14 @@ DOC;
         //更新
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
             (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
-        }        
+            echo $diff.'ok'."\n";
+        }
+        echo 'all ok';
+        exit;
     }
 }
