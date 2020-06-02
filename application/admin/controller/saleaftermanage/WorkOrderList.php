@@ -280,11 +280,20 @@ class WorkOrderList extends Backend
                     if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
                     }
-
-                    //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
-                        throw new Exception("措施不能为空");
+                    $userId = session('admin.id');
+                    $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+                    $warehouseArr = config('workorder.warehouse_department_rule');
+                    $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+                    if(!empty($checkIsWarehouse)){
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    }else{
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }                        
                     }
+                    //判断是否选择措施
 
                     //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
@@ -2245,6 +2254,9 @@ EOF;
                 case 5:
                     $value['work_status'] = '部分处理';
                     break;
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;     
                 default:
                     $value['work_status'] = '已处理';
                     break;
