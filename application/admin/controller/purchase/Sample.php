@@ -1200,13 +1200,11 @@ class Sample extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->samplelendlog
                 ->where($where)
-                ->where($where_arr)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->samplelendlog
                 ->where($where)
-                ->where($where_arr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1250,25 +1248,29 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-                if($params['product_list_data']){
-                    //生成入库主表数据
-                    $lendlog['status'] = 1;
-                    $lendlog['create_user'] = session('admin.nickname');
-                    $lendlog['createtime'] = date('Y-m-d H:i:s',time());
-                    $this->samplelendlog->save($lendlog);
-                    $log_id = $this->samplelendlog->id;
-                    $product_data = array_filter(explode(',',$params['product_list_data']));
-                    foreach ($product_data as $key=>$value){
-                        $info = array_filter(explode('_',$value));
-                        $lendlog_item['log_id'] = $log_id;
-                        $lendlog_item['sku'] = $info[0];
-                        $lendlog_item['lend_num'] = $info[1];
-                        Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
-                    }
-                    $this->success();
-                }else{
+                $sku_arr = array_column($params['goods'],'sku');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
+                //判断数据中是否有空值
+                if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
                 }
+                //生成入库主表数据
+                $lendlog['status'] = 1;
+                $lendlog['create_user'] = session('admin.nickname');
+                $lendlog['createtime'] = date('Y-m-d H:i:s',time());
+                $this->samplelendlog->save($lendlog);
+                $log_id = $this->samplelendlog->id;
+                foreach ($params['goods'] as $value){
+                    $lendlog_item['log_id'] = $log_id;
+                    $lendlog_item['sku'] = $value['sku'];
+                    $lendlog_item['lend_num'] = $value['lend_num'];
+                    Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
+                }
+                $this->success();
+               
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
@@ -1333,23 +1335,35 @@ class Sample extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                //判断商品信息是否为空
-                $product_data = explode(',',$params['product_list_data']);
-                if($params['product_list_data']){
-                    //处理商品
-                    Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->delete();
-                    foreach ($product_data as $key=>$value){
-                        $lendlog_item = array();
-                        $info = explode('_',$value);
-                        $lendlog_item['log_id'] = $ids;
-                        $lendlog_item['sku'] = $info[0];
-                        $lendlog_item['lend_num'] = $info[1];
-                        Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
-                    }
-                    $this->success();
-                }else{
+                $sku_arr = array_column($params['goods'],'sku');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
+                //判断数据中是否有空值
+                if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
                 }
+                //获取该入库单下的商品sku，并将不在该列表的数据进行删除
+                $save_sku_arr = Db('purchase_sample_lendlog_item')->where(['log_id'=>$ids])->column('sku');
+                $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
+                Db('purchase_sample_lendlog_item')->where('sku','in',$diff_sku_arr)->where('log_id',$ids)->delete();
+                //处理商品
+                foreach ($params['goods'] as $key=>$value){
+                    $is_exist = Db::name('purchase_sample_lendlog_item')->where(['log_id'=>$ids,'sku'=>$value['sku']])->value('id');
+                    if($is_exist){
+                        //更新
+                        Db::name('purchase_sample_lendlog_item')->where(['log_id'=>$ids,'sku'=>$value['sku']])->update(['lend_num'=>$value['lend_num']]);
+                    }else{
+                        //插入
+                        $lendlog_item = array();
+                        $lendlog_item['log_id'] = $ids;
+                        $lendlog_item['sku'] = $value['sku'];
+                        $lendlog_item['lend_num'] = $value['lend_num'];
+                        Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
+                    }
+                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
