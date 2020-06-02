@@ -26,6 +26,7 @@ class Test3 extends Backend{
      * @return void
      */
     public function export_order_node(){
+        set_time_limit(0);
         //查询物流结点
         $where['d.order_node'] = 3;
         $where['d.node_type'] = 8;
@@ -42,7 +43,7 @@ class Test3 extends Backend{
             $arr[$i]['create_time'] = $item['create_time'];
             //查询是否有最终状态时间
             $where_detail['order_node'] = 4;
-            $endtime = Db('order_node_detail')->where(['order_node'=>4])->value('create_time');
+            $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
             if($endtime){
                 $arr[$i]['complete_time'] = $item['create_time'];
                 $hour=floor((strtotime($endtime)-strtotime($item['create_time']))%86400/3600);
