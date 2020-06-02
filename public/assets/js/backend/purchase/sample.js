@@ -548,7 +548,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -586,7 +586,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
                 console.log(sku_arr);
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
