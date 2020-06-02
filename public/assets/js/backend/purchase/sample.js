@@ -536,7 +536,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value="" class="form-control"></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -573,7 +573,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', "#add_product", function () {
                 var number = $("#product_data > tr").length;
                 var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value=""></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value="" class="form-control"></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },

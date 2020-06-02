@@ -61,7 +61,7 @@
         <tbody id="product_data">
         {foreach $product_list as $k=>$vo}
         <tr role="row" class="odd del_{$k}">
-            <td>{$vo.sku}<input type="hidden" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td>
+            <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td>
             <td><input type="text" class="form-control" name="row[goods][{$k}][stock]" value="{$vo.stock}"></td>
             <td>
                 <select name="row[goods][{$k}][location_id]" class="form-control supplier" required >
