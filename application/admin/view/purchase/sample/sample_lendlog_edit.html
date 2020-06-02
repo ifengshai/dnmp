@@ -26,7 +26,7 @@
         border-radius: 61px;
         cursor: pointer;
         margin-left: 8px;
-        margin-top: 2px;
+        margin-top: 9px;
     }
     .desc{
         display: flex;
@@ -36,6 +36,9 @@
         margin: 0 10px 10px;
         border-radius: 4px;
         resize: none;
+    }
+    .location{
+        padding-top: 15px !important;
     }
 </style>
 
@@ -52,9 +55,9 @@
         <tbody id="product_data">
             {foreach $product_list as $key=>$vo}
             <tr role="row" class="odd del_{$key}">
-                <td>{$vo.sku}<input type="hidden" name="row[goods][{$key}][sku]" value="{$vo.sku}"></td>
-                <td><input type="text" name="row[goods][{$key}][lend_num]" value="{$vo.lend_num}"></td>
-                <td>{$vo.location}</td>
+                <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$key}][sku]" value="{$vo.sku}"></td>
+                <td><input type="text" class="form-control" name="row[goods][{$key}][lend_num]" value="{$vo.lend_num}"></td>
+                <td class="location">{$vo.location}</td>
                 <td id="del"><a href="javascript:;" onclick=del_lend_tr({$key})> 删除 </a></td>
             </tr>
             {/foreach}
