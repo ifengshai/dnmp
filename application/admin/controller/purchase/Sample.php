@@ -1347,7 +1347,7 @@ class Sample extends Backend
                 //获取该入库单下的商品sku，并将不在该列表的数据进行删除
                 $save_sku_arr = Db('purchase_sample_lendlog_item')->where(['log_id'=>$ids])->column('sku');
                 $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
-                Db('purchase_sample_lendlog_item')->where('sku','in',$diff_sku_arr)->where('parent_id',$ids)->delete();
+                Db('purchase_sample_lendlog_item')->where('sku','in',$diff_sku_arr)->where('log_id',$ids)->delete();
                 //处理商品
                 foreach ($params['goods'] as $key=>$value){
                     $is_exist = Db::name('purchase_sample_lendlog_item')->where(['log_id'=>$ids,'sku'=>$value['sku']])->value('id');

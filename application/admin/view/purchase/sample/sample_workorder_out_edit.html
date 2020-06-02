@@ -61,7 +61,7 @@
         {foreach $product_list as $key=>$vo}
         <tr role="row" class="odd del_{$key}">
             <td>{$vo.sku}<input type="hidden" name="row[goods][{$key}][sku]" value="{$vo.sku}"></td>
-            <td>{$vo.stock}<input type="hidden" name="row[goods][{$key}][stock]" value="{$vo.stock}"></td>
+            <td><input type="text" name="row[goods][{$key}][stock]" value="{$vo.stock}"></td>
             <td>{$vo.location}<input type="hidden" id="location_info" value="{$vo.location}"></td>
             <td id="del"><a href="javascript:;" onclick=del_add_tr({$key})> 删除 </a></td>
         </tr>
