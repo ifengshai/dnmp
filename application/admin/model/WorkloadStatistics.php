@@ -30,10 +30,10 @@ class WorkloadStatistics extends Model
      */
     public function getyesterdayData($type=1)
     {
-        $arr = Cache::get('WorkloadStatistics_getyesterdayData_'.$type);
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_getyesterdayData_'.$type);
+        // if($arr){
+        //     return $arr;
+        // }
         $map['create_date'] = date("Y-m-d", strtotime("-1 day"));
         if($type<10){
             $where['platform'] = $type;
@@ -57,7 +57,7 @@ class WorkloadStatistics extends Model
                 $arr['pending_num']    = 0;                
             } 
         }
-        Cache::set('WorkloadStatistics_getyesterdayData_'.$type, $arr, 7200);
+        //Cache::set('WorkloadStatistics_getyesterdayData_'.$type, $arr, 7200);
         return $arr;
         
     }
