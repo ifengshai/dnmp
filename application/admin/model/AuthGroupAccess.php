@@ -31,25 +31,25 @@ class AuthGroupAccess extends Model
         if($result){
             $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 0;
             $result = collection($result)->toArray();
-            foreach($result as $k =>$v){
+            foreach($result as $v){
                 if($v['rules'] == '*'){
                     $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 1; 
                 }elseif(!empty($v['rules']) && ($v['rules']!='*')){
                     $rulesArr = explode(',',$v['rules']);
                      //zeelool权限
-                    if(in_array(839,$rulesArr)){
+                    if(in_array(846,$rulesArr)){
                         $zeelool_privilege = 1;    
                     }
                     //voogueme权限
-                    if(in_array(840,$rulesArr)){
+                    if(in_array(847,$rulesArr)){
                         $voogueme_privilege = 1;
                     }
                     //nihao权限
-                    if(in_array(841,$rulesArr)){
+                    if(in_array(848,$rulesArr)){
                         $nihao_privilege = 1;
                     }
                     //meeloog权限
-                    if(in_array(842,$rulesArr)){
+                    if(in_array(849,$rulesArr)){
                         $meeloog_privilege = 1;
                     }
                 }
