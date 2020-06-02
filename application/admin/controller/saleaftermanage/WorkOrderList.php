@@ -2245,6 +2245,9 @@ EOF;
                 case 5:
                     $value['work_status'] = '部分处理';
                     break;
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;     
                 default:
                     $value['work_status'] = '已处理';
                     break;
