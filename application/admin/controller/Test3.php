@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\admin\model\Elaticsearch;
 use app\common\controller\Backend;
 use think\Db;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 
 class Test3 extends Backend{
@@ -42,23 +43,86 @@ class Test3 extends Backend{
             $where_detail['order_node'] = 4;
             $endtime = Db('order_node_detail')->where(['order_node'=>4])->value('create_time');
             if($endtime){
-                $arr[$i]['create_time'] = $item['create_time'];
+                $arr[$i]['complete_time'] = $item['create_time'];
                 $hour=floor((strtotime($endtime)-strtotime($item['create_time']))%86400/3600);
                 $hour_num = $hour%24;
                 $arr[$i]['day'] = floor($hour/24).'天'.$hour_num.'个小时';
             }else{
-                $arr[$i]['create_time'] = '';
+                $arr[$i]['complete_time'] = '';
                 $arr[$i]['day'] = 0;
             }
-            $file_content = $file_content . implode(',',$arr[$i]);
-            $file_content = $file_content . "\n";
-            echo $i." is ok\n";
             $i++;
         }
-        $export_str = array('订单号','物流商','运单号','当前节点状态','上网时间','最终状态时间','时间长短');
-        $file_title = implode(',',$export_str) ." \n";
-        $file = $file_title . $file_content ;
-        file_put_contents('/www/wwwroot/mojing/li_exl.csv',$file);
-        exit;
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
+            ->setCellValue("B1", "物流商")
+            ->setCellValue("C1", "运单号");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "当前节点状态")
+            ->setCellValue("E1", "上网时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "完成时间")
+            ->setCellValue("G1", "时长");
+
+        foreach ($arr as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['order_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['shipment_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['track_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['node_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['complete_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['day']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '物流信息' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }
