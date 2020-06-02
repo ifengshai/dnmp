@@ -33,6 +33,7 @@ class Index extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
+		$this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
     /**
@@ -205,12 +206,35 @@ class Index extends Backend
 
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
-
+		
         $this->view->assign("label", $label);
         $this->view->assign("row", $row);
         $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
         $this->view->assign("pay", $pay);
+        return $this->view->fetch();
+    }
+	
+	
+	
+	/**
+     * 订单信息2
+     */
+    public function orderDetail($order_number = null)
+    {       				
+
+		$order_number = $order_number ?? $this->request->get('order_number');
+        //$order_number = 100077570;
+        //查询订单详情		
+        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq',$order_number],'order_node'=>['neq',0]])->order('node_type asc')->column('node_type,create_time'))->toArray();
+		
+		$key_list = array_keys($ruleList);
+		
+		$entity_id = $this->request->get('id');
+		$label = $this->request->get('label', 1);	
+		$this->view->assign(compact('order_number','entity_id','label')); 
+        $this->view->assign("list", $ruleList);
+		$this->view->assign("key_list", $key_list);
         return $this->view->fetch();
     }
 
