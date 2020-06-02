@@ -1416,7 +1416,7 @@ class WorkOrderList extends Backend
         }
 		//$ids = 520;
 		$workOrderNote = WorkOrderNote::where('work_id', $ids)->select(); //回复内容
-        $this->view->assign('workOrderNote', $workOrderNote);
+        $this->view->assign('workOrderNote', $workOrderNote); 
 		
 		
 		
