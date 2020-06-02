@@ -10,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class Test3 extends Backend{
 
+    protected $noNeedLogin = ['*'];
     public function _initialize()
     {
         parent::_initialize();
