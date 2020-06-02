@@ -35,6 +35,19 @@ class Ding extends Controller
     }
 
     /**
+     * 人员遗漏，手动补充
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/01 17:35:27 
+     */
+    public function test2(){
+        $userId = '01072659631529272289';
+        $user = $this->app->user->get($userId);
+        Admin::userAdd($user);
+    }
+
+    /**
      * 注册事件回调
      * @return [type] [description]
      */

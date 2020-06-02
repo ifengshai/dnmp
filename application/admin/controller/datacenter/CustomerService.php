@@ -959,6 +959,14 @@ class CustomerService extends Backend
         $where['create_user_id'] = ['neq',0];
         return $this->model->where($map_create)->where($where)->field('count(*) as counter,create_user_id')->group('create_user_id')->select();
     }
+    /**
+     * 获取昨天工作量
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 10:01:17 
+     * @return void
+     */
 	public function getyesterdayWorkloadNum(){
 		$where['is_public'] = 1;
 		$where['is_admin']  = 1;
@@ -1416,7 +1424,7 @@ class CustomerService extends Backend
             if ('echart1' == $params['key']) {
                 //问题大分类统计、措施统计
                 $data = $this->get_workorder_data($order_platform, $map);
-                $customer_problem_classify = config('workorder.customer_problem_classify');
+                $customer_problem_classify = config('workorder.new_customer_problem_classify');
                 $column = array_keys($customer_problem_classify);
                 $columnData = [];
                 foreach ($column as $k =>$v) {
@@ -1430,12 +1438,13 @@ class CustomerService extends Backend
                 //问题类型统计
                 $problem_data = $this->get_problem_type_data($order_platform, $map, 1);
                 //问题类型数组
-                $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+                $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
                 $customer_problem_list  = config('workorder.customer_problem_type');
                 //循环数组根据id获取客服问题类型
                 $column = $columnData = [];
                 foreach ($customer_problem_arr as $k => $v) {
-                    $column[] = $customer_problem_list[$v];
+                        $column[] = $customer_problem_list[$v];  
+                    
                 }
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
@@ -1508,11 +1517,11 @@ class CustomerService extends Backend
             //问题类型统计
             $step = array_merge(config('workorder.step'));
             //求出默认的问题类型，饼图2右边展示的东东
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
             $customer_problem_list  = config('workorder.customer_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                    $customer_arr[] = $customer_problem_list[$v];  
             }
             //提交过后的平台数值
             //$this->view->assign('platformNew',$platform);
@@ -1549,26 +1558,31 @@ class CustomerService extends Backend
             //问题类型统计
             $step = array_merge(config('workorder.step'));
             //求出默认的问题类型，饼图2右边展示的东东
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                    $customer_arr[] = $customer_problem_list[$v];
             }
             $this->view->assign(compact('data', 'problem_type_total', 'step_total', 'problem_form_total', 'step_four_total', 'problem_data', 'step_data', 'step', 'customer_arr'));
         }
 
         //第四个饼图二级tab联动默认的二级数据 start
-        $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+
+        $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
+        //客服问题列表
         $customer_problem_list  = config('workorder.customer_problem_type');
+        //仓库问题列表
+        $warehouse_problem_list = config('workorder.warehouse_problem_type');
         //循环数组根据id获取客服问题类型
         $column = [];
         foreach ($customer_problem_arr as $k => $v) {
-            $column[$v] = $customer_problem_list[$v];
+                $column[$v] = $customer_problem_list[$v];
         }
         //第四个饼图二级tab联动默认的二级数据 end
         //第二张和第四张tab默认显示数据 start
-        $customer_problem_classify = config('workorder.customer_problem_classify');
+        $customer_problem_classify = config('workorder.new_customer_problem_classify');
         $problem_type = array_keys($customer_problem_classify);
         //第二张和第四张tab默认显示数据 end
         $orderPlatformList = config('workorder.platform');
@@ -1598,12 +1612,20 @@ class CustomerService extends Backend
             //问题类型统计
             $problem_data = $this->get_problem_type_data($order_platform, $map, $value);
             //问题类型数组
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             //循环数组根据id获取客服问题类型
             $column = $columnData = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $column[] = $customer_problem_list[$v];
+                if($value<=4){
+                    $column[] = $customer_problem_list[$v];
+                }else{
+                    $column[] = $warehouse_problem_list[$v];
+                }
+                
             }
             foreach ($column as $ck => $cv) {
                 $columnData[$ck]['name'] = $cv;
@@ -1634,8 +1656,9 @@ class CustomerService extends Backend
             }
             $value = $params['value'];
             $order_platform = $params['platform'];
+            $problem = $params['problem'];
             //问题类型统计
-            $data = $this->get_problem_step_data($order_platform, $map, $value);
+            $data = $this->get_problem_step_data($order_platform, $map, $value,$problem);
             //问题类型数组
             $step = config('workorder.step');
             $column = array_merge($step);
@@ -1662,12 +1685,20 @@ class CustomerService extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $value = $params['value'];
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题类型
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             //循环数组根据id获取客服问题类型
             $column = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $column[$v] = $customer_problem_list[$v];
+                if($value<=4){
+                    $column[$v] = $customer_problem_list[$v];
+                }else{
+                    $column[$v] = $warehouse_problem_list[$v];
+                }
+                
             }
             $this->success('', '', $column);
         }
@@ -1687,19 +1718,25 @@ class CustomerService extends Backend
             return $arr;
         }
         if ($platform<10) {
-            $where['work_platform'] = $platform;
+            $where['work_platform'] = $warehouse['work_platform']= $platform;
         }
         $where['work_type'] = 1;
+        $warehouse['work_type'] = 2;
         //订单修改数组
         //$changeOrderArr = config('workorder.customer_problem_classify_arr')[1];
         //
         //问题总数组
-        $problem_arr = config('workorder.customer_problem_classify_arr');
+        $problem_arr = config('workorder.new_customer_problem_classify_arr');
         //问题结果
         $result = [];
-        foreach ($problem_arr as $v) {
+        foreach ($problem_arr as $k=> $v) {
             //问题大分类的统计
-            $result['problem_type'][] = $this->model->where($where)->where($map)->where('problem_type_id', 'in', $v)->count('id');
+            if($k<=4){
+                $result['problem_type'][] = $this->model->where($where)->where($map)->where('problem_type_id', 'in', $v)->count('id');
+            }else{
+                $result['problem_type'][] = $this->model->where($warehouse)->where($map)->count('id');
+            }
+            
         }
         //所有完成的work_id
         $all_work_id = $this->model->where($where)->where($map)->column('id');
@@ -1727,16 +1764,22 @@ class CustomerService extends Backend
             return $arr;
         }
         if ($platform<10) {
-            $where['work_platform'] = $platform;
+            $where['work_platform'] = $warehouse['work_platform'] = $platform;
         }
         $where['work_type'] = 1;
+        $warehouse['work_type'] = 2;
         //所有的问题组
-        $problem_arr = config('workorder.customer_problem_classify_arr');
+        $problem_arr = config('workorder.new_customer_problem_classify_arr');
         //当前的问题组
         $current_problem_arr = $problem_arr[$problem_type];
         $result = [];
         foreach ($current_problem_arr as $k =>$v) {
-            $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id', $v)->count('id');
+            if($problem_type <= 4){
+                $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id', $v)->count('id');
+            }else{
+                $result[$k] = $this->model->where($warehouse)->where($map)->where('problem_type_id', $v)->count('id');
+            }
+            
         }
         Cache::set('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)), $result, 7200);
         return $result;
@@ -1751,18 +1794,24 @@ class CustomerService extends Backend
      * @param [type] $map
      * @param [type] $problem_type
      * @param [type] $step_id
+     * @param [type] $problem 是否是仓库问题  5 是 其他不是 默认 1
      * @return void
      */
-    public function get_problem_step_data($platform, $map, $problem_id)
+    public function get_problem_step_data($platform, $map, $problem_id,$problem=1)
     {
-        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)));
+        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)));
         if ($arr) {
             return $arr;
         }
         if ($platform<10) {
             $where['work_platform'] = $platform;
         }
-        $where['work_type'] = 1;
+        if($problem!=5){
+            $where['work_type'] = 1;
+        }else{
+            $where['work_type'] = 2;
+        }
+        
         $result = $info = [];
         $result = $this->model->where($where)->where($map)->where('problem_type_id', $problem_id)->column('id');
         $where_step['operation_type'] = 1;
@@ -1770,7 +1819,7 @@ class CustomerService extends Backend
         foreach ($step_arr as $k =>$v) {
             $info['step'][]  = $this->step->where($where_step)->where('work_id', 'in', $result)->where('measure_choose_id', $k)->count('id');
         }
-        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)), $info, 7200);
+        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)), $info, 7200);
         return $info;
     }
     /**
@@ -1798,11 +1847,19 @@ class CustomerService extends Backend
             foreach ($problem_data as $dv) {
                 $problem_form_total +=$dv;
             }
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                if($value<=4){
+                    $customer_arr[] = $customer_problem_list[$v];
+                }else{
+                    $customer_arr[] = $warehouse_problem_list[$v];
+                }
+                
             }
             $data['problem_data'] =  $problem_data;
             $data['problem_form_total'] =  $problem_form_total;
@@ -1830,7 +1887,8 @@ class CustomerService extends Backend
             }
             $order_platform = $params['platform'];
             $value          = $params['value'];
-            $step_data = $this->get_problem_step_data($order_platform, $map, $value);
+            $problem        = $params['problem'];
+            $step_data = $this->get_problem_step_data($order_platform, $map, $value,$problem);
             $step_four_total = 0;
             //求出措施总数据
             foreach ($step_data['step'] as $tv) {

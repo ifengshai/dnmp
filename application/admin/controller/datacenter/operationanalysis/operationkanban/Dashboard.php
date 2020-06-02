@@ -404,4 +404,52 @@ class Dashboard extends Backend
         Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)), $arr, 7200);
         return $arr;
     }
+    /**
+     * 对应的zeelool权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:38:25 
+     * @return void
+     */
+    public function zeelool_index()
+    {
+
+    }
+    /**
+     * 对应的voogueme权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:39:19 
+     * @return void
+     */
+    public function voogueme_index()
+    {
+
+    }
+    /**
+     * 对应的nihao权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:40:10 
+     * @return void
+     */
+    public function nihao_index()
+    {
+
+    }
+    /**
+     * 对应的meeloog权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:41:01 
+     * @return void
+     */
+    public function meeloog_index()
+    {
+
+    }
 }
