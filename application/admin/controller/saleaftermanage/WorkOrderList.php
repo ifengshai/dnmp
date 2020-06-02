@@ -1334,6 +1334,7 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
+		    
         $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -1403,8 +1404,13 @@ class WorkOrderList extends Backend
         if (!empty($row->problem_type_id)) {
             $this->assignconfig('problem_type_id', $row->problem_type_id);
         }
-
-        //求出工单选择的措施传递到js页面
+		//$ids = 520;
+		$workOrderNote = WorkOrderNote::where('work_id', $ids)->select(); //回复内容
+        $this->view->assign('workOrderNote', $workOrderNote);
+		
+		
+		
+		//求出工单选择的措施传递到js页面
         $measureList = WorkOrderMeasure::workMeasureList($row->id);
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
@@ -1425,15 +1431,15 @@ class WorkOrderList extends Backend
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
-        //查询工单处理备注
+		
+		//查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
         //获取处理的措施
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
         $this->view->assign('recepts', $recepts);
 
         $this->view->assign('remarkList', $remarkList);
-        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
-        $this->view->assign('workOrderNote', $workOrderNote);
+       
         return $this->view->fetch();
     }
 
