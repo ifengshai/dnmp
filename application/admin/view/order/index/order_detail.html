@@ -127,25 +127,28 @@
 		</div>
 
 		<p class="track-title">物流信息</p>
-		<ul class="track-nav">
+		<ul class="track-nav">				
 			<li {in name="2" value="$key_list" } class="on" {/in}><span>已打印标签</span></li>
-			<li {in name="3" value="$key_list" } class="on" {/in}><span>已配镜架</span></li>
+			<li {in name="3" value="$key_list" } class="on" {/in}><span>已配镜架</span></li>			
 			<?php if(in_array(4,$key_list)){ ?>
 			<li class="on" ><span>已配镜片</span></li>
-			<?php }elseif(!in_array(6,$key_list)){ ?>
+			<?php }elseif(!in_array(6,$key_list)){ ?> 
 			<li><span>已配镜片</span></li>
 			<?php } ?>
+
 			<?php if(in_array(5,$key_list)){ ?>
 			<li class="on" ><span>已加工</span></li>
 			<?php }elseif(!in_array(6,$key_list)){ ?>
 			<li><span>已加工</span></li>
-			<?php } ?> 	
+			<?php } ?> 
+			
 			<li {in name="6" value="$key_list" } class="on" {/in}><span>已成品质检</span></li>
 			<li {in name="7" value="$key_list" } class="on" {/in}><span>已出库</span></li>
 			<li {in name="8" value="$key_list" } class="on" {/in}><span>上网</span></li>
-			<li {in name="9" value="$key_list" } class="on" {/in}><span>已脚航</span></li>
+			<li {in name="9" value="$key_list" } class="on" {/in}><span>已交航</span></li>
 			<li {in name="10" value="$key_list" } class="on" {/in}><span>运输途中</span></li>
 			<li {in name="11" value="$key_list" } class="on" {/in}><span>到达目的国</span></li>
+			
 			<?php if(in_array(30,$key_list)){ ?>
 			<li  class="on" ><span>到达待取</span></li>	
 			<?php }elseif(in_array(35,$key_list)){ ?>					
@@ -157,28 +160,9 @@
 			<?php }else{ ?>
 			<li><span>投递成功</span></li>
 			<?php } ?>		
+		
 		</ul>
 		<ul class="track-infor">
-			<li {in name="2" value="$key_list" } class="on" {/in}><span>{in name="2" value="$key_list" } {$list[2]} {/in}</span>已打印标签</li>  
-			<li {in name="3" value="$key_list" } class="on" {/in}><span>{in name="3" value="$key_list" } {$list[3]} {/in}</span>已配镜架</li>			
-			
-			<?php if(in_array(4,$key_list)){ ?>
-			<li class="on"><span>{$list[4]}</span>已配镜片</li>
-			<?php }elseif(!in_array(6,$key_list)){ ?>
-			<li><span></span>已配镜片</li>
-			<?php } ?>			
-			
-			<?php if(in_array(5,$key_list)){ ?>
-			<li class="on"><span>{$list[5]}</span>已加工</li>
-			<?php }elseif(!in_array(6,$key_list)){ ?>
-			<li><span></span>已加工</li>
-			<?php } ?> 					
-			<li {in name="6" value="$key_list" } class="on" {/in}><span>{in name="6" value="$key_list" } {$list[6]} {/in}</span>已成品质检</li>
-			<li {in name="7" value="$key_list" } class="on" {/in}><span>{in name="7" value="$key_list" } {$list[7]} {/in}</span>已出库</li>
-			<li {in name="8" value="$key_list" } class="on" {/in}><span>{in name="8" value="$key_list" } {$list[8]} {/in}</span>上网</li>
-			<li {in name="9" value="$key_list" } class="on" {/in}><span>{in name="9" value="$key_list" } {$list[9]} {/in}</span>已脚航</li>
-			<li {in name="10" value="$key_list" } class="on" {/in}><span>{in name="10" value="$key_list" } {$list[10]} {/in}</span>运输途中</li>
-			<li {in name="11" value="$key_list" } class="on" {/in}><span>{in name="11" value="$key_list" } {$list[11]} {/in}</span>到达目的国</li>
 			<?php if(in_array(30,$key_list)){ ?>
 			<li  class="on" ><span>{$list[30]}</span>到达待取</li>	
 			<?php }elseif(in_array(35,$key_list)){ ?>					
@@ -187,10 +171,24 @@
 			<li  class="on" ><span>{$list[40]}</span>投递成功</li>
 			<?php }elseif(in_array(50,$key_list)){ ?>						
 			<li  class="on" ><span>{$list[50]}</span>可能异常</li>
-			<?php }else{ ?>
-			<li><span></span>投递成功</li>
-			<?php } ?>
+			<?php }else{ ?>			
+			<?php } ?>			
+			{in name="11" value="$key_list" }<li  class="on" ><span>{$list[11]}</span>到达目的国</li>{/in}						
+			{in name="10" value="$key_list" }<li class="on" ><span>{$list[10]} </span>运输途中</li>{/in}						
+			{in name="9" value="$key_list" }<li class="on" ><span>{$list[9]}</span>已交航</li>{/in}					
+			{in name="8" value="$key_list" }<li class="on"> <span>{$list[8]}</span>上网</li>{/in}
+			{in name="7" value="$key_list" }<li class="on"><span>{$list[7]}</span>已出库</li>{/in}
+			{in name="6" value="$key_list" }<li class="on"><span>{$list[6]}</span>已成品质检</li>{/in}
+			<?php if(in_array(4,$key_list)){ ?>
+			<li class="on"><span>{$list[4]}</span>已配镜片</li>			
+			<?php } ?>			
 			
-		
+			<?php if(in_array(5,$key_list)){ ?>
+			<li class="on"><span>{$list[5]}</span>已加工</li>			
+			<?php } ?> 
+			{in name="3" value="$key_list" }<li class="on"><span>{$list[3]}</span>已配镜架</li>{/in}
+			{in name="2" value="$key_list" }<li class="on"><span>{$list[2]}</span>已打印标签</li>{/in}
+			{in name="1" value="$key_list" }<li class="on"><span>{$list[1]}</span>已支付</li>{/in}
+			{in name="0" value="$key_list" }<li class="on"><span>{$list[0]}</span>已提交订单</li>{/in}
 		</ul>
 
