@@ -1421,7 +1421,7 @@ class WorkOrderList extends Backend
 		
 		
 		//求出工单选择的措施传递到js页面
-        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);  
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
