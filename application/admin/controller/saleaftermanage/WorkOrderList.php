@@ -280,7 +280,7 @@ class WorkOrderList extends Backend
                     if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
                     }
-                    
+
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     $warehouseArr = config('workorder.warehouse_department_rule');
@@ -2269,12 +2269,9 @@ EOF;
                 case 5:
                     $value['work_status'] = '部分处理';
                     break;
-<<<<<<< Updated upstream
-=======
                 case 0:
                     $value['work_status'] = '已取消';
                     break;
->>>>>>> Stashed changes
                 default:
                     $value['work_status'] = '已处理';
                     break;
