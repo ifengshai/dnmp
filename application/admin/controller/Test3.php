@@ -27,6 +27,7 @@ class Test3 extends Backend{
      */
     public function export_order_node(){
         set_time_limit(0);
+        ini_set('memory_limit', '512M');
         //查询物流结点
         $where['d.order_node'] = 3;
         $where['d.node_type'] = 8;
