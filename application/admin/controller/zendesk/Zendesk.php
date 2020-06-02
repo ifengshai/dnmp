@@ -987,4 +987,28 @@ DOC;
             echo $ticketId."\r\n";
         }
     }
+
+    /**
+     * https断掉的数据更新
+     * @return [type] [description]
+     */
+    public function asyncTicketHttps()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        
+        //求交集的更新
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+        foreach($intersects as $intersect){
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+        }
+        //新增
+        foreach($diffs as $diff){
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+        }        
+    }
 }
