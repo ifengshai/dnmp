@@ -27,6 +27,58 @@ class AuthGroupAccess extends Model
         //     $info = $this->where('id','in',$arr_group)->field('id,rules')->select();
         //     $info = 
         // }
-        //$result = $this->alias('')
+        $result = $this->alias('a')->where(['a.uid'=>113])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
+        if($result){
+            $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 0;
+            $result = collection($result)->toArray();
+            foreach($result as $k =>$v){
+                if($v['rules']){
+                    $rulesArr = explode(',',$v['rules']);
+                     //zeelool权限
+                    if(in_array(839,$rulesArr)){
+                        $zeelool_privilege = 1;
+                     //voogueme权限   
+                    }elseif(in_array(840,$rulesArr)){
+                        $voogueme_privilege = 1;
+                    }elseif(in_array(841,$rulesArr)){
+                        $nihao_privilege = 1;
+                    }elseif(in_array(842,$rulesArr)){
+                        $meeloog_privilege = 1;
+                    }
+                }
+            }
+                $privilege = 0;
+            if($zeelool_privilege ==1 && $voogueme_privilege==0 && $nihao_privilege == 0 && $meeloog_privilege == 0){
+                //只有zeelool的权限
+                $privilege = 1;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==1 && $nihao_privilege == 0 && $meeloog_privilege == 0){
+                //只有voogueme权限
+                $privilege = 2;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==0 && $nihao_privilege == 1 && $meeloog_privilege == 0){
+                //只有nihao权限
+                $privilege = 3;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==0 && $nihao_privilege == 0 && $meeloog_privilege == 1){
+                //只有meeloog权限
+                $privilege = 4;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==1 && $nihao_privilege == 0 && $meeloog_privilege == 0){
+                //只有zeelool和voogueme权限
+                $privilege = 5;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==0 && $nihao_privilege == 1 && $meeloog_privilege == 0){
+                //只有zeelool和nihao权限
+                $privilege = 6;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==0 && $nihao_privilege == 0 && $meeloog_privilege == 1){
+                //只有zeelool和meeloog权限
+                $privilege = 7;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==1 && $nihao_privilege == 1 && $meeloog_privilege == 0){
+                //只有voogueme和nihao权限
+                $privilege = 8;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==1 && $nihao_privilege == 0 && $meeloog_privilege == 1){
+                //只有voogueme和meeloog权限
+                $privilege = 9;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==0 && $nihao_privilege == 1 && $meeloog_privilege == 1){
+                //只有nihao和meeloog权限
+                $privilege = 10;
+            }
+        }
     }
 }

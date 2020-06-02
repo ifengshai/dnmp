@@ -105,22 +105,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     $('#today_pending_num').text(today.pending_num);
 
                     $('#yesterday_wait_num').text(yesterday.wait_num);
-                    $('#yesterday_increment_num').text(yesterday.wait_num);
-                    $('#yesterday_reply_num').text(yesterday.wait_num);
-                    $('#yesterday_waiting_num').text(yesterday.wait_num);
-                    $('#yesterday_pending_num').text(yesterday.wait_num);
+                    $('#yesterday_increment_num').text(yesterday.increment_num);
+                    $('#yesterday_reply_num').text(yesterday.reply_num);
+                    $('#yesterday_waiting_num').text(yesterday.waiting_num);
+                    $('#yesterday_pending_num').text(yesterday.pending_num);
 
                     $('#serven_wait_num').text(serven.wait_num);
-                    $('#serven_increment_num').text(serven.wait_num);
-                    $('#serven_reply_num').text(serven.wait_num);
-                    $('#serven_waiting_num').text(serven.wait_num);
-                    $('#serven_pending_num').text(serven.wait_num);
+                    $('#serven_increment_num').text(serven.increment_num);
+                    $('#serven_reply_num').text(serven.reply_num);
+                    $('#serven_waiting_num').text(serven.waiting_num);
+                    $('#serven_pending_num').text(serven.pending_num);
 
                     $('#third_wait_num').text(third.wait_num);
-                    $('#third_increment_num').text(third.wait_num);
-                    $('#third_reply_num').text(third.wait_num);
-                    $('#third_waiting_num').text(third.wait_num);
-                    $('#third_pending_num').text(third.wait_num);
+                    $('#third_increment_num').text(third.increment_num);
+                    $('#third_reply_num').text(third.reply_num);
+                    $('#third_waiting_num').text(third.waiting_num);
+                    $('#third_pending_num').text(third.pending_num);
                     var tr = '<tr id="new_tr">';
                         tr += '<td style="text-align: center; vertical-align: middle;">'+starttime+':'+endtime+'</td>';
                         tr += '<td style="text-align: center; vertical-align: middle;">'+info.wait_num+'</td>';

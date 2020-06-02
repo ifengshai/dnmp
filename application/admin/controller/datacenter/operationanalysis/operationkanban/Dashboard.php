@@ -8,7 +8,7 @@ use think\Db;
 use think\Exception;
 use app\admin\model\platformmanage\MagentoPlatform;
 use think\Cache;
-
+use app\admin\model\AuthGroupAccess;
 class Dashboard extends Backend
 {
     protected $model = null;
@@ -451,5 +451,10 @@ class Dashboard extends Backend
     public function meeloog_index()
     {
 
+    }
+    public function ceshi(){
+        $user_id = session('admin.id');
+        $result = (new AuthGroupAccess())->getUserPrivilege($user_id);
+        dump($result);
     }
 }
