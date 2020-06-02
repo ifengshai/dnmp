@@ -1351,6 +1351,7 @@ class PurchaseOrder extends Backend
     {
         //设置过滤方法
         //$this->relationSearch = true;
+        $this->relationSearch = true;
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -1359,15 +1360,16 @@ class PurchaseOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $whereCondition['purchase_status'] = ['egt', 2];
+            $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             $total = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
@@ -1375,18 +1377,19 @@ class PurchaseOrder extends Backend
                 ->select();
             //查询总共的ID    
             $totalId = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
+                ->where($whereTotalId)
                 ->where($where)
-                ->column('id');
+                ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->column('id');
+                ->column('purchase_order.id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
             $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId, $thisPageId);
