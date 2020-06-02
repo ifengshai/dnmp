@@ -226,7 +226,7 @@ class Index extends Backend
 		$order_number = $order_number ?? $this->request->get('order_number');
         //$order_number = 100077570;
         //查询订单详情		
-        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq',$order_number],'order_node'=>['neq',0]])->order('node_type asc')->column('node_type,create_time'))->toArray();
+        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq',$order_number]])->order('node_type asc')->column('node_type,create_time'))->toArray();
 		
 		$key_list = array_keys($ruleList);
 		
