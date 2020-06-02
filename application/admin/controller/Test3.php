@@ -56,9 +56,9 @@ class Test3 extends Backend{
             $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
             if($endtime){
                 $arr[$i]['complete_time'] = $endtime;
-                $hour=floor((strtotime($endtime)-strtotime($item['create_time']))%86400/3600);
-                $hour_num = $hour%24;
-                $arr[$i]['day'] = floor($hour/24).'天'.$hour_num.'个小时';
+                $time=floor((strtotime($endtime)-strtotime($item['create_time']))/3600);
+                $hour_num = $time%24;
+                $arr[$i]['day'] = floor($time/24).'天'.$hour_num.'个小时';
             }else{
                 $arr[$i]['complete_time'] = '';
                 $arr[$i]['day'] = 0;
