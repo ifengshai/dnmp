@@ -43,9 +43,9 @@ class ItDemandReport extends Backend
             $web_type = input('web_type');
             if($web_type == 'web'){
                 //网站组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
-                $task_month = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->sum('type')*10;//本月
-                $task_month_01 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->sum('type')*10;
-                $task_month_02 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->sum('type')*10;
+                $task_month = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10;//本月
+                $task_month_01 = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10;
+                $task_month_02 = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10;
                 //网站组--目标--end
 
                 //网站组--BUG(普通：1个,小概率：2个)--start
@@ -86,9 +86,9 @@ class ItDemandReport extends Backend
                 //合计--end
             }else{
                 //开发组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
-                $task_month = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->sum('type')*10;//本月
-                $task_month_01 = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->sum('type')*10;
-                $task_month_02 = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->sum('type')*10;
+                $task_month = $this->developWebTaskItem->alias('ti')->join('fa_develop_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10;//本月
+                $task_month_01 = $this->developWebTaskItem->alias('ti')->join('fa_develop_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10;
+                $task_month_02 = $this->developWebTaskItem->alias('ti')->join('fa_develop_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10;
                 //开发组--目标--end
 
                 //开发组--BUG(普通：1个)--start
@@ -279,7 +279,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -327,7 +327,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -373,7 +373,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -412,7 +412,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
