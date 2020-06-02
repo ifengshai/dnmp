@@ -280,12 +280,21 @@ class WorkOrderList extends Backend
                     if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
                     }
-
-                    //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
-                        throw new Exception("措施不能为空");
+                    
+                    $userId = session('admin.id');
+                    $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+                    $warehouseArr = config('workorder.warehouse_department_rule');
+                    $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+                    if (!empty($checkIsWarehouse)) {
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    } else {
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
                     }
-
+                  
                     //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
@@ -330,11 +339,10 @@ class WorkOrderList extends Backend
                     }
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
-                        unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id']) {
-                            throw new Exception("补差价订单号不能为空");
+                        if (!$params['replenish_money']) {
+                            throw new Exception("补差价金额不能为空");
                         }
                     }
 
@@ -788,11 +796,10 @@ class WorkOrderList extends Backend
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
-                        unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id']) {
-                            throw new Exception("补差价订单号不能为空");
+                        if (!$params['replenish_money']) {
+                            throw new Exception("补差价金额不能为空");
                         }
                     }
 
@@ -1429,6 +1436,16 @@ class WorkOrderList extends Backend
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
         $this->view->assign('recepts', $recepts);
 
+        //判断站点
+        if ($row['work_platform'] == 1 && $row['replenish_money']) {
+            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' .$row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
+            $url = config('url.new_voogueme_url') . 'price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
+            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        }
+     
+        $this->view->assign('url',$url);
         $this->view->assign('remarkList', $remarkList);
         $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
         $this->view->assign('workOrderNote', $workOrderNote);
@@ -2252,6 +2269,12 @@ EOF;
                 case 5:
                     $value['work_status'] = '部分处理';
                     break;
+<<<<<<< Updated upstream
+=======
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;
+>>>>>>> Stashed changes
                 default:
                     $value['work_status'] = '已处理';
                     break;
