@@ -99,7 +99,9 @@ table.altrowstable tr:nth-child(even){
 												{foreach name="orderPlatformList" item="vo"}
                                                 <option value="{$key}">{$vo}</option>
                                                 {/foreach}
-												<option value="10">全部</option>
+                                                {if isset($result) && $result == 15}
+                                                <option value="10">全部</option>
+                                                {/if}
                                             </select>
                                         </div>
                                     </div>
@@ -398,6 +400,7 @@ table.altrowstable tr:nth-child(even){
                         <th style="text-align: center; vertical-align: middle;">客单价（$）</th>
                     </tr>
                     </thead>
+                        {if isset($arr) && in_array(1,$arr)}
                          <tr>
                              <td style="text-align: center; vertical-align: middle;">1</td>
                              <td style="text-align: center; vertical-align: middle;">zeelool</td>
@@ -421,7 +424,9 @@ table.altrowstable tr:nth-child(even){
                             <td id='zeelool_app_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_money}</td>
                             <td id='zeelool_app_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_num}</td>
                             <td id='zeelool_app_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_unit_price}</td>
-                        </tr> 
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(2,$arr)} 
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">4</td>
                             <td style="text-align: center; vertical-align: middle;">voogueme</td>
@@ -437,7 +442,9 @@ table.altrowstable tr:nth-child(even){
                             <td id='voogueme_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_sales_money}</td>
                             <td id='voogueme_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_sales_num}</td>
                             <td id='voogueme_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_unit_price}</td>
-                        </tr> 
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(3,$arr)} 
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">6</td>
                             <td style="text-align: center; vertical-align: middle;">nihao</td>
@@ -454,6 +461,8 @@ table.altrowstable tr:nth-child(even){
                             <td id='nihao_wap_sales_num'       style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_sales_num}</td>
                             <td id='nihao_wap_unit_price'      style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_unit_price}</td>
                         </tr>
+                        {/if}
+                        {if isset($arr) && in_array(4,$arr)}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">8</td>
                             <td style="text-align: center; vertical-align: middle;">meeloog</td>
@@ -469,7 +478,8 @@ table.altrowstable tr:nth-child(even){
                             <td id='meeloog_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_money}</td>
                             <td id='meeloog_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_num}</td>
                             <td id='meeloog_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_unit_price}</td>
-                        </tr>                                                                                                                                                                            							 
+                        </tr>
+                        {/if}                                                                                                                                                                            							 
                 </table>
             </div>
         </div>        		
