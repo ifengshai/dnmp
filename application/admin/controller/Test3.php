@@ -31,8 +31,10 @@ class Test3 extends Backend{
         //查询物流结点
         $where['d.order_node'] = 3;
         $where['d.node_type'] = 8;
+        $where['d.order_id'] = 300909;
         $where['d.create_time'] = ['between', ['2020-05-01', '2020-05-10']];
         $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.node_type,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
+        dump($order);exit;
         $arr = array();
         $i = 0;
         foreach($order as $key=>$item){
@@ -44,7 +46,7 @@ class Test3 extends Backend{
             //查询是否有最终状态时间
             $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
             if($endtime){
-                $arr[$i]['complete_time'] = $item['create_time'];
+                $arr[$i]['complete_time'] = $endtime;
                 $hour=floor((strtotime($endtime)-strtotime($item['create_time']))%86400/3600);
                 $hour_num = $hour%24;
                 $arr[$i]['day'] = floor($hour/24).'天'.$hour_num.'个小时';
