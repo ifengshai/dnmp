@@ -30,11 +30,10 @@ class Test3 extends Backend{
         //查询物流结点
         $where['d.order_node'] = 3;
         $where['d.node_type'] = 8;
-        $where['d.create_time'] = ['between', ['2020-05-01', '2020-05-31']];
+        $where['d.create_time'] = ['between', ['2020-05-01', '2020-05-10']];
         $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.node_type,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
         $arr = array();
         $i = 0;
-        $file_content = '';
         foreach($order as $key=>$item){
             $arr[$i]['order_id'] = $item['order_id'];
             $arr[$i]['shipment_type'] = $item['shipment_type'];
@@ -42,7 +41,6 @@ class Test3 extends Backend{
             $arr[$i]['node_type'] = $item['node_type'];
             $arr[$i]['create_time'] = $item['create_time'];
             //查询是否有最终状态时间
-            $where_detail['order_node'] = 4;
             $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
             if($endtime){
                 $arr[$i]['complete_time'] = $item['create_time'];
