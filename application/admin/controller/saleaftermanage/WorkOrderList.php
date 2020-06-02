@@ -750,8 +750,18 @@ class WorkOrderList extends Backend
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
 
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1  && $params['status'] == 2) {
-                        throw new Exception("措施不能为空");
+                    $userId = session('admin.id');
+                    $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+                    $warehouseArr = config('workorder.warehouse_department_rule');
+                    $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+                    if(!empty($checkIsWarehouse)){
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    }else{
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }                        
                     }
 
                     //更换镜框判断是否有库存

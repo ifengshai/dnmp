@@ -27,26 +27,34 @@ class AuthGroupAccess extends Model
         //     $info = $this->where('id','in',$arr_group)->field('id,rules')->select();
         //     $info = 
         // }
-        $result = $this->alias('a')->where(['a.uid'=>113])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
+        $result = $this->alias('a')->where(['a.uid'=>$user_id])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
         if($result){
             $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 0;
             $result = collection($result)->toArray();
-            foreach($result as $k =>$v){
-                if($v['rules']){
+            foreach($result as $v){
+                if($v['rules'] == '*'){
+                    $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 1; 
+                }elseif(!empty($v['rules']) && ($v['rules']!='*')){
                     $rulesArr = explode(',',$v['rules']);
                      //zeelool权限
-                    if(in_array(839,$rulesArr)){
-                        $zeelool_privilege = 1;
-                     //voogueme权限   
-                    }elseif(in_array(840,$rulesArr)){
+                    if(in_array(846,$rulesArr)){
+                        $zeelool_privilege = 1;    
+                    }
+                    //voogueme权限
+                    if(in_array(847,$rulesArr)){
                         $voogueme_privilege = 1;
-                    }elseif(in_array(841,$rulesArr)){
+                    }
+                    //nihao权限
+                    if(in_array(848,$rulesArr)){
                         $nihao_privilege = 1;
-                    }elseif(in_array(842,$rulesArr)){
+                    }
+                    //meeloog权限
+                    if(in_array(849,$rulesArr)){
                         $meeloog_privilege = 1;
                     }
                 }
             }
+                //都没有权限
                 $privilege = 0;
             if($zeelool_privilege ==1 && $voogueme_privilege==0 && $nihao_privilege == 0 && $meeloog_privilege == 0){
                 //只有zeelool的权限
@@ -78,7 +86,26 @@ class AuthGroupAccess extends Model
             }elseif($zeelool_privilege ==0 && $voogueme_privilege==0 && $nihao_privilege == 1 && $meeloog_privilege == 1){
                 //只有nihao和meeloog权限
                 $privilege = 10;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==1 && $nihao_privilege == 1 && $meeloog_privilege == 0){
+                //只有zeelool、voogueme、nihao的权限
+                $privilege = 11;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==1 && $nihao_privilege == 0 && $meeloog_privilege == 1){
+                //只有zeelool、voogueme、meeloog权限
+                $privilege = 12;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==0 && $nihao_privilege == 1 && $meeloog_privilege == 1){
+                //只有zeelool、nihao、meeloog权限
+                $privilege = 13;
+            }elseif($zeelool_privilege ==0 && $voogueme_privilege==1 && $nihao_privilege == 1 && $meeloog_privilege == 1){
+                //只有voogueme、nihao、meeloog权限
+                $privilege = 14;
+            }elseif($zeelool_privilege ==1 && $voogueme_privilege==1 && $nihao_privilege == 1 && $meeloog_privilege == 1){
+                //拥有所有的权限
+                $privilege = 15;
+            }else{
+                //都没有权限
+                $privilege = 0; 
             }
         }
+        return $privilege ?? 0;
     }
 }
