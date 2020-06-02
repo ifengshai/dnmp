@@ -279,7 +279,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -327,7 +327,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -373,7 +373,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -412,7 +412,7 @@ class ItDemandReport extends Backend
             $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
