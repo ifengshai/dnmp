@@ -31,17 +31,26 @@ class Test3 extends Backend{
         //查询物流结点
         $where['d.order_node'] = 3;
         $where['d.node_type'] = 8;
-        $where['d.order_id'] = 300909;
         $where['d.create_time'] = ['between', ['2020-05-01', '2020-05-10']];
-        $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.node_type,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
-        dump($order);exit;
+        $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.order_node,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
         $arr = array();
         $i = 0;
         foreach($order as $key=>$item){
             $arr[$i]['order_id'] = $item['order_id'];
             $arr[$i]['shipment_type'] = $item['shipment_type'];
             $arr[$i]['track_number'] = $item['track_number'];
-            $arr[$i]['node_type'] = $item['node_type'];
+            if($item['order_node'] == 0){
+                $order_node = '客户';
+            }elseif($item['order_node'] == 1){
+                $order_node = '等待加工';
+            }elseif($item['order_node'] == 2){
+                $order_node = '加工备货';
+            }elseif($item['order_node'] == 3){
+                $order_node = '快递物流';
+            }elseif($item['order_node'] == 4){
+                $order_node = '完成';
+            }
+            $arr[$i]['node_type'] = $order_node;
             $arr[$i]['create_time'] = $item['create_time'];
             //查询是否有最终状态时间
             $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
