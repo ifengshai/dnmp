@@ -628,22 +628,6 @@ function del_add_tr(key){
     $(".del_"+key).remove();
 }
 /**
- * 借出记录删除
- * @param {sku} sku 
- * @param {借出数量} lend_num 
- */
-function del_lend_tr(sku,lend_num){
-    $(".del_"+sku).remove();
-    var arr = $("#product_list_data").val().split(',');
-    var str = sku+'_'+lend_num;
-    var sku_arr = $("#sku_arr").val().split(',');    
-    sku_arr.splice($.inArray(sku, sku_arr),1)
-    arr.splice($.inArray(str, arr),1)
-    $("#sku_arr").val(sku_arr.join(','))
-    $("#product_list_data").val(arr.join(','))
-    
-}
-/**
  * 库位添加保存草稿
  */
 function save(){
