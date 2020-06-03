@@ -994,12 +994,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         return false;
                                     },
                                     visible: function (row) {
-                                        console.log(row);
+                                        console.log(row.refund_amount);
                                         //返回true时按钮显示,返回false隐藏
                                         // if ((row.purchase_status == 8) || (row.payment_status == 1) || (row.refund_amount == 0)) {
                                         //     return false;
                                         // }
-                                        if ((row.refund_amount <= 0) || (row.refund_amount == 'undefined')) {
+                                        if ((row.refund_amount <= 0) || (!row.refund_amount)) {
                                             return false;
                                         }                                        
                                         return true;
