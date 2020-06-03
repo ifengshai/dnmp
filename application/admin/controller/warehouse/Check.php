@@ -153,6 +153,8 @@ class Check extends Backend
                         $unqualified_images = $this->request->post("unqualified_images/a");
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
+                        $error_type = $this->request->post("error_type/a");
+                        $should_arrival_num = $this->request->post("should_arrival_num/a");
                         //新增采购单ID create@lsw
                         $purchase_id = $this->request->post("purchase_id/a");
                         $data = [];
@@ -177,6 +179,8 @@ class Check extends Backend
                             $data[$k]['unqualified_num'] = $unqualified_num[$k];
                             $data[$k]['quantity_rate'] = $quantity_rate[$k];
                             $data[$k]['check_id'] = $this->model->id;
+                            $data[$k]['error_type'] = $error_type[$k];
+                            $data[$k]['should_arrival_num'] = $should_arrival_num[$k];
                         }
                         //批量添加
                         $this->check_item->allowField(true)->saveAll($data);
@@ -291,6 +295,7 @@ class Check extends Backend
                         $item_id = $this->request->post("item_id/a");
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
+                        $error_type = $this->request->post("error_type/a");
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -306,6 +311,7 @@ class Check extends Backend
                             $data[$k]['unqualified_images'] = $unqualified_images[$k];
                             $data[$k]['unqualified_num'] = $unqualified_num[$k];
                             $data[$k]['quantity_rate'] = $quantity_rate[$k];
+                            $data[$k]['error_type'] = $error_type[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
                             } else {
@@ -537,56 +543,42 @@ class Check extends Backend
      */
     public function setStatus()
     {
-        $ids = $this->request->post("ids/a");
+        $ids = $this->request->post("ids");
         if (!$ids) {
             $this->error('缺少参数！！');
         }
-        $map['id'] = ['in', $ids];
-        $row = $this->model->where($map)->select();
-
-        foreach ($row as $v) {
-            if ($v['status'] !== 1) {
-                $this->error('只有待审核状态才能操作！！');
-            }
+        $row = $this->model->get($ids);
+        if ($row['status'] !== 1) {
+            $this->error('只有待审核状态才能操作！！');
         }
         $data['status'] = input('status');
-        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        $res = $this->model->allowField(true)->isUpdate(true, ['id' => $ids])->save($data);
 
         if ($res) {
+            $logisticsinfo = new \app\admin\model\warehouse\LogisticsInfo;
             if ($data['status'] == 2) {
+                //标记物流单检索为已创建质检单
+                $logisticsinfo->save(['is_check_order' => 1], ['id' => $row['logistics_id']]);
 
-                //查询对应采购单总采购数量 以及总到货数量
-                foreach ($row as $k => $v) {
-                    //采购质检
-                    if ($v['purchase_id']) {
-                        //查询质检信息
-                        $check_map['Check.purchase_id'] = $v['purchase_id'];
-                        $check_map['type'] = 1;
-                        $check = new \app\admin\model\warehouse\Check;
-                        //总到货数量
-                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
-
-                        //查询总采购数量
-                        $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
-                        $all_purchase_num = $purchaseItem->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
-
-                        //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
-                        if ($all_arrivals_num < $all_purchase_num) {
-                            $check_status = 1;
-                        } else {
-                            $check_status = 2;
-                        }
-                        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-                        //修改采购单质检状态
-                        $purchase_data['check_status'] = $check_status;
-                        $purchase->where(['id' => $v['purchase_id']])->update($purchase_data);
+                //查询物流信息表对应采购单下数据是否全部质检完毕
+                if ($row['purchase_id']) {
+                    //查询质检信息
+                    $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
+                    if ($count > 0) {
+                        $check_status = 1;
+                    } else {
+                        $check_status = 2;
                     }
+                    $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                    //修改采购单质检状态
+                    $purchase_data['check_status'] = $check_status;
+                    $purchase->where(['id' => $row['purchase_id']])->update($purchase_data);
                 }
 
                 //查询明细表有样品的数据
                 $checkItem = new \app\admin\model\warehouse\CheckItem();
                 $sampleworkorder = new \app\admin\model\purchase\SampleWorkorder();
-                $list = $checkItem->where(['check_id' => ['in', $ids], 'sample_num' => ['>', 0]])->select();
+                $list = $checkItem->where(['check_id' => $ids, 'sample_num' => ['>', 0]])->select();
                 if ($list) {
                     $location_number = 'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     //生成入库主表数据
@@ -603,6 +595,48 @@ class Check extends Backend
                         $workorder_item[$k]['stock'] = $v['sample_num'];
                     }
                     Db::name('purchase_sample_workorder_item')->insertAll($workorder_item);
+                }
+
+                //生成收货异常数据
+                //判断此批次是否全部质检完成 或者此采购单全部质检完成
+                if ($row['batch_id']) {
+                    $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'],'batch_id' => $row['batch_id'], 'is_check_order' => 0])->count();
+                } else {
+                    $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
+                }
+            
+                //全部质检完成则查询是否有异常单
+                if ($count <= 0) {
+                    $map[] = ['exp', Db::raw("a.is_error = 1 or b.error_type > 0")];
+                    $result = $this->model->alias('a')->where(['a.batch_id' => $row['batch_id']])->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->select();
+                    if ($result) {
+                        $list = [];
+                        $list['error_number'] = 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                        $list['supplier_id'] = $row['supplier_id'];
+                        $list['purchase_id'] = $row['purchase_id'];
+                        $list['batch_id'] = $row['batch_id'];
+                        $list['createtime'] = date('Y-m-d H:i:s');
+                        $item = [];
+                        foreach($result as $k => $v) {
+                            $item[$k]['sku'] = $v['sku'];
+                            $item[$k]['supplier_sku'] = $v['supplier_sku'];
+                            $item[$k]['purchase_num'] = $v['purchase_num'];
+                            $item[$k]['should_arrival_num'] = $v['should_arrival_num'];
+                            $item[$k]['arrival_num'] = $v['arrivals_num'];
+                            $item[$k]['error_type'] = $v['error_type'];
+                            if ($v['is_error'] == 1) {
+                                $is_error = 1;
+                            }
+                        }
+                        $list['is_error'] = $is_error;
+                        $abnormal = new \app\admin\model\purchase\PurchaseAbnormal();
+                        $abnormal->save($list);
+
+                        foreach($item as $k => $v) {
+                            $item[$k]['abnormal_id'] = $abnormal->id;
+                        }
+                        Db::name('purchase_abnormal_item')->insertAll($item);
+                    }
                 }
             }
 
