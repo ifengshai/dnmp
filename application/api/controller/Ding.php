@@ -7,7 +7,6 @@
 
 namespace app\api\controller;
 
-
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
@@ -39,9 +38,10 @@ class Ding extends Controller
      *
      * @Description
      * @author Lx
-     * @since 2020/06/01 17:35:27 
+     * @since 2020/06/01 17:35:27
      */
-    public function test2(){
+    public function test2()
+    {
         $userId = '144428384720920523';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user);
@@ -55,7 +55,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://mojing.mruilove.com/api/ding/receive',
+            'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
     }
@@ -69,7 +69,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://mojing.mruilove.com/api/ding/receive',
+            'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
     }
@@ -157,7 +157,7 @@ class Ding extends Controller
         if ($departments['errcode'] === 0 && !empty($departments['department'])) {
             foreach ($departments['department'] as $department) {
                 //查找是否存在，已存在的不创建
-                $depart = Department::where('department_id',$department['id'])->value('id');
+                $depart = Department::where('department_id', $department['id'])->value('id');
                 if (!$depart) {
                     $data = [
                         'name' => $department['name'],
@@ -203,7 +203,7 @@ class Ding extends Controller
                     } else {
                         $username = str_replace(' ', '', pinyin($user['name']));
                         $count = Admin::where('username', $username)->count();
-                        if($count == 1){
+                        if ($count == 1) {
                             $username = $username.$count;
                         }
                         $salt = Random::alnum();
@@ -259,10 +259,11 @@ class Ding extends Controller
             //判断用户是否排休
             $results = $listByDay['result'];
             //放假的掠过分配
-            if (count($results) < 2 && $results[0]['is_rest'] == 'Y') continue;
+            if (count($results) < 2 && $results[0]['is_rest'] == 'Y') {
+                continue;
+            }
             //获取用户的工作的时间
             foreach ($results as $result) {
-
                 $person[$userId] = [
                 ];
             }
@@ -275,7 +276,8 @@ class Ding extends Controller
         // 邮件id%5求余数分配
     }
 
-    public function ding_notice(array $userIds,$url = null,$title=null,$text=null, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png'){
+    public function ding_notice(array $userIds, $url = null, $title=null, $text=null, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png')
+    {
         $url = config('ding.message_url');
         $agentId = config('ding.agent_id');
         $link = [
@@ -307,20 +309,31 @@ class Ding extends Controller
      * @param string $title 通知标题
      * @param string $content 通知内容
      */
-    public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png') {
-        if (!self::$instance) self::$instance = new self();
+    public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png')
+    {
+        if (!self::$instance) {
+            self::$instance = new self();
+        }
         $instance = self::$instance;
-        if (!is_array($users)) $users = [$users];
+        if (!is_array($users)) {
+            $users = [$users];
+        }
         foreach ($users as $k =>&$user) {
             // 使用id获取userid
             if (($get = Admin::get(['id' =>$user])) || ($get = Admin::get(['username' =>$user]))) {
                 $user = $get['userid'];
             }
-            if (!$user) unset($users[$k]);
+            if (!$user) {
+                unset($users[$k]);
+            }
         }
         
-        if (!$title) $title = '您有一条新消息';
-        if (!$content) $content = '请前往魔晶查看详情';
+        if (!$title) {
+            $title = '您有一条新消息';
+        }
+        if (!$content) {
+            $content = '请前往魔晶查看详情';
+        }
         return $instance ->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
     }
 
@@ -329,7 +342,8 @@ class Ding extends Controller
      * @param $type
      * @return string
      */
-    public static function demandType($type) {
+    public static function demandType($type)
+    {
         return ['bug', '需求', '疑难'][$type - 1]?? '消息';
     }
 
@@ -338,14 +352,16 @@ class Ding extends Controller
      * @param $type
      * @return string
      */
-    public static function demandPriority($type) {
+    public static function demandPriority($type)
+    {
         return ['低', '中', '高'][$type - 1]?? '低';
     }
 
     /**
      * 根据it_web_demand表返回站点名称
      */
-    public static function siteType($type_id) {
+    public static function siteType($type_id)
+    {
         return [
             'zeelool',
             'voogueme',
@@ -360,16 +376,19 @@ class Ding extends Controller
      * @param string $name 事件名称
      * @param \app\admin\model\demand\ItWebDemand $demand 需求管理模型
      */
-    public static function dingHook(string $name, \app\admin\model\demand\ItWebDemand $demand) {
-        if ($demand ->type == 3) return false; // 疑难不作处理
+    public static function dingHook(string $name, \app\admin\model\demand\ItWebDemand $demand)
+    {
+        if ($demand ->type == 3) {
+            return false;
+        } // 疑难不作处理
         $demand = ItWebDemand::get($demand->id);
         $send_ids = []; // 被发送者id, userid或nickname
         $msg = ''; // 消息内容
-        switch($name){
+        switch ($name) {
             case 'add':                     // 添加内容通知, 发送给所有测试人员
                 $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
                 $copy_to_user_id = $demand->copy_to_user_id;
-                $copyToUserId = explode(',',$copy_to_user_id ?: '');
+                $copyToUserId = explode(',', $copy_to_user_id ?: '');
 
                 $send_ids = array_filter(array_merge(
                     $authUserIds, // 所有有权限点击测试确认的用户
@@ -391,7 +410,7 @@ class Ding extends Controller
                         explode(',', $demand ->test_user_id)
                     );
                     $msg = '测试已确认, 等待分配中';
-                }else if($demand ->type == 2){ // 需求, 需要前后端审核
+                } elseif ($demand ->type == 2) { // 需求, 需要前后端审核
                     $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 所有有权限点击[通过]按钮的人
                     $msg = '有个新需求需要您审核';
                 }
@@ -455,11 +474,13 @@ class Ding extends Controller
                 $msg = '需求已通过, 等待分配';
                 break;
         }
-        if ($send_ids && $msg) return self::cc_ding(
-            $send_ids
-            ,'【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg
-            , '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
-        );
+        if ($send_ids && $msg) {
+            return self::cc_ding(
+                $send_ids,
+                '【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg,
+                '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
+            );
+        }
         return false;
     }
 
@@ -469,58 +490,61 @@ class Ding extends Controller
      * @param string $name 事件名称
      * @param \app\admin\model\demand\DevelopDemand $demand 需求管理模型
      */
-    public static function dingHookByDevelop(string $name, \app\admin\model\demand\DevelopDemand $demand) {
-        if ($demand ->type == 3) return false; // 疑难不作处理
+    public static function dingHookByDevelop(string $name, \app\admin\model\demand\DevelopDemand $demand)
+    {
+        if ($demand ->type == 3) {
+            return false;
+        } // 疑难不作处理
         $demand = DevelopDemand::get($demand->id);
         $send_ids = []; // 被发送者id, userid或nickname
         $msg = ''; // 消息内容
-        switch($name){ //type =1 BUG    type =2 需求
+        switch ($name) { //type =1 BUG    type =2 需求
             case 'add':                     // 添加内容通知, 需求管理通知产品经理审核，产品经理审核通过通知 开发主管审核，  开发主管分配完成 通知开发负责人，  开发人员点击开发完成，通知测试人，测试通过通知产品经理确认，产品经理确认完成 通知测试进行回归测试。中间节点，测试记录问题通知责任人
-               if ($demand->type==1){
+               if ($demand->type==1) {
                    $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
                    $entry_user = Admin::get($demand ->create_person_id) ->nickname;
                    $msg =$entry_user .'刚刚录入了一个新的['. self::demandType($demand ->type). '], 请关注';
                    break;
-               }elseif ($demand->type==2){
-                $send_ids = Auth::getUsersId('demand/develop_demand/review') ?: [];
-                $entry_user = Admin::get($demand ->create_person_id) ->nickname;
-                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 等待您的审核';
-                break;
+               } elseif ($demand->type==2) {
+                   $send_ids = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                   $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                   $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 等待您的审核';
+                   break;
                }
+               // no break
             case 'review':             // 产品经理审核通过
-                if ($demand->review_status_manager==1){
-                $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: []; // 所有有权限点击测试确认的用户
-                $msg ='一个优先级['. self::demandPriority($demand ->type). ']的任务产品经理已审核通过, 等待您的审核';
+                if ($demand->review_status_manager==1) {
+                    $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: []; // 所有有权限点击测试确认的用户
+                    $msg ='一个优先级['. self::demandPriority($demand ->type). ']的任务产品经理已审核通过, 等待您的审核';
                 }
                 break;
             case 'distribution':                    // 分配开发人员
-                $send_ids =  explode(',',$demand->assign_developer_ids);//获取开发人员
+                $send_ids =  explode(',', $demand->assign_developer_ids);//获取开发人员
                 $msg = '有个[' . (['简单的', '中等的', '复杂的'][$demand ->complexity - 1]) . ']任务已被分配给您';
                 break;
             case 'set_complete_status':       // 开发完成-- 通知测试人员
                 if ($demand ->is_test == 1) { // 是否需要测试
-                    $send_ids =  explode(',',$demand->test_person);
+                    $send_ids =  explode(',', $demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) .']任务已开发完成,等待您的测试';
-                }else if($demand ->is_test == 0){ // 不需要测试,开发完成直接上线,根据不同类型通知不同人
+                } elseif ($demand ->is_test == 0) { // 不需要测试,开发完成直接上线,根据不同类型通知不同人
 
-                    if ($demand->type==2){//需求类型,产品经理确认
+                    if ($demand->type==2) {//需求类型,产品经理确认
                         $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop'); // 所有有权限点击[通过]按钮的人
                         $msg ='一个任务已开发完成,等待您的确认';
-                    }elseif ($demand->type==1){//BUG 类型`
+                    } elseif ($demand->type==1) {//BUG 类型`
                         $send_ids = array_merge(
                             Auth::getUsersId('demand/develop_demand/review_status_develop'),
                             explode(',', $demand ->assign_developer_ids)
                         );
                         $msg ='一个任务已开发完成,请您关注';
                     }
-
                 }
                 break;
             case 'test_is_passed': // 测试站通过测试,通知相关人员进行确认
-                if ($demand->type==2){//需求类型,产品经理确认
+                if ($demand->type==2) {//需求类型,产品经理确认
                     $send_ids =  Auth::getUsersId('demand/develop_demand/is_finish_task'); // 所有有权限点击[通过]按钮的人
                     $msg ='测试已完成,等待您的确认';
-                }elseif ($demand->type==1){//BUG 类型
+                } elseif ($demand->type==1) {//BUG 类型
                     $send_ids = explode(',', $demand ->assign_developer_ids);
                     $msg ='测试已完成,请您关注';
                 }
@@ -529,7 +553,7 @@ class Ding extends Controller
                 if ($demand ->is_test == 1) { // 是否需要测试
                     $send_ids =   explode(',', $demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已产品经理已确认,等待回归测试';
-                }else{
+                } else {
                     $send_ids =  $demand->create_person_id;
                     $msg = '任务已完成,请关注';
                 }
@@ -538,13 +562,13 @@ class Ding extends Controller
                 if ($demand ->is_test == 1) { // 是否需要测试
                     $send_ids = explode(',', $demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已上线,等待回归测试';
-                }else{
+                } else {
                     $send_ids =  $demand->create_person_id;
                     $msg = '任务已完成,请关注';
                 }
                 break;
             case 'test_record_bug':          // 测试站记录问题
-                $send_ids = explode(',',$demand->assign_developer_ids);
+                $send_ids = explode(',', $demand->assign_developer_ids);
                 $record = \think\Db::name('develop_test_record') // 刚刚填的测试问题
                 ->where('pid', $demand ->id)
                     ->order('id', 'desc')
@@ -553,7 +577,7 @@ class Ding extends Controller
                 $msg = '有个任务在 [测试环境] 被记录了一个[' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 需要您查看';
                 break;
             case 'regression_test_info':          // 正式站记录问题
-                $send_ids =    explode(',',$demand->assign_developer_ids);
+                $send_ids =    explode(',', $demand->assign_developer_ids);
                 $record = \think\Db::name('develop_test_record') // 刚刚填的测试问题
                 ->where('pid', $demand ->id)
                     ->order('id', 'desc')
@@ -567,12 +591,13 @@ class Ding extends Controller
                 $msg = '任务已完成,请关注';
                 break;
         }
-        if ($send_ids && $msg) return self::cc_ding(
-            $send_ids
-            , '【开发组' . self::demandType($demand ->type) . '】' . $msg
-            , '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
-        );
+        if ($send_ids && $msg) {
+            return self::cc_ding(
+                $send_ids,
+                '【开发组' . self::demandType($demand ->type) . '】' . $msg,
+                '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
+            );
+        }
         return false;
     }
-
 }
