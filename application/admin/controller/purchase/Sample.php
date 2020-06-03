@@ -544,6 +544,9 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'],'sku');
                 if(in_array('',$sku_arr)){
@@ -603,6 +606,9 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'],'sku');
                 if(in_array('',$sku_arr)){
@@ -916,6 +922,9 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 $sku_arr = array_column($params['goods'],'sku');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
@@ -979,6 +988,9 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 $sku_arr = array_column($params['goods'],'sku');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
@@ -1248,6 +1260,9 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 $sku_arr = array_column($params['goods'],'sku');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
@@ -1335,6 +1350,9 @@ class Sample extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if(!$params['goods']){
+                    $this->error(__('提交信息不能为空', ''));
+                }
                 $sku_arr = array_column($params['goods'],'sku');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
