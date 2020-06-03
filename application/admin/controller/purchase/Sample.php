@@ -1201,8 +1201,6 @@ class Sample extends Backend
      * @return void
      */
     public function sample_workorder_out_del($ids = null){
-        $ids = $this->request->post("ids/a");
-        $status = input('status');
         if (!$ids) {
             $this->error('缺少参数！！');
         }
