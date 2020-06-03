@@ -809,17 +809,17 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['increment_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['customer_firstname']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['customer_email']);
-            if ($value['status'] == 1) {
+            if ($value['custom_order_prescription_type'] == 1) {
                 $custom_order_prescription_type = '仅镜架';
-            } elseif ($value['status'] == 2) {
+            } elseif ($value['custom_order_prescription_type'] == 2) {
                 $custom_order_prescription_type = '现货处方镜';
-            } elseif ($value['status'] == 3) {
+            } elseif ($value['custom_order_prescription_type'] == 3) {
                 $custom_order_prescription_type = '定制处方镜';
-            } elseif ($value['status'] == 4) {
+            } elseif ($value['custom_order_prescription_type'] == 4) {
                 $custom_order_prescription_type = '镜架+现货';
-            } elseif ($value['status'] == 5) {
+            } elseif ($value['custom_order_prescription_type'] == 5) {
                 $custom_order_prescription_type = '镜架+定制';
-            } elseif ($value['status'] == 6) {
+            } elseif ($value['custom_order_prescription_type'] == 6) {
                 $custom_order_prescription_type = '现片+定制片';
             }
 
