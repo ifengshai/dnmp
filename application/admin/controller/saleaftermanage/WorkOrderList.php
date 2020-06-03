@@ -284,14 +284,14 @@ class WorkOrderList extends Backend
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     $warehouseArr = config('workorder.warehouse_department_rule');
                     $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-                    if(!empty($checkIsWarehouse)){
+                    if (!empty($checkIsWarehouse)) {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
                         }
-                    }else{
+                    } else {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
-                        }                        
+                        }
                     }
                     //判断是否选择措施
 
@@ -340,11 +340,10 @@ class WorkOrderList extends Backend
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
-                        unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id']) {
-                            throw new Exception("补差价订单号不能为空");
+                        if (!$params['replenish_money']) {
+                            throw new Exception("补差价金额不能为空");
                         }
                     }
 
@@ -808,11 +807,10 @@ class WorkOrderList extends Backend
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
-                        unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id']) {
-                            throw new Exception("补差价订单号不能为空");
+                        if (!$params['replenish_money']) {
+                            throw new Exception("补差价金额不能为空");
                         }
                     }
 
@@ -1448,6 +1446,16 @@ class WorkOrderList extends Backend
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
         $this->view->assign('recepts', $recepts);
 
+        //判断站点
+        if ($row['work_platform'] == 1 && $row['replenish_money']) {
+            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' .$row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
+            $url = config('url.new_voogueme_url') . 'price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
+            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+        }
+     
+        $this->view->assign('url',$url);
         $this->view->assign('remarkList', $remarkList);
        
         return $this->view->fetch();
@@ -2272,7 +2280,7 @@ EOF;
                     break;
                 case 0:
                     $value['work_status'] = '已取消';
-                    break;     
+                    break;
                 default:
                     $value['work_status'] = '已处理';
                     break;
