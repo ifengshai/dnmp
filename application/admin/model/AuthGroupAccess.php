@@ -108,4 +108,122 @@ class AuthGroupAccess extends Model
         }
         return $privilege ?? 0;
     }
+    /**
+     * 经营报告权限分组
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 15:58:54 
+     * @param [type] $user_id
+     * @return void
+     */
+    public function getOperationalreportPrivilege($user_id)
+    {
+        $result = $this->alias('a')->where(['a.uid'=>$user_id])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
+        if($result){
+            $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 0;
+            $result = collection($result)->toArray();
+            foreach($result as $v){
+                if($v['rules'] == '*'){
+                    $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 1; 
+                }elseif(!empty($v['rules']) && ($v['rules']!='*')){
+                    $rulesArr = explode(',',$v['rules']);
+                     //zeelool权限
+                    if(in_array(850,$rulesArr)){
+                        $zeelool_privilege = 1;    
+                    }
+                    //voogueme权限
+                    if(in_array(851,$rulesArr)){
+                        $voogueme_privilege = 1;
+                    }
+                    //nihao权限
+                    if(in_array(852,$rulesArr)){
+                        $nihao_privilege = 1;
+                    }
+                    //meeloog权限
+                    if(in_array(853,$rulesArr)){
+                        $meeloog_privilege = 1;
+                    }
+                }
+            }
+                //都没有权限
+                $arr = [];
+            if(1 == $zeelool_privilege){
+                //有zeelool的权限
+                $arr[] = 1;
+            }
+            if(1 == $voogueme_privilege){
+                //有voogueme权限
+                $arr[] = 2;
+            }
+            if(1 == $nihao_privilege){
+                //有nihao权限
+                $arr[] = 3;
+            }
+            if(1 == $meeloog_privilege){
+                //有meeloog权限
+                $arr[] = 4;
+            }
+        }
+        return $arr ?? [];
+    }
+    /**
+     * 转化率权限分组
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 15:58:54 
+     * @param [type] $user_id
+     * @return void
+     */
+    public function getConversionratePrivilege($user_id)
+    {
+        $result = $this->alias('a')->where(['a.uid'=>$user_id])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
+        if($result){
+            $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 0;
+            $result = collection($result)->toArray();
+            foreach($result as $v){
+                if($v['rules'] == '*'){
+                    $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 1; 
+                }elseif(!empty($v['rules']) && ($v['rules']!='*')){
+                    $rulesArr = explode(',',$v['rules']);
+                     //zeelool权限
+                    if(in_array(854,$rulesArr)){
+                        $zeelool_privilege = 1;    
+                    }
+                    //voogueme权限
+                    if(in_array(855,$rulesArr)){
+                        $voogueme_privilege = 1;
+                    }
+                    //nihao权限
+                    if(in_array(856,$rulesArr)){
+                        $nihao_privilege = 1;
+                    }
+                    //meeloog权限
+                    if(in_array(857,$rulesArr)){
+                        $meeloog_privilege = 1;
+                    }
+                }
+            }
+                //都没有权限
+                $arr = [];
+            if(1 == $zeelool_privilege){
+                //有zeelool的权限
+                $arr[] = 1;
+            }
+            if(1 == $voogueme_privilege){
+                //有voogueme权限
+                $arr[] = 2;
+            }
+            if(1 == $nihao_privilege){
+                //有nihao权限
+                $arr[] = 3;
+            }
+            if(1 == $meeloog_privilege){
+                //有meeloog权限
+                $arr[] = 4;
+            }
+        }
+        return $arr ?? [];
+    }        
 }
