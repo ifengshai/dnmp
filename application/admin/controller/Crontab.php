@@ -2016,8 +2016,8 @@ order by sfoi.item_id asc limit 1000";
         $where['a.label'] = 1;
         $where['a.status'] = 1;
         $where['b.status'] = 1;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
-
+        $supplier_list = $supplier->alias('a')->where($where)->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
+        
         //查询产品库正常SKU
         $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
 
