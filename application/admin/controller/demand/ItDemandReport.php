@@ -95,7 +95,8 @@ class ItDemandReport extends Backend
 				
 				//网站组--BUG--end
 
-                //网站组--需求(普通：1个,中等：3个,复杂：5个)--start
+                
+				//网站组--需求(普通：1个,中等：3个,复杂：5个)--start
                 $demand1_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first, $month_last])->count();
                 $demand2_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*3;
                 $demand3_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*5;
@@ -126,16 +127,9 @@ class ItDemandReport extends Backend
                 $demand2_month_05 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count()*3;
                 $demand3_month_05 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_05, $month_last_05])->count()*5;
                 $demand_month_05 = $demand1_month_05+$demand2_month_05+$demand3_month_05;
-				
-				
-				
-				
+			
 				//网站组--需求--end
 
-                
-				
-				
-				
 				//合计--start
                 $all = $task_month+$bug_month+$demand_month;
                 $all_01 = $task_month_01+$bug_month_01+$demand_month_01;
@@ -143,11 +137,7 @@ class ItDemandReport extends Backend
 				$all_03 = $task_month_03+$bug_month_03+$demand_month_03; 
 				$all_04 = $task_month_04+$bug_month_04+$demand_month_04;
 				$all_05 = $task_month_05+$bug_month_05+$demand_month_05;
-				
-                
-				
-				
-				
+			
 				//合计--end
             }else{
                 //开发组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
@@ -258,44 +248,46 @@ class ItDemandReport extends Backend
             $web_outtime_statistics = $this->web_outtime_statistics($month);
             //统计站点任务量
                 //bug统计
-                $zeelool0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $zeelool1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $zeelool2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$zeelool3_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-				$zeelool4_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-				$zeelool5_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+                $zeelool0_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
+                $zeelool1_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
+                $zeelool2_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
+				$zeelool3_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
+				$zeelool4_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
+				$zeelool5_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
 				
 				
-				$voogueme0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $voogueme1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $voogueme2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$voogueme3_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $voogueme4_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $voogueme5_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+				$voogueme0_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
+                $voogueme1_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
+                $voogueme2_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
+				$voogueme3_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
+                $voogueme4_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
+                $voogueme5_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
 
-                $nihao0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $nihao1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $nihao2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$nihao3_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $nihao4_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $nihao5_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+                $nihao0_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
+                $nihao1_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
+                $nihao2_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
+				$nihao3_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
+                $nihao4_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
+                $nihao5_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
 
-                $wesee0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $wesee1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $wesee2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$wesee3_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $wesee4_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $wesee5_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+                $wesee0_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
+                $wesee1_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
+                $wesee2_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
+				$wesee3_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
+                $wesee4_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
+                $wesee5_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
 
                 
-				$others0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $others1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $others2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-                $others3_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $others4_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $others5_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+				$others0_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
+                $others1_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
+                $others2_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
+                $others3_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
+                $others4_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
+                $others5_bug = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
+               
                 
-                //需求统计
+				
+				//需求统计
                 $zeelool0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=1 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
                 $zeelool1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=1 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
                 $zeelool2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=1 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
@@ -334,79 +326,42 @@ class ItDemandReport extends Backend
                 $others5_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=5 and create_time between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
 				
                 //开发任务统计
-                
-				/*  老的
-				$zeelool0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];           				
-				$zeelool1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];                	
-				$zeelool2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];				
-				$zeelool3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-				$zeelool4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $zeelool5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
-				*/						
-				$zeelool0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first."' and '".$month_last."')")[0]['count']; 				
-				$zeelool1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first_01."' and '".$month_last_01."')")[0]['count']; 
-				$zeelool2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first_02."' and '".$month_last_02."')")[0]['count']; 
-				$zeelool3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first_03."' and '".$month_last_03."')")[0]['count']; 				
-				$zeelool4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first_04."' and '".$month_last_04."')")[0]['count']; 
-				$zeelool5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=1 and createtime between '".$month_first_05."' and '".$month_last_05."')")[0]['count']; 				
+
+				$zeelool0_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10; 				
+				$zeelool1_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10; 				
+				$zeelool2_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10; 				
+				$zeelool3_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first_03, $month_last_03])->sum('ti.type')*10; 				
+				$zeelool4_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first_04, $month_last_04])->sum('ti.type')*10; 				
+				$zeelool5_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$month_first_05, $month_last_05])->sum('ti.type')*10; 				
+     
+				$voogueme0_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10; 				
+				$voogueme1_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10; 				
+				$voogueme2_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10; 				
+				$voogueme3_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first_03, $month_last_03])->sum('ti.type')*10; 				
+				$voogueme4_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first_04, $month_last_04])->sum('ti.type')*10; 				
+				$voogueme5_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$month_first_05, $month_last_05])->sum('ti.type')*10; 				
 				
-				/*  老的
-                $voogueme0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $voogueme1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $voogueme2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$voogueme3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $voogueme4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $voogueme5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
-				*/
-                $voogueme0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first."' and '".$month_last."')")[0]['count']; 				
-				$voogueme1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first_01."' and '".$month_last_01."')")[0]['count']; 
-				$voogueme2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first_02."' and '".$month_last_02."')")[0]['count']; 
-				$voogueme3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first_03."' and '".$month_last_03."')")[0]['count']; 				
-				$voogueme4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first_04."' and '".$month_last_04."')")[0]['count']; 
-				$voogueme5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=2 and createtime between '".$month_first_05."' and '".$month_last_05."')")[0]['count']; 	
-				/*  老的
-				$nihao0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $nihao1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $nihao2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$nihao3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $nihao4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $nihao5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
-				*/	
-                $nihao0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first."' and '".$month_last."')")[0]['count']; 				
-				$nihao1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first_01."' and '".$month_last_01."')")[0]['count']; 
-				$nihao2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first_02."' and '".$month_last_02."')")[0]['count']; 
-				$nihao3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first_03."' and '".$month_last_03."')")[0]['count']; 				
-				$nihao4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first_04."' and '".$month_last_04."')")[0]['count']; 
-				$nihao5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=3 and createtime between '".$month_first_05."' and '".$month_last_05."')")[0]['count']; 
-				/*  老的
-				$wesee0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $wesee1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $wesee2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-				$wesee3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $wesee4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $wesee5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
-				*/
-                $wesee0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first."' and '".$month_last."')")[0]['count']; 				
-				$wesee1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first_01."' and '".$month_last_01."')")[0]['count']; 
-				$wesee2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first_02."' and '".$month_last_02."')")[0]['count']; 
-				$wesee3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first_03."' and '".$month_last_03."')")[0]['count']; 				
-				$wesee4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first_04."' and '".$month_last_04."')")[0]['count']; 
-				$wesee5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=4 and createtime between '".$month_first_05."' and '".$month_last_05."')")[0]['count']; 		
-				/*  老的
-				$others0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $others1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $others2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-                $others3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_03."' and '".$month_last_03."'")[0]['count'];
-                $others4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_04."' and '".$month_last_04."'")[0]['count'];
-                $others5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_05."' and '".$month_last_05."'")[0]['count'];
-                */
-                $others0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first."' and '".$month_last."')")[0]['count']; 				
-				$others1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first_01."' and '".$month_last_01."')")[0]['count']; 
-				$others2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first_02."' and '".$month_last_02."')")[0]['count']; 
-				$others3_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first_03."' and '".$month_last_03."')")[0]['count']; 				
-				$others4_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first_04."' and '".$month_last_04."')")[0]['count']; 
-				$others5_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task_item where task_id in (SELECT id FROM fa_it_web_task WHERE is_del=1 and site_type=5 and createtime between '".$month_first_05."' and '".$month_last_05."')")[0]['count']; 
-				 
+				$nihao0_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10; 				
+				$nihao1_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10; 				
+				$nihao2_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10; 				
+				$nihao3_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first_03, $month_last_03])->sum('ti.type')*10; 				
+				$nihao4_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first_04, $month_last_04])->sum('ti.type')*10; 				
+				$nihao5_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$month_first_05, $month_last_05])->sum('ti.type')*10; 				
+           
+				$wesee0_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10; 				
+				$wesee1_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10; 				
+				$wesee2_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10; 				
+				$wesee3_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first_03, $month_last_03])->sum('ti.type')*10; 				
+				$wesee4_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first_04, $month_last_04])->sum('ti.type')*10; 				
+				$wesee5_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$month_first_05, $month_last_05])->sum('ti.type')*10; 				
+ 
+				$others0_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first, $month_last])->sum('ti.type')*10; 				
+				$others1_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first_01, $month_last_01])->sum('ti.type')*10; 				
+				$others2_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first_02, $month_last_02])->sum('ti.type')*10; 				
+				$others3_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first_03, $month_last_03])->sum('ti.type')*10; 				
+				$others4_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first_04, $month_last_04])->sum('ti.type')*10; 				
+				$others5_task = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$month_first_05, $month_last_05])->sum('ti.type')*10; 				
+			 
 				
 				
 				$sum_total = array(
