@@ -450,19 +450,23 @@ class WorkOrderList extends Backend
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
-                        //如果不是客服人员则指定审核人为客服经理 start
-                        $customerKefu = config('workorder.kefumanage');
-                        $customerArr = []; 
-                        foreach($customerKefu as $v){
-                            foreach($v as $vv){
-                                $customerArr[] =$vv;
+                        //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
+                        if(1 == $params['work_type']){
+                            $customerKefu = config('workorder.kefumanage');
+                            $customerArr = []; 
+                            foreach($customerKefu as $v){
+                                foreach($v as $vv){
+                                    $customerArr[] =$vv;
+                                }
                             }
-                        }
-                        if(!in_array(session('admin.id'),$customerArr)){
-                            $params['is_check'] = 1;
-                            $params['assign_user_id'] = config('workorder.customer_manager');
-                        }else{
-                            $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                            if(!in_array(session('admin.id'),$customerArr)){
+                                if(1 == $params['is_check']){
+                                    $params['assign_user_id'] = config('workorder.customer_manager');
+                                }
+                                
+                            }else{
+                                $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                            }
                         }
                         //如果不是客服人员则指定审核人为客服经理 end
                         $result = $this->model->allowField(true)->save($params);
@@ -931,19 +935,22 @@ class WorkOrderList extends Backend
                     if (false === $updateInfo) {
                         throw new Exception('更新失败!!');
                     }
-                    //如果不是客服人员则指定审核人为客服经理 start
-                    $customerKefu = config('workorder.kefumanage');
-                    $customerArr = []; 
-                    foreach($customerKefu as $v){
-                        foreach($v as $vv){
-                            $customerArr[] =$vv;
+                    //如果不是客服人员则指定审核人为客服经理(只能客服工单) start
+                    if(1 == $params['work_type']){
+                        $customerKefu = config('workorder.kefumanage');
+                        $customerArr = []; 
+                        foreach($customerKefu as $v){
+                            foreach($v as $vv){
+                                $customerArr[] =$vv;
+                            }
                         }
-                    }
-                    if(!in_array(session('admin.id'),$customerArr)){
-                        $params['is_check'] = 1;
-                        $params['assign_user_id'] = config('workorder.customer_manager');
-                    }else{
-                        $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        if(!in_array(session('admin.id'),$customerArr)){
+                            if(1 == $params['is_check']){
+                                $params['assign_user_id'] = config('workorder.customer_manager');
+                            }
+                        }else{
+                            $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        }
                     }
                     //如果不是客服人员则指定审核人为客服经理 end
                     $result = $row->allowField(true)->save($params);
