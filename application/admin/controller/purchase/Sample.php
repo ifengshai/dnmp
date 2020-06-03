@@ -1193,6 +1193,23 @@ class Sample extends Backend
         }
     }
     /**
+     * 出库删除
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 17:26:57 
+     * @return void
+     */
+    public function sample_workorder_out_del($ids = null){
+        $ids = $this->request->post("ids/a");
+        $status = input('status');
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $this->sampleworkorder->where(['id'=>$ids])->update(['is_del'=>2]);
+        $this->success();
+    }
+    /**
      * 借出记录列表
      *
      * @Description
