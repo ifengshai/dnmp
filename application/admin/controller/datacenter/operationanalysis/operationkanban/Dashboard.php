@@ -115,7 +115,7 @@ class Dashboard extends Backend
         $user_id = session('admin.id');
         $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
         if(0 == $result){
-            $this->error('您没有权限访问','general/profile');
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
             switch($result){
                 //只有zeelool权限
