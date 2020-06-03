@@ -926,6 +926,7 @@ class Sample extends Backend
                     $this->error(__('提交信息不能为空', ''));
                 }
                 $sku_arr = array_column($params['goods'],'sku');
+                $stock_arr = array_column($params['goods'],'stock');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
                     $this->error(__('sku不能重复', ''));
@@ -933,6 +934,9 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
+                }
+                if(in_array('',$stock_arr)){
+                    $this->error(__('出库数量不能为空', ''));
                 }
                 //生成出库主表数据
                 $workorder['location_number'] = $location_number;
@@ -992,6 +996,7 @@ class Sample extends Backend
                     $this->error(__('提交信息不能为空', ''));
                 }
                 $sku_arr = array_column($params['goods'],'sku');
+                $stock_arr = array_column($params['goods'],'stock');
                 //判断是否有重复项
                 if (count($sku_arr) != count(array_unique($sku_arr))) { 
                     $this->error(__('sku不能重复', ''));
@@ -999,6 +1004,9 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
+                }
+                if(in_array('',$stock_arr)){
+                    $this->error(__('出库数量不能为空', ''));
                 }
                 //获取该入库单下的商品sku，并将不在该列表的数据进行删除
                 $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id'=>$ids])->column('sku');
