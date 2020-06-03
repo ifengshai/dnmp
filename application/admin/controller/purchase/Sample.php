@@ -275,14 +275,17 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->samplelocation
                 ->where($where)
+                ->where($where_arr)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->samplelocation
                 ->where($where)
+                ->where($where_arr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -428,48 +431,11 @@ class Sample extends Backend
      */
     public function sample_location_del($ids = "")
     {
-        if ($ids) {
-            $pk = $this->samplelocation->getPk();
-            $adminIds = $this->getDataLimitAdminIds();
-            if (is_array($adminIds)) {
-                $this->samplelocation->where($this->dataLimitField, 'in', $adminIds);
-            }
-            $list = $this->samplelocation->where($pk, 'in', $ids)->select();
-
-            $count = 0;
-            Db::startTrans();
-            try {
-                if (!empty($this->samplelocation)) {
-                    $fieldArr = $this->samplelocation->getTableFields();
-                    if (in_array('is_del', $fieldArr)) {
-                        $this->samplelocation->where($pk, 'in', $ids)->update(['is_del' => 2]);
-                        $count = 1;
-                    } else {
-                        foreach ($list as $k => $v) {
-                            $count += $v->delete();
-                        }
-                    }
-                } else {
-                    foreach ($list as $k => $v) {
-                        $count += $v->delete();
-                    }
-                }
-
-                Db::commit();
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            }
-            if ($count) {
-                $this->success();
-            } else {
-                $this->error(__('No rows were deleted'));
-            }
+        if (!$ids) {
+            $this->error(__('无效参数'));
         }
-        $this->error(__('Parameter %s can not be empty', 'ids'));
+        $this->samplelocation->where('id', $ids)->update(['is_del' => 2]);
+        $this->success();
     }
     /**
      * 入库列表
