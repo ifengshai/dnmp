@@ -7,6 +7,10 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
  * 
@@ -124,7 +128,7 @@ class Sample extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['日期', '订单号', 'SKU', '眼球', 'SPH', 'CYL', 'AXI', 'ADD', '镜片', '处方类型'];
+        $listName = ['SKU', '库位号', '库存'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -163,100 +167,30 @@ class Sample extends Backend
             $this->error($exception->getMessage());
         }
 
-        /*********************镜片出库计算逻辑***********************/
-        /**
-         * 镜片扣减逻辑
-         * SHP,CYL都是“-” 直接带入扣减库存
-         * 若SPH为+，CYL为- 直接带入扣减库存，若SPH为“-”CYL为“+”则 sph=SPH+CYL,cyl变正负号，用新得到的sph,cyl扣减库存
-         * 若带有ADD，sph=SPH+ADD,用新sph带入上面正负号判断里判断
-         */
-        //补充第二列订单号
-        foreach ($data as $k => $v) {
-            if (!$v[1]) {
-                $data[$k][0] = $data[$k - 1][0];
-                $data[$k][1] = $data[$k - 1][1];
-                $data[$k][2] = $data[$k - 1][2];
-                if (!$v[7]) {
-                    $data[$k][7] = $data[$k - 1][7];
-                }
-                $data[$k][8] = $data[$k - 1][8];
-                $data[$k][9] = $data[$k - 1][9];
-            }
+        /*********************样品入库逻辑***********************/
+        $sku_arr = array_column($data,0);
+        $save_sku_arr = $this->sample->column('sku');
+        $equal_sku_arr = array_intersect($sku_arr,$save_sku_arr);
+        if(count($equal_sku_arr) != 0){
+            $equal_sku_str = implode(',',$equal_sku_arr);
+            $this->error('SKU：'.$equal_sku_str.'不能重复添加');
         }
-
         foreach ($data as $k => $v) {
-            $lens_type = trim($v[8]);
-            //如果ADD为真  sph = sph + ADD;
-            $sph = $v[4];
-            $cyl = $v[5];
-            if ($sph) {
-                $sph = $sph * 1;
-                if ($v[7]) {
-                    $sph = $sph + $v[7] * 1;
-                }
-                
-                //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
-                if ($cyl && $cyl * 1 > 0) {
-                    $sph = $sph + $cyl * 1;
-                    $cyl = '-' . number_format($cyl * 1, 2);
-                } else {
-                    if ($cyl) {
-                        $cyl = number_format($cyl * 1, 2);
-                    } 
-                }
-                
-                if ($sph > 0) {
-                    $sph = '+' . number_format($sph, 2);
-                } else {
-                    $sph = number_format($sph, 2);
-                }
-            }
-
-            if (!$cyl || $cyl * 1 == 0) {
-                $cyl = '+0.00';
-            }
-            if (!$sph || $sph * 1 == 0) {
-                $sph = '+0.00';
-            }
-
-            if ($lens_type) {
-
-                //扣减库存
-                $map['sph'] = trim($sph);
-                $map['cyl'] = trim($cyl);
-                $map['lens_type'] = ['like', '%' . $lens_type . '%'];
-                $res = $this->model->where($map)->setDec('stock_num');
-
-                //生成出库单
-                if ($res) {
-                    $params[$k]['num'] = 1;
-                } else {
-                    $params[$k]['num'] = 0;
-                }
-                //查询镜片单价
-                $price = $this->model->where($map)->value('price');
-                $params[$k]['lens_type'] = $lens_type;
-                $params[$k]['sph'] = trim($sph);
-                $params[$k]['cyl'] = trim($cyl);
-                $params[$k]['createtime'] = date('Y-m-d H:i:s', time());
-                $params[$k]['create_person'] = session('admin.nickname');
-                $params[$k]['price'] = $price * $params[$k]['num'];
-                $params[$k]['order_number'] = $v[1];
-                $params[$k]['sku'] = trim($v[2]);
-                $params[$k]['eye_type'] = $v[3];
-                $params[$k]['order_sph'] = trim($v[4]);
-                $params[$k]['order_cyl'] = trim($v[5]);
-                $params[$k]['order_date'] = $v[0];
-                $params[$k]['axi'] = $v[6];
-                $params[$k]['add'] = trim($v[7]);
-                $params[$k]['order_lens_type'] = $v[8];
-                $params[$k]['prescription_type'] = $v[9];
-            }
+            //通过库位查库位号
+            $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
+            $params[$k]['sku'] = $v[0];
+            $params[$k]['location_id'] = $location_id;
+            $params[$k]['stock'] = $v[2];
+            $params[$k]['is_lend'] = 0;
+            $params[$k]['lend_num'] = 0;
         }
-
-        $this->outorder->saveAll($params);
+        $result = $this->sample->allowField(true)->saveAll($params);
+        if ($result) {
+            $this->success('导入成功！！');
+        } else {
+            $this->error('导入失败！！');
+        }
         /*********************end***********************/
-        $this->success('导入成功！！');
     }
     /**
      * 库位列表

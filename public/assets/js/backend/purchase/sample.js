@@ -1,8 +1,9 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($, undefined, Backend, Table, Form,Upload) {
     var Controller = {
         sample_index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_index' + location.search,
                     add_url: 'purchase/sample/sample_import_xls',
@@ -52,6 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         sample_location_index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_location_index' + location.search,
                     add_url: 'purchase/sample/sample_location_add',
@@ -87,6 +89,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         sample_workorder_index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_workorder_index' + location.search,
                     add_url: 'purchase/sample/sample_workorder_add',
@@ -235,6 +238,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         sample_workorder_out_index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_workorder_out_index' + location.search,
                     add_url: 'purchase/sample/sample_workorder_out_add',
@@ -383,6 +387,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         sample_lendlog_index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_lendlog_index' + location.search,
                     add_url: 'purchase/sample/sample_lendlog_add',
