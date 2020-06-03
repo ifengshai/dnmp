@@ -1429,7 +1429,7 @@ class Sample extends Backend
                 if(count($lend_arr) > 0){
                     foreach($lend_arr as $value){
                         //借出商品并更新状态
-                        $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update();
+                        $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(['is_lend'=>1]);
                     }
                     $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
                 }
