@@ -29,15 +29,15 @@ class ItDemandReport extends Backend
      */
     public function statistical(){
         $month_first = date("Y-m-01",time());//本月第一天
-        $month_last = date('Y-m-d', strtotime("$month_first +1 month -1 day"));//本月最后一天
-
+        $month_last = date('Y-m-d', strtotime("$month_first +1 month"));//本月最后一天
+        
         $month_01 = date('Y-m', strtotime('-1 month'));//上月
         $month_first_01 = date('Y-m-01', strtotime('-1 month'));//上月第一天
-        $month_last_01 = date('Y-m-t', strtotime('-1 month'));//上月最后一天
+        $month_last_01 = date("Y-m-01",time());//上月最后一天
 
         $month_02 = date('Y-m', strtotime('-2 month'));
         $month_first_02 = date('Y-m-01', strtotime('-2 month'));//第一天
-        $month_last_02 = date('Y-m-t', strtotime('-2 month'));//最后一天
+        $month_last_02 =date('Y-m-01', strtotime('-1 month'));//最后一天
 
         if ($this->request->isAjax()) {
             $web_type = input('web_type');
@@ -273,10 +273,11 @@ class ItDemandReport extends Backend
     public function web_score_statistics($month){
         if($month == 0){
             $stime = date("Y-m-01",time());//本月第一天
-            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
         $task_smap['plan_date'] = ['between', [$stime, $etime]];
@@ -323,8 +324,9 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
         $task_smap['plan_date'] = ['between', [$stime, $etime]];
@@ -369,8 +371,9 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
         $task_smap['plan_date'] = ['between', [$stime, $etime]];
@@ -408,8 +411,9 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
         $task_smap['plan_date'] = ['between', [$stime, $etime]];
