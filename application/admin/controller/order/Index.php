@@ -16,13 +16,15 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
 use think\Loader;
 use think\Db;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 
 /**
  * 订单列表
  */
 class Index extends Backend
 {
-    protected $noNeedRight = ['batch_print_label_new'];
+    protected $noNeedRight = ['batch_print_label_new', 'batch_export_xls'];
     protected $model = null;
 
     public function _initialize()
@@ -33,7 +35,7 @@ class Index extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
-		$this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
+        $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
     /**
@@ -206,7 +208,7 @@ class Index extends Backend
 
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
-		
+
         $this->view->assign("label", $label);
         $this->view->assign("row", $row);
         $this->view->assign("address", $address);
@@ -214,27 +216,27 @@ class Index extends Backend
         $this->view->assign("pay", $pay);
         return $this->view->fetch();
     }
-	
-	
-	
-	/**
+
+
+
+    /**
      * 订单信息2
      */
     public function orderDetail($order_number = null)
-    {       				
+    {
 
-		$order_number = $order_number ?? $this->request->get('order_number');
+        $order_number = $order_number ?? $this->request->get('order_number');
         //$order_number = 100077570;
         //查询订单详情		
-        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq',$order_number]])->order('node_type asc')->column('node_type,create_time'))->toArray();
-		
-		$key_list = array_keys($ruleList);
-		
-		$entity_id = $this->request->get('id');
-		$label = $this->request->get('label', 1);	
-		$this->view->assign(compact('order_number','entity_id','label')); 
+        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->column('node_type,create_time'))->toArray();
+
+        $key_list = array_keys($ruleList);
+
+        $entity_id = $this->request->get('id');
+        $label = $this->request->get('label', 1);
+        $this->view->assign(compact('order_number', 'entity_id', 'label'));
         $this->view->assign("list", $ruleList);
-		$this->view->assign("key_list", $key_list);
+        $this->view->assign("key_list", $key_list);
         return $this->view->fetch();
     }
 
@@ -723,5 +725,177 @@ EOF;
             }
             echo $file_header . $file_content;
         }
+    }
+
+    /**
+     * 批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        //根据传的标签切换对应站点数据库
+        $label = $this->request->get('label', 1);
+        switch ($label) {
+            case 1:
+                $model = $this->zeelool;
+                break;
+            case 2:
+                $model = $this->voogueme;
+                break;
+            case 3:
+                $model = $this->nihao;
+                break;
+            case 4:
+                $model = $this->weseeoptical;
+                break;
+            case 5:
+                $model = $this->meeloog;
+                break;
+            default:
+                return false;
+                break;
+        }
+
+        $ids = input('ids');
+        if ($ids) {
+            $map['entity_id'] = ['in', $ids];
+        }
+
+        $filter = json_decode($this->request->get('filter'), true);
+        //SKU搜索
+        if ($filter['sku']) {
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            if ($filter['status']) {
+                $smap['status'] = ['in', $filter['status']];
+            }
+            $ids = $model->getOrderId($smap);
+            $map['entity_id'] = ['in', $ids];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+
+        list($where) = $this->buildparams();
+
+        $list = $model
+            ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
+            ->where($where)
+            ->where($map)
+            ->select();
+
+        $list = collection($list)->toArray();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
+            ->setCellValue("B1", "客户名称")
+            ->setCellValue("C1", "邮箱");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "状态")
+            ->setCellValue("E1", "订单金额");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "邮费")
+            ->setCellValue("G1", "处方类型");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "订单类型")
+            ->setCellValue("I1", "创建时间");
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['increment_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['customer_firstname']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['customer_email']);
+            if ($value['custom_order_prescription_type'] == 1) {
+                $custom_order_prescription_type = '仅镜架';
+            } elseif ($value['custom_order_prescription_type'] == 2) {
+                $custom_order_prescription_type = '现货处方镜';
+            } elseif ($value['custom_order_prescription_type'] == 3) {
+                $custom_order_prescription_type = '定制处方镜';
+            } elseif ($value['custom_order_prescription_type'] == 4) {
+                $custom_order_prescription_type = '镜架+现货';
+            } elseif ($value['custom_order_prescription_type'] == 5) {
+                $custom_order_prescription_type = '镜架+定制';
+            } elseif ($value['custom_order_prescription_type'] == 6) {
+                $custom_order_prescription_type = '现片+定制片';
+            }
+
+            if ($value['order_type'] == 1) {
+                $order_type = '普通订单';
+            } elseif ($value['order_type'] == 2) {
+                $order_type = '批发单';
+            } elseif ($value['order_type'] == 3) {
+                $order_type = '网红单';
+            } elseif ($value['order_type'] == 4) {
+                $order_type = '补发单';
+            } elseif ($value['order_type'] == 5) {
+                $order_type = '补差价';
+            } elseif ($value['order_type'] == 6) {
+                $order_type = '一件代发';
+            }
+
+
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['base_grand_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['base_shipping_amount']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $custom_order_prescription_type);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $order_type);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['created_at']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '订单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }
