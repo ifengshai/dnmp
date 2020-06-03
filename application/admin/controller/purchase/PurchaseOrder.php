@@ -1360,7 +1360,13 @@ class PurchaseOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $whereCondition['purchase_status'] = ['egt', 2];
-            $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            $rep    = $this->request->get('filter');
+            //如果没有搜索条件
+            if($rep != '{}'){
+                $whereTotalId = '1=1';
+            }else{
+                $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            }
             $total = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
