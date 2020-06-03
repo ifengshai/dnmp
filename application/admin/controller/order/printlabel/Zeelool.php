@@ -1357,6 +1357,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['is_new_version'] = $value['is_new_version'];
         }
 
+        dump($finalResult);die;
+
         $spreadsheet = new Spreadsheet();
 
         //常规方式：利用setCellValue()填充数据
