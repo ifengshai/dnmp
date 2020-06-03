@@ -27,14 +27,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号'), operate: 'like' },
                         { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
-                        { field: 'country_id', title: __('国家')},
+                        { field: 'country_id', title: __('国家') },
                         { field: 'customer_firstname', title: __('客户名称'), operate: 'like' },
                         { field: 'customer_email', title: __('邮箱'), operate: 'like' },
-                        { field: 'status', title: __('状态'),addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
+                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'custom_order_prescription_type', title: __('处方类型'), custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue',6:'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价',6:'一件代发' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, formatter: Table.api.formatter.status },
                         { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
@@ -80,15 +80,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/order/index/batch_export_xls?ids=' + ids, '_blank');
+                    window.open(Config.moduleurl + '/order/index/batch_export_xls?ids=' + ids + '&label=' + Config.label, '_blank');
                 } else {
                     var options = table.bootstrapTable('getOptions');
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
-                    window.open(Config.moduleurl + '/order/index/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    window.open(Config.moduleurl + '/order/index/batch_export_xls?filter=' + filter + '&op=' + op + '&label=' + Config.label, '_blank');
                 }
-                
+
             });
 
         },
