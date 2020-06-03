@@ -1441,11 +1441,11 @@ class Sample extends Backend
             $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
             foreach($lendlog_items as $item){
                 $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
-            }
-            //判断是否没有借出数量，如果没有修改样品间列表的状态
-            $already_lend_num = $this->sample->where('sku',$item['sku'])->value();
-            if($already_lend_num == 0){
-                $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
+                //判断是否没有借出数量，如果没有修改样品间列表的状态
+                $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
+                if($already_lend_num == 0){
+                    $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
+                }
             }
             $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
         }else{
