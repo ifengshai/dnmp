@@ -420,7 +420,9 @@ class ItDemandReport extends Backend
         }else{
             $web_score_statistics = $this->develop_score_statistics($month);
             $web_outtime_statistics = $this->develop_outtime_statistics($month);
+			
         }
+		
         $this->assign('web_score_statistics',$web_score_statistics);
         $this->assign('web_outtime_statistics',$web_outtime_statistics);
         $this->assign('date_arr',$date_arr);
@@ -602,9 +604,9 @@ class ItDemandReport extends Backend
         ->where($task_smap)
         ->select();
         $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
-
+		
         $php_user_total = $this->DevelopOuttimeNum($phper_user_arr,'assign_developer_ids','开发',$list,$task_item_list);
-       
+      
         return $php_user_total;
     }
     /**
@@ -814,36 +816,41 @@ class ItDemandReport extends Backend
                             }
                         } elseif ($v['type'] == 2) {
                             $complexity = $v['complexity'];
-                            $demand_num++;
-                            if($v[$complexity] == 1){
+                            $demand_num++;														
+                            if($complexity == 1){								
                                 $demand_total++;
                                 $score_total++;
-                            }elseif($v[$complexity] == 2){
+                            }elseif($complexity == 2){								
                                 $demand_total += 3;
                                 $score_total += 3;
                             }
-                            elseif($v[$complexity] == 3){
+                            elseif($complexity == 3){								
                                 $demand_total += 5;
                                 $score_total += 5;
                             }   
                         }
                     }
                 }
+				
                 foreach ($item_list as $k => $v) {
                     if ($v['person_in_charge'] == $uk) {
                         $task_num++;
                         if($v['type'] == 1){
+							
                             $task_total += 10;
                             $score_total += 10;
                         }elseif($v['type'] == 2){
+							
                             $task_total += 20;
                             $score_total += 20;
                         }else{
+							
                             $task_total += 30;
                             $score_total += 30;
                         }
                     }
                 }
+				
                 $web_user[$i]['bug_num'] = $bug_num;
                 $web_user[$i]['bug_total'] = $bug_total;
                 $web_user[$i]['demand_num'] = $demand_num;
@@ -912,6 +919,7 @@ class ItDemandReport extends Backend
                 $i++;
             }
         }
+		
         return $web_user;
     }
 
