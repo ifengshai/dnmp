@@ -42,7 +42,7 @@ class Ding extends Controller
      */
     public function test2()
     {
-        $userId = '144428384720920523';
+        $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user);
     }

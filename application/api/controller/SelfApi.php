@@ -179,6 +179,9 @@ class SelfApi extends Api
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             default:
                 return false;
                 break;
@@ -306,7 +309,7 @@ class SelfApi extends Api
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
         $order_node = $this->request->request('order_node'); //订单节点
-        
+
         if (!$order_number) {
             $this->error(__('缺少订单号参数'), [], 400);
         }
@@ -319,37 +322,37 @@ class SelfApi extends Api
             $this->error(__('缺少节点参数'), [], 400);
         }
 
-        if($order_number){
+        if ($order_number) {
             $where['order_number'] = $order_number;
         }
         $where['site'] = $site;
-        if($order_node != 5){
-            if($order_node == 3){
+        if ($order_node != 5) {
+            if ($order_node == 3) {
                 $where['order_node'] = ['in', ['3', '4']];
-            }else{
+            } else {
                 $where['order_node'] = $order_node;
             }
         }
-        
+
         $order_node_data = (new OrderNodeDetail())->where($where)->select();
         $order_data['order_data'] = collection($order_node_data)->toArray();
 
-        if($other_order_number){
+        if ($other_order_number) {
             $orther_where['site'] = $site;
-            if($order_node != 5){
-                if($order_node == 3){
+            if ($order_node != 5) {
+                if ($order_node == 3) {
                     $orther_where['order_node'] = ['in', ['3', '4']];
-                }else{
+                } else {
                     $orther_where['order_node'] = $order_node;
                 }
             }
-            foreach($other_order_number as $val){
+            foreach ($other_order_number as $val) {
                 $orther_where['order_number'] = $val;
                 $orther_order_node_data = (new OrderNodeDetail())->where($orther_where)->select();
                 $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
             }
         }
-        $this->success('成功',$order_data,200);
+        $this->success('成功', $order_data, 200);
     }
 
     /**
@@ -375,21 +378,21 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        if($order_id){
+        if ($order_id) {
             $where['order_id'] = $order_id;
         }
-        if($order_number){
+        if ($order_number) {
             $where['order_number'] = $order_number;
         }
-        if($track_number){
+        if ($track_number) {
             $where['track_number'] = $track_number;
         }
 
         $where['site'] = $site;
-        
+
         $order_track_data = (new OrderNodeCourier())->where($where)->select();
         $order_track_data = collection($order_track_data)->toArray();
-        
-        $this->success('成功',$order_track_data,200);
+
+        $this->success('成功', $order_track_data, 200);
     }
 }
