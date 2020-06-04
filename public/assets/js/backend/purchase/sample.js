@@ -21,6 +21,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
@@ -71,6 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
@@ -107,6 +109,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
@@ -256,6 +259,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
@@ -405,6 +409,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
