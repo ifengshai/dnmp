@@ -366,23 +366,24 @@ class Index extends Backend
 
         //总数
         $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
+		
         //A级数量即总占比
         $res['AA_num'] = $AA_num;
-        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['AA_percent'] = @round($AA_num / $all_num * 100, 2);
         $res['A_num'] = $A_num;
-        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['A_percent'] = @round($A_num / $all_num * 100, 2);
         $res['B_num'] = $B_num;
-        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['B_percent'] = @round($B_num / $all_num * 100, 2);
         $res['CA_num'] = $CA_num;
-        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['CA_percent'] = @round($CA_num / $all_num * 100, 2);
         $res['C_num'] = $C_num;
-        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['C_percent'] = @round($C_num / $all_num * 100, 2);
         $res['D_num'] = $D_num;
-        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['D_percent'] = @round($D_num / $all_num * 100, 2);
         $res['E_num'] = $E_num;
-        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['E_percent'] = @round($E_num / $all_num * 100, 2);
         $res['F_num'] = $F_num;
-        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        $res['F_percent'] = @round($F_num / $all_num * 100, 2); 
 
         $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
         $this->view->assign('res', $res);
@@ -872,21 +873,21 @@ class Index extends Backend
         $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
         //A级数量即总占比
         $res['AA_num'] = $AA_num;
-        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['AA_percent'] = @round($AA_num / $all_num * 100, 2);
         $res['A_num'] = $A_num;
-        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['A_percent'] = @round($A_num / $all_num * 100, 2);
         $res['B_num'] = $B_num;
-        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['B_percent'] = @round($B_num / $all_num * 100, 2);
         $res['CA_num'] = $CA_num;
-        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['CA_percent'] = @round($CA_num / $all_num * 100, 2);
         $res['C_num'] = $C_num;
-        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['C_percent'] = @round($C_num / $all_num * 100, 2);
         $res['D_num'] = $D_num;
-        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['D_percent'] = @round($D_num / $all_num * 100, 2);
         $res['E_num'] = $E_num;
-        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['E_percent'] = @round($E_num / $all_num * 100, 2);
         $res['F_num'] = $F_num;
-        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        $res['F_percent'] = @round($F_num / $all_num * 100, 2); 
 
         $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
         $this->view->assign('res', $res);
