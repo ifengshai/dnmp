@@ -317,7 +317,7 @@ class Sample extends Backend
                 $params = $this->preExcludeFields($params);
                 //判断库位号是否重复
                 $location_repeat = Db::name('purchase_sample_location')
-                    ->where('location',$params['location'])
+                    ->where(['location'=>$params['location'],'is_del'=>1])
                     ->find();
                 if($location_repeat){
                     $this->error(__('库位号不能重复'));
