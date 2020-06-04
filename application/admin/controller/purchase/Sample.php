@@ -168,23 +168,23 @@ class Sample extends Backend
         }
 
         /*********************样品入库逻辑***********************/
-        $sku_arr = array_column($data,0);
-        $save_sku_arr = $this->sample->column('sku');
-        $equal_sku_arr = array_intersect($sku_arr,$save_sku_arr);
-        if(count($equal_sku_arr) != 0){
-            $equal_sku_str = implode(',',$equal_sku_arr);
-            $this->error('SKU：'.$equal_sku_str.'不能重复添加');
-        }
         foreach ($data as $k => $v) {
-            //通过库位查库位号
-            $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
-            $params[$k]['sku'] = $v[0];
-            $params[$k]['location_id'] = $location_id;
-            $params[$k]['stock'] = $v[2];
-            $params[$k]['is_lend'] = 0;
-            $params[$k]['lend_num'] = 0;
+            //查询样品间是否存在该商品
+            $sample = $this->sample->where('sku',$v[0])->value('id');
+            $params = array();
+            if($sample){
+                $result = $this->sample->where('sku',$v[0])->inc('stock',$v[2])->update();
+            }else{
+                //通过库位查库位号
+                $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
+                $params[$k]['sku'] = $v[0];
+                $params[$k]['location_id'] = $location_id;
+                $params[$k]['stock'] = $v[2];
+                $params[$k]['is_lend'] = 0;
+                $params[$k]['lend_num'] = 0;
+                $result = $this->sample->allowField(true)->saveAll($params);
+            }
         }
-        $result = $this->sample->allowField(true)->saveAll($params);
         if ($result) {
             $this->success('导入成功！！');
         } else {
