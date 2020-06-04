@@ -251,7 +251,7 @@ class Sample extends Backend
                 }
                 //判断库位号是否重复
                 $location_repeat = Db::name('purchase_sample_location')
-                    ->where('location',$params['location'])
+                    ->where(['location'=>$params['location'],'is_del'=>1])
                     ->find();
                 if($location_repeat){
                     $this->error(__('库位号不能重复'));
@@ -391,6 +391,7 @@ class Sample extends Backend
             $where_arr['type'] = 1;
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $total = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
