@@ -778,7 +778,7 @@ class PurchaseOrder extends Backend
         $data['purchase_status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res !== false) {
-
+            
             $this->success();
         } else {
             $this->error('修改失败！！');
