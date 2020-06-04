@@ -2013,7 +2013,7 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $where['a.label'] = 1;
+        // $where['a.label'] = 1;
         $where['a.status'] = 1;
         $where['b.status'] = 1;
         $supplier_list = $supplier->alias('a')->where($where)->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
