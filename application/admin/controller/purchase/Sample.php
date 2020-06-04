@@ -1124,6 +1124,10 @@ class Sample extends Backend
         $this->sampleworkorder->where(['id'=>$ids])->update(['is_del'=>2]);
         $this->success();
     }
+    public function sample_workorder_out_cancel($ids = null){
+        $this->sampleworkorder->where('id',$ids)->update(['status'=>5]);
+        $this->success();
+    }
     /**
      * 借出记录列表
      *
