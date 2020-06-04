@@ -775,10 +775,10 @@ class PurchaseOrder extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-
         $data['purchase_status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res !== false) {
+
             $this->success();
         } else {
             $this->error('修改失败！！');
@@ -1223,29 +1223,27 @@ class PurchaseOrder extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-
+            $skus = array_column($list, 'true_sku');
             //查询所有产品库存
             $map['is_del'] = 1;
+            $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
             $product = $item->where($map)->column('available_stock', 'sku');
 
             //计算在途数量
-            $skus = array_column($list, 'true_sku');
-
             //计算SKU总采购数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
             $purchase_map['check_status'] = ['in', [0, 1]];
             $purchase_map['is_diff'] = 0;
             $purchase_map['is_del'] = 1;
-
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
 
-            //查询出满足条件的采购单号
+            //查询出满足条件的采购单号  旧在途库存计算方式
             $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
@@ -1262,6 +1260,9 @@ class PurchaseOrder extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
+
+
+
 
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
