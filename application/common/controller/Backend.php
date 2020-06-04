@@ -113,8 +113,8 @@ class Backend extends Controller
     use \app\admin\library\traits\Backend;
 
     public function _initialize()
-    {
-        $modulename = $this->request->module();
+    {        
+		$modulename = $this->request->module();
         $controllername = Loader::parseName($this->request->controller());
         $actionname = strtolower($this->request->action());
 

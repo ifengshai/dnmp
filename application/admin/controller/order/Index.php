@@ -22,7 +22,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 /**
  * 订单列表
  */
-class Index extends Backend
+class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 {
     protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls'];
     protected $model = null;
