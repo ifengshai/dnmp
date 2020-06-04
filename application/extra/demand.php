@@ -8,6 +8,7 @@ return [
         '3' => 'Nihao',
         '4' => 'Wesee',
         '5' => 'Other',
+        '6' => '如弗小程序',
     ],
     //抄送人
     'copyToUserId' => [
