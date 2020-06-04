@@ -628,7 +628,7 @@ class Check extends Backend
                                 $is_error = 1;
                             }
                         }
-                        $list['is_error'] = $is_error;
+                        $list['is_error'] = $is_error ?: 0;
                         $abnormal = new \app\admin\model\purchase\PurchaseAbnormal();
                         $abnormal->save($list);
 
