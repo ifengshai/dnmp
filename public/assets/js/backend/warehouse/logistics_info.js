@@ -55,10 +55,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.type == 2) {
-                                            return false;
+                                        if (row.status == 1) {
+                                            return true;
                                         }
-                                        return true;
+                                        return false;
                                     }
                                 },
                                 {

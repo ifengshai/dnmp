@@ -30,11 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { field: 'id', title: __('Id') },
                         { field: 'check_order_number', title: __('Check_order_number'), operate: 'like' },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
-                        {
-                            field: 'error_type', title: __('异常状态'), custom: { 0: 'success', 1: 'danger', 2: 'danger', 3: 'danger' },
-                            searchList: { 0: '正常', 1: '错发', 2: '多发', 3: '少发' },
-                            formatter: Table.api.formatter.status
-                        },
+
                         { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'remark', title: __('Remark'), formatter: Controller.api.formatter.getClear, operate: false },
@@ -58,33 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                /* {
-                                    name: 'submitAudit',
-                                    text: '提交审核',
-                                    title: __('提交审核'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: 'warehouse/check/audit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                }, */
+
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -258,7 +228,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 }
                 )
             })
-     
+
             var purchase_id = $('.purchase_id').val();
             var batch_id = $('.batch_id').val();
             if (purchase_id && !batch_id) {
@@ -273,7 +243,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
             })
-            
+
         },
         add_return_order: function () {
             Controller.api.bindevent();
@@ -330,6 +300,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     }
                 }
                 )
+            })
+
+            //审核
+            $(document).on('click', '.btn-check', function () {
+                var ids = $(this).attr('data-ids');
+                var status = $(this).attr('data-status');
+                if (!ids) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'warehouse/check/setStatus',
+                    data: { ids: ids, status: status }
+                }, function (item, ret) {
+                    parent.location.reload();
+                })
             })
         },
         api: {
@@ -457,17 +443,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var arrivals_num = $(this).val();
                     //判断是否分批
                     if (batch_id) {
-                        var true_num = $(this).parent().parent().find('.batch_arrival_num').text();
+                        var true_num = $(this).parent().parent().find('.should_arrival_num').val();
                     } else {
-                        var true_num = $(this).parent().parent().find('.purchase_num').text();
+                        var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
 
-                    if (arrivals_num*1 > true_num*1) {
-                        $('#error_type').val(2);
-                    } else if (arrivals_num*1 < true_num) {
-                        $('#error_type').val(3);
+                    
+                    if (arrivals_num * 1 > true_num * 1) {
+                        $(this).parent().parent().find('.error_type').val(1);
+                    } else if (arrivals_num * 1 < true_num) {
+                        $(this).parent().parent().find('.error_type').val(2);
                     } else {
-                        $('#error_type').val(0);
+                        $(this).parent().parent().find('.error_type').val(0);
                     }
 
                     if (type == 1) {
@@ -533,19 +520,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             }
 
                             var batch_id = $('.batch_id').val();
-                            console.log(batch_id);
                             if (!batch_id) {
                                 var html = '';
-                                if (data.batch ) {
+                                if (data.batch) {
                                     for (var i in data.batch) {
-                                        html +='<option value="' + data.batch[i].id + '">' + data.batch[i].batch + '</option>';
+                                        html += '<option value="' + data.batch[i].id + '">' + data.batch[i].batch + '</option>';
                                     }
                                 }
-                                // $('.batch_id').append(html);
-                                console.log(123);
+                                $('.batch_id').append(html);
                             }
 
-                      
+
                             //循环展示商品信息
                             if (data.item) {
                                 var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
@@ -556,13 +541,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     if (!sku) {
                                         sku = '';
                                     }
-    
+
                                     var supplier_sku = data.item[i].supplier_sku;
                                     if (!supplier_sku) {
                                         supplier_sku = '';
                                     }
-    
-                                    shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+
+                                    shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
@@ -574,18 +559,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
                                     shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
                                     shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
-    
+
                                     shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
                                     shtml += ' 上传</button></span>'
-    
+
                                     shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
                                     shtml += ' </td>'
-    
+
                                     shtml += ' </tr>'
                                 }
                                 $('.caigou table tbody').append(shtml);
                             }
-                            
+
                             //模糊匹配订单
                             $('.sku').autocomplete({
                                 source: function (request, response) {
@@ -631,7 +616,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             url: url,
                             data: { id: id }
                         }, function (item, ret) {
-                            
+
                             //循环展示商品信息
                             if (item) {
 
@@ -651,13 +636,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     if (!supplier_sku) {
                                         supplier_sku = '';
                                     }
-    
-                                    shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+
+                                    shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + item[i].purchase_id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + item[i].purchase_num + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + item[i].check_num + '"></td>'
-                                    shtml += ' <td class="batch_arrival_num">' + item[i].arrival_num + '</td>'
+                                    shtml += ' <td class="batch_arrival_num"><input class="form-control should_arrival_num" readonly name="should_arrival_num[]" type="text" value="' + item[i].arrival_num + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
@@ -665,18 +650,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
                                     shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
                                     shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
-    
+
                                     shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
                                     shtml += ' 上传</button></span>'
-    
+
                                     shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
                                     shtml += ' </td>'
-    
+
                                     shtml += ' </tr>'
                                 }
                                 $('.caigou table tbody').append(shtml);
                             }
-                            
+
                             //模糊匹配订单
                             $('.sku').autocomplete({
                                 source: function (request, response) {
@@ -714,7 +699,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 })
 
 
-        
+
                 //获取sku信息
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();

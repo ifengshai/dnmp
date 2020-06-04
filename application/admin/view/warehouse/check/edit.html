@@ -102,14 +102,13 @@
 
         <label class="control-label col-xs-12 col-sm-2">是否错发:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  class="form-control batch_type" name="batch_type">
+            <select  class="form-control is_error" name="row[is_error]">
                 <option value="">请选择</option>
-                <option value="0" {:$row['error_type'] == 0 ? 'selected' : ''}>否</option>
-                <option value="1" {:$row['error_type'] == 1 ? 'selected' : ''}>是</option>
+                <option value="0" {:$row['is_error'] == 0 ? 'selected' : ''}>否</option>
+                <option value="1" {:$row['is_error'] == 1 ? 'selected' : ''}>是</option>
             </select>
         </div>
     </div>
-    <input  class="form-control" id="error_type" name="row[error_type]" type="hidden" value="{$row.error_type}">
     <style>
         .plupload-preview li {
             width: 80px;
@@ -144,6 +143,7 @@
                 </tr>
                 {foreach $item as $k => $v}
                 <tr>
+                    <input  class="form-control error_type" name="error_type[]" type="hidden" value="{$v.error_type}">
                     <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" type="hidden"
                         value="{$v.id}">
                     <td>
@@ -212,6 +212,7 @@
 <div id="table-content" style="display: none;">
     <table>
         <tr>
+            <input  class="form-control error_type" name="error_type[]" type="hidden" value="0">
             <td>
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>

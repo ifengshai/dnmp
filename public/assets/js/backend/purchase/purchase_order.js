@@ -718,9 +718,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().next().next().append(shtml);
             })
 
+            // $(document).on('click', '.btn-del', function () {
+            //     $(this).parent().remove();
+            // })
+
+            //删除商品数据
             $(document).on('click', '.btn-del', function () {
-                $(this).parent().remove();
+                var id = $(this).parent().find('.logistics_ids').val();
+                var _this = $(this);
+                if (id) {
+                    Layer.confirm(
+                        __('确定要删除吗'),
+                        function (index) {
+                            Backend.api.ajax({
+                                url: Config.moduleurl + '/purchase/purchase_order/deleteLogisticsItem',
+                                data: { id: id }
+                            }, function (data, ret) {
+                                _this.parent().remove();
+                                Layer.closeAll();
+                            });
+                        }
+                    );
+
+                } else {
+                    $(this).parent().remove();
+                }
             })
+
         },
         remark: function () {
             Controller.api.bindevent();
@@ -858,10 +882,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
-                       
+
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                               
+
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -878,7 +902,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         return true;
                                     }
                                 }
-                              
+
                             ], formatter: Table.api.formatter.operate
                         }
                     ]

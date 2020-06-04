@@ -51,6 +51,8 @@
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
+    
+    <input  class="form-control" name="row[logistics_id]" value="{$info.id}" type="hidden">
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">质检单号:</label>
         <div class="col-xs-12 col-sm-3">
@@ -105,7 +107,7 @@
 
         <label class="control-label col-xs-12 col-sm-2">是否错发:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  class="form-control error_type" name="error_type">
+            <select  class="form-control is_error" name="row[is_error]">
                 <option value="">请选择</option>
                 <option value="0">否</option>
                 <option value="1">是</option>
@@ -142,6 +144,7 @@
                     <th>操作</td>
                 </tr>
                 <tr>
+                    <input  class="form-control error_type" name="error_type[]" type="hidden">
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
                     </td>
@@ -204,6 +207,7 @@
 <div id="table-content" style="display: none;">
     <table>
         <tr>
+            <input  class="form-control error_type" name="error_type[]" type="hidden">
             <td>
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
