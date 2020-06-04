@@ -24,7 +24,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class Index extends Backend
 {
-    protected $noNeedRight = ['batch_print_label_new', 'batch_export_xls'];
+    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls'];
     protected $model = null;
 
     public function _initialize()
@@ -231,7 +231,7 @@ class Index extends Backend
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->column('node_type,create_time'))->toArray();
 
         $key_list = array_keys($ruleList);
-
+	
         $entity_id = $this->request->get('id');
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
