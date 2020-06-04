@@ -443,11 +443,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var arrivals_num = $(this).val();
                     //判断是否分批
                     if (batch_id) {
-                        var true_num = $(this).parent().parent().find('.batch_arrival_num').text();
+                        var true_num = $(this).parent().parent().find('.should_arrival_num').val();
                     } else {
-                        var true_num = $(this).parent().parent().find('.purchase_num').text();
+                        var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
 
+                    
                     if (arrivals_num * 1 > true_num * 1) {
                         $(this).parent().parent().find('.error_type').val(1);
                     } else if (arrivals_num * 1 < true_num) {

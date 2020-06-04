@@ -9,11 +9,11 @@
     </div>
     <input type="hidden" name="batch_id[]" class="batch_id" value="{$v.id}">
     <div class='logistics_content'>
-      
+        {if $logistics_data}
         {foreach $logistics_data as $val}
         {if $val['batch_id'] == $v['id']}
-        <input type="hidden" name="logistics_ids[{$v.id}][]" class="logistics_ids" value="{$val.id}"/>
         <div class="form-group">
+            <input type="hidden" name="logistics_ids[{$v.id}][]" class="logistics_ids" value="{$val.id}"/>
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[{$v.id}][]" value="{$val.logistics_company_no}"
@@ -25,10 +25,11 @@
 
 
             </div>
-
+            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
         </div>
         {/if}
         {/foreach}
+        {/if}
     </div>
     {/foreach}
     {else/}
@@ -37,9 +38,10 @@
     </div>
 
     <div class='logistics_content'>
+        {if $logistics_data}
         {foreach $logistics_data as $val}
-        <input type="hidden" name="logistics_ids[]" class="logistics_ids" value="{$val.id}"/>
         <div class="form-group">
+            <input type="hidden" name="logistics_ids[]" class="logistics_ids" value="{$val.id}"/>
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="{$val.logistics_company_no}"
@@ -51,9 +53,10 @@
 
 
             </div>
-
+            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
         </div>
         {/foreach}
+        {/if}
     </div>
     {/if}
 

@@ -600,15 +600,15 @@ class Check extends Backend
                 //生成收货异常数据
                 //判断此批次是否全部质检完成 或者此采购单全部质检完成
                 if ($row['batch_id']) {
-                    $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'],'batch_id' => $row['batch_id'], 'is_check_order' => 0])->count();
+                    $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'], 'batch_id' => $row['batch_id'], 'is_check_order' => 0])->count();
                 } else {
                     $count = $logisticsinfo->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
                 }
-            
+
                 //全部质检完成则查询是否有异常单
                 if ($count <= 0) {
                     $map[] = ['exp', Db::raw("a.is_error = 1 or b.error_type > 0")];
-                    $result = $this->model->alias('a')->where(['a.batch_id' => $row['batch_id']])->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->select();
+                    $result = $this->model->alias('a')->where(['a.batch_id' => $row['batch_id'], 'a.status' => 2])->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->select();
                     if ($result) {
                         $list = [];
                         $list['error_number'] = 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -617,7 +617,7 @@ class Check extends Backend
                         $list['batch_id'] = $row['batch_id'];
                         $list['createtime'] = date('Y-m-d H:i:s');
                         $item = [];
-                        foreach($result as $k => $v) {
+                        foreach ($result as $k => $v) {
                             $item[$k]['sku'] = $v['sku'];
                             $item[$k]['supplier_sku'] = $v['supplier_sku'];
                             $item[$k]['purchase_num'] = $v['purchase_num'];
@@ -632,7 +632,7 @@ class Check extends Backend
                         $abnormal = new \app\admin\model\purchase\PurchaseAbnormal();
                         $abnormal->save($list);
 
-                        foreach($item as $k => $v) {
+                        foreach ($item as $k => $v) {
                             $item[$k]['abnormal_id'] = $abnormal->id;
                         }
                         Db::name('purchase_abnormal_item')->insertAll($item);

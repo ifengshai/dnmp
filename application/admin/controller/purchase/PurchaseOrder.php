@@ -36,7 +36,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls', 'deleteLogisticsItem'];
 
     public function _initialize()
     {
@@ -664,6 +664,29 @@ class PurchaseOrder extends Backend
 
         return $this->view->fetch();
     }
+
+    /**
+     * 删除采购单物流数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/04 13:55:22 
+     * @return void
+     */
+    public function deleteLogisticsItem()
+    {
+        if ($this->request->isAjax()) {
+            $id = input('id');
+            $logistics = new \app\admin\model\LogisticsInfo();
+            $res = $logistics->destroy($id);
+            if ($res) {
+                $this->success();
+            } else {
+                $this->error();
+            }
+        }
+    }
+
 
     /**
      * 备注

@@ -97,22 +97,16 @@ class PurchaseAbnormal extends Backend
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_name = $supplier->where(['id' => $row['supplier_id']])->value('supplier_name');
 
+        //查询采购单单号
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $purchase_number = $purchase->where(['id' => $row['purchase_id']])->value('purchase_number');
+
         //查询子表信息
         $map['abnormal_id'] = $ids;
         $item = $this->item->where($map)->select();
         $this->assign('item', $item);
-
-        //查询分批数据
-        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $ids)->select();
-        $this->assign('batch', $batch);
-
-        //查询合同
-        $contract = new \app\admin\model\purchase\Contract;
-        $contract_data = $contract->getContractData();
-        $this->assign('contract_data', $contract_data);
-
-        $getTabList = ['采购单信息', '质检信息', '物流信息', '付款信息'];
-        $this->assign('getTabList', $getTabList);
+        $this->assign('supplier_name', $supplier_name);
+        $this->assign('purchase_number', $purchase_number);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }

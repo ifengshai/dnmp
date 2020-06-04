@@ -15,6 +15,7 @@
         text-align: center;
 
     }
+
     .caigou #caigou-table tr {
 
         border-width: 1px;
@@ -84,31 +85,28 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-purchase_number" class="form-control" readonly name="row[purchase_number]"
-                value="{$row.purchase_number}" type="text">
+            <input class="form-control" readonly name="row[purchase_number]" value="{$purchase_number}" type="text">
         </div>
         <label class="control-label col-xs-12 col-sm-2">采购批次:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-purchase_name" class="form-control" readonly name="row[purchase_name]" value="{$row.purchase_name}"
-                type="text">
+            <input  class="form-control" readonly name="row[purchase_name]" value="{$row.batch_id}" type="text">
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-purchase_number" class="form-control" readonly name="row[purchase_number]"
-                value="{$row.purchase_number}" type="text">
+            <input class="form-control" readonly name="row[purchase_number]" value="{$supplier_name}" type="text">
         </div>
         <label class="control-label col-xs-12 col-sm-2">是否错发:</label>
         <div class="col-xs-12 col-sm-3">
-            <select name="row[type]" class="form-control" disabled>
+            <select name="row[is_error]" class="form-control" disabled>
                 <option value="">请选择</option>
-                <option value="1" {:$row['type']==1 ? 'selected' : '' }>现货</option>
-                <option value="2" {:$row['type']==2 ? 'selected' : '' }>大货</option>
+                <option value="1" {:$row['is_error']==1 ? 'selected' : '' }>是</option>
+                <option value="0" {:$row['is_error']==0 ? 'selected' : '' }>否</option>
             </select>
         </div>
     </div>
-    
+
     <hr>
 
     <div class='caigou' style="width: 80%;margin-left: 10%;">
@@ -118,131 +116,30 @@
             <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>SKU</td>
-                    <th>产品名称</td>
                     <th>供应商sku</td>
-                    <th>采购数量（个）</td>
-                    <th>采购单价（元）</td>
-                    <th>总价（元）</td>
+                    <th>采购数量</td>
+                    <th>应到货数量</td>
+                    <th>到货数量</td>
+                    <th>异常类型</td>
                 </tr>
                 {foreach $item as $v}
                 <tr>
-                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}"
-                        type="hidden">
-                    <td>
-                        <input id="c-purchase_remark" class="form-control sku" readonly {:$row['contract_id'] ? 'readonly' : '' }
-                            name="sku[]" value="{$v.sku}" type="text">
-                    </td>
-                    <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                            value="{$v.product_name}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
-                            value="{$v.supplier_sku}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" readonly {:$row['contract_id']
-                            ? 'readonly' : '' } name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_price" readonly {:$row['contract_id']
-                            ? 'readonly' : '' } name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" readonly
-                            value="{$v.purchase_total}" type="text"></td>
-                    <!-- <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> -->
+                    <td>{$v.sku}</td>
+                    <td>{$v.supplier_sku}</td>
+                    <td>{$v.purchase_num}</td>
+                    <td>{$v.should_arrival_num}</td>
+                    <td>{$v.arrival_num}</td>
+                    {php}
+                    if ($v['error_type'] == 1) $str = '多发';  
+                    elseif($v['error_type'] == 2) $str = '少发';
+                    {/php}
+                    <td>{$str}</td>
                 </tr>
                 {/foreach}
             </table>
         </div>
 
 
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">商品总额:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-product_total" class="form-control total" readonly step="0.01" name="row[product_total]"
-                    type="number" value="{$row.product_total}">
-            </div>
-
-            <label class="control-label col-xs-12 col-sm-2">运费:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-purchase_freight" class="form-control freight" readonly step="0.01" name="row[purchase_freight]"
-                    type="number" value="{$row.purchase_freight}">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">总计:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-purchase_total" class="form-control purchase_total" readonly step="0.01"
-                    name="row[purchase_total]" value="{$row.purchase_total}" type="number">
-            </div>
-            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
-            <div class="col-xs-12 col-sm-3">
-                <select name="row[settlement_method]" class="form-control settlement_method" disabled>
-                    <option value="1" {:$row['settlement_method']==1 ? 'selected' : '' }>先付款</option>
-                    <option value="2" {:$row['settlement_method']==2 ? 'selected' : '' }>货到付款</option>
-                    <option value="3" {:$row['settlement_method']==3 ? 'selected' : '' }>付定金，货到付款</option>
-                </select>
-            </div>
-
-
-        </div>
-        <div class="form-group {:$row['settlement_method'] == 3 ? '' : 'hidden'} final_amount">
-
-            <label class="control-label col-xs-12 col-sm-2">定金金额:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-deposit_amount" class="form-control deposit_amount" readonly step="0.01" name="row[deposit_amount]"
-                    type="number" value="{$row.deposit_amount}">
-            </div>
-
-            <label class="control-label col-xs-12 col-sm-2">尾款金额:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-final_amount" class="form-control final_amount" readonly step="0.01" name="row[final_amount]"
-                    type="number" value="{$row.final_amount}">
-            </div>
-
-        </div>
-    </div>
-
-    <hr>
-    <div class='caigou' style="width: 50%;margin-left: 10%;">
-        <p style="font-size: 16px;text-align: center;"><b>交货信息</b></p>
-        <div style="margin-bottom: 20px;" id="arrival_div">
-            <div id="toolbar1" class="toolbar">
-                <!-- <a href="javascript:;" class="btn btn-success btn-addplus" title="添加交货批次"><i class="fa fa-plus"></i>
-                    添加交货批次</a> -->
-            </div>
-            {foreach $batch as $k => $v}
-            <input class="form-control" name="batch_id[]" value="{$v.id}" readonly type="hidden">
-            <div class="list" style="margin-top:20px;">
-                
-                <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> 批次预计到货时间：</label>
-                <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
-                    <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" readonly type="text"
-                        value="{$v->arrival_time}">
-
-                </div>
-                <!-- <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>
-                    删除</a> -->
-                <table id="caigou-table" style="width:80%;">
-                    <tr>
-                        <th>SKU</td>
-
-                        <th>到货数量</td>
-                    </tr>
-                    {foreach $v->purchaseBatchItem as $val}
-                    <input class="form-control" name="batch_item_id[{$k}][]" value="{$val.id}" readonly type="hidden">
-                    <tr>
-                        <td>
-                            <input id="c-purchase_remark" class="form-control" name="batch_sku[{$k}][]" value="{$val.sku}" readonly type="text">
-                        </td>
-
-                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" readonly name="arrival_num[{$k}][]"
-                                type="text"></td>
-
-                    </tr>
-                    {/foreach}
-
-                </table>
-
-
-            </div>
-            {/foreach}
-        </div>
-    </div>
+        
 
 </form>
