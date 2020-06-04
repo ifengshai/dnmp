@@ -3843,6 +3843,8 @@ order by sfoi.item_id asc limit 1000";
             case 3:
                 $model = Db::connect('database.db_nihao');
                 break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');    
             default:
                 $model = false;
                 break;
