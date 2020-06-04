@@ -1215,7 +1215,7 @@ class PurchaseOrder extends Backend
     }
 
     /**
-     * 产品补货列表
+     * 产品补货列表 在途库存新
      */
     public function product_grade_list()
     {
@@ -1249,38 +1249,38 @@ class PurchaseOrder extends Backend
             $map['is_del'] = 1;
             $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
-            $product = $item->where($map)->column('available_stock', 'sku');
+            $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');
 
             //计算在途数量
             //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $hasWhere['sku'] = ['in', $skus];
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
-            $purchase_map['check_status'] = ['in', [0, 1]];
-            $purchase_map['is_diff'] = 0;
-            $purchase_map['is_del'] = 1;
-            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('sku')
-                ->column('sum(purchase_num) as purchase_num', 'sku');
+            // $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
+            // $purchase_map['check_status'] = ['in', [0, 1]];
+            // $purchase_map['is_diff'] = 0;
+            // $purchase_map['is_del'] = 1;
+            // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('sku')
+            //     ->column('sum(purchase_num) as purchase_num', 'sku');
 
-            //查询出满足条件的采购单号  旧在途库存计算方式
-            $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('PurchaseOrder.id')
-                ->column('PurchaseOrder.id');
+            // //查询出满足条件的采购单号  旧在途库存计算方式
+            // $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('PurchaseOrder.id')
+            //     ->column('PurchaseOrder.id');
 
-            //查询留样库存
-            //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $check_map['status'] = 2;
-            $check_map['type'] = 1;
-            $check_map['Check.purchase_id'] = ['in', $ids];
-            $check = new \app\admin\model\warehouse\Check;
-            $hasWhere['sku'] = ['in', $skus];
-            $check_list = $check->hasWhere('checkItem', $hasWhere)
-                ->where($check_map)
-                ->group('sku')
-                ->column('sum(arrivals_num) as arrivals_num', 'sku');
+            // //查询留样库存
+            // //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
+            // $check_map['status'] = 2;
+            // $check_map['type'] = 1;
+            // $check_map['Check.purchase_id'] = ['in', $ids];
+            // $check = new \app\admin\model\warehouse\Check;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $check_list = $check->hasWhere('checkItem', $hasWhere)
+            //     ->where($check_map)
+            //     ->group('sku')
+            //     ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
 
 
@@ -1306,7 +1306,7 @@ class PurchaseOrder extends Backend
 
             foreach ($list as &$v) {
                 $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
-                $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
+                $onway_stock = $product[$v['true_sku']]['on_way_stock'];
                 if ($v['grade'] == 'A+') {
                     $times = 1.5;
                 } elseif ($v['grade'] == 'A') {
@@ -1325,7 +1325,7 @@ class PurchaseOrder extends Backend
                 //补货量
                 $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']] - $onway_stock);
                 $v['replenish_num'] = $replenish_num > 0 ? $replenish_num : 0;
-                $v['stock'] = $product[$v['true_sku']];
+                $v['stock'] = $product[$v['true_sku']]['available_stock'];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
                 $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock'] / $v['days_sales_num']) : 0;
@@ -1380,26 +1380,6 @@ class PurchaseOrder extends Backend
         $this->assign('res', $res);
 
         return $this->view->fetch();
-
-        // //计算断货频次
-        // $sku_where['sku'] = ['in', $sku_list];
-        // $sku_data = M('product_sku_stock', 'zeelool_')->where($sku_where)->order('sku asc,createtime asc')->cache(true, 86400)->select();
-        // $sku_list = [];
-        // foreach ($sku_data as $k => $v) {
-        //     //实时库存加上采购未入库库存
-        //     if (($v['qty'] + $v['stock_num']) <= 0) {
-        //         if (!$sku_list[$v['sku']]) {
-        //             $sku_list[$v['sku']]['num'] = 1;
-        //         } else {
-        //             //实时库存加上采购未入库库存
-        //             if (($sku_data[$k - 1]['qty'] + $sku_data[$k - 1]['stock_num']) > 0) {
-        //                 $sku_list[$v['sku']]['num'] = $sku_list[$v['sku']]['num'] + 1;
-        //             }
-        //         }
-        //     }
-        // }
-
-
 
     }
 

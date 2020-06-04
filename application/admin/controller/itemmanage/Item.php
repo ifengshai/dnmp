@@ -1099,39 +1099,39 @@ class Item extends Backend
 
             $list = collection($list)->toArray();
 
-            $skus = array_column($list, 'sku');
+            // $skus = array_column($list, 'sku');
 
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $hasWhere['sku'] = ['in', $skus];
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_map['is_del'] = 1;
-            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('sku')
-                ->column('sum(purchase_num) as purchase_num', 'sku');
+            // //计算SKU总采购数量
+            // $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            // $purchase_map['stock_status'] = ['in', [0, 1]];
+            // $purchase_map['is_del'] = 1;
+            // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('sku')
+            //     ->column('sum(purchase_num) as purchase_num', 'sku');
 
-            //查询出满足条件的采购单号
-            $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('PurchaseOrder.id')
-                ->column('PurchaseOrder.id');
+            // //查询出满足条件的采购单号
+            // $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('PurchaseOrder.id')
+            //     ->column('PurchaseOrder.id');
 
-            //查询留样库存
-            //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $check_map['status'] = 2;
-            $check_map['type'] = 1;
-            $check_map['Check.purchase_id'] = ['in', $ids];
-            $check = new \app\admin\model\warehouse\Check;
-            $hasWhere['sku'] = ['in', $skus];
-            $check_list = $check->hasWhere('checkItem', $hasWhere)
-                ->where($check_map)
-                ->group('sku')
-                ->column('sum(arrivals_num) as arrivals_num', 'sku');
-            foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
-            }
+            // //查询留样库存
+            // //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
+            // $check_map['status'] = 2;
+            // $check_map['type'] = 1;
+            // $check_map['Check.purchase_id'] = ['in', $ids];
+            // $check = new \app\admin\model\warehouse\Check;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $check_list = $check->hasWhere('checkItem', $hasWhere)
+            //     ->where($check_map)
+            //     ->group('sku')
+            //     ->column('sum(arrivals_num) as arrivals_num', 'sku');
+            // foreach ($list as &$v) {
+            //     $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
+            // }
 
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -1186,8 +1186,7 @@ class Item extends Backend
         $supplier_where['status'] = 1;
         $supplier_where['label'] = 1;
         $product_cycle = $supplier_sku->where($supplier_where)->value('product_cycle');
-        
-        $num = 0;
+
         $check = new \app\admin\model\warehouse\Check;
         foreach ($info as $k => $v) {
             //计算质检单到货数量
@@ -1201,14 +1200,12 @@ class Item extends Backend
                 continue;
             }
             $info[$k]['arrivals_num'] = $arrivals_num;
-            $num += $v['purchase_num'] - $arrivals_num;
             $product_cycle = $product_cycle ? $product_cycle : 7;
             $info[$k]['product_cycle_time'] = date('Y-m-d H:i:s', strtotime('+' . $product_cycle . ' day', strtotime($v['createtime'])));
 
         }
 
         $this->assign('info', $info);
-        $this->assign('num', $num);
         $this->assign('product_cycle', $product_cycle);
 
 
