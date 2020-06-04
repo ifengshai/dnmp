@@ -600,6 +600,11 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                //查询入库单信息是否齐全
+                $location_arr = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->column('location_id');
+                if(in_array(0,$location_arr)){
+                    $this->error(__('库位号不能为空', ''));
+                }
                 $workorder['status'] = $params['workorder_status'];
                 if($params['workorder_status'] == 3){
                     //审核通过后添加商品到样品间列表
@@ -719,6 +724,11 @@ class Sample extends Backend
         $status = input('status');
         if (!$ids) {
             $this->error('缺少参数！！');
+        }
+        //判断信息是否完整
+        $location_arr = Db::name('purchase_sample_workorder_item')->where('parent_id','in',$ids)->column('location_id');
+        if(in_array(0,$location_arr)){
+            $this->error(__('库位号不能为空', ''));
         }
         $is_update = 0;
         $where['id'] = ['in', $ids];
