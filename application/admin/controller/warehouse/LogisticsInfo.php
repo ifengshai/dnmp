@@ -23,6 +23,7 @@ class LogisticsInfo extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\LogisticsInfo;
         $this->purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
     }
 
     /**
@@ -49,6 +50,7 @@ class LogisticsInfo extends Backend
         if (!$ids) {
             $this->error('缺少参数！！');
         }
+
         if ($this->request->isAjax()) {
             $res = $this->model->save(['status' => 1], ['id' => $ids]);
             if (false !== $res) {
@@ -59,8 +61,27 @@ class LogisticsInfo extends Backend
                 } else {
                     $data['purchase_status'] = 7;
                 }
+                $data['arrival_time'] = date('Y-m-d H:i:s');
                 $this->purchase->save($data, ['id' => $row['purchase_id']]);
-                
+
+                //签收扣减在途库存
+                $batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
+                $item = new \app\admin\model\itemmanage\Item();
+                if ($row['batch_id']) {
+                    $list = $batch_item->where(['purchase_batch_id' => $row['batch_id']])->select();
+                    foreach ($list as $v) {
+                        $item->where(['sku' => $v['sku']])->setDec('on_way_stock', $v['arrival_num']);
+                    }
+                } else {
+                    if ($row['purchase_id']) {
+                        $list = $this->purchase_item->where(['purchase_id' => $row['purchase_id']])->select();
+                        foreach ($list as $v) {
+                            $item->where(['sku' => $v['sku']])->setDec('on_way_stock', $v['purchase_num']);
+                        }
+                    }
+                }
+
+
                 $this->success('签收成功');
             } else {
                 $this->error('签收失败');

@@ -775,10 +775,21 @@ class PurchaseOrder extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-        $data['purchase_status'] = input('status');
+        $status = input('status');
+        $data['purchase_status'] = $status;
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        $item = new \app\admin\model\itemmanage\Item();
         if ($res !== false) {
-            
+
+            //在途库存新逻辑
+            if ($status == 2) {
+                //审核通过添加在途库存
+                $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
+                foreach ($list as $v) {
+                    $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+                }
+            }
+
             $this->success();
         } else {
             $this->error('修改失败！！');
@@ -960,6 +971,7 @@ class PurchaseOrder extends Backend
         $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
         $new_product = new \app\admin\model\NewProduct();
+        $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $k => $v) {
             //匹配SKU
             if ($v['skuid']) {
@@ -970,7 +982,11 @@ class PurchaseOrder extends Backend
 
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+
+                $item->where(['sku' => $params['sku']])->setInc('on_way_stock', $v['purchase_num']);
             }
+
+            
 
             //判断sku是否为选品库SKU
             $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
@@ -1028,6 +1044,7 @@ class PurchaseOrder extends Backend
             sleep(1);
         }
         $new_product = new \app\admin\model\NewProduct();
+        $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -1097,8 +1114,7 @@ class PurchaseOrder extends Backend
                     if ($allDeliveredTime) {
                         $matches = [];
                         preg_match('/\d{14}/', $allDeliveredTime, $matches);
-                        $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
-                        $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                        $list['delivery_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
 
                     //待发货
@@ -1152,6 +1168,11 @@ class PurchaseOrder extends Backend
                         if ($count > 0) {
                             $kval = 1;
                         }
+
+                        if ($params[$key]['sku']) {
+                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $val['purchase_num']);
+                        }
+                       
                     }
                     //修改为选品采购单
                     if ($kval == 1) {
