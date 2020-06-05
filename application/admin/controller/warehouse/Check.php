@@ -31,6 +31,7 @@ class Check extends Backend
         $this->model = new \app\admin\model\warehouse\Check;
         $this->check_item = new \app\admin\model\warehouse\CheckItem;
         $this->purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $this->batch = new \app\admin\model\purchase\PurchaseBatch();
     }
 
@@ -608,7 +609,7 @@ class Check extends Backend
                 //全部质检完成则查询是否有异常单
                 if ($count <= 0) {
                     $map[] = ['exp', Db::raw("a.is_error = 1 or b.error_type > 0")];
-                    $result = $this->model->alias('a')->where(['a.batch_id' => $row['batch_id'], 'a.status' => 2])->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->select();
+                    $result = $this->model->alias('a')->where(['a.batch_id' => $row['batch_id'], 'a.purchase_id' => $row['purchase_id'], 'a.status' => 2])->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->select();
                     if ($result) {
                         $list = [];
                         $list['error_number'] = 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -624,6 +625,9 @@ class Check extends Backend
                             $item[$k]['should_arrival_num'] = $v['should_arrival_num'];
                             $item[$k]['arrival_num'] = $v['arrivals_num'];
                             $item[$k]['error_type'] = $v['error_type'];
+                            $item[$k]['purchase_id'] = $row['purchase_id'];
+                            $item[$k]['purchase_price'] = $this->purchase_item->where(['purchase_id' => $row['purchase_id'], 'sku' => $v['sku']])->value('purchase_price');
+
                             if ($v['is_error'] == 1) {
                                 $is_error = 1;
                             }
