@@ -154,7 +154,7 @@
                     {elseif $row['store_id'] == 4 && $label != 3}
                     <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
                         readonly>
-                    {else/}
+                    {elseif $row['store_id'] == 5}
                     <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="未知" type="text"
                         readonly>
                     {/if}
