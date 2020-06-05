@@ -462,6 +462,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         $(this).parent().parent().find('.error_type').val(0);
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                     }
+
+                    if (not_quantity_num < 0) {
+                        not_quantity_num = 0;
+                    }
                     
                     $(this).parent().next().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
@@ -489,6 +493,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     } else {
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                     }
+
+                    if (not_quantity_num < 0) {
+                        not_quantity_num = 0;
+                    }
+
+
                     
                     $(this).parent().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
