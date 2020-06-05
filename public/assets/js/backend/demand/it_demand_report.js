@@ -1,6 +1,65 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','echartsobj'], function ($, undefined, Backend, Table, Form,EchartObj) {
 
     var Controller = {
+
+        statistical: function () {
+            Controller.api.bindevent();
+
+
+            //销售排行榜图表
+            var chartOptions = {
+                targetId: 'echart',
+                downLoadTitle: '图表',
+                type: 'bar',
+                bar: {
+                    xAxis: {
+                        type: 'category',
+                        data: []
+                    },
+                    grid: { //直角坐标系内绘图网格
+                        top: '10%', //grid 组件离容器上侧的距离。
+                        left: '10%', //grid 组件离容器左侧的距离。
+                        right: '10%', //grid 组件离容器右侧的距离。
+                        bottom: '10%', //grid 组件离容器下侧的距离。
+                        containLabel: true //grid 区域是否包含坐标轴的刻度标签。
+                    },
+                    tooltip: { //提示框组件。
+                        trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
+                        axisPointer: { //坐标轴指示器配置项。
+                            type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
+                        },
+                        formatter: function (param) { //格式化提示信息
+                            console.log(param);
+                            return param[0].seriesName + '：' + param[0].value + '<br>' + param[1].seriesName + '：' + param[1].value +'<br>' + param[2].seriesName + '：' + param[2].value +'<br>'+ param[3].seriesName + '：' + param[3].value +'<br>';
+                        }
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: { //坐标轴刻度标签的相关设置。坐标轴刻度标签的显示间隔，在类目轴中有效。【0 强制显示所有标签。】【1，表示『隔一个标签显示一个标签』】【2，表示隔两个标签显示一个标签】，以次类推
+                                interval: 0, //倾斜度 -90 至 90 默认为0
+                                margin: 10, //刻度标签与轴线之间的距离。
+                                formatter: '{value}', //格式化刻度值
+                                textStyle: { //类目标签的文字样式。
+                                    color: '#797979', //文字的颜色。
+                                    fontStyle: 'normal' //文字的字体系列
+                                }
+                            },
+                        }
+                    ],
+                }
+            };
+            var web_type=$("#web_type").val();
+            var options = {
+                type: 'post',
+                url: 'demand/it_demand_report/statistical',
+                data: {
+                    web_type:web_type
+                }
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+        },
         index: function () {
             // 初始化表格参数配置
             Table.api.init();

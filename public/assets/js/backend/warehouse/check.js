@@ -29,10 +29,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'check_order_number', title: __('Check_order_number'), operate: 'like' },
-                        { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
+
                         { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
-                        { field: 'orderreturn.return_order_number', title: __('退货单号'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'remark', title: __('Remark'), formatter: Controller.api.formatter.getClear, operate: false },
                         {
@@ -55,33 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                {
-                                    name: 'submitAudit',
-                                    text: '提交审核',
-                                    title: __('提交审核'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: 'warehouse/check/audit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                },
+
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -219,7 +192,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             //批量生成退销单
             $(document).on('click', '.btn-matching', function () {
                 var ids = Table.api.selectedids(table);
-            
+
                 Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["60%", "60%"] });
 
             });
@@ -236,7 +209,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var op = search.op;
                     window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
+
             });
 
 
@@ -255,17 +228,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 }
                 )
             })
-            var type = $('.type').val();
+
             var purchase_id = $('.purchase_id').val();
-            if (purchase_id && type == 1) {
+            var batch_id = $('.batch_id').val();
+            if (purchase_id && !batch_id) {
                 $('.purchase_id').change();
             }
 
-            var order_return_id = $('.order_return_id').val();
-            if (order_return_id && type == 2) {
-                $('.order_return_id').change();
+            if (batch_id) {
+                $('.batch_id').change();
             }
-
 
             //移除
             $(document).on('click', '.btn-del', function () {
@@ -329,6 +301,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 }
                 )
             })
+
+            //审核
+            $(document).on('click', '.btn-check', function () {
+                var ids = $(this).attr('data-ids');
+                var status = $(this).attr('data-status');
+                if (!ids) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'warehouse/check/setStatus',
+                    data: { ids: ids, status: status }
+                }, function (item, ret) {
+                    parent.location.reload();
+                })
+            })
         },
         api: {
             formatter: {
@@ -353,6 +341,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             bindevent: function (success, error) {
 
                 Form.api.bindevent($("form[role=form]"), success, error);
+
+                $(document).on('click', '.btn-status', function () {
+                    $('.status').val(1);
+                })
 
                 //模糊匹配订单
                 $('.sku').autocomplete({
@@ -446,10 +438,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.arrivals_num', function () {
+                    var batch_id = $('.batch_id').val();
                     var type = $('.type').val();
+                    var arrivals_num = $(this).val();
+                    //判断是否分批
+                    if (batch_id) {
+                        var true_num = $(this).parent().parent().find('.should_arrival_num').val();
+                    } else {
+                        var true_num = $(this).parent().parent().find('.purchase_num').val();
+                    }
+
+                    
+                    if (arrivals_num * 1 > true_num * 1) {
+                        $(this).parent().parent().find('.error_type').val(1);
+                    } else if (arrivals_num * 1 < true_num) {
+                        $(this).parent().parent().find('.error_type').val(2);
+                    } else {
+                        $(this).parent().parent().find('.error_type').val(0);
+                    }
+
                     if (type == 1) {
                         var check_num = $(this).parent().prev().find('input').val();
-                        var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().next().find('.quantity_num').val();
                         var sample_num = $(this).parent().next().next().find('.sample_num').val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
@@ -460,7 +469,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         }
 
                     } else if (type == 2) {
-                        var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
@@ -474,37 +482,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
-                    var type = $('.type').val();
-                    if (type == 1) {
-                        var check_num = $(this).parent().prev().prev().find('input').val();
-                        var arrivals_num = $(this).parent().prev().find('input').val();
-                        var quantity_num = $(this).val();
-                        var sample_num = $(this).parent().next().find('.sample_num').val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
+                    var arrivals_num = $(this).parent().prev().find('input').val();
+                    var quantity_num = $(this).val();
+                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
-                        $(this).parent().next().next().find('input').val(not_quantity_num);
-                        if (arrivals_num * 1 > 0) {
-                            $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
-                        }
-
-                    } else if (type == 2) {
-                        var arrivals_num = $(this).parent().parent().find('.arrivals_num').val();
-                        var quantity_num = $(this).val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
-                        $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        if (arrivals_num * 1 > 0) {
-                            $(this).parent().parent().find('.quantity_rate').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
-                        }
-
+                    $(this).parent().next().next().find('input').val(not_quantity_num);
+                    if (arrivals_num * 1 > 0) {
+                        $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                     }
                 })
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.sample_num', function () {
-                    var check_num = $(this).parent().prev().prev().prev().find('input').val();
                     var arrivals_num = $(this).parent().prev().prev().find('input').val();
                     var quantity_num = $(this).parent().prev().find('input').val();
-                    var sample_num = $(this).val();
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
@@ -527,44 +518,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             if ($('.supplier.selectpicker option').length > 1) {
                                 $(".supplier").selectpicker('val', data.supplier_id);//默认选中
                             }
-                            //console.log(data.id);
-                            //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
-                            $('.caigou table tbody').html('');
-                            $('#toolbar').hide();
-                            for (var i in data.item) {
-                                var sku = data.item[i].sku;
-                                if (!sku) {
-                                    sku = '';
+
+                            var batch_id = $('.batch_id').val();
+                            if (!batch_id) {
+                                var html = '';
+                                if (data.batch) {
+                                    for (var i in data.batch) {
+                                        html += '<option value="' + data.batch[i].id + '">' + data.batch[i].batch + '</option>';
+                                    }
                                 }
-
-                                var supplier_sku = data.item[i].supplier_sku;
-                                if (!supplier_sku) {
-                                    supplier_sku = '';
-                                }
-
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
-                                shtml += ' <input id="c-purchase_remark" class="form-control sku" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
-                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
-                                shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
-                                shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
-
-                                shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
-                                shtml += ' 上传</button></span>'
-
-                                shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
-                                shtml += ' </td>'
-
-                                shtml += ' </tr>'
+                                $('.batch_id').append(html);
                             }
-                            $('.caigou table tbody').append(shtml);
+
+
+                            //循环展示商品信息
+                            if (data.item) {
+                                var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
+                                $('.caigou table tbody').html('');
+                                $('#toolbar').hide();
+                                for (var i in data.item) {
+                                    var sku = data.item[i].sku;
+                                    if (!sku) {
+                                        sku = '';
+                                    }
+
+                                    var supplier_sku = data.item[i].supplier_sku;
+                                    if (!supplier_sku) {
+                                        supplier_sku = '';
+                                    }
+
+                                    shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+                                    shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
+                                    shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
+                                    shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
+
+                                    shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
+                                    shtml += ' 上传</button></span>'
+
+                                    shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
+                                    shtml += ' </td>'
+
+                                    shtml += ' </tr>'
+                                }
+                                $('.caigou table tbody').append(shtml);
+                            }
 
                             //模糊匹配订单
                             $('.sku').autocomplete({
@@ -602,51 +607,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     }
                 })
 
-
-                //退货单
-                $(document).on('change', '.order_return_id', function () {
+                //采购单分批
+                $(document).on('change', '.batch_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = Config.moduleurl + '/warehouse/check/getOrderReturnData';
+                        var url = Config.moduleurl + '/warehouse/check/getItemData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }
-                        }, function (data, ret) {
-                            $('#toolbar').hide();
-
-                            if ($('.supplier.selectpicker option').length > 1) {
-                                $(".supplier").selectpicker('val', data.supplier_id);//默认选中
-                            }
+                        }, function (item, ret) {
 
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
-                            $('.caigou table tbody').html('');
-                            console.log(data);
-                            for (var i in data) {
-                                var sku = data[i].return_sku;
-                                if (!sku) {
-                                    sku = '';
+                            if (item) {
+
+                                if ($('.supplier.selectpicker option').length > 1) {
+                                    $(".supplier").selectpicker('val', item[0].supplier_id);//默认选中
                                 }
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
-                                shtml += ' <input id="c-purchase_remark" class="form-control sku" name="purchase_id[]" readonly type="hidden" value="0">'
-                                shtml += ' <td>' + data[i].return_sku_qty + '</td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" readonly name="unqualified_num[]" type="text"></td>'
-                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" readonly name="quantity_rate[]" type="text">%</td>'
-                                shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
-                                shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
 
-                                shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
-                                shtml += ' 上传</button></span>'
+                                var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>应到货数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
+                                $('.caigou table tbody').html('');
+                                $('#toolbar').hide();
+                                for (var i in item) {
+                                    var sku = item[i].sku;
+                                    if (!sku) {
+                                        sku = '';
+                                    }
+                                    var supplier_sku = item[i].supplier_sku;
+                                    if (!supplier_sku) {
+                                        supplier_sku = '';
+                                    }
 
-                                shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
-                                shtml += ' </td>'
+                                    shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+                                    shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + item[i].purchase_id + '">'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + item[i].purchase_num + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + item[i].check_num + '"></td>'
+                                    shtml += ' <td class="batch_arrival_num"><input class="form-control should_arrival_num" readonly name="should_arrival_num[]" type="text" value="' + item[i].arrival_num + '"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
+                                    shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
+                                    shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
 
-                                shtml += ' </tr>'
+                                    shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
+                                    shtml += ' 上传</button></span>'
+
+                                    shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
+                                    shtml += ' </td>'
+
+                                    shtml += ' </tr>'
+                                }
+                                $('.caigou table tbody').append(shtml);
                             }
-                            $('.caigou table tbody').append(shtml);
-
 
                             //模糊匹配订单
                             $('.sku').autocomplete({
@@ -682,8 +696,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             });
                         });
                     }
-
                 })
+
 
 
                 //获取sku信息

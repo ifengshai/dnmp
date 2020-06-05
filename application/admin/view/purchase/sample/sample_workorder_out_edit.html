@@ -1,0 +1,86 @@
+<style>
+    .form-group{
+        float: left;
+        width: 34%;
+    }
+    .col-sm-2 {
+        width:30%
+    }
+    #add_product{
+        width: 73px;
+        height: 31px;
+        line-height: 31px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 0 10px 0px;
+    }
+    #del{
+        float: left;
+        width: 25%;
+        height: 28px;
+        line-height: 12px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 8px;
+        margin-top: 9px;
+        background: #e74c3c;
+    }
+    .desc{
+        display: flex;
+        margin: 10px 0 ;
+        border-bottom: 1px solid #ddd;
+    }
+    .desc textarea{
+        margin: 0 10px 10px;
+        border-radius: 4px;
+        resize: none;
+    }
+    .location{
+        padding-top: 15px !important;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div>
+        入库单号：{$row.location_number}
+    </div>
+    <div class="desc">
+        <label>备注：</label>
+        <textarea name="row[description]" id="description" cols="30" rows="6">{$row.description}</textarea>
+    </div>
+    <div id="add_product"><span>add</span></div>
+    <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+        <thead>
+        <tr role="row">
+            <th style="width: 150px;">SKU</th>
+            <th style="width: 150px;">出库数量</th>
+            <th style="width: 150px;">库位号</th>
+            <th style="width: 150px;">删除</th>
+        </thead>
+        <tbody id="product_data">
+        {foreach $product_list as $key=>$vo}
+        <tr role="row" class="odd del_{$key}">
+            <td style="padding-top: 15px">{$vo.sku}<input class="form-control" type="hidden" name="row[goods][{$key}][sku]" value="{$vo.sku}"></td>
+            <td><input type="text" class="form-control" name="row[goods][{$key}][stock]" value="{$vo.stock}"></td>
+            <td style="padding-top: 15px">{$vo.location}<input type="hidden" id="location" value="{$vo.location}"></td>
+            <td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr({$key})> 删除 </a></td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+        </div>
+    </div>
+    <div id="sku_info" style="display: none;">
+        <option value="">请输入</option>
+        {foreach name="sku_data" item="vo"}
+        <option data-id="{$vo.location}" value="{$vo.sku}" >{$vo.sku}</option>
+        {/foreach}
+    </div>
+</form>

@@ -37,7 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Controller.api.formatter.getcontent,
                         },
 
-                        { field: 'create_person', title: __('提出人'), operate: false },
+                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'nickname', title: __('负责人'), operate: 'like', visible:false },
                         {
                             field: 'priority',
                             title: __('Priority'),
@@ -665,7 +666,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        { field: 'create_person', title: __('提出人'), operate: false },
+                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'nickname', title: __('负责人'), operate: 'like', visible:false },
                         {
                             field: 'priority',
                             title: __('Priority'),

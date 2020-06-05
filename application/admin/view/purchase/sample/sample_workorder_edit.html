@@ -1,0 +1,95 @@
+<style>
+    .form-group{
+        float: left;
+        width: 32%;
+    }
+    .col-sm-2 {
+        width:30%
+    }
+    #add_product{
+        width: 73px;
+        height: 31px;
+        line-height: 31px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 0 10px 0px;
+    }
+    #del{
+        float: left;
+        width: 25%;
+        height: 28px;
+        line-height: 12px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 8px;
+        margin-top: 9px;
+        background: #e74c3c;
+    }
+    .desc{
+        display: flex;
+        margin: 10px 0 ;
+        border-bottom: 1px solid #ddd;
+    }
+    .desc textarea{
+        margin: 0 10px 10px;
+        border-radius: 4px;
+        resize: none;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div>
+        入库单号：{$row.location_number}
+    </div>
+    <div class="desc">
+        <label>备注：</label>
+        <textarea name="row[description]" id="description" cols="30" rows="6">{$row.description}</textarea>
+    </div>
+    <div id="add_product"><span>add</span></div>
+    <input type="hidden" id="sku_arr" value="{$sku_str}">
+    <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+        <thead>
+        <tr role="row">
+            <th style="width: 150px;">SKU</th>
+            <th style="width: 150px;">库存</th>
+            <th style="width: 150px;">库位号</th>
+            <th style="width: 150px;">删除</th>
+        </thead>
+        <tbody id="product_data">
+        {foreach $product_list as $k=>$vo}
+        <tr role="row" class="odd del_{$k}">
+            <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td>
+            <td><input type="text" class="form-control" name="row[goods][{$k}][stock]" value="{$vo.stock}"></td>
+            <td>
+                <select name="row[goods][{$k}][location_id]" class="form-control supplier" required >
+                    <option value="">请选择</option>
+                    {foreach $location_data as $key => $v}
+                    <option value="{$key}" {:$vo['location_id']==$key ? 'selected' : '' }>{$v}</option>
+                    {/foreach}
+                </select>
+            </td>
+            <td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr({$k})> 删除 </a></td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+        </div>
+    </div>
+
+<div style="display: none;">
+    <select id="select_location">
+        {foreach $location_data as $k => $v}
+        <option value="{$k}">{$v}</option>
+        {/foreach}
+    </select>
+</div>
+
+    
+</form>

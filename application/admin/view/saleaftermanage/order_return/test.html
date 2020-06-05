@@ -1,0 +1,595 @@
+{notempty name="customerInfo"}
+<div class="infos-wrap">
+    <h2>用户个人信息</h2>
+    <div class="user-info-wrap ">
+        <ul class="user-list ">
+            <li>
+                <span class="name">Email:</span>
+                <span>{$customerInfo.customer_email}</span>
+            </li>
+            <li>
+                <span class="name">Name:</span>
+                <span>{$customerInfo.customer_name}</span>
+            </li>
+            <li>
+                <span class="name">Customer Group:</span>
+                <span>{$customerInfo.customer_group_code}</span>
+            </li>
+        </ul>
+        <ul class="pay-infos" style="font-size: 16px;">
+            <li>
+                <strong>{$customerInfo.success_counter}</strong>
+                <span>支付成功数量</span>
+            </li>
+            <li>
+                <strong>{$customerInfo.success_total}</strong>
+                <span>支付成功金额($)</span>
+            </li>
+            <li class="failed">
+                <strong>{$customerInfo.failed_counter}</strong>
+                <span>支付失败数量</span>
+            </li>
+            <li class="failed">
+                <strong>{$customerInfo.failed_total}</strong>
+                <span>支付失败金额($)</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{/notempty}
+{notempty name="orderInfoResult"}
+<div class="order-list-wrap">
+    <h2>订单信息列表</h2>
+    <div class="table-responsive">
+        <ul class="order-list">
+            <li>订单类型</li>
+            <li>订单号</li>
+            <li class="num">快递单号</li>
+            <li>快递名称</li>
+            <li>订单状态</li>
+            <li>支付货币</li>
+            <li>原币种<br>支付金额</li>
+            <li>美金($)<br>支付金额</li>
+            <li>优惠券</li>
+            <li>优惠码</li>
+            <li>积分</li>
+            <li>抵扣</li>
+            <li>运费</li>
+            <li>快递方式</li>
+            <li>创建时间</li>
+            <li>操作</li>
+        </ul>
+
+
+        {foreach name="orderInfoResult" item="orderInfoList"}
+
+        <ul class="order-list">
+            <li class="normal">{$orderInfoList.order_type}</li>
+            <li>{$orderInfoList.increment_id}</li>
+            <li class="num"><a href="javascript:void(0)" class="track-number"
+                    data-id='{$orderInfoList.entity_id}'>{$orderInfoList.track_number}</a></li>
+            <li>{$orderInfoList.title}</li>
+            <li>{$orderInfoList.status}</li>
+            <li>{$orderInfoList.order_currency_code}</li>
+            <li>{:round($orderInfoList.grand_total,3)}</li>
+            <li>{:round($orderInfoList.base_grand_total,2)}</li>
+            <li>{$orderInfoList.coupon_code}</li>
+            <li>{$orderInfoList.coupon_rule_name}</li>
+            <li>{:round($orderInfoList.mw_rewardpoint,2)}</li>
+            <li>{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</li>
+            <li>{:round($orderInfoList.base_shipping_amount,2)}</li>
+            <li>{$orderInfoList.shipping_description}</li>
+            <li>{$orderInfoList.created_at}</li>
+            <li class="option">
+                <button type="button" class="addOrder"
+                    data-id="{$orderInfoList.increment_id}">增加工单</button>
+                <button type="button" class='machiningBtn'
+                    data-id="{$orderInfoList.increment_id}">配货记录</button>
+                <button class="detail-btn" type="button">展开详情</button>
+            </li>
+
+            <li class="detail-wrap" style="display: none;">
+
+                <div class="product-list">
+                    <h3>商品列表</h3>
+                    <table>
+                        <tr>
+                            <th>Product</th>
+                            <th>Lens</th>
+                            <th>Prescription Type</th>
+                            <th>Frame Price</th>
+                            <th>Lens Price</th>
+                            <th>Original price</th>
+                            <th>Discount</th>
+                            <th>Row Total</th>
+                        </tr>
+                        {foreach $orderInfoList.item as $itemInfoList}
+                        <tr>
+                            <td>
+                                <ul class="product-info">
+                                    <li>{$itemInfoList.name}</li>
+                                    <li>SKU：{$itemInfoList.sku} </li>
+                                    <li>Color：{$itemInfoList.options[0]['value']}</li>
+                                    <li>Qty：{:round($itemInfoList.qty_ordered)}</li>
+                                </ul>
+                            </td>
+                            <td class="lens-wrap-td">
+                                {if $itemInfoList.index_type || $itemInfoList.coatiing_name}
+                                <ul class="lens-wrap">
+                                    <li>
+                                        <span class="name">{$itemInfoList.index_type}</span> <span
+                                            class="price">{$itemInfoList.index_price}</span> </li>
+                                    <li>
+                                        <span class="name">{$itemInfoList.coatiing_name}</span>
+                                        <span>{$itemInfoList.coatiing_price}</span>
+                                    </li>
+                                </ul>
+                                {/if}
+                            </td>
+                            <td class="pres-type">
+                                <table>
+                                    <tr>
+                                        <th class="type" colspan="5">
+                                            {$itemInfoList.prescription_type}</th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>SPH</th>
+                                        <th>CYL</th>
+                                        <th>Axis</th>
+                                        <th>ADD</th>
+                                    </tr>
+                                    <tr>
+                                        <th>OD</th>
+                                        <td>{$itemInfoList.od_sph}</td>
+                                        <td>{$itemInfoList.od_cyl}</td>
+                                        <td>{$itemInfoList.od_axis}</td>
+                                        {if $itemInfoList.total_add}
+                                        <td rowspan="2">{$itemInfoList.total_add}</td>
+                                        {else/}
+                                        <td>{$itemInfoList.os_add}</td>
+                                        {/if}
+                                    </tr>
+                                    <tr>
+                                        <th>OS</th>
+                                        <td>{$itemInfoList.os_sph}</td>
+                                        <td>{$itemInfoList.os_cyl}</td>
+                                        <td>{$itemInfoList.os_axis}</td>
+                                        {if !$itemInfoList.total_add}
+                                        <td>{$itemInfoList.od_add}</td>
+                                        {/if}
+                                    </tr>
+                                    <tr>
+                                        <th>PD</th>
+                                        {if $itemInfoList.pd}
+                                        <td>{$itemInfoList.pd}</td>
+                                        <td></td>
+                                        {else/}
+                                        <td class="pd">{$itemInfoList.pd_r} <span>(OD)</span></td>
+                                        <td class="pd">{$itemInfoList.pd_l} <span>(OS)</span></td>
+                                        {/if}
+
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {if $itemInfoList.prismcheck == 'on'}
+                                    <tr>
+                                        <th></th>
+                                        <th> Prism Horizontal</th>
+                                        <th>Base Direction</th>
+                                        <th>Prism Vertical</th>
+                                        <th>Base Direction</th>
+                                    </tr>
+                                    <tr>
+                                        <th>OD</th>
+                                        <td>{$itemInfoList.od_pv}</td>
+                                        <td>{$itemInfoList.od_bd}</td>
+                                        <td>{$itemInfoList.od_pv_r}</td>
+                                        <td>{$itemInfoList.od_bd_r}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>OS</th>
+                                        <td>{$itemInfoList.os_pv}</td>
+                                        <td>{$itemInfoList.os_bd}</td>
+                                        <td>{$itemInfoList.os_pv_r}</td>
+                                        <td>{$itemInfoList.os_bd_r}</td>
+                                    </tr>
+                                    {/if}
+                                </table>
+                            </td>
+                            <td>{:round($itemInfoList.frame_price,2)}</td>
+                            <td>{:round($itemInfoList.index_price,2)}</td>
+                            <td>{:round($itemInfoList.original_price,2)}</td>
+                            <td>{:round($itemInfoList.discount_amount,2)}</td>
+                            <td>{:round($itemInfoList.total,2)}</td>
+                        </tr>
+                        {/foreach}
+                    </table>
+                </div>
+
+                <div class="address-pay-info">
+                    <div>
+                        <h3>支付信息</h3>
+                        <ul>
+                            <li>
+                                <span>支付方式:</span>
+                                <em> {$orderInfoList.method}</em>
+                            </li>
+                            <li>
+                                <span>last trans id:</span>
+                                <em> {$orderInfoList.last_trans_id}</em>
+                            </li>
+                            <li>
+                                <span>paypal payer email:</span>
+                                <em> {$orderInfoList.additional_information.paypal_payer_email}</em>
+                            </li>
+                            <li>
+                                <span>paypal payment status:</span>
+                                <em> {$orderInfoList.additional_information.paypal_payment_status}</em>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>地址信息</h3>
+                        <!-- <img class="edit" src="../../web/edit.png" alt=""> -->
+                        <dl>
+                            {foreach $orderInfoList.address as $value}
+                            {php}
+                            if ($value['address_type'] == 'billing') {
+                            $address_type = 'Billing Address';
+                            } elseif ($value['address_type'] == 'shipping') {
+                            $address_type = 'Shipping Address';
+                            }
+                            {/php}
+                            <dt>
+                                <strong>{$address_type}</strong>
+                            </dt>
+                            <dd>
+                                <div><span>Name</span><em> {$value.firstname} {$value.lastname}</em>
+                                </div>
+                                <div>
+                                    <span>Address</span><em>{$value.street}，{$value.city}，{$value.region}，{$value.postcode}，{$value.country_id}</em>
+                                </div>
+                                <div><span>Tel</span> <em>{$value.telephone}</em></div>
+                            </dd>
+
+                            {/foreach}
+                        </dl>
+                    </div>
+                </div>
+                {notempty name="orderInfoList.workOrderList"}
+
+                <div class="list-wrap">
+                    <div>
+                        <h3>工单列表</h3>
+                        <table>
+                            <tr>
+                                <th>序号</th>
+                                <th>ID</th>
+                                <th>工单类型</th>
+                                <th>优惠券</th>
+                                <th>补发订单号</th>
+                                <th>工单级别</th>
+                                <th>问题类型</th>
+                                <th>相关人员</th>
+                                <th>承接人</th>
+                                <th>措施状态</th>
+                                <th>工单状态</th>
+                                <th>时间</th>
+                                <th>操作</th>
+
+                            </tr>
+                            {foreach $orderInfoList.workOrderList as $k => $workorder}
+                            <tr>
+                                <td>{$k+1}</td>
+                                <td>{$workorder.id}</td>
+                                <td>{$workorder.work_type_str}</td>
+                                <td>{$workorder.coupon_str}</td>
+                                <td>{$workorder.replacement_order}</td>
+                                <td class="leave">
+                                    {$workorder.work_level_str}
+                                </td>
+                                <td>{$workorder.problem_type_content}</td>
+                                <td>
+                                    <ul>
+                                        <li><span
+                                                class="name">工单创建人:</span><span>{$workorder.create_user_name}</span>
+                                        </li>
+                                        <li><span
+                                                class="name">实际审核人:</span><span>{$workorder.operation_user_name}</span>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        {foreach $workorder.step as $step}
+                                        <li>
+                                            <span
+                                                class="name">{$step.measure_content}:</span><span>{$step.recept_user}</span>
+                                        </li>
+                                        {/foreach}
+
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        {foreach $workorder.step as $step}
+                                        <li>
+                                            <span class="name">{$step.measure_content}:</span>
+                                            <span>{$step.operation_type}</span>
+                                        </li>
+                                        {/foreach}
+
+                                    </ul>
+                                </td>
+                                <td class="status ">{$workorder.work_status}</td>
+
+                                <td>
+                                    <ul>
+                                        <li>
+                                            创建时间：{$workorder.create_time}
+                                        </li>
+                                        <li>
+                                            提交时间：{$workorder.submit_time}
+                                        </li>
+                                        <li>
+                                            审核时间：{$workorder.check_time}
+                                        </li>
+                                        <li>
+                                            完成时间：{$workorder.complete_time}
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <a href="{:url('saleaftermanage/work_order_list/index')}?work_id={$workorder.id}"
+                                        class="btn btn-primary btn-xs btn-click btn-addtabs"
+                                        data-table-id="table" data-field-index="11" data-row-index="0"
+                                        data-button-index="3" title="售后工单列表"><i
+                                            class="fa fa-list"></i>查看</a>
+                                </td>
+
+                            </tr>
+                            {/foreach}
+                        </table>
+                    </div>
+                </div>
+
+                {/notempty}
+                <!-- notempty name="orderInfoList.replenish_list" -->
+
+                <div class="list-wrap ">
+                    <div class="is-dif-wrap ">
+                        <h3>补差价列表</h3>
+                        <table>
+                            <tr>
+                                <th>序号</th>
+                                <th>订单号</th>
+                                <th>订单状态</th>
+                                <th>付款金额</th>
+                                <th>币种</th>
+                                <th>创建时间</th>
+                            </tr>
+                            {foreach $orderInfoList.replenish_list as $k => $replenish_list}
+                            <tr>
+                                <td>{$k+1}</td>
+                                <td>{$replenish_list.replenish_increment_id}</td>
+                                <td>{$replenish_list.status}</td>
+                                <td>{$replenish_list.replenish_money}</td>
+                                <td>{$replenish_list.order_pay_currency}</td>
+                                <td>{$replenish_list.create_time}</td>
+                            </tr>
+                            {/foreach}
+                        </table>
+                    </div>
+                    <img class="slide-down" src="/assets/img/shouqi.png" alt="">
+                </div>
+
+                <!-- /notempty -->
+            </li>
+
+        </ul>
+
+        {/foreach}
+
+
+    </div>
+</div>
+{/notempty}
+
+{notempty name="customerInfo.order_vip"}
+<div class="order-list-wrap vip-wrap ">
+    <h2>VIP会员订单列表</h2>
+    <div class="table-responsive ">
+        <table class="table ">
+            <tr>
+                <th>序号</th>
+                <th>订单号</th>
+                <th>订单状态</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>账户状态</th>
+            </tr>
+            {foreach name="customerInfo.order_vip" item="order_vip"}
+            <tr>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.id}</td>
+
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.order_number}</td>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.order_status}</td>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time}</td>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time}</td>
+                <td style="text-align: center; vertical-align: middle;">{:$order_vip.is_active_status ==
+                    1 ? '正常' : '禁用'}</td>
+
+            </tr>
+            {/foreach}
+        </table>
+    </div>
+</div>
+{/notempty}
+
+
+<div class="widget-body no-padding">
+
+    {notempty name="infoSynergyTaskResult"}
+    <table id="info-synergy-task" class="altrowstable"
+        data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+        data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}" width="100%">
+        <thead>
+            <tr>
+                <th colspan="16"
+                    style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
+                    协同任务列表</th>
+            </tr>
+            <tr>
+                <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
+                <th style="text-align: center; vertical-align: middle;">任务状态</th>
+                <!-- <th style="text-align: center; vertical-align: middle;">协同任务单号</th> -->
+                <th style="text-align: center; vertical-align: middle;">关联单据类型</th>
+                <th style="text-align: center; vertical-align: middle;">关联单号</th>
+                <th style="text-align: center; vertical-align: middle;">订单SKUS</th>
+                <th style="text-align: center; vertical-align: middle;">平台类型</th>
+                <th style="text-align: center; vertical-align: middle;">承接部门</th>
+                <th style="text-align: center; vertical-align: middle;">承接人</th>
+                <th style="text-align: center; vertical-align: middle;">任务优先级</th>
+                <th style="text-align: center; vertical-align: middle;">任务分类</th>
+                <th style="text-align: center; vertical-align: middle;">问题描述</th>
+                <th style="text-align: center; vertical-align: middle;">创建人</th>
+                <th style="text-align: center; vertical-align: middle;">创建时间</th>
+                <th style="text-align: center; vertical-align: middle;">操作</th>
+            </tr>
+        </thead>
+        {foreach name="infoSynergyTaskResult" item="synergyTaskList" }
+        <tr>
+            <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.id}</td> -->
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_status}
+            </td>
+            <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_number}</td> -->
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_id}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                {$synergyTaskList.synergy_order_number}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_status}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_platform}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.dept_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.rep_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.prty_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_task_id}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.problem_desc}</td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_person}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_time}</td>
+            <td style="text-align: center; vertical-align: middle;"><a
+                    href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}"
+                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
+                    data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i
+                        class="fa fa-list"></i>查看</a></td>
+        </tr>
+        {/foreach}
+    </table>
+    {/notempty}
+    {notempty name="saleAfterTaskResult"}
+    <table id="sale-after-task" class="altrowstable"
+        data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+        data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}" width="100%">
+        <thead>
+            <tr>
+                <th colspan="16"
+                    style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
+                    售后任务列表</th>
+            </tr>
+            <tr>
+                <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
+                <!-- <th style="text-align: center; vertical-align: middle;">任务单号</th> -->
+                <th style="text-align: center; vertical-align: middle;">任务状态</th>
+                <th style="text-align: center; vertical-align: middle;">订单平台</th>
+                <th style="text-align: center; vertical-align: middle;">订单号</th>
+                <th style="text-align: center; vertical-align: middle;">订单SKU</th>
+                <th style="text-align: center; vertical-align: middle;">客户姓名</th>
+                <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
+                <th style="text-align: center; vertical-align: middle;">订单状态</th>
+                <th style="text-align: center; vertical-align: middle;">责任部门</th>
+                <th style="text-align: center; vertical-align: middle;">承接人</th>
+                <!-- <th style="text-align: center; vertical-align: middle;">任务优先级</th> -->
+                <th style="text-align: center; vertical-align: middle;">问题分类</th>
+                <th style="text-align: center; vertical-align: middle;">问题描述</th>
+                <th style="text-align: center; vertical-align: middle;">解决方案</th>
+                <th style="text-align: center; vertical-align: middle;">创建人</th>
+                <th style="text-align: center; vertical-align: middle;">创建时间</th>
+                <th style="text-align: center; vertical-align: middle;">操作</th>
+            </tr>
+        </thead>
+        {foreach name="saleAfterTaskResult" item="saleTaskList"}
+        <tr>
+            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.id}</td> -->
+            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_number}</td> -->
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_status}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_platform}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_number}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_skus}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.customer_name}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.customer_email}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_status}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.dept_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.rep_id}</td>
+            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.prty_id}</td> -->
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_desc}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.handle_scheme}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_person}</td>
+            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_time}</td>
+            <td style="text-align: center; vertical-align: middle;"><a
+                    href="{:url('saleaftermanage/sale_after_task/index')}?task_number={$saleTaskList.task_number}"
+                    class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
+                    data-field-index="11" data-row-index="0" data-button-index="3" title="售后任务"><i
+                        class="fa fa-list"></i>查看</a></td>
+        </tr>
+        {/foreach}
+    </table>
+    {/notempty}
+    {notempty name="orderReturnResult"}
+    <table id="order-return-task" class="altrowstable"
+        data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+        data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}" width="100%">
+        <thead>
+            <tr>
+                <th colspan="16"
+                    style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
+                    退货任务列表</th>
+            </tr>
+            <tr>
+                <th style="text-align: center; vertical-align: middle;">序号</th>
+                <th style="text-align: center; vertical-align: middle;">退货单号</th>
+                <th style="text-align: center; vertical-align: middle;">订单号</th>
+                <th style="text-align: center; vertical-align: middle;">订单平台</th>
+                <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
+                <th style="text-align: center; vertical-align: middle;">问题描述</th>
+                <th style="text-align: center; vertical-align: middle;">退件状态</th>
+                <th style="text-align: center; vertical-align: middle;">记录创建人</th>
+                <th style="text-align: center; vertical-align: middle;">创建日期</th>
+            </tr>
+        </thead>
+        {foreach name="orderReturnResult" item="orderReturnList"}
+        <tr>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.id}</td>
+            <td style="text-align: center; vertical-align: middle;">
+                {$orderReturnList.return_order_number}</td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.increment_id}</td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.order_platform}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.customer_email}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.return_remark}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.status}</td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.create_person}
+            </td>
+            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.create_time}</td>
+        </tr>
+        {/foreach}
+    </table>
+    {/notempty}
+
+
+</div>

@@ -13,7 +13,7 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         text-align: center;
-       
+
     }
 
     .caigou #caigou-table tr {
@@ -185,7 +185,7 @@
             <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
             </div>
-            <table id="caigou-table">
+            <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>SKU</td>
                     <th>产品名称</td>
@@ -289,14 +289,14 @@
     </div>
 
     <hr>
-    <div class='caigou' style="width: 80%;margin-left: 10%;">
+    <div class='caigou' style="width: 50%;margin-left: 10%;">
         <p style="font-size: 16px;text-align: center;"><b>交货信息</b></p>
-        <div style="margin-bottom: 20px;">
-            <div id="toolbar" class="toolbar">
-                <a href="javascript:;" class="btn btn-success btn-addplus" title="增加"><i class="fa fa-plus"></i> 添加交货批次</a>
+        <div style="margin-bottom: 20px;" id="arrival_div">
+            <div id="toolbar1" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-addplus" title="添加交货批次"><i class="fa fa-plus"></i>
+                    添加交货批次</a>
             </div>
-
-            <div class="list" style="margin-top:20px;">
+            <!-- <div class="list" style="margin-top:20px;">
                 <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
                 <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
                     <input id="c-arrival_time" readonly class="form-control datetimepicker arrival_time"
@@ -309,64 +309,25 @@
                 <table id="caigou-table" style="width:80%;">
                     <tr>
                         <th>SKU</td>
-                        <th>产品名称</td>
-                        <th>供应商sku</td>
+                        
                         <th>到货数量</td>
                     </tr>
 
                     <tr>
                         <td>
-                            <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
+                            <input id="c-purchase_remark" class="form-control" name="sku[]" readonly type="text">
                         </td>
-                        <td><input id="c-purchase_remark" class="form-control product_name" readonly
-                                name="product_name[]" type="text"></td>
-                        <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly
-                                name="supplier_sku[]" type="text"></td>
-
-                        <td><input id="c-purchase_remark" class="form-control arrival_num" readonly name="arrival_num[]"
+                    
+                        <td><input id="c-purchase_remark" class="form-control arrival_num" name="arrival_num[]"
                                 type="text"></td>
 
                     </tr>
 
                 </table>
 
-               
-            </div>
-            
 
-            <div class="list" style="margin-top:20px;">
-                <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
-                <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
-                    <input id="c-arrival_time" readonly class="form-control datetimepicker arrival_time"
-                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="arrival_time[]" type="text"
-                        value="{:date('Y-m-d H:i:s')}">
-                </div>
-                <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>
-                    删除</a>
-                <table id="caigou-table" style="width:80%;">
-                    <tr>
-                        <th>SKU</td>
-                        <th>产品名称</td>
-                        <th>供应商sku</td>
-                        <th>到货数量</td>
-                    </tr>
+            </div> -->
 
-                    <tr>
-                        <td>
-                            <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
-                        </td>
-                        <td><input id="c-purchase_remark" class="form-control product_name" readonly
-                                name="product_name[]" type="text"></td>
-                        <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly
-                                name="supplier_sku[]" type="text"></td>
-
-                        <td><input id="c-purchase_remark" class="form-control arrival_num" readonly name="arrival_num[]"
-                                type="text"></td>
-
-                    </tr>
-
-                </table>
-            </div>
         </div>
     </div>
     <input type='hidden' name="row[purchase_status]" class="status" value="0">
@@ -374,7 +335,7 @@
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <!-- <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button> -->
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
