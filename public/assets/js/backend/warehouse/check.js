@@ -439,7 +439,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.arrivals_num', function () {
                     var batch_id = $('.batch_id').val();
-                    var type = $('.type').val();
                     var arrivals_num = $(this).val();
                     //判断是否分批
                     if (batch_id) {
@@ -448,44 +447,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
 
-                    
+                    /**
+                     * 到货数量大于应到货数量时：不合格数量=应到数量-合格数量。不合格数量小于0时取0.
+                     * 到货数量小于、等于应到会数量时：不合格数量=到货数量-合格数量
+                     */
+                    var quantity_num = $(this).parent().next().find('.quantity_num').val();
                     if (arrivals_num * 1 > true_num * 1) {
                         $(this).parent().parent().find('.error_type').val(1);
+                        var not_quantity_num = true_num * 1 - quantity_num * 1;
                     } else if (arrivals_num * 1 < true_num) {
                         $(this).parent().parent().find('.error_type').val(2);
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                     } else {
                         $(this).parent().parent().find('.error_type').val(0);
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                     }
-
-                    if (type == 1) {
-                        var check_num = $(this).parent().prev().find('input').val();
-                        var quantity_num = $(this).parent().next().find('.quantity_num').val();
-                        var sample_num = $(this).parent().next().next().find('.sample_num').val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
-
-                        $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                        if (arrivals_num * 1 > 0) {
-                            $(this).parent().next().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
-                        }
-
-                    } else if (type == 2) {
-                        var quantity_num = $(this).parent().parent().find('.quantity_num').val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
-                        $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        if (arrivals_num * 1 > 0) {
-                            $(this).parent().parent().find('.quantity_rate').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
-                        }
-
+                    
+                    $(this).parent().next().next().next().find('input').val(not_quantity_num);
+                    if (arrivals_num * 1 > 0) {
+                        $(this).parent().next().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                     }
 
                 })
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
+                    var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).parent().prev().find('input').val();
+                    //判断是否分批
+                    if (batch_id) {
+                        var true_num = $(this).parent().parent().find('.should_arrival_num').val();
+                    } else {
+                        var true_num = $(this).parent().parent().find('.purchase_num').val();
+                    }
                     var quantity_num = $(this).val();
-                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
+                    if (arrivals_num * 1 > true_num * 1) {
+                        var not_quantity_num = true_num * 1 - quantity_num * 1;
+                    } else if (arrivals_num * 1 < true_num) {
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
+                    } else {
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
+                    }
                     $(this).parent().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
                         $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
