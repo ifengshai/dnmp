@@ -125,16 +125,12 @@
             <table id="caigou-table">
                 <tr>
                     <th>SKU</th>
-                    {if $row['type'] == 1}
                     <th>供应商SKU</th>
                     <th>采购数量</th>
                     <th>已质检数量</th>
-                    {/if}
                     <th>到货数量</th>
                     <th>合格数量</th>
-                    {if $row['type'] == 1}
                     <th>留样数量</th>
-                    {/if}
                     <th>不合格数量</th>
                     <th>合格率</th>
                     <th>备注</th>
@@ -149,22 +145,22 @@
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="{$v.sku}">
                     </td>
-                    {if $row['type'] == 1}
+                 
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" type="text"
                             value="{$v.supplier_sku}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" readonly name="purchase_num[]"
                             type="text" value="{$v.purchase_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control check_num" readonly name="check_num[]" type="text"
                             value="{$v.check_num}"></td>
-                    {/if}
+               
                     <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]"
                             type="text" value="{$v.arrivals_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]"
                             type="text" value="{$v.quantity_num}"></td>
-                    {if $row['type'] == 1}
+                 
                     <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"
                             value="{$v.sample_num}"></td>
-                    {/if}
+                
                     <td><input id="c-purchase_remark" class="form-control unqualified_num" readonly name="unqualified_num[]" type="text"
                         value="{$v.unqualified_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control quantity_rate" readonly name="quantity_rate[]" type="text"
