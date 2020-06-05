@@ -1044,17 +1044,6 @@ class WorkOrderList extends Model
                     break;
             }
 
-            //补差价列表
-            if ($v['replenish_increment_id']) {
-                $status = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $v['platform_order']])->value('status');
-                $replenish_list[$i]['replenish_increment_id'] = $v['replenish_increment_id'];
-                $replenish_list[$i]['status'] = $status;
-                $replenish_list[$i]['replenish_money'] = $v['replenish_money'];
-                $replenish_list[$i]['order_pay_currency'] = $v['order_pay_currency'];
-                $replenish_list[$i]['create_time'] = $v['create_time'];
-                $i++;
-            }
-
             //排列sku
             if ($v['order_sku']) {
                 $v['order_sku_arr'] = explode(',', $v['order_sku']);
