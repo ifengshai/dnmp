@@ -137,10 +137,13 @@ class PurchaseOrder extends Model
             return false;
         }
         $map['purchase_id'] = ['in', $totalArr];
+        //退销单的退销金额
         $returnResult = Db::name('purchase_return')->where($map)->field('purchase_id,round(sum(return_money),2) return_money')->group('purchase_id')->select();
+        //收货异常的退销金额 start
+        $abnormalResult = Db::name('purchase_abnormal_item')->where($map)->where(['error_type'=>2])->field('purchase_id,round(sum((should_arrival_num-arrival_num)*purchase_price)) return_price')->group('purchase_id')->select();
         $arr = [];
         $arr['return_money'] = 0;
-        if (!$returnResult) {
+        if (!$returnResult && !$abnormalResult) {
             $arr['thisPageArr'] = [];
             return $arr;
         }
@@ -149,6 +152,15 @@ class PurchaseOrder extends Model
             $arr['return_money'] += $v['return_money'];
             if (in_array($v['purchase_id'], $thisPageIdArr)) {
                 $arr['thisPageArr'][$v['purchase_id']] = $v['return_money'];
+            }
+        }
+
+        if($abnormalResult){
+            foreach($abnormalResult as $av){
+                $arr['return_money'] += $av['return_price'];
+                if(in_array($av['purchase_id'],$thisPageIdArr)){
+                    $arr['thisPageArr'][$av['purchase_id']] += $av['return_price'];
+                }
             }
         }
         return $arr;
