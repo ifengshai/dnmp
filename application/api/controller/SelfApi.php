@@ -395,4 +395,31 @@ class SelfApi extends Api
 
         $this->success('成功', $order_track_data, 200);
     }
+
+    /**
+     * 补差价订单支付成功 钉钉通知工单创建人
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/05 13:37:18 
+     * @return void
+     */
+    public function order_pay_ding()
+    {
+        //校验参数
+        $order_number = $this->request->request('order_number'); //订单号
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        //根据订单号查询工单
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3])->field('create_user_id,id')->find();
+        if ($list) {
+            Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+        } else {
+            $this->error(__('未查询到数据'), [], 400);
+        }
+        $this->success('成功', [], 200);
+    }
 }
