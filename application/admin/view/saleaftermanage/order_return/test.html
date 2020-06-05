@@ -371,8 +371,8 @@
                                 <th>币种</th>
                                 <th>创建时间</th>
                             </tr>
-                            {notempty name="differencePriceList"}
-                            {foreach $differencePriceList as $k => $replenish_list}
+                            {notempty name="orderInfoResult.differencePriceList"}
+                            {foreach $orderInfoResult.differencePriceList as $k => $replenish_list}
                             <tr>
                                 <td>{$k+1}</td>
                                 <td>{$replenish_list.order_number}</td>

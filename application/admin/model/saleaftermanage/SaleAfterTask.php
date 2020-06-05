@@ -651,7 +651,7 @@ class SaleAfterTask extends Model
 
                 //补差价列表
                 $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
-
+               
                 $result[$k]['workOrderList'] = $workOrderListResult['list'];
                 $result[$k]['differencePriceList'] = $differencePriceList;
                 switch ($v['order_type']) {
