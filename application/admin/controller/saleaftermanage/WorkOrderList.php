@@ -585,26 +585,26 @@ class WorkOrderList extends Backend
                 }
                 if ($result !== false) {
                     //通知
-                    // if ($this->model->work_type == 1) {
-                    //     if ($this->model->work_status == 2) {
-                    //         Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
-                    //     } elseif ($this->model->work_status == 3) {
-                    //         $usersId = explode(',', $this->model->recept_person_id);
-                    //         Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    //     }
-                    // }
+                    if ($this->model->work_type == 1) {
+                        if ($this->model->work_status == 2) {
+                            Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
+                        } elseif ($this->model->work_status == 3) {
+                            $usersId = explode(',', $this->model->recept_person_id);
+                            Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                        }
+                    }
 
-                    // //经手人
-                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
+                    //经手人
+                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
 
-                    //     Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    // }
+                        Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    }
 
-                    // //跟单处理
-                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
+                    //跟单处理
+                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
 
-                    //     Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    // }
+                        Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    }
 
                     $this->success();
                 } else {
