@@ -290,7 +290,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("row", $row);
         $this->view->assign("label", $label);
         return $this->view->fetch();
-    }
+    } 
 
 
     /**
