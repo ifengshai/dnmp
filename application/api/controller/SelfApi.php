@@ -416,7 +416,7 @@ class SelfApi extends Api
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3])->field('create_user_id,id')->find();
         if ($list) {
-            Ding::cc_ding(106, '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+            Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }
