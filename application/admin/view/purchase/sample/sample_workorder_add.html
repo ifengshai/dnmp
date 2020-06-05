@@ -38,6 +38,9 @@
         border-radius: 4px;
         resize: none;
     }
+    .location{
+        padding-top:15px !important;
+    }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -69,11 +72,10 @@
         </div>
     </div>
 
-    <div style="display: none;">
-        <select id="select_location">
-            {foreach $location_data as $k => $v}
-            <option value="{$k}">{$v}</option>
-            {/foreach}
-        </select>
+    <div id="sku_info" style="display: none;">
+        <option value="">请输入</option>
+        {foreach $sample_list as $k => $vo}
+        <option data-id="{$vo.location}" value="{$vo.sku}" >{$vo.sku}</option>
+        {/foreach}
     </div>
 </form>
