@@ -197,6 +197,7 @@
 
     </div>
 
+    {if $row['status'] == 1}
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
@@ -204,4 +205,5 @@
             <button type="button" class="btn btn-danger btn-embossed  btn-check" data-status='3' data-ids='{$row.id}'>审核拒绝</button>
         </div>
     </div>
+    {/if}
 </form>
