@@ -129,6 +129,7 @@
                     <th>供应商SKU</th>
                     <th>采购数量</th>
                     <th>已质检数量</th>
+                    <th>应到货数量</th>
                     <th>到货数量</th>
                     <th>合格数量</th>
                     <th>留样数量</th>
@@ -152,6 +153,7 @@
                             type="text" value="{$v.purchase_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control check_num" readonly name="check_num[]"
                             type="text" value="{$v.check_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control" readonly type="text" value="{$v.should_arrival_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control arrivals_num" readonly name="arrivals_num[]"
                             type="text" value="{$v.arrivals_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control quantity_num" readonly name="quantity_num[]"
