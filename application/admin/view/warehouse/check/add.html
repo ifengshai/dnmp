@@ -86,14 +86,7 @@
 
         <label class="control-label col-xs-12 col-sm-2">采购批次 :</label>
         <div class="col-xs-12 col-sm-3">
-            <select name="row[batch_id]" class="form-control batch_id">
-                <option value="">请选择</option>
-                {if $batch}
-                {foreach $batch as $k => $v}
-                <option value="{$v.id}" {:$info['batch_id']==$v['id'] ? 'selected' : '' }>{$v.batch}</option>
-                {/foreach}
-                {/if}
-            </select>
+            <input  class="form-control batch_id" name="row[batch_id]"  value="{$info['batch_id']}" readonly type="text" >
         </div>
     </div>
 
