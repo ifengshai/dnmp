@@ -473,7 +473,8 @@ class OrderReturn extends Backend
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
-            
+
+        
             $this->view->assign('orderPlatformId', $order_platform);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);

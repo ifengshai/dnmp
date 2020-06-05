@@ -716,7 +716,7 @@ class SaleAfterTask extends Model
         } else {
             $result = false;
         }
-
+      
         return $result;
     }
     /***
