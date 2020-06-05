@@ -489,26 +489,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     } else {
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                     }
+                    
                     $(this).parent().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
                         $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                     }
                 })
 
-                //计算不合格数量及合格率
-                $(document).on('blur', '.sample_num', function () {
-                    var arrivals_num = $(this).parent().prev().prev().find('input').val();
-                    var quantity_num = $(this).parent().prev().find('input').val();
-                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
-
-                    $(this).parent().next().find('input').val(not_quantity_num);
-                    if (arrivals_num * 1 > 0) {
-                        $(this).parent().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
-                    }
-
-                })
-
-
+            
                 //采购单
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
