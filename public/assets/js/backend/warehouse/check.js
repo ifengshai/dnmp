@@ -486,6 +486,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     }
                     var quantity_num = $(this).val();
 
+                    if (quantity_num > arrivals_num) {
+                        $(this).val(0);
+                        Toastr.error('合格数量不能大于到货数量');
+                        return false;
+                    }
+
                     if (arrivals_num * 1 > true_num * 1) {
                         var not_quantity_num = true_num * 1 - quantity_num * 1;
                     } else if (arrivals_num * 1 < true_num) {
@@ -505,6 +511,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                     }
                 })
+
+                //计算不合格数量及合格率
+                $(document).on('blur', '.sample_num', function () {
+                    var sample_num = $(this).val();
+                    var quantity_num = $(this).parent().prev().find('input').val();
+                    if (sample_num > quantity_num) {
+                        $(this).val(0);
+                        Toastr.error('样品数量不能大于合格数量');
+                        return false;
+                    }
+                })
+
+
 
             
                 //采购单
