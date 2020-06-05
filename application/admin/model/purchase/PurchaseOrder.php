@@ -137,6 +137,7 @@ class PurchaseOrder extends Model
             return false;
         }
         $map['purchase_id'] = ['in', $totalArr];
+        //退销单的退款金额
         $returnResult = Db::name('purchase_return')->where($map)->field('purchase_id,round(sum(return_money),2) return_money')->group('purchase_id')->select();
         $arr = [];
         $arr['return_money'] = 0;
