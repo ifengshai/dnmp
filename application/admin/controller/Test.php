@@ -57,9 +57,9 @@ class Test extends Backend
 
         $order_shipment = Db::name('order_node')->where('shipment_type','like', '%FedE%')->select();
         $order_shipment = collection($order_shipment)->toArray();
-
+        
         $trackingConnector = new TrackingConnector($this->apiKey);
-        //dump($order_shipment);exit;
+
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['shipment_type']));
             $carrier = $this->getCarrier($title);
@@ -84,7 +84,7 @@ class Test extends Backend
 
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-                if (stripos($v['title'], 'fede') !== false) {
+                if (stripos($v['shipment_type'], 'fede') !== false) {
                     $this->fedex_data($trackdata, $add);
                 }
             }
