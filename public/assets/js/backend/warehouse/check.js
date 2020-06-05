@@ -486,7 +486,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     }
                     var quantity_num = $(this).val();
 
-                    if (quantity_num > arrivals_num) {
+                    if (quantity_num*1 > arrivals_num*1) {
                         $(this).val(0);
                         Toastr.error('合格数量不能大于到货数量');
                         return false;
@@ -504,8 +504,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         not_quantity_num = 0;
                     }
 
-
-                    
                     $(this).parent().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
                         $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
@@ -515,8 +513,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.sample_num', function () {
                     var sample_num = $(this).val();
-                    var quantity_num = $(this).parent().prev().find('input').val();
-                    if (sample_num > quantity_num) {
+                    var quantity_num = $(this).parent().parent().find('.quantity_num').val();
+                    if (sample_num*1 > quantity_num*1) {
                         $(this).val(0);
                         Toastr.error('样品数量不能大于合格数量');
                         return false;

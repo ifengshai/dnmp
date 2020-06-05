@@ -6,7 +6,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_index' + location.search,
-                    add_url: 'purchase/sample/sample_import_xls',
+                    add_url: 'purchase/sample/sample_add',
+                    import_url: 'purchase/sample/sample_import_xls',
                     edit_url: 'purchase/sample/sample_edit',
                     del_url: 'purchase/sample/sample_del',
                     multi_url: 'purchase/sample/multi',
@@ -32,6 +33,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'stock', title: __('留样库存'),operate:false},
                         {field: 'is_lend', title: __('是否借出'),searchList: {"1": __('是'), "0": __('否')}},
                         {field: 'lend_num', title: __('借出数量'),operate:false},
+                        {
+                            field: 'buttons',
+                            width: "120px",
+                            operate:false,
+                            title: __('操作'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'edit',
+                                    text: __('编辑'),
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'purchase/sample/sample_edit',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'del',
+                                    text: __('删除'),
+                                    title: __('删除'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: 'purchase/sample/sample_del',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
                     ]
                 ]
             });
@@ -143,36 +180,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 },
                                 {
-                                    name: 'check',
-                                    text: __('审核'),
-                                    title: __('审核'),
+                                    name: 'detail',
+                                    text: __('详情'),
+                                    title: __('详情'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'purchase/sample/sample_workorder_detail',
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status_id < 3){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id < 3){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
+                                        return true;
                                     }
                                 },
                                 {
@@ -185,7 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
-                                        if(row.status_id < 3){
+                                        if(row.status_id == 1){
                                             return true;
                                         }else{
                                             return false;
@@ -293,29 +309,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 },
                                 {
-                                    name: 'check',
-                                    text: __('审核'),
-                                    title: __('审核'),
+                                    name: 'detail',
+                                    text: __('详情'),
+                                    title: __('详情'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'purchase/sample/sample_workorder_out_detail',
                                     callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id < 3){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_out_del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
                                         if(row.status_id < 3){
@@ -335,7 +334,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
-                                        if(row.status_id < 3){
+                                        if(row.status_id == 1){
                                             return true;
                                         }else{
                                             return false;
@@ -538,15 +537,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 });
             })
         },
+        sample_add: function () {
+            Controller.api.bindevent();
+        },
         sample_location_add: function () {
             Controller.api.bindevent();
         },
         sample_workorder_add: function () {
             Controller.api.bindevent();
+            $("body").on('change', ".sku_arr", function () {
+                $(this).parents('tr').find(".location").html($(this).find("option:selected").attr('data-id'))
+            });
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
-                var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value="" class="form-control"></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var sku_arr = $("#sku_info").html();
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },
@@ -575,15 +580,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 $('#product_data').append(add_str);
             });
         },
+        sample_edit: function () {
+            Controller.api.bindevent();
+        },
         sample_location_edit: function () {
             Controller.api.bindevent();
         },
         sample_workorder_edit: function () {
             Controller.api.bindevent();
+            $("body").on('change', ".sku_arr", function () {
+                $(this).parents('tr').find(".location").html($(this).find("option:selected").attr('data-id'))
+            });
             $(document).on('click', "#add_product", function () {
                 var number = $("#product_data > tr").length;
-                var location_option = $("#select_location").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><input type="text" name="row[goods]['+number+'][sku]" value="" class="form-control"></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" value=""></td><td><select name="row[goods]['+number+'][location_id]" class="form-control supplier" required ><option value="">请选择</option>'+location_option+'</select></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var sku_arr = $("#sku_info").html();
+                console.log(sku_arr);
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
             });
         },

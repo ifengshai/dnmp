@@ -38,6 +38,9 @@
         border-radius: 4px;
         resize: none;
     }
+    .location{
+        padding-top:15px !important;
+    }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -63,13 +66,8 @@
         <tr role="row" class="odd del_{$k}">
             <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td>
             <td><input type="text" class="form-control" name="row[goods][{$k}][stock]" value="{$vo.stock}"></td>
-            <td>
-                <select name="row[goods][{$k}][location_id]" class="form-control supplier" required >
-                    <option value="">请选择</option>
-                    {foreach $location_data as $key => $v}
-                    <option value="{$key}" {:$vo['location_id']==$key ? 'selected' : '' }>{$v}</option>
-                    {/foreach}
-                </select>
+            <td class="location">
+                {$vo.location}
             </td>
             <td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr({$k})> 删除 </a></td>
         </tr>
@@ -83,13 +81,12 @@
         </div>
     </div>
 
-<div style="display: none;">
-    <select id="select_location">
-        {foreach $location_data as $k => $v}
-        <option value="{$k}">{$v}</option>
+    <div id="sku_info" style="display: none;">
+        <option value="">请输入</option>
+        {foreach $sample_list as $k => $vo}
+        <option data-id="{$vo.location}" value="{$vo.sku}" >{$vo.sku}</option>
         {/foreach}
-    </select>
-</div>
+    </div>
 
     
 </form>
