@@ -211,7 +211,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 window.open("about:blank","_self").close();
             }, function (data, ret) {
                 Toastr.success("失败");
-            });            
+            });
             //删除商品数据
             $(document).on('click', '.merge', function () {
                 var nid = $(this).data('nid');
@@ -335,7 +335,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }else{
                     parent.$(".layui-layer-footer").show();
                 }
-            });           
+            });
+            $(document).on('click', ".create_ticket", function () {
+                var order_number=$(".order_info tr:eq(1) td:eq(0)").html();
+                var options = {
+                    shadeClose: false,
+                    shade: [0.3, '#393D49'],
+                    area: ['100%', '100%'], //弹出层宽高
+                    callback: function (value) {
+
+                    }
+                };
+                Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
+            });
         },
         api: {
             bindevent: function () {

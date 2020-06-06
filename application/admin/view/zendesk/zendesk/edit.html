@@ -121,14 +121,12 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">是否创建工单：</label>
+                            <label class="control-label col-xs-12 col-sm-2">创建工单：</label>
                             <div class="col-xs-12 col-sm-8">
-                                <input  id="c-switch" name="row[switch]" type="hidden" value="0">
-                                <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-switch" data-yes="1" data-no="0" >
-                                    <i class="fa fa-toggle-on text-success  fa-2x fa-flip-horizontal text-gray"></i>
-                                </a>
+                                <a href="javascript:;" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
                             </div>
                         </div>
+                        
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
                             <div class="col-xs-12 col-sm-8">
@@ -257,7 +255,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body table-responsive no-padding">
-                    <table class="table table-hover">
+                    <table class="table table-hover order_info">
                         <tr>
                             <th>Number</th>
                             <th>Date</th>
@@ -266,7 +264,6 @@
                         </tr>
                         {foreach name="orders" item="vo"}
                         <tr>
-
                             <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo->increment_id}</a></td>
                             <td>{$vo->created_at|strtotime|date='d/m/Y',###}</td>
                             <td>{$vo->order_currency_code}{$vo->grand_total|substr=0,-2}</td>
