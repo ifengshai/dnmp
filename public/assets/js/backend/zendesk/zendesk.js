@@ -337,7 +337,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
             });
             $(document).on('click', ".create_ticket", function () {
-                var order_number=$(".order_info tr:eq(1) td:eq(0)").html();
+                var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
                 var options = {
                     shadeClose: false,
                     shade: [0.3, '#393D49'],
