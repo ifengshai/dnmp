@@ -1382,7 +1382,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (is_add == 1) {
                     var val = $(this).val();
                     var prescription = prescriptions_add_edit[val];
-
                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                     console.log(prescription);
                     prescription_div.find('input').val('');
