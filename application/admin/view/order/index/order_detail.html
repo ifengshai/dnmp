@@ -137,8 +137,11 @@
 		<!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
 		</ul>
 		</div>
-
-		<p class="track-title">物流信息&nbsp&nbsp&nbsp&nbsp&nbsp {in name="7" value="$key_list" } 快递商类型：{$list[7]['shipment_type']}；快递单号：{$list[7]['track_number']}{/in}</p> 
+		<p class="track-title" style="float: left;">物流信息</p> 
+		{in name="7" value="$key_list" }
+		<p class="track-title" style="float: left; margin-left: 10%;color: #909090;">物流类型：<span style="color: #383838;font-size: 16px;">{$list[7]['shipment_type']}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;物流单号：<span style="color: #383838;font-size: 16px;">{$list[7]['track_number']}</span></p> 
+		{/in}
+		
 		<ul class="track-nav">				
 			<li {in name="2" value="$key_list" } class="on" {/in}><span>已打印标签</span></li>
 			<li {in name="3" value="$key_list" } class="on" {/in}><span>已配镜架</span></li>			
