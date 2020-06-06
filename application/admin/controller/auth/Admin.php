@@ -127,9 +127,12 @@ class Admin extends Backend
         return $this->view->fetch();
     }
 
-    public function return_department_name($department_id,$name = ''){
-		
+    public function return_department_name($department_id,$name = ''){		
 		$pid = $this->departmentmodel->where(['department_id'=>$department_id])->value('pid');
+		
+		if(!$pid){
+			return $name;
+		} 
 		
 		if($pid == 1){
 			
