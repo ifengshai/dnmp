@@ -831,11 +831,6 @@ class Sample extends Backend
         if (!$ids) {
             $this->error('缺少参数！！');
         }
-        //判断信息是否完整
-        $location_arr = Db::name('purchase_sample_workorder_item')->where('parent_id','in',$ids)->column('location_id');
-        if(in_array(0,$location_arr)){
-            $this->error(__('库位号不能为空', ''));
-        }
         $is_update = 0;
         $where['id'] = ['in', $ids];
         $row = $this->sampleworkorder->where($where)->select();
@@ -859,23 +854,30 @@ class Sample extends Backend
                 }
             }
         }
+        $workorder_item = Db::name('purchase_sample_workorder_item')->where('parent_id','in',$ids)->select();
+        $location_error_sku = array();
+        foreach($workorder_item as $val){
+            $location = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$val['sku'])->value('location');
+            if(!$location){
+                $location_error_sku[] = $val['sku'];
+            }
+        }
+        if(count($location_error_sku) != 0){
+            $this->error('SKU:'.implode(',',array_unique($location_error_sku)).'库位号不存在，无法审核！！');
+        }
         if($is_update == 1){
             $this->sampleworkorder->where($where)->update(['status'=>$status]);
             if($status == 3){
                 //审核通过后将商品信息添加到样品间列表
                 foreach($ids as $id){
                     $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id',$id)->order('id asc')->select();
-                    $location = array();
-                    foreach($product_arr as $val){
-                        //$product_list[$key]['location'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$value['sku'])->value('location');
-                    }
                     foreach($product_arr as $item){
                         $is_exist = $this->sample->where('sku',$item['sku'])->value('id');
                         if($is_exist){
                             $this->sample->where('sku',$item['sku'])->inc('stock',$item['stock'])->update();
                         }else{
                             $sample['sku'] = $item['sku'];
-                            $sample['location_id'] = $item['location_id'];
+                            $sample['location_id'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$item['sku'])->value('location');
                             $sample['stock'] = $item['stock'];
                             $sample['is_lend'] = 0;
                             $sample['lend_num'] = 0;
