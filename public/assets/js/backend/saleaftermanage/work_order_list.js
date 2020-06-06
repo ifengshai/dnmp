@@ -858,7 +858,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('change', '#prescription_select', function () {
                 var val = $(this).val();
                 var prescription = prescriptions[val];
-                //console.log(prescription);
+                console.log(prescription);
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                 prescription_div.find('input').val('');
                 prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
@@ -1384,6 +1384,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var prescription = prescriptions_add_edit[val];
 
                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                    console.log(1111);
+                    console.log(prescription);
+                    console.log(2222);
                     prescription_div.find('input').val('');
                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
