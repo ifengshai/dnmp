@@ -128,21 +128,39 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
-
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+
+                    $batch_sku = $this->request->post("batch_sku/a");
+                    $arrival_num = $this->request->post("arrival_num/a");
+                    if ($arrival_num) {
+                        //现在分批到货数量必须等于采购数量
+                        $arr = [];
+                        foreach ($arrival_num as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $arr[$key] += $val;
+                            }
+                        }
+                        foreach ($num as $k => $v) {
+                            if ($arr[$k] != $v) {
+                                $this->error('分批到货数量必须等于采购数量');
+                            }
+                        }
+                    }
+
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
                     if ($result !== false) {
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
-                        $num = $this->request->post("purchase_num/a");
+
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
 
@@ -247,6 +265,7 @@ class PurchaseOrder extends Backend
         //生成采购编号
         $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('purchase_number', $purchase_number);
+        $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
         return $this->view->fetch();
     }
 
@@ -353,11 +372,29 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
+
+                    $arrival_num = $this->request->post("arrival_num/a");
+                    if ($arrival_num) {
+                        //现在分批到货数量必须等于采购数量
+                        $arr = [];
+                        foreach ($arrival_num as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $arr[$key] += $val;
+                            }
+                        }
+                        foreach ($num as $k => $v) {
+                            if ($arr[$k] != $v) {
+                                $this->error('分批到货数量必须等于采购数量');
+                            }
+                        }
+                    }
+
 
                     $result = $row->allowField(true)->save($params);
 
@@ -365,7 +402,7 @@ class PurchaseOrder extends Backend
                     if ($result !== false) {
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
-                        $num = $this->request->post("purchase_num/a");
+
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
                         $item_id = $this->request->post("item_id/a");
@@ -391,7 +428,6 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
                         $batch_id = $this->request->post("batch_id/a");
                         $batch_sku = $this->request->post("batch_sku/a");
-                        $arrival_num = $this->request->post("arrival_num/a");
                         $batch_item_id = $this->request->post("batch_item_id/a");
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {

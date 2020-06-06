@@ -441,7 +441,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).val();
                     if (arrivals_num*1 < 0) {
-                        Toastr.error();
+                        Toastr.error('到货数量不能小于0');
+                        $(this).val(0);
                         return false;
                     }
                     //判断是否分批
@@ -480,6 +481,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
+                    var quantity_num = $(this).val();
+                    if (quantity_num*1 < 0) {
+                        Toastr.error('合格数量不能小于0');
+                        $(this).val(0);
+                        return false;
+                    }
+
                     var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).parent().prev().find('input').val();
                     //判断是否分批
@@ -488,8 +496,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     } else {
                         var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
-                    var quantity_num = $(this).val();
-
+                    
                     if (quantity_num*1 > arrivals_num*1) {
                         $(this).val(0);
                         Toastr.error('合格数量不能大于到货数量');
@@ -517,6 +524,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.sample_num', function () {
                     var sample_num = $(this).val();
+                    if (sample_num*1 < 0) {
+                        Toastr.error('留样数量不能小于0');
+                        $(this).val(0);
+                        return false;
+                    }
                     var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                     if (sample_num*1 > quantity_num*1) {
                         $(this).val(0);
