@@ -173,10 +173,8 @@ class ItDemandReport extends Backend
                         'total4' => $wesee_bug[$k]+$wesee_demand[$k]+$wesee_task[$k],
                         'total5' => $others_bug[$k]+$others_demand[$k]+$others_task[$k],
 					);
-				}
-			
-                $this->assign('sum_total',$sum_total);
-              
+				}			
+                $this->assign('sum_total',$sum_total);         
         }else{
             $web_score_statistics = $this->develop_score_statistics($month);
             $web_outtime_statistics = $this->develop_outtime_statistics($month);

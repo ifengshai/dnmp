@@ -87,11 +87,14 @@
 				font-size: 14px;
 				color: #383838;
 			}
-			.track-infor div p:first-child {
-				font-size: 16px;
+			.track-infor div p:last-child {
 				color: #909090;
 			}
-			
+			.track-infor div p:first-child {
+				font-size: 16px;
+				color: #383838;
+			}
+
 			.track-infor li:before {
 				content: '';
 				display: block;
@@ -134,8 +137,11 @@
 		<!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
 		</ul>
 		</div>
-
-		<p class="track-title">物流信息&nbsp&nbsp&nbsp&nbsp&nbsp {in name="7" value="$key_list" }快递商类型：{$list[7]['shipment_type']}；快递单号：{$list[7]['track_number']}{/in}</p> 
+		<p class="track-title" style="float: left;">物流信息</p> 
+		{in name="7" value="$key_list" }
+		<p class="track-title" style="float: left;margin-left: 10%;color: #909090;">物流类型：<span style="color: #383838;font-size: 16px;">{$list[7]['shipment_type']}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;物流单号：<span style="color: #383838;font-size: 16px;">{$list[7]['track_number']}</span></p> 
+		{/in}
+		<p style="width: 100%; overflow: hidden;"></p>
 		<ul class="track-nav">				
 			<li {in name="2" value="$key_list" } class="on" {/in}><span>已打印标签</span></li>
 			<li {in name="3" value="$key_list" } class="on" {/in}><span>已配镜架</span></li>			
@@ -177,9 +183,6 @@
 				<span>{$list[30]['create_time']}</span>
 				<div>
 					<p>到达待取</p>
-					{if condition=" $list[30]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[30]['handle_user_name']}</p>				
-					{/if}
 				</div>				
 			</li> 	
 			<?php }elseif(in_array(35,$key_list)){ ?>					
@@ -187,9 +190,6 @@
 				<span>{$list[35]['create_time']}</span>
 				<div>
 					<p>投递失败</p>
-					{if condition=" $list[35]['handle_user_name'] neq null "} 
-					<p>处理人姓名：{$list[35]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			<?php }elseif(in_array(40,$key_list)){ ?>						
@@ -197,9 +197,6 @@
 				<span>{$list[40]['create_time']}</span>
 				<div>
 					<p>投递成功</p>
-					{if condition=" $list[40]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[40]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			<?php }elseif(in_array(50,$key_list)){ ?>						
@@ -207,9 +204,6 @@
 				<span>{$list[50]['create_time']}</span>
 				<div>
 					<p>可能异常</p>
-					{if condition=" $list[50]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[50]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			<?php }else{ ?>			
@@ -219,9 +213,6 @@
 				<span>{$list[11]['create_time']}</span>
 				<div>
 					<p>到达目的国</p>
-					{if condition=" $list[11]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[11]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			{/in}						
@@ -231,9 +222,6 @@
 				<span>{$list[10]['create_time']} </span>
 				<div>
 					<p>运输途中</p>
-					{if condition=" $list[10]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[10]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			{/in}						
@@ -243,9 +231,6 @@
 				<span>{$list[9]['create_time']}</span>
 				<div>
 					<p>已交航</p>
-					{if condition=" $list[9]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[9]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			{/in}					
@@ -255,9 +240,6 @@
 				<span>{$list[8]['create_time']}</span>
 				<div>
 					<p>物流上网</p>
-					{if condition=" $list[8]['handle_user_name'] neq null "}
-					<p>处理人姓名：{$list[8]['handle_user_name']}</p>				
-					{/if}
 				</div>
 			</li>
 			{/in}
