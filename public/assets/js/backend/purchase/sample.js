@@ -151,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('库位ID'),operate:false},
-                        {field: 'location_number', title: __('库位号')},
+                        {field: 'location_number', title: __('入库单号')},
                         {field: 'status', title: __('状态'),searchList: {"1": __('新建'), "2": __('待审核'), "3": __('已审核'), "4": __('已拒绝'), "5": __('已取消')}},
                         {field: 'create_user', title: __('创建人')},
                         {field: 'createtime', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -280,7 +280,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('库位ID'),operate:false},
-                        {field: 'location_number', title: __('库位号')},
+                        {field: 'location_number', title: __('出库单号')},
                         {field: 'status', title: __('状态'),searchList: {"1": __('新建'), "2": __('待审核'), "3": __('已审核'), "4": __('已拒绝'), "5": __('已取消')}},
                         {field: 'create_user', title: __('创建人')},
                         {field: 'createtime', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
