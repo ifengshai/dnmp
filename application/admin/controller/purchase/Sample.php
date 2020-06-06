@@ -711,7 +711,7 @@ class Sample extends Backend
         //获取入库商品信息
         $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
         foreach ($product_list as $key=>$value){
-            $product_list[$key]['location'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$value['sku'])->value('location');
+            $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
         return $this->view->fetch();
@@ -743,7 +743,7 @@ class Sample extends Backend
         //获取入库商品信息
         $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
         foreach ($product_list as $key=>$value){
-            $product_list[$key]['location'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$value['sku'])->value('location');
+            $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
 
@@ -857,7 +857,7 @@ class Sample extends Backend
         $workorder_item = Db::name('purchase_sample_workorder_item')->where('parent_id','in',$ids)->select();
         $location_error_sku = array();
         foreach($workorder_item as $val){
-            $location = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$val['sku'])->value('location');
+            $location = $this->sample->getlocation($val['sku']);
             if(!$location){
                 $location_error_sku[] = $val['sku'];
             }
@@ -877,7 +877,7 @@ class Sample extends Backend
                             $this->sample->where('sku',$item['sku'])->inc('stock',$item['stock'])->update();
                         }else{
                             $sample['sku'] = $item['sku'];
-                            $sample['location_id'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$item['sku'])->value('location');
+                            $sample['location_id'] = $this->sample->getlocation($item['sku']);
                             $sample['stock'] = $item['stock'];
                             $sample['is_lend'] = 0;
                             $sample['lend_num'] = 0;
@@ -1082,7 +1082,7 @@ class Sample extends Backend
         //获取出库商品信息
         $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
         foreach ($product_list as $key=>$value){
-            $product_list[$key]['location'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$value['sku'])->value('location');
+            $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
 
@@ -1116,7 +1116,7 @@ class Sample extends Backend
         //获取出库商品信息
         $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
         foreach ($product_list as $key=>$value){
-            $product_list[$key]['location'] = $this->sample->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$value['sku'])->value('location');
+            $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
 
@@ -1416,18 +1416,10 @@ class Sample extends Backend
 
         //获取样品借出商品信息
         $product_list = Db::name('purchase_sample_lendlog_item')->field('sku,lend_num')->where('log_id',$ids)->order('id asc')->select();
-        $sku_arr = array();
-        $product_arr = array();
         foreach ($product_list as $key=>$value){
-            $sku_arr[] = $value['sku'];
-            $product_arr[] = $value['sku'].'_'.$value['lend_num'];
             $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
             $product_list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
         }
-        $sku_str = implode(',',$sku_arr);
-        $product_str = implode(',',$product_arr);
-        $this->assign('sku_str',$sku_str);
-        $this->assign('product_str',$product_str);
         $this->assign('product_list', $product_list);
 
         return $this->view->fetch();

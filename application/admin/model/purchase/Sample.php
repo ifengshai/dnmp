@@ -42,6 +42,19 @@ class Sample extends Model
         }
         return $data;
     }
+    /**
+     * 通过sku获取库位号
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/06 09:53:35 
+     * @param [type] $sku
+     * @return void
+     */
+    public function getlocation($sku){
+        $location = $this->alias('s')->join('fa_purchase_sample_location l','s.location_id=l.id')->where('s.sku',$sku)->value('location');
+        return $location;
+    }
     
 
     
