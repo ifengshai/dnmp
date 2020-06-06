@@ -89,6 +89,8 @@
 			}
 			.track-infor div p:first-child {
 				font-size: 16px;
+			}
+			.track-infor div p:last-child {
 				color: #909090;
 			}
 			
@@ -135,7 +137,7 @@
 		</ul>
 		</div>
 
-		<p class="track-title">物流信息&nbsp&nbsp&nbsp&nbsp&nbsp {in name="7" value="$key_list" }快递商类型：{$list[7]['shipment_type']}；快递单号：{$list[7]['track_number']}{/in}</p> 
+		<p class="track-title">{in name="7" value="$key_list" }物流信息&nbsp&nbsp&nbsp&nbsp&nbsp 快递商类型：{$list[7]['shipment_type']}；快递单号：{$list[7]['track_number']}{/in}</p> 
 		<ul class="track-nav">				
 			<li {in name="2" value="$key_list" } class="on" {/in}><span>已打印标签</span></li>
 			<li {in name="3" value="$key_list" } class="on" {/in}><span>已配镜架</span></li>			
