@@ -36,7 +36,7 @@ class Admin extends Backend
     {
         parent::_initialize();
         $this->model = model('Admin');
-
+		$this->departmentmodel = model('Department');
         $this->childrenAdminIds = $this->auth->getChildrenAdminIds(true);
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
 
@@ -107,11 +107,14 @@ class Admin extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            foreach ($list as $k => &$v) {
+            
+			
+			foreach ($list as $k => &$v) {
                 $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
                 $v['groups'] = implode(',', array_keys($groups));
                 $v['groups_text'] = implode(',', array_values($groups));
-            }
+				$v['department_id'] = $this->departmentmodel->where(['department_id'=>$v['department_id']])->value('name');
+			}
             unset($v);
             $result = array("total" => $total, "rows" => $list);
 
@@ -120,7 +123,39 @@ class Admin extends Backend
         return $this->view->fetch();
     }
 
-    /**
+    
+	public function department_list(){
+			
+		 
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+          
+			
+			$total = $this->departmentmodel
+               // ->where($where)
+                ->where(['pid' => ['neq',1]])
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->departmentmodel
+                //->where($where)
+                ->where(['pid' => ['neq',1]])
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            
+			
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
      * 添加
      */
     public function add()

@@ -176,7 +176,7 @@ class ItDemandReport extends Backend
 				}
 			
                 $this->assign('sum_total',$sum_total);
-               
+              
         }else{
             $web_score_statistics = $this->develop_score_statistics($month);
             $web_outtime_statistics = $this->develop_outtime_statistics($month);
