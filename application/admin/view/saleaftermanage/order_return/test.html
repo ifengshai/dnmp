@@ -357,7 +357,7 @@
                 </div>
 
                 {/notempty}
-                <!-- notempty name="orderInfoList.replenish_list" -->
+              
 
                 <div class="list-wrap ">
                     <div class="is-dif-wrap ">
@@ -371,22 +371,24 @@
                                 <th>币种</th>
                                 <th>创建时间</th>
                             </tr>
-                            {foreach $orderInfoList.replenish_list as $k => $replenish_list}
+                            {notempty name="$orderInfoList.workOrderList"}
+                            {foreach $orderInfoList.differencePriceList as $k => $replenish_list}
                             <tr>
                                 <td>{$k+1}</td>
-                                <td>{$replenish_list.replenish_increment_id}</td>
-                                <td>{$replenish_list.status}</td>
-                                <td>{$replenish_list.replenish_money}</td>
-                                <td>{$replenish_list.order_pay_currency}</td>
-                                <td>{$replenish_list.create_time}</td>
+                                <td>{$replenish_list.order_number}</td>
+                                <td>{$replenish_list.order_status}</td>
+                                <td>{$replenish_list.order_amount}</td>
+                                <td>{$replenish_list.order_currency}</td>
+                                <td>{$replenish_list.start_time}</td>
                             </tr>
                             {/foreach}
+                            {/notempty}
                         </table>
                     </div>
                     <img class="slide-down" src="/assets/img/shouqi.png" alt="">
                 </div>
 
-                <!-- /notempty -->
+             
             </li>
 
         </ul>

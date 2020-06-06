@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other', 6:'如弗小程序'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
@@ -560,7 +560,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other', 6:'如弗小程序'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},

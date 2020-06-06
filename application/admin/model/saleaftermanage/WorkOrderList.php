@@ -781,7 +781,7 @@ class WorkOrderList extends Model
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
                     //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) {
+                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [9, 10])) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                         $key++;
@@ -1042,17 +1042,6 @@ class WorkOrderList extends Model
                 default:
                     return false;
                     break;
-            }
-
-            //补差价列表
-            if ($v['replenish_increment_id']) {
-                $status = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $v['platform_order']])->value('status');
-                $replenish_list[$i]['replenish_increment_id'] = $v['replenish_increment_id'];
-                $replenish_list[$i]['status'] = $status;
-                $replenish_list[$i]['replenish_money'] = $v['replenish_money'];
-                $replenish_list[$i]['order_pay_currency'] = $v['order_pay_currency'];
-                $replenish_list[$i]['create_time'] = $v['create_time'];
-                $i++;
             }
 
             //排列sku

@@ -47,6 +47,58 @@ class Test extends Backend
     }
 
     /**
+     * 同步异常数据
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/05 17:07:43 
+     */
+    public function track_shipment_error(){
+
+        $order_shipment = Db::name('order_node')->where('shipment_type','like', '%FedE%')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+            $title = strtolower(str_replace(' ', '-', $v['shipment_type']));
+            $carrier = $this->getCarrier($title);
+            
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /*'number' => 'UF105842059YP', //燕文
+                'carrier' => '190012'*/
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+            ]]);
+            $add['site'] = $v['site'];
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $v['order_number'];
+            $add['shipment_type'] = $v['shipment_type'];
+            $add['track_number'] = $v['track_number'];
+
+            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+                if (stripos($v['shipment_type'], 'fede') !== false) {
+                    $this->fedex_data($trackdata, $add);
+                }
+            }
+
+            echo $k . ':' . $v['order_id'] . "\n";
+            usleep(200000);
+
+        }
+        echo 'ok';
+        exit;
+        dump($order_shipment);exit;
+    }
+
+    /**
      * 批量 获取物流明细
      * 莫删除
      */
@@ -56,8 +108,9 @@ class Test extends Backend
         $map['b.handle'] = 1;
         $order_shipment = $this->zeelool->alias('a')->field('b.entity_id,b.track_number,b.title,b.updated_at,b.order_id,a.increment_id')
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
-            ->where($map)->order('a.entity_id asc')->select();
+            ->where($map)->order('a.entity_id asc')->limit(10)->select();
         $order_shipment = collection($order_shipment)->toArray();
+        dump($order_shipment);exit;
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
@@ -196,7 +249,7 @@ class Test extends Backend
             $add['create_time'] = $v['a'];
             $add['content'] = $v['z'];
             $add['courier_status'] = $data['e'];
-            Db::name('order_node_courier')->insert($add); //插入物流日志表
+            //Db::name('order_node_courier')->insert($add); //插入物流日志表
 
             $order_node_detail['order_node'] = 3;
             $order_node_detail['create_time'] = $v['a'];
@@ -224,7 +277,7 @@ class Test extends Backend
                 }
             }
 
-            if (stripos($v['z'], 'BEIJING CN, In transit') !== false || stripos($v['z'], 'GUANGZHOU CN, In transit') !== false) {
+            if (stripos($v['z'], 'In transit') !== false) {
                 $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
                 if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
                     if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {

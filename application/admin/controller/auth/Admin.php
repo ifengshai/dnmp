@@ -36,7 +36,7 @@ class Admin extends Backend
     {
         parent::_initialize();
         $this->model = model('Admin');
-
+		$this->departmentmodel = model('Department');
         $this->childrenAdminIds = $this->auth->getChildrenAdminIds(true);
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
 
@@ -107,11 +107,18 @@ class Admin extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            foreach ($list as $k => &$v) {
+            
+			
+			foreach ($list as $k => &$v) {
                 $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
                 $v['groups'] = implode(',', array_keys($groups));
                 $v['groups_text'] = implode(',', array_values($groups));
-            }
+				if($v['department_id'] != null){
+					$v['department_id'] = self::return_department_name($v['department_id']);
+				}
+				
+				
+			}
             unset($v);
             $result = array("total" => $total, "rows" => $list);
 
@@ -120,7 +127,57 @@ class Admin extends Backend
         return $this->view->fetch();
     }
 
-    /**
+    public function return_department_name($department_id,$name = ''){
+		
+		$pid = $this->departmentmodel->where(['department_id'=>$department_id])->value('pid');
+		
+		if($pid == 1){
+			
+			if($name == null){
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name');
+			}else{
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+			}
+			return $name;	
+		}else{
+			
+			if($name == null){
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name');
+			}else{
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+			}
+			$f_department_id = $this->departmentmodel->where(['id'=>$pid])->value('department_id');
+			return self::return_department_name($f_department_id,$name);
+		}
+		
+	}
+    
+	
+	public function department_list(){					 
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();         			
+			$total = $this->departmentmodel
+               // ->where($where)
+                ->where(['pid' => ['neq',1]])
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->departmentmodel
+                //->where($where)
+                ->where(['pid' => ['neq',1]])
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();            			
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
      * 添加
      */
     public function add()
@@ -283,7 +340,7 @@ class Admin extends Backend
                 $adminValidate = \think\Loader::validate('Admin');
                 $adminValidate->rule([
                     'username' => 'require|max:50|unique:admin,username,' . $row->id,
-                    'email'    => 'require|email|unique:admin,email,' . $row->id
+                    'email'    => 'email|unique:admin,email,' . $row->id
                 ]);
                 $result = $row->validate('Admin.edit')->save($params);
                 if ($result === false) {

@@ -228,14 +228,15 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $order_number = $order_number ?? $this->request->get('order_number');
         //$order_number = 100077570;
         //查询订单详情		
-        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->column('node_type,create_time'))->toArray();
-
-        $key_list = array_keys($ruleList);
-	
+        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
+		
+		$new_ruleList = array_column($ruleList,NULL,'node_type');	
+        $key_list = array_keys($new_ruleList);
+		
         $entity_id = $this->request->get('id');
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
-        $this->view->assign("list", $ruleList);
+        $this->view->assign("list", $new_ruleList);
         $this->view->assign("key_list", $key_list);
         return $this->view->fetch();
     }
@@ -290,7 +291,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("row", $row);
         $this->view->assign("label", $label);
         return $this->view->fetch();
-    }
+    } 
 
 
     /**

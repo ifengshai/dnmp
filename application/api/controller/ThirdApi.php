@@ -118,7 +118,7 @@ class ThirdApi extends Api
                     }
                 }
     
-                if (stripos($v['z'], 'BEIJING CN, In transit') !== false || stripos($v['z'], 'GUANGZHOU CN, In transit') !== false) {
+                if (stripos($v['z'], 'In transit') !== false) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
                     if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
                         if ($data['e'] == 40 || $data['e'] == 30 || $data['e'] == 35) {
