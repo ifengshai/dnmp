@@ -340,7 +340,7 @@ class Admin extends Backend
                 $adminValidate = \think\Loader::validate('Admin');
                 $adminValidate->rule([
                     'username' => 'require|max:50|unique:admin,username,' . $row->id,
-                    'email'    => 'require|email|unique:admin,email,' . $row->id
+                    'email'    => 'email|unique:admin,email,' . $row->id
                 ]);
                 $result = $row->validate('Admin.edit')->save($params);
                 if ($result === false) {
