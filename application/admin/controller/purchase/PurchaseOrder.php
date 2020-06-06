@@ -986,7 +986,7 @@ class PurchaseOrder extends Backend
                 $item->where(['sku' => $params['sku']])->setInc('on_way_stock', $v['purchase_num']);
             }
 
-            
+
 
             //判断sku是否为选品库SKU
             $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
@@ -1172,7 +1172,6 @@ class PurchaseOrder extends Backend
                         if ($params[$key]['sku']) {
                             $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $val['purchase_num']);
                         }
-                       
                     }
                     //修改为选品采购单
                     if ($kval == 1) {
@@ -1306,7 +1305,7 @@ class PurchaseOrder extends Backend
 
             foreach ($list as &$v) {
                 $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
-                $onway_stock = $product[$v['true_sku']]['on_way_stock'];
+                $onway_stock = $product[$v['true_sku']]['on_way_stock'] ?? 0;
                 if ($v['grade'] == 'A+') {
                     $times = 1.5;
                 } elseif ($v['grade'] == 'A') {
@@ -1359,28 +1358,29 @@ class PurchaseOrder extends Backend
 
         //总数
         $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
-        //A级数量即总占比
-        $res['AA_num'] = $AA_num;
-        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
-        $res['A_num'] = $A_num;
-        $res['A_percent'] = round($A_num / $all_num * 100, 2);
-        $res['B_num'] = $B_num;
-        $res['B_percent'] = round($B_num / $all_num * 100, 2);
-        $res['CA_num'] = $CA_num;
-        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
-        $res['C_num'] = $C_num;
-        $res['C_percent'] = round($C_num / $all_num * 100, 2);
-        $res['D_num'] = $D_num;
-        $res['D_percent'] = round($D_num / $all_num * 100, 2);
-        $res['E_num'] = $E_num;
-        $res['E_percent'] = round($E_num / $all_num * 100, 2);
-        $res['F_num'] = $F_num;
-        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        if ($all_num) {
+            //A级数量即总占比
+            $res['AA_num'] = $AA_num;
+            $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+            $res['A_num'] = $A_num;
+            $res['A_percent'] = round($A_num / $all_num * 100, 2);
+            $res['B_num'] = $B_num;
+            $res['B_percent'] = round($B_num / $all_num * 100, 2);
+            $res['CA_num'] = $CA_num;
+            $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+            $res['C_num'] = $C_num;
+            $res['C_percent'] = round($C_num / $all_num * 100, 2);
+            $res['D_num'] = $D_num;
+            $res['D_percent'] = round($D_num / $all_num * 100, 2);
+            $res['E_num'] = $E_num;
+            $res['E_percent'] = round($E_num / $all_num * 100, 2);
+            $res['F_num'] = $F_num;
+            $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        }
 
         $this->assign('res', $res);
 
         return $this->view->fetch();
-
     }
 
 
