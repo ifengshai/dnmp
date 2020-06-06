@@ -87,13 +87,13 @@
 				font-size: 14px;
 				color: #383838;
 			}
-			.track-infor div p:first-child {
-				font-size: 16px;
-			}
 			.track-infor div p:last-child {
 				color: #909090;
 			}
-			
+			.track-infor div p:first-child {
+				font-size: 16px;
+				color: #383838;
+			}
 			.track-infor li:before {
 				content: '';
 				display: block;
@@ -179,7 +179,7 @@
 				<span>{$list[30]['create_time']}</span>
 				<div>
 					<p>到达待取</p>
-					{if condition=" $list[30]['handle_user_name'] neq null "}
+					{if condition=" $list[30]['handle_user_name'] neq null && $list[30]['handle_user_name'] neq 'system'"}
 					<p>处理人姓名：{$list[30]['handle_user_name']}</p>				
 					{/if}
 				</div>				
