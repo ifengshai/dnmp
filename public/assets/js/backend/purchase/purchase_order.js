@@ -343,7 +343,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     '<input type="hidden" name="row[is_batch]" value="1">' +
                     '    <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>\n' +
                     '    <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">\n' +
-                    '        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-rule="required" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text" value="">\n' +
+                    '        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-rule="required" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text" value="' + Config.newdatetime + '">\n' +
                     '    </div>\n' +
                     '    <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
                     '    <table id="caigou-table" style="width:80%;">\n' +

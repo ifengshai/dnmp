@@ -440,6 +440,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 $(document).on('blur', '.arrivals_num', function () {
                     var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).val();
+                    if (arrivals_num*1 < 0) {
+                        Toastr.error('到货数量不能小于0');
+                        $(this).val(0);
+                        return false;
+                    }
                     //判断是否分批
                     if (batch_id) {
                         var true_num = $(this).parent().parent().find('.should_arrival_num').val();
@@ -476,6 +481,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
+                    var quantity_num = $(this).val();
+                    if (quantity_num*1 < 0) {
+                        Toastr.error('合格数量不能小于0');
+                        $(this).val(0);
+                        return false;
+                    }
+
                     var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).parent().prev().find('input').val();
                     //判断是否分批
@@ -484,8 +496,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     } else {
                         var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
-                    var quantity_num = $(this).val();
-
+                    
                     if (quantity_num*1 > arrivals_num*1) {
                         $(this).val(0);
                         Toastr.error('合格数量不能大于到货数量');
@@ -513,6 +524,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.sample_num', function () {
                     var sample_num = $(this).val();
+                    if (sample_num*1 < 0) {
+                        Toastr.error('留样数量不能小于0');
+                        $(this).val(0);
+                        return false;
+                    }
                     var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                     if (sample_num*1 > quantity_num*1) {
                         $(this).val(0);
@@ -570,9 +586,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="number"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="number"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="number"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
                                     shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
                                     shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
@@ -661,9 +677,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + item[i].purchase_num + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + item[i].check_num + '"></td>'
                                     shtml += ' <td class="batch_arrival_num"><input class="form-control should_arrival_num" readonly name="should_arrival_num[]" type="text" value="' + item[i].arrival_num + '"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
-                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="number"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="number"></td>'
+                                    shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="number"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
                                     shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
                                     shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'

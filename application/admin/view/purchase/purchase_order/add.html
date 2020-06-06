@@ -157,8 +157,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-3">
 
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required'
-                    data-live-search='true'>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required' data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
