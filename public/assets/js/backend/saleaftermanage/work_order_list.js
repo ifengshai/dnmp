@@ -858,9 +858,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('change', '#prescription_select', function () {
                 var val = $(this).val();
                 var prescription = prescriptions[val];
-                console.log(prescription.pd);
-                console.log(prescription.pd_r);
-                console.log(prescription.pd_l);
+                // console.log(prescription.pd);
+                // console.log(prescription.pd_r);
+                // console.log(prescription.pd_l);
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                 prescription_div.find('input').val('');
                 prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
@@ -890,7 +890,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
-                if (typeof(prescription.pd) != undefined && (prescription.pd != '')) {
+                if (prescription.hasOwnProperty("pd") && (prescription.pd != '')) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                 }else{
@@ -1386,9 +1386,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var prescription = prescriptions_add_edit[val];
 
                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
-                    console.log(prescription.pd);
-                    console.log(prescription.pd_r);
-                    console.log(prescription.pd_l);
+                    // console.log(prescription.pd);
+                    // console.log(prescription.pd_r);
+                    // console.log(prescription.pd_l);
                     prescription_div.find('input').val('');
                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
@@ -1417,7 +1417,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                     }
-                    if (typeof(prescription.pd) != undefined && prescription.pd != '') {
+                    if (prescription.hasOwnProperty("pd") && prescription.pd != '') {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                     } else {
