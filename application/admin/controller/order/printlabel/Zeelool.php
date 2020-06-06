@@ -1061,10 +1061,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
+            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
                 $value['od_axis'] =  $value['od_axis'];
             } else {
@@ -1713,15 +1713,15 @@ EOF;
 
                     $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
-                    $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-                    $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-                    $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-                    $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                    $final_print['od_sph'] = isset($final_print['od_sph']) ? urldecode($final_print['od_sph']) : '';
+                    $final_print['os_sph'] = isset($final_print['os_sph']) ? urldecode($final_print['os_sph']) : '';
+                    $final_print['od_cyl'] = isset($final_print['od_cyl']) ? urldecode($final_print['od_cyl']) : '';
+                    $final_print['os_cyl'] = isset($final_print['os_cyl']) ? urldecode($final_print['os_cyl']) : '';
                     $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
                     $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
 
-                    $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-                    $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+                    $final_print['od_add'] = isset($final_print['od_add']) ? urldecode($final_print['od_add']) : '';
+                    $final_print['os_add'] = isset($final_print['os_add']) ? urldecode($final_print['os_add']) : '';
 
                     $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
                     $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
@@ -1745,7 +1745,7 @@ EOF;
 
                 //如果为太阳镜 拼接颜色
                 if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-                    $finalResult['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
                 }
 
                 //处理PD值
