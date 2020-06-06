@@ -13,6 +13,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+
 /**
  * Sales Flat Order
  *
@@ -253,7 +254,7 @@ class Weseeoptical extends Backend
                 };
                 //sku映射表
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-  
+
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
@@ -604,10 +605,13 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
+
+
+
             $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
-            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
+            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
-            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['degrees'];
 
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
@@ -950,6 +954,7 @@ EOF;
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                $final_print['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
@@ -985,7 +990,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add']*1 != 0 && $final_print['os_add']*1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1069,7 +1074,7 @@ EOF;
                     " </tr>
             <tr>
             <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
-            <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
+            <td colspan='8' style=' text-align:center'>Lens：" . $final_print['degrees'] . ' ' . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";
             }

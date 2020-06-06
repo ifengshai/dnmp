@@ -113,7 +113,7 @@ class WeseeopticalPrescriptionDetailHelper {
             $final_params['second_name'] = substr($product_options['info_buyRequest']['tmplens']['second_name'],0,100);
             $final_params['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
             $final_params['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
-            $final_params['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+            $final_params['zsl'] = $product_options['info_buyRequest']['tmplens']['degrees'];
 
             $items[$item_key]['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
             $items[$item_key]['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
@@ -129,10 +129,10 @@ class WeseeopticalPrescriptionDetailHelper {
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];      
 			$items[$item_key]['options']  = $product_options['options'];
 
-            $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['third_type'];
+            $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['index_type'];
             $items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
             $items[$item_key]['coatiing_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
-            $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
+            $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['index_type'];
             $items[$item_key]['index_id']  = $product_options['info_buyRequest']['tmplens']['third_id'];
                                                 
 			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true) ?? [];
