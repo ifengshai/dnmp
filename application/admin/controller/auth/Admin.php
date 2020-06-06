@@ -113,7 +113,11 @@ class Admin extends Backend
                 $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
                 $v['groups'] = implode(',', array_keys($groups));
                 $v['groups_text'] = implode(',', array_values($groups));
-				$v['department_id'] = $this->departmentmodel->where(['department_id'=>$v['department_id']])->value('name');
+				if($v['department_id'] != null){
+					$v['department_id'] = self::return_department_name($v['department_id']);
+				}
+				
+				
 			}
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -123,13 +127,34 @@ class Admin extends Backend
         return $this->view->fetch();
     }
 
+    public function return_department_name($department_id,$name = ''){
+		
+		$pid = $this->departmentmodel->where(['department_id'=>$department_id])->value('pid');
+		
+		if($pid == 1){
+			
+			if($name == null){
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name');
+			}else{
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+			}
+			return $name;	
+		}else{
+			
+			if($name == null){
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name');
+			}else{
+				$name = $this->departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+			}
+			$f_department_id = $this->departmentmodel->where(['id'=>$pid])->value('department_id');
+			return self::return_department_name($f_department_id,$name);
+		}
+		
+	}
     
-	public function department_list(){
-			
-		 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-          
-			
+	
+	public function department_list(){					 
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();         			
 			$total = $this->departmentmodel
                // ->where($where)
                 ->where(['pid' => ['neq',1]])
@@ -141,11 +166,8 @@ class Admin extends Backend
                 ->where(['pid' => ['neq',1]])
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select();
-            
-			
+                ->select();            			
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
 	}
 	
