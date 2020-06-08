@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use think\Validate;
+use think\Db;
 
 use think\Exception;
 
@@ -157,30 +158,31 @@ class Admin extends Backend
     
 	
 	public function department_list(){					 
-            $pageNumber = $this->request->request("pageNumber");
-			$pageSize = $this->request->request("pageSize");
-			$first = ($pageNumber-1)*$pageSize + 1;
-			$end = $pageSize;
-			$name = $this->request->request('name');
-			$where['pid'] = array('neq',1);
-			if($name){
-				$where['name'] = array('like','%'.$name.'%');
-			}
-			$total = $this->departmentmodel
-               // ->where($where)
-                ->where($where)
-                ->order($sort, $order)
-                ->count(); 
-			
-            $list = $this->departmentmodel
-                //->where($where)
-                ->where($where)
-                ->order($sort, $order)
-                ->limit($first, $end)
-                ->select();            			
-            $result = array("total" => $total, "rows" => $list);
-            return json($result);
-	}
+		$pageNumber = $this->request->request("pageNumber");
+		$pageSize = $this->request->request("pageSize");
+		$first = ($pageNumber-1)*$pageSize;
+		$end = $pageSize;
+		$name = $this->request->request('name');
+		$where['pid'] = array('neq',1);
+		//$name = '客服';
+		if($name){
+			$where['name'] = array('like','%'.$name.'%');
+		} 		
+		$total = $this->departmentmodel
+		   // ->where($where)
+			->where($where)
+			->order($sort, $order)
+			->count(); 
+		
+		$list = $this->departmentmodel
+			//->where($where)
+			->where($where)
+			->order($sort, $order)
+			->limit($first, $end)
+			->select(); 	
+		$result = array("total" => $total, "rows" => $list);
+		return json($result);
+	} 
 	
 	
 	

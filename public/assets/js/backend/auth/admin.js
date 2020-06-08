@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'nickname', title: __('Nickname')},
                         {field: 'groups_text', title: __('Group'), operate:false, formatter: Table.api.formatter.label},
                         {field: 'email', title: __('Email')}, 
-						{field: 'department_id', title: __('Department'), addClass: "selectpage", extend: "data-source='auth/admin/department_list' data-field='name' data-primary-key='department_id' data-pagination='true' data-page-size='10'"},
+						{field: 'department_id', title: __('Department'), operate: 'LIKE %...%', placeholder: '模糊搜索，*表示任意字符', addClass: "selectpage", extend: "data-source='auth/admin/department_list' data-field='name' data-primary-key='department_id' data-pagination='true' data-page-size='10'"},
                       
 						//{field: 'department_id', title: __('Department'), formatter: Table.api.formatter.search},
 						{field: 'status', title: __("Status"), formatter: Table.api.formatter.status},
