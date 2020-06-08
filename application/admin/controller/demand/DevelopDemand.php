@@ -154,7 +154,7 @@ class DevelopDemand extends Backend
                 if ($val['review_status_manager'] == 0) {
                     $list[$k]['status_str'] = '产品待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
-                    $list[$k]['status_str'] = '主管待审核';
+                    $list[$k]['status_str'] = '开发待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
                     $list[$k]['status_str'] = '审核通过';
                 } else {

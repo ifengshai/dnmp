@@ -8,14 +8,15 @@ use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 
-class Test3 extends Backend{
+class Test3 extends Backend
+{
 
     protected $noNeedLogin = ['*'];
     public function _initialize()
     {
         parent::_initialize();
 
-       //$this->es = new Elaticsearch();
+        //$this->es = new Elaticsearch();
     }
     /**
      * id 订单号，物流商，运单号，当前节点状态，从上网到最终状态的时间有多久(如果大状态为4，则代表最终状态)
@@ -25,7 +26,8 @@ class Test3 extends Backend{
      * @since 2020/06/02 10:11:53 
      * @return void
      */
-    public function export_order_node(){
+    public function export_order_node()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         //查询物流结点
@@ -35,31 +37,31 @@ class Test3 extends Backend{
         $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.order_node,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
         $arr = array();
         $i = 0;
-        foreach($order as $key=>$item){
+        foreach ($order as $key => $item) {
             $arr[$i]['order_id'] = $item['order_id'];
             $arr[$i]['shipment_type'] = $item['shipment_type'];
             $arr[$i]['track_number'] = $item['track_number'];
-            if($item['order_node'] == 0){
+            if ($item['order_node'] == 0) {
                 $order_node = '客户';
-            }elseif($item['order_node'] == 1){
+            } elseif ($item['order_node'] == 1) {
                 $order_node = '等待加工';
-            }elseif($item['order_node'] == 2){
+            } elseif ($item['order_node'] == 2) {
                 $order_node = '加工备货';
-            }elseif($item['order_node'] == 3){
+            } elseif ($item['order_node'] == 3) {
                 $order_node = '快递物流';
-            }elseif($item['order_node'] == 4){
+            } elseif ($item['order_node'] == 4) {
                 $order_node = '完成';
             }
             $arr[$i]['node_type'] = $order_node;
             $arr[$i]['create_time'] = $item['create_time'];
             //查询是否有最终状态时间
-            $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
-            if($endtime){
+            $endtime = Db('order_node_detail')->where(['order_node' => 4, 'order_id' => $item['order_id']])->order('id asc')->value('create_time');
+            if ($endtime) {
                 $arr[$i]['complete_time'] = $endtime;
-                $time=floor((strtotime($endtime)-strtotime($item['create_time']))/3600);
-                $hour_num = $time%24;
-                $arr[$i]['day'] = floor($time/24).'天'.$hour_num.'个小时';
-            }else{
+                $time = floor((strtotime($endtime) - strtotime($item['create_time'])) / 3600);
+                $hour_num = $time % 24;
+                $arr[$i]['day'] = floor($time / 24) . '天' . $hour_num . '个小时';
+            } else {
                 $arr[$i]['complete_time'] = '';
                 $arr[$i]['day'] = 0;
             }
@@ -136,5 +138,50 @@ class Test3 extends Backend{
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+
+
+    public function proccess_stock()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
+        $result = collection($result)->toArray();
+        $skus = array_column($result, 'sku');
+        //计算SKU总采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $hasWhere['sku'] = ['in', $skus];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase_map['is_del'] = 1;
+        $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->group('sku')
+            ->column('sum(purchase_num) as purchase_num', 'sku');
+
+        //查询出满足条件的采购单号
+        $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->group('PurchaseOrder.id')
+            ->column('PurchaseOrder.id');
+
+        //查询留样库存
+        //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
+        $check_map['status'] = 2;
+        $check_map['type'] = 1;
+        $check_map['Check.purchase_id'] = ['in', $ids];
+        $check = new \app\admin\model\warehouse\Check;
+        $hasWhere['sku'] = ['in', $skus];
+        $check_list = $check->hasWhere('checkItem', $hasWhere)
+            ->where($check_map)
+            ->group('sku')
+            ->column('sum(arrivals_num) as arrivals_num', 'sku');
+        foreach ($result as &$v) {
+            $on_way_stock = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
+            $v['on_way_stock'] = $on_way_stock > 0 ? $on_way_stock : 0;
+        }
+        unset($v);
+        $res = $item->saveAll($result);
+
+        
     }
 }
