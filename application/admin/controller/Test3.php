@@ -193,6 +193,7 @@ class Test3 extends Backend
      */
     public function setPayTime()
     {
+        ini_set('memory_limit', '512M');
         $order_node_detail = new \app\admin\model\OrderNodeDetail();
         $list = $order_node_detail->where(['order_node' => 0, 'node_type' => 0])->field('create_time,order_id')->select();
         $list = collection($list)->toArray();
