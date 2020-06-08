@@ -7,15 +7,15 @@ use app\common\controller\Backend;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-
-class Test3 extends Backend{
+class Test3 extends Backend
+{
 
     protected $noNeedLogin = ['*'];
     public function _initialize()
     {
         parent::_initialize();
 
-       //$this->es = new Elaticsearch();
+        //$this->es = new Elaticsearch();
     }
     /**
      * id 订单号，物流商，运单号，当前节点状态，从上网到最终状态的时间有多久(如果大状态为4，则代表最终状态)
@@ -25,7 +25,8 @@ class Test3 extends Backend{
      * @since 2020/06/02 10:11:53 
      * @return void
      */
-    public function export_order_node(){
+    public function export_order_node()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         //查询物流结点
@@ -35,31 +36,31 @@ class Test3 extends Backend{
         $order = Db::name('order_node')->alias('o')->field('o.order_id,o.shipment_type,o.track_number,o.order_node,d.create_time')->where($where)->join(['fa_order_node_detail' => 'd'], 'o.order_id=d.order_id')->select();
         $arr = array();
         $i = 0;
-        foreach($order as $key=>$item){
+        foreach ($order as $key => $item) {
             $arr[$i]['order_id'] = $item['order_id'];
             $arr[$i]['shipment_type'] = $item['shipment_type'];
             $arr[$i]['track_number'] = $item['track_number'];
-            if($item['order_node'] == 0){
+            if ($item['order_node'] == 0) {
                 $order_node = '客户';
-            }elseif($item['order_node'] == 1){
+            } elseif ($item['order_node'] == 1) {
                 $order_node = '等待加工';
-            }elseif($item['order_node'] == 2){
+            } elseif ($item['order_node'] == 2) {
                 $order_node = '加工备货';
-            }elseif($item['order_node'] == 3){
+            } elseif ($item['order_node'] == 3) {
                 $order_node = '快递物流';
-            }elseif($item['order_node'] == 4){
+            } elseif ($item['order_node'] == 4) {
                 $order_node = '完成';
             }
             $arr[$i]['node_type'] = $order_node;
             $arr[$i]['create_time'] = $item['create_time'];
             //查询是否有最终状态时间
-            $endtime = Db('order_node_detail')->where(['order_node'=>4,'order_id'=>$item['order_id']])->order('id asc')->value('create_time');
-            if($endtime){
+            $endtime = Db('order_node_detail')->where(['order_node' => 4, 'order_id' => $item['order_id']])->order('id asc')->value('create_time');
+            if ($endtime) {
                 $arr[$i]['complete_time'] = $endtime;
-                $time=floor((strtotime($endtime)-strtotime($item['create_time']))/3600);
-                $hour_num = $time%24;
-                $arr[$i]['day'] = floor($time/24).'天'.$hour_num.'个小时';
-            }else{
+                $time = floor((strtotime($endtime) - strtotime($item['create_time'])) / 3600);
+                $hour_num = $time % 24;
+                $arr[$i]['day'] = floor($time / 24) . '天' . $hour_num . '个小时';
+            } else {
                 $arr[$i]['complete_time'] = '';
                 $arr[$i]['day'] = 0;
             }
@@ -136,5 +137,114 @@ class Test3 extends Backend{
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+
+
+
+    /**
+     * 测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/06 15:19:57 
+     * @return void
+     */
+    public function test()
+    {
+        session_start();
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+
+        $startDate = '7daysAgo';
+        $endDate = 'today';
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport($analytics, $startDate, $endDate);
+
+        // Print the response.
+        $result = $this->printResults($response);
+
+        dump($result);die;
+
+
+        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+        //     // Set the access token on the client.
+        //     $client->setAccessToken($_SESSION['access_token']);
+
+            
+        // } else {
+        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
+        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+        // }
+    }
+
+
+
+    /**
+     * Queries the Analytics Reporting API V4.
+     *
+     * @param service An authorized Analytics Reporting API V4 service object.
+     * @return The Analytics Reporting API V4 response.
+     */
+    protected function getReport($analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
+
+        // Create the DateRange object.
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        // Create the Metrics object.
+        $sessions = new \Google_Service_AnalyticsReporting_Metric();
+        $sessions->setExpression("ga:sessions");
+        $sessions->setAlias("sessions");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($sessions));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    /**
+     * Parses and prints the Analytics Reporting API V4 response.
+     *
+     * @param An Analytics Reporting API V4 response.
+     */
+    protected function printResults($reports)
+    {
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    print($dimensionHeaders[$i] . ": " . $dimensions[$i] . "\n");
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        print($entry->getName() . ": " . $values[$k] . "\n");
+                    }
+                }
+            }
+        }
     }
 }

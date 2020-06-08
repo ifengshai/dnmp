@@ -6,7 +6,6 @@ return [
     'url_html_suffix'        => '',
     'controller_auto_search' => true,
 
-
     'kuaidi' => [
         'yunda' => '韵达快递',
         'youzhengguonei' => '邮政快递包裹',
