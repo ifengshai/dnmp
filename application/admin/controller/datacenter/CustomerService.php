@@ -6,6 +6,7 @@ use app\common\controller\Backend;
 use think\Cache;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
+use app\admin\model\zendesk\ZendeskAgents;
 
 class CustomerService extends Backend
 {
@@ -58,25 +59,42 @@ class CustomerService extends Backend
             $replyArr = [];
             $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
             $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
-            //$this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             foreach ($customerReply as $ok =>$ov) {
                 if (array_key_exists($ov['due_id'], $infoOne)) { 
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    //$replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    //$replyArr['one']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    switch($ov['customer_type']){
+                        case 1:
+                            $replyArr[$ov['due_id']]['customer_type']   = '邮件组';
+                        break;
+                        case 2:
+                            $replyArr[$ov['due_id']]['customer_type']   = '电话组';
+                        break;
+                        default:
+                            $replyArr[$ov['due_id']]['customer_type']   = '未知';
+                        break;   
+                    }
                     $replyArr['one']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['one']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
                 if (array_key_exists($ov['due_id'], $infoTwo)) {
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    //$replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    //$replyArr['two']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    switch($ov['customer_type']){
+                        case 1:
+                            $replyArr[$ov['due_id']]['customer_type']   = '邮件组';
+                        break;
+                        case 2:
+                            $replyArr[$ov['due_id']]['customer_type']   = '电话组';
+                        break;
+                        default:
+                            $replyArr[$ov['due_id']]['customer_type']   = '未知';
+                        break;   
+                    }                    
                     $replyArr['two']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['two']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
@@ -1140,6 +1158,8 @@ class CustomerService extends Backend
         //客服分组
         $info = $this->customers();
         $kefumanage = config('workorder.kefumanage');
+        //客服组信息电话、邮件
+        $customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
             $handleNum = $noQualifyDay = 0;
             foreach ($customerReply as $k => $v) {
@@ -1153,6 +1173,13 @@ class CustomerService extends Backend
                 }
                 if (array_key_exists($v['due_id'], $info)) {
                     $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
+                }
+                if(count($customerType)>1){
+                    if(array_key_exists($v['due_id'],$customerType)){
+                        $customerReply[$k]['customer_type'] = $customerType[$v['due_id']];
+                    }
+                }else{
+                    $customerReply[$k]['customer_type'] = 0;
                 }
                 $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                 $handleNum+=$v['counter'];
@@ -1940,6 +1967,19 @@ class CustomerService extends Backend
             }
         }
         return $info ? $info : [];
+
+    }
+    /**
+     * 获取客服是 电话组或者邮件组
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/08 13:55:44 
+     * @return void
+     */
+    public function getCustomerType()
+    {
+       return ZendeskAgents::column('admin_id,agent_type');
 
     }
 }
