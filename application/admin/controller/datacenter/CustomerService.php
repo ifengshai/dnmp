@@ -53,6 +53,7 @@ class CustomerService extends Backend
         $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d 00:00:00', time()+3600*24)]];
         $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
         $customerReply = $this->workload_info_original($workload_map, $start, $end, 10);
+        $customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
             unset($customerReply['noQualifyDay']);
@@ -65,17 +66,6 @@ class CustomerService extends Backend
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    switch($ov['customer_type']){
-                        case 1:
-                            $replyArr[$ov['due_id']]['customer_type']   = '邮件组';
-                        break;
-                        case 2:
-                            $replyArr[$ov['due_id']]['customer_type']   = '电话组';
-                        break;
-                        default:
-                            $replyArr[$ov['due_id']]['customer_type']   = '未知';
-                        break;   
-                    }
                     $replyArr['one']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['one']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
@@ -83,18 +73,7 @@ class CustomerService extends Backend
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
-                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    switch($ov['customer_type']){
-                        case 1:
-                            $replyArr[$ov['due_id']]['customer_type']   = '邮件组';
-                        break;
-                        case 2:
-                            $replyArr[$ov['due_id']]['customer_type']   = '电话组';
-                        break;
-                        default:
-                            $replyArr[$ov['due_id']]['customer_type']   = '未知';
-                        break;   
-                    }                    
+                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];                   
                     $replyArr['two']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['two']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
@@ -218,7 +197,8 @@ class CustomerService extends Backend
             'yesterdayData',
             'servenData',
             'thirdData',
-            'replyArr'
+            'replyArr',
+            'customerType'
         ));
         return $this->view->fetch();
     }
@@ -1159,7 +1139,7 @@ class CustomerService extends Backend
         $info = $this->customers();
         $kefumanage = config('workorder.kefumanage');
         //客服组信息电话、邮件
-        $customerType = $this->getCustomerType();
+        //$customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
             $handleNum = $noQualifyDay = 0;
             foreach ($customerReply as $k => $v) {
@@ -1174,13 +1154,13 @@ class CustomerService extends Backend
                 if (array_key_exists($v['due_id'], $info)) {
                     $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
                 }
-                if(count($customerType)>1){
-                    if(array_key_exists($v['due_id'],$customerType)){
-                        $customerReply[$k]['customer_type'] = $customerType[$v['due_id']];
-                    }
-                }else{
-                    $customerReply[$k]['customer_type'] = 0;
-                }
+                // if(count($customerType)>1){
+                //     if(array_key_exists($v['due_id'],$customerType)){
+                //         $customerReply[$k]['customer_type'] = $customerType[$v['due_id']];
+                //     }
+                // }else{
+                //     $customerReply[$k]['customer_type'] = 0;
+                // }
                 $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                 $handleNum+=$v['counter'];
                 $noQualifyDay += $customerReply[$k]['no_qualified_day'];
@@ -1979,7 +1959,25 @@ class CustomerService extends Backend
      */
     public function getCustomerType()
     {
-       return ZendeskAgents::column('admin_id,agent_type');
-
+       $info =  ZendeskAgents::field('admin_id,agent_type')->select();
+       if(!$info){
+           return false;
+       }
+       $arr = [];
+       foreach($info as $v){
+          switch($v['agent_type']){
+              case 1:
+                $agent_value = '邮件组';
+              break;
+              case 2:
+                $agent_value = '电话组';
+              break;
+              default:
+                $agent_value = '未知';
+              break;
+          }
+          $arr[$v['admin_id']] = $agent_value;
+       }
+       return $arr ?:[];
     }
 }
