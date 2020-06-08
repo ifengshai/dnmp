@@ -155,6 +155,14 @@ table.altrowstable tr:nth-child(even){
                                         {/foreach}
                                     </select>
                                 </div>
+                                <label class="control-label col-xs-1 col-sm-1">工作组别:</label>
+                                <div class="col-xs-2">
+                                    <select  id="c-order_platform" class="form-control" name="customer_workload">
+                                        {foreach name="customer_workload" item="vo"}
+                                        <option value="{$key}" {if $customerWorkload == $key}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>                                
                             </div>                            
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
@@ -188,6 +196,7 @@ table.altrowstable tr:nth-child(even){
              <tr>
                  <th style="text-align: center; vertical-align: middle;">姓名</th>
                  <th style="text-align: center; vertical-align: middle;">分组</th>
+                 <th style="text-align: center; vertical-align: middle;">工作组别</th>
                  <th style="text-align: center; vertical-align: middle;">日期</th>
                  <th style="text-align: center; vertical-align: middle;">处理量</th>
                  <th style="text-align: center; vertical-align: middle;">未达标天数</th>
@@ -200,6 +209,7 @@ table.altrowstable tr:nth-child(even){
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
                       <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
+                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.workload_group}</td>
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start}:{$end}</td>
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$vo.no_qualified_day}</td>
@@ -211,7 +221,8 @@ table.altrowstable tr:nth-child(even){
                   {foreach name="worklistOne" item="vo" key="k"}
                   <tr>
                       <td rowspan="2" style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['nickname']}</td>   
-                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['group']}</td>  
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['group']}</td>
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$worklistOne[$k]['workload_group']}</td>   
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistOne[$k]['counter'];?></td>   
                       <td style="text-align: center; vertical-align: middle;"><?php echo $worklistOne[$k]['no_qualified_day'];?></td>

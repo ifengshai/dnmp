@@ -516,9 +516,10 @@ class CustomerService extends Backend
             $customer_type = $params['customer_type'];
             //员工分类
             $customer_category = $params['customer_category'];
-            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform,$customer_type,$customer_category);
+            $customer_workload = $params['customer_workload'];
+            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform,$customer_type,$customer_category,$customer_workload);
             if (!empty($mapTwo)) {
-                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform,$customer_type,$customer_category);
+                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform,$customer_type,$customer_category,$customer_workload);
             }
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
@@ -574,7 +575,8 @@ class CustomerService extends Backend
             $this->view->assign(
                 [
                     'customerType'=>$customer_type,
-                    'customerCategory'=>$customer_category
+                    'customerCategory'=>$customer_category,
+                    'customerWorkload'=>$customer_workload
                 ]
             );
             $orderPlatformList = config('workorder.platform');
@@ -595,6 +597,8 @@ class CustomerService extends Backend
             $customerReply = collection($customerReply)->toArray();
             //客服分组
             //$info = $this->customers();
+            //获取邮件电话分组
+            $customerType = $this->getCustomerType();
             //整个客服部门人员
             $allCustomers = $this->newCustomers();
             if(!empty($allCustomers)){
@@ -610,6 +614,11 @@ class CustomerService extends Backend
                             }
                         }
                     }
+                    if(!empty($customerType)){
+                        if(array_key_exists($v['id'],$customerType)){
+                            $allCustomers[$k]['workload_group'] = $customerType[$v['id']];
+                        }
+                    }
                 } 
             }
             $orderPlatformList = config('workorder.platform');
@@ -619,7 +628,8 @@ class CustomerService extends Backend
         //客服数据
         $customer_type = config('workorder.customer_type');
         $customer_category = config('workorder.customer_category');
-        $this->view->assign(compact('customer_type','customer_category'));
+        $customer_workload = config('workorder.customer_workload');
+        $this->view->assign(compact('customer_type','customer_category','customer_workload'));
         return $this->view->fetch();
     }
     /**
@@ -937,6 +947,14 @@ class CustomerService extends Backend
                 $arr[] = $v;
             }
             $arr[] = 95;
+        }else{
+            foreach ($kefumanage as $k=> $v) {
+                $arr[] = $k;
+                foreach ($v as $val) {
+                    $arr[] = $val;
+                }
+            }
+            $result[75] = '王伟';           
         }
         // $result[1]  = 'Admin';
         // $result[75] = '王伟';
@@ -981,7 +999,7 @@ class CustomerService extends Backend
      * @since 2020/05/23 15:49:44
      * @return void
      */
-    public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0)
+    public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0,$customer_workload = 0)
     {
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
@@ -1002,8 +1020,10 @@ class CustomerService extends Backend
         //B组员工      
         }elseif(2 == $customer_type){
             $type = $this->customers_by_group(2);
+        }else{ //全部
+            $type = $this->customers_by_group(0);
         }
-        $type_arr = $category_arr = [];
+        $type_arr = $category_arr = $group_arr = [];
         if(!empty($type)){
             foreach($type as $k =>$v){
                 $type_arr[] = $k;
@@ -1014,39 +1034,64 @@ class CustomerService extends Backend
             $category = $this->getCustomerFormal(1);
         }elseif(2 == $customer_category){ //非正式员工
             $category = $this->getCustomerFormal(2);
+        }else{
+            //全部
+            $category = $this->getCustomerFormal(0);
         }
         if(!empty($category)){
             foreach($category as $k=>$v){
                 $category_arr[] = $v;
             }
         }
-        if(count($type_arr)>0 && count($category_arr)==0){
-            $filterPerson  = $type_arr;
-            $where['due_id'] = ['in',$type_arr];
-        }elseif(count($type_arr)>0 && count($category_arr)>0){
-            $filterPerson = array_intersect($type_arr,$category_arr);
-            $where['due_id'] = ['in',$filterPerson];
-        }elseif(count($type_arr) == 0 && count($category_arr)>0){
-            $filterPerson = $category_arr;
-            $where['due_id'] = ['in',$category_arr];
-        }else{
-            $where['due_id'] = ['neq',0];
+        //客服员工分组 电话/邮件
+        if(1 == $customer_workload){
+            $customer_group = $this->getAllCustomerType(1);
+        }elseif(2 == $customer_workload){
+            $customer_group = $this->getAllCustomerType(2);
         }
+        if(!empty($customer_group)){
+            foreach($customer_group as $k =>$v){
+                $group_arr[] = $k;
+            }
+        }
+        if(count($group_arr)<1){
+            $filterPerson = array_intersect($type_arr,$category_arr);           
+        }else{
+            $filterPerson = array_intersect($type_arr,$category_arr,$group_arr);
+
+        }
+        $where['due_id'] = ['in',$filterPerson];
+        
+        
+        // if(count($type_arr)>0 && count($category_arr)==0){
+        //     $filterPerson  = $type_arr;
+        //     $where['due_id'] = ['in',$type_arr];
+        // }elseif(count($type_arr)>0 && count($category_arr)>0){
+        //     $filterPerson = array_intersect($type_arr,$category_arr);
+        //     $where['due_id'] = ['in',$filterPerson];
+        // }elseif(count($type_arr) == 0 && count($category_arr)>0){
+        //     $filterPerson = $category_arr;
+        //     $where['due_id'] = ['in',$category_arr];
+        // }else{
+        //     $where['due_id'] = ['neq',0];
+        // }
+        
 		//整个客服部门人员
 		$arrCustomers = $this->newCustomers();
-		$allCustomers = [];
+        $allCustomers = [];
 		if(isset($filterPerson)){
 			foreach($arrCustomers as $k =>$v){
 				if(in_array($v['id'],$filterPerson)){
 					$allCustomers[$k]['id'] = $v['id'];
 					$allCustomers[$k]['nickname'] = $v['nickname'];
 					$allCustomers[$k]['group'] = $v['group'];
-				}
+                }
 			}			
 		}else{
 			$allCustomers = $arrCustomers;
         }
-                                
+        //获取组别
+        $customerArr     = $this->getCustomerType();                        
         //客服处理量
         $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
         $customerReply = collection($customerReply)->toArray();
@@ -1061,6 +1106,11 @@ class CustomerService extends Backend
                             $handleNum+=$cv['counter'];
                             $noQualifiyDay += $allCustomers[$k]['no_qualified_day'];
                         }
+                    }
+                }
+                if(!empty($customerArr)){
+                    if(array_key_exists($v['id'],$customerArr)){
+                        $allCustomers[$k]['workload_group'] = $customerArr[$v['id']];
                     }
                 }
             }
@@ -1944,6 +1994,10 @@ class CustomerService extends Backend
                         $info[] = $k;
                     }
                 }    
+            }else{ //全部员工
+                foreach($result as $k => $v){
+                    $info[] = $k;
+                }
             }
         }
         return $info ? $info : [];
@@ -1979,5 +2033,21 @@ class CustomerService extends Backend
           $arr[$v['admin_id']] = $agent_value;
        }
        return $arr ?:[];
+    }
+    /**
+     * 获取客服的邮件组还是电话组或者全部
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/08 15:23:40 
+     * @return void
+     */
+    public function getAllCustomerType($type)
+    {
+        if(0 != $type){
+            $where['agent_type'] = $type;
+        }
+        return  ZendeskAgents::where($where)->column('admin_id,agent_type');
+
     }
 }
