@@ -181,7 +181,26 @@ class Test3 extends Backend
         }
         unset($v);
         $res = $item->saveAll($result);
+    }
 
-        
+    /**
+     * 修改支付时间
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/08 17:02:59 
+     * @return void
+     */
+    public function setPayTime()
+    {
+        $order_node_detail = new \app\admin\model\OrderNodeDetail();
+        $list = $order_node_detail->where(['order_node' => 0, 'node_type' => 0])->field('create_time,order_id')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $order_node_detail->where(['order_id' => $v['order_id'], 'order_node' => 0, 'node_type' => 1])->update(['create_time' => $v['create_time']]);
+            echo $v['order_id'] . "\n";
+        }
+        echo 'ok';
+        die;
     }
 }
