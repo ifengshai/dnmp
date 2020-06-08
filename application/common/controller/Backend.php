@@ -442,8 +442,10 @@ class Backend extends Controller
         $field = $this->request->request("showField");
         //主键
         $primarykey = $this->request->request("keyField");
+		
         //主键值
         $primaryvalue = $this->request->request("keyValue");
+		
         //搜索字段
         $searchfield = (array) $this->request->request("searchField/a");
         //自定义搜索条件
@@ -487,11 +489,14 @@ class Backend extends Controller
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
+		
         $total = $this->model->where($where)->count();
+		
         if ($total > 0) {
             if (is_array($adminIds)) {
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
             }
+		
             $datalist = $this->model->where($where)
                 ->order($order)
                 ->page($page, $pagesize)

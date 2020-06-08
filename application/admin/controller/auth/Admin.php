@@ -157,18 +157,26 @@ class Admin extends Backend
     
 	
 	public function department_list(){					 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();         			
+            $pageNumber = $this->request->request("pageNumber");
+			$pageSize = $this->request->request("pageSize");
+			$first = ($pageNumber-1)*$pageSize + 1;
+			$end = $pageSize;
+			$name = $this->request->request('name');
+			$where['pid'] = array('neq',1);
+			if($name){
+				$where['name'] = array('like','%'.$name.'%');
+			}
 			$total = $this->departmentmodel
                // ->where($where)
-                ->where(['pid' => ['neq',1]])
+                ->where($where)
                 ->order($sort, $order)
-                ->count();
-
+                ->count(); 
+			
             $list = $this->departmentmodel
                 //->where($where)
-                ->where(['pid' => ['neq',1]])
+                ->where($where)
                 ->order($sort, $order)
-                ->limit($offset, $limit)
+                ->limit($first, $end)
                 ->select();            			
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -421,6 +429,16 @@ class Admin extends Backend
     {
         $this->dataLimit = 'auth';
         $this->dataLimitField = 'id';
+        return parent::selectpage();
+    }
+	
+	/**
+     * 下拉搜索
+     */
+    public function selectpage1()
+    {
+        // $this->dataLimit = 'auth';
+        // $this->dataLimitField = 'id';
         return parent::selectpage();
     }
 }
