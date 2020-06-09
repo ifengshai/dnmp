@@ -237,6 +237,7 @@ class Test3 extends Backend
                 $logistics_info->where(['id' => $v['id']])->update(['is_check_order' => 1]);
             }
             echo $k . "\n";
+            usleep(50000);
         }
         echo 'ok';
     }
