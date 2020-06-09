@@ -1550,7 +1550,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function wesee_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type > 0 order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_weseeoptical')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
@@ -1580,11 +1580,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type']) {
+                if (($v['index_type'] == '' || !$v['index_type']) && !$v['sph_degree']) {
                     $label[] = 1; //仅镜架
                 } elseif ($v['index_type'] && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif ($v['index_type'] && $v['is_custom_lens'] == 1) {
+                } elseif ($v['sph_degree'] && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
