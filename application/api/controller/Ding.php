@@ -142,7 +142,7 @@ class Ding extends Controller
                     }
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
-                case 'org_dept_modify':
+                case 'org_dept_remove':
                     //删除部门
                     $deptIds = $payload['DeptId'];
                     foreach ($deptIds as $deptId) {
