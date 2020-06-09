@@ -750,20 +750,6 @@ class Sample extends Backend
         return $this->view->fetch();
     }
     /**
-     * 入库取消
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/05/23 16:13:54 
-     * @param [type] $ids
-     * @return void
-     */
-    public function sample_workorder_cancel($ids = null){
-        $workorder['status'] = 5;
-        $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
-        $this->success();
-    }
-    /**
      * 入库批量审核
      *
      * @Description
@@ -1133,19 +1119,6 @@ class Sample extends Backend
             }
             $this->success();
         }
-    }
-    /**
-     * 出库取消
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/06/09 11:32:09 
-     * @param [type] $ids
-     * @return void
-     */
-    public function sample_workorder_out_cancel($ids = null){
-        $this->sampleworkorder->where('id',$ids)->update(['status'=>5]);
-        $this->success();
     }
     /**
      * 借出记录列表

@@ -191,23 +191,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         return true;
                                     }
                                 },
-                                {
-                                    name: 'cancel',
-                                    text: __('取消'),
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_cancel',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -318,23 +301,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     },
                                     visible: function(row){
                                         return true;
-                                    }
-                                },
-                                {
-                                    name: 'cancel',
-                                    text: __('取消'),
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_out_cancel',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
                                     }
                                 },
                             ],
