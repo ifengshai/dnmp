@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 }
             }
             EchartObj.api.ajax(options1, chartOptions1);
-            EchartObj.api.ajax(options3, chartOptions3);
+            //EchartObj.api.ajax(options3, chartOptions3);
                         //点击重置按钮
             $(document).on('click', '.btn-workload-time', function () {
                 $('#workload_time').val('');

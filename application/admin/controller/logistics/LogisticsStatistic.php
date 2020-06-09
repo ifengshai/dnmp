@@ -108,6 +108,10 @@ class LogisticsStatistic extends Backend
      */
     public function logistics_data($site, $map)
     {
+        $arr = Cache::get('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)));
+        if ($arr) {
+            return $arr;
+        }
         if ($site !=10) {
             $where['site'] = $whereSite['site'] = $site;
         }
@@ -185,6 +189,7 @@ class LogisticsStatistic extends Backend
                 $info['gtTwenty_deliverd_rate'] = 0;
                 $info['deliverd_order_num_all'] = 0;
             }
+            Cache::set('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)), $info, 7200);
         return $info;
     }
     /**
