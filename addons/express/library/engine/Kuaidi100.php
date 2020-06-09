@@ -40,6 +40,7 @@ class Kuaidi100 extends Server
     {
         // 缓存索引
         $cacheIndex = 'express_kuaidi100_' . $express_id;
+      
 
         if ($data = cache($cacheIndex)) {
             return $data;
@@ -47,7 +48,6 @@ class Kuaidi100 extends Server
         if (!$shipper_code) {
 
             $data = Http::get($this->codeURL . $express_id . '&key=' . $this->config['app_key']);
-
             $data = json_decode($data, true);
 
             if (!isset($data[0]) || !isset($data[0]->comCode)) {
@@ -56,7 +56,6 @@ class Kuaidi100 extends Server
             }
             $shipper_code = $data[0]->comCode;
         }
-
 
         // 参数设置
         $postData = [

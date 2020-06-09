@@ -559,6 +559,7 @@ class Index extends Backend
             $stime = date('Y-m-d 00:00:00');
             $etime = date('Y-m-d H:i:s', time());
             $where = "created_at between '" . $stime . "' and '" . $etime . "'";
+
         }
         $sql = "select SUM(IF((b.sph > - 3 AND b.sph < 0 ) AND b.cyl < 2, 1, 0 )) AS A,
         SUM(IF(( sph > - 3.00 AND sph < 0 AND cyl > 2.00 ) OR ( sph < - 3.00 AND sph > - 6.00 AND cyl < 2.00 ),1, 0 )) AS B,

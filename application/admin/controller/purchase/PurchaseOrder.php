@@ -36,13 +36,21 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls', 'deleteLogisticsItem'];
 
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\purchase\PurchaseOrder;
         $this->purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $this->batch = new \app\admin\model\purchase\PurchaseBatch();
+        $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
     }
 
     /**
@@ -126,21 +134,39 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
-
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+
+                    $batch_sku = $this->request->post("batch_sku/a");
+                    $arrival_num = $this->request->post("arrival_num/a");
+                    if ($arrival_num) {
+                        //现在分批到货数量必须等于采购数量
+                        $arr = [];
+                        foreach ($arrival_num as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $arr[$key] += $val;
+                            }
+                        }
+                        foreach ($num as $k => $v) {
+                            if ($arr[$k] != $v) {
+                                $this->error('分批到货数量必须等于采购数量');
+                            }
+                        }
+                    }
+
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
                     if ($result !== false) {
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
-                        $num = $this->request->post("purchase_num/a");
+
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
 
@@ -156,7 +182,37 @@ class PurchaseOrder extends Backend
                             $data[$k]['purchase_order_number'] = $params['purchase_number'];
                         }
                         //批量添加
-                        $this->purchase_order_item->allowField(true)->saveAll($data);
+                        $this->purchase_order_item->saveAll($data);
+
+                        //添加分批数据
+                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batch_sku = $this->request->post("batch_sku/a");
+                        $arrival_num = $this->request->post("arrival_num/a");
+
+                        //判断是否有分批数据
+                        if ($batch_arrival_time && count($batch_arrival_time) > 0) {
+                            $i = 0;
+                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                                $batch_data['purchase_id'] = $this->model->id;
+                                $batch_data['arrival_time'] = $v;
+                                $batch_data['batch'] = $i + 1;
+                                $batch_data['create_person'] = session('admin.nickname');
+                                $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                $batch_id = $this->batch->insertGetId($batch_data);
+                                $i++;
+                                $list = [];
+                                foreach ($batch_sku[$k] as $key => $val) {
+                                    if (!$val || !$arrival_num[$k][$key]) {
+                                        continue;
+                                    }
+                                    $list[$key]['sku'] = $val;
+                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                    $list[$key]['purchase_batch_id'] = $batch_id;
+                                }
+
+                                $this->batch_item->saveAll($list);
+                            }
+                        }
                     }
 
                     Db::commit();
@@ -215,6 +271,7 @@ class PurchaseOrder extends Backend
         //生成采购编号
         $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('purchase_number', $purchase_number);
+        $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
         return $this->view->fetch();
     }
 
@@ -321,11 +378,29 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
+
+                    $arrival_num = $this->request->post("arrival_num/a");
+                    if ($arrival_num) {
+                        //现在分批到货数量必须等于采购数量
+                        $arr = [];
+                        foreach ($arrival_num as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $arr[$key] += $val;
+                            }
+                        }
+                        foreach ($num as $k => $v) {
+                            if ($arr[$k] != $v) {
+                                $this->error('分批到货数量必须等于采购数量');
+                            }
+                        }
+                    }
+
 
                     $result = $row->allowField(true)->save($params);
 
@@ -333,7 +408,7 @@ class PurchaseOrder extends Backend
                     if ($result !== false) {
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
-                        $num = $this->request->post("purchase_num/a");
+
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
                         $item_id = $this->request->post("item_id/a");
@@ -354,7 +429,49 @@ class PurchaseOrder extends Backend
                         }
                         //批量添加
                         $this->purchase_order_item->allowField(true)->saveAll($data);
+
+                        //添加分批数据
+                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batch_id = $this->request->post("batch_id/a");
+                        $batch_sku = $this->request->post("batch_sku/a");
+                        $batch_item_id = $this->request->post("batch_item_id/a");
+                        //判断是否有分批数据
+                        if ($batch_arrival_time && count($batch_arrival_time) > 0) {
+                            $i = 0;
+                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                                //判断是否存在id 如果存在则为编辑
+                                $batch_data = [];
+                                if ($batch_id[$k]) {
+                                    $batch_data['arrival_time'] = $v;
+                                    $this->batch->where(['id' => $batch_id[$k]])->update($batch_data);
+                                } else {
+                                    $batch_data['purchase_id'] = $ids;
+                                    $batch_data['arrival_time'] = $v;
+                                    $batch_data['batch'] = $i + 1;
+                                    $batch_data['create_person'] = session('admin.nickname');
+                                    $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                    $batch_id = $this->batch->insertGetId($batch_data);
+                                }
+                                $i++;
+                                $list = [];
+                                foreach ($batch_sku[$k] as $key => $val) {
+                                    if (!$val || !$arrival_num[$k][$key]) {
+                                        continue;
+                                    }
+                                    if ($batch_item_id[$k][$key]) {
+                                        $list[$key]['id'] = $batch_item_id[$k][$key];
+                                    } else {
+                                        $list[$key]['purchase_batch_id'] = $batch_id;
+                                        $list[$key]['sku'] = $val;
+                                    }
+                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                }
+
+                                $this->batch_item->allowField(true)->saveAll($list);
+                            }
+                        }
                     }
+
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -383,6 +500,10 @@ class PurchaseOrder extends Backend
         $map['purchase_id'] = $ids;
         $item = $this->purchase_order_item->where($map)->select();
         $this->assign('item', $item);
+
+        //查询分批数据
+        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $ids)->select();
+        $this->assign('batch', $batch);
 
         //查询合同
         $contract = new \app\admin\model\purchase\Contract;
@@ -422,6 +543,10 @@ class PurchaseOrder extends Backend
         $item = $this->purchase_order_item->where($map)->select();
         $this->assign('item', $item);
 
+        //查询分批数据
+        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $ids)->select();
+        $this->assign('batch', $batch);
+
         //查询合同
         $contract = new \app\admin\model\purchase\Contract;
         $contract_data = $contract->getContractData();
@@ -429,7 +554,6 @@ class PurchaseOrder extends Backend
 
         $getTabList = ['采购单信息', '质检信息', '物流信息', '付款信息'];
         $this->assign('getTabList', $getTabList);
-
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -443,12 +567,32 @@ class PurchaseOrder extends Backend
         $ids = explode(',', $ids);
         if (count($ids) > 1) {
             $row = $this->model->where(['id' => ['in', $ids]])->select();
+            foreach ($row as $v) {
+                if ($v['is_batch'] == 1) {
+                    $this->error(__('分批到货采购单只能单选'), url('index'));
+                }
+
+                if (!in_array($v['purchase_status'], [2, 5, 6, 9])) {
+                    $this->error(__('此状态不能录入物流单号'), url('index'));
+                }
+            }
         } else {
             $row = $this->model->get($ids);
             if (!$row) {
-                $this->error(__('No Results were found'));
+                $this->error(__('No Results were found'), url('index'));
             }
+
+            if (!in_array($row['purchase_status'], [2, 5, 6, 9])) {
+                $this->error(__('此状态不能录入物流单号'), url('index'));
+            }
+
+            $logistics = new \app\admin\model\LogisticsInfo();
+            $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
+            $logistics_data = collection($logistics_data)->toArray();
+
+            $this->view->assign("logistics_data", $logistics_data);
         }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -456,7 +600,7 @@ class PurchaseOrder extends Backend
             }
         }
         if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
+            $params = input('post.');
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -471,31 +615,67 @@ class PurchaseOrder extends Backend
                     $params['is_add_logistics'] = 1;
                     $params['purchase_status'] = 6; //待收货
                     $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
-
-                    //添加快递100订阅推送服务
-                    $logistics_company_no = explode(',', trim($params['logistics_company_no']));
-                    $logistics_number = explode(',', trim($params['logistics_number']));
-                    Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], implode(',', $ids));
-
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
-                    if (count($ids) > 1) {
-                        foreach ($row as $k => $v) {
-                            $list['logistics_number'] = $params['logistics_number'];
-                            $list['type'] = 1;
-                            $list['order_number'] = $v['purchase_number'];
-                            $list['purchase_id'] = $v['id'];
-                            $logistics->addLogisticsInfo($list);
+                    $logistics_company_no = $params['logistics_company_no'];
+                    $logistics_number = $params['logistics_number'];
+                    $logistics_ids = $params['logistics_ids'];
+
+                    if ($params['batch_id']) {
+                        foreach ($logistics_company_no as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $list = [];
+                                if (!$val) {
+                                    continue;
+                                }
+                                if ($logistics_ids[$k][$key]) {
+                                    $list['id'] = $logistics_ids[$k][$key];
+                                } else {
+                                    $list['order_number'] = $row['purchase_number'];
+                                    $list['purchase_id'] = $row['id'];
+                                    $list['type'] = 1;
+                                    $list['batch_id'] = $k;
+                                }
+                                $list['logistics_number'] = $logistics_number[$k][$key];
+                                $list['logistics_company_no'] = $val;
+                                $logistics->addLogisticsInfo($list);
+                            }
                         }
                     } else {
-                        $list['logistics_number'] = $params['logistics_number'];
-                        $list['type'] = 1;
-                        $list['order_number'] = $row['purchase_number'];
-                        $list['purchase_id'] = $row['id'];
-                        $logistics->addLogisticsInfo($list);
+                        if (count($ids) > 1) {
+                            foreach ($row as $k => $v) {
+                                foreach ($logistics_company_no as $key => $val) {
+                                    $list = [];
+                                    if (!$val) {
+                                        continue;
+                                    }
+                                    $list['logistics_number'] = $logistics_number[$key];
+                                    $list['logistics_company_no'] = $val;
+                                    $list['type'] = 1;
+                                    $list['order_number'] = $v['purchase_number'];
+                                    $list['purchase_id'] = $v['id'];
+                                    $logistics->addLogisticsInfo($list);
+                                }
+                            }
+                        } else {
+                            foreach ($logistics_company_no as $k => $v) {
+                                if (!$v) {
+                                    continue;
+                                }
+                                $list = [];
+                                if ($logistics_ids[$k]) {
+                                    $list['id'] = $logistics_ids[$k];
+                                } else {
+                                    $list['order_number'] = $row['purchase_number'];
+                                    $list['purchase_id'] = $row['id'];
+                                    $list['type'] = 1;
+                                }
+                                $list['logistics_number'] = $logistics_number[$k];
+                                $list['logistics_company_no'] = $v;
+                                $logistics->addLogisticsInfo($list);
+                            }
+                        }
                     }
-
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -516,7 +696,37 @@ class PurchaseOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
+        //判断是否为分批到货
+        if ($row['is_batch'] == 1) {
+            //查询分批数据
+            $batch = new \app\admin\model\purchase\PurchaseBatch();
+            $batch_data = $batch->where('purchase_id', $row['id'])->select();
+            $this->view->assign("batch_data", $batch_data);
+        }
+
         return $this->view->fetch();
+    }
+
+    /**
+     * 删除采购单物流数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/04 13:55:22 
+     * @return void
+     */
+    public function deleteLogisticsItem()
+    {
+        if ($this->request->isAjax()) {
+            $id = input('id');
+            $logistics = new \app\admin\model\LogisticsInfo();
+            $res = $logistics->destroy($id);
+            if ($res) {
+                $this->success();
+            } else {
+                $this->error();
+            }
+        }
     }
 
 
@@ -576,7 +786,6 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
-
     /**
      * 删除合同里商品信息
      */
@@ -608,10 +817,21 @@ class PurchaseOrder extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-
-        $data['purchase_status'] = input('status');
+        $status = input('status');
+        $data['purchase_status'] = $status;
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        $item = new \app\admin\model\itemmanage\Item();
         if ($res !== false) {
+
+            //在途库存新逻辑
+            if ($status == 2) {
+                //审核通过添加在途库存
+                $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
+                foreach ($list as $v) {
+                    $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+                }
+            }
+
             $this->success();
         } else {
             $this->error('修改失败！！');
@@ -651,32 +871,30 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $data = [];
-        //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
-        if ($row['purchase_type'] == 2) {
-            $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
-            $data = Cache::get($cacheIndex);
-            if (!$data) {
-                $data = Alibaba::getLogisticsMsg($row['purchase_number']);
-                // 记录缓存, 时效1小时
-                Cache::set($cacheIndex, $data, 3600);
-            }
-            $data = $data->logisticsTrace[0];
-        } else {
-            if ($row['logistics_number']) {
-                $arr = explode(',', $row['logistics_number']);
-                //物流公司编码
-                $company = explode(',', $row['logistics_company_no']);
-                foreach ($arr as $k => $v) {
-                    try {
-                        $param['express_id'] = trim($v);
-                        $param['code'] = trim($company[$k]);
-                        $data[$k] = Hook::listen('express_query', $param)[0];
-                    } catch (\Exception $e) {
-                        $this->error($e->getMessage());
-                    }
+
+        //查询物流信息表快递数据
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $list = $logistics->where(['purchase_id' => $id])->select();
+        $list = collection($list)->toArray();
+        if (!$list) {
+            $this->error(__('No Results were found'));
+        }
+
+        $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
+        $data = Cache::get($cacheIndex);
+        if (!$data) {
+            foreach ($list as $k => $v) {
+                //来源快递100
+                if ($v['source'] == 1) {
+                    $param['express_id'] = $v['logistics_number'];
+                    $param['code'] = $v['logistics_company_no'];
+                    $data[$k] = Hook::listen('express_query', $param)[0];
+                } elseif ($v['source'] == 2) { //来源1688
+                    $data[$k] = Alibaba::getLogisticsMsg($v['order_number']);
                 }
             }
+            // 记录缓存, 时效1小时
+            Cache::set($cacheIndex, $data, 3600);
         }
 
         //采购单退销物流信息
@@ -794,6 +1012,8 @@ class PurchaseOrder extends Backend
 
         $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
+        $new_product = new \app\admin\model\NewProduct();
+        $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $k => $v) {
             //匹配SKU
             if ($v['skuid']) {
@@ -801,8 +1021,19 @@ class PurchaseOrder extends Backend
 
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
+
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+
+                $item->where(['sku' => $params['sku']])->setInc('on_way_stock', $v['purchase_num']);
+            }
+
+
+
+            //判断sku是否为选品库SKU
+            $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
+            if ($count > 0) {
+                $this->model->where('id', $v['purchase_id'])->update(['is_new_product' => 1]);
             }
         }
 
@@ -852,7 +1083,10 @@ class PurchaseOrder extends Backend
         for ($i = 1; $i <= ceil($success_data['totalRecord'] / 50); $i++) {
             //根据不同的状态取订单数据
             $data[$i] = Alibaba::getOrderList($i, $params)['result'];
+            sleep(1);
         }
+        $new_product = new \app\admin\model\NewProduct();
+        $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -902,10 +1136,6 @@ class PurchaseOrder extends Backend
                     //1688用户配置id
                     $userIDs = config('1688user');
                     $list['create_person'] = $userIDs[$v['baseInfo']['buyerSubID']] ?? '任萍';
-                    //采购02账号 默认都为新品
-                    if ($v['baseInfo']['buyerSubID'] == 2201224483475) {
-                        $list['is_new_product'] = 1;
-                    }
                     $jsonDate = $v['baseInfo']['createTime'];
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
@@ -926,8 +1156,7 @@ class PurchaseOrder extends Backend
                     if ($allDeliveredTime) {
                         $matches = [];
                         preg_match('/\d{14}/', $allDeliveredTime, $matches);
-                        $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
-                        $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                        $list['delivery_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
 
                     //待发货
@@ -957,6 +1186,7 @@ class PurchaseOrder extends Backend
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];
+                    $kval = 0;
                     foreach ($v['productItems'] as  $key => $val) {
                         //添加商品数据
                         $params[$key]['purchase_id'] = $result->id;
@@ -974,6 +1204,20 @@ class PurchaseOrder extends Backend
                             $params[$key]['sku'] = (new SupplierSku())->getSkuData($val['skuID']);
                             $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val['skuID']);
                         }
+
+                        //判断sku是否为选品库SKU
+                        $count = $new_product->where(['sku' => $params[$key]['sku'], 'item_status' => 1, 'is_del' => 1])->count();
+                        if ($count > 0) {
+                            $kval = 1;
+                        }
+
+                        if ($params[$key]['sku']) {
+                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $val['purchase_num']);
+                        }
+                    }
+                    //修改为选品采购单
+                    if ($kval == 1) {
+                        $this->model->where('id', $result->id)->update(['is_new_product' => 1]);
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }
@@ -1012,7 +1256,7 @@ class PurchaseOrder extends Backend
     }
 
     /**
-     * 产品补货列表
+     * 产品补货列表 在途库存新
      */
     public function product_grade_list()
     {
@@ -1041,45 +1285,46 @@ class PurchaseOrder extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-
+            $skus = array_column($list, 'true_sku');
             //查询所有产品库存
             $map['is_del'] = 1;
+            $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
-            $product = $item->where($map)->column('available_stock', 'sku');
+            $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');
 
             //计算在途数量
-            $skus = array_column($list, 'true_sku');
-
             //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $hasWhere['sku'] = ['in', $skus];
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['check_status'] = ['in', [0, 1]];
-            $purchase_map['is_diff'] = 0;
-            $purchase_map['is_del'] = 1;
+            // $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
+            // $purchase_map['check_status'] = ['in', [0, 1]];
+            // $purchase_map['is_diff'] = 0;
+            // $purchase_map['is_del'] = 1;
+            // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('sku')
+            //     ->column('sum(purchase_num) as purchase_num', 'sku');
 
-            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('sku')
-                ->column('sum(purchase_num) as purchase_num', 'sku');
+            // //查询出满足条件的采购单号  旧在途库存计算方式
+            // $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            //     ->where($purchase_map)
+            //     ->group('PurchaseOrder.id')
+            //     ->column('PurchaseOrder.id');
 
-            //查询出满足条件的采购单号
-            $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('PurchaseOrder.id')
-                ->column('PurchaseOrder.id');
+            // //查询留样库存
+            // //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
+            // $check_map['status'] = 2;
+            // $check_map['type'] = 1;
+            // $check_map['Check.purchase_id'] = ['in', $ids];
+            // $check = new \app\admin\model\warehouse\Check;
+            // $hasWhere['sku'] = ['in', $skus];
+            // $check_list = $check->hasWhere('checkItem', $hasWhere)
+            //     ->where($check_map)
+            //     ->group('sku')
+            //     ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
-            //查询留样库存
-            //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $check_map['status'] = 2;
-            $check_map['type'] = 1;
-            $check_map['Check.purchase_id'] = ['in', $ids];
-            $check = new \app\admin\model\warehouse\Check;
-            $hasWhere['sku'] = ['in', $skus];
-            $check_list = $check->hasWhere('checkItem', $hasWhere)
-                ->where($check_map)
-                ->group('sku')
-                ->column('sum(arrivals_num) as arrivals_num', 'sku');
+
+
 
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
@@ -1102,7 +1347,7 @@ class PurchaseOrder extends Backend
 
             foreach ($list as &$v) {
                 $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
-                $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
+                $onway_stock = $product[$v['true_sku']]['on_way_stock'] ?? 0;
                 if ($v['grade'] == 'A+') {
                     $times = 1.5;
                 } elseif ($v['grade'] == 'A') {
@@ -1119,9 +1364,9 @@ class PurchaseOrder extends Backend
                 }
 
                 //补货量
-                $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']] - $onway_stock);
+                $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['available_stock'] - $onway_stock);
                 $v['replenish_num'] = $replenish_num > 0 ? $replenish_num : 0;
-                $v['stock'] = $product[$v['true_sku']];
+                $v['stock'] = $product[$v['true_sku']]['available_stock'];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
                 $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock'] / $v['days_sales_num']) : 0;
@@ -1155,49 +1400,86 @@ class PurchaseOrder extends Backend
 
         //总数
         $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
-        //A级数量即总占比
-        $res['AA_num'] = $AA_num;
-        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
-        $res['A_num'] = $A_num;
-        $res['A_percent'] = round($A_num / $all_num * 100, 2);
-        $res['B_num'] = $B_num;
-        $res['B_percent'] = round($B_num / $all_num * 100, 2);
-        $res['CA_num'] = $CA_num;
-        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
-        $res['C_num'] = $C_num;
-        $res['C_percent'] = round($C_num / $all_num * 100, 2);
-        $res['D_num'] = $D_num;
-        $res['D_percent'] = round($D_num / $all_num * 100, 2);
-        $res['E_num'] = $E_num;
-        $res['E_percent'] = round($E_num / $all_num * 100, 2);
-        $res['F_num'] = $F_num;
-        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        if ($all_num) {
+            //A级数量即总占比
+            $res['AA_num'] = $AA_num;
+            $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+            $res['A_num'] = $A_num;
+            $res['A_percent'] = round($A_num / $all_num * 100, 2);
+            $res['B_num'] = $B_num;
+            $res['B_percent'] = round($B_num / $all_num * 100, 2);
+            $res['CA_num'] = $CA_num;
+            $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+            $res['C_num'] = $C_num;
+            $res['C_percent'] = round($C_num / $all_num * 100, 2);
+            $res['D_num'] = $D_num;
+            $res['D_percent'] = round($D_num / $all_num * 100, 2);
+            $res['E_num'] = $E_num;
+            $res['E_percent'] = round($E_num / $all_num * 100, 2);
+            $res['F_num'] = $F_num;
+            $res['F_percent'] = round($F_num / $all_num * 100, 2);
+        }
 
         $this->assign('res', $res);
 
         return $this->view->fetch();
-
-        // //计算断货频次
-        // $sku_where['sku'] = ['in', $sku_list];
-        // $sku_data = M('product_sku_stock', 'zeelool_')->where($sku_where)->order('sku asc,createtime asc')->cache(true, 86400)->select();
-        // $sku_list = [];
-        // foreach ($sku_data as $k => $v) {
-        //     //实时库存加上采购未入库库存
-        //     if (($v['qty'] + $v['stock_num']) <= 0) {
-        //         if (!$sku_list[$v['sku']]) {
-        //             $sku_list[$v['sku']]['num'] = 1;
-        //         } else {
-        //             //实时库存加上采购未入库库存
-        //             if (($sku_data[$k - 1]['qty'] + $sku_data[$k - 1]['stock_num']) > 0) {
-        //                 $sku_list[$v['sku']]['num'] = $sku_list[$v['sku']]['num'] + 1;
-        //             }
-        //         }
-        //     }
-        // }
-
-
-
     }
+
+
+    /**
+     * 查看
+     */
+    public function process()
+    {
+        $this->model = new \app\admin\model\warehouse\Check;
+        $this->check_item = new \app\admin\model\warehouse\CheckItem;
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->check_item->where($smap)->column('check_id');
+                $map['check.id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //是否存在需要退回产品
+            $smap['unqualified_num'] = ['>', 0];
+            $ids = $this->check_item->where($smap)->column('check_id');
+            $map['check.id'] = ['in', $ids];
+            $map['check.is_return'] = 0;
+            $map['check.status'] = 2;
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->with(['purchaseorder', 'supplier'])
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            $list = $this->model
+                ->with(['purchaseorder', 'supplier'])
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
 
     /**
      * 批量导出xls

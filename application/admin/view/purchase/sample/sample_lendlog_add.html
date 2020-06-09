@@ -1,0 +1,70 @@
+<style>
+    .form-group{
+        float: left;
+        width: 34%;
+    }
+    .col-sm-2 {
+        width:30%
+    }
+    #add_entry_product{
+        width: 73px;
+        height: 31px;
+        line-height: 31px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 0 10px 0px;
+    }
+    #del{
+        float: left;
+        width: 25%;
+        height: 28px;
+        line-height: 12px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 8px;
+        margin-top: 9px;
+        background: #e74c3c;
+    }
+    .location{
+        padding-top: 15px !important;
+    }
+    .desc{
+        display: flex;
+        margin: 10px 0 ;
+    }
+    .desc textarea{
+        margin: 0 10px 10px;
+        border-radius: 4px;
+        resize: none;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div id="add_entry_product"><span>add</span></div>
+    <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+        <thead>
+        <tr role="row">
+            <th style="width: 150px;">SKU</th>
+            <th style="width: 150px;">借出数量</th>
+            <th style="width: 150px;">库位</th>
+            <th style="width: 150px;">删除</th>
+        </thead>
+        <tbody id="product_data">
+        </tbody>
+    </table>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('提交申请')}</button>
+        </div>
+    </div>
+    <div id="sku_info" style="display: none;">
+        <option value="">请输入</option>
+        {foreach name="sku_data" item="vo"}
+        <option data-id="{$vo.location}" value="{$vo.sku}" >{$vo.sku}</option>
+        {/foreach}
+    </div>
+</form>

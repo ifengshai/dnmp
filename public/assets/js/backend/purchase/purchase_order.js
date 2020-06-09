@@ -45,12 +45,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: false },
                         { field: 'purchase_remark', title: __('采购备注'), formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款' },
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success', 8: 'success', 9: 'success', 10: 'success' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款', 9: '部分签收', 10: '已完成' },
                             addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
@@ -94,33 +93,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                {
-                                    name: 'submitAudit',
-                                    text: '提交审核',
-                                    title: __('提交审核'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: 'purchase/purchase_order/audit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 0) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                },
+
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -178,25 +151,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     }
                                 },
                                 {
-                                    name: 'detail',
-                                    text: '录入物流单号',
-                                    title: '录入物流单号',
-                                    classname: 'btn btn-xs  btn-success  btn-dialog',
-                                    icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/logistics',
-                                    extend: 'data-area = \'["50%","60%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if ((row.purchase_status == 2 || row.purchase_status == 6) && row.purchase_type == 1) {
-                                            return true;
-                                        }
-                                        return false;
-                                    }
-                                },
-                                {
                                     name: 'edit',
                                     text: '',
                                     title: __('Edit'),
@@ -216,7 +170,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         }
                                     }
                                 },
-                                {
+                                /* {
                                     name: 'check',
                                     text: '去质检',
                                     title: __('质检'),
@@ -235,7 +189,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             return false;
                                         }
                                     }
-                                }
+                                } */
 
                             ], formatter: Table.api.formatter.operate
                         }
@@ -258,7 +212,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     var op = search.op;
                     window.open(Config.moduleurl + '/purchase/purchase_order/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
+
             });
 
             $(document).on('click', ".problem_desc_info", function () {
@@ -281,16 +235,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
                 var url = 'purchase/purchase_order/remark?ids=' + ids;
                 Fast.api.open(url, __('添加备注'), { area: ['900px', '500px'] });
-               
+
                 return false;
             });
 
             $(document).on('click', ".btn-logistics", function () {
                 var ids = Table.api.selectedids(table);
-                
+
                 var url = 'purchase/purchase_order/logistics?ids=' + ids;
                 Fast.api.open(url, __('录入物流单号'), { area: ['50%', '60%'] });
-               
+
                 return false;
             });
 
@@ -344,15 +298,88 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         add: function () {
             Controller.api.bindevent();
+            var z = 0;
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
+                $('.purchase-table tbody').append(content);
 
                 Controller.api.bindevent();
             })
 
             $(document).on('click', '.btn-del', function () {
+               
                 $(this).parent().parent().remove();
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                 //运费
+                 var freight = $('.freight').val();
+                 //总计
+                 $('.purchase_total').val(total + freight * 1);
+            })
+
+            $(document).on('click', '.btn-arrival-del', function () {
+                $(this).parent().remove();
+                z--;
+            })
+
+            //获取sku信息
+            $(document).on('change', '.sku', function () {
+                var sku = $(this).val();
+                var supplier_id = $('.supplier.selectpicker').val();
+                var _this = $(this);
+                if (!sku) {
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'ajax/getSkuList',
+                    data: { sku: sku, supplier_id: supplier_id }
+                }, function (data, ret) {
+                    _this.parent().parent().find('.product_name').val(data.name);
+                    _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
+                }, function (data, ret) {
+                    Fast.api.error(ret.msg);
+                });
+
+            })
+
+            $(document).on('click', '.btn-addplus', function () {
+                // var content = $('#arrival-content').html();
+                // $('#arrival_div').append(content);
+                var html = '<div class="list" style="margin-top:20px;">\n' +
+                    '<input type="hidden" name="row[is_batch]" value="1">' +
+                    '    <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>\n' +
+                    '    <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">\n' +
+                    '        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-rule="required" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text" value="' + Config.newdatetime + '">\n' +
+                    '    </div>\n' +
+                    '    <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '    <table id="caigou-table" style="width:80%;">\n' +
+                    '        <tr>\n' +
+                    '            <th>SKU</td>\n' +
+                    '            <th>到货数量</td>\n' +
+                    '        </tr>\n';
+                var els = $('.purchase-table').find('.sku');
+
+                for (var i = 0, j = els.length; i < j; i++) {
+                    var sku = els[i].value;
+                    html += '<tr>\n' +
+                        '            <td>\n' +
+                        '                <input id="c-purchase_remark" class="form-control" readonly name="batch_sku[' + z + '][' + i + ']" value="' + sku + '" type="text">\n' +
+                        '            </td>\n' +
+                        '            <td><input id="c-purchase_remark" class="form-control arrival_num"  name="arrival_num[' + z + '][' + i + ']" type="text"></td>\n' +
+                        '        </tr>\n';
+
+                }
+                z++;
+                html += '    </table>\n' +
+                    '</div>';
+                $('#arrival_div').append(html);
+
+                Controller.api.bindevent();
             })
 
 
@@ -372,6 +399,100 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $('.supplier.selectpicker').change();
             }
 
+            //切换合同 异步获取合同数据
+            $(document).on('change', '.contract_id', function () {
+                var id = $(this).val();
+                if (id) {
+                    var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
+                    Backend.api.ajax({
+                        url: url,
+                        data: { id: id }
+                    }, function (data, ret) {
+                        $('.contract_name').val(data.contract_name);
+                        $('.delivery_address').val(data.delivery_address);
+                        $('.delivery_stime').val(data.delivery_stime);
+                        $('.delivery_etime').val(data.delivery_etime);
+                        $('.contract_stime').val(data.contract_stime);
+                        $('.contract_etime').val(data.contract_etime);
+                        $('.contract_images').val(data.contract_images);
+                        $('#c-contract_images').change();
+
+                        $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                        $(".supplier_address").val(data.supplier_address);
+                        $(".total").val(data.total);
+                        $(".freight").val(data.freight);
+                        $(".deposit_amount").val(data.deposit_amount);
+                        $(".final_amount").val(data.final_amount);
+                        $(".settlement_method").val(data.settlement_method);
+                        $('.address').val(data.delivery_address);
+                        if (data.settlement_method == 3) {
+                            $('.deposit_amount').removeClass('hidden');
+                            $('.final_amount').removeClass('hidden');
+                        }
+
+                        $('.freight').attr("readonly", "readonly");;
+
+                        //总计
+                        var purchase_total = data.total * 1 + data.freight * 1;
+                        $('.purchase_total').val(purchase_total);
+
+
+                        //循环展示商品信息
+                        var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td></tr>';
+                        $('.purchase-table tbody').html('');
+                        $('#toolbar').remove();
+                        for (var i in data.item) {
+                            var sku = data.item[i].sku;
+                            if (!sku) {
+                                sku = '';
+                            }
+                            shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly value="' + sku + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" readonly name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" readonly name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
+                            // shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                            shtml += '</tr>'
+                        }
+                        $('.purchase-table tbody').append(shtml);
+
+                        //模糊匹配订单
+                        $('.sku').autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "ajax/ajaxGetLikeOriginSku",
+                                    dataType: "json",
+                                    cache: false,
+                                    async: false,
+                                    data: {
+                                        origin_sku: request.term
+                                    },
+                                    success: function (json) {
+                                        var data = json.data;
+                                        response($.map(data, function (item) {
+                                            return {
+                                                label: item,//下拉框显示值
+                                                value: item,//选中后，填充到input框的值
+                                                //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                            };
+                                        }));
+                                    }
+                                });
+                            },
+                            delay: 10,//延迟100ms便于输入
+                            select: function (event, ui) {
+                                $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                            },
+                            scroll: true,
+                            pagingMore: true,
+                            max: 5000
+                        });
+                    });
+                }
+
+            })
 
         },
         edit: function () {
@@ -383,6 +504,165 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
 
                 Controller.api.bindevent();
+
+            })
+            var z = $('.arrival_time').length - 1;
+            $(document).on('click', '.btn-arrival-del', function () {
+                $(this).parent().remove();
+                z--;
+            })
+
+            $(document).on('click', '.btn-addplus', function () {
+                // var content = $('#arrival-content').html();
+                // $('#arrival_div').append(content);
+                var html = '<div class="list" style="margin-top:20px;">\n' +
+                    '<input type="hidden" name="row[is_batch]" value="1">' +
+                    '    <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>\n' +
+                    '    <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">\n' +
+                    '        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-rule="required" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text" value="">\n' +
+                    '    </div>\n' +
+                    '    <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '    <table id="caigou-table" style="width:80%;">\n' +
+                    '        <tr>\n' +
+                    '            <th>SKU</td>\n' +
+                    '            <th>到货数量</td>\n' +
+                    '        </tr>\n';
+                var els = $('.purchase-table').find('.sku');
+
+                for (var i = 0, j = els.length; i < j; i++) {
+                    var sku = els[i].value;
+                    html += '<tr>\n' +
+                        '            <td>\n' +
+                        '                <input id="c-purchase_remark" class="form-control" readonly name="batch_sku[' + z + '][' + i + ']" value="' + sku + '" type="text">\n' +
+                        '            </td>\n' +
+                        '            <td><input id="c-purchase_remark" class="form-control arrival_num"  name="arrival_num[' + z + '][' + i + ']" type="text"></td>\n' +
+                        '        </tr>\n';
+
+                }
+                z++;
+                html += '    </table>\n' +
+                    '</div>';
+                $('#arrival_div').append(html);
+
+                Controller.api.bindevent();
+            })
+
+
+
+            //获取sku信息
+            $(document).on('change', '.sku', function () {
+                var sku = $(this).val();
+                var supplier_id = $('.supplier.selectpicker').val();
+                var _this = $(this);
+                if (!sku) {
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'ajax/getSkuList',
+                    data: { sku: sku, supplier_id: supplier_id }
+                }, function (data, ret) {
+                    _this.parent().parent().find('.product_name').val(data.name);
+                    _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
+                }, function (data, ret) {
+                    Fast.api.error(ret.msg);
+                });
+
+            })
+
+            //切换合同 异步获取合同数据
+            $(document).on('change', '.contract_id', function () {
+                var id = $(this).val();
+                if (id) {
+                    var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
+                    Backend.api.ajax({
+                        url: url,
+                        data: { id: id }
+                    }, function (data, ret) {
+                        $('.contract_name').val(data.contract_name);
+                        $('.delivery_address').val(data.delivery_address);
+                        $('.delivery_stime').val(data.delivery_stime);
+                        $('.delivery_etime').val(data.delivery_etime);
+                        $('.contract_stime').val(data.contract_stime);
+                        $('.contract_etime').val(data.contract_etime);
+                        $('.contract_images').val(data.contract_images);
+                        $('#c-contract_images').change();
+
+                        $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                        $(".supplier_address").val(data.supplier_address);
+                        $(".total").val(data.total);
+                        $(".freight").val(data.freight);
+                        $(".deposit_amount").val(data.deposit_amount);
+                        $(".final_amount").val(data.final_amount);
+                        $(".settlement_method").val(data.settlement_method);
+                        $('.address').val(data.delivery_address);
+                        if (data.settlement_method == 3) {
+                            $('.deposit_amount').removeClass('hidden');
+                            $('.final_amount').removeClass('hidden');
+                        }
+
+                        $('.freight').attr("readonly", "readonly");;
+
+                        //总计
+                        var purchase_total = data.total * 1 + data.freight * 1;
+                        $('.purchase_total').val(purchase_total);
+
+
+                        //循环展示商品信息
+                        var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td></tr>';
+                        $('.caigou table tbody').html('');
+                        $('#toolbar').remove();
+                        for (var i in data.item) {
+                            var sku = data.item[i].sku;
+                            if (!sku) {
+                                sku = '';
+                            }
+                            shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly value="' + sku + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" readonly name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" readonly name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
+                            shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
+                            // shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                            shtml += '</tr>'
+                        }
+                        $('.caigou table tbody').append(shtml);
+
+
+
+                        //模糊匹配订单
+                        $('.sku').autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "ajax/ajaxGetLikeOriginSku",
+                                    dataType: "json",
+                                    cache: false,
+                                    async: false,
+                                    data: {
+                                        origin_sku: request.term
+                                    },
+                                    success: function (json) {
+                                        var data = json.data;
+                                        response($.map(data, function (item) {
+                                            return {
+                                                label: item,//下拉框显示值
+                                                value: item,//选中后，填充到input框的值
+                                                //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                            };
+                                        }));
+                                    }
+                                });
+                            },
+                            delay: 10,//延迟100ms便于输入
+                            select: function (event, ui) {
+                                $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                            },
+                            scroll: true,
+                            pagingMore: true,
+                            max: 5000
+                        });
+                    });
+                }
 
             })
 
@@ -428,12 +708,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         logistics: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-add', function () {
+                var shtml = $('#logistics_div').html();
+                $(this).parent().next().append(shtml);
+            })
+
+            $(document).on('click', '.btn-add-batch', function () {
+                var batch_id = $(this).parent().next('.batch_id').val();
+                var shtml = '<div class="form-group">' +
+                    '<label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>' +
+                    '<div class="col-xs-12 col-sm-3">' +
+                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">' +
+                    '</div>' +
+                    '<label class="control-label col-xs-12 col-sm-2">物流单号:</label>' +
+                    '<div class="col-xs-12 col-sm-3">' +
+                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text">' +
+                    '</div>' +
+                    '<a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>' +
+                    '</div>';
+                $(this).parent().next().next().append(shtml);
+            })
+
+            // $(document).on('click', '.btn-del', function () {
+            //     $(this).parent().remove();
+            // })
+
+            //删除商品数据
+            $(document).on('click', '.btn-del', function () {
+                var id = $(this).parent().find('.logistics_ids').val();
+                var _this = $(this);
+                if (id) {
+                    Layer.confirm(
+                        __('确定要删除吗'),
+                        function (index) {
+                            Backend.api.ajax({
+                                url: Config.moduleurl + '/purchase/purchase_order/deleteLogisticsItem',
+                                data: { id: id }
+                            }, function (data, ret) {
+                                _this.parent().remove();
+                                Layer.closeAll();
+                            });
+                        }
+                    );
+
+                } else {
+                    $(this).parent().remove();
+                }
+            })
+
         },
         remark: function () {
             Controller.api.bindevent();
         },
         logisticsDetail: function () {
             Controller.api.bindevent();
+            
         },
         checkdetail: function () {
             Controller.api.bindevent();
@@ -449,6 +778,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         location.reload();
                     });
                 }
+            })
+
+            //上传文件
+            $(document).on('click', '.pluploads', function () {
+                var _this = $(this);
+                var url = $(this).attr('data-url');
+                Fast.api.open(
+                    'warehouse/check/uploads?img_url=' + url, '上传文件', {
+                    callback: function (data) {
+                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                    }
+                }
+                )
             })
 
         },
@@ -534,6 +876,141 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
+        process: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'purchase/purchase_order/process' + location.search,
+                    table: 'check_order',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'check.createtime',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'check_order_number', title: __('质检单号'), operate: 'like' },
+                        { field: 'purchaseorder.purchase_number', title: __('采购单号'), operate: 'like' },
+                        { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
+                        { field: 'supplier.supplier_name', title: __('供应商'), operate: 'like' },
+                        { field: 'remark', title: __('质检备注'), formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
+
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/check/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+
+            //批量生成退销单
+            $(document).on('click', '.btn-matching', function () {
+                var ids = Table.api.selectedids(table);
+
+                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["60%", "60%"] });
+
+            });
+
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+
+            });
+
+
+        },
         api: {
             bindevent: function () {
                 $(document).on('click', '.btn-status', function () {
@@ -541,102 +1018,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 })
                 Form.api.bindevent($("form[role=form]"));
 
-                //切换合同 异步获取合同数据
-                $(document).on('change', '.contract_id', function () {
-                    var id = $(this).val();
-                    if (id) {
-                        var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
-                        Backend.api.ajax({
-                            url: url,
-                            data: { id: id }
-                        }, function (data, ret) {
-                            $('.contract_name').val(data.contract_name);
-                            $('.delivery_address').val(data.delivery_address);
-                            $('.delivery_stime').val(data.delivery_stime);
-                            $('.delivery_etime').val(data.delivery_etime);
-                            $('.contract_stime').val(data.contract_stime);
-                            $('.contract_etime').val(data.contract_etime);
-                            $('.contract_images').val(data.contract_images);
-                            $('#c-contract_images').change();
 
-                            $(".supplier").selectpicker('val', data.supplier_id);//默认选中
-                            $(".supplier_address").val(data.supplier_address);
-                            $(".total").val(data.total);
-                            $(".freight").val(data.freight);
-                            $(".deposit_amount").val(data.deposit_amount);
-                            $(".final_amount").val(data.final_amount);
-                            $(".settlement_method").val(data.settlement_method);
-                            $('.address').val(data.delivery_address);
-                            if (data.settlement_method == 3) {
-                                $('.deposit_amount').removeClass('hidden');
-                                $('.final_amount').removeClass('hidden');
-                            }
-
-                            $('.freight').attr("readonly", "readonly");;
-
-                            //总计
-                            var purchase_total = data.total * 1 + data.freight * 1;
-                            $('.purchase_total').val(purchase_total);
-
-
-                            //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td></tr>';
-                            $('.caigou table tbody').html('');
-                            $('#toolbar').remove();
-                            for (var i in data.item) {
-                                var sku = data.item[i].sku;
-                                if (!sku) {
-                                    sku = '';
-                                }
-                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly value="' + sku + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" readonly name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" readonly name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
-                                // shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
-                                shtml += '</tr>'
-                            }
-                            $('.caigou table tbody').append(shtml);
-
-
-
-                            //模糊匹配订单
-                            $('.sku').autocomplete({
-                                source: function (request, response) {
-                                    $.ajax({
-                                        type: "POST",
-                                        url: "ajax/ajaxGetLikeOriginSku",
-                                        dataType: "json",
-                                        cache: false,
-                                        async: false,
-                                        data: {
-                                            origin_sku: request.term
-                                        },
-                                        success: function (json) {
-                                            var data = json.data;
-                                            response($.map(data, function (item) {
-                                                return {
-                                                    label: item,//下拉框显示值
-                                                    value: item,//选中后，填充到input框的值
-                                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                                };
-                                            }));
-                                        }
-                                    });
-                                },
-                                delay: 10,//延迟100ms便于输入
-                                select: function (event, ui) {
-                                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
-                                },
-                                scroll: true,
-                                pagingMore: true,
-                                max: 5000
-                            });
-                        });
-                    }
-
-                })
 
 
                 //计算金额
@@ -688,25 +1070,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 })
 
 
-                //获取sku信息
-                $(document).on('change', '.sku', function () {
-                    var sku = $(this).val();
-                    var supplier_id = $('.supplier.selectpicker').val();
-                    var _this = $(this);
-                    if (!sku) {
-                        return false;
-                    }
-                    Backend.api.ajax({
-                        url: 'ajax/getSkuList',
-                        data: { sku: sku, supplier_id: supplier_id }
-                    }, function (data, ret) {
-                        _this.parent().parent().find('.product_name').val(data.name);
-                        _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
-                    }, function (data, ret) {
-                        Fast.api.error(ret.msg);
-                    });
 
-                })
 
                 //模糊匹配订单
                 $('.sku').autocomplete({
