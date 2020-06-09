@@ -1485,11 +1485,11 @@ class WorkOrderList extends Backend
 
         //判断站点
         if ($row['work_platform'] == 1 && $row['replenish_money']) {
-            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' .$row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' .$row['replenish_money'];
         } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
-            $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+            $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'];
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
-            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&currency=' . $row['order_pay_currency'] . '&order_rate=' . $row['base_to_order_rate'];
+            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'];
         }
      
         $this->view->assign('url',$url);
