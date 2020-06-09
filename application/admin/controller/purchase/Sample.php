@@ -750,60 +750,6 @@ class Sample extends Backend
         return $this->view->fetch();
     }
     /**
-     * 入库删除
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/05/23 16:48:44 
-     * @param string $ids
-     * @return void
-     */
-    public function sample_workorder_del($ids = "")
-    {
-        if ($ids) {
-            $pk = $this->sampleworkorder->getPk();
-            $adminIds = $this->getDataLimitAdminIds();
-            if (is_array($adminIds)) {
-                $this->sampleworkorder->where($this->dataLimitField, 'in', $adminIds);
-            }
-            $list = $this->sampleworkorder->where($pk, 'in', $ids)->select();
-
-            $count = 0;
-            Db::startTrans();
-            try {
-                if (!empty($this->sampleworkorder)) {
-                    $fieldArr = $this->sampleworkorder->getTableFields();
-                    if (in_array('is_del', $fieldArr)) {
-                        $this->sampleworkorder->where($pk, 'in', $ids)->update(['is_del' => 2]);
-                        $count = 1;
-                    } else {
-                        foreach ($list as $k => $v) {
-                            $count += $v->delete();
-                        }
-                    }
-                } else {
-                    foreach ($list as $k => $v) {
-                        $count += $v->delete();
-                    }
-                }
-
-                Db::commit();
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            }
-            if ($count) {
-                $this->success();
-            } else {
-                $this->error(__('No rows were deleted'));
-            }
-        }
-        $this->error(__('Parameter %s can not be empty', 'ids'));
-    }
-    /**
      * 入库取消
      *
      * @Description
@@ -1189,20 +1135,14 @@ class Sample extends Backend
         }
     }
     /**
-     * 出库删除
+     * 出库取消
      *
      * @Description
      * @author mjj
-     * @since 2020/05/23 17:26:57 
+     * @since 2020/06/09 11:32:09 
+     * @param [type] $ids
      * @return void
      */
-    public function sample_workorder_out_del($ids = null){
-        if (!$ids) {
-            $this->error('缺少参数！！');
-        }
-        $this->sampleworkorder->where(['id'=>$ids])->update(['is_del'=>2]);
-        $this->success();
-    }
     public function sample_workorder_out_cancel($ids = null){
         $this->sampleworkorder->where('id',$ids)->update(['status'=>5]);
         $this->success();
@@ -1423,68 +1363,6 @@ class Sample extends Backend
         $this->assign('product_list', $product_list);
 
         return $this->view->fetch();
-    }
-    /**
-     * 借出记录审核
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/05/26 10:25:09 
-     * @return void
-     */
-    public function sample_lendlog_check($ids = null){
-        $params = input();
-        if (!$params['ids']) {
-            $this->error('缺少参数！！');
-        }
-        $where['id'] = $params['ids'];
-       
-        if($params['status'] == 2){
-            $is_check = 0;
-            $lend_arr = array();
-            //判断审核单中的商品是否可以借出
-            $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
-            foreach($lendlog_items as $item){
-                $sample = $this->sample->where('sku',$item['sku'])->find();
-                $rest_stock = $sample['stock'] - $sample['lend_num'];
-                if($rest_stock>=$item['lend_num']){
-                    $lend_arr[] = array(
-                        'sku' => $item['sku'],
-                        'lend_num' => $item['lend_num'],
-                    );
-                }else{
-                    //借出单中存在商品数量不足，无法借出
-                    $is_check++; 
-                }
-            }
-            if($is_check == 0){
-                //审核通过
-                if(count($lend_arr) > 0){
-                    foreach($lend_arr as $value){
-                        //借出商品并更新状态
-                        $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(['is_lend'=>1]);
-                    }
-                    $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
-                }
-            }else{
-                $this->error('借出单中存在商品数量不足，无法借出');
-            }
-        }elseif($params['status'] == 4){
-            //归还
-            $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
-            foreach($lendlog_items as $item){
-                $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
-                //判断是否没有借出数量，如果没有修改样品间列表的状态
-                $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
-                if($already_lend_num == 0){
-                    $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
-                }
-            }
-            $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
-        }else{
-            $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
-        }
-        $this->success();
     }
     /**
      * 借出记录批量审核

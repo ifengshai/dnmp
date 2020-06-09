@@ -449,40 +449,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 },
                                 {
-                                    name: 'check_pass',
-                                    text: __('审核通过'),
-                                    title: __('审核通过'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: 'purchase/sample/sample_lendlog_check/status/2',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        } 
-                                    }
-                                },
-                                {
-                                    name: 'check_refuse',
-                                    text: __('审核拒绝'),
-                                    title: __('审核拒绝'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_lendlog_check/status/3',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
                                     name: 'check_back',
                                     text: __('归还'),
                                     title: __('归还'),
