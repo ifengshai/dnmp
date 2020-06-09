@@ -55,7 +55,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 1) {
+                                        if (row.status == 1 && row.type == 1) {
                                             return true;
                                         }
                                         return false;
@@ -74,7 +74,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.status == 0) {
+                                        if (row.status == 0 && row.type == 1) {
                                             return true;
                                         } else {
                                             return false;
