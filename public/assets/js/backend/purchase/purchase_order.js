@@ -307,7 +307,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
             $(document).on('click', '.btn-del', function () {
+               
                 $(this).parent().parent().remove();
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                 //运费
+                 var freight = $('.freight').val();
+                 //总计
+                 $('.purchase_total').val(total + freight * 1);
             })
 
             $(document).on('click', '.btn-arrival-del', function () {
@@ -317,7 +329,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             //获取sku信息
             $(document).on('change', '.sku', function () {
-                console.log(123);
                 var sku = $(this).val();
                 var supplier_id = $('.supplier.selectpicker').val();
                 var _this = $(this);
