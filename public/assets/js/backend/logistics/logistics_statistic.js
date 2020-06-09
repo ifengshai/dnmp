@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     tooltip: { //提示框组件。
                         trigger: 'item',
                         formatter: function (param) {
-                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            return param.data.name + '<br/>比率：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                         }
                     },
                 }               
@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 }
             }
             EchartObj.api.ajax(options1, chartOptions1);
-            //EchartObj.api.ajax(options3, chartOptions3);
+            EchartObj.api.ajax(options3, chartOptions3);
                         //点击重置按钮
             $(document).on('click', '.btn-workload-time', function () {
                 $('#workload_time').val('');
@@ -98,6 +98,28 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         },
                     }
                 };
+                var chartOptions3 = {
+                    targetId: 'echart3',
+                    downLoadTitle: '图表',
+                    type: 'pie',
+                    pie: {
+                        tooltip: { //提示框组件。
+                            trigger: 'item',
+                            formatter: function (param) {
+                                return param.data.name + '<br/>比率：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            }
+                        },
+                    }               
+                };
+                var options3 = {
+                    type: 'post',
+                    url: 'logistics/logistics_statistic/index',
+                    data: {
+                        'time': create_time,
+                        'platform': platform,
+                        'key':'echart3' 
+                    }
+                }                 
                 var options1 = {
                     type: 'post',
                     url: 'logistics/logistics_statistic/index',
@@ -108,6 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     }
                 }               
                 EchartObj.api.ajax(options1, chartOptions1);
+                EchartObj.api.ajax(options3, chartOptions3);
                 Backend.api.ajax({
                     url:'logistics/logistics_statistic/index',
                     data:{time:create_time,platform:platform}

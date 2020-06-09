@@ -45,7 +45,9 @@ class LogisticsStatistic extends Backend
             $site = $params['platform'] ?:10;
             $result = $this->logistics_data($site,$map);
             $deliverd_order_num = $result['deliverd_order_num_all'];
+            $rate = $result['rate'];
             unset($result['deliverd_order_num_all']);
+            unset($result['rate']);
             //所有的物流渠道
             $column =  $this->model->distinct(true)->field('shipment_type')->where('shipment_type','neq',"")->column('shipment_type');
             if ('echart1' == $params['key']) {
@@ -57,25 +59,14 @@ class LogisticsStatistic extends Backend
                  $json['column'] = $column;
                  $json['columnData'] = $columnData;
                  return json(['code' => 1, 'data' => $json]);
-            } elseif ('echart2' == $params['key']) {
-                // //问题类型统计
-                // $problem_data = $this->get_problem_type_data($order_platform, $map, 1);
-                // //问题类型数组
-                // $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
-                // $customer_problem_list  = config('workorder.customer_problem_type');
-                // //循环数组根据id获取客服问题类型
-                // $column = $columnData = [];
-                // foreach ($customer_problem_arr as $k => $v) {
-                //         $column[] = $customer_problem_list[$v];  
-                    
-                // }
-                // foreach ($column as $ck => $cv) {
-                //     $columnData[$ck]['name'] = $cv;
-                //     $columnData[$ck]['value'] = $problem_data[$ck];
-                // }
-                // $json['column'] = $column;
-                // $json['columnData'] = $columnData;
-                // return json(['code' => 1, 'data' => $json]);
+            } elseif ('echart3' == $params['key']) {
+                foreach ($column as $ck => $cv) {
+                    $columnData[$ck]['name'] = $cv;
+                    $columnData[$ck]['value'] = $rate[$cv];
+                }
+                $json['column'] = $column;
+                $json['columnData'] = $columnData;
+                return json(['code' => 1, 'data' => $json]);
             }
             $this->success('','',$result);
         }        
@@ -89,6 +80,7 @@ class LogisticsStatistic extends Backend
         $site = $params['platform'] ?: 10;
         $result = $this->logistics_data($site,$map);
         unset($result['deliverd_order_num_all']);
+        unset($result['rate']);
         $orderPlatformList = config('logistics.platform');
         $this->view->assign(compact(
             'orderPlatformList',
@@ -119,7 +111,7 @@ class LogisticsStatistic extends Backend
             $orderNode['order_node'] = ['egt',3];
             $all_shipment_type =  $this->model->where($whereSite)->distinct(true)->field('shipment_type')->where('shipment_type','neq',"")->select();
             if($all_shipment_type){
-                $arr = $rs = [];
+                $arr = $rs = $rate = [];
                 $all_shipment_type = collection($all_shipment_type)->toArray();
                 foreach($all_shipment_type as $k => $v){
                     //物流渠道
@@ -155,6 +147,12 @@ class LogisticsStatistic extends Backend
                         $arr['twenty_deliverd_rate'][$k] = 0;
                         $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     }
+                    //发货数量
+                    if($send_order_num > 0){
+                        $rate[$v['shipment_type']] = round(($send_order_num/$order_num)*100,2);
+                    }else{
+                        $rate[$v['shipment_type']] = 0;
+                    }
                     //平均妥投时效
                     if($order_num>0){
                         $arr['avg_deliverd_rate'][$k] = round(($deliverd_order_num/$order_num)*100,2);
@@ -176,6 +174,7 @@ class LogisticsStatistic extends Backend
 
                 }
                 $info['deliverd_order_num_all'] = $rs;
+                $info['rate'] = $rate;
 
             }else{
                 $info['shipment_type'] = 0;
@@ -188,6 +187,7 @@ class LogisticsStatistic extends Backend
                 $info['twenty_deliverd_rate'] = 0;
                 $info['gtTwenty_deliverd_rate'] = 0;
                 $info['deliverd_order_num_all'] = 0;
+                $info['rate'] = 0;
             }
             Cache::set('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)), $info, 7200);
         return $info;
