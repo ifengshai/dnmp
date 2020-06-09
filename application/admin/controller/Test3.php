@@ -141,6 +141,14 @@ class Test3 extends Backend
     }
 
 
+    /**
+     * 处理在途库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/09 10:08:03 
+     * @return void
+     */
     public function proccess_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
@@ -181,7 +189,56 @@ class Test3 extends Backend
         }
         unset($v);
         $res = $item->saveAll($result);
-        echo $res;die;
+        echo $res;
+        die;
+    }
+
+    /**
+     * 处理质检单状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/09 10:09:17 
+     * @return void
+     */
+    public function process_status()
+    {
+        $logistics_info = new \app\admin\model\LogisticsInfo();
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $list = $logistics_info->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $status = $purchase->where(['id' => $v['purchase_id']])->value('check_status');
+            if ($status == 2) {
+                $logistics_info->where(['id' => $v['id']])->update(['status' => 1]);
+            }
+            echo $k . "\n";
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 处理质检单状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/09 10:09:17 
+     * @return void
+     */
+    public function process_check()
+    {
+        $logistics_info = new \app\admin\model\LogisticsInfo();
+        $check = new \app\admin\model\warehouse\Check();
+        $list = $logistics_info->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $count = $check->where(['purchase_id' => $v['purchase_id'], 'status' => 2])->count();
+            if ($count > 0) {
+                $logistics_info->where(['id' => $v['id']])->update(['is_check_order' => 1]);
+            }
+            echo $k . "\n";
+        }
+        echo 'ok';
     }
 
     /**
@@ -200,7 +257,7 @@ class Test3 extends Backend
     //     $list = collection($list)->toArray();
     //     foreach ($list as $k => $v) {
     //         $order_node_detail->where(['order_id' => $v['order_id'], 'order_node' => 0, 'node_type' => 1, 'site' => $v['site']])->update(['create_time' => $v['create_time']]);
-            
+
     //         echo $v['order_id'] . "\n";
     //         usleep(50000);
     //     }
