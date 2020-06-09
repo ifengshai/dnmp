@@ -67,8 +67,8 @@ class LogisticsStatistic extends Backend
                     'gtTwenty'=>'20天以上妥投率',
                 ];
                 foreach ($column as $ck => $cv) {
-                    $columnData[$ck]['name'] = $cv;
-                    $columnData[$ck]['value'] = round($rate[$ck]/$rate['total_num']*100,2);
+                    $columnData[]['name'] = $cv;
+                    $columnData[]['value'] = round($rate[$ck]/$rate['total_num']*100,2);
                 }
                 $json['column'] = array_values($column);
                 $json['columnData'] = $columnData;
