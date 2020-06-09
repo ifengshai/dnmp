@@ -70,7 +70,7 @@ class LogisticsStatistic extends Backend
                     $columnData[$ck]['name'] = $cv;
                     $columnData[$ck]['value'] = round($rate[$ck]/$rate['total_num']*100,2);
                 }
-                $json['column'] = $column;
+                $json['column'] = array_values($column);
                 $json['columnData'] = $columnData;
                 return json(['code' => 1, 'data' => $json]);
             }
