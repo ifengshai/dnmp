@@ -18,6 +18,12 @@ class LogisticsInfo extends Backend
      */
     protected $model = null;
 
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['signin'];
+
     public function _initialize()
     {
         parent::_initialize();
