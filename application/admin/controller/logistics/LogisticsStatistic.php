@@ -61,10 +61,10 @@ class LogisticsStatistic extends Backend
                  return json(['code' => 1, 'data' => $json]);
             } elseif ('echart3' == $params['key']) {
                 $column = [
-                    1=>'7天妥投率',
-                    2=>'14天妥投率',
-                    3=>'20天妥投率',
-                    4=>'20天以上妥投率',
+                    0=>'7天妥投率',
+                    1=>'14天妥投率',
+                    2=>'20天妥投率',
+                    3=>'20天以上妥投率',
                 ];
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
@@ -158,10 +158,10 @@ class LogisticsStatistic extends Backend
                         $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     }
                     //总共妥投数量
-                    $rate[1] += $date_order['serven_num'];  
-                    $rate[2] += $date_order['fourteen_num'];
-                    $rate[3] += $date_order['twenty_num'];
-                    $rate[4] += $date_order['gtTwenty_num'];
+                    $rate[0] += $date_order['serven_num'];  
+                    $rate[1] += $date_order['fourteen_num'];
+                    $rate[2] += $date_order['twenty_num'];
+                    $rate[3] += $date_order['gtTwenty_num'];
                     $rate['total_num'] += $total_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num'] + $date_order['gtTwenty_num'];
                     //平均妥投时效
                     if($total_num>0){
