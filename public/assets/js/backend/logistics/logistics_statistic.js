@@ -104,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     data: {
                         'time': create_time,
                         'platform': platform,
-                        'key':'echart4' 
+                        'key':'echart1' 
                     }
                 }               
                 EchartObj.api.ajax(options1, chartOptions1);
