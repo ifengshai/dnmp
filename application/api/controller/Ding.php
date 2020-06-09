@@ -100,6 +100,7 @@ class Ding extends Controller
                             Admin::userAdd($user);
                         }
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
                 case 'user_modify_org':
                     //用户更新
@@ -111,6 +112,7 @@ class Ding extends Controller
                             Admin::userUpdate($user, $id);
                         }
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
                 case 'user_leave_org':
                     //用户离职
@@ -118,6 +120,7 @@ class Ding extends Controller
                     foreach ($userIds as $userId) {
                         Admin::where('userid', $userId)->setField('status', 'hidden');
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
                 case 'org_dept_create':
                     //创建部门
@@ -127,6 +130,7 @@ class Ding extends Controller
                         $department = $this->app->department->get($deptId);
                         Department::deptAdd($department);
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
                 case 'org_dept_modify':
                     //修改部门
@@ -136,6 +140,7 @@ class Ding extends Controller
                         $department = $this->app->department->get($deptId);
                         Department::deptUpdate($department);
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
                 case 'org_dept_modify':
                     //删除部门
@@ -143,6 +148,7 @@ class Ding extends Controller
                     foreach ($deptIds as $deptId) {
                         Department::deptDelete($deptId);
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt',json_encode($payload),FILE_APPEND);
                     break;
             }
         });
