@@ -1714,13 +1714,16 @@ order by sfoi.item_id asc limit 1000";
              * 4、当cyl<=-4或cyl>=4
              */
          
-
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
             }
 
             if ($final_params['degrees']) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
             }
 
             unset($final_params);
