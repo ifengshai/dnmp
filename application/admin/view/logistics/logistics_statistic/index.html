@@ -114,7 +114,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="row">
                                 <div class="col-xs-12 col-md-3">
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4">工单平台</label>
+                                        <label class="control-label col-xs-4">站点选择</label>
                                         <div class="col-xs-8">
                                             <select  id="order_platform_workload" data-rule="required" class="form-control" name="order_platform">
 												<option value="10" selected="selected">全部</option>
@@ -146,119 +146,49 @@ table.altrowstable tr:nth-child(even){
                 width="100%">
              <thead>                    
              <tr>
-                 <th style="text-align: center; vertical-align: middle;">时间</th>
-                 <th style="text-align: center; vertical-align: middle;">待处理</th>
-                 <th style="text-align: center; vertical-align: middle;">新增</th>
-                 <th style="text-align: center; vertical-align: middle;">已回复</th>
-                 <th style="text-align: center; vertical-align: middle;">待分配</th>
-                 <th style="text-align: center; vertical-align: middle;">pending量</th>
+                 <th style="text-align: center; vertical-align: middle;">物流渠道</th>
+                 <th style="text-align: center; vertical-align: middle;">订单数</th>
+                 <th style="text-align: center; vertical-align: middle;">发货数量</th>
+                 <th style="text-align: center; vertical-align: middle;">妥投订单数</th>
+                 <th style="text-align: center; vertical-align: middle;">7天妥投率</th>
+                 <th style="text-align: center; vertical-align: middle;">14天妥投率</th>
+                 <th style="text-align: center; vertical-align: middle;">20天妥投率</th>
+                 <th style="text-align: center; vertical-align: middle;">20天以上妥投率</th>
+                 <th style="text-align: center; vertical-align: middle;">平均妥投时效</th>
              </tr>
              </thead>
+                 {if isset($result)}
+                 {foreach name="result" item="vo" key="k"}
                   <tr>
-                      <td style="text-align: center; vertical-align: middle;">今天</td>
-                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$todayData.wait_num}</td>
-                      <td id='today_increment_num' style="text-align: center; vertical-align: middle;">{$todayData.increment_num}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$todayData.reply_num}</td>
-                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$todayData.waiting_num}</td>
-                      <td id='today_pending_num' style="text-align: center; vertical-align: middle;">{$todayData.pending_num}</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.shipment_type}</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.order_num}</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.send_order_num}</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.deliverd_order_num}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.serven_deliverd_rate}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.fourteen_deliverd_rate}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.twenty_deliverd_rate}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.gtTwenty_deliverd_rate}</td>
+                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$vo.avg_deliverd_rate}</td>
                   </tr>
-                  <tr>
-                    <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">昨天</td>
-                    <td id='yesterday_wait_num'    style="text-align: center; vertical-align: middle;">{$yesterdayData.wait_num}</td>
-                    <td id='yesterday_increment_num'       style="text-align: center; vertical-align: middle;">{$yesterdayData.increment_num}</td>
-                    <td id='yesterday_reply_num'          style="text-align: center; vertical-align: middle;">{$yesterdayData.reply_num}</td>
-                    <td id='yesterday_waiting_num'  style="text-align: center; vertical-align: middle;">{$yesterdayData.waiting_num}</td>
-                    <td id='yesterday_pending_num' style="text-align: center; vertical-align: middle;">{$yesterdayData.pending_num}</td>
-                </tr>
-                <tr>
-                    <td id='serven_sales_money'         style="text-align: center; vertical-align: middle;">过去7天</td>
-                    <td id='serven_wait_num'   style="text-align: center; vertical-align: middle;">{$servenData.wait_num}</td>
-                    <td id='serven_increment_num' style="text-align: center; vertical-align: middle;">{$servenData.increment_num}</td>
-                    <td id='serven_reply_num'   style="text-align: center; vertical-align: middle;">{$servenData.reply_num}</td>
-                    <td id='serven_waiting_num'  style="text-align: center; vertical-align: middle;">{$servenData.waiting_num}</td>
-                    <td id='serven_pending_num' style="text-align: center; vertical-align: middle;">{$servenData.pending_num}</td>
-                </tr>
-                <tr>
-                    <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">过去30天</td>
-                    <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                    <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                    <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                    <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                    <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
-                </tr>                                                   			 
+                  {/foreach}
+                  {/if}                                                			 
                 </table>                
             </div>
             <div class="tab-pane fade active in">
-                <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
-                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
-                    method="post">
-                    <div class="col-xs-12 col-md-9">
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label class="control-label col-xs-2">工单平台</label>
-                            <div class="col-xs-4">
-                                <select  id="order_platform_one" data-rule="required" class="form-control" name="order_platform">
-                                    {foreach name="orderPlatformList" item="vo"}
-                                    {if $key == $platform}
-                                    <option value="{$key}" selected="selected">{$vo}</option>
-                                    {else}
-                                    <option value="{$key}">{$vo}</option>
-                                    {/if}
-                                    {/foreach}
-                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
-                                </select>
-                            </div>
-                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
-                            <div class="col-xs-4">
-                                <input type="hidden" class="form-control operate" name="create_time_one-operate" data-name="create_time_one" value="RANGE" readonly="">
-                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_one"  placeholder="创建时间" id="create_time_one" value="" data-index="14">
-                            </div>
-                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
-                                <input type="button" class="btn btn-success echart1-btn" value="提交">
-                                <input type="reset" class="btn btn-default btn-create_time_one reset" value="重置"></div>                                                        
-                        </div>                                                                 
-                    </div>
-                  </form>                    
+                <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">                   
                     <div class="col-lg-12">
                         <div style="float: left;width:60%;">
                             <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top: 20px;">工单问题类型统计</label>
+                                style="font-weight: bold;width: 150px;margin-top: 20px;">妥投数量统计</label>
                             <div id="echart1" style="float: left;height:400px;width:100%;"></div>
                         </div>
                     </div>
                 </div>
-                <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">
-                 <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
-                    method="post">
-                    <div class="col-xs-12 col-md-9">
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label class="control-label col-xs-2">工单平台</label>
-                            <div class="col-xs-4">
-                                <select  id="order_platform_two" data-rule="required" class="form-control" name="order_platform">
-                                    {foreach name="orderPlatformList" item="vo"}
-                                    {if $key == $platform}
-                                    <option value="{$key}" selected="selected">{$vo}</option>
-                                    {else}
-                                    <option value="{$key}">{$vo}</option>
-                                    {/if}
-                                    {/foreach}
-                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
-                                </select>
-                            </div>
-                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
-                            <div class="col-xs-4">
-                                <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
-                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
-                            </div>
-                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
-                                <input type="button" class="btn btn-success echart3-btn" value="提交">
-                                <input type="reset" class="btn btn-default btn-create_time_two reset" value="重置"></div>                                                        
-                        </div>                                                                 
-                    </div>
-                  </form>                    
+                <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">                   
                     <div class="col-lg-12">
                         <div class="col-lg-12" style="float: left;">
                             <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top:20px;">工单处理措施统计</label>
+                                style="font-weight: bold;width: 150px;margin-top:20px;">妥投比率统计</label>
                                 <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
                         </div>
                     </div>
