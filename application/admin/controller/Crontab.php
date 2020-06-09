@@ -1551,7 +1551,7 @@ order by sfoi.item_id asc limit 1000";
     public function wesee_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
-        $order_entity_id_list = Db::connect('database.db_meeloog')->query($order_entity_id_querySql);
+        $order_entity_id_list = Db::connect('database.db_weseeoptical')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
             exit;
@@ -1572,7 +1572,7 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-            $items = Db::connect('database.db_meeloog')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            $items = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
             }
@@ -1580,11 +1580,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
+                if ($v['index_type'] == '' || $v['index_type']) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif ($v['index_type'] && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif ($v['index_type'] && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1617,35 +1617,35 @@ order by sfoi.item_id asc limit 1000";
 
         if ($type_1_entity_id) {
             $map['entity_id'] = ['in', $type_1_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
         }
 
         if ($type_2_entity_id) {
             $map['entity_id'] = ['in', $type_2_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
         }
 
         if ($type_3_entity_id) {
             $map['entity_id'] = ['in', $type_3_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
         }
 
 
         if ($type_4_entity_id) {
             $map['entity_id'] = ['in', $type_4_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
         }
 
 
         if ($type_5_entity_id) {
             $map['entity_id'] = ['in', $type_5_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
         }
 
 
         if ($type_6_entity_id) {
             $map['entity_id'] = ['in', $type_6_entity_id];
-            Db::connect('database.db_meeloog')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
         }
 
         echo "执行成功！！";
