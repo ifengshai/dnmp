@@ -242,6 +242,26 @@ class Test3 extends Backend
         echo 'ok';
     }
 
+    public function process_logstatic()
+    {
+        $logistics_info = new \app\admin\model\LogisticsInfo();
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $list = $logistics_info->where(['type' => 1])->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $logistics_info = $purchase->where(['id' => $v['purchase_id']])->field('logistics_company_no,purchase_type')->find();
+            if ($logistics_info->purchase_type == 1) {
+                $data['source'] = 1;
+            } else {
+                $data['source'] = 2;
+            }
+            $data['logistics_company_no'] = $v->logistics_company_no;
+            $logistics_info->where(['id' => $v['id']])->update($data);
+            echo $k . "\n";
+        }
+        echo 'ok';
+    }
+
     /**
      * 修改支付时间
      *
