@@ -181,6 +181,7 @@ class Test3 extends Backend
         }
         unset($v);
         $res = $item->saveAll($result);
+        echo $res;die;
     }
 
     /**
@@ -191,19 +192,19 @@ class Test3 extends Backend
      * @since 2020/06/08 17:02:59 
      * @return void
      */
-    public function setPayTime()
-    {
-        ini_set('memory_limit', '512M');
-        $order_node_detail = new \app\admin\model\OrderNodeDetail();
-        $list = $order_node_detail->where(['order_node' => 0, 'node_type' => 0])->field('create_time,order_id,site')->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $order_node_detail->where(['order_id' => $v['order_id'], 'order_node' => 0, 'node_type' => 1, 'site' => $v['site']])->update(['create_time' => $v['create_time']]);
+    // public function setPayTime()
+    // {
+    //     ini_set('memory_limit', '512M');
+    //     $order_node_detail = new \app\admin\model\OrderNodeDetail();
+    //     $list = $order_node_detail->where(['order_node' => 0, 'node_type' => 0])->field('create_time,order_id,site')->select();
+    //     $list = collection($list)->toArray();
+    //     foreach ($list as $k => $v) {
+    //         $order_node_detail->where(['order_id' => $v['order_id'], 'order_node' => 0, 'node_type' => 1, 'site' => $v['site']])->update(['create_time' => $v['create_time']]);
             
-            echo $v['order_id'] . "\n";
-            usleep(50000);
-        }
-        echo 'ok';
-        die;
-    }
+    //         echo $v['order_id'] . "\n";
+    //         usleep(50000);
+    //     }
+    //     echo 'ok';
+    //     die;
+    // }
 }
