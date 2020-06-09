@@ -60,9 +60,15 @@ class LogisticsStatistic extends Backend
                  $json['columnData'] = $columnData;
                  return json(['code' => 1, 'data' => $json]);
             } elseif ('echart3' == $params['key']) {
+                $column = [
+                    'serven'=>'7天妥投率',
+                    'fourteen'=>'14天妥投率',
+                    'twenty'=>'20天妥投率',
+                    'gtTwenty'=>'20天以上妥投率',
+                ];
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
-                    $columnData[$ck]['value'] = $rate[$cv];
+                    $columnData[$ck]['value'] = round($rate[$ck]/$rate['total_num']*100,2);
                 }
                 $json['column'] = $column;
                 $json['columnData'] = $columnData;
@@ -112,6 +118,7 @@ class LogisticsStatistic extends Backend
             $all_shipment_type =  $this->model->where($whereSite)->distinct(true)->field('shipment_type')->where('shipment_type','neq',"")->select();
             if($all_shipment_type){
                 $arr = $rs = $rate = [];
+                $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
                 $all_shipment_type = collection($all_shipment_type)->toArray();
                 foreach($all_shipment_type as $k => $v){
                     //物流渠道
@@ -119,9 +126,9 @@ class LogisticsStatistic extends Backend
                     //订单数
                     $arr['order_num'][$k]     =   $order_num =   $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
                     //发货数量
-                    $arr['send_order_num'][$k]  = $send_order_num = $this->model->where(['shipment_type'=>$v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("*");
+                    $arr['send_order_num'][$k]  = $rs[$v['shipment_type']] = $send_order_num = $this->model->where(['shipment_type'=>$v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("*");
                     //妥投单数
-                    $arr['deliverd_order_num'][$k] = $rs[$v['shipment_type']] = $deliverd_order_num =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($where)->count("*");
+                    $arr['deliverd_order_num'][$k] = $deliverd_order_num =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($where)->count("*");
                     //各个日期妥投单数
                     $date_order = $this->calculate_delievered_num($site,$v['shipment_type'],$map);
                     //7天妥投单数
@@ -132,6 +139,9 @@ class LogisticsStatistic extends Backend
                     $arr['twenty_deliverd_order_num'][$k] = $date_order['twenty_num'];
                     //20天以上妥投单数
                     $arr['gtTwenty_deliverd_order_num'][$k] = $date_order['gtTwenty_num'];
+                    //总共花费时间(单位s)
+                    //$arr['expend_time'][$k] = $data_order['wait_time'];
+
                     //妥投比率
                     //$arr['deliverd_order_rate'][$k] = $this->calculate_delievered_num($site,$v['shipment_type'],$map);
                     //妥投率
@@ -147,15 +157,15 @@ class LogisticsStatistic extends Backend
                         $arr['twenty_deliverd_rate'][$k] = 0;
                         $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     }
-                    //发货数量
-                    if($send_order_num > 0){
-                        $rate[$v['shipment_type']] = round(($send_order_num/$order_num)*100,2);
-                    }else{
-                        $rate[$v['shipment_type']] = 0;
-                    }
+                    //总共妥投数量
+                    $rate['serven'] += $date_order['serven_num'];  
+                    $rate['fourteen'] += $date_order['fourteen_num'];
+                    $rate['twenty'] += $date_order['twenty_num'];
+                    $rate['gtTwenty'] += $date_order['gtTwenty_num'];
+                    $rate['total_num'] += $total_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num'] + $date_order['gtTwenty_num'];
                     //平均妥投时效
-                    if($order_num>0){
-                        $arr['avg_deliverd_rate'][$k] = round(($deliverd_order_num/$order_num)*100,2);
+                    if($total_num>0){
+                        $arr['avg_deliverd_rate'][$k] = round(($date_order['wait_time']/$total_num/86400),2);
                     }else{
                         $arr['avg_deliverd_rate'][$k] = 0;
                     }
@@ -208,7 +218,7 @@ class LogisticsStatistic extends Backend
             $where['site'] = $whereSite['site'] = $site;
         }
         $where['node_type'] = 40;
-        $whereSite['node_type'] = 7;
+        $whereSite['node_type'] = 8;
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
         //14天妥投时间
@@ -230,10 +240,11 @@ class LogisticsStatistic extends Backend
         //求出所有妥投订单号出库时间
         $out_stock_order = $this->model->where($whereSite)->where('order_number','in',$all_order)->column('order_number,create_time');
         $delievered_order = collection($delievered_order)->toArray();
-        $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = 0;
+        $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time =0;
         foreach($delievered_order as $key => $val){
             if(array_key_exists($val['order_number'],$out_stock_order)){
                 $distance_time = strtotime($val['create_time']) - strtotime($out_stock_order[$val['order_number']]);
+                $wait_time += $distance_time;
                 //时间小于7天的
                 if($serven_time_out >= $distance_time){
                     $serven_num++;
@@ -250,7 +261,8 @@ class LogisticsStatistic extends Backend
             'serven_num'=>$serven_num,
             'fourteen_num'=>$fourteen_num,
             'twenty_num'=>$twenty_num,
-            'gtTwenty_num'=>$gtTwenty_num, 
+            'gtTwenty_num'=>$gtTwenty_num,
+            'wait_time' => $wait_time 
         ];
         return $arr;
     }
