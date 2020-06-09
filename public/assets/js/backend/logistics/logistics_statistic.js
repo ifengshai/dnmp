@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             };
             var create_time = $('#workload_time').val();
             //console.log(time_two);
-            var platform = 1;
+            var platform = 10;
             var options1 = {
                 type: 'post',
                 url: 'logistics/logistics_statistic/index',
