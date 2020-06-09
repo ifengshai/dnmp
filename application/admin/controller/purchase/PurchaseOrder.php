@@ -36,7 +36,13 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls', 'deleteLogisticsItem'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+    
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls', 'deleteLogisticsItem'];
 
     public function _initialize()
     {
