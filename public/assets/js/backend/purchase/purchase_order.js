@@ -762,6 +762,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         logisticsDetail: function () {
             Controller.api.bindevent();
+            
         },
         checkdetail: function () {
             Controller.api.bindevent();
@@ -777,6 +778,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         location.reload();
                     });
                 }
+            })
+
+            //上传文件
+            $(document).on('click', '.pluploads', function () {
+                var _this = $(this);
+                var url = $(this).attr('data-url');
+                Fast.api.open(
+                    'warehouse/check/uploads?img_url=' + url, '上传文件', {
+                    callback: function (data) {
+                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                    }
+                }
+                )
             })
 
         },

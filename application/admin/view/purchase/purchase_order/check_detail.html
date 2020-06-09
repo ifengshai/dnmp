@@ -143,6 +143,7 @@
                     <th>质检合格数量（个）</th>
                     <th>留样数量（个）</th>
                     <th>质检合格率</th>
+                    <th>质检不合格图片</th>
                 </tr>
                 {foreach $v['check_item'] as $key => $val}
                 <tr>
@@ -155,6 +156,15 @@
                     <td>{$val.quantity_num}</td>
                     <td>{$val.sample_num}</td>
                     <td>{$val.quantity_rate}</td>
+                    <td>
+                        {if $val['unqualified_images']}
+                        <span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads"
+                                data-input-id="c-unqualified_images"
+                                data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
+                                data-maxcount="3" data-preview-id="p-unqualified_images" data-url='{$val.unqualified_images}'><i class="fa fa-upload"></i>
+                                {:__('查看')}</button></span>
+                        {/if}
+                    </td>
 
                 </tr>
                 {/foreach}
