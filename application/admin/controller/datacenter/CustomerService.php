@@ -1317,7 +1317,7 @@ class CustomerService extends Backend
 					$allCustomers[$k]['coupon'] = 0;
 				}
 				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_type']);
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_platform']);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
