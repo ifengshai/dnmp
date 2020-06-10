@@ -64,7 +64,7 @@ class Test extends Backend
             Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $v['site']])->update(['node_type' => $trackInfo['data']['accepted'][0]['track']['e']]);
             
             echo $k . '_' . $v['id'] . "\n";
-            unsleep(50000);
+            usleep(50000);
         }
         echo "ok";die;
     }
