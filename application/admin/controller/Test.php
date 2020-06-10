@@ -59,7 +59,7 @@ class Test extends Backend
                 /* 'number' => '74890988318620573173', //Fedex
                 'carrier' => '100003' */
             ]]);
-            
+            dump($trackInfo);
             dump($trackInfo['data']['accepted']['track']['e']);die;
             Db::name('order_node_detail')->where(['id' => $v['id']])->update(['node_type' => $trackInfo['data']['accepted']['track']['e']]);
 
