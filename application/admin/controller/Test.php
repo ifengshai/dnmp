@@ -45,9 +45,11 @@ class Test extends Backend
      */
     public function track_shipment_time(){
         ini_set('memory_limit', '512M');
-        $order_shipment = Db::name('order_node_detail')->where('node_type','=', '7')->select();
+        $order_shipment = Db::name('order_node')->where('node_type','=', '6')->select();
         $order_shipment = collection($order_shipment)->toArray();
         foreach($order_shipment as $k => $v){
+            $list = array();
+
             switch ($v['site']) {
                 case 1:
                     $ku = 'database.db_zeelool';
@@ -62,16 +64,34 @@ class Test extends Backend
                     return false;
                     break;
             }
-        
+
+            
             $order_create_time = Db::connect($ku)
             ->table('sales_flat_shipment_track')
-            ->field('order_id,created_at')
+            ->field('order_id,created_at,track_number,title')
             ->where('order_id', '=', $v['order_id'])
             ->order('entity_id ASC')
             ->find();
 
-            $update['create_time'] = $order_create_time['created_at'];
-            Db::name('order_node_detail')->where('id', $v['id'])->update($update);
+            if($order_create_time){
+                $list['order_node'] = 2;
+                $list['node_type'] = 7; //出库
+                $list['content'] = 'Leave warehouse, Waiting for being picked up.';
+                $list['create_time'] = $order_create_time['created_at'];
+                $list['site'] = $v['site'];
+                $list['order_id'] = $v['order_id'];
+                $list['order_number'] = $v['order_number'];
+                $list['shipment_type'] = $order_create_time['title'];
+                $list['track_number'] = $order_create_time['track_number'];
+                Db::name('order_node_detail')->insert($list);
+
+                $data['order_node'] = 2;
+                $data['node_type'] = 7;
+                $data['update_time'] = $order_create_time['created_at'];
+                $data['shipment_type'] = $order_create_time['title'];
+                $data['track_number'] = $order_create_time['track_number'];
+                Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
+            } 
 
             echo $k . ':' . $v['id'] . "\n";
             usleep(50000);
@@ -1864,4 +1884,6 @@ class Test extends Backend
             echo $value['id']."\n";
         }
     }
+
+
 }
