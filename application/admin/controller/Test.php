@@ -16,10 +16,10 @@ class Test extends Backend
     protected $str2 = 'Delivered to Air Transport.';
     protected $str3 = 'In Transit to Next Facility.';
     protected $str4 = 'Arrived in the Final Destination Country.';
-    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.';//到达待取
-    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.';//投递失败
-    protected $str40 = 'Delivered successfully.';//投递成功
-    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.';//可能异常
+    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.'; //到达待取
+    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
+    protected $str40 = 'Delivered successfully.'; //投递成功
+    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
 
     public function _initialize()
     {
@@ -35,6 +35,43 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+
+    public function track_shipment_jiedian()
+    {
+        $order_shipment = Db::name('order_node_detail')->where(['order_node' => 4, 'node_type' => ['<', 30]])->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+            $title = strtolower(str_replace(' ', '-', 'FedEx'));
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => 392241076797,
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /*'number' => 'UF105842059YP', //燕文
+                'carrier' => '190012'*/
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+            ]]);
+            dump($trackInfo);
+            dump($trackInfo['data']['accepted']['track']['e']);die;
+            Db::name('order_node_detail')->where(['id' => $v['id']])->update(['node_type' => $trackInfo['data']['accepted']['track']['e']]);
+
+            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $v['site']])->update(['node_type' => $trackInfo['data']['accepted']['track']['e']]);
+
+            dump($trackInfo);
+            exit;
+        }
+    }
+
+
+
     /**
      * 临时06,10
      *
@@ -43,11 +80,12 @@ class Test extends Backend
      * @since 2020/06/10 10:47:07 
      * @return void
      */
-    public function track_shipment_time(){
+    public function track_shipment_time()
+    {
         ini_set('memory_limit', '512M');
-        $order_shipment = Db::name('order_node')->where('node_type','=', '6')->select();
+        $order_shipment = Db::name('order_node')->where('node_type', '=', '6')->select();
         $order_shipment = collection($order_shipment)->toArray();
-        foreach($order_shipment as $k => $v){
+        foreach ($order_shipment as $k => $v) {
             $list = array();
 
             switch ($v['site']) {
@@ -65,15 +103,15 @@ class Test extends Backend
                     break;
             }
 
-            
-            $order_create_time = Db::connect($ku)
-            ->table('sales_flat_shipment_track')
-            ->field('order_id,created_at,track_number,title')
-            ->where('order_id', '=', $v['order_id'])
-            ->order('entity_id ASC')
-            ->find();
 
-            if($order_create_time){
+            $order_create_time = Db::connect($ku)
+                ->table('sales_flat_shipment_track')
+                ->field('order_id,created_at,track_number,title')
+                ->where('order_id', '=', $v['order_id'])
+                ->order('entity_id ASC')
+                ->find();
+
+            if ($order_create_time) {
                 $list['order_node'] = 2;
                 $list['node_type'] = 7; //出库
                 $list['content'] = 'Leave warehouse, Waiting for being picked up.';
@@ -91,7 +129,7 @@ class Test extends Backend
                 $data['shipment_type'] = $order_create_time['title'];
                 $data['track_number'] = $order_create_time['track_number'];
                 Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
-            } 
+            }
 
             echo $k . ':' . $v['id'] . "\n";
             usleep(50000);
@@ -107,17 +145,18 @@ class Test extends Backend
      * @author Lx
      * @since 2020/06/05 17:07:43 
      */
-    public function track_shipment_error(){
+    public function track_shipment_error()
+    {
 
-        $order_shipment = Db::name('order_node')->where('shipment_type','like', '%FedE%')->select();
+        $order_shipment = Db::name('order_node')->where('shipment_type', 'like', '%FedE%')->select();
         $order_shipment = collection($order_shipment)->toArray();
-        
+
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['shipment_type']));
             $carrier = $this->getCarrier($title);
-            
+
             $trackInfo = $trackingConnector->getTrackInfoMulti([[
                 'number' => $v['track_number'],
                 'carrier' => $carrier['carrierId']
@@ -145,11 +184,11 @@ class Test extends Backend
 
             echo $k . ':' . $v['order_id'] . "\n";
             usleep(200000);
-
         }
         echo 'ok';
         exit;
-        dump($order_shipment);exit;
+        dump($order_shipment);
+        exit;
     }
 
     /**
@@ -164,7 +203,8 @@ class Test extends Backend
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id')
             ->where($map)->order('a.entity_id asc')->limit(10)->select();
         $order_shipment = collection($order_shipment)->toArray();
-        dump($order_shipment);exit;
+        dump($order_shipment);
+        exit;
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
@@ -224,7 +264,7 @@ class Test extends Backend
         exit;
     }
 
-     /**
+    /**
      * 批量 获取物流明细
      * 莫删除
      */
@@ -239,7 +279,7 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
-          
+
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
             $carrier = $this->getCarrier($title);
@@ -1846,8 +1886,8 @@ class Test extends Backend
     public function tempprocess()
     {
         $data = $this->ordernode->where('shipment_type', 2)->select();
-        foreach($data as $k => $v) {
-            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id',$v['order_id'])->value('title');
+        foreach ($data as $k => $v) {
+            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id', $v['order_id'])->value('title');
             $this->ordernode->where('id', $v['id'])->update(['shipment_type' => $shipment_type]);
             echo $k . '\n';
         }
@@ -1875,15 +1915,14 @@ class Test extends Backend
      * @since 2020/06/01 10:18:25 
      * @return void
      */
-    public function modify_zendesk_used(){
+    public function modify_zendesk_used()
+    {
         $account = Db('zendesk_account')->select();
-        foreach($account as $key=>$value){
-            $is_exist = Db('zendesk_agents')->where('agent_id',$value['account_id'])->value('id');
+        foreach ($account as $key => $value) {
+            $is_exist = Db('zendesk_agents')->where('agent_id', $value['account_id'])->value('id');
             $is_used = $is_exist ? 2 : 1;
-            Db('zendesk_account')->where('account_id',$value['account_id'])->update(['is_used'=>$is_used]);
-            echo $value['id']."\n";
+            Db('zendesk_account')->where('account_id', $value['account_id'])->update(['is_used' => $is_used]);
+            echo $value['id'] . "\n";
         }
     }
-
-
 }
