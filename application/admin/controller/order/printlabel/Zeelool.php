@@ -582,7 +582,6 @@ class Zeelool extends Backend
                     if ($qty == 0) {
                         continue;
                     }
-
                     //总库存
                     $item_map['sku'] = $trueSku;
                     $item_map['is_del'] = 1;

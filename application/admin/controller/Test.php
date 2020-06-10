@@ -44,7 +44,7 @@ class Test extends Backend
      * @return void
      */
     public function track_shipment_time(){
-        //ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '512M');
         $order_shipment = Db::name('order_node')->where('node_type','=', '6')->select();
         $order_shipment = collection($order_shipment)->toArray();
         foreach($order_shipment as $k => $v){
