@@ -43,27 +43,15 @@ class TrackReg extends Backend
             ->where('a.created_at', '>=', '2020-03-31 00:00:00')
             ->where('a.handle', '=', '0')
             ->group('a.order_id')
-            ->limit(100)
             ->select();
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
-            if ($title == 'china-post') {
-                $order_shipment[$k]['title'] = 'china-ems';
-            }
-            $carrier = $this->getCarrier($v['title']);
+            $carrier = $this->getCarrier($title);
             $shipment_reg[$k]['number'] =  $v['track_number'];
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] =  $v['order_id'];
 
-            //查询主表是否到质检阶段
-            $count = Db::name('order_node')->where([
-                'order_id' => $v['order_id'],
-                'order_node' => 2,
-                'node_type' => 6
-            ])->count();
-            if ($count < 1) {
-                continue;
-            }
+
             $list[$k]['order_node'] = 2;
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
@@ -102,7 +90,7 @@ class TrackReg extends Backend
             }
             $order_ids = array();
 
-            sleep(1);
+            usleep(500000);
         }
         echo $site_str . ' is ok' . "\n";
     }
