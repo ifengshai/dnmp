@@ -67,7 +67,7 @@ class TrackReg extends Backend
             $list[$k]['order_node'] = 2;
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
-            $list[$k]['site'] = 1;
+            $list[$k]['site'] = $site_type;
             $list[$k]['order_id'] = $v['entity_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
@@ -76,7 +76,7 @@ class TrackReg extends Backend
 
             $data['order_node'] = 2;
             $data['node_type'] = 7;
-            $data['update_time'] = $v['updated_at'];
+            $data['update_time'] = $v['created_at'];
             $data['shipment_type'] = $v['title'];
             $data['track_number'] = $v['track_number'];
             Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
