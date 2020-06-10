@@ -40,10 +40,58 @@ class Test extends Backend
     {
         $zend = Db::name('zendesk')->field('id,type')->select();
         foreach ($zend as $k => $v) {
+
+            $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+
+
             $update['platform'] = $v['type'];
             Db::name('zendesk_comments')->where('zid', $v['id'])->update($update);
             echo $v['id'] . "\n";
         }
+    }
+
+    /**
+     * 临时06,10
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/10 10:47:07 
+     * @return void
+     */
+    public function track_shipment_time(){
+        $order_shipment = Db::name('order_node_detail')->where('node_type','=', '7')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        foreach($order_shipment as $k => $v){
+            switch ($v['site']) {
+                case 1:
+                    $ku = 'database.db_zeelool';
+                    break;
+                case 2:
+                    $ku = 'database.db_voogueme';
+                    break;
+                case 3:
+                    $ku = 'database.db_nihao';
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        
+            $order_create_time = Db::connect($ku)
+            ->table('sales_flat_shipment_track')
+            ->field('order_id,created_at')
+            ->where('order_id', '=', $v['order_id'])
+            ->order('entity_id ASC')
+            ->find();
+
+            $update['create_time'] = $order_create_time['created_at'];
+            Db::name('order_node_detail')->where('id', $v['id'])->update($update);
+
+            echo $k . ':' . $v['id'] . "\n";
+            usleep(50000);
+        }
+        echo 'ok';
+        exit;
     }
 
     /**
