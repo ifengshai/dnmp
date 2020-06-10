@@ -810,8 +810,8 @@ class CustomerService extends Backend
 					$allCustomers[$k]['replacement_num'] = 0;
 					$allCustomers[$k]['coupon'] = 0;
 				}
-				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				//累计退款金额 
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_platform']);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
@@ -849,12 +849,15 @@ class CustomerService extends Backend
      * @since 2020/05/19 10:06:11
      * @return void
      */
-    public function calculate_refund_money($create_user_id, $map)
+    public function calculate_refund_money($create_user_id, $map,$type)
     {
         $where['create_user_id'] = $create_user_id;
         $where['refund_money']   = ['GT',0];
         $where['work_type'] = 1;
         $where['work_status'] = 6;
+        if($type !=10){
+            $where['work_platform'] = $type;
+        }
         $info = $this->model->where($where)->where($map)->field('base_to_order_rate,refund_money')->select();
         if (!empty($info)) {
             $refund_money = 0;
@@ -1314,7 +1317,7 @@ class CustomerService extends Backend
 					$allCustomers[$k]['coupon'] = 0;
 				}
 				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_type']);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
@@ -1436,7 +1439,7 @@ class CustomerService extends Backend
                 }
 
                 //累计退款金额
-                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map);
+                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map,10);
                 if (0<$workList[$k]['total_refund_money']) {
                     $refundMoney += $workList[$k]['total_refund_money'];
                 }
