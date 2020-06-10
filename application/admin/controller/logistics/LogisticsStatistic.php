@@ -129,9 +129,9 @@ class LogisticsStatistic extends Backend
                 //物流渠道
                 $arr['shipment_type'][$k] = $v['shipment_type'];
                 //订单数
-                $arr['order_num'][$k]     =   $order_num =   $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
+                $arr['order_num'][$k]     =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
                 //发货数量
-                $arr['send_order_num'][$k]  = $rs[$v['shipment_type']] = $send_order_num = $this->model->where(['shipment_type'=>$v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("*");
+                $arr['send_order_num'][$k]  = $rs[$v['shipment_type']]  = $this->model->where(['shipment_type'=>$v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("*");
                 //妥投单数
                 $arr['deliverd_order_num'][$k] = $deliverd_order_num =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($where)->count("*");
                 //各个日期妥投单数
