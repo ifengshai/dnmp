@@ -4026,11 +4026,11 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'FX0206-02
-        OP049594-01
-        ';
-        $skus = explode('
-        ', $str);
+        
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
 
         $stock = [
             926,
@@ -4062,11 +4062,10 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $str = 'FX0206-02
-        OP049594-01
-        ';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -4115,11 +4114,10 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $str = 'FX0206-02
-        OP049594-01
-        ';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -4163,11 +4161,10 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'FX0206-02
-        OP049594-01
-        ';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
