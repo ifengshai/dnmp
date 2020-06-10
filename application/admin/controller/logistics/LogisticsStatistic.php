@@ -111,10 +111,10 @@ class LogisticsStatistic extends Backend
      */
     public function logistics_data($site, $map)
     {
-        $arr = Cache::get('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)));
-        if ($arr) {
-            return $arr;
-        }
+        // $arr = Cache::get('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)));
+        // if ($arr) {
+        //     return $arr;
+        // }
         if ($site !=10) {
             $where['site'] = $whereSite['site'] = $site;
         }
@@ -125,6 +125,9 @@ class LogisticsStatistic extends Backend
             $arr = $rs = $rate = [];
             $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
             $all_shipment_type = collection($all_shipment_type)->toArray();
+            //总共的妥投数量,妥投时间
+            $all_total_num = $all_total_wait_time = 0;
+            //循环所有的物流渠道
             foreach ($all_shipment_type as $k => $v) {
                 //物流渠道
                 $arr['shipment_type'][$k] = $v['shipment_type'];
@@ -174,18 +177,59 @@ class LogisticsStatistic extends Backend
                 } else {
                     $arr['avg_deliverd_rate'][$k] = 0;
                 }
+                $all_total_num += $total_num;
+                $all_total_wait_time += $date_order['wait_time'];
             }
+            //设置发货总数量 妥投订单总数量数为0
+            $total_send_order_num = $total_deliverd_order_num = 0;
             $info = [];
             foreach ($arr['shipment_type'] as $ak =>$av) {
                 $info[$ak]['shipment_type'] = $av;
                 // $info[$ak]['order_num'] = $arr['order_num'][$ak];
-                $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
+                $info[$ak]['send_order_num'] =  $arr['send_order_num'][$ak];
                 $info[$ak]['deliverd_order_num'] = $arr['deliverd_order_num'][$ak];
                 $info[$ak]['serven_deliverd_rate'] = $arr['serven_deliverd_rate'][$ak];
                 $info[$ak]['fourteen_deliverd_rate'] = $arr['fourteen_deliverd_rate'][$ak];
                 $info[$ak]['twenty_deliverd_rate'] = $arr['twenty_deliverd_rate'][$ak];
                 $info[$ak]['gtTwenty_deliverd_rate'] = $arr['gtTwenty_deliverd_rate'][$ak];
                 $info[$ak]['avg_deliverd_rate'] = $arr['avg_deliverd_rate'][$ak];
+                //计算总妥投率
+                if($arr['send_order_num'][$ak] > 0){
+                   $info[$ak]['total_deliverd_rate'] = round($arr['deliverd_order_num'][$ak]/$arr['send_order_num'][$ak]*100,2); 
+                }else{
+                   $info[$ak]['total_deliverd_rate'] = 0; 
+                }
+                $total_send_order_num += $arr['send_order_num'][$ak];
+                $total_deliverd_order_num += $arr['deliverd_order_num'][$ak];   
+            }
+            //求出合计的数据
+            $info[$ak+1]['shipment_type'] = '合计';
+            $info[$ak+1]['send_order_num'] = $total_send_order_num;
+            $info[$ak+1]['deliverd_order_num'] = $total_deliverd_order_num;
+             //总妥投率
+            if(0<$total_send_order_num){
+                $info[$ak+1]['total_deliverd_rate'] = round($total_deliverd_order_num/$total_send_order_num*100,2);
+            }else{
+                $info[$ak+1]['total_deliverd_rate'] = 0;
+            } 
+             
+            //7天妥投率、14天妥投率、20天妥投率、21天妥投率总和
+            if($all_total_num > 0){
+                $info[$ak+1]['serven_deliverd_rate']  =  round($rate[0]/$all_total_num*100,2);
+                $info[$ak+1]['fourteen_deliverd_rate'] = round($rate[1]/$all_total_num*100,2);
+                $info[$ak+1]['twenty_deliverd_rate'] = round($rate[2]/$all_total_num*100,2);
+                $info[$ak+1]['gtTwenty_deliverd_rate'] = round($rate[3]/$all_total_num*100,2);
+            }else{
+                $info[$ak+1]['serven_deliverd_rate']  = 0;
+                $info[$ak+1]['fourteen_deliverd_rate'] = 0;
+                $info[$ak+1]['twenty_deliverd_rate'] = 0;
+                $info[$ak+1]['gtTwenty_deliverd_rate'] = 0;
+            }
+            //总共妥投时效
+            if($all_total_num> 0){
+                $info[$ak+1]['avg_deliverd_rate']  = round($all_total_wait_time/$all_total_num/86400,2); 
+            }else{
+                $info[$ak+1]['avg_deliverd_rate']  = 0;
             }
             $info['deliverd_order_num_all'] = $rs;
             $info['rate'] = $rate;
@@ -199,6 +243,7 @@ class LogisticsStatistic extends Backend
             $info['fourteen_deliverd_rate'] = 0;
             $info['twenty_deliverd_rate'] = 0;
             $info['gtTwenty_deliverd_rate'] = 0;
+            $info['total_deliverd_rate'] = 0; 
             $info['deliverd_order_num_all'] = 0;
             $info['rate'] = 0;
         }
