@@ -44,11 +44,11 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
-            $title = strtolower(str_replace(' ', '-', 'FedEx'));
+            $title = strtolower(str_replace(' ', '-', $v['shipment_type']));
             $carrier = $this->getCarrier($title);
 
             $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => 392241076797,
+                'number' => $v['track_number'],
                 'carrier' => $carrier['carrierId']
                 /*'number' => 'LO546092713CN',//E邮宝
                 'carrier' => '03011'*/
@@ -59,15 +59,14 @@ class Test extends Backend
                 /* 'number' => '74890988318620573173', //Fedex
                 'carrier' => '100003' */
             ]]);
-            dump($trackInfo);
-            dump($trackInfo['data']['accepted']['track']['e']);die;
-            Db::name('order_node_detail')->where(['id' => $v['id']])->update(['node_type' => $trackInfo['data']['accepted']['track']['e']]);
+            Db::name('order_node_detail')->where(['id' => $v['id']])->update(['node_type' => $trackInfo['data']['accepted'][0]['track']['e']]);
 
-            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $v['site']])->update(['node_type' => $trackInfo['data']['accepted']['track']['e']]);
-
-            dump($trackInfo);
-            exit;
+            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $v['site']])->update(['node_type' => $trackInfo['data']['accepted'][0]['track']['e']]);
+            
+            echo $k . '_' . $v['id'] . "\n";
+            sleep(1);
         }
+        echo "ok";die;
     }
 
     /**

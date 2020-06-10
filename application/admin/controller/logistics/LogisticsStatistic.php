@@ -49,7 +49,7 @@ class LogisticsStatistic extends Backend
             unset($result['deliverd_order_num_all']);
             unset($result['rate']);
             //所有的物流渠道
-            $column =  $this->model->distinct(true)->field('shipment_type')->where('shipment_type', 'neq', "")->column('shipment_type');
+            $column =  $this->model->distinct(true)->field('shipment_type')->whereNotIn('shipment_type',['','CPC','EYB'])->column('shipment_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k =>$v) {
@@ -111,16 +111,17 @@ class LogisticsStatistic extends Backend
      */
     public function logistics_data($site, $map)
     {
-        // $arr = Cache::get('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)));
-        // if ($arr) {
-        //     return $arr;
-        // }
+        $arr = Cache::get('LogisticsStatistic_logistics_data_'.$site.md5(serialize($map)));
+        if ($arr) {
+            return $arr;
+        }
         if ($site !=10) {
             $where['site'] = $whereSite['site'] = $site;
         }
         $where['node_type'] = 40;
+        //$shipmentArr['shipment_type'] = ['','CPC','EYB'];
         $orderNode['order_node'] = ['egt',3];
-        $all_shipment_type =  $this->model->where($whereSite)->distinct(true)->field('shipment_type')->where('shipment_type', 'neq', "")->select();
+        $all_shipment_type =  $this->model->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type',['','CPC','EYB'])->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
