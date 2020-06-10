@@ -139,7 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     console.log(ret.data);
                     var str = '<tr>';
                     str+='<th style="text-align: center; vertical-align: middle;">物流渠道</th>';
-                    str+='<th style="text-align: center; vertical-align: middle;">订单数</th>';
+                    // str+='<th style="text-align: center; vertical-align: middle;">订单数</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">发货数量</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">妥投订单数</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">7天妥投率</th>';
@@ -151,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     for(var i=0;i<ret.data.length;i++){
                         str+='<tr>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].shipment_type+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].order_num+'</td>'+
+                        // '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].send_order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].deliverd_order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].serven_deliverd_rate+'</td>'+
