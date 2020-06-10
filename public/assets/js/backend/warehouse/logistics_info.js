@@ -32,14 +32,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         { field: 'order_number', title: __('关联单号') },
+                        { field: 'purchase_name', title: __('采购名称'), operate: false },
                         { field: 'batch_id', title: __('关联批次ID') },
                         {
-                            field: 'status', title: __('签收状态'), custom: { 1: 'success',  0: 'danger' },
+                            field: 'status', title: __('签收状态'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已签收', 0: '未签收' },
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'is_check_order', title: __('质检状态'), custom: { 1: 'success',  0: 'danger' },
+                            field: 'is_check_order', title: __('质检状态'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已质检', 0: '未质检' },
                             formatter: Table.api.formatter.status
                         },
@@ -86,7 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         }
                                     }
                                 }
-                            
+
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -95,6 +96,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            
+            //批量签收
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/logistics_info/batch_signin',
+                    data: { ids: ids}
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
         },
         add: function () {
             Controller.api.bindevent();

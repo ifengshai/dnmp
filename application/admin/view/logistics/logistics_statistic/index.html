@@ -150,6 +150,7 @@ table.altrowstable tr:nth-child(even){
                  <!-- <th style="text-align: center; vertical-align: middle;">订单数</th> -->
                  <th style="text-align: center; vertical-align: middle;">发货数量</th>
                  <th style="text-align: center; vertical-align: middle;">妥投订单数</th>
+                 <th style="text-align: center; vertical-align: middle;">总妥投率</th>
                  <th style="text-align: center; vertical-align: middle;">7天妥投率</th>
                  <th style="text-align: center; vertical-align: middle;">14天妥投率</th>
                  <th style="text-align: center; vertical-align: middle;">20天妥投率</th>
@@ -160,18 +161,19 @@ table.altrowstable tr:nth-child(even){
                  {if isset($result)}
                  {foreach name="result" item="vo" key="k"}
                   <tr>
-                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.shipment_type}</td>
-                      <!-- <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.order_num}</td> -->
-                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.send_order_num}</td>
-                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$vo.deliverd_order_num}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.serven_deliverd_rate}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.fourteen_deliverd_rate}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.twenty_deliverd_rate}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$vo.gtTwenty_deliverd_rate}</td>
-                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$vo.avg_deliverd_rate}</td>
+                      <td   style="text-align: center; vertical-align: middle;">{$vo.shipment_type}</td>
+                      <!-- <td    style="text-align: center; vertical-align: middle;">{$vo.order_num}</td> -->
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.send_order_num}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.deliverd_order_num}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.total_deliverd_rate}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.serven_deliverd_rate}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.fourteen_deliverd_rate}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.twenty_deliverd_rate}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.gtTwenty_deliverd_rate}</td>
+                      <td    style="text-align: center; vertical-align: middle;">{$vo.avg_deliverd_rate}</td>
                   </tr>
                   {/foreach}
-                  {/if}                                                			 
+                  {/if}                                                                 			 
                 </table>                
             </div>
             <div class="tab-pane fade active in">
