@@ -155,12 +155,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         // '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].send_order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].deliverd_order_num+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].total_deliverd_rate+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].serven_deliverd_rate+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].fourteen_deliverd_rate+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].twenty_deliverd_rate+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].gtTwenty_deliverd_rate+'</td>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].avg_deliverd_rate+'</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].total_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].serven_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].fourteen_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].twenty_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].gtTwenty_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].avg_deliverd_rate+'天</td>'+
                         '<tr/>';
                     }
                     $("#workload-info").append(str);                       
