@@ -149,7 +149,7 @@ class Test extends Backend
                     $this->fedex_data($trackdata, $add);
                 } */
             }
-            echo $k . ':' . $v['order_id'] . "\n";
+            echo 'site:'.$type.';key:'.$k.';order_id'. $v['order_id'] . "\n";
             usleep(200000);
         }
         echo 'ok';
