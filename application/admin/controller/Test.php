@@ -35,21 +35,6 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
-
-    public function tongbu_zendesk()
-    {
-        $zend = Db::name('zendesk')->field('id,type')->select();
-        foreach ($zend as $k => $v) {
-
-            $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-
-
-            $update['platform'] = $v['type'];
-            Db::name('zendesk_comments')->where('zid', $v['id'])->update($update);
-            echo $v['id'] . "\n";
-        }
-    }
-
     /**
      * 临时06,10
      *
@@ -59,6 +44,7 @@ class Test extends Backend
      * @return void
      */
     public function track_shipment_time(){
+        ini_set('memory_limit', '512M');
         $order_shipment = Db::name('order_node_detail')->where('node_type','=', '7')->select();
         $order_shipment = collection($order_shipment)->toArray();
         foreach($order_shipment as $k => $v){
