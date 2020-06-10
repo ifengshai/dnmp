@@ -1233,6 +1233,12 @@ class CustomerService extends Backend
      */
     public function works_info($where, $map,$customer_type=0,$customer_category=0)
     {
+        if(!empty($where['work_platform']) && ($where['work_platform'] !=10)){
+            //站点
+            $site  = $where['work_platform'];
+        }else{
+            $site  = 10;
+        }
         $where['work_type'] = 1;
         $where['work_status'] = 6;
         //A组员工
@@ -1317,7 +1323,7 @@ class CustomerService extends Backend
 					$allCustomers[$k]['coupon'] = 0;
 				}
 				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_platform']);
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$site);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
