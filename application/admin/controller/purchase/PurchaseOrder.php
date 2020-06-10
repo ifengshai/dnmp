@@ -1044,14 +1044,13 @@ class PurchaseOrder extends Backend
     {
         $map['b.createtime'] = ['between',['2020-06-09 11:00:00','2020-06-11 11:00:00']];
         $map['b.purchase_type'] = 2;
-
         $data = $this->purchase_order_item->alias('a')->join(['fa_purchase_order'=>'b'],'a.purchase_id=b.id')->where($map)->select();
         $data = collection($data)->toArray();
+        dump($data);die;
         $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $k => $v) {
             $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
         }
-        $this->success();
     }
 
     /**
