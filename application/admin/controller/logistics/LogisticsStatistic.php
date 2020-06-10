@@ -214,7 +214,7 @@ class LogisticsStatistic extends Backend
             } 
              
             //7天妥投率、14天妥投率、20天妥投率、21天妥投率总和
-            if($total_num > 0){
+            if($all_total_num > 0){
                 $info[$ak+1]['serven_deliverd_rate']  =  round($rate[0]/$all_total_num*100,2);
                 $info[$ak+1]['fourteen_deliverd_rate'] = round($rate[1]/$all_total_num*100,2);
                 $info[$ak+1]['twenty_deliverd_rate'] = round($rate[2]/$all_total_num*100,2);
