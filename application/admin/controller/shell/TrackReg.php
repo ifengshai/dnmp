@@ -39,10 +39,11 @@ class TrackReg extends Backend
         $order_shipment = Db::connect($site_str)
             ->table('sales_flat_shipment_track')->alias('a')
             ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
-            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,b.increment_id')
+            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
             ->where('a.created_at', '>=', '2020-03-31 00:00:00')
             ->where('a.handle', '=', '0')
             ->group('a.order_id')
+            ->limit(100)
             ->select();
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
@@ -54,15 +55,24 @@ class TrackReg extends Backend
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] =  $v['order_id'];
 
-
+            //查询主表是否到质检阶段
+            $count = Db::name('order_node')->where([
+                'order_id' => $v['order_id'],
+                'order_node' => 2,
+                'node_type' => 6
+            ])->count();
+            if ($count < 1) {
+                continue;
+            }
             $list[$k]['order_node'] = 2;
             $list[$k]['node_type'] = 7; //出库
-            $list[$k]['create_time'] = $v['updated_at'];
+            $list[$k]['create_time'] = $v['created_at'];
             $list[$k]['site'] = 1;
             $list[$k]['order_id'] = $v['entity_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
             $list[$k]['track_number'] = $v['track_number'];
+            $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
             $data['order_node'] = 2;
             $data['node_type'] = 7;
@@ -74,7 +84,7 @@ class TrackReg extends Backend
         if ($list) {
             $this->ordernodedetail->saveAll($list);
         }
-        
+
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
