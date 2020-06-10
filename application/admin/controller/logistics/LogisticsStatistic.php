@@ -129,7 +129,7 @@ class LogisticsStatistic extends Backend
                 //物流渠道
                 $arr['shipment_type'][$k] = $v['shipment_type'];
                 //订单数
-                $arr['order_num'][$k]     =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
+                //$arr['order_num'][$k]     =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
                 //发货数量
                 $arr['send_order_num'][$k]  = $rs[$v['shipment_type']]  = $this->model->where(['shipment_type'=>$v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("*");
                 //妥投单数
@@ -178,7 +178,7 @@ class LogisticsStatistic extends Backend
             $info = [];
             foreach ($arr['shipment_type'] as $ak =>$av) {
                 $info[$ak]['shipment_type'] = $av;
-                $info[$ak]['order_num'] = $arr['order_num'][$ak];
+                // $info[$ak]['order_num'] = $arr['order_num'][$ak];
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
                 $info[$ak]['deliverd_order_num'] = $arr['deliverd_order_num'][$ak];
                 $info[$ak]['serven_deliverd_rate'] = $arr['serven_deliverd_rate'][$ak];
@@ -191,7 +191,7 @@ class LogisticsStatistic extends Backend
             $info['rate'] = $rate;
         } else {
             $info['shipment_type'] = 0;
-            $info['order_num'] = 0;
+            // $info['order_num'] = 0;
             $info['send_order_num'] = 0;
             $info['deliverd_order_num'] = 0;
             $info['serven_deliverd_rate'] = 0;
@@ -238,6 +238,7 @@ class LogisticsStatistic extends Backend
                'fourteen_num'=>0,
                'twenty_num'=>0,
                'gtTwenty_num'=>0,
+               'wait_time' => 0
             ];
         }
         //求出所有妥投订单号出库时间
