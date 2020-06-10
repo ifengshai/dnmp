@@ -281,6 +281,41 @@ class ThirdApi extends Api
                             $order_node_detail['create_time'] = $time;
                             Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         }
+                        
+    
+                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                            $time = date('Y-m-d H:i', strtotime(($order_node_date['update_time'] . " +1 day")));
+    
+                            $order_node_detail['node_type'] = 9;
+                            $order_node_detail['content'] = $this->str2;
+                            $order_node_detail['create_time'] = $time;
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                            $time = date('Y-m-d H:i', strtotime(($time . " +5 day")));
+    
+                            $order_node_detail['node_type'] = 10;
+                            $order_node_detail['content'] = $this->str3;
+                            $order_node_detail['create_time'] = $time;
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $update_order_node['order_node'] = 3;
+                            $update_order_node['node_type'] = 10;
+                            $update_order_node['update_time'] = $time;
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                        }
+    
+                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 9) {
+                            $time = date('Y-m-d H:i', strtotime(($order_node_date['update_time'] . " +5 day")));
+    
+                            $order_node_detail['node_type'] = 10;
+                            $order_node_detail['content'] = $this->str3;
+                            $order_node_detail['create_time'] = $time;
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+    
+                            $update_order_node['order_node'] = 3;
+                            $update_order_node['node_type'] = 10;
+                            $update_order_node['update_time'] = $time;
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+                        }
                     }
     
                 
