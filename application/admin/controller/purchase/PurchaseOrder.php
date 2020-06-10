@@ -1029,7 +1029,6 @@ class PurchaseOrder extends Backend
             }
 
 
-
             //判断sku是否为选品库SKU
             $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
             if ($count > 0) {
@@ -1212,7 +1211,7 @@ class PurchaseOrder extends Backend
                         }
 
                         if ($params[$key]['sku']) {
-                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $val['purchase_num']);
+                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $params[$key]['purchase_num']);
                         }
                     }
                     //修改为选品采购单
