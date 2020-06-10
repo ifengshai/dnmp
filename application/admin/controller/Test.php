@@ -35,6 +35,40 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+
+    public function track_shipment_jiedian(){
+        $order_shipment = Db::name('order_node_detail')->where('node_type','=', '6')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach($order_shipment as $k => $v){
+            $title = strtolower(str_replace(' ', '-', $v['shipment_type']));
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /*'number' => 'UF105842059YP', //燕文
+                'carrier' => '190012'*/
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+            ]]);
+
+            dump($trackInfo);exit;
+
+
+        }
+
+
+    }
+
+
+
     /**
      * 临时06,10
      *
