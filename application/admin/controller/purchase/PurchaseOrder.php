@@ -1039,6 +1039,20 @@ class PurchaseOrder extends Backend
         $this->success();
     }
 
+
+    public function test()
+    {
+        $map['b.createtime'] = ['between',['2020-06-09 11:00:00','2020-06-11 11:00:00']];
+        $map['b.purchase_type'] = 2;
+        $data = $this->purchase_order_item->alias('a')->field('sku,purchase_num')->join(['fa_purchase_order'=>'b'],'a.purchase_id=b.id')->where($map)->select();
+        $data = collection($data)->toArray();
+        dump($data);die;
+        $item = new \app\admin\model\itemmanage\Item();
+        foreach ($data as $k => $v) {
+            $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+        }
+    }
+
     /**
      * 定时获取1688采购单 每天9点更新一次
      */
@@ -1643,9 +1657,9 @@ class PurchaseOrder extends Backend
             $whereCondition['purchase_status'] = ['egt', 2];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
-            if($rep != '{}'){
+            if ($rep != '{}') {
                 $whereTotalId = '1=1';
-            }else{
+            } else {
                 $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
             $total = $this->model
