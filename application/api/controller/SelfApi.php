@@ -236,7 +236,7 @@ class SelfApi extends Api
         if (count($track['data']['rejected']) > 0) {
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
-
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', 200  . "\r\n", FILE_APPEND);
         $this->success('提交成功', [], 200);
     }
 
