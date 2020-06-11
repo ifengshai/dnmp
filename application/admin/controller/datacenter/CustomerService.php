@@ -652,7 +652,7 @@ class CustomerService extends Backend
             $arr[] = $starttime;
         }
         $where['is_public'] = 1;
-        $where['due_id'] = $assignee['assignee_id'] =  $admin_id;
+        $where['due_id'] = $assignee['admin_id'] =  $admin_id;
         //未达标天数
         $no_qualified_day = 0;
         foreach ($arr as $v) {
