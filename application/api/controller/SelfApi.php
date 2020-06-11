@@ -194,6 +194,8 @@ class SelfApi extends Api
             ->field('entity_id,track_number,title')
             ->where('order_id', $order_id)
             ->find();
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($order_shipment)  . "\r\n", FILE_APPEND);
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
