@@ -172,7 +172,6 @@ class SelfApi extends Api
         if (!$site) {
             $this->error(__('缺少站点参数'), [], 400);
         }
-
         switch ($site) {
             case 1:
                 $db = 'database.db_zeelool';

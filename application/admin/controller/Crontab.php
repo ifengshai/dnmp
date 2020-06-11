@@ -2008,6 +2008,8 @@ order by sfoi.item_id asc limit 1000";
                 $params[$k]['purchase_id'] = $v['id'];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s');
                 $params[$k]['create_person'] = 'Admin';
+                $params[$k]['logistics_company_no'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyNo;
+                $params[$k]['source'] = 2;
             }
         }
 
