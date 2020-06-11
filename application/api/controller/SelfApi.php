@@ -157,6 +157,8 @@ class SelfApi extends Api
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
         $site = $this->request->request('site'); //站点
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -219,8 +221,7 @@ class SelfApi extends Api
             'track_number' => $order_shipment['track_number'],
         ]);
 
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
-
+      
         //注册17track
         $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
         $carrier = $this->getCarrier($title);
