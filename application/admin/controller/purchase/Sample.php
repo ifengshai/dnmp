@@ -311,7 +311,7 @@ class Sample extends Backend
             if($location_id){
                 $arr = array(
                     'sku'=>$v[1],
-                    'location_id'=>$v[0],
+                    'location_id'=>$location_id,
                     'stock'=>$v[2],
                 );
                 $this->sample->insert($arr);
