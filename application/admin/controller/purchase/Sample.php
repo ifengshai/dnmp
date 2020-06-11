@@ -284,7 +284,7 @@ class Sample extends Backend
             }
 
             //模板文件不正确
-            if ($allRow > 1000) {
+            if ($allRow > 3500) {
                 throw new Exception("表格行数过大");
             }
 
