@@ -264,8 +264,7 @@ class Sample extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        // $listName = ['SKU', '库位号'];
-        $listName = ['库位', '编码','数量'];
+         $listName = ['SKU', '库位号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -305,20 +304,7 @@ class Sample extends Backend
         }
 
         /*********************样品入库逻辑***********************/
-        foreach ($data as $k => $v) {
-            //查询样品间是否存在该商品
-            $location_id = $this->samplelocation->where('location',trim($v[0]))->value('id');
-            if($location_id){
-                $arr = array(
-                    'sku'=>$v[1],
-                    'location_id'=>$location_id,
-                    'stock'=>$v[2],
-                );
-                $this->sample->insert($arr);
-            }
-        }
-        $this->success('导入成功！！');
-        /* $no_sku = array();
+        $no_sku = array();
         $no_location = array();
         $result_index = 0;
         foreach ($data as $k => $v) {
@@ -349,7 +335,7 @@ class Sample extends Backend
             $this->success('导入成功！！'.$str);
         } else {
             $this->error('导入失败！！'.$str);
-        } */
+        } 
         /*********************end***********************/
     }
     /**
