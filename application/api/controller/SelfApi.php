@@ -172,6 +172,14 @@ class SelfApi extends Api
         if (!$site) {
             $this->error(__('缺少站点参数'), [], 400);
         }
+
+        if (!$title) {
+            $this->error(__('缺少运营商参数'), [], 400);
+        }
+
+        if (!$track_number) {
+            $this->error(__('缺少快递单号参数'), [], 400);
+        }
         switch ($site) {
             case 1:
                 $db = 'database.db_zeelool';
