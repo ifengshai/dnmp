@@ -1392,6 +1392,7 @@ class Sample extends Backend
                     //审核通过
                     foreach($lend_arr as $value){
                         $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(); 
+                        $this->sample->where('sku',$value['sku'])->update(['is_lend'=>1]); 
                     }
                     $this->samplelendlog->where($where)->update(['status'=>$status]);
                 }else{
