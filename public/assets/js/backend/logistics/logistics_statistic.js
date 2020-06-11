@@ -77,6 +77,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(document).on('click','.btn-create_time_warehouse',function(){
                 $("#create_time_warehouse").val('');
             });
+            //点击清除缓存
+            $(document).on('click','#clear-cache',function(){
+                var create_time = $('#workload_time').val();
+                var platform    = $('#order_platform_workload').val();
+                if (!create_time) {
+                    Toastr.error('请先选择需要清除缓存的时间范围');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url:'logistics/logistics_statistic/clear_cache',
+                    data:{time:create_time,platform:platform}
+                },  function(data,ret){
+                        Layer.alert(ret.msg);
+                        return false;
+                });
+
+            });
+
             //点击提交
             $(document).on('click','#workload-btn',function(){
                 var create_time = $('#workload_time').val();

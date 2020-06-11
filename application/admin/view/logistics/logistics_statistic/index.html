@@ -1,49 +1,53 @@
 <style>
-    .content{
-        max-width:100%;
+    .content {
+        max-width: 100%;
     }
-    .echart-style td{
-        width:60px;
+
+    .echart-style td {
+        width: 60px;
     }
 </style>
 
 <style type="text/css">
-table.altrowstable {
-    margin: 0 auto;
-    width: 100%;
-    font-family: verdana, arial, sans-serif;
-    font-size: 11px;
-    color: #333333;
-    border-width: 1px;
-    border-color: #247692;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
 
-table.altrowstable th {
-    border-width: 1px;
-    padding: 8px;
-    font-size: 14px;
-    border-style: solid;
-    border-color: #d2d6de;
-}
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
 
-table.altrowstable td {
-    border-width: 1px;
-    padding: 8px;
-    text-align: center;
-    font-size: 12px;
-    border-style: solid;
-    border-color: #ddd;
-}
-table.altrowstable tr:nth-child(odd){
-    background:#E9F1F4;
-    background: #F5F5F5;
-}
-table.altrowstable tr:nth-child(even){
-    background: #fff;
-    background: #eee;
-}
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
     .caigou-table {
         width: 30%;
         height: 130px;
@@ -83,6 +87,7 @@ table.altrowstable tr:nth-child(even){
         border-color: #a9c6c9;
         border-radius: 6px;
     }
+
     .btn-div {
         font-size: 14px;
         line-height: 50px;
@@ -98,10 +103,11 @@ table.altrowstable tr:nth-child(even){
         margin-right: 20px;
         width: 180px;
     }
+
     .tab-content > .active {
-       display: block;
-       clear: both;
-    }  
+        display: block;
+        clear: both;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -109,93 +115,105 @@ table.altrowstable tr:nth-child(even){
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-                    <!-- <form id = "form1" action="#" class="form-commonsearch form-horizontal" role="form1" method="post"> -->
-                        <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
-                            <div class="row">
-                                <div class="col-xs-12 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">站点选择</label>
-                                        <div class="col-xs-8">
-                                            <select  id="order_platform_workload" data-rule="required" class="form-control" name="order_platform">
-												<option value="10" selected="selected">全部</option>
-												{foreach name="orderPlatformList" item="vo"}
-                                                <option value="{$key}" {if $platform == $key}selected="selected"{/if} >{$vo}</option>
-                                                {/foreach}
-                                            </select>
-                                        </div>
-                                    </div>                                                                 
-                            </div>
+                <!-- <form id = "form1" action="#" class="form-commonsearch form-horizontal" role="form1" method="post"> -->
+                <div id="form8" role="form8"
+                     style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-3">
                             <div class="form-group">
-                                <label class="control-label col-xs-1 col-sm-1">时间:</label>
-                                <div class="col-xs-2">
-                                    <input type="hidden" class="form-control operate" name="workload_time-operate" data-name="one_time" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="workload_time"  placeholder="创建时间" id="workload_time" value="" data-index="14">
+                                <label class="control-label col-xs-4">站点选择</label>
+                                <div class="col-xs-8">
+                                    <select id="order_platform_workload" data-rule="required" class="form-control"
+                                            name="order_platform">
+                                        <option value="10" selected="selected">全部</option>
+                                        {foreach name="orderPlatformList" item="vo"}
+                                        <option value="{$key}" {if $platform== $key}selected="selected" {
+                                        /if} >{$vo}</option>
+                                        {/foreach}
+                                    </select>
                                 </div>
-                            </div>                            
-                            <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                <div class="col-sm-8 col-xs-offset-4">
-                                    <input id='workload-btn' type="submit" class="btn btn-success workload-btn" value="提交"> 
-                                    <input type="reset" class="btn btn-default btn-workload-time reset" value="重置" ></div>
-                            </div>                                                            
-                            </div>                                                                                                                                           
+                            </div>
                         </div>
-                    <!-- </form> -->
+                        <div class="form-group">
+                            <label class="control-label col-xs-1 col-sm-1">时间:</label>
+                            <div class="col-xs-2">
+                                <input type="hidden" class="form-control operate" name="workload_time-operate"
+                                       data-name="one_time" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange"
+                                       name="workload_time" placeholder="创建时间" id="workload_time" value=""
+                                       data-index="14">
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="col-sm-8 col-xs-offset-4">
+                                <input id='workload-btn' type="submit" class="btn btn-success workload-btn" value="提交">
+                                <input type="reset" class="btn btn-default btn-workload-time reset" value="重置"></div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <input id='clear-cache' type="submit" class="btn btn-danger workload-btn" value="清除缓存">
+                        </div>
+
+                    </div>
+                </div>
+                <!-- </form> -->
                 <table id="workload-info" class="altrowstable"
-                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                width="100%">
-             <thead>                    
-             <tr>
-                 <th style="text-align: center; vertical-align: middle;">物流渠道</th>
-                 <!-- <th style="text-align: center; vertical-align: middle;">订单数</th> -->
-                 <th style="text-align: center; vertical-align: middle;">发货数量</th>
-                 <th style="text-align: center; vertical-align: middle;">妥投订单数</th>
-                 <th style="text-align: center; vertical-align: middle;">总妥投率</th>
-                 <th style="text-align: center; vertical-align: middle;">7天妥投率</th>
-                 <th style="text-align: center; vertical-align: middle;">14天妥投率</th>
-                 <th style="text-align: center; vertical-align: middle;">20天妥投率</th>
-                 <th style="text-align: center; vertical-align: middle;">20天以上妥投率</th>
-                 <th style="text-align: center; vertical-align: middle;">平均妥投时效</th>
-             </tr>
-             </thead>
-                 {if isset($result)}
-                 {foreach name="result" item="vo" key="k"}
-                  <tr>
-                      <td   style="text-align: center; vertical-align: middle;">{$vo.shipment_type}</td>
-                      <!-- <td    style="text-align: center; vertical-align: middle;">{$vo.order_num}</td> -->
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.send_order_num}</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.deliverd_order_num}</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.total_deliverd_rate}%</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.serven_deliverd_rate}%</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.fourteen_deliverd_rate}%</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.twenty_deliverd_rate}%</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.gtTwenty_deliverd_rate}%</td>
-                      <td    style="text-align: center; vertical-align: middle;">{$vo.avg_deliverd_rate}天</td>
-                  </tr>
-                  {/foreach}
-                  {/if}                                                                 			 
-                </table>                
+                       data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                       data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                       width="100%">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center; vertical-align: middle;">物流渠道</th>
+                        <!-- <th style="text-align: center; vertical-align: middle;">订单数</th> -->
+                        <th style="text-align: center; vertical-align: middle;">发货数量</th>
+                        <th style="text-align: center; vertical-align: middle;">妥投订单数</th>
+                        <th style="text-align: center; vertical-align: middle;">总妥投率</th>
+                        <th style="text-align: center; vertical-align: middle;">7天妥投率</th>
+                        <th style="text-align: center; vertical-align: middle;">14天妥投率</th>
+                        <th style="text-align: center; vertical-align: middle;">20天妥投率</th>
+                        <th style="text-align: center; vertical-align: middle;">20天以上妥投率</th>
+                        <th style="text-align: center; vertical-align: middle;">平均妥投时效</th>
+                    </tr>
+                    </thead>
+                    {if isset($result)}
+                    {foreach name="result" item="vo" key="k"}
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.shipment_type}</td>
+                        <!-- <td    style="text-align: center; vertical-align: middle;">{$vo.order_num}</td> -->
+                        <td style="text-align: center; vertical-align: middle;">{$vo.send_order_num}</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.deliverd_order_num}</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.total_deliverd_rate}%</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.serven_deliverd_rate}%</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.fourteen_deliverd_rate}%</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.twenty_deliverd_rate}%</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.gtTwenty_deliverd_rate}%</td>
+                        <td style="text-align: center; vertical-align: middle;">{$vo.avg_deliverd_rate}天</td>
+                    </tr>
+                    {/foreach}
+                    {/if}
+                </table>
             </div>
             <div class="tab-pane fade active in">
-                <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">                   
+                <div class="row item_info"
+                     style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
                     <div class="col-lg-12">
                         <div style="float: left;width:60%;">
                             <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top: 20px;">发货数量统计</label>
+                                   style="font-weight: bold;width: 150px;margin-top: 20px;">发货数量统计</label>
                             <div id="echart1" style="float: left;height:400px;width:100%;"></div>
                         </div>
                     </div>
                 </div>
-                <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">                   
+                <div class="row item_info"
+                     style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">
                     <div class="col-lg-12">
                         <div class="col-lg-12" style="float: left;">
                             <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top:20px;">妥投比率统计</label>
-                                <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
+                                   style="font-weight: bold;width: 150px;margin-top:20px;">妥投比率统计</label>
+                            <div id="echart3" style="float: left;height:400px;width:100%;"></div>
                         </div>
                     </div>
-                </div>                                                
-            </div>                                                                      
-        </div>     		
-	</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
