@@ -651,7 +651,7 @@ class Zeelool extends Backend
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
-                $list[$k]['handle_user_name'] = session('admin.nickname');;
+                $list[$k]['handle_user_name'] = session('admin.nickname');
 
                 //配镜架
                 if ($status == 1) {
