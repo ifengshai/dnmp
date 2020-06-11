@@ -264,7 +264,7 @@ class Sample extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['SKU', '库位号'];
+         $listName = ['SKU', '库位号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -283,7 +283,7 @@ class Sample extends Backend
             }
 
             //模板文件不正确
-            if ($allRow > 1000) {
+            if ($allRow > 3500) {
                 throw new Exception("表格行数过大");
             }
 
@@ -335,7 +335,7 @@ class Sample extends Backend
             $this->success('导入成功！！'.$str);
         } else {
             $this->error('导入失败！！'.$str);
-        }
+        } 
         /*********************end***********************/
     }
     /**

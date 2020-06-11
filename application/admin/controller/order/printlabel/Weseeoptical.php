@@ -606,17 +606,13 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
             $tmp_product_options = unserialize($value['product_options']);
 
-
-
             $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
-            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['degrees'];
-
+            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+         
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
-            // dump($prescription_params);
-            // dump($product_options);
 
             $finalResult[$key]['prescription_type'] = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription_type']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
@@ -664,12 +660,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+
+            //判断是否为成品老花镜
+            if ($finalResult[$key]['degrees']) {
+                $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
+                $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
+                $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+            }
+
         }
-        // dump($finalResult);
-        // exit;
-        //从数据库查询需要的数据
-        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
-        // Create new Spreadsheet object
+      
         $spreadsheet = new Spreadsheet();
         // Add title
 
@@ -988,6 +988,11 @@ EOF;
 
                 $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
+                if ($final_print['degrees']) {
+                    $final_print['od_sph'] = $final_print['degrees'];
+                    $final_print['os_sph'] = $final_print['degrees'];
+                    $final_print['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+                }
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
                 if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
@@ -1010,9 +1015,6 @@ EOF;
                     $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
                     $os_pd = "";
                 }
-
-                // dump($os_add);
-                // dump($od_add);
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {
@@ -1074,7 +1076,7 @@ EOF;
                     " </tr>
             <tr>
             <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
-            <td colspan='8' style=' text-align:center'>Lens：" . $final_print['degrees'] . ' ' . $final_print['index_type'] . "</td>
+            <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";
             }

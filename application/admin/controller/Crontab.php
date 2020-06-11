@@ -2008,6 +2008,8 @@ order by sfoi.item_id asc limit 1000";
                 $params[$k]['purchase_id'] = $v['id'];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s');
                 $params[$k]['create_person'] = 'Admin';
+                $params[$k]['logistics_company_no'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyNo;
+                $params[$k]['source'] = 2;
             }
         }
 
@@ -2043,7 +2045,7 @@ order by sfoi.item_id asc limit 1000";
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE '%Price%' ORDER BY counter DESC";
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
