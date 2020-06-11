@@ -219,12 +219,15 @@ class SelfApi extends Api
             'track_number' => $order_shipment['track_number'],
         ]);
 
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
+
         //注册17track
         $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
         $carrier = $this->getCarrier($title);
         $shipment_reg[0]['number'] =  $order_shipment['track_number'];
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($track)  . "\r\n", FILE_APPEND);
         if (count($track['data']['rejected']) > 0) {
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
