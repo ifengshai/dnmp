@@ -157,6 +157,8 @@ class SelfApi extends Api
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
         $site = $this->request->request('site'); //站点
+        $title = $this->request->request('title'); //运营商
+        $track_number = $this->request->request('track_number'); //快递单号
 
         file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
         if (!$order_id) {
@@ -188,14 +190,7 @@ class SelfApi extends Api
                 return false;
                 break;
         }
-        //根据订单id查询运单号
-        $order_shipment = Db::connect($db)
-            ->table('sales_flat_shipment_track')
-            ->field('entity_id,track_number,title')
-            ->where('order_id', $order_id)
-            ->find();
 
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($order_shipment)  . "\r\n", FILE_APPEND);
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -206,8 +201,8 @@ class SelfApi extends Api
             'order_node' => 2,
             'node_type' => 7,
             'update_time' => date('Y-m-d H:i:s'),
-            'shipment_type' => $order_shipment['title'],
-            'track_number' => $order_shipment['track_number'],
+            'shipment_type' => $title,
+            'track_number' => $track_number,
         ]);
 
         //插入节点子表
@@ -219,15 +214,15 @@ class SelfApi extends Api
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
             'node_type' => 7,
-            'shipment_type' => $order_shipment['title'],
-            'track_number' => $order_shipment['track_number'],
+            'shipment_type' => $title,
+            'track_number' => $track_number,
         ]);
 
       
         //注册17track
-        $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
+        $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
-        $shipment_reg[0]['number'] =  $order_shipment['track_number'];
+        $shipment_reg[0]['number'] =  $track_number;
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
         file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($track)  . "\r\n", FILE_APPEND);
