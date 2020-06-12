@@ -401,12 +401,13 @@ order by sfoi.item_id asc limit 1000";
                     . "'" . $value['os_bd'] . "',"
                     . "'" . $value['os_pv_r'] . "',"
                     . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
+                    . "'" . $value['is_custom_lens'] . "',"
+                    . "'" . $value['options_color'] . "'"
                     . "),";
             }
 
             $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
+                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens,options_color) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
             $result = Db::connect('database.db_zeelool')->execute($batch_order_item_prescription_insertSql);
             if ($result) {
