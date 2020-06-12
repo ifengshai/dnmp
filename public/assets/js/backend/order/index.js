@@ -228,6 +228,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //批量导出xls
+            $('#account_order_batch_export_xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/order/index/account_order_batch_export_xls?ids=' + ids + '&label=' + Config.label, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/order/index/account_order_batch_export_xls?filter=' + filter + '&op=' + op + '&label=' + Config.label, '_blank');
+                }
+
+            });
         },
         postage_import: function () {
             // 初始化表格参数配置
