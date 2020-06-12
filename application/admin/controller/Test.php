@@ -75,7 +75,7 @@ class Test extends Backend
      */
     public function track_ship_date()
     {
-        $this->track_shipment_num(1);
+        // $this->track_shipment_num(1);
         $this->track_shipment_num(2);
         $this->track_shipment_num(3);
     }
@@ -153,7 +153,6 @@ class Test extends Backend
             usleep(200000);
         }
         echo 'ok';
-        exit;
     }
 
     //fedex
