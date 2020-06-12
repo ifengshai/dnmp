@@ -692,6 +692,8 @@ class CustomerService extends Backend
             }
             if (10 !=$params['order_platform']) {
                 $where['work_platform'] = $params['order_platform'];
+            }else{
+                $where['work_platform'] = ['in',[1,2,3]];
             }
             //员工分组
             $customer_type = $params['customer_type'];
@@ -776,9 +778,9 @@ class CustomerService extends Backend
             $where['work_status'] = 6;
             $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
             sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-            $where['replacement_order'] = ['neq',''];
+            //$where['replacement_order'] = ['neq',''];
             //补发单数和优惠券发放量
-            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
             $workList = collection($workList)->toArray();
             $replacementOrder = collection($replacementOrder)->toArray();
             if (!empty($replacementOrder)) {
@@ -1292,8 +1294,8 @@ class CustomerService extends Backend
 		}
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {
@@ -1306,7 +1308,7 @@ class CustomerService extends Backend
 
 			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
 			foreach($allCustomers as $k =>$v){
-				if (is_array($replacementArr)) {
+				if (isset($replacementArr) && is_array($replacementArr)) {
 					//客服的补发订单数
 					if (array_key_exists($v['id'], $replacementArr)) {
 						$allCustomers[$k]['replacement_num'] = $replacementArr[$v['id']];
@@ -1401,8 +1403,8 @@ class CustomerService extends Backend
         }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {
