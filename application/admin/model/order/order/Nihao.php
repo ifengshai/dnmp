@@ -305,20 +305,6 @@ class Nihao extends Model
         if (!$totalId || !$thisPageId) {
             return $arr;
         }
-        //原先逻辑已经废弃(总付款金额)
-        // $totalMap['parent_id'] = ['in',$totalId];
-        // //总付款金额
-        // $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
-        // $arr['totalPayInfo'] = $payInfo;
-        // $thisPageIdMap['parent_id'] = ['in',$thisPageId];
-        // $thisPageInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($thisPageIdMap)->field('parent_id,base_amount_paid')->select();
-        // if(!$thisPageInfo){
-        //     return $arr;
-        // }
-        // $thisPageInfo = collection($thisPageInfo)->toArray($thisPageInfo);
-        // foreach($thisPageInfo as  $v){
-        //         $arr['thisPagePayPrice'][$v['parent_id']] = round($v['base_amount_paid'],2);
-        // }
         //求出总付款金额
         $totalMap['entity_id'] = ['in', $totalId];
         $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
