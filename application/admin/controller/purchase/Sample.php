@@ -1405,8 +1405,8 @@ class Sample extends Backend
             $this->success();
         }
     }
-        /**
-     * 借出记录审核
+     /**
+     * 借出记录归还
      *
      * @Description
      * @author mjj
