@@ -264,7 +264,7 @@ class Sample extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['SKU', '库位号'];
+         $listName = ['SKU', '库位号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -283,7 +283,7 @@ class Sample extends Backend
             }
 
             //模板文件不正确
-            if ($allRow > 1000) {
+            if ($allRow > 3500) {
                 throw new Exception("表格行数过大");
             }
 
@@ -335,7 +335,7 @@ class Sample extends Backend
             $this->success('导入成功！！'.$str);
         } else {
             $this->error('导入失败！！'.$str);
-        }
+        } 
         /*********************end***********************/
     }
     /**
@@ -1392,6 +1392,7 @@ class Sample extends Backend
                     //审核通过
                     foreach($lend_arr as $value){
                         $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(); 
+                        $this->sample->where('sku',$value['sku'])->update(['is_lend'=>1]); 
                     }
                     $this->samplelendlog->where($where)->update(['status'=>$status]);
                 }else{
@@ -1403,5 +1404,32 @@ class Sample extends Backend
             }
             $this->success();
         }
+    }
+     /**
+     * 借出记录归还
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/26 10:25:09 
+     * @return void
+     */
+    public function sample_lendlog_check($ids = null){
+        $params = input();
+        if (!$params['ids']) {
+            $this->error('缺少参数！！');
+        }
+        $where['id'] = $params['ids'];
+        //归还
+        $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
+        foreach($lendlog_items as $item){
+            $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
+            //判断是否没有借出数量，如果没有修改样品间列表的状态
+            $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
+            if($already_lend_num == 0){
+                $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
+            }
+        }
+        $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
+        $this->success();
     }
 }

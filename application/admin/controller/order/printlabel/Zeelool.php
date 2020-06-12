@@ -536,7 +536,6 @@ class Zeelool extends Backend
                     ->group('change_sku')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
-                file_put_contents('/www/wwwroot/mojing/runtime/log/order.log', 'infoRes_' . serialize($infoRes) . "\r\n", FILE_APPEND);
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -593,11 +592,8 @@ class Zeelool extends Backend
                     //总库存
                     $item_map['sku'] = $trueSku;
                     $item_map['is_del'] = 1;
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/order.log', 'list_map_' . serialize($item_map) . "\r\n", FILE_APPEND);
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/order.log', 'list_sku_' . $trueSku . '_' . $qty . "\r\n", FILE_APPEND);
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/order.log', 'list_res_' . $res . "\r\n", FILE_APPEND);
                     if (false === $res) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
@@ -655,7 +651,7 @@ class Zeelool extends Backend
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
-                $list[$k]['handle_user_name'] = session('admin.nickname');;
+                $list[$k]['handle_user_name'] = session('admin.nickname');
 
                 //配镜架
                 if ($status == 1) {
