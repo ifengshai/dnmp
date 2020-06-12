@@ -250,7 +250,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -330,7 +330,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -407,7 +407,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
