@@ -498,6 +498,7 @@ class LogisticsStatistic extends Backend
                 $arr['shipment_type'][$k] = $v['shipment_type'];
                 //发货订单号
                 $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
+                $delievered_order = collection($delievered_order)->toArray();
                 if(!$delievered_order){
                     $arr['send_order_num'][$k] = 0;
                     $arr['deliverd_order_num'][$k] = 0;
@@ -508,7 +509,6 @@ class LogisticsStatistic extends Backend
                     $arr['avg_deliverd_rate'][$k] = 0;
                     continue;
                 }
-                $delievered_order = collection($delievered_order)->toArray();
                 //发货数量
                 $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = count(array_column($delievered_order,'order_number'));
                 $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
