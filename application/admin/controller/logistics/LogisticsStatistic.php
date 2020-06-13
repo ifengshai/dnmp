@@ -37,6 +37,7 @@ class LogisticsStatistic extends Backend
     public function index()
     {
         set_time_limit(0);
+        ini_set('memory_limit', '512M');
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             if ($params['time']) {
