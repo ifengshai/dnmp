@@ -533,7 +533,7 @@ class LogisticsStatistic extends Backend
                         } else {
                             $gtTwenty_num++;
                         }
-                    } else {
+                    } elseif($val['signing_time']) {
                         $send_order_num--;
                     }
                 }
