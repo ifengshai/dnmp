@@ -175,11 +175,15 @@ class LogisticsStatistic extends Backend
                 //$arr['order_num'][$k]     =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
                 //发货数量
                 $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->distinct(true)->count("distinct order_number");
-                //妥投单数
-                $arr['deliverd_order_num'][$k] = $deliverd_order_num = $this->model->where(['shipment_type' => $v['shipment_type']])->where($map)->where($where)->count("*");
+                //发货订单号
+				$all_send_order = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->distinct(true)->column("order_number");
+			    //妥投单数
+                //$arr['deliverd_order_num'][$k] = $deliverd_order_num = $this->model->where(['shipment_type' => $v['shipment_type']])->where($map)->where($where)->count("*");
                 //各个日期妥投单数
-                $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map);
-                //7天妥投单数
+                $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map,$all_send_order);
+                //妥投单数
+				$arr['deliverd_order_num'][$k]    = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num']+ $date_order['gtTwenty_num'];
+				//7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $date_order['serven_num'];
                 //14天妥投单数
                 $arr['fourteen_deliverd_order_num'][$k] = $date_order['fourteen_num'];
@@ -301,13 +305,15 @@ class LogisticsStatistic extends Backend
      * @since 2020/06/09 14:13:34
      * @author lsw
      */
-    public function calculate_delievered_num($site, $shipment_type, $map)
+    public function calculate_delievered_num($site, $shipment_type, $map,$all_send_order)
     {
         if (10 != $site) {
             $where['site'] = $whereSite['site'] = $site;
         }
         $where['node_type'] = 40;
         $whereSite['node_type'] = 8;
+		//求出这段时间内所有的发货订单号
+		
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
         //14天妥投时间
@@ -315,9 +321,9 @@ class LogisticsStatistic extends Backend
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
         //求出所有的妥投订单号
-        $all_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->column('order_number');
+        $all_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->column('order_number');
         //求出所有的妥投订单号妥投时间
-        $delievered_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->field('order_id,order_number,create_time')->select();
+        $delievered_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->field('order_id,order_number,create_time')->select();
         if (!$delievered_order) {
             return [
                 'serven_num' => 0,
