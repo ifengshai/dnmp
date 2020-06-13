@@ -493,7 +493,7 @@ class LogisticsStatistic extends Backend
         $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
-            $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
+            //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
             $all_shipment_type = collection($all_shipment_type)->toArray();
             //总共的妥投数量,妥投时间
             $all_total_num = $all_total_wait_time = 0;
