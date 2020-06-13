@@ -36,6 +36,7 @@ class LogisticsStatistic extends Backend
      */
     public function index()
     {
+        set_time_limit(0);
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             if ($params['time']) {
