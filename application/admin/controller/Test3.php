@@ -24,7 +24,7 @@ class Test3 extends Backend
      * */
     public function track_time()
     {
-        $order_node = Db::name('order_node')->limit(100)->select();
+        $order_node = Db::name('order_node')->select();
         $order_node = collection($order_node)->toArray();
 
         foreach ($order_node as $k => $v) {
