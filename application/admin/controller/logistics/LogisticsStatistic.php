@@ -561,14 +561,14 @@ class LogisticsStatistic extends Backend
                 $rate[1] += $fourteen_num;
                 $rate[2] += $twenty_num;
                 $rate[3] += $gtTwenty_num;
-                $rate['total_num'] += $total_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
+                $rate['total_num'] += $deliverd_order_num;
                 //平均妥投时效
-                if ($total_num > 0) {
-                    $arr['avg_deliverd_rate'][$k] = round(($wait_time / $total_num / 86400), 2);
+                if ($deliverd_order_num > 0) {
+                    $arr['avg_deliverd_rate'][$k] = round(($wait_time / $deliverd_order_num / 86400), 2);
                 } else {
                     $arr['avg_deliverd_rate'][$k] = 0;
                 }
-                $all_total_num += $total_num;
+                $all_total_num += $deliverd_order_num;
                 $all_total_wait_time += $wait_time;
             }
             //设置发货总数量 妥投订单总数量数为0
