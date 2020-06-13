@@ -47,25 +47,19 @@ class Test3 extends Backend
         $order_node = collection($order_node)->toArray();
 
         foreach ($order_node as $k => $v) {
-            if($v['order_node'] >= 3){
+            if($v['node_type'] >= 7){
                 $where['site'] = $v['site'];
                 $where['order_id'] = $v['order_id'];
-                $where['node_type'] = 8;
+                $where['node_type'] = 7;
                 $order_create_time = Db::name('order_node_detail')->where($where)->field('create_time')->find();
 
                 $update['delivery_time'] = $order_create_time['create_time'];//更新上网时间
 
-                if($v['node_type'] == 40){
-                    $where['node_type'] = 40;
-                    $order_end_time = Db::name('order_node_detail')->where($where)->field('create_time')->find();
-                    $update['signing_time'] = $order_end_time['create_time'];//更新签收时间
-                }
-
                 Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
+                $update = '';
             }
 
             echo $k . '_' . $v['id'] . "\n";
-            usleep(50000);
         }
         echo "ok";die;
     }
