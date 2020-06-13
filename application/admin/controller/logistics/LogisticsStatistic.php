@@ -507,6 +507,7 @@ class LogisticsStatistic extends Backend
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     $arr['avg_deliverd_rate'][$k] = 0;
+                    $rs[$v['shipment_type']] = 0;
                     continue;
                 }
                 //发货数量
