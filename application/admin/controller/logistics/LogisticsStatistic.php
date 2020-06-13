@@ -49,13 +49,18 @@ class LogisticsStatistic extends Backend
                 $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
             }
             $site = $params['platform'] ?: 10;
+            if($site ==10){
+                $whereSite['site'] = ['in',[1,2,3]];
+            }else{
+                $whereSite['site'] = $site;
+            }
             $result = $this->logistics_data($site, $map);
             $deliverd_order_num = $result['deliverd_order_num_all'];
             $rate = $result['rate'];
             unset($result['deliverd_order_num_all']);
             unset($result['rate']);
             //所有的物流渠道
-            $column = $this->orderNode->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->column('shipment_type');
+            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->column('shipment_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
