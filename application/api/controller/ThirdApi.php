@@ -109,7 +109,6 @@ class ThirdApi extends Api
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
-                        $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                         $order_node_detail['node_type'] = 8;
@@ -264,7 +263,6 @@ class ThirdApi extends Api
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 10;
                             $update_order_node['update_time'] = $v['a'];
-                            $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                             $order_node_detail['node_type'] = 8;
@@ -397,7 +395,6 @@ class ThirdApi extends Api
                                 $update_order_node['order_node'] = 3;
                                 $update_order_node['node_type'] = 8;
                                 $update_order_node['update_time'] = $v['a'];
-                                $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                                 Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                                 $order_node_detail['node_type'] = 8;
@@ -504,7 +501,6 @@ class ThirdApi extends Api
                                     $update_order_node['order_node'] = 3;
                                     $update_order_node['node_type'] = 8;
                                     $update_order_node['update_time'] = $v['a'];
-                                    $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
         
                                     $order_node_detail['node_type'] = 8;
@@ -610,7 +606,6 @@ class ThirdApi extends Api
                                     $update_order_node['order_node'] = 3;
                                     $update_order_node['node_type'] = 8;
                                     $update_order_node['update_time'] = $v['a'];
-                                    $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                 
                                     $order_node_detail['node_type'] = 8;
@@ -734,7 +729,6 @@ class ThirdApi extends Api
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
-                        $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                         $order_node_detail['node_type'] = 8;
@@ -884,7 +878,6 @@ class ThirdApi extends Api
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 8;
                             $update_order_node['update_time'] = $v['a'];
-                            $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                             $order_node_detail['node_type'] = 8;
@@ -1036,7 +1029,6 @@ class ThirdApi extends Api
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
-                        $update_order_node['delivery_time'] = $v['a'];//更新上网时间
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
     
                         $order_node_detail['node_type'] = 8;
