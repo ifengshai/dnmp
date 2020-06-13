@@ -496,13 +496,13 @@ class LogisticsStatistic extends Backend
                 //发货订单号
                 $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 if(!$delievered_order){
-                    $arr['send_order_num'][$ak] = 0;
-                    $arr['deliverd_order_num'][$ak] = 0;
+                    $arr['send_order_num'][$k] = 0;
+                    $arr['deliverd_order_num'][$k] = 0;
                     $arr['serven_deliverd_rate'][$k] = 0;
                     $arr['fourteen_deliverd_rate'][$k] = 0;
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
-                    $arr['avg_deliverd_rate'][$ak] = 0;
+                    $arr['avg_deliverd_rate'][$k] = 0;
                     continue;
                 }
                 $delievered_order = collection($delievered_order)->toArray();
@@ -526,7 +526,7 @@ class LogisticsStatistic extends Backend
                     }
                 }
                 //妥投单数
-                $arr['deliverd_order_num'][$k] = $deliverd_order_num + $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
+                $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
                 //7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $serven_num;
                 //14天妥投单数
