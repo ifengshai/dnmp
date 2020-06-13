@@ -43,7 +43,7 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
             $site = $params['platform'] ?: 10;
             $result = $this->logistics_data($site, $map);
@@ -182,7 +182,7 @@ class LogisticsStatistic extends Backend
                 //$arr['deliverd_order_num'][$k] = $deliverd_order_num = $this->model->where(['shipment_type' => $v['shipment_type']])->where($map)->where($where)->count("*");
                 //各个日期妥投单数
                 $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map,$all_send_order);
-                //妥投单数
+				//妥投单数
 				$arr['deliverd_order_num'][$k] =$deliverd_order_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num']+ $date_order['gtTwenty_num'];
 				//7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $date_order['serven_num'];
@@ -366,5 +366,5 @@ class LogisticsStatistic extends Backend
             'wait_time' => $wait_time
         ];
         return $arr;
-    }
+    }	
 }
