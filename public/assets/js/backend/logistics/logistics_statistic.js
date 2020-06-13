@@ -81,10 +81,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(document).on('click','#clear-cache',function(){
                 var create_time = $('#workload_time').val();
                 var platform    = $('#order_platform_workload').val();
-                if (!create_time) {
-                    Toastr.error('请先选择需要清除缓存的时间范围');
-                    return false;
-                }
                 Backend.api.ajax({
                     url:'logistics/logistics_statistic/clear_cache',
                     data:{time:create_time,platform:platform}
