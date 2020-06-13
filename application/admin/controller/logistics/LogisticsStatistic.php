@@ -497,7 +497,7 @@ class LogisticsStatistic extends Backend
                 //物流渠道
                 $arr['shipment_type'][$k] = $v['shipment_type'];
                 //发货订单号
-                $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where('delivery_time<signing_time')->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
+                $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 $delievered_order = collection($delievered_order)->toArray();
                 if(!$delievered_order){
                     $arr['send_order_num'][$k] = 0;
@@ -511,10 +511,11 @@ class LogisticsStatistic extends Backend
                     continue;
                 }
                 //发货数量
-                $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = count(array_column($delievered_order,'order_number'));
+                $send_order_num = count(array_column($delievered_order,'order_number'));
+               
                 $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
                 foreach ($delievered_order as $key => $val) {
-                    if (!empty($val['signing_time'])) {
+                    if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) -strtotime($val['delivery_time']))/86400) > 2) {
                         $distance_time = strtotime($val['signing_time']) - strtotime($val['delivery_time']);
                         $wait_time += $distance_time;
                         //时间小于7天的
@@ -527,8 +528,13 @@ class LogisticsStatistic extends Backend
                         } else {
                             $gtTwenty_num++;
                         }
+                    } else {
+                        $send_order_num--;
                     }
                 }
+
+                $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $send_order_num;
+               
                 //妥投单数
                 $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
                 //7天妥投单数
