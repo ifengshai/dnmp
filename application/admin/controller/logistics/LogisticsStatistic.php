@@ -45,13 +45,13 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['delivery_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $BeginDate=date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
+                $BeginDate = date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
                 $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
             }
             $site = $params['platform'] ?: 10;
-            if($site ==10){
-                $whereSite['site'] = ['in',[1,2,3]];
-            }else{
+            if ($site == 10) {
+                $whereSite['site'] = ['in', [1, 2, 3]];
+            } else {
                 $whereSite['site'] = $site;
             }
             $result = $this->logistics_data($site, $map);
@@ -96,9 +96,8 @@ class LogisticsStatistic extends Backend
             $time = explode(' ', $params['time']);
             $map['delivery_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
         } else {
-            $BeginDate=date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
+            $BeginDate = date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
             $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
-
         }
         $site = $params['platform'] ?: 10;
         $result = $this->logistics_data($site, $map);
@@ -128,14 +127,15 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['delivery_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map['delivery_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $BeginDate = date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
+                $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
             }
             $site = $params['platform'] ?: 10;
-            $judge = Cache::has('LogisticsStatistic_logistics_data_' . $site . md5(serialize($map)));
+            $judge = Cache::has('LogisticsStatistic_logistics_list_' . $site . md5(serialize($map)));
             //判断缓存是否存在
             if ($judge === true) {
                 //清除单个缓存文件
-                $result = Cache::rm('LogisticsStatistic_logistics_data_' . $site . md5(serialize($map)));
+                $result = Cache::rm('LogisticsStatistic_logistics_list_' . $site . md5(serialize($map)));
                 if ($result === true) {
                     $this->success('清除缓存成功', '');
                 } else {
@@ -504,7 +504,7 @@ class LogisticsStatistic extends Backend
                 //发货订单号
                 $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 $delievered_order = collection($delievered_order)->toArray();
-                if(!$delievered_order){
+                if (!$delievered_order) {
                     $arr['send_order_num'][$k] = 0;
                     $arr['deliverd_order_num'][$k] = 0;
                     $arr['serven_deliverd_rate'][$k] = 0;
@@ -516,11 +516,11 @@ class LogisticsStatistic extends Backend
                     continue;
                 }
                 //发货数量
-                $send_order_num = count(array_column($delievered_order,'order_number'));
-               
+                $send_order_num = count(array_column($delievered_order, 'order_number'));
+
                 $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
                 foreach ($delievered_order as $key => $val) {
-                    if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) - strtotime($val['delivery_time']))/86400) > 2) {
+                    if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) - strtotime($val['delivery_time'])) / 86400) > 2) {
                         $distance_time = strtotime($val['signing_time']) - strtotime($val['delivery_time']);
                         $wait_time += $distance_time;
                         //时间小于7天的
@@ -533,13 +533,13 @@ class LogisticsStatistic extends Backend
                         } else {
                             $gtTwenty_num++;
                         }
-                    } elseif($val['signing_time']) {
+                    } elseif ($val['signing_time']) {
                         $send_order_num--;
                     }
                 }
 
                 $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $send_order_num;
-               
+
                 //妥投单数
                 $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
                 //7天妥投单数
@@ -651,7 +651,7 @@ class LogisticsStatistic extends Backend
         }
         Cache::set('LogisticsStatistic_logistics_list_' . $site . md5(serialize($map)), $info, 7200);
         return $info;
-    }    
+    }
     /**
      * 计算某个物流渠道下某个时间段的妥投单数
      *
