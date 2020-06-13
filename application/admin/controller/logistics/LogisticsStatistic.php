@@ -45,7 +45,8 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['delivery_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map['delivery_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-10 day')), date('Y-m-d H:i:s', time())]];
+                $BeginDate=date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
+                $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
             }
             $site = $params['platform'] ?: 10;
             $result = $this->logistics_data($site, $map);
@@ -90,7 +91,9 @@ class LogisticsStatistic extends Backend
             $time = explode(' ', $params['time']);
             $map['delivery_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
         } else {
-            $map['delivery_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            $BeginDate=date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
+            $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
+
         }
         $site = $params['platform'] ?: 10;
         $result = $this->logistics_data($site, $map);
