@@ -182,7 +182,7 @@ class LogisticsStatistic extends Backend
                 //各个日期妥投单数
                 $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map,$all_send_order);
                 //妥投单数
-				$arr['deliverd_order_num'][$k]    = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num']+ $date_order['gtTwenty_num'];
+				$arr['deliverd_order_num'][$k] =$deliverd_order_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num']+ $date_order['gtTwenty_num'];
 				//7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $date_order['serven_num'];
                 //14天妥投单数
