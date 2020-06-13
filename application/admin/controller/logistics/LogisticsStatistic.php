@@ -24,6 +24,7 @@ class LogisticsStatistic extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\OrderNodeDetail;
+        $this->orderNode = new \app\admin\model\OrderNode;
     }
 
     /**
@@ -160,7 +161,7 @@ class LogisticsStatistic extends Backend
         $where['node_type'] = 40;
         //$shipmentArr['shipment_type'] = ['','CPC','EYB'];
         $orderNode['order_node'] = ['egt', 3];
-        $all_shipment_type = $this->model->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->cache(86400)->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->cache(86400)->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
