@@ -55,7 +55,7 @@ class LogisticsStatistic extends Backend
             unset($result['deliverd_order_num_all']);
             unset($result['rate']);
             //所有的物流渠道
-            $column = $this->model->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->column('shipment_type');
+            $column = $this->orderNode->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->column('shipment_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
@@ -507,6 +507,7 @@ class LogisticsStatistic extends Backend
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     $arr['avg_deliverd_rate'][$k] = 0;
+                    $rs[$v['shipment_type']] = 0;
                     continue;
                 }
                 //发货数量
