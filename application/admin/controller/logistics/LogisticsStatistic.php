@@ -24,6 +24,7 @@ class LogisticsStatistic extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\OrderNodeDetail;
+        $this->orderNode = new \app\admin\model\OrderNode;
     }
 
     /**
@@ -37,13 +38,14 @@ class LogisticsStatistic extends Backend
     public function index()
     {
         set_time_limit(0);
+        ini_set('memory_limit', '512M');
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             if ($params['time']) {
                 $timeOne = explode(' ', $params['time']);
                 $map['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-10 day')), date('Y-m-d H:i:s', time())]];
             }
             $site = $params['platform'] ?: 10;
             $result = $this->logistics_data($site, $map);
@@ -76,7 +78,6 @@ class LogisticsStatistic extends Backend
                     } else {
                         $columnData[$ck]['value'] = 0;
                     }
-
                 }
                 $json['column'] = $column;
                 $json['columnData'] = $columnData;
@@ -136,7 +137,6 @@ class LogisticsStatistic extends Backend
                 $this->error('当前条件暂无缓存', '');
             }
         }
-
     }
 
     /**
@@ -161,7 +161,7 @@ class LogisticsStatistic extends Backend
         $where['node_type'] = 40;
         //$shipmentArr['shipment_type'] = ['','CPC','EYB'];
         $orderNode['order_node'] = ['egt', 3];
-        $all_shipment_type = $this->model->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->cache(86400)->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             $rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
@@ -175,16 +175,16 @@ class LogisticsStatistic extends Backend
                 //订单数
                 //$arr['order_num'][$k]     =  $this->model->where(['shipment_type'=>$v['shipment_type']])->where($map)->where($whereSite)->count("*");
                 //发货数量
-                $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->distinct(true)->count("distinct order_number");
+                $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->count("distinct order_number");
                 //发货订单号
-				$all_send_order = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->distinct(true)->column("order_number");
-			    //妥投单数
+                $all_send_order = $this->model->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->distinct(true)->column("order_number");
+                //妥投单数
                 //$arr['deliverd_order_num'][$k] = $deliverd_order_num = $this->model->where(['shipment_type' => $v['shipment_type']])->where($map)->where($where)->count("*");
                 //各个日期妥投单数
-                $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map,$all_send_order);
-				//妥投单数
-				$arr['deliverd_order_num'][$k] =$deliverd_order_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num']+ $date_order['gtTwenty_num'];
-				//7天妥投单数
+                $date_order = $this->calculate_delievered_num($site, $v['shipment_type'], $map, $all_send_order);
+                //妥投单数
+                $arr['deliverd_order_num'][$k] = $deliverd_order_num = $date_order['serven_num'] + $date_order['fourteen_num'] + $date_order['twenty_num'] + $date_order['gtTwenty_num'];
+                //7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $date_order['serven_num'];
                 //14天妥投单数
                 $arr['fourteen_deliverd_order_num'][$k] = $date_order['fourteen_num'];
@@ -306,15 +306,15 @@ class LogisticsStatistic extends Backend
      * @since 2020/06/09 14:13:34
      * @author lsw
      */
-    public function calculate_delievered_num($site, $shipment_type, $map,$all_send_order)
+    public function calculate_delievered_num($site, $shipment_type, $map, $all_send_order)
     {
         if (10 != $site) {
             $where['site'] = $whereSite['site'] = $site;
         }
         $where['node_type'] = 40;
         $whereSite['node_type'] = 8;
-		//求出这段时间内所有的发货订单号
-		
+        //求出这段时间内所有的发货订单号
+
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
         //14天妥投时间
@@ -324,7 +324,7 @@ class LogisticsStatistic extends Backend
         //求出所有的妥投订单号
         //$all_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->column('order_number');
         //求出所有的妥投订单号妥投时间
-        $delievered_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->field('order_id,order_number,create_time')->select();
+        $delievered_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number', 'in', $all_send_order)->field('order_id,order_number,create_time')->select();
         if (!$delievered_order) {
             return [
                 'serven_num' => 0,
@@ -334,14 +334,12 @@ class LogisticsStatistic extends Backend
                 'wait_time' => 0
             ];
         }
-		$all_order = [];
-		foreach($delievered_order as $dk => $dv){
-			$all_order[] = $dv['order_number'];
-		}
+        $delievered_order = collection($delievered_order)->toArray();
+        $all_order = array_column($delievered_order, 'order_number');
+
         //求出所有妥投订单号出库时间
         $out_stock_order = $this->model->where($whereSite)->where('order_number', 'in', $all_order)->column('order_number,create_time');
-        $delievered_order = collection($delievered_order)->toArray();
-		$serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
+        $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
         foreach ($delievered_order as $key => $val) {
             if (array_key_exists($val['order_number'], $out_stock_order)) {
                 $distance_time = strtotime($val['create_time']) - strtotime($out_stock_order[$val['order_number']]);
