@@ -520,7 +520,7 @@ class LogisticsStatistic extends Backend
                
                 $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
                 foreach ($delievered_order as $key => $val) {
-                    if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) -strtotime($val['delivery_time']))/86400) > 2) {
+                    if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) - strtotime($val['delivery_time']))/86400) > 2) {
                         $distance_time = strtotime($val['signing_time']) - strtotime($val['delivery_time']);
                         $wait_time += $distance_time;
                         //时间小于7天的
