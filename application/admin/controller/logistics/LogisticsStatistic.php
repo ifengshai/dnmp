@@ -473,7 +473,7 @@ class LogisticsStatistic extends Backend
      */
     public function logistics_data($site, $map)
     {
-        $arr = Cache::get('LogisticsStatistic_logistics_data_' . $site . md5(serialize($map)));
+        $arr = Cache::get('LogisticsStatistic_logistics_list_' . $site . md5(serialize($map)));
         if ($arr) {
             return $arr;
         }
@@ -649,7 +649,7 @@ class LogisticsStatistic extends Backend
             $info['deliverd_order_num_all'] = 0;
             $info['rate'] = 0;
         }
-        Cache::set('LogisticsStatistic_logistics_data_' . $site . md5(serialize($map)), $info, 7200);
+        Cache::set('LogisticsStatistic_logistics_list_' . $site . md5(serialize($map)), $info, 7200);
         return $info;
     }    
     /**
