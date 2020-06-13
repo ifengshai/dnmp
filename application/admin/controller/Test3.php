@@ -60,7 +60,7 @@ class Test3 extends Backend
                 $update['delivery_time'] = $order_create_time['create_time'];//更新上网时间
 
                 Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
-                $update = '';
+                $update = array();
                 echo $k . '_' . $v['id'] . "\n";
                 usleep(20000);
             }
