@@ -88,7 +88,7 @@ class LogisticsStatistic extends Backend
             $time = explode(' ', $params['time']);
             $map['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
         } else {
-            $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
         }
         $site = $params['platform'] ?: 10;
         $result = $this->logistics_data($site, $map);
@@ -321,7 +321,7 @@ class LogisticsStatistic extends Backend
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
         //求出所有的妥投订单号
-        $all_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->column('order_number');
+        //$all_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->column('order_number');
         //求出所有的妥投订单号妥投时间
         $delievered_order = $this->model->where(['shipment_type' => $shipment_type])->where($map)->where($where)->where('order_number','in',$all_send_order)->field('order_id,order_number,create_time')->select();
         if (!$delievered_order) {
@@ -333,10 +333,14 @@ class LogisticsStatistic extends Backend
                 'wait_time' => 0
             ];
         }
+		$all_order = [];
+		foreach($delievered_order as $dk => $dv){
+			$all_order[] = $dv['order_number'];
+		}
         //求出所有妥投订单号出库时间
         $out_stock_order = $this->model->where($whereSite)->where('order_number', 'in', $all_order)->column('order_number,create_time');
         $delievered_order = collection($delievered_order)->toArray();
-        $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
+		$serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
         foreach ($delievered_order as $key => $val) {
             if (array_key_exists($val['order_number'], $out_stock_order)) {
                 $distance_time = strtotime($val['create_time']) - strtotime($out_stock_order[$val['order_number']]);
