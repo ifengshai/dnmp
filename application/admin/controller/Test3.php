@@ -43,6 +43,10 @@ class Test3 extends Backend
      * */
     public function track_time()
     {
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        
         $order_node = Db::name('order_node')->select();
         $order_node = collection($order_node)->toArray();
 
@@ -57,9 +61,8 @@ class Test3 extends Backend
 
                 Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
                 $update = '';
+                echo $k . '_' . $v['id'] . "\n";
             }
-
-            echo $k . '_' . $v['id'] . "\n";
         }
         echo "ok";die;
     }
