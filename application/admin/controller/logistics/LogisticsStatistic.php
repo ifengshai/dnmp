@@ -55,6 +55,8 @@ class LogisticsStatistic extends Backend
                 $whereSite['site'] = $site;
             }
             $result = $this->logistics_data($site, $map);
+            dump($result);
+            exit;
             $deliverd_order_num = $result['deliverd_order_num_all'];
             $rate = $result['rate'];
             unset($result['deliverd_order_num_all']);
