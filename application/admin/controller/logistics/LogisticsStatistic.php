@@ -502,7 +502,7 @@ class LogisticsStatistic extends Backend
                 //物流渠道
                 $arr['shipment_type'][$k] = $v['shipment_type'];
                 //发货订单号
-                $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
+                $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where('delivery_time<signing_time')->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 $delievered_order = collection($delievered_order)->toArray();
                 if(!$delievered_order){
                     $arr['send_order_num'][$k] = 0;
