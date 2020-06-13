@@ -44,7 +44,7 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-10 day')), date('Y-m-d H:i:s', time())]];
             }
             $site = $params['platform'] ?: 10;
             $result = $this->logistics_data($site, $map);
