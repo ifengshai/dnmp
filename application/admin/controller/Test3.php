@@ -22,6 +22,25 @@ class Test3 extends Backend
     /*
      * 跑数据
      * */
+    public function track_time2()
+    {
+        $where['node_type'] = ['neq',40];
+        $order_node = Db::name('order_node')->where($where)->where('signing_time is not null')->select();
+        $order_node = collection($order_node)->toArray();
+
+        foreach ($order_node as $k => $v) {
+            $update['signing_time'] = null;
+            Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
+
+            echo $v['id'] . "\n";
+            usleep(20000);
+        }
+        echo "ok";die;
+    }
+
+    /*
+     * 跑数据
+     * */
     public function track_time()
     {
         $order_node = Db::name('order_node')->select();
