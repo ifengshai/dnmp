@@ -274,6 +274,7 @@ class Zendesk extends Model
                 }
             }
         }
+        exit;
         //获取所有的open和new的邮件
         $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
         foreach ($waitTickets as $ticket) {
