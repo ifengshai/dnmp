@@ -76,7 +76,7 @@ class Test extends Backend
     public function track_ship_date()
     {
         // $this->track_shipment_num(1);
-        $this->track_shipment_num(2);
+        //$this->track_shipment_num(2);
         $this->track_shipment_num(3);
     }
     public function track_shipment_num($type)
