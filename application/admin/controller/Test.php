@@ -2139,7 +2139,9 @@ class Test extends Backend
                 Db::name('order_node')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
             }
             echo $item['id']."\n";
+            usleep(20000);
         }
+        echo "ok";exit;
     }
     /**
      * order_node_courier表批量增加魔晶内部使用的物流商
@@ -2175,7 +2177,9 @@ class Test extends Backend
                 Db::name('order_node_courier')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
             }
             echo $item['id']."\n";
+            usleep(20000);
         }
+        echo "ok";exit;
     }
     /**
      * order_node_detail表批量增加魔晶内部使用的物流商
@@ -2211,6 +2215,8 @@ class Test extends Backend
                 Db::name('order_node_detail')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
             }
             echo $item['id']."\n";
+            usleep(20000);
         }
+        echo "ok";exit;
     }
 }
