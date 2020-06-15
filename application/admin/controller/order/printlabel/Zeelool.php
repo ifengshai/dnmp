@@ -1686,11 +1686,11 @@ EOF;
                     $final_print['od_add'] = urldecode($final_print['od_add']);
 
                     //处理ADD
-                    if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
+                    if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['os_add'] * 1 != 0 && (float) $final_print['od_add'] * 1 != 0) {
                         $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                     } else {
-                        if ($final_print['os_add'] && $final_print['os_add'] * 1 != 0) {
+                        if ($final_print['os_add'] && (float) $final_print['os_add'] * 1 != 0) {
                             $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                             $os_add = "";
                         } else {
