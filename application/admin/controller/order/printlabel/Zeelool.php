@@ -577,7 +577,7 @@ class Zeelool extends Backend
                             'occupy_stock_change'       => -$v['qty'],
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '质检通过增加配货占用库存,存在更换镜框工单'
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -626,7 +626,7 @@ class Zeelool extends Backend
                         'occupy_stock_change'       => -$qty,
                         'create_person'             => session('admin.nickname'),
                         'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '质检通过增加配货占用库存'
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
