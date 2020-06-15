@@ -181,8 +181,9 @@ class Notice extends Controller
         } catch (Exception $e) {
             Db::rollback();
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            echo $e->getMessage();
+            //echo $e->getMessage();
         }
+        return 'success';
     }
 
     /**
