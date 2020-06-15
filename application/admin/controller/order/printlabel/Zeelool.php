@@ -572,7 +572,9 @@ class Zeelool extends Backend
                             'sku'                       => $trueSku,
                             'order_number'              => $v['increment_id'],
                             'public_id'                 => $orderList[$v['increment_id']],
-                            'distribution_stock_change' => $v['qty'],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
                             'remark'                    => '质检通过增加配货占用库存,存在更换镜框工单'
@@ -619,7 +621,9 @@ class Zeelool extends Backend
                         'sku'                       => $trueSku,
                         'order_number'              => $v['increment_id'],
                         'public_id'                 => $orderList[$v['increment_id']],
-                        'distribution_stock_change' => $qty,
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
                         'create_person'             => session('admin.nickname'),
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '质检通过增加配货占用库存'
