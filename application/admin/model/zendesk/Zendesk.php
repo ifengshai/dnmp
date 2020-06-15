@@ -249,20 +249,15 @@ class Zendesk extends Model
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
-            $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->select(false);
-            dump($agents);exit;
+            $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->select();
             //查询该用户今天是否休息
             $userlist_arr = array_filter(array_column($agents,'userid'));
-            
             $userlist_str = implode(',',$userlist_arr);
             $time = strtotime(date('Y-m-d 0:0:0',time()));
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
-            
             foreach ($agents as $agent) {
                 if(!in_array($agent['admin_id'],$restuser_arr)){
-                    echo "<pre>";
-                    print_r($agent);
                     //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
                      ZendeskTasks::create([
                         'type' => $agent['type'],
