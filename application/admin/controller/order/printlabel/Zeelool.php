@@ -471,6 +471,7 @@ class Zeelool extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }

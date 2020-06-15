@@ -255,17 +255,18 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
             $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
 
-
+            $final_params['os_add'] = urldecode($final_params['os_add']);
+            $final_params['od_add'] = urldecode($final_params['od_add']);
             //判断双ADD还是单ADD
             if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
-                $items[$order_item_key]['os_add'] = $lens_params['os_add'];
-                $items[$order_item_key]['od_add'] = $lens_params['od_add'];
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                if ($items[$order_item_key]['od_add'] && $lens_params['od_add'] * 1 != 0) {
-                    $items[$order_item_key]['total_add'] = $lens_params['od_add'];
+                if ($items[$order_item_key]['od_add'] && $final_params['od_add'] * 1 != 0) {
+                    $items[$order_item_key]['total_add'] = $final_params['od_add'];
                 } else {
-                    $items[$order_item_key]['total_add'] = $lens_params['os_add'];
+                    $items[$order_item_key]['total_add'] = $final_params['os_add'];
                 }
             }
 
