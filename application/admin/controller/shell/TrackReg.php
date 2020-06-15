@@ -67,6 +67,7 @@ class TrackReg extends Backend
             $data['update_time'] = $v['created_at'];
             $data['shipment_type'] = $v['title'];
             $data['track_number'] = $v['track_number'];
+            $data['delivery_time'] = $v['created_at'];
             Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
         }
         if ($list) {

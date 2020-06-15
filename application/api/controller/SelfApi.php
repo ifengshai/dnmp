@@ -210,6 +210,7 @@ class SelfApi extends Api
             'update_time' => date('Y-m-d H:i:s'),
             'shipment_type' => $title,
             'track_number' => $track_number,
+            'delivery_time' => date('Y-m-d H:i:s')
         ]);
 
         //插入节点子表

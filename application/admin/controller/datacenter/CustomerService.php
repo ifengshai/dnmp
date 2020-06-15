@@ -56,7 +56,7 @@ class CustomerService extends Backend
         $customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
-            unset($customerReply['noQualifyDay']);
+            unset($customerReply['noQualifiyDay']);
             $replyArr = [];
             $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
             $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
@@ -525,7 +525,7 @@ class CustomerService extends Backend
             if ($worklistOne && !$mapTwo) {
                 //取出总数
                 $handleNum          = $worklistOne['handleNum'];
-                $noQualifyDay       = $worklistOne['noQualifyDay'];
+                $noQualifiyDay       = $worklistOne['noQualifiyDay'];
                 if ($timeOne) {
                     $start = $timeOne[0];
                     $end   = $timeOne[3];
@@ -535,7 +535,7 @@ class CustomerService extends Backend
                 }
                 //销毁变量
                 unset($worklistOne['handleNum']);
-                unset($worklistOne['noQualifyDay']);
+                unset($worklistOne['noQualifiyDay']);
                 $this->view->assign([
                     'type'=>2,
                     'allCustomers'  => $worklistOne,
@@ -546,7 +546,7 @@ class CustomerService extends Backend
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
                 $handleNum       = $worklistOne['handleNum'] + $worklistTwo['handleNum'];
-                $noQualifyDay    = $worklistOne['noQualifyDay'] + $worklistTwo['noQualifyDay']; 
+                $noQualifiyDay   = $worklistOne['noQualifiyDay'] + $worklistTwo['noQualifiyDay']; 
                 if ($timeOne) {
                     $startOne = $timeOne[0];
                     $endOne   = $timeOne[3];
@@ -558,7 +558,7 @@ class CustomerService extends Backend
                 $endTwo   = $timeTwo[3];
                 //销毁变量
                 unset($worklistOne['handleNum'],$worklistTwo['handleNum']);
-                unset($worklistOne['noQualifyDay'],$worklistTwo['noQualifyDay']);
+                unset($worklistOne['noQualifiyDay'],$worklistTwo['noQualifiyDay']);
                 $this->view->assign([
                      'type'         =>3,
                      'worklistOne'  => $worklistOne,
@@ -580,7 +580,7 @@ class CustomerService extends Backend
                 ]
             );
             $orderPlatformList = config('workorder.platform');
-            $this->view->assign(compact('orderPlatformList', 'handleNum','noQualifyDay'));
+            $this->view->assign(compact('orderPlatformList', 'handleNum','noQualifiyDay'));
         } else {
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             //默认显示
@@ -692,6 +692,8 @@ class CustomerService extends Backend
             }
             if (10 !=$params['order_platform']) {
                 $where['work_platform'] = $params['order_platform'];
+            }else{
+                $where['work_platform'] = ['in',[1,2,3]];
             }
             //员工分组
             $customer_type = $params['customer_type'];
@@ -776,9 +778,9 @@ class CustomerService extends Backend
             $where['work_status'] = 6;
             $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
             sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-            $where['replacement_order'] = ['neq',''];
+            //$where['replacement_order'] = ['neq',''];
             //补发单数和优惠券发放量
-            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
             $workList = collection($workList)->toArray();
             $replacementOrder = collection($replacementOrder)->toArray();
             if (!empty($replacementOrder)) {
@@ -1118,7 +1120,7 @@ class CustomerService extends Backend
                 }
             }
             $allCustomers['handleNum'] = $handleNum;
-            $allCustomers['noQualifyDay'] = $noQualifiyDay; 
+            $allCustomers['noQualifiyDay'] = $noQualifiyDay; 
         }
         return $allCustomers ? $allCustomers : false;
     }
@@ -1194,7 +1196,7 @@ class CustomerService extends Backend
         //客服组信息电话、邮件
         //$customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
-            $handleNum = $noQualifyDay = 0;
+            $handleNum = $noQualifiyDay = 0;
             foreach ($customerReply as $k => $v) {
                 //客服分组
                 if (in_array($v['due_id'], $kefumanage[95]) || (95 == $v['due_id'])) {
@@ -1216,10 +1218,10 @@ class CustomerService extends Backend
                 // }
                 $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                 $handleNum+=$v['counter'];
-                $noQualifyDay += $customerReply[$k]['no_qualified_day'];
+                $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
             }
             $customerReply['handleNum'] = $handleNum;
-            $customerReply['noQualifyDay'] = $noQualifyDay;
+            $customerReply['noQualifiyDay'] = $noQualifiyDay;
         }
         return $customerReply ? $customerReply : false;
     }
@@ -1292,8 +1294,8 @@ class CustomerService extends Backend
 		}
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {
@@ -1306,7 +1308,7 @@ class CustomerService extends Backend
 
 			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
 			foreach($allCustomers as $k =>$v){
-				if (is_array($replacementArr)) {
+				if (isset($replacementArr) && is_array($replacementArr)) {
 					//客服的补发订单数
 					if (array_key_exists($v['id'], $replacementArr)) {
 						$allCustomers[$k]['replacement_num'] = $replacementArr[$v['id']];
@@ -1401,8 +1403,8 @@ class CustomerService extends Backend
         }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {

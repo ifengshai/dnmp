@@ -250,7 +250,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -330,7 +330,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -407,7 +407,7 @@ return [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -470,6 +470,8 @@ return [
             156, //刘梦楠
             114,  //李昱皓
             198,  //李丹
+            231,
+            233
             // 228  //李鑫
         ],
         //韩雨薇组

@@ -652,12 +652,13 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', json_encode($postData), FILE_APPEND);
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', json_encode($postData), FILE_APPEND);
                 $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+                self::where(['id' => $work_id])->setField('replacement_order',$increment_id);
+ 
             } catch (Exception $e) {
                 exception($e->getMessage());
             }
@@ -829,7 +830,7 @@ class WorkOrderList extends Model
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (in_array($measure_choose_id, [8, 9, 10])) {
+                        if (in_array($measure_choose_id, [7,8, 9, 10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
