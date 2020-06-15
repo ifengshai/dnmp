@@ -24,7 +24,7 @@ class Test3 extends Backend
      * */
     public function track_time2()
     {
-        $where['node_type'] = ['neq',40];
+        $where['node_type'] = ['neq', 40];
         $order_node = Db::name('order_node')->where($where)->where('signing_time is not null')->select();
         $order_node = collection($order_node)->toArray();
 
@@ -35,7 +35,8 @@ class Test3 extends Backend
             echo $v['id'] . "\n";
             usleep(20000);
         }
-        echo "ok";die;
+        echo "ok";
+        die;
     }
 
     /*
@@ -51,14 +52,14 @@ class Test3 extends Backend
         $order_node = collection($order_node)->toArray();
 
         foreach ($order_node as $k => $v) {
-            if($k > 88981){
-                if($v['node_type'] >= 7){
+            if ($k > 88981) {
+                if ($v['node_type'] >= 7) {
                     $where['site'] = $v['site'];
                     $where['order_id'] = $v['order_id'];
                     $where['node_type'] = 7;
                     $order_create_time = Db::name('order_node_detail')->where($where)->field('create_time')->find();
 
-                    $update['delivery_time'] = $order_create_time['create_time'];//更新上网时间
+                    $update['delivery_time'] = $order_create_time['create_time']; //更新上网时间
 
                     Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
                     $update = array();
@@ -67,7 +68,8 @@ class Test3 extends Backend
                 }
             }
         }
-        echo "ok";die;
+        echo "ok";
+        die;
     }
 
     /**
@@ -204,7 +206,7 @@ class Test3 extends Backend
     public function proccess_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1, 'on_way_stock' => ['<', 0]])->field('sku,id')->select();
         $result = collection($result)->toArray();
         $skus = array_column($result, 'sku');
         //计算SKU总采购数量
