@@ -2105,4 +2105,112 @@ class Test extends Backend
             echo $value['id'] . "\n";
         }
     }
+    /**
+     * order_node表批量增加魔晶内部使用的物流商
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/11 10:42:13 
+     * @return void
+     */
+    public function add_shipment_data_type1(){
+        //查询order_node表中有运营商的数据信息
+        $node_track_list = Db::name('order_node')->where('shipment_type','<>','')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = collection($node_track_list)->toArray();
+        foreach($node_track_list as $item){
+            if(strtolower($item['shipment_type']) == 'usps'){
+                $track_num1 = substr($item['track_number'] , 0 , 10);
+                if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+                    //郭伟峰
+                    $usps_type = 'USPS_1';
+                }else{
+                    $track_num2 = substr($item['track_number'] , 0 , 4);
+                    if($track_num2 == '9400'){
+                        //加诺
+                        $usps_type = 'USPS_2';
+                    }else{
+                        //杜明明
+                        $usps_type = 'USPS_3';
+                    }
+                }
+                Db::name('order_node')->where('id',$item['id'])->update(['shipment_data_type'=>$usps_type]);
+            }else{
+                //更新魔晶运营商数据
+                Db::name('order_node')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
+            }
+            echo $item['id']."\n";
+        }
+    }
+    /**
+     * order_node_courier表批量增加魔晶内部使用的物流商
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/11 10:42:13 
+     * @return void
+     */
+    public function add_shipment_data_type2(){
+        //查询order_node_courier表中有运营商的数据信息
+        $node_track_list = Db::name('order_node_courier')->where('shipment_type','<>','')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = collection($node_track_list)->toArray();
+        foreach($node_track_list as $item){
+            if(strtolower($item['shipment_type']) == 'usps'){
+                $track_num1 = substr($item['track_number'] , 0 , 10);
+                if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+                    //郭伟峰
+                    $usps_type = 'USPS_1';
+                }else{
+                    $track_num2 = substr($item['track_number'] , 0 , 4);
+                    if($track_num2 == '9400'){
+                        //加诺
+                        $usps_type = 'USPS_2';
+                    }else{
+                        //杜明明
+                        $usps_type = 'USPS_3';
+                    }
+                }
+                Db::name('order_node_courier')->where('id',$item['id'])->update(['shipment_data_type'=>$usps_type]);
+            }else{
+                //更新魔晶运营商数据
+                Db::name('order_node_courier')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
+            }
+            echo $item['id']."\n";
+        }
+    }
+    /**
+     * order_node_detail表批量增加魔晶内部使用的物流商
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/11 10:42:13 
+     * @return void
+     */
+    public function add_shipment_data_type3(){
+        //查询order_node_detail表中有运营商的数据信息
+        $node_track_list = Db::name('order_node_detail')->where('shipment_type','<>','')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = collection($node_track_list)->toArray();
+        foreach($node_track_list as $item){
+            if(strtolower($item['shipment_type']) == 'usps'){
+                $track_num1 = substr($item['track_number'] , 0 , 10);
+                if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+                    //郭伟峰
+                    $usps_type = 'USPS_1';
+                }else{
+                    $track_num2 = substr($item['track_number'] , 0 , 4);
+                    if($track_num2 == '9400'){
+                        //加诺
+                        $usps_type = 'USPS_2';
+                    }else{
+                        //杜明明
+                        $usps_type = 'USPS_3';
+                    }
+                }
+                Db::name('order_node_detail')->where('id',$item['id'])->update(['shipment_data_type'=>$usps_type]);
+            }else{
+                //更新魔晶运营商数据
+                Db::name('order_node_detail')->where('id',$item['id'])->update(['shipment_data_type'=>$item['shipment_type']]);
+            }
+            echo $item['id']."\n";
+        }
+    }
 }
