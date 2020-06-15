@@ -2156,6 +2156,7 @@ class Test extends Backend
      */
     public function add_shipment_data_type2()
     {
+        ini_set('memory_limit', '512M');
         //查询order_node_courier表中有运营商的数据信息
         $node_track_list = Db::name('order_node_courier')->where('shipment_type', 'USPS')->field('shipment_type,id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
@@ -2193,6 +2194,7 @@ class Test extends Backend
      */
     public function add_shipment_data_type3()
     {
+        ini_set('memory_limit', '512M');
         //查询order_node_detail表中有运营商的数据信息
         $node_track_list = Db::name('order_node_detail')->where('shipment_type', 'USPS')->field('shipment_type,id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
