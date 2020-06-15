@@ -92,7 +92,7 @@ class Notice extends Controller
         }
         //存在已创建的则跳过流程
         if(Zendesk::where(['ticket_id' => $id,'type' => $type])->find()){
-            return false;
+            return 'success';
         }
         $via = $ticket->via;
         $priority = 0;
@@ -225,7 +225,7 @@ class Notice extends Controller
         }catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
         //开启事务
