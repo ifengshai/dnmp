@@ -1126,7 +1126,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             } else {
 
-                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                if ($value['os_add'] && (float) $value['os_add'] * 1 != 0) {
                     //数值在上一行合并有效，数值在下一行合并后为空
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                     $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
