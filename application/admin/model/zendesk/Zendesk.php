@@ -7,11 +7,8 @@ use think\Db;
 use think\Model;
 use think\Exception;
 
-
 class Zendesk extends Model
 {
-
-
     // 表名
     protected $name = 'zendesk';
 
@@ -252,21 +249,31 @@ class Zendesk extends Model
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
-            $agents = ZendeskAgents::all();
+            $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->select();
+            //查询该用户今天是否休息
+            $userlist_arr = array_filter(array_column($agents,'userid'));
+            $userlist_str = implode(',',$userlist_arr);
+            $time = strtotime(date('Y-m-d 0:0:0',time()));
+            $ding = new \app\api\controller\Ding;
+            $restuser_arr=$ding->getRestList($userlist_str,$time);
             foreach ($agents as $agent) {
-                //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
-                ZendeskTasks::create([
-                    'type' => $agent->getType(),
-                    'admin_id' => $agent->admin_id,
-                    'assignee_id' => $agent->agent_id,
-                    'leave_count' => 0,
-                    'target_count' => $agent->count,
-                    'surplus_count' => $agent->count,
-                    'complete_count' => 0,
-                    'check_count' => $agent->count,
-                    'apply_count' => 0,
-                    'complete_apply_count' => 0
-                ]);
+                if(!in_array($agent['admin_id'],$restuser_arr)){
+                    echo "<pre>";
+                    print_r($agent);
+                    //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
+                     ZendeskTasks::create([
+                        'type' => $agent['type'],
+                        'admin_id' => $agent['admin_id'],
+                        'assignee_id' => $agent['agent_id'],
+                        'leave_count' => 0,
+                        'target_count' => $agent['count'],
+                        'surplus_count' => $agent['count'],
+                        'complete_count' => 0,
+                        'check_count' => $agent['count'],
+                        'apply_count' => 0,
+                        'complete_apply_count' => 0
+                    ]); 
+                }
             }
         }
         //获取所有的open和new的邮件
