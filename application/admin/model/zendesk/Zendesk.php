@@ -241,7 +241,7 @@ class Zendesk extends Model
      * @throws \think\exception\DbException
      */
     public static function shellAssignTicketChange()
-    {
+    {echo 111;exit;
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
         //设置所有的隐藏
