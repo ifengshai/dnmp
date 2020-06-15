@@ -124,12 +124,28 @@ class WorkOrderList extends Backend
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
                 $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
-                if ($workIds) {
-                    $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
-                } else {
+                //如果在我的任务选项卡中 点击了措施按钮
+                if ($workIds){
+                    if (!empty($filter['measure_choose_id'])) {
+                        $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+                        //将两个数组相同的数据取出
+                        $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                        $newWorkIds = implode($newWorkIds);
+                        if (strlen($newWorkIds) > 0){
+                            //数据查询的条件
+                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        }else{
+                            $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        }
+                    }
+                    else{
+                        $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                    }
+                }else{
                     $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
+                unset($filter['measure_choose_id']);
             }
             if ($filter['recept_person']) {
                 $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
@@ -149,7 +165,6 @@ class WorkOrderList extends Backend
             }
 
             $this->request->get(['filter' => json_encode($filter)]);
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -163,7 +178,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
+//            dump($map);
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
