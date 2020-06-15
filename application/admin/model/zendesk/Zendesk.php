@@ -241,7 +241,7 @@ class Zendesk extends Model
      * @throws \think\exception\DbException
      */
     public static function shellAssignTicketChange()
-    {echo 111;exit;
+    {
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
         //设置所有的隐藏
@@ -256,6 +256,7 @@ class Zendesk extends Model
             $time = strtotime(date('Y-m-d 0:0:0',time()));
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
+            dump($restuser_arr);exit;
             foreach ($agents as $agent) {
                 if(!in_array($agent['admin_id'],$restuser_arr)){
                     echo "<pre>";
