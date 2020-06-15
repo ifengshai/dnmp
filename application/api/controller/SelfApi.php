@@ -203,12 +203,33 @@ class SelfApi extends Api
         if (!$row) {
             $this->error(__('订单记录不存在'), [], 400);
         }
+        
+        //区分usps运营商
+        if(strtolower($title) == 'usps'){
+            $track_num1 = substr($track_number , 0 , 10);
+            if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+                //郭伟峰
+                $shipment_data_type = 'USPS_1';
+            }else{
+                $track_num2 = substr($track_number , 0 , 4);
+                if($track_num2 == '9400'){
+                    //加诺
+                    $shipment_data_type = 'USPS_2';
+                }else{
+                    //杜明明
+                    $shipment_data_type = 'USPS_3';
+                }
+            }
+        }else{
+            $shipment_data_type = $title;
+        }
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
             'node_type' => 7,
             'update_time' => date('Y-m-d H:i:s'),
             'shipment_type' => $title,
+            'shipment_data_type' => $shipment_data_type,
             'track_number' => $track_number,
             'delivery_time' => date('Y-m-d H:i:s')
         ]);
@@ -223,6 +244,7 @@ class SelfApi extends Api
             'order_node' => 2,
             'node_type' => 7,
             'shipment_type' => $title,
+            'shipment_data_type' => $shipment_data_type,
             'track_number' => $track_number,
         ]);
 
