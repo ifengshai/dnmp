@@ -2161,6 +2161,9 @@ class Test extends Backend
         $node_track_list = Db::name('order_node_courier')->where('shipment_type', 'USPS')->field('shipment_type,id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
+            if ($item['id'] < 17424) {
+                continue;
+            }
             if (strtolower($item['shipment_type']) == 'usps') {
                 $track_num1 = substr($item['track_number'], 0, 10);
                 if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
