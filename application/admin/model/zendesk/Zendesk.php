@@ -252,11 +252,12 @@ class Zendesk extends Model
             $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->select();
             //查询该用户今天是否休息
             $userlist_arr = array_filter(array_column($agents,'userid'));
+            dump($userlist_arr);exit;
             $userlist_str = implode(',',$userlist_arr);
             $time = strtotime(date('Y-m-d 0:0:0',time()));
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
-            dump($restuser_arr);exit;
+            
             foreach ($agents as $agent) {
                 if(!in_array($agent['admin_id'],$restuser_arr)){
                     echo "<pre>";
