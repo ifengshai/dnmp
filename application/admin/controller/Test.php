@@ -569,6 +569,10 @@ class Test extends Backend
         $order_node_detail['track_number'] = $add['track_number'];
 
         if($all_num > 0 && $data['e'] != 0){
+
+            dump($data);
+            dump(1111111111111111);
+            exit;
             $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
             //上网
             if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
