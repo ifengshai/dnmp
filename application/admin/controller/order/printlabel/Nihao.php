@@ -12,7 +12,7 @@ use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -320,6 +320,7 @@ class Nihao extends Backend
         if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -331,6 +332,8 @@ class Nihao extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -429,14 +432,17 @@ class Nihao extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 3,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 3,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -446,7 +452,7 @@ class Nihao extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -473,7 +479,7 @@ class Nihao extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -484,14 +490,17 @@ class Nihao extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 3,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 3,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -535,16 +544,19 @@ class Nihao extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 3,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 3,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -580,16 +592,19 @@ class Nihao extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 3,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 3,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);

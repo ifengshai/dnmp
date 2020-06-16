@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use app\admin\model\StockLog;
 
 /**
  * 库存盘点单
@@ -645,7 +646,7 @@ class Inventory extends Backend
             //审核通过 生成入库单 并同步库存
             if ($data['check_status'] == 2) {
                 $infos = $this->item->where(['inventory_id' => ['in', $ids]])
-                    ->field('sku,error_qty')
+                    ->field('sku,error_qty,inventory_id')
                     ->group('sku')
                     ->select();
                 $infos = collection($infos)->toArray();
@@ -660,16 +661,27 @@ class Inventory extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
-                        $stock = $item->where($item_map)->setInc('stock', $v['error_qty']);
-                        //可用库存
-                        $available_stock = $item->where($item_map)->setInc('available_stock', $v['error_qty']);
+                        $stock = $item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
                     }
 
                     //修改库存结果为真
-                    if ($stock === false || $available_stock === false) {
+                    if ($stock === false) {
                         throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
                         break;
                     }
+
+                    //插入日志表
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'two_type'                  => 5,
+                        'sku'                       => $v['sku'],
+                        'public_id'                 => $v['inventory_id'],
+                        'stock_change'              => $v['error_qty'],
+                        'available_stock_change'    => $v['error_qty'],
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '出库单减少总库存,减少可用库存'
+                    ]);
 
                     if ($v['error_qty'] > 0) {
                         //生成入库单
@@ -1110,7 +1122,6 @@ class Inventory extends Backend
             $params['inventory_qty'] = $v[3];
 
             $this->item->where($map)->update($params);
-
         }
 
         return json(['code' => 1, 'msg' => '导入成功！！']);
@@ -1386,7 +1397,7 @@ class Inventory extends Backend
      * @param change_sku   改变之后的sKu
      * @param change_number 改变之后的sku数量
      */
-    public function workChangeFrame($id, $order_platform, $increment_id,$changeRow,$type)
+    public function workChangeFrame($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1438,11 +1449,43 @@ class Inventory extends Backend
                             if ($warehouse_original_sku && $original_number) {
                                 $original_sku_log['distribution_change_num'] = -$original_number;
                                 $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'                      => 2,
+                                    'site'                      => 3,
+                                    'two_type'                  => 2,
+                                    'sku'                       => $warehouse_change_sku,
+                                    'order_number'              => $increment_id,
+                                    'public_id'                 => $id,
+                                    'distribution_stock_change' => $change_number,
+                                    'available_stock_change'    => -$change_number,
+                                    'occupy_stock_change'       => $change_number,
+                                    'create_person'             => session('admin.nickname'),
+                                    'create_time'               => date('Y-m-d H:i:s'),
+                                    'remark'                    => '工单更换镜框'
+                                ]);
                             }
                             //更新之后的sku减少可用库存,增加占用库存
                             if ($warehouse_change_sku && $change_number) {
                                 $change_sku_log['distribution_change_num'] = $change_number;
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'                      => 2,
+                                    'site'                      => 3,
+                                    'two_type'                  => 2,
+                                    'sku'                       => $warehouse_change_sku,
+                                    'order_number'              => $increment_id,
+                                    'public_id'                 => $id,
+                                    'distribution_stock_change' => $change_number,
+                                    'available_stock_change'    => -$change_number,
+                                    'occupy_stock_change'       => $change_number,
+                                    'create_person'             => session('admin.nickname'),
+                                    'create_time'               => date('Y-m-d H:i:s'),
+                                    'remark'                    => '工单更换镜框'
+                                ]);
                             }
                         } else { //否则走原先的流程
                             //原先sku增加可用库存,减少占用库存
@@ -1512,7 +1555,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workCancelOrder($id, $order_platform, $increment_id,$changeRow,$type)
+    public function workCancelOrder($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1586,7 +1629,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workPresent($id, $order_platform, $increment_id,$changeRow,$type)
+    public function workPresent($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1628,5 +1671,5 @@ class Inventory extends Backend
                 $this->error($e->getMessage());
             }
         }
-    }    
+    }
 }
