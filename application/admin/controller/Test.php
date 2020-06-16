@@ -52,7 +52,7 @@ class Test extends Backend
     public function new_track_shipment_num()
     {
 
-        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->limit(10)->select();
+        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->select();
         $order_shipment = collection($order_shipment)->toArray();
         
         $trackingConnector = new TrackingConnector($this->apiKey);
