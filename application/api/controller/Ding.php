@@ -77,8 +77,6 @@ class Ding extends Controller
      */
     public function getRestList($userlist_str,$time){
         //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
-        /* $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
-        $time = 1592150400; */
         $user=$this->app->attendance->listByUsers('1965280658937204',$userlist_str,$time.'000',$time.'000');
         $userlist = $user['result'];
         $rest_list = array();
