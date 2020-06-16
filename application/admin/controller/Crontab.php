@@ -31,6 +31,7 @@ class Crontab extends Backend
 
     protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
+
     /**
      * 定时处理 订单列表分类
      * 1：仅镜架
@@ -72,11 +73,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') === false)) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && !$v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && !$v['options_color'])) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') !== false)) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && $v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' && ($v['index_type'] == 'Sunglasses Frameonly' && strpos($v['options_color'], 'colortint') !== false)) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && $v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -234,7 +235,7 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
             $items[$order_item_key]['index_type'] = $final_params['index_type'];
             $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
-            $items[$order_item_key]['options_color'] = $product_options['options'][0]['value'];
+            $items[$order_item_key]['options_color'] = $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
 
             $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
             $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
@@ -254,17 +255,19 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
             $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
 
-
+            $final_params['os_add'] = urldecode($final_params['os_add']);
+            $final_params['od_add'] = urldecode($final_params['od_add']);
+    
             //判断双ADD还是单ADD
-            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
+            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
-                $items[$order_item_key]['os_add'] = $lens_params['os_add'];
-                $items[$order_item_key]['od_add'] = $lens_params['od_add'];
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                if ($items[$order_item_key]['od_add'] && $lens_params['od_add'] * 1 != 0) {
-                    $items[$order_item_key]['total_add'] = $lens_params['od_add'];
+                if ($items[$order_item_key]['od_add'] && $final_params['od_add'] * 1 != 0) {
+                    $items[$order_item_key]['total_add'] = $final_params['od_add'];
                 } else {
-                    $items[$order_item_key]['total_add'] = $lens_params['os_add'];
+                    $items[$order_item_key]['total_add'] = $final_params['os_add'];
                 }
             }
 
@@ -400,12 +403,13 @@ order by sfoi.item_id asc limit 1000";
                     . "'" . $value['os_bd'] . "',"
                     . "'" . $value['os_pv_r'] . "',"
                     . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
+                    . "'" . $value['is_custom_lens'] . "',"
+                    . "'" . $value['options_color'] . "'"
                     . "),";
             }
 
             $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
+                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens,options_color) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
             $result = Db::connect('database.db_zeelool')->execute($batch_order_item_prescription_insertSql);
             if ($result) {
@@ -1539,6 +1543,211 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
+     * 定时处理 订单列表分类 meeloog站点
+     * 1：仅镜架
+     * 2：仅现货处方镜
+     * 3：仅定制处方镜
+     * 4：镜架+现货
+     * 5：镜架+定制
+     * 6：现片+定制片
+     */
+    public function wesee_order_custom_order_prescription()
+    {
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type > 0 order by entity_id desc limit 1000 ";
+        $order_entity_id_list = Db::connect('database.db_weseeoptical')->query($order_entity_id_querySql);
+        if (empty($order_entity_id_list)) {
+            echo '处理完毕！';
+            exit;
+        }
+
+        /**
+         * 1：仅镜架
+         * 2：仅现货处方镜
+         * 3：仅定制处方镜
+         * 4：镜架+现货
+         * 5：镜架+定制
+         * 6：现片+定制片
+         */
+        $type_1_entity_id = [];
+        $type_2_entity_id = [];
+        $type_3_entity_id = [];
+        $type_4_entity_id = [];
+        $type_5_entity_id = [];
+        $type_6_entity_id = [];
+        foreach ($order_entity_id_list as $key => $value) {
+            $items = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($items as $k => $v) {
+                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
+                if (($v['index_type'] == '' || !$v['index_type']) && !$v['sph_degree']) {
+                    $label[] = 1; //仅镜架
+                } elseif ($v['index_type'] && $v['is_custom_lens'] == 0) {
+                    $label[] = 2; //现片含处方
+                } elseif ($v['sph_degree'] && $v['is_custom_lens'] == 1) {
+                    $label[] = 3; //定制含处方
+                }
+            }
+
+            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
+            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
+                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
+
+                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
+            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
+
+                //如果订单只有 仅镜架 类型则为 仅镜架
+            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+
+                //如果订单只有 现货 类型则为 现货处方镜
+            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
+                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
+
+                //如果订单只有 定制 类型则为 仅定制处方镜
+            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
+            } elseif (in_array(2, $label) && in_array(3, $label)) {
+                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
+            } else {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+            }
+        }
+
+        if ($type_1_entity_id) {
+            $map['entity_id'] = ['in', $type_1_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+        }
+
+        if ($type_2_entity_id) {
+            $map['entity_id'] = ['in', $type_2_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+        }
+
+        if ($type_3_entity_id) {
+            $map['entity_id'] = ['in', $type_3_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+        }
+
+
+        if ($type_4_entity_id) {
+            $map['entity_id'] = ['in', $type_4_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+        }
+
+
+        if ($type_5_entity_id) {
+            $map['entity_id'] = ['in', $type_5_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+        }
+
+
+        if ($type_6_entity_id) {
+            $map['entity_id'] = ['in', $type_6_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+        }
+
+        echo "执行成功！！";
+    }
+
+    /**
+     * 定时处理订单处方表序列化数据
+     */
+    public function wesee_order_item_process()
+    {
+        $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
+        $max_item_id_list = Db::connect('database.db_weseeoptical')->query($max_item_id_querySql);
+        if ($max_item_id_list) {
+            $max_item_id = $max_item_id_list[0]['max_item_id'];
+        }
+
+        $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
+from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
+order by sfoi.item_id asc limit 1000";
+        $order_item_list = Db::connect('database.db_weseeoptical')->query($order_item_prescription_querySql);
+        foreach ($order_item_list as $order_item_key => $order_item_value) {
+            $product_options = unserialize($order_item_value['product_options']);
+
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+            $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+            $items[$order_item_key]['sph_degree'] = $final_params['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
+
+            $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
+            $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
+            $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
+            $items[$order_item_key]['name'] = $order_item_value['name'];
+            $items[$order_item_key]['sku'] = $order_item_value['sku'];
+            $items[$order_item_key]['created_at'] = $order_item_value['created_at'];
+            $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
+            $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
+
+            $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
+            $items[$order_item_key]['index_type'] = $final_params['index_type'];
+            $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+
+            $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
+            $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
+            $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
+
+
+            /**
+             * 判断定制现片逻辑
+             * 1、渐进镜 Progressive
+             * 2、偏光镜 镜片类型包含Polarized
+             * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、当cyl<=-4或cyl>=4
+             */
+         
+            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
+            }
+
+            if ($final_params['degrees']) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
+            }
+
+            unset($final_params);
+            unset($prescription_params);
+            unset($product_options);
+        }
+        if ($items) {
+            $result = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item_prescription')->insertAll($items);
+            if ($result) {
+                echo '<br>执行成功';
+            } else {
+                echo '<br>执行失败';
+            }
+          
+        } else {
+            echo '执行完毕！';
+        }
+    }
+
+
+    /**
      * 定时统计每天的销量(弃用)
      */
     public function get_sales_order_num()
@@ -1802,6 +2011,8 @@ order by sfoi.item_id asc limit 1000";
                 $params[$k]['purchase_id'] = $v['id'];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s');
                 $params[$k]['create_person'] = 'Admin';
+                $params[$k]['logistics_company_no'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyNo;
+                $params[$k]['source'] = 2;
             }
         }
 
@@ -1837,7 +2048,7 @@ order by sfoi.item_id asc limit 1000";
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE '%Price%' ORDER BY counter DESC";
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
@@ -1898,11 +2109,11 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $where['a.label'] = 1;
+        // $where['a.label'] = 1;
         $where['a.status'] = 1;
         $where['b.status'] = 1;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
-
+        $supplier_list = $supplier->alias('a')->where($where)->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
+        
         //查询产品库正常SKU
         $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
 
@@ -3728,6 +3939,9 @@ order by sfoi.item_id asc limit 1000";
             case 3:
                 $model = Db::connect('database.db_nihao');
                 break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
+                break;    
             default:
                 $model = false;
                 break;
@@ -3817,12 +4031,15 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OP01899-01';
-        $skus = explode('
-        ', $str);
+        
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
 
         $stock = [
-            0
+            926,
+            276
         ];
 
         foreach ($skus as $k => $v) {
@@ -3850,9 +4067,10 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $str = 'OP01899-01';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -3901,9 +4119,10 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $str = 'OP01899-01';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -3947,9 +4166,10 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
-        $skus = explode('
-        ', $str);
+        $skus =[
+            'FX0206-02',
+            'OP049594-01'
+        ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];

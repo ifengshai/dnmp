@@ -27,13 +27,12 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[site_type]', $siteType, null, ['class'=>'form-control site-type', 'data-rule'=>'required','data-live-search' => true,'id'=>'site_type'])}
+            {:Form::select('row[site_type]', $siteType, null, ['class'=>'form-control site-type selectpicker','data-title'=>'请选择', 'data-rule'=>'required','data-live-search' => false,'id'=>'site_type'])}
         </div>
 
         <label class="control-label col-xs-12 col-sm-2">{:__('Intention_level')}:</label>
         <div class="col-xs-12 col-sm-3">
             <select class="form-control site-type" data-rule="required" data-live-search="1"  name="row[intention_level]" data-rule="required">
-                <option value="">请选择</option>
                 <option value="1">低</option>
                 <option value="2">中</option>
                 <option value="3">高</option>

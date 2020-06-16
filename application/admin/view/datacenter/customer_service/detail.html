@@ -178,6 +178,16 @@ table.altrowstable tr:nth-child(even){
                                 <td>0</td>
                                 {/if}
                             </tr>
+                            <tr>
+                                <td>仓库问题</td>
+                                <td>{$data.problem_type[4]}</td>
+                                <td>占比</td>
+                                {if $problem_type_total gt 0}
+                                <td>{:round($data.problem_type[4]/$problem_type_total*100,2)}%</td>
+                                {else/}
+                                <td>0</td>
+                                {/if}
+                            </tr>                            
                         </table>
                     </div>
                 </div>
@@ -187,11 +197,11 @@ table.altrowstable tr:nth-child(even){
                     <div style="float: left;width:55%;">
                         <label for="create_time" class="control-label col-xs-1"
                             style="font-weight: bold;width: 150px;margin-top:20px;">问题类型统计</label>
-                            <ul class="nav nav-tabs" style="float:left;clear:both;" >
+                            <ul class="nav nav-tabs problem-counter" style="float:left;clear:both;" >
                                 <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
                                 {foreach name="problem_type" item="vo" key="k"}
                                 {if $k eq 0}
-                                <li class="active"><a  href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
+                                <li class="active"><a href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
                                 {else/}
                                 <li><a href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
                                 {/if}
@@ -249,11 +259,12 @@ table.altrowstable tr:nth-child(even){
                     <div style="float: left;width:100%;">
                                 <label for="create_time" class="control-label col-xs-1"
                                 style="font-weight: bold;width: 150px;margin-top:20px;">问题措施比统计</label>
-                                    <ul class="nav nav-tabs" style="float:left;clear:both;" >
+                                    <input type="hidden" id="warehouse" name="warehouse" value="0"/>
+                                    <ul class="nav nav-tabs step-type" style="float:left;clear:both;" >
                                         <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
                                         {foreach name="problem_type" item="vo" key="k"}
                                         {if $k eq 0}
-                                        <li class="active"><a  href="javascript:void(0);" data-value="{$k+1}" class="statisticsTwo">{$vo}</a>
+                                        <li class="active"><a href="javascript:void(0);" data-value="{$k+1}" class="statisticsTwo">{$vo}</a>
                                         </li>
                                         {else/}
                                         <li><a href="javascript:void(0);" data-value="{$k+1}" class="statisticsTwo">{$vo}</a></li>
@@ -263,7 +274,7 @@ table.altrowstable tr:nth-child(even){
                                     <ul id="second-level" class="nav nav-tabs" style="margin-left:30px;float:left;clear:both; " >
                                         <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
                                         {foreach name="column" item="vo" key="k"}
-                                        {if $k eq 0}
+                                        {if $k eq 1}
                                         <li class="active"><a  href="javascript:void(0);" data-value="{$k}" class="statisticsThree">{$vo}</a>
                                         </li>
                                         {else/}

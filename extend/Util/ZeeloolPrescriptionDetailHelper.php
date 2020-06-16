@@ -14,7 +14,7 @@ class ZeeloolPrescriptionDetailHelper
 	public static function get_one_by_entity_id($entity_id)
 	{
 		if ($entity_id) {
-			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id=$entity_id";
@@ -43,7 +43,7 @@ class ZeeloolPrescriptionDetailHelper
 		// }
 
 		if ($increment_id) {
-			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id='{$increment_id}'";
@@ -67,7 +67,7 @@ class ZeeloolPrescriptionDetailHelper
 	public static function get_list_by_entity_ids($entity_id)
 	{
 		if ($entity_id) {
-			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -127,8 +127,9 @@ class ZeeloolPrescriptionDetailHelper
 			$items[$item_key]['created_at'] = $item_value['created_at'];
 			$items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];
 			$items[$item_key]['quote_item_id'] = $item_value['quote_item_id'];
-			$items[$item_key]['discount_amount'] = $item_value['discount_amount'];
+			$items[$item_key]['discount_amount'] = $item_value['base_discount_amount'];
 			$items[$item_key]['original_price'] = $item_value['original_price'];
+			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];
 			$product_options = unserialize($item_value['product_options']);
 			//判断是否为新处方
 			if ($item_value['is_new_version'] == 1) {
@@ -159,6 +160,12 @@ class ZeeloolPrescriptionDetailHelper
 			if ($items[$item_key]['index_type'] == 'Sunglasses Frameonly') {
 				$items[$item_key]['index_type'] .= '-' . $product_options['options'][0]['value'];
 			}
+
+			 //如果为太阳镜 拼接颜色
+			 if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+				$items[$item_key]['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+			}
+
 			//添加color-name 参数	
 			$items[$item_key]['color_name']  = isset($product_options['info_buyRequest']['tmplens']['color_data_name']) ? $product_options['info_buyRequest']['tmplens']['color_data_name'] : '';
 			$items[$item_key]['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
@@ -171,6 +178,8 @@ class ZeeloolPrescriptionDetailHelper
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
 			$items[$item_key]['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['color_id'] = $product_options['info_buyRequest']['tmplens']['color_id'];
+			$items[$item_key]['lenstype_data_name'] = $product_options['info_buyRequest']['tmplens']['lenstype_data_name'];
+			$items[$item_key]['lenstype_base_price'] = $product_options['info_buyRequest']['tmplens']['lenstype_base_price'];
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
 			$prescription_params = explode("&", $prescription_params);

@@ -12,7 +12,7 @@ use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -340,6 +340,7 @@ class Zeelool extends Backend
         if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -351,6 +352,8 @@ class Zeelool extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -448,14 +451,17 @@ class Zeelool extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 1,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 1,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -465,12 +471,13 @@ class Zeelool extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -491,7 +498,7 @@ class Zeelool extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -502,14 +509,17 @@ class Zeelool extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 1,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 1,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -535,6 +545,7 @@ class Zeelool extends Backend
                     ])
                     ->group('change_sku')
                     ->select();
+                $infoRes = collection($infoRes)->toArray();
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -553,16 +564,19 @@ class Zeelool extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 1,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 1,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -576,6 +590,7 @@ class Zeelool extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -598,16 +613,19 @@ class Zeelool extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 1,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 1,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -645,7 +663,7 @@ class Zeelool extends Backend
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
-                $list[$k]['handle_user_name'] = session('admin.nickname');;
+                $list[$k]['handle_user_name'] = session('admin.nickname');
 
                 //配镜架
                 if ($status == 1) {
@@ -966,8 +984,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             }
 
             //如果为太阳镜 拼接颜色
-            if ($finalResult[$key]['index_type'] == 'Sunglasses Frameonly') {
-                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['options'][0]['value'];
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
             }
 
 
@@ -1061,10 +1079,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
+            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
                 $value['od_axis'] =  $value['od_axis'];
             } else {
@@ -1119,7 +1137,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             } else {
 
-                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                if ($value['os_add'] && (float) $value['os_add'] * 1 != 0) {
                     //数值在上一行合并有效，数值在下一行合并后为空
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                     $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
@@ -1256,86 +1274,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '400249002
-        400249006
-        400249014
-        400249028
-        400249033
-        400249031
-        400249034
-        400249037
-        400249039
-        400249042
-        400249043
-        400249047
-        400249050
-        400249065
-        400249066
-        100116789
-        100116790
-        400249119
-        400249155
-        400206077
-        400249191
-        100116820
-        100116822
-        400249209
-        100116166
-        400249145
-        100116722
-        400249233
-        100115190
-        400249275
-        100116876
-        400245670
-        400249327
-        100116917
-        400249350
-        100114933
-        100116957
-        400249477
-        100116976
-        400249499
-        400249514
-        400249546
-        400249279
-        400249574
-        400249582
-        400249259
-        400249595
-        400247989
-        400249683
-        500003416
-        400249716
-        400249746
-        400249748
-        400249781
-        400249802
-        400249804
-        400249891
-        400249892
-        400249915
-        100117187
-        400250050
-        400250061
-        400250066
-        400190342
-        400250073
-        400250110
-        400250161
-        100117268
-        400229980
-        100115252
-        400250280
-        100117299
-        ';
-        $str = explode('
-        ', $str);
+        $str = ['100117395', '400250565', '400250621', '400250705', '400249311', '100117261', '100117544', '400250865', '100117573', '100117582', '400250924', '500003521', '500003522', '100117621', '100117653', '100117671', '100117266', '100117692', '100117718', '400251347', '400251347', '400251347', '100117735', '100117748', '100117749', '400251382', '400251383', '100117759', '100117766', '100117796', '100117800', '100117801', '400251480', '400251506', '100117892', '400251728', '400251774', '400251782', '400251856', '400251865', '100117933', '100117944', '400251910', '400251990', '400252004', '100118010', '400252061', '400252070', '400252086', '400252088', '400252103', '400252119', '400252125', '100118031', '400252320', '100118121', '400252454', '500003611', '500003612', '100118144', '100118147', '400252521', '100118186', '400252748', '400252838', '100118274', '400252873', '100118297', '100118340', '100118346', '100118392', '400253095', '100118407', '100118412', '100118419', '100118419', '400253210', '100118444', '100118444', '400055496', '100118493', '100118493', '100118516', '100118518', '100118541', '100118582', '100118590', '100118606', '400253623', '100118653', '500003722', '100118688'];
 
         $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at,sfo.is_new_version';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -1373,6 +1317,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             }
 
+            //如果为太阳镜 拼接颜色
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
 
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
@@ -1749,11 +1697,11 @@ EOF;
                     $final_print['od_add'] = urldecode($final_print['od_add']);
 
                     //处理ADD
-                    if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
+                    if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['os_add'] * 1 != 0 && (float) $final_print['od_add'] * 1 != 0) {
                         $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                     } else {
-                        if ($final_print['os_add'] && $final_print['os_add'] * 1 != 0) {
+                        if ($final_print['os_add'] && (float) $final_print['os_add'] * 1 != 0) {
                             $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                             $os_add = "";
                         } else {
@@ -1783,15 +1731,15 @@ EOF;
 
                     $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
-                    $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-                    $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-                    $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-                    $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                    $final_print['od_sph'] = isset($final_print['od_sph']) ? urldecode($final_print['od_sph']) : '';
+                    $final_print['os_sph'] = isset($final_print['os_sph']) ? urldecode($final_print['os_sph']) : '';
+                    $final_print['od_cyl'] = isset($final_print['od_cyl']) ? urldecode($final_print['od_cyl']) : '';
+                    $final_print['os_cyl'] = isset($final_print['os_cyl']) ? urldecode($final_print['os_cyl']) : '';
                     $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
                     $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
 
-                    $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-                    $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+                    $final_print['od_add'] = isset($final_print['od_add']) ? urldecode($final_print['od_add']) : '';
+                    $final_print['os_add'] = isset($final_print['os_add']) ? urldecode($final_print['os_add']) : '';
 
                     $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
                     $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
@@ -1814,8 +1762,8 @@ EOF;
                 }
 
                 //如果为太阳镜 拼接颜色
-                if ($final_print['index_type'] == 'Sunglasses Frameonly') {
-                    $final_print['index_type'] .= '-' . $product_options['options'][0]['value'];
+                if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
                 }
 
                 //处理PD值

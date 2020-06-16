@@ -12,11 +12,27 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 targetId: 'echart1',
                 downLoadTitle: '图表',
                 type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
             };
             var chartOptions3 = {
                 targetId: 'echart3',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var time_one = $('#create_time_one').val() ? $('#create_time_one').val() :'';
             //console.log(time_one);
@@ -89,22 +105,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     $('#today_pending_num').text(today.pending_num);
 
                     $('#yesterday_wait_num').text(yesterday.wait_num);
-                    $('#yesterday_increment_num').text(yesterday.wait_num);
-                    $('#yesterday_reply_num').text(yesterday.wait_num);
-                    $('#yesterday_waiting_num').text(yesterday.wait_num);
-                    $('#yesterday_pending_num').text(yesterday.wait_num);
+                    $('#yesterday_increment_num').text(yesterday.increment_num);
+                    $('#yesterday_reply_num').text(yesterday.reply_num);
+                    $('#yesterday_waiting_num').text(yesterday.waiting_num);
+                    $('#yesterday_pending_num').text(yesterday.pending_num);
 
                     $('#serven_wait_num').text(serven.wait_num);
-                    $('#serven_increment_num').text(serven.wait_num);
-                    $('#serven_reply_num').text(serven.wait_num);
-                    $('#serven_waiting_num').text(serven.wait_num);
-                    $('#serven_pending_num').text(serven.wait_num);
+                    $('#serven_increment_num').text(serven.increment_num);
+                    $('#serven_reply_num').text(serven.reply_num);
+                    $('#serven_waiting_num').text(serven.waiting_num);
+                    $('#serven_pending_num').text(serven.pending_num);
 
                     $('#third_wait_num').text(third.wait_num);
-                    $('#third_increment_num').text(third.wait_num);
-                    $('#third_reply_num').text(third.wait_num);
-                    $('#third_waiting_num').text(third.wait_num);
-                    $('#third_pending_num').text(third.wait_num);
+                    $('#third_increment_num').text(third.increment_num);
+                    $('#third_reply_num').text(third.reply_num);
+                    $('#third_waiting_num').text(third.waiting_num);
+                    $('#third_pending_num').text(third.pending_num);
                     var tr = '<tr id="new_tr">';
                         tr += '<td style="text-align: center; vertical-align: middle;">'+starttime+':'+endtime+'</td>';
                         tr += '<td style="text-align: center; vertical-align: middle;">'+info.wait_num+'</td>';
@@ -132,7 +148,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 var chartOptions3 = {
                     targetId: 'echart1',
                     downLoadTitle: '图表',
-                    type: 'pie',               
+                    type: 'pie',
+                    pie: {
+                        tooltip: { //提示框组件。
+                            trigger: 'item',
+                            formatter: function (param) {
+                                return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            }
+                        },
+                    }               
                 };
                 var platform = $('#order_platform_one').val();                
                 var options3 = {
@@ -408,21 +432,53 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 targetId: 'echart1',
                 downLoadTitle: '图表',
                 type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
             };
             var chartOptions2 = {
                 targetId: 'echart2',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var chartOptions3 = {
                 targetId: 'echart3',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };
             var chartOptions4 = {
                 targetId: 'echart4',
                 downLoadTitle: '图表',
-                type: 'pie',               
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }               
             };                                   
             var time = $('#create_time').val();
             var platform = $('#c-order_platform').val();           
@@ -470,12 +526,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(".statistics").on('click',function(){
                 var value = $(this).data("value");
                 if(value>0){
+                    $(".problem-counter li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     var time = $('#create_time').val();
                     var platform = $('#c-order_platform').val();  
                     var chartOptions = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
                     };
                     var options = {
                         type: 'post',
@@ -522,7 +588,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(".statisticsTwo").on('click',function(){
                 var value = $(this).data("value");
                 if(value>0){
+                    $(".step-type li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     $("#second-level").html('');
+                    $("#warehouse").val(value)
                     //异步获取第二个tab数据
                     Backend.api.ajax({
                         url:'datacenter/customer_service/get_problem_by_classify',
@@ -544,14 +613,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             });
             //根据选择的问题类型查找对应的数据
             $(document).on('click', '.statisticsThree', function(e){
+                var problem = $("#warehouse").val();
                 var value = $(this).data("value");
                 if(value>0){
+                    $("#second-level li").siblings('li').removeClass('active');
+                    $(this).parent().addClass('active');
                     var time = $('#create_time').val();
                     var platform = $('#c-order_platform').val();  
                     var chartOptions = {
                         targetId: 'echart4',
                         downLoadTitle: '图表',
                         type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
                     };
                     var options = {
                         type: 'post',
@@ -559,7 +639,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         data: {
                             'time': time,
                             'platform': platform,
-                            'value':value
+                            'value':value,
+                            'problem':problem
                         }
                    };
                    EchartObj.api.ajax(options, chartOptions);
@@ -569,7 +650,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         data:{
                             value:value,
                             time:time,
-                            platform:platform
+                            platform:platform,
+                            problem:problem
                         }
                     }, function(data, ret){
                     $("#caigou-table4 tr").remove();

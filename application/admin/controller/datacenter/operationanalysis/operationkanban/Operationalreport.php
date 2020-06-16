@@ -5,6 +5,7 @@ use think\Cache;
 use app\common\controller\Backend;
 use app\admin\model\OrderItemInfo;
 use app\admin\model\platformmanage\MagentoPlatform;
+use app\admin\model\AuthGroupAccess;
 class Operationalreport extends Backend{
     //订单类型数据统计
     protected $item = null;
@@ -19,9 +20,14 @@ class Operationalreport extends Backend{
      */
     public function index ()
     {
-        $orderPlatform = (new MagentoPlatform())->getOrderPlatformList();
+        $user_id = session('admin.id');
+        $resultPrivilege = (new AuthGroupAccess)->getOperationalreportPrivilege($user_id);
+        if(1>count($resultPrivilege)){
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
+        }
+        $orderPlatform = (new MagentoPlatform())->getNewOrderPlatformList($resultPrivilege);
         $create_time = input('create_time');
-        $platform    = input('order_platform', 1);
+        $platform    = input('order_platform', $resultPrivilege[0]);
         if($this->request->isAjax()){
             $params = $this->request->param();
             //默认7天数据
@@ -32,7 +38,7 @@ class Operationalreport extends Backend{
                 $map['created_at'] = $itemMap['m.created_at'] =  ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
-            if(4<=$order_platform){
+            if(10<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
             //缓存图标数据
@@ -136,6 +142,9 @@ class Operationalreport extends Backend{
             case 3:
             $model = Db::connect('database.db_nihao');
             break;
+            case 4:
+            $model = Db::connect('database.db_meeloog');
+            break;
             default:
             $model = false;
             break;            
@@ -168,16 +177,32 @@ class Operationalreport extends Backend{
         $fill_post_order            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->count('*');
         //补差价订单金额
         $fill_post_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->sum('base_grand_total');
-        //普通订单占比
-        $general_order_percent      = @round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
-        //批发订单占比
-        $wholesale_order_percent    = @round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
-        //网红订单占比
-        $celebrity_order_percent    = @round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
-        //补发订单占比
-        $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
-        //补差价订单占比
-        $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //所有的订单数量
+        $all_order                  = $general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order;
+        if(0<$all_order){
+            //普通订单占比
+            $general_order_percent      = round(($general_order/$all_order)*100,2);
+            //批发订单占比
+            $wholesale_order_percent    = round(($wholesale_order/$all_order)*100,2);
+            //网红订单占比
+            $celebrity_order_percent    = round(($celebrity_order/$all_order)*100,2);
+            //补发订单占比
+            $reissue_order_percent      = round(($reissue_order/$all_order)*100,2);
+            //补差价订单占比
+            $fill_post_order_percent    = round(($fill_post_order/$all_order)*100,2);
+        }else{
+             //普通订单占比
+             $general_order_percent      = 0;
+             //批发订单占比
+             $wholesale_order_percent    = 0;
+             //网红订单占比
+             $celebrity_order_percent    = 0;
+             //补发订单占比
+             $reissue_order_percent      = 0;
+             //补差价订单占比
+             $fill_post_order_percent    = 0;           
+        }
+
         //美元订单数量
         $usd_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->count('*');
         //美元订单金额
@@ -232,17 +257,32 @@ class Operationalreport extends Backend{
         }else{
             $gbp_order_average_amount   = 0;
         }
-        
-        //usd订单百分比
-        $usd_order_percent          = @round(($usd_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);                 
-        //cad订单百分比
-        $cad_order_percent          = @round(($cad_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
-        //aud订单百分比
-        $aud_order_percent          = @round(($aud_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
-        //eur订单百分比
-        $eur_order_percent          = @round(($eur_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
-        //gbp订单百分比
-        $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
+        //所有的订单数量
+        $all_order_num              = $usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num;
+        if(0<$all_order_num){
+            //usd订单百分比
+            $usd_order_percent          = round(($usd_order_num/$all_order_num)*100,2);                 
+            //cad订单百分比
+            $cad_order_percent          = round(($cad_order_num/$all_order_num)*100,2);
+            //aud订单百分比
+            $aud_order_percent          = round(($aud_order_num/$all_order_num)*100,2);
+            //eur订单百分比
+            $eur_order_percent          = round(($eur_order_num/$all_order_num)*100,2);
+            //gbp订单百分比
+            $gbp_order_percent          = round(($gbp_order_num/$all_order_num)*100,2);
+        }else{
+            //usd订单百分比
+            $usd_order_percent          = 0;                 
+            //cad订单百分比
+            $cad_order_percent          = 0;
+            //aud订单百分比
+            $aud_order_percent          = 0;
+            //eur订单百分比
+            $eur_order_percent          = 0;
+            //gbp订单百分比
+            $gbp_order_percent          = 0;
+        }
+
         //所有的订单状态
         $order_status               = $model->table('sales_flat_order')->distinct(true)->field('status')->select();
         $order_status_arr           = $all_shipping_amount_arr = [];
@@ -431,4 +471,52 @@ class Operationalreport extends Backend{
         Cache::set('Operationalreport_platformOrderInfo'.$platform.md5(serialize($map)),$arr,7200);
         return $arr;
     }
+        /**
+         * zeelool站点的权限
+         *
+         * @Description
+         * @author lsw
+         * @since 2020/06/03 15:37:41 
+         * @return void
+         */
+        public function zeelool_privilege()
+        {
+
+        }
+        /**
+         * voogueme站点的权限
+         *
+         * @Description
+         * @author lsw
+         * @since 2020/06/03 15:38:12 
+         * @return void
+         */
+        public function voogueme_privilege()
+        {
+
+        }
+        /**
+         * nihao站点权限
+         *
+         * @Description
+         * @author lsw
+         * @since 2020/06/03 15:39:07 
+         * @return void
+         */
+        public function nihao_privilege()
+        {
+
+        }
+        /**
+         * meeloog站点权限
+         *
+         * @Description
+         * @author lsw
+         * @since 2020/06/03 16:14:30 
+         * @return void
+         */
+        public function meeloog_privilege()
+        {
+
+        }
 }

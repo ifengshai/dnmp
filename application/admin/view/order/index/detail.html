@@ -100,7 +100,8 @@
     {:build_heading()}
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
         <li class="active"><a href="{:url('detail')}?id={$row.entity_id}&label={$label}">订单信息</a></li>
-        <li><a href="{:url('checkDetail')}?id={$row.entity_id}&label={$label}">订单执行信息</a></li>
+		<li><a href="{:url('orderDetail')}?order_number={$row.increment_id}&id={$row.entity_id}&label={$label}">订单节点</a></li> 
+        <!-- <li><a href="{:url('checkDetail')}?id={$row.entity_id}&label={$label}">订单执行信息</a></li> -->
         <!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
     </ul>
 </div>
@@ -153,8 +154,8 @@
                     {elseif $row['store_id'] == 4 && $label != 3}
                     <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
                         readonly>
-                    {else/}
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="未知" type="text"
+                    {elseif $row['store_id'] == 5}
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="app" type="text"
                         readonly>
                     {/if}
 

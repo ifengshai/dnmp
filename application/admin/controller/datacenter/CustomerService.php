@@ -6,6 +6,7 @@ use app\common\controller\Backend;
 use think\Cache;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
+use app\admin\model\zendesk\ZendeskAgents;
 
 class CustomerService extends Backend
 {
@@ -45,58 +46,58 @@ class CustomerService extends Backend
         //总览数据end
 
         //工作量概况start
-        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        //$this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         $start = date('Y-m-d', strtotime('-1 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
         $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d 00:00:00', time()+3600*24)]];
         $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
         $customerReply = $this->workload_info_original($workload_map, $start, $end, 10);
+        $customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
             unset($customerReply['handleNum']);
-            unset($customerReply['noQualifyDay']);
+            unset($customerReply['noQualifiyDay']);
             $replyArr = [];
-            $replyArr['one']['yester_num'] = $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
-            $replyArr['two']['yester_num'] = $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
-            $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+            $replyArr['one']['counter'] = $replyArr['one']['no_qualified_day'] = 0;
+            $replyArr['two']['counter'] = $replyArr['two']['no_qualified_day'] = 0;
             foreach ($customerReply as $ok =>$ov) {
                 if (array_key_exists($ov['due_id'], $infoOne)) { 
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
                     $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    $replyArr['one']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
                     $replyArr['one']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['one']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
                 if (array_key_exists($ov['due_id'], $infoTwo)) {
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['due_id']];
                     $replyArr[$ov['due_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['due_id']]['yester_num'] = $this->zendeskComments->where(['is_public'=>1,'due_id'=>$ov['due_id'],'is_admin'=>1])->where('author_id','neq','382940274852')->where($workload)->count("*");
                     $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
-                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
-                    $replyArr['two']['yester_num']       += $replyArr[$ov['due_id']]['yester_num'];
+                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];                   
                     $replyArr['two']['counter']          += $replyArr[$ov['due_id']]['counter'];
                     $replyArr['two']['no_qualified_day'] += $replyArr[$ov['due_id']]['no_qualified_day'];
                 }
             }
         }
+		$yesterdayWorkload = $this->getyesterdayWorkloadNum();
+		if(!empty($yesterdayWorkload)){
+			$replyArr['one']['yester_num'] = $replyArr['two']['yester_num'] =0;
+			$yesterdayWorkload = collection($yesterdayWorkload)->toArray();
+			foreach($yesterdayWorkload as $k =>$v){
+				 if(array_key_exists($v['due_id'],$infoOne)){
+					$replyArr[$v['due_id']]['yester_num'] = $v['counter'];
+					$replyArr['one']['yester_num']        += $replyArr[$v['due_id']]['yester_num'];
+                 }
+				 if(array_key_exists($v['due_id'],$infoTwo)){
+					$replyArr[$v['due_id']]['yester_num'] = $v['counter'];
+					$replyArr['two']['yester_num']        += $replyArr[$v['due_id']]['yester_num'];					 
+				 }
+			}
+		}
         //工作量概况end
 
         //工单统计信息
-        //$map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
-        //本月工单创建量
-        // $thisMonthWorkOrderNum = $this->getThisMonthWorkOrderNum();
-        // if(!empty($thisMonthWorkOrderNum)){
-        //     foreach($thisMonthWorkOrderNum as $k =>$v){
-        //         if(array_key_exists($v['create_user_id'],$infoOne)){
-
-        //         }
-        //     }
-        // }
-        $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
-        $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        $map_measure['w.create_time'] = $map['complete_time']   = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $workList = $this->works_info_original([], $map);
 		$workArr  = [];
         if (!empty($workList)) {
@@ -144,9 +145,6 @@ class CustomerService extends Backend
         if(!empty($thisMonthWorkOrderNum)){
 			$workArr['one']['create_num'] =	$workArr['two']['create_num'] = 0;
 			$thisMonthWorkOrderNum = collection($thisMonthWorkOrderNum)->toArray();
-/* 			dump($thisMonthWorkOrderNum);
-			dump($infoOne);
-			exit; */
 			foreach($thisMonthWorkOrderNum as $k =>$v){
                  if(array_key_exists($v['create_user_id'],$infoOne)){
 					$workArr[$v['create_user_id']]['create_num'] = $v['counter'];
@@ -199,7 +197,8 @@ class CustomerService extends Backend
             'yesterdayData',
             'servenData',
             'thirdData',
-            'replyArr'
+            'replyArr',
+            'customerType'
         ));
         return $this->view->fetch();
     }
@@ -382,7 +381,7 @@ class CustomerService extends Backend
         //$where['is_check'] = 1;
         $where['work_type'] = 1;
         //where('id','not in',[1,5,8]);
-        $where['work_status'] = ['in',[3,6]];
+        $where['work_status'] = ['in',[3,5,6]];
         //$where['work_status'] = ['neq',7];
         //求出措施的超时时间
         $time_out = config('workorder.step_time_out');
@@ -447,7 +446,7 @@ class CustomerService extends Backend
     public function warehouse_handle($map, $warehouse_problem_type)
     {
         $where['work_type'] = 2;
-        $where['work_status'] = ['in',[3,6]];
+        $where['work_status'] = ['in',[3,5,6]];
         //$where['work_status'] = ['lt',2];
         //求出主管的超时时间
         $time_out = config('workorder.warehouse_time_out');
@@ -517,15 +516,16 @@ class CustomerService extends Backend
             $customer_type = $params['customer_type'];
             //员工分类
             $customer_category = $params['customer_category'];
-            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform,$customer_type,$customer_category);
+            $customer_workload = $params['customer_workload'];
+            $worklistOne = $this->workload_info($mapOne, $timeOne[0], $timeOne[3], $platform,$customer_type,$customer_category,$customer_workload);
             if (!empty($mapTwo)) {
-                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform,$customer_type,$customer_category);
+                $worklistTwo = $this->workload_info($mapTwo, $timeTwo[0], $timeTwo[3], $platform,$customer_type,$customer_category,$customer_workload);
             }
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
                 //取出总数
                 $handleNum          = $worklistOne['handleNum'];
-                $noQualifyDay       = $worklistOne['noQualifyDay'];
+                $noQualifiyDay       = $worklistOne['noQualifiyDay'];
                 if ($timeOne) {
                     $start = $timeOne[0];
                     $end   = $timeOne[3];
@@ -535,7 +535,7 @@ class CustomerService extends Backend
                 }
                 //销毁变量
                 unset($worklistOne['handleNum']);
-                unset($worklistOne['noQualifyDay']);
+                unset($worklistOne['noQualifiyDay']);
                 $this->view->assign([
                     'type'=>2,
                     'allCustomers'  => $worklistOne,
@@ -546,7 +546,7 @@ class CustomerService extends Backend
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
                 $handleNum       = $worklistOne['handleNum'] + $worklistTwo['handleNum'];
-                $noQualifyDay    = $worklistOne['noQualifyDay'] + $worklistTwo['noQualifyDay']; 
+                $noQualifiyDay   = $worklistOne['noQualifiyDay'] + $worklistTwo['noQualifiyDay']; 
                 if ($timeOne) {
                     $startOne = $timeOne[0];
                     $endOne   = $timeOne[3];
@@ -558,7 +558,7 @@ class CustomerService extends Backend
                 $endTwo   = $timeTwo[3];
                 //销毁变量
                 unset($worklistOne['handleNum'],$worklistTwo['handleNum']);
-                unset($worklistOne['noQualifyDay'],$worklistTwo['noQualifyDay']);
+                unset($worklistOne['noQualifiyDay'],$worklistTwo['noQualifiyDay']);
                 $this->view->assign([
                      'type'         =>3,
                      'worklistOne'  => $worklistOne,
@@ -575,11 +575,12 @@ class CustomerService extends Backend
             $this->view->assign(
                 [
                     'customerType'=>$customer_type,
-                    'customerCategory'=>$customer_category
+                    'customerCategory'=>$customer_category,
+                    'customerWorkload'=>$customer_workload
                 ]
             );
             $orderPlatformList = config('workorder.platform');
-            $this->view->assign(compact('orderPlatformList', 'handleNum','noQualifyDay'));
+            $this->view->assign(compact('orderPlatformList', 'handleNum','noQualifiyDay'));
         } else {
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             //默认显示
@@ -596,6 +597,8 @@ class CustomerService extends Backend
             $customerReply = collection($customerReply)->toArray();
             //客服分组
             //$info = $this->customers();
+            //获取邮件电话分组
+            $customerType = $this->getCustomerType();
             //整个客服部门人员
             $allCustomers = $this->newCustomers();
             if(!empty($allCustomers)){
@@ -611,6 +614,11 @@ class CustomerService extends Backend
                             }
                         }
                     }
+                    if(!empty($customerType)){
+                        if(array_key_exists($v['id'],$customerType)){
+                            $allCustomers[$k]['workload_group'] = $customerType[$v['id']];
+                        }
+                    }
                 } 
             }
             $orderPlatformList = config('workorder.platform');
@@ -620,7 +628,8 @@ class CustomerService extends Backend
         //客服数据
         $customer_type = config('workorder.customer_type');
         $customer_category = config('workorder.customer_category');
-        $this->view->assign(compact('customer_type','customer_category'));
+        $customer_workload = config('workorder.customer_workload');
+        $this->view->assign(compact('customer_type','customer_category','customer_workload'));
         return $this->view->fetch();
     }
     /**
@@ -643,7 +652,7 @@ class CustomerService extends Backend
             $arr[] = $starttime;
         }
         $where['is_public'] = 1;
-        $where['due_id'] = $assignee['assignee_id'] =  $admin_id;
+        $where['due_id'] = $assignee['admin_id'] =  $admin_id;
         //未达标天数
         $no_qualified_day = 0;
         foreach ($arr as $v) {
@@ -683,6 +692,8 @@ class CustomerService extends Backend
             }
             if (10 !=$params['order_platform']) {
                 $where['work_platform'] = $params['order_platform'];
+            }else{
+                $where['work_platform'] = ['in',[1,2,3]];
             }
             //员工分组
             $customer_type = $params['customer_type'];
@@ -767,9 +778,9 @@ class CustomerService extends Backend
             $where['work_status'] = 6;
             $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
             sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-            $where['replacement_order'] = ['neq',''];
+            //$where['replacement_order'] = ['neq',''];
             //补发单数和优惠券发放量
-            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
             $workList = collection($workList)->toArray();
             $replacementOrder = collection($replacementOrder)->toArray();
             if (!empty($replacementOrder)) {
@@ -801,8 +812,8 @@ class CustomerService extends Backend
 					$allCustomers[$k]['replacement_num'] = 0;
 					$allCustomers[$k]['coupon'] = 0;
 				}
-				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				//累计退款金额 
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$where['work_platform']);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
@@ -840,12 +851,15 @@ class CustomerService extends Backend
      * @since 2020/05/19 10:06:11
      * @return void
      */
-    public function calculate_refund_money($create_user_id, $map)
+    public function calculate_refund_money($create_user_id, $map,$type)
     {
         $where['create_user_id'] = $create_user_id;
         $where['refund_money']   = ['GT',0];
         $where['work_type'] = 1;
         $where['work_status'] = 6;
+        if($type !=10){
+            $where['work_platform'] = $type;
+        }
         $info = $this->model->where($where)->where($map)->field('base_to_order_rate,refund_money')->select();
         if (!empty($info)) {
             $refund_money = 0;
@@ -938,6 +952,14 @@ class CustomerService extends Backend
                 $arr[] = $v;
             }
             $arr[] = 95;
+        }else{
+            foreach ($kefumanage as $k=> $v) {
+                $arr[] = $k;
+                foreach ($v as $val) {
+                    $arr[] = $val;
+                }
+            }
+            $result[75] = '王伟';           
         }
         // $result[1]  = 'Admin';
         // $result[75] = '王伟';
@@ -959,6 +981,22 @@ class CustomerService extends Backend
         return $this->model->where($map_create)->where($where)->field('count(*) as counter,create_user_id')->group('create_user_id')->select();
     }
     /**
+     * 获取昨天工作量
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 10:01:17 
+     * @return void
+     */
+	public function getyesterdayWorkloadNum(){
+		$where['is_public'] = 1;
+		$where['is_admin']  = 1;
+		$where['author_id'] = ['neq','382940274852'];
+        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00', time())]];
+		return $this->zendeskComments->where($where)->where($workload)->field('count(*) as counter,due_id')->group('due_id')->select();		
+	}
+    /**
      * 获取工作量信息
      *
      * @Description
@@ -966,7 +1004,7 @@ class CustomerService extends Backend
      * @since 2020/05/23 15:49:44
      * @return void
      */
-    public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0)
+    public function workload_info($map, $start, $end, $platform,$customer_type=0,$customer_category=0,$customer_workload = 0)
     {
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
@@ -987,8 +1025,10 @@ class CustomerService extends Backend
         //B组员工      
         }elseif(2 == $customer_type){
             $type = $this->customers_by_group(2);
+        }else{ //全部
+            $type = $this->customers_by_group(0);
         }
-        $type_arr = $category_arr = [];
+        $type_arr = $category_arr = $group_arr = [];
         if(!empty($type)){
             foreach($type as $k =>$v){
                 $type_arr[] = $k;
@@ -999,39 +1039,64 @@ class CustomerService extends Backend
             $category = $this->getCustomerFormal(1);
         }elseif(2 == $customer_category){ //非正式员工
             $category = $this->getCustomerFormal(2);
+        }else{
+            //全部
+            $category = $this->getCustomerFormal(0);
         }
         if(!empty($category)){
             foreach($category as $k=>$v){
                 $category_arr[] = $v;
             }
         }
-        if(count($type_arr)>0 && count($category_arr)==0){
-            $filterPerson  = $type_arr;
-            $where['due_id'] = ['in',$type_arr];
-        }elseif(count($type_arr)>0 && count($category_arr)>0){
-            $filterPerson = array_intersect($type_arr,$category_arr);
-            $where['due_id'] = ['in',$filterPerson];
-        }elseif(count($type_arr) == 0 && count($category_arr)>0){
-            $filterPerson = $category_arr;
-            $where['due_id'] = ['in',$category_arr];
-        }else{
-            $where['due_id'] = ['neq',0];
+        //客服员工分组 电话/邮件
+        if(1 == $customer_workload){
+            $customer_group = $this->getAllCustomerType(1);
+        }elseif(2 == $customer_workload){
+            $customer_group = $this->getAllCustomerType(2);
         }
+        if(!empty($customer_group)){
+            foreach($customer_group as $k =>$v){
+                $group_arr[] = $k;
+            }
+        }
+        if(count($group_arr)<1){
+            $filterPerson = array_intersect($type_arr,$category_arr);           
+        }else{
+            $filterPerson = array_intersect($type_arr,$category_arr,$group_arr);
+
+        }
+        $where['due_id'] = ['in',$filterPerson];
+        
+        
+        // if(count($type_arr)>0 && count($category_arr)==0){
+        //     $filterPerson  = $type_arr;
+        //     $where['due_id'] = ['in',$type_arr];
+        // }elseif(count($type_arr)>0 && count($category_arr)>0){
+        //     $filterPerson = array_intersect($type_arr,$category_arr);
+        //     $where['due_id'] = ['in',$filterPerson];
+        // }elseif(count($type_arr) == 0 && count($category_arr)>0){
+        //     $filterPerson = $category_arr;
+        //     $where['due_id'] = ['in',$category_arr];
+        // }else{
+        //     $where['due_id'] = ['neq',0];
+        // }
+        
 		//整个客服部门人员
 		$arrCustomers = $this->newCustomers();
-		$allCustomers = [];
+        $allCustomers = [];
 		if(isset($filterPerson)){
 			foreach($arrCustomers as $k =>$v){
 				if(in_array($v['id'],$filterPerson)){
 					$allCustomers[$k]['id'] = $v['id'];
 					$allCustomers[$k]['nickname'] = $v['nickname'];
 					$allCustomers[$k]['group'] = $v['group'];
-				}
+                }
 			}			
 		}else{
 			$allCustomers = $arrCustomers;
         }
-                                
+        //获取组别
+        $customerArr     = $this->getCustomerType();                        
         //客服处理量
         $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
         $customerReply = collection($customerReply)->toArray();
@@ -1048,9 +1113,14 @@ class CustomerService extends Backend
                         }
                     }
                 }
+                if(!empty($customerArr)){
+                    if(array_key_exists($v['id'],$customerArr)){
+                        $allCustomers[$k]['workload_group'] = $customerArr[$v['id']];
+                    }
+                }
             }
             $allCustomers['handleNum'] = $handleNum;
-            $allCustomers['noQualifyDay'] = $noQualifiyDay; 
+            $allCustomers['noQualifiyDay'] = $noQualifiyDay; 
         }
         return $allCustomers ? $allCustomers : false;
     }
@@ -1123,8 +1193,10 @@ class CustomerService extends Backend
         //客服分组
         $info = $this->customers();
         $kefumanage = config('workorder.kefumanage');
+        //客服组信息电话、邮件
+        //$customerType = $this->getCustomerType();
         if (!empty($customerReply)) {
-            $handleNum = $noQualifyDay = 0;
+            $handleNum = $noQualifiyDay = 0;
             foreach ($customerReply as $k => $v) {
                 //客服分组
                 if (in_array($v['due_id'], $kefumanage[95]) || (95 == $v['due_id'])) {
@@ -1137,12 +1209,19 @@ class CustomerService extends Backend
                 if (array_key_exists($v['due_id'], $info)) {
                     $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
                 }
+                // if(count($customerType)>1){
+                //     if(array_key_exists($v['due_id'],$customerType)){
+                //         $customerReply[$k]['customer_type'] = $customerType[$v['due_id']];
+                //     }
+                // }else{
+                //     $customerReply[$k]['customer_type'] = 0;
+                // }
                 $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'], $start, $end);
                 $handleNum+=$v['counter'];
-                $noQualifyDay += $customerReply[$k]['no_qualified_day'];
+                $noQualifiyDay += $customerReply[$k]['no_qualified_day'];
             }
             $customerReply['handleNum'] = $handleNum;
-            $customerReply['noQualifyDay'] = $noQualifyDay;
+            $customerReply['noQualifiyDay'] = $noQualifiyDay;
         }
         return $customerReply ? $customerReply : false;
     }
@@ -1156,6 +1235,12 @@ class CustomerService extends Backend
      */
     public function works_info($where, $map,$customer_type=0,$customer_category=0)
     {
+        if(!empty($where['work_platform']) && ($where['work_platform'] !=10)){
+            //站点
+            $site  = $where['work_platform'];
+        }else{
+            $site  = 10;
+        }
         $where['work_type'] = 1;
         $where['work_status'] = 6;
         //A组员工
@@ -1209,8 +1294,8 @@ class CustomerService extends Backend
 		}
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {
@@ -1223,7 +1308,7 @@ class CustomerService extends Backend
 
 			$workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
 			foreach($allCustomers as $k =>$v){
-				if (is_array($replacementArr)) {
+				if (isset($replacementArr) && is_array($replacementArr)) {
 					//客服的补发订单数
 					if (array_key_exists($v['id'], $replacementArr)) {
 						$allCustomers[$k]['replacement_num'] = $replacementArr[$v['id']];
@@ -1240,7 +1325,7 @@ class CustomerService extends Backend
 					$allCustomers[$k]['coupon'] = 0;
 				}
 				//累计退款金额
-				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map);
+				$allCustomers[$k]['total_refund_money'] = $this->calculate_refund_money($v['id'], $map,$site);
 				if (0<$allCustomers[$k]['total_refund_money']) {
 					$refundMoney += $allCustomers[$k]['total_refund_money'];
 				}
@@ -1318,8 +1403,8 @@ class CustomerService extends Backend
         }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        $where['replacement_order'] = ['neq',''];
-        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,count(coupon_str) as coupon,create_user_id')->group('create_user_id')->select();
+        //$where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
         if (!empty($replacementOrder)) {
@@ -1362,7 +1447,7 @@ class CustomerService extends Backend
                 }
 
                 //累计退款金额
-                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map);
+                $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'], $map,10);
                 if (0<$workList[$k]['total_refund_money']) {
                     $refundMoney += $workList[$k]['total_refund_money'];
                 }
@@ -1407,7 +1492,7 @@ class CustomerService extends Backend
             if ('echart1' == $params['key']) {
                 //问题大分类统计、措施统计
                 $data = $this->get_workorder_data($order_platform, $map);
-                $customer_problem_classify = config('workorder.customer_problem_classify');
+                $customer_problem_classify = config('workorder.new_customer_problem_classify');
                 $column = array_keys($customer_problem_classify);
                 $columnData = [];
                 foreach ($column as $k =>$v) {
@@ -1421,12 +1506,13 @@ class CustomerService extends Backend
                 //问题类型统计
                 $problem_data = $this->get_problem_type_data($order_platform, $map, 1);
                 //问题类型数组
-                $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+                $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
                 $customer_problem_list  = config('workorder.customer_problem_type');
                 //循环数组根据id获取客服问题类型
                 $column = $columnData = [];
                 foreach ($customer_problem_arr as $k => $v) {
-                    $column[] = $customer_problem_list[$v];
+                        $column[] = $customer_problem_list[$v];  
+                    
                 }
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
@@ -1499,11 +1585,11 @@ class CustomerService extends Backend
             //问题类型统计
             $step = array_merge(config('workorder.step'));
             //求出默认的问题类型，饼图2右边展示的东东
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
             $customer_problem_list  = config('workorder.customer_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                    $customer_arr[] = $customer_problem_list[$v];  
             }
             //提交过后的平台数值
             //$this->view->assign('platformNew',$platform);
@@ -1540,26 +1626,31 @@ class CustomerService extends Backend
             //问题类型统计
             $step = array_merge(config('workorder.step'));
             //求出默认的问题类型，饼图2右边展示的东东
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                    $customer_arr[] = $customer_problem_list[$v];
             }
             $this->view->assign(compact('data', 'problem_type_total', 'step_total', 'problem_form_total', 'step_four_total', 'problem_data', 'step_data', 'step', 'customer_arr'));
         }
 
         //第四个饼图二级tab联动默认的二级数据 start
-        $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+
+        $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[1];
+        //客服问题列表
         $customer_problem_list  = config('workorder.customer_problem_type');
+        //仓库问题列表
+        $warehouse_problem_list = config('workorder.warehouse_problem_type');
         //循环数组根据id获取客服问题类型
         $column = [];
         foreach ($customer_problem_arr as $k => $v) {
-            $column[$v] = $customer_problem_list[$v];
+                $column[$v] = $customer_problem_list[$v];
         }
         //第四个饼图二级tab联动默认的二级数据 end
         //第二张和第四张tab默认显示数据 start
-        $customer_problem_classify = config('workorder.customer_problem_classify');
+        $customer_problem_classify = config('workorder.new_customer_problem_classify');
         $problem_type = array_keys($customer_problem_classify);
         //第二张和第四张tab默认显示数据 end
         $orderPlatformList = config('workorder.platform');
@@ -1589,12 +1680,20 @@ class CustomerService extends Backend
             //问题类型统计
             $problem_data = $this->get_problem_type_data($order_platform, $map, $value);
             //问题类型数组
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             //循环数组根据id获取客服问题类型
             $column = $columnData = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $column[] = $customer_problem_list[$v];
+                if($value<=4){
+                    $column[] = $customer_problem_list[$v];
+                }else{
+                    $column[] = $warehouse_problem_list[$v];
+                }
+                
             }
             foreach ($column as $ck => $cv) {
                 $columnData[$ck]['name'] = $cv;
@@ -1625,8 +1724,9 @@ class CustomerService extends Backend
             }
             $value = $params['value'];
             $order_platform = $params['platform'];
+            $problem = $params['problem'];
             //问题类型统计
-            $data = $this->get_problem_step_data($order_platform, $map, $value);
+            $data = $this->get_problem_step_data($order_platform, $map, $value,$problem);
             //问题类型数组
             $step = config('workorder.step');
             $column = array_merge($step);
@@ -1653,12 +1753,20 @@ class CustomerService extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $value = $params['value'];
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题类型
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             //循环数组根据id获取客服问题类型
             $column = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $column[$v] = $customer_problem_list[$v];
+                if($value<=4){
+                    $column[$v] = $customer_problem_list[$v];
+                }else{
+                    $column[$v] = $warehouse_problem_list[$v];
+                }
+                
             }
             $this->success('', '', $column);
         }
@@ -1678,19 +1786,25 @@ class CustomerService extends Backend
             return $arr;
         }
         if ($platform<10) {
-            $where['work_platform'] = $platform;
+            $where['work_platform'] = $warehouse['work_platform']= $platform;
         }
         $where['work_type'] = 1;
+        $warehouse['work_type'] = 2;
         //订单修改数组
         //$changeOrderArr = config('workorder.customer_problem_classify_arr')[1];
         //
         //问题总数组
-        $problem_arr = config('workorder.customer_problem_classify_arr');
+        $problem_arr = config('workorder.new_customer_problem_classify_arr');
         //问题结果
         $result = [];
-        foreach ($problem_arr as $v) {
+        foreach ($problem_arr as $k=> $v) {
             //问题大分类的统计
-            $result['problem_type'][] = $this->model->where($where)->where($map)->where('problem_type_id', 'in', $v)->count('id');
+            if($k<=4){
+                $result['problem_type'][] = $this->model->where($where)->where($map)->where('problem_type_id', 'in', $v)->count('id');
+            }else{
+                $result['problem_type'][] = $this->model->where($warehouse)->where($map)->count('id');
+            }
+            
         }
         //所有完成的work_id
         $all_work_id = $this->model->where($where)->where($map)->column('id');
@@ -1718,16 +1832,22 @@ class CustomerService extends Backend
             return $arr;
         }
         if ($platform<10) {
-            $where['work_platform'] = $platform;
+            $where['work_platform'] = $warehouse['work_platform'] = $platform;
         }
         $where['work_type'] = 1;
+        $warehouse['work_type'] = 2;
         //所有的问题组
-        $problem_arr = config('workorder.customer_problem_classify_arr');
+        $problem_arr = config('workorder.new_customer_problem_classify_arr');
         //当前的问题组
         $current_problem_arr = $problem_arr[$problem_type];
         $result = [];
         foreach ($current_problem_arr as $k =>$v) {
-            $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id', $v)->count('id');
+            if($problem_type <= 4){
+                $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id', $v)->count('id');
+            }else{
+                $result[$k] = $this->model->where($warehouse)->where($map)->where('problem_type_id', $v)->count('id');
+            }
+            
         }
         Cache::set('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)), $result, 7200);
         return $result;
@@ -1742,18 +1862,24 @@ class CustomerService extends Backend
      * @param [type] $map
      * @param [type] $problem_type
      * @param [type] $step_id
+     * @param [type] $problem 是否是仓库问题  5 是 其他不是 默认 1
      * @return void
      */
-    public function get_problem_step_data($platform, $map, $problem_id)
+    public function get_problem_step_data($platform, $map, $problem_id,$problem=1)
     {
-        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)));
+        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)));
         if ($arr) {
             return $arr;
         }
         if ($platform<10) {
             $where['work_platform'] = $platform;
         }
-        $where['work_type'] = 1;
+        if($problem!=5){
+            $where['work_type'] = 1;
+        }else{
+            $where['work_type'] = 2;
+        }
+        
         $result = $info = [];
         $result = $this->model->where($where)->where($map)->where('problem_type_id', $problem_id)->column('id');
         $where_step['operation_type'] = 1;
@@ -1761,7 +1887,7 @@ class CustomerService extends Backend
         foreach ($step_arr as $k =>$v) {
             $info['step'][]  = $this->step->where($where_step)->where('work_id', 'in', $result)->where('measure_choose_id', $k)->count('id');
         }
-        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)), $info, 7200);
+        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.$problem.md5(serialize($map)), $info, 7200);
         return $info;
     }
     /**
@@ -1789,11 +1915,19 @@ class CustomerService extends Backend
             foreach ($problem_data as $dv) {
                 $problem_form_total +=$dv;
             }
-            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_arr   = config('workorder.new_customer_problem_classify_arr')[$value];
+            //客服问题列表
             $customer_problem_list  = config('workorder.customer_problem_type');
+            //仓库问题列表
+            $warehouse_problem_list = config('workorder.warehouse_problem_type');
             $customer_arr = [];
             foreach ($customer_problem_arr as $k => $v) {
-                $customer_arr[] = $customer_problem_list[$v];
+                if($value<=4){
+                    $customer_arr[] = $customer_problem_list[$v];
+                }else{
+                    $customer_arr[] = $warehouse_problem_list[$v];
+                }
+                
             }
             $data['problem_data'] =  $problem_data;
             $data['problem_form_total'] =  $problem_form_total;
@@ -1821,7 +1955,8 @@ class CustomerService extends Backend
             }
             $order_platform = $params['platform'];
             $value          = $params['value'];
-            $step_data = $this->get_problem_step_data($order_platform, $map, $value);
+            $problem        = $params['problem'];
+            $step_data = $this->get_problem_step_data($order_platform, $map, $value,$problem);
             $step_four_total = 0;
             //求出措施总数据
             foreach ($step_data['step'] as $tv) {
@@ -1870,9 +2005,60 @@ class CustomerService extends Backend
                         $info[] = $k;
                     }
                 }    
+            }else{ //全部员工
+                foreach($result as $k => $v){
+                    $info[] = $k;
+                }
             }
         }
         return $info ? $info : [];
+
+    }
+    /**
+     * 获取客服是 电话组或者邮件组
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/08 13:55:44 
+     * @return void
+     */
+    public function getCustomerType()
+    {
+       $info =  ZendeskAgents::field('admin_id,agent_type')->select();
+       if(!$info){
+           return false;
+       }
+       $arr = [];
+       foreach($info as $v){
+          switch($v['agent_type']){
+              case 1:
+                $agent_value = '邮件组';
+              break;
+              case 2:
+                $agent_value = '电话组';
+              break;
+              default:
+                $agent_value = '未知';
+              break;
+          }
+          $arr[$v['admin_id']] = $agent_value;
+       }
+       return $arr ?:[];
+    }
+    /**
+     * 获取客服的邮件组还是电话组或者全部
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/08 15:23:40 
+     * @return void
+     */
+    public function getAllCustomerType($type)
+    {
+        if(0 != $type){
+            $where['agent_type'] = $type;
+        }
+        return  ZendeskAgents::where($where)->column('admin_id,agent_type');
 
     }
 }

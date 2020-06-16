@@ -8,6 +8,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\warehouse\OutStockLog;
+use app\admin\model\StockLog;
 
 /**
  * 出库单管理
@@ -337,10 +338,21 @@ class Outstock extends Backend
                     //总库存
                     $item = new \app\admin\model\itemmanage\Item;
                     $item_map['sku'] = $v['sku'];
-                    $item->where($item_map)->setDec('stock', $v['out_stock_num']);
-                    //可用库存
-                    $item->where($item_map)->setDec('available_stock', $v['out_stock_num']);
+                    $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
                 }
+
+                //插入日志表
+                (new StockLog())->setData([
+                    'type'                      => 2,
+                    'two_type'                  => 4,
+                    'sku'                       => $v['sku'],
+                    'public_id'                 => $v['out_stock_id'],
+                    'stock_change'              => -$v['out_stock_num'],
+                    'available_stock_change'    => -$v['out_stock_num'],
+                    'create_person'             => session('admin.nickname'),
+                    'create_time'               => date('Y-m-d H:i:s'),
+                    'remark'                    => '出库单减少总库存,减少可用库存'
+                ]);
 
                 //先入先出逻辑
                 $this->item->setPurchaseOrder($list);

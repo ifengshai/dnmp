@@ -3,6 +3,7 @@ namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
 use app\common\controller\Backend;
 use app\admin\model\OrderStatistics;
 use app\admin\model\platformmanage\MagentoPlatform;
+use app\admin\model\AuthGroupAccess;
 class Conversionrate extends Backend{
     /**
      * 转化率首页
@@ -14,9 +15,14 @@ class Conversionrate extends Backend{
      */
     public function index ()
     {
-        $orderPlatform = (new MagentoPlatform())->getOrderPlatformList();
+        $user_id = session('admin.id');
+        $resultPrivilege = (new AuthGroupAccess)->getConversionratePrivilege($user_id);
+        if(1>count($resultPrivilege)){
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
+        }
+        $orderPlatform = (new MagentoPlatform())->getNewOrderPlatformList($resultPrivilege);
         $create_time = input('create_time');
-        $platform    = input('order_platform', 1);	
+        $platform    = input('order_platform', $resultPrivilege[0]);	
         //头部数据
         if($this->request->isAjax()){
             $params = $this->request->param();
@@ -70,5 +76,53 @@ class Conversionrate extends Backend{
         $this->assignconfig('platform', $platform);
         $this->assignconfig('create_time',$create_time);
         return  $this->view->fetch();
+    }
+    /**
+     * zeelool站点的权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 15:37:41 
+     * @return void
+     */
+    public function zeelool_privilege()
+    {
+
+    }
+    /**
+     * voogueme站点的权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 15:38:12 
+     * @return void
+     */
+    public function voogueme_privilege()
+    {
+
+    }
+    /**
+     * nihao站点权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 15:39:07 
+     * @return void
+     */
+    public function nihao_privilege()
+    {
+
+    }
+    /**
+     * meeloog站点权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/03 16:14:30 
+     * @return void
+     */
+    public function meeloog_privilege()
+    {
+
     }
 }

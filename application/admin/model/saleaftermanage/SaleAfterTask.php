@@ -648,8 +648,12 @@ class SaleAfterTask extends Model
 
                 //工单列表
                 $workOrderListResult = \app\admin\model\saleaftermanage\WorkOrderList::workOrderListInfo($v['increment_id']);
+
+                //补差价列表
+                $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
+               
                 $result[$k]['workOrderList'] = $workOrderListResult['list'];
-                $result[$k]['replenish_list'] = $workOrderListResult['replenish_list'];
+                $result[$k]['differencePriceList'] = $differencePriceList;
                 switch ($v['order_type']) {
                     case 2:
                         $result[$k]['order_type'] = '<span style="color:#f39c12">批发</span>';
@@ -712,7 +716,7 @@ class SaleAfterTask extends Model
         } else {
             $result = false;
         }
-
+      
         return $result;
     }
     /***

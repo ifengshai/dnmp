@@ -157,6 +157,10 @@ class SelfApi extends Api
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
         $site = $this->request->request('site'); //站点
+        $title = $this->request->request('title'); //运营商
+        $track_number = $this->request->request('track_number'); //快递单号
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -169,6 +173,13 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
+        if (!$title) {
+            $this->error(__('缺少运营商参数'), [], 400);
+        }
+
+        if (!$track_number) {
+            $this->error(__('缺少快递单号参数'), [], 400);
+        }
         switch ($site) {
             case 1:
                 $db = 'database.db_zeelool';
@@ -179,28 +190,48 @@ class SelfApi extends Api
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             default:
                 return false;
                 break;
         }
-        //根据订单id查询运单号
-        $order_shipment = Db::connect($db)
-            ->table('sales_flat_shipment_track')
-            ->field('entity_id,track_number,title')
-            ->where('order_id', $order_id)
-            ->find();
+
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
             $this->error(__('订单记录不存在'), [], 400);
+        }
+        
+        //区分usps运营商
+        if(strtolower($title) == 'usps'){
+            $track_num1 = substr($track_number , 0 , 10);
+            if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+                //郭伟峰
+                $shipment_data_type = 'USPS_1';
+            }else{
+                $track_num2 = substr($track_number , 0 , 4);
+                if($track_num2 == '9400'){
+                    //加诺
+                    $shipment_data_type = 'USPS_2';
+                }else{
+                    //杜明明
+                    $shipment_data_type = 'USPS_3';
+                }
+            }
+        }else{
+            $shipment_data_type = $title;
         }
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
             'node_type' => 7,
             'update_time' => date('Y-m-d H:i:s'),
-            'shipment_type' => $order_shipment['title'],
-            'track_number' => $order_shipment['track_number'],
+            'shipment_type' => $title,
+            'shipment_data_type' => $shipment_data_type,
+            'track_number' => $track_number,
+            'delivery_time' => date('Y-m-d H:i:s')
         ]);
 
         //插入节点子表
@@ -212,20 +243,23 @@ class SelfApi extends Api
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
             'node_type' => 7,
-            'shipment_type' => $order_shipment['title'],
-            'track_number' => $order_shipment['track_number'],
+            'shipment_type' => $title,
+            'shipment_data_type' => $shipment_data_type,
+            'track_number' => $track_number,
         ]);
 
+      
         //注册17track
-        $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
+        $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
-        $shipment_reg[0]['number'] =  $order_shipment['track_number'];
+        $shipment_reg[0]['number'] =  $track_number;
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($track)  . "\r\n", FILE_APPEND);
         if (count($track['data']['rejected']) > 0) {
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
-
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', 200  . "\r\n", FILE_APPEND);
         $this->success('提交成功', [], 200);
     }
 
@@ -306,7 +340,7 @@ class SelfApi extends Api
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
         $order_node = $this->request->request('order_node'); //订单节点
-        
+
         if (!$order_number) {
             $this->error(__('缺少订单号参数'), [], 400);
         }
@@ -319,37 +353,37 @@ class SelfApi extends Api
             $this->error(__('缺少节点参数'), [], 400);
         }
 
-        if($order_number){
+        if ($order_number) {
             $where['order_number'] = $order_number;
         }
         $where['site'] = $site;
-        if($order_node != 5){
-            if($order_node == 3){
+        if ($order_node != 5) {
+            if ($order_node == 3) {
                 $where['order_node'] = ['in', ['3', '4']];
-            }else{
+            } else {
                 $where['order_node'] = $order_node;
             }
         }
-        
+
         $order_node_data = (new OrderNodeDetail())->where($where)->select();
         $order_data['order_data'] = collection($order_node_data)->toArray();
 
-        if($other_order_number){
+        if ($other_order_number) {
             $orther_where['site'] = $site;
-            if($order_node != 5){
-                if($order_node == 3){
+            if ($order_node != 5) {
+                if ($order_node == 3) {
                     $orther_where['order_node'] = ['in', ['3', '4']];
-                }else{
+                } else {
                     $orther_where['order_node'] = $order_node;
                 }
             }
-            foreach($other_order_number as $val){
+            foreach ($other_order_number as $val) {
                 $orther_where['order_number'] = $val;
                 $orther_order_node_data = (new OrderNodeDetail())->where($orther_where)->select();
                 $order_data['other_order_data'][$val] = collection($orther_order_node_data)->toArray();
             }
         }
-        $this->success('成功',$order_data,200);
+        $this->success('成功', $order_data, 200);
     }
 
     /**
@@ -375,21 +409,48 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        if($order_id){
+        if ($order_id) {
             $where['order_id'] = $order_id;
         }
-        if($order_number){
+        if ($order_number) {
             $where['order_number'] = $order_number;
         }
-        if($track_number){
+        if ($track_number) {
             $where['track_number'] = $track_number;
         }
 
         $where['site'] = $site;
-        
+
         $order_track_data = (new OrderNodeCourier())->where($where)->select();
         $order_track_data = collection($order_track_data)->toArray();
-        
-        $this->success('成功',$order_track_data,200);
+
+        $this->success('成功', $order_track_data, 200);
+    }
+
+    /**
+     * 补差价订单支付成功 钉钉通知工单创建人
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/05 13:37:18 
+     * @return void
+     */
+    public function order_pay_ding()
+    {
+        //校验参数
+        $order_number = $this->request->request('order_number'); //订单号
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        //根据订单号查询工单
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3])->field('create_user_id,id')->find();
+        if ($list) {
+            Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+        } else {
+            $this->error(__('未查询到数据'), [], 400);
+        }
+        $this->success('成功', [], 200);
     }
 }

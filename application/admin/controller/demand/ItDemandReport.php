@@ -27,240 +27,168 @@ class ItDemandReport extends Backend
      * @author Lx
      * @since 2020/05/23 15:53:16 
      */
-    public function statistical(){
-        $month_first = date("Y-m-01",time());//本月第一天
-        $month_last = date('Y-m-d', strtotime("$month_first +1 month -1 day"));//本月最后一天
-
-        $month_01 = date('Y-m', strtotime('-1 month'));//上月
-        $month_first_01 = date('Y-m-01', strtotime('-1 month'));//上月第一天
-        $month_last_01 = date('Y-m-t', strtotime('-1 month'));//上月最后一天
-
-        $month_02 = date('Y-m', strtotime('-2 month'));
-        $month_first_02 = date('Y-m-01', strtotime('-2 month'));//第一天
-        $month_last_02 = date('Y-m-t', strtotime('-2 month'));//最后一天
-
-        if ($this->request->isAjax()) {
+    public function statistical(){       				
+		/*new  start*/		
+		$month_num = 6; /*这边修改任意数来统计出不同月份*/ 
+		$month_data = [];
+		for($i = 1; $i<=$month_num; $i++){
+			
+			$month_data_ifon[$i - 1] = date('Y-m', strtotime(-($i - 1).' month'));
+			$month_data[$i - 1]['first'] = date('Y-m-01', strtotime(-($i - 1).' month'));
+			$month_data[$i - 1]['last'] = date('Y-m-01', strtotime((-($i - 1) + 1).' month'));
+		}
+		$new_month_data_ifon = array_reverse($month_data_ifon);
+		foreach($new_month_data_ifon as $k=>$v){			
+			if($k == (count($month_data_ifon) - 1)){
+				$new_month_data_ifon[$k] = '本月'; 
+			}
+		}	
+		if ($this->request->isAjax()) { 
             $web_type = input('web_type');
-            if($web_type == 'web'){
-                //网站组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
-                $task_month = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->sum('type')*10;//本月
-                $task_month_01 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->sum('type')*10;
-                $task_month_02 = $this->itWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->sum('type')*10;
-                //网站组--目标--end
-
-                //网站组--BUG(普通：1个,小概率：2个)--start
-                $bug0_month = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first, $month_last])->count();
-                $bug1_month = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*2;
-                $bug_month = $bug0_month+$bug1_month;
-
-                $bug0_month_01 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count();
-                $bug1_month_01 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*2;
-                $bug_month_01 = $bug0_month_01+$bug1_month_01;
-
-                $bug0_month_02 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count();
-                $bug1_month_02 = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*2;
-                $bug_month_02 = $bug0_month_02+$bug1_month_02;
-                //网站组--BUG--end
-
-                //网站组--需求(普通：1个,中等：3个,复杂：5个)--start
-                $demand1_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first, $month_last])->count();
-                $demand2_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*3;
-                $demand3_month = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first, $month_last])->count()*5;
-                $demand_month = $demand1_month+$demand2_month+$demand3_month;
-
-                $demand1_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count();
-                $demand2_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*3;
-                $demand3_month_01 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_01, $month_last_01])->count()*5;
-                $demand_month_01 = $demand1_month_01+$demand2_month_01+$demand3_month_01;
-
-                $demand1_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count();
-                $demand2_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*3;
-                $demand3_month_02 = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$month_first_02, $month_last_02])->count()*5;
-                $demand_month_02 = $demand1_month_02+$demand2_month_02+$demand3_month_02;
-                //网站组--需求--end
-
-                //合计--start
-                $all = $task_month+$bug_month+$demand_month;
-                $all_01 = $task_month_01+$bug_month_01+$demand_month_01;
-                $all_02 = $task_month_02+$bug_month_02+$demand_month_02;
-                //合计--end
-            }else{
-                //开发组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
-                $task_month = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->sum('type')*10;//本月
-                $task_month_01 = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->sum('type')*10;
-                $task_month_02 = $this->developWebTask->where('is_del', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->sum('type')*10;
-                //开发组--目标--end
-
-                //开发组--BUG(普通：1个)--start
-                $bug_month = $this->developmodel->where('is_del', 1)->where('type', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->count();
-                $bug_month_01 = $this->developmodel->where('is_del', 1)->where('type', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->count();
-                $bug_month_02 = $this->developmodel->where('is_del', 1)->where('type', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->count();
-                //开发组--BUG--end
-                
-                //开发组--需求(普通：1个,中等：3个,复杂：5个)--start
-                $demand1_month = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 1)->whereTime('createtime', 'between', [$month_first, $month_last])->count();
-                $demand2_month = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 2)->whereTime('createtime', 'between', [$month_first, $month_last])->count()*3;
-                $demand3_month = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 3)->whereTime('createtime', 'between', [$month_first, $month_last])->count()*5;
-                $demand_month = $demand1_month+$demand2_month+$demand3_month;
-
-                $demand1_month_01 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 1)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->count();
-                $demand2_month_01 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 2)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->count()*3;
-                $demand3_month_01 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 3)->whereTime('createtime', 'between', [$month_first_01, $month_last_01])->count()*5;
-                $demand_month_01 = $demand1_month_01+$demand2_month_01+$demand3_month_01;
-
-                $demand1_month_02 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 1)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->count();
-                $demand2_month_02 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 2)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->count()*3;
-                $demand3_month_02 = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 3)->whereTime('createtime', 'between', [$month_first_02, $month_last_02])->count()*5;
-                $demand_month_02 = $demand1_month_02+$demand2_month_02+$demand3_month_02;
-                //开发组--需求--end
-
-                //合计--start
-                $all = $task_month+$bug_month+$demand_month;
-                $all_01 = $task_month_01+$bug_month_01+$demand_month_01;
-                $all_02 = $task_month_02+$bug_month_02+$demand_month_02;
-                //合计--end
+            if($web_type == 'web'){ 
+				/* new start */
+				$task_month = [];
+				$bug0_month = [];
+				$bug1_month = [];
+				$bug_month = [];
+				$demand1_month = [];
+				$demand2_month = [];
+				$demand3_month = [];
+				$demand_month = [];
+				$all = [];				
+				$new_month_data = array_reverse($month_data);
+				foreach($new_month_data as $k=>$v){
+					//网站组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
+					$task_month[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10;					
+					//网站组--目标--end			
+					//网站组--BUG(普通：1个,小概率：2个)--start
+					$bug0_month[$k] = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count();
+					$bug1_month[$k] = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*2;
+					$bug_month[$k] = $bug0_month[$k]+$bug1_month[$k];
+					//网站组--BUG--end					
+					//网站组--需求(普通：1个,中等：3个,复杂：5个)--start
+					$demand1_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count();
+					$demand2_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*3;
+					$demand3_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*5;
+					$demand_month[$k] = $demand1_month[$k]+$demand2_month[$k]+$demand3_month[$k];	
+					//网站组--需求--end
+					
+					//合计--start
+					$all[$k] = $task_month[$k]+$bug_month[$k]+$demand_month[$k];
+					//合计--end
+				}			
+				/* new end */									
+            }else{					
+				/* new start */
+				$task_month = [];				
+				$bug_month = [];
+				$demand1_month = [];
+				$demand2_month = [];
+				$demand3_month = [];
+				$demand_month = [];
+				$all = [];				
+				$new_month_data = array_reverse($month_data);
+				foreach($new_month_data as $k=>$v){
+					//开发组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
+					$task_month[$k] = $this->developWebTaskItem->alias('ti')->join('fa_develop_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10;					
+					//开发组--目标--end					
+					//开发组--BUG(普通：1个,小概率：2个)--start					
+					$bug_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 1)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count();
+					//开发组--BUG--end					
+					//开发组--需求(普通：1个,中等：3个,复杂：5个)--start
+					$demand1_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 1)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count();
+					$demand2_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 2)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count()*3;
+					$demand3_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 3)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count()*5;
+					$demand_month[$k] = $demand1_month[$k]+$demand2_month[$k]+$demand3_month[$k];	
+					//开发组--需求--end					
+					//合计--start
+					$all[$k] = $task_month[$k]+$bug_month[$k]+$demand_month[$k];
+					//合计--end
+				}			
+				/* new end */	
             }
-            $json['columnData'] = [
+            /*new start*/	
+			$json['columnData'] = [ 
                 [
                     'name'=> '开发',
                     'type'=>'bar',
-                    'data'=> [$task_month_02, $task_month_01, $task_month]
+                    'data'=> $task_month
                 ],
                 [
                     'name'=> 'BUG',
                     'type'=>'bar',
-                    'data'=>  [$bug_month_02, $bug_month_01, $bug_month]
+                    'data'=>  $bug_month
                 ],
                 [
                     'name'=> '需求',
                     'type'=>'bar',
-                    'data'=> [$demand_month_02, $demand_month_01, $demand_month]
+                    'data'=> $demand_month
                 ],
                 [
                     'name'=> '合计',
                     'type'=>'bar',
-                    'data'=> [$all_02, $all_01, $all]
+                    'data'=> $all
                 ],
  
-            ];
-
-            $json['xColumnName'] = [$month_02, $month_01, '本月'];
+            ];	 		
+			$json['xColumnName'] = $new_month_data_ifon;
             //$json['column'] = ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'];
-            return json(['code' => 1, 'data' => $json]);
+            return json(['code' => 1, 'data' => $json]);			
+			/*new end*/
         }
-        $date_arr = array(
-            date("Y-m",time()),
-            date('Y-m', strtotime('-1 month')),
-            date('Y-m', strtotime('-2 month')),
-        );
-        $month = input('month') ? input('month') : 0;
+	
+		$date_arr = $month_data_ifon;		
+				
+		$month = input('month') ? input('month') : 0;
         $type = input('type') ? input('type') : 'web';
         if($type == 'web'){
             $web_score_statistics = $this->web_score_statistics($month);
             $web_outtime_statistics = $this->web_outtime_statistics($month);
-            //统计站点任务量
-                //bug统计
-                $zeelool0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $zeelool1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $zeelool2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $voogueme0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $voogueme1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $voogueme2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $nihao0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $nihao1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $nihao2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $wesee0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $wesee1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $wesee2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $others0_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $others1_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $others2_bug = $this->model->query("select sum(if(is_small_probability=0,1,2)) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-                
-                //需求统计
-                $zeelool0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $zeelool1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $zeelool2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $voogueme0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $voogueme1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $voogueme2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $nihao0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $nihao1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $nihao2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $wesee0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $wesee1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $wesee2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $others0_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and create_time between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $others1_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and create_time between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $others2_demand = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and create_time between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                //开发任务统计
-                $zeelool0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $zeelool1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $zeelool2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=1 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $voogueme0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $voogueme1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $voogueme2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=2 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $nihao0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $nihao1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $nihao2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=3 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $wesee0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $wesee1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $wesee2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=4 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-
-                $others0_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first."' and '".$month_last."'")[0]['count'];
-                $others1_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_01."' and '".$month_last_01."'")[0]['count'];
-                $others2_task = $this->developmodel->query("select sum(case type when 1 then 10 when 2 then 20 else 30 end) as count from fa_it_web_task where is_del=1 and site_type=5 and createtime between '".$month_first_02."' and '".$month_last_02."'")[0]['count'];
-                
-                $sum_total = array(
-                    array(
-                        'date'=>date("Y-m",time()),
-                        'total1' => $zeelool0_bug+$zeelool0_demand+$zeelool0_task,
-                        'total2' => $voogueme0_bug+$voogueme0_demand+$voogueme0_task,
-                        'total3' => $nihao0_bug+$nihao0_demand+$nihao0_task,
-                        'total4' => $wesee0_bug+$wesee0_demand+$wesee0_task,
-                        'total5' => $others0_bug+$others0_demand+$others0_task,
-                    ),
-                    array(
-                        'date'=>date('Y-m', strtotime('-1 month')),
-                        'total1' => $zeelool1_bug+$zeelool1_demand+$zeelool1_task,
-                        'total2' => $voogueme1_bug+$voogueme1_demand+$voogueme1_task,
-                        'total3' => $nihao1_bug+$nihao1_demand+$nihao1_task,
-                        'total4' => $wesee1_bug+$wesee1_demand+$wesee1_task,
-                        'total5' => $others1_bug+$others1_demand+$others1_task,
-                    ),
-                    array(
-                        'date'=>date('Y-m', strtotime('-2 month')),
-                        'total1' => $zeelool2_bug+$zeelool2_demand+$zeelool2_task,
-                        'total2' => $voogueme2_bug+$voogueme2_demand+$voogueme2_task,
-                        'total3' => $nihao2_bug+$nihao2_demand+$nihao2_task,
-                        'total4' => $wesee2_bug+$wesee2_demand+$wesee2_task,
-                        'total5' => $others2_bug+$others2_demand+$others2_task,
-                    ),
-                );
-                $this->assign('sum_total',$sum_total);
-               
+            //统计站点任务量				
+				foreach($month_data as $k=>$v){
+					//bug统计 
+					$zeelool_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];					
+					$voogueme_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$nihao_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$wesee_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$others_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					//需求统计 
+					$zeelool_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=1 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$voogueme_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=2 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$nihao_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=3 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$wesee_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=4 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$others_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=5 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					//开发任务统计
+					$zeelool_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$voogueme_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$nihao_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$wesee_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$others_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+			 
+					$sum_total[$k] = array(
+						'date'=>$month_data_ifon[$k],
+						'total1' => $zeelool_bug[$k]+$zeelool_demand[$k]+$zeelool_task[$k],
+						'total2' => $voogueme_bug[$k]+$voogueme_demand[$k]+$voogueme_task[$k], 
+                        'total3' => $nihao_bug[$k]+$nihao_demand[$k]+$nihao_task[$k],
+                        'total4' => $wesee_bug[$k]+$wesee_demand[$k]+$wesee_task[$k],
+                        'total5' => $others_bug[$k]+$others_demand[$k]+$others_task[$k],
+					);
+				}			
+                $this->assign('sum_total',$sum_total);         
         }else{
             $web_score_statistics = $this->develop_score_statistics($month);
             $web_outtime_statistics = $this->develop_outtime_statistics($month);
+			
         }
+		
         $this->assign('web_score_statistics',$web_score_statistics);
         $this->assign('web_outtime_statistics',$web_outtime_statistics);
         $this->assign('date_arr',$date_arr);
         $this->assign('month',$month);
         $this->assign('type',$type);
-
-        return $this->view->fetch();
+        return $this->view->fetch();		
+		/*new end*/ 
+				
     }
     /**
      * 网站统计任务量
@@ -273,13 +201,14 @@ class ItDemandReport extends Backend
     public function web_score_statistics($month){
         if($month == 0){
             $stime = date("Y-m-01",time());//本月第一天
-            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -323,11 +252,12 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['create_time'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -369,11 +299,12 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -408,11 +339,12 @@ class ItDemandReport extends Backend
             $stime = date("Y-m-01",time());//本月第一天
             $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
         }else{
+            $last_month = $month-1;
             $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
-            $etime = date('Y-m-t', strtotime('-'.$month.' month'));//上月最后一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
         }
         $smap['createtime'] = ['between', [$stime, $etime]];
-        $task_smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
 
         //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
         //遍历每个人获取相应数据
@@ -431,9 +363,9 @@ class ItDemandReport extends Backend
         ->where($task_smap)
         ->select();
         $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
-
+		
         $php_user_total = $this->DevelopOuttimeNum($phper_user_arr,'assign_developer_ids','开发',$list,$task_item_list);
-       
+      
         return $php_user_total;
     }
     /**
@@ -643,36 +575,41 @@ class ItDemandReport extends Backend
                             }
                         } elseif ($v['type'] == 2) {
                             $complexity = $v['complexity'];
-                            $demand_num++;
-                            if($v[$complexity] == 1){
+                            $demand_num++;														
+                            if($complexity == 1){								
                                 $demand_total++;
                                 $score_total++;
-                            }elseif($v[$complexity] == 2){
+                            }elseif($complexity == 2){								
                                 $demand_total += 3;
                                 $score_total += 3;
                             }
-                            elseif($v[$complexity] == 3){
+                            elseif($complexity == 3){								
                                 $demand_total += 5;
                                 $score_total += 5;
                             }   
                         }
                     }
                 }
+				
                 foreach ($item_list as $k => $v) {
                     if ($v['person_in_charge'] == $uk) {
                         $task_num++;
                         if($v['type'] == 1){
+							
                             $task_total += 10;
                             $score_total += 10;
                         }elseif($v['type'] == 2){
+							
                             $task_total += 20;
                             $score_total += 20;
                         }else{
+							
                             $task_total += 30;
                             $score_total += 30;
                         }
                     }
                 }
+				
                 $web_user[$i]['bug_num'] = $bug_num;
                 $web_user[$i]['bug_total'] = $bug_total;
                 $web_user[$i]['demand_num'] = $demand_num;
@@ -741,6 +678,7 @@ class ItDemandReport extends Backend
                 $i++;
             }
         }
+		
         return $web_user;
     }
 
@@ -1048,7 +986,7 @@ class ItDemandReport extends Backend
                 }
 
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = array("total" => $total, "rows" => $list); 
             return json($result);
         }
         return $this->view->fetch();

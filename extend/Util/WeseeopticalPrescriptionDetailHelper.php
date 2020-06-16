@@ -114,6 +114,7 @@ class WeseeopticalPrescriptionDetailHelper {
             $final_params['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
             $final_params['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
             $final_params['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+            $final_params['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
 
             $items[$item_key]['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
             $items[$item_key]['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
@@ -129,10 +130,10 @@ class WeseeopticalPrescriptionDetailHelper {
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];      
 			$items[$item_key]['options']  = $product_options['options'];
 
-            $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['third_type'];
+            $items[$item_key]['index_type']  =$final_params['zsl'] . ' ' . $product_options['info_buyRequest']['tmplens']['index_type'];
             $items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
             $items[$item_key]['coatiing_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
-            $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
+            $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['index_type'];
             $items[$item_key]['index_id']  = $product_options['info_buyRequest']['tmplens']['third_id'];
                                                 
 			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true) ?? [];
@@ -169,6 +170,15 @@ class WeseeopticalPrescriptionDetailHelper {
             $items[$item_key]['od_axis'] = $final_params['od_axis'];
             $items[$item_key]['os_axis'] = $final_params['os_axis'];
 			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
+
+			 //判断是否为成品老花镜
+			 if ($final_params['degrees']) {
+                $items[$item_key]['od_sph'] = $final_params['degrees'];
+                $items[$item_key]['os_sph'] = $final_params['degrees'];
+                $items[$item_key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+            }
+
+
             if($final_params['prescription_type'] == 'Reading Glasses' && strlen($final_params['os_add']) > 0 && strlen($final_params['od_add']) > 0){
                 $items[$item_key]['os_add'] = $final_params['os_add'];
                 $items[$item_key]['od_add'] = $final_params['od_add'];

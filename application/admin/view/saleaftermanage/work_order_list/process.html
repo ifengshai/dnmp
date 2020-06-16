@@ -545,7 +545,33 @@
             </div>
         </div>
     </div>     
-    {/if}    
+    {/if}  
+	{if $workOrderNote}
+    <div class="form-group" style="width: 80%;">
+        <div class="caigou">
+            <label class="control-label col-xs-12 col-sm-2" style="width: 11%;">{:__('回复记录')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <table class="caigou-table-sku"  style="background-color: white;">
+                    <tr style="height: 30px;">
+                        <th>序号</th>
+                        <th>备注详情</th>
+                        <th>记录人</th>
+                        <th>操作时间</th>
+                    </tr>
+                    {foreach $workOrderNote as $k => $v}
+                    <tr>
+                        <td>{$k+1}</td>
+                        <td>{$v.content}</td>
+                        <td>{$v.note_user_name}</td>
+                        <td>{$v.note_time}</td>
+                    </tr>
+                    {/foreach}
+                </table>
+
+            </div>
+        </div>
+    </div>
+    {/if}	
     <div class="form-group" style="width: 80%;">
         <div class="caigou">
             <label class="control-label col-xs-12 col-sm-2" style="width: 9%;">{:__('处理')}：</label>
