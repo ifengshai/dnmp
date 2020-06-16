@@ -444,6 +444,7 @@ class Test extends Backend
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
+                
                 //运输中
                 if ($k == $sel_num+1) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
@@ -586,6 +587,7 @@ class Test extends Backend
                 $order_node_detail['content'] = $this->str3;
                 $order_node_detail['create_time'] = $time;
                 Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                dump('lx1111111111111111111111111');
             }
 
             //运输中
@@ -625,6 +627,7 @@ class Test extends Backend
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        dump('lx2222222222222222222222222222222');
                     }
                 }
 
