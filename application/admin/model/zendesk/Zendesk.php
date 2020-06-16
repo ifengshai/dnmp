@@ -243,7 +243,7 @@ class Zendesk extends Model
     public static function shellAssignTicketChange()
     {
         //1，判断今天有无task，无，创建
-        $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+        $tasks = ZendeskTasks::whereTime('create_time', 'yesterday')->find();
         //设置所有的隐藏
         self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
@@ -253,7 +253,8 @@ class Zendesk extends Model
             //查询该用户今天是否休息
             $userlist_arr = array_filter(array_column($agents,'userid'));
             $userlist_str = implode(',',$userlist_arr);
-            $time = strtotime(date('Y-m-d 0:0:0',time()));
+            // $time = strtotime(date('Y-m-d 0:0:0',time()));
+            $time = 1592150400;
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
             foreach ($agents as $agent) {
