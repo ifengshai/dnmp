@@ -256,7 +256,6 @@ class Zendesk extends Model
             $time = strtotime(date('Y-m-d 0:0:0',time()));
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
-            dump($restuser_arr);exit;
             foreach ($agents as $agent) {
                 if(!in_array($agent['admin_id'],$restuser_arr)){
                     //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;

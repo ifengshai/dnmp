@@ -372,19 +372,9 @@ class Ding extends Controller
             }
         }
         
-<<<<<<< HEAD
         if (!$title) $title = '您有一条新消息';
         if (!$content) $content = '请前往魔晶查看详情';
         return $instance->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
-=======
-        if (!$title) {
-            $title = '您有一条新消息';
-        }
-        if (!$content) {
-            $content = '请前往魔晶查看详情';
-        }
-        return $instance ->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
->>>>>>> stocklog
     }
 
     /**
