@@ -250,6 +250,7 @@ class Zendesk extends Model
             //创建所有的tasks
             //获取所有的agents
             $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->select();
+            dump($agents);exit;
             //查询该用户今天是否休息
             $userlist_arr = array_filter(array_column($agents,'userid'));
             $userlist_str = implode(',',$userlist_arr);
