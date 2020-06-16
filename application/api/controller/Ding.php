@@ -18,6 +18,7 @@ use app\common\model\Auth;
 use fast\Random;
 use think\Controller;
 use EasyDingTalk\Application;
+use think\Db;
 
 class Ding extends Controller
 {
@@ -45,13 +46,46 @@ class Ding extends Controller
         /* $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user); */
-        $user = $this->app->user->getDetailedUsers('101991334',0,100);
-        //$aa = $this->app->user->administrators();
-        dump($user);
-        dump($aa);exit;
+        // $user=$this->app->attendance->schedules('2020-06-07');
+        $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
+        $time = 1592150400;
+        //$user=$this->app->attendance->listByUsers('1965280658937204',$user_arr,'1592269200000','1592269200000');
+        $user=$this->app->attendance->listByUsers('1965280658937204',$dinguserlist,$time.'000',$time.'000');
+        $userlist = $user['result'];
+        $rest_list = array();
+        foreach($userlist as $item){
+            if($item['is_rest'] == 'Y'){
+                $rest_list[] = Db::name('admin')->where('userid',$item['userid'])->value('id');
+            }
+        }
+        //$aa=$this->app->attendance->groups();
+        echo "<pre>";
+        print_r($userlist);
+        dump($rest_list);exit;
         //Admin::userAdd($user);
     }
-
+    /**
+     * 批量查询客服休息用户id
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/15 15:52:31 
+     * @param [type] 客服的钉钉id集合，格式'246806095338604104,285168290324340480,225802421126255952'
+     * @param [type] 时间戳  
+     * @return void
+     */
+    public function getRestList($userlist_str,$time){
+        //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
+        $user=$this->app->attendance->listByUsers('1965280658937204',$userlist_str,$time.'000',$time.'000');
+        $userlist = $user['result'];
+        $rest_list = array();
+        foreach($userlist as $item){
+            if($item['is_rest'] == 'Y'){
+                $rest_list[] = Db::name('admin')->where('userid',$item['userid'])->value('id');
+            }
+        }
+        return $rest_list;
+    }
     /**
      * 注册事件回调
      * @return [type] [description]
