@@ -243,7 +243,7 @@ class Zendesk extends Model
     public static function shellAssignTicketChange()
     {
         //1，判断今天有无task，无，创建
-        $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+        $tasks = ZendeskTasks::whereTime('create_time', 'yesterday')->find();
         //设置所有的隐藏
         self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
