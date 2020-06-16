@@ -111,7 +111,7 @@ class Test extends Backend
 
             }
             echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
-            usleep(200000);
+            usleep(100000);
         }
         echo 'ok';
     }
