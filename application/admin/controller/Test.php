@@ -90,7 +90,7 @@ class Test extends Backend
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
 
-                if (stripos($v['title'], 'USPS') !== false) {
+                if (stripos($v['shipment_type'], 'USPS') !== false) {
                     if($v['shipment_data_type'] == 'USPS_1'){
                         //郭伟峰
                         $this->usps_1_data($trackdata, $add);
@@ -101,11 +101,11 @@ class Test extends Backend
                     }
                 }
 
-                if (stripos($v['title'], 'DHL') !== false) {
+                if (stripos($v['shipment_type'], 'DHL') !== false) {
                     $this->new_dhl_data($trackdata, $add);
                 }
 
-                if (stripos($v['title'], 'fede') !== false) {
+                if (stripos($v['shipment_type'], 'fede') !== false) {
                     $this->new_fedex_data($trackdata, $add);
                 }
 
@@ -444,7 +444,6 @@ class Test extends Backend
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-                
                 //运输中
                 if ($k == $sel_num+1) {
                     $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
@@ -569,10 +568,6 @@ class Test extends Backend
         $order_node_detail['track_number'] = $add['track_number'];
 
         if($all_num > 0 && $data['e'] != 0){
-
-            dump($data);
-            dump(1111111111111111);
-            exit;
             $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
             //上网
             if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
@@ -591,7 +586,6 @@ class Test extends Backend
                 $order_node_detail['content'] = $this->str3;
                 $order_node_detail['create_time'] = $time;
                 Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                dump('lx1111111111111111111111111');
             }
 
             //运输中
@@ -631,7 +625,6 @@ class Test extends Backend
                         $order_node_detail['content'] = $this->str4;
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                        dump('lx2222222222222222222222222222222');
                     }
                 }
 
