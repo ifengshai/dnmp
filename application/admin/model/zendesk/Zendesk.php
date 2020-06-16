@@ -253,7 +253,8 @@ class Zendesk extends Model
             //查询该用户今天是否休息
             $userlist_arr = array_filter(array_column($agents,'userid'));
             $userlist_str = implode(',',$userlist_arr);
-            $time = strtotime(date('Y-m-d 0:0:0',time()));
+            // $time = strtotime(date('Y-m-d 0:0:0',time()));
+            $time = 1592150400;
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
             foreach ($agents as $agent) {
