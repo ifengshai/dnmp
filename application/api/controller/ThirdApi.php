@@ -37,13 +37,14 @@ class ThirdApi extends Api
         if($verify_sign == $track_arr['sign']){
             if($track_arr['event'] != 'TRACKING_STOPPED'){
                 file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
-                $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type')->where('track_number',$track_arr['data']['number'])->find();
+                $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number',$track_arr['data']['number'])->find();
                 $add['site'] = $order_node['site'];
                 $add['order_id'] = $order_node['order_id'];
                 $add['order_number'] = $order_node['order_number'];
                 $add['shipment_type'] = $order_node['shipment_type'];
+                $add['shipment_data_type'] = $order_node['shipment_data_type'];
                 $add['track_number'] = $track_arr['data']['number'];
-    
+   
                 if (stripos($order_node['shipment_type'], 'Post') !== false) {
                     $this->china_post_data($track_arr['data']['track'], $add);
                 }
@@ -101,6 +102,7 @@ class ThirdApi extends Api
                 $order_node_detail['order_id'] = $add['order_id'];
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
     
                 if (stripos($v['z'], 'Shipment information sent to FedEx') !== false) {
@@ -257,8 +259,9 @@ class ThirdApi extends Api
                     $order_node_detail['order_id'] = $add['order_id'];
                     $order_node_detail['order_number'] = $add['order_number'];
                     $order_node_detail['shipment_type'] = $add['shipment_type'];
+                    $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
                     $order_node_detail['track_number'] = $add['track_number'];
-    
+                    
                     if (stripos($v['z'], 'Picked Up') !== false || stripos($v['z'], 'Shipping Partner Facility') !== false || stripos($v['z'], 'Shipping Label Created') !== false) {
                         $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
                         if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
@@ -391,6 +394,7 @@ class ThirdApi extends Api
                         $order_node_detail['order_id'] = $add['order_id'];
                         $order_node_detail['order_number'] = $add['order_number'];
                         $order_node_detail['shipment_type'] = $add['shipment_type'];
+                        $order_node_detail['shipment_data_type'] = 'USPS_1';
                         $order_node_detail['track_number'] = $add['track_number'];
     
                         if (stripos($v['z'], 'Picked Up') !== false || stripos($v['z'], 'Shipping Partner Facility') !== false) {
@@ -499,6 +503,7 @@ class ThirdApi extends Api
                             $order_node_detail['order_id'] = $add['order_id'];
                             $order_node_detail['order_number'] = $add['order_number'];
                             $order_node_detail['shipment_type'] = $add['shipment_type'];
+                            $order_node_detail['shipment_data_type'] = 'USPS_2';
                             $order_node_detail['track_number'] = $add['track_number'];
         
                             if (stripos($v['z'], 'Shipping Label Created') !== false) {
@@ -606,6 +611,7 @@ class ThirdApi extends Api
                             $order_node_detail['order_id'] = $add['order_id'];
                             $order_node_detail['order_number'] = $add['order_number'];
                             $order_node_detail['shipment_type'] = $add['shipment_type'];
+                            $order_node_detail['shipment_data_type'] = 'USPS_3';
                             $order_node_detail['track_number'] = $add['track_number'];
                 
                             if (stripos($v['z'], 'Picked Up') !== false || stripos($v['z'], 'Shipping Partner Facility') !== false) {
@@ -731,6 +737,7 @@ class ThirdApi extends Api
                 $order_node_detail['order_id'] = $add['order_id'];
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
     
                 if (stripos($v['z'], 'Picked up') !== false) {
@@ -881,6 +888,7 @@ class ThirdApi extends Api
                 $order_node_detail['order_id'] = $add['order_id'];
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
     
                 if ($data['e'] != 0) {
@@ -1035,6 +1043,7 @@ class ThirdApi extends Api
                 $order_node_detail['order_id'] = $add['order_id'];
                 $order_node_detail['order_number'] = $add['order_number'];
                 $order_node_detail['shipment_type'] = $add['shipment_type'];
+                $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
                 $order_node_detail['track_number'] = $add['track_number'];
     
                 if (stripos($v['z'], '已收件，揽投员') !== false) {
