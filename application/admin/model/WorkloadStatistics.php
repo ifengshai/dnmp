@@ -30,10 +30,10 @@ class WorkloadStatistics extends Model
      */
     public function getyesterdayData($type=1)
     {
-        $arr = Cache::get('WorkloadStatistics_getyesterdayData_'.$type);
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_getyesterdayData_'.$type);
+        // if($arr){
+        //     return $arr;
+        // }
         $map['create_date'] = date("Y-m-d", strtotime("-1 day"));
         if($type<10){
             $where['platform'] = $type;
@@ -57,7 +57,7 @@ class WorkloadStatistics extends Model
                 $arr['pending_num']    = 0;                
             } 
         }
-        Cache::set('WorkloadStatistics_getyesterdayData_'.$type, $arr, 7200);
+        //Cache::set('WorkloadStatistics_getyesterdayData_'.$type, $arr, 7200);
         return $arr;
         
     }
@@ -120,10 +120,10 @@ class WorkloadStatistics extends Model
      */
     public function getSevenData($type=1)
     {
-        $arr = Cache::get('WorkloadStatistics_getSevenData_'.$type);
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_getSevenData_'.$type);
+        // if($arr){
+        //     return $arr;
+        // }
         $stime = date("Y-m-d", strtotime("-7 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
@@ -147,7 +147,7 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
-        Cache::set('WorkloadStatistics_getSevenData_'.$type, $arr, 7200);
+        //Cache::set('WorkloadStatistics_getSevenData_'.$type, $arr, 7200);
         return $arr;        
     }
     /**
@@ -160,10 +160,10 @@ class WorkloadStatistics extends Model
      */
     public function getthirdData($type)
     {
-        $arr = Cache::get('WorkloadStatistics_getthirdData_'.$type);
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_getthirdData_'.$type);
+        // if($arr){
+        //     return $arr;
+        // }
         $stime = date("Y-m-d", strtotime("-30 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
@@ -187,7 +187,7 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
-        Cache::set('WorkloadStatistics_getthirdData_'.$type, $arr, 7200);
+        //Cache::set('WorkloadStatistics_getthirdData_'.$type, $arr, 7200);
         return $arr;
     }
     /**
@@ -200,10 +200,10 @@ class WorkloadStatistics extends Model
      */
     public function gettwoTimeData($starttime,$endtime,$type)
     {
-        $arr = Cache::get('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)));
-        if($arr){
-            return $arr;
-        }
+        // $arr = Cache::get('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)));
+        // if($arr){
+        //     return $arr;
+        // }
         if(empty($starttime) || empty($endtime)){
             return [];
         }
@@ -228,7 +228,7 @@ class WorkloadStatistics extends Model
             $arr['waiting_num']    = 0;
             $arr['pending_num']    = 0; 
         }
-        Cache::set('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)), $arr, 7200);
+        //Cache::set('WorkloadStatistics_gettwoTimeData_'.$type.md5(serialize($starttime.$endtime)), $arr, 7200);
         return $arr;        
     }
 

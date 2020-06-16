@@ -8,7 +8,7 @@ use think\Db;
 use think\Exception;
 use app\admin\model\platformmanage\MagentoPlatform;
 use think\Cache;
-
+use app\admin\model\AuthGroupAccess;
 class Dashboard extends Backend
 {
     protected $model = null;
@@ -32,9 +32,9 @@ class Dashboard extends Backend
         return $date;
     }
     /**
-     * 仪表盘首页
+     * 仪表盘首页(原先)
      */
-    public function index()
+    public function index_yuan()
     {
         //上边部分数据 默认zeelool站数据
         $platform = (new MagentoPlatform())->getOrderPlatformList();
@@ -103,6 +103,163 @@ class Dashboard extends Backend
 			'nihaoRegisterCustomer'				=> $nihaoRegisterCustomer ?:[],
 			'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
             'bottom_data'						=> $bottom_data
+        ]);
+        // $this->view->assign("orderPlatformList", $platform);
+        // $this->view->assign("zeelool_data",$zeelool_data);
+        // $this->view->assign("date",$this->date());
+        return $this->view->fetch();
+    }
+
+    public function index()
+    {
+        $user_id = session('admin.id');
+        $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
+        if(0 == $result){
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
+        }
+            switch($result){
+                //只有zeelool权限
+                case 1:
+                    $arr = [1];
+                break;
+                //只有voogueme权限
+                case 2:
+                    $arr = [2];
+                break;
+                //只有nihao权限
+                case 3:
+                    $arr = [3];
+                break;
+                //只有meeloog权限
+                case 4:
+                    $arr = [4];
+                break;
+                //只有zeelool和voogueme权限    
+                case 5:
+                    $arr = [1,2];
+                break;
+                //只有zeelool和nihao权限
+                case 6:
+                    $arr = [1,3];
+                break;
+                //只有zeelool和meeloog权限
+                case 7:
+                    $arr = [1,4];
+                break;
+                //只有voogueme和nihao权限
+                case 8:
+                    $arr = [2,3];
+                break;
+                //只有voogueme和meeloog权限
+                case 9:
+                    $arr = [2,4];
+                break;
+                //只有nihao和meeloog权限
+                case 10:
+                    $arr = [3,4];
+                break;
+                //只有zeelool、voogueme、nihao的权限
+                case 11:
+                    $arr = [1,2,3];
+                break;
+                //只有zeelool、voogueme、meeloog权限
+                case 12:
+                    $arr = [1,2,4];
+                break;
+                //只有zeelool、nihao、meeloog权限
+                case 13:
+                    $arr = [1,3,4];
+                break;
+                //只有voogueme、nihao、meeloog权限
+                case 14:
+                    $arr = [2,3,4];
+                break;    
+                //所有
+                case 15:
+                    $arr = [1,2,3,4];
+                break;    
+            }            
+        //上边部分数据 默认zeelool站数据
+        $platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
+        $zeelool_data = $this->model->getList($arr[0]);
+        //z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+        //z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
+        $zeelool_data = collection($zeelool_data)->toArray();
+        //中间部分数据
+        $orderStatistics = new OrderStatistics();
+        $list = $orderStatistics->getAllData();
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = [];
+        foreach ($list as $v) {
+            //如果有zeelool权限
+            if(in_array(1,$arr)){
+                $zeeloolSalesNumList[$v['create_date']]  			 = $v['zeelool_sales_num'];
+                $zeeloolSalesMoneyList[$v['create_date']] 			 = $v['zeelool_sales_money'];
+                $zeeloolUnitPriceList[$v['create_date']]			 = $v['zeelool_unit_price'];
+                $zeeloolShoppingcartTotal[$v['create_date']]		 = $v['zeelool_shoppingcart_total'];
+                $zeeloolShoppingcartConversion[$v['create_date']]	 = $v['zeelool_shoppingcart_conversion'];
+                $zeeloolRegisterCustomer[$v['create_date']]		     = $v['zeelool_register_customer'];
+            }
+            //如果有voogueme权限
+            if(in_array(2,$arr)){
+                $vooguemeSalesNumList[$v['create_date']] 			 = $v['voogueme_sales_num'];
+                $vooguemeSalesMoneyList[$v['create_date']]			 = $v['voogueme_sales_money'];
+                $vooguemeUnitPriceList[$v['create_date']]			 = $v['voogueme_unit_price'];
+                $vooguemeShoppingcartTotal[$v['create_date']]		 = $v['voogueme_shoppingcart_total'];
+                $vooguemeShoppingcartConversion[$v['create_date']]   = $v['voogueme_shoppingcart_conversion'];
+                $vooguemeRegisterCustomer[$v['create_date']]		 = $v['voogueme_register_customer'];
+            }
+            //如果有nihao权限
+            if(in_array(3,$arr)){
+                $nihaoSalesNumList[$v['create_date']]    			 = $v['nihao_sales_num'];
+                $nihaoSalesMoneyList[$v['create_date']]				 = $v['nihao_sales_money'];
+                $nihaoUnitPriceList[$v['create_date']]				 = $v['nihao_unit_price'];
+                $nihaoShoppingcartTotal[$v['create_date']]			 = $v['nihao_shoppingcart_total'];
+                $nihaoShoppingcartConversion[$v['create_date']]	     = $v['nihao_shoppingcart_conversion'];
+                $nihaoRegisterCustomer[$v['create_date']]			 = $v['nihao_register_customer'];
+            }
+            //如果有meeloog权限
+            if(in_array(4,$arr)){
+                $meeloogSalesNumList[$v['create_date']]    			 = $v['meeloog_sales_num'];
+                $meeloogSalesMoneyList[$v['create_date']]			 = $v['meeloog_sales_money'];
+                $meeloogUnitPriceList[$v['create_date']]			 = $v['meeloog_unit_price'];
+                $meeloogShoppingcartTotal[$v['create_date']]		 = $v['meeloog_shoppingcart_total'];
+                $meeloogShoppingcartConversion[$v['create_date']]	 = $v['meeloog_shoppingcart_conversion'];
+                $meeloogRegisterCustomer[$v['create_date']]			 = $v['meeloog_register_customer'];
+            }	
+        }
+        //下边部分数据 默认30天数据
+        $bottom_data = $this->get_platform_data(1);
+        $this->view->assign([
+            'orderPlatformList'					=> $platform,
+            'zeelool_data'						=> $zeelool_data,
+            'date'								=> $this->date(),
+            'zeeloolSalesNumList'       		=> $zeeloolSalesNumList ?:[], //折线图数据
+            'vooguemeSalesNumList'      		=> $vooguemeSalesNumList ?:[],
+			'nihaoSalesNumList'         		=> $nihaoSalesNumList ?:[],
+			'meeloogSalesNumList'         		=> $meeloogSalesNumList ?:[],
+            'zeeloolSalesMoneyList'				=> $zeeloolSalesMoneyList ?:[],
+            'vooguemeSalesMoneyList'			=> $vooguemeSalesMoneyList ?:[],
+			'nihaoSalesMoneyList'				=> $nihaoSalesMoneyList ?:[],
+			'meeloogSalesMoneyList'				=> $meeloogSalesMoneyList ?:[],
+            'zeeloolUnitPriceList'				=> $zeeloolUnitPriceList ?:[],
+            'vooguemeUnitPriceList'				=> $vooguemeUnitPriceList ?:[],
+			'nihaoUnitPriceList'				=> $nihaoUnitPriceList ?:[],
+			'meeloogUnitPriceList'				=> $meeloogUnitPriceList ?:[],
+            'zeeloolShoppingcartTotal'			=> $zeeloolShoppingcartTotal ?:[],
+            'vooguemeShoppingcartTotal' 		=> $vooguemeShoppingcartTotal ?:[],
+			'nihaoShoppingcartTotal'			=> $nihaoShoppingcartTotal ?:[],
+			'meeloogShoppingcartTotal'			=> $meeloogShoppingcartTotal ?:[],
+            'zeeloolShoppingcartConversion'	 	=> $zeeloolShoppingcartConversion ?:[],
+            'vooguemeShoppingcartConversion'	=> $vooguemeShoppingcartConversion ?:[],
+			'nihaoShoppingcartConversion'	 	=> $nihaoShoppingcartConversion ?:[],
+			'meeloogShoppingcartConversion'	 	=> $meeloogShoppingcartConversion ?:[],
+            'zeeloolRegisterCustomer'			=> $zeeloolRegisterCustomer ?:[],
+            'vooguemeRegisterCustomer'			=> $vooguemeRegisterCustomer ?:[],
+			'nihaoRegisterCustomer'				=> $nihaoRegisterCustomer ?:[],
+			'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
+            'bottom_data'						=> $bottom_data,
+            'result'                            => $result,
+            'arr'                               => $arr
         ]);
         // $this->view->assign("orderPlatformList", $platform);
         // $this->view->assign("zeelool_data",$zeelool_data);
@@ -403,5 +560,58 @@ class Dashboard extends Backend
         ];
         Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)), $arr, 7200);
         return $arr;
+    }
+    /**
+     * 对应的zeelool权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:38:25 
+     * @return void
+     */
+    public function zeelool_index()
+    {
+
+    }
+    /**
+     * 对应的voogueme权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:39:19 
+     * @return void
+     */
+    public function voogueme_index()
+    {
+
+    }
+    /**
+     * 对应的nihao权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:40:10 
+     * @return void
+     */
+    public function nihao_index()
+    {
+
+    }
+    /**
+     * 对应的meeloog权限
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/01 16:41:01 
+     * @return void
+     */
+    public function meeloog_index()
+    {
+
+    }
+    public function ceshi(){
+        $user_id = session('admin.id');
+        $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
+        dump($result);
     }
 }

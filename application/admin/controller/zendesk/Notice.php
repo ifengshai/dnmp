@@ -1011,7 +1011,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-05-09T00:10:00Z updated_at<=2020-05-09T03:20:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-06-01T01:00:00Z updated_at<=2020-06-01T11:00:00Z order_by:updated_at sort:asc';
          //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1019,6 +1019,9 @@ class Notice extends Controller
         if(!$tickets->count){
             return true;
         }
+
+        echo $tickets->count;
+
         $page = ceil($tickets->count / 100 );
         if($page >= 1){
             //获取后续的

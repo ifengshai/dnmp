@@ -307,7 +307,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
             $(document).on('click', '.btn-del', function () {
+               
                 $(this).parent().parent().remove();
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                 //运费
+                 var freight = $('.freight').val();
+                 //总计
+                 $('.purchase_total').val(total + freight * 1);
             })
 
             $(document).on('click', '.btn-arrival-del', function () {
@@ -317,7 +329,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             //获取sku信息
             $(document).on('change', '.sku', function () {
-                console.log(123);
                 var sku = $(this).val();
                 var supplier_id = $('.supplier.selectpicker').val();
                 var _this = $(this);
@@ -751,6 +762,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         logisticsDetail: function () {
             Controller.api.bindevent();
+            
         },
         checkdetail: function () {
             Controller.api.bindevent();
@@ -766,6 +778,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         location.reload();
                     });
                 }
+            })
+
+            //上传文件
+            $(document).on('click', '.pluploads', function () {
+                var _this = $(this);
+                var url = $(this).attr('data-url');
+                Fast.api.open(
+                    'warehouse/check/uploads?img_url=' + url, '上传文件', {
+                    callback: function (data) {
+                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                    }
+                }
+                )
             })
 
         },
@@ -1194,8 +1219,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //这里可以获取从服务端获取的JSON数据
                 //这里我们手动设置底部的值
                 //console.log(data.total_money);
-                $("#total-money").text(data.total_money);
-                $("#return-money").text(data.return_money);
+                $("#total-money").text(Math.round(data.total_money * 100)/100);
+                $("#return-money").text(Math.round(data.return_money * 100) / 100);
 
             });
             // 初始化表格
@@ -1333,10 +1358,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         return false;
                                     },
                                     visible: function (row) {
+                                        console.log(row.refund_amount);
                                         //返回true时按钮显示,返回false隐藏
-                                        if ((row.purchase_status == 8) || (row.payment_status == 1)) {
+                                        // if ((row.purchase_status == 8) || (row.payment_status == 1) || (row.refund_amount == 0)) {
+                                        //     return false;
+                                        // }
+                                        if ((row.refund_amount <= 0) || (!row.refund_amount)) {
                                             return false;
-                                        }
+                                        }                                        
                                         return true;
                                     }
                                 }

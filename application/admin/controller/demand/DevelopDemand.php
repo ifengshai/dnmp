@@ -64,13 +64,20 @@ class DevelopDemand extends Backend
                 if (in_array($adminId, $authUserIds)) {
                     $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
                 }
-                //开发主管
+                /* old
+				//开发主管
                 $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
                 if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
                     $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))"; //主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
                 }
-
-                //判断是否是普通的测试
+				*/
+                 //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
+                    $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
+                }
+				
+				//判断是否是普通的测试
                 $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
                 if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
                     $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
@@ -145,9 +152,9 @@ class DevelopDemand extends Backend
 
 
                 if ($val['review_status_manager'] == 0) {
-                    $list[$k]['status_str'] = '经理待审核';
+                    $list[$k]['status_str'] = '产品待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
-                    $list[$k]['status_str'] = '主管待审核';
+                    $list[$k]['status_str'] = '开发待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
                     $list[$k]['status_str'] = '审核通过';
                 } else {

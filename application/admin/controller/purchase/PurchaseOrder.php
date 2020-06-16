@@ -36,7 +36,13 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls', 'deleteLogisticsItem'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls', 'deleteLogisticsItem'];
 
     public function _initialize()
     {
@@ -566,7 +572,7 @@ class PurchaseOrder extends Backend
                     $this->error(__('分批到货采购单只能单选'), url('index'));
                 }
 
-                if (!in_array($v['purchase_status'], [2, 5, 6, 9])) {
+                if (!in_array($v['purchase_status'], [2, 5, 6, 7, 9])) {
                     $this->error(__('此状态不能录入物流单号'), url('index'));
                 }
             }
@@ -576,7 +582,7 @@ class PurchaseOrder extends Backend
                 $this->error(__('No Results were found'), url('index'));
             }
 
-            if (!in_array($row['purchase_status'], [2, 5, 6, 9])) {
+            if (!in_array($row['purchase_status'], [2, 5, 6, 7, 9])) {
                 $this->error(__('此状态不能录入物流单号'), url('index'));
             }
 
@@ -1023,7 +1029,6 @@ class PurchaseOrder extends Backend
             }
 
 
-
             //判断sku是否为选品库SKU
             $count = $new_product->where(['sku' => $params['sku'], 'item_status' => 1, 'is_del' => 1])->count();
             if ($count > 0) {
@@ -1032,6 +1037,21 @@ class PurchaseOrder extends Backend
         }
 
         $this->success();
+    }
+
+
+    public function test()
+    {
+        $map['b.createtime'] = ['between', ['2020-06-09 11:00:00', '2020-06-11 11:00:00']];
+        $map['b.purchase_type'] = 2;
+        $data = $this->purchase_order_item->alias('a')->field('sku,purchase_num')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->where($map)->select();
+        $data = collection($data)->toArray();
+        dump($data);
+        die;
+        $item = new \app\admin\model\itemmanage\Item();
+        foreach ($data as $k => $v) {
+            $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+        }
     }
 
     /**
@@ -1206,7 +1226,7 @@ class PurchaseOrder extends Backend
                         }
 
                         if ($params[$key]['sku']) {
-                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $val['purchase_num']);
+                            $item->where(['sku' => $params[$key]['sku']])->setInc('on_way_stock', $params[$key]['purchase_num']);
                         }
                     }
                     //修改为选品采购单
@@ -1627,6 +1647,7 @@ class PurchaseOrder extends Backend
     {
         //设置过滤方法
         //$this->relationSearch = true;
+        $this->relationSearch = true;
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -1635,15 +1656,22 @@ class PurchaseOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $whereCondition['purchase_status'] = ['egt', 2];
+            $rep    = $this->request->get('filter');
+            //如果没有搜索条件
+            if ($rep != '{}') {
+                $whereTotalId = '1=1';
+            } else {
+                $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            }
             $total = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
@@ -1651,18 +1679,19 @@ class PurchaseOrder extends Backend
                 ->select();
             //查询总共的ID    
             $totalId = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
+                ->where($whereTotalId)
                 ->where($where)
-                ->column('id');
+                ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
-                //->with(['supplier'])
+                ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->column('id');
+                ->column('purchase_order.id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
             $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId, $thisPageId);

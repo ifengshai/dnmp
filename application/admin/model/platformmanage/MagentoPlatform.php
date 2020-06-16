@@ -55,7 +55,26 @@ class MagentoPlatform extends Model
         }
         return $arr;
     }
-
+    /**
+     * 根据条件获取平台
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/02 15:22:31 
+     * @return void
+     */
+    public function getNewOrderPlatformList($arr)
+    {
+        $result = $this->where('status', '=', 1)->where('id','in',$arr)->field('id,name')->select();
+        if (!$result) {
+            return [0 => '请先添加平台'];
+        }
+        $arr = [];
+        foreach ($result as $key => $val) {
+            $arr[$val['id']] = $val['name'];
+        }
+        return $arr;
+    }
     /**
      * 求出所有的对接平台
      */

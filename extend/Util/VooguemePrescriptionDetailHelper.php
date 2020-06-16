@@ -11,7 +11,7 @@ class VooguemePrescriptionDetailHelper{
 	*/
 	public static function get_one_by_entity_id($entity_id){
 		if($entity_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id=$entity_id";
@@ -36,7 +36,7 @@ class VooguemePrescriptionDetailHelper{
 	public static function get_one_by_increment_id($increment_id){
 		
 		if($increment_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.store_id,sfo.customer_lastname,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.store_id,sfo.customer_lastname,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id='{$increment_id}'";
@@ -59,7 +59,7 @@ class VooguemePrescriptionDetailHelper{
 	*/
 	public static function get_list_by_entity_ids($entity_id){
 		if($entity_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -82,7 +82,7 @@ class VooguemePrescriptionDetailHelper{
 	public static function get_list_by_increment_ids($increment_ids){
 		if($increment_ids){
 			$increment_ids = rtrim($increment_ids,',');
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id in($increment_ids)";
@@ -116,7 +116,8 @@ class VooguemePrescriptionDetailHelper{
 			$items[$item_key]['created_at'] = $item_value['created_at'];
 			$items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];
 			$items[$item_key]['quote_item_id'] = $item_value['quote_item_id'];
-			$items[$item_key]['discount_amount'] = $item_value['discount_amount'];    
+			$items[$item_key]['discount_amount'] = $item_value['base_discount_amount'];    
+			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];    
 			$items[$item_key]['original_price'] = $item_value['original_price'];
 			$product_options = unserialize($item_value['product_options']);
             // dump($product_options);

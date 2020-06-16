@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other', 6:'如弗小程序'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
@@ -116,7 +116,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
-                            operate: false,
+                            operate: 'in',
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -131,6 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             },
                         },
+                        {field: 'create_time', title: __('create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         /*{field: 'all_finish_time', title: __('时间节点'), operate:'RANGE', addclass:'datetimerange',operate:false},*/
 
                         {
@@ -438,13 +440,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                        if(row.status <= 4){
+                                            if(row.demand_del){//操作权限
                                                 return true;
                                             }
                                         }else{
                                             return false;
                                         }
+                                        /* if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        } */
                                     }
                                 },
                                 {
@@ -551,7 +560,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Other', 6:'如弗小程序'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
@@ -613,7 +622,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
-                            operate: false,
+                            operate: 'in',
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -628,6 +638,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             },
                         },
+                        {field: 'create_time', title: __('create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'is_small_probability',
                             title: __('is_small_probability'),

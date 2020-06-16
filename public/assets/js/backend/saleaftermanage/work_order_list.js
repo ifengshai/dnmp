@@ -64,14 +64,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
                             align: 'left',
-                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent'),
-                            visible: false
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
                         },
                         {
                             field: 'measure_choose_id',
                             title: __('措施'),
                             align: 'left',
-                            searchList: $.getJSON('saleaftermanage/work_order_list/getMeasureContent')
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getMeasureContent'),
+                            visible:false
                         },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_refund', title: __('是否有退款'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
@@ -94,6 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 return all_user_name;
                             },
                         },
+                        { field: 'assign_user_id', title: __('直接审核人'), searchList: { 75: '王伟', 95: '白青青', 117: '韩雨薇' }, formatter: Table.api.formatter.status ,visible:false},
                         {
                             field: 'after_user_id',
                             title: __('recept_user'),
@@ -211,9 +212,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.work_status == 1) {
-                                            return false;
-                                        }
+                                        // if (row.work_status == 1) {
+                                        //     return false;
+                                        // }
                                         return true;
                                     }
                                 },
@@ -887,10 +888,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
-                if (prescription.hasOwnProperty("pd")) {
+                if (prescription.hasOwnProperty("pd") && (prescription.pd != '')) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                } else {
+                }else{
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                     prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
                 }
@@ -1381,8 +1382,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (is_add == 1) {
                     var val = $(this).val();
                     var prescription = prescriptions_add_edit[val];
-
                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                    console.log(prescription);
                     prescription_div.find('input').val('');
                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
@@ -1411,7 +1412,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                     }
-                    if (prescription.hasOwnProperty("pd")) {
+                    if (prescription.hasOwnProperty("pd") && prescription.pd != '') {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                     } else {
@@ -1717,7 +1718,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         if (Config.measureList) {
                             var checkIDss = Config.measureList;//措施列表赋值给checkID
-                            console.log(checkIDss);
+                            //console.log(checkIDss);
                             for (var m = 0; m < checkIDss.length; m++) {
                                 $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
                                 var node = $('.step' + checkIDss[m]);
@@ -1998,13 +1999,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             prescription_type: prescription_type
                         }
                     }, function (data, ret) {
-                        console.log(data);
+                        //console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
-                        console.log(lens_type);
+                        //console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         prescription_div.find('#color_type').val('');
                         $('.selectpicker ').selectpicker('refresh');
@@ -2027,7 +2028,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             color_id: color_id
                         }
                     }, function (data, ret) {
-                        console.log(data);
+                        //console.log(data);
                         var prescription_div = that.parents('.panel-body');
                         var color_type;
                         for (var i = 0; i < data.length; i++) {

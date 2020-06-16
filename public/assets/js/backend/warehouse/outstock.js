@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'out_stock_number', title: __('Out_stock_number'), operate: 'like' },
                         { field: 'outstocktype.name', title: __('Type_id'), operate: 'like' },
                         { field: 'order_number', title: __('Order_number'), operate: 'like' },
-                        { field: 'remark', title: __('Remark'), operate: false },
+                        { field: 'remark', title: __('Remark'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
@@ -134,6 +134,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
 
+            //td宽度以及内容超过宽度隐藏
+            function formatTableUnit(value, row, index) {
+                return {
+                    css: {
+                        "white-space": "nowrap",
+                        "text-overflow": "ellipsis",
+                        "overflow": "hidden",
+                        "max-width": "200px"
+                    }
+                }
+            }
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('data');
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: decodeURIComponent(problem_desc)
+                });
+                return false;
+            });
+
             //审核通过
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
@@ -196,6 +219,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             Controller.api.bindevent();
         },
         api: {
+            formatter: {
+                strip_tags: function (msg) {
+                    var msg = msg.replace(/<\/?[^>]*>/g, ''); //去除HTML Tag
+                    msg = msg.replace(/[|]*\n/, '') //去除行尾空格
+                    msg = msg.replace(/&nbsp;/ig, ''); //去掉nbsp
+                    return msg;
+                },
+                getClear: function (value) {
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
+                    }
+                },
+
+            },
+            
             bindevent: function () {
                 //提交审核
                 $(document).on('click', '.btn-status', function () {

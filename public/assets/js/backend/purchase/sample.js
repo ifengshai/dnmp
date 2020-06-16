@@ -191,23 +191,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         return true;
                                     }
                                 },
-                                {
-                                    name: 'cancel',
-                                    text: __('取消'),
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_cancel',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -320,23 +303,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         return true;
                                     }
                                 },
-                                {
-                                    name: 'cancel',
-                                    text: __('取消'),
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_workorder_out_cancel',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -439,40 +405,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'purchase/sample/sample_lendlog_edit',
                                     callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'check_pass',
-                                    text: __('审核通过'),
-                                    title: __('审核通过'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: 'purchase/sample/sample_lendlog_check/status/2',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    visible: function(row){
-                                        if(row.status_id == 1){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        } 
-                                    }
-                                },
-                                {
-                                    name: 'check_refuse',
-                                    text: __('审核拒绝'),
-                                    title: __('审核拒绝'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'purchase/sample/sample_lendlog_check/status/3',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
                                         if(row.status_id == 1){

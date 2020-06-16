@@ -13,6 +13,8 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
+
 /**
  * Sales Flat Order
  *
@@ -58,7 +60,7 @@ class Weseeoptical extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'closed']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
@@ -187,10 +189,11 @@ class Weseeoptical extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        $res = $this->model->field('entity_id,increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -202,6 +205,7 @@ class Weseeoptical extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         switch ($status) {
@@ -253,7 +257,7 @@ class Weseeoptical extends Backend
                 };
                 //sku映射表
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-  
+
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
@@ -288,14 +292,17 @@ class Weseeoptical extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 5,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 5,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $v['qty'],
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                     ]);
                 }
                 unset($v);
@@ -338,16 +345,19 @@ class Weseeoptical extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 5,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 5,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$v['qty'],
+                        'stock_change'              => -$v['qty'],
+                        'occupy_stock_change'       => -$v['qty'],
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -604,15 +614,14 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
+
             $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
-            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
+            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
             $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
-
+         
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
-            // dump($prescription_params);
-            // dump($product_options);
 
             $finalResult[$key]['prescription_type'] = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription_type']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
@@ -660,12 +669,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+
+            //判断是否为成品老花镜
+            if ($finalResult[$key]['degrees']) {
+                $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
+                $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
+                $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+            }
+
         }
-        // dump($finalResult);
-        // exit;
-        //从数据库查询需要的数据
-        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
-        // Create new Spreadsheet object
+      
         $spreadsheet = new Spreadsheet();
         // Add title
 
@@ -950,6 +963,7 @@ EOF;
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                $final_print['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
@@ -983,9 +997,14 @@ EOF;
 
                 $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
+                if ($final_print['degrees']) {
+                    $final_print['od_sph'] = $final_print['degrees'];
+                    $final_print['os_sph'] = $final_print['degrees'];
+                    $final_print['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+                }
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add']*1 != 0 && $final_print['os_add']*1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1005,9 +1024,6 @@ EOF;
                     $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
                     $os_pd = "";
                 }
-
-                // dump($os_add);
-                // dump($od_add);
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {

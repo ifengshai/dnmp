@@ -124,12 +124,28 @@ class WorkOrderList extends Backend
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
                 $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
-                if ($workIds) {
-                    $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
-                } else {
+                //如果在我的任务选项卡中 点击了措施按钮
+                if ($workIds){
+                    if (!empty($filter['measure_choose_id'])) {
+                        $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+                        //将两个数组相同的数据取出
+                        $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                        $newWorkIds = implode($newWorkIds);
+                        if (strlen($newWorkIds) > 0){
+                            //数据查询的条件
+                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        }else{
+                            $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        }
+                    }
+                    else{
+                        $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                    }
+                }else{
                     $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
+                unset($filter['measure_choose_id']);
             }
             if ($filter['recept_person']) {
                 $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
@@ -149,7 +165,6 @@ class WorkOrderList extends Backend
             }
 
             $this->request->get(['filter' => json_encode($filter)]);
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -163,7 +178,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
+//            dump($map);
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -280,7 +295,6 @@ class WorkOrderList extends Backend
                     if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
                     }
-
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     $warehouseArr = config('workorder.warehouse_department_rule');
@@ -294,7 +308,8 @@ class WorkOrderList extends Backend
                             throw new Exception("措施不能为空");
                         }
                     }
-                  
+                    //判断是否选择措施
+
                     //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
@@ -449,6 +464,25 @@ class WorkOrderList extends Backend
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
+                        if(1 == $params['work_type']){
+                            $customerKefu = config('workorder.kefumanage');
+                            $customerArr = []; 
+                            foreach($customerKefu as $v){
+                                foreach($v as $vv){
+                                    $customerArr[] =$vv;
+                                }
+                            }
+                            if(!in_array(session('admin.id'),$customerArr)){
+                                if(1 == $params['is_check']){
+                                    $params['assign_user_id'] = config('workorder.customer_manager');
+                                }
+                                
+                            }else{
+                                $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                            }
+                        }
+                        //如果不是客服人员则指定审核人为客服经理 end
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
@@ -565,26 +599,26 @@ class WorkOrderList extends Backend
                 }
                 if ($result !== false) {
                     //通知
-                    // if ($this->model->work_type == 1) {
-                    //     if ($this->model->work_status == 2) {
-                    //         Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
-                    //     } elseif ($this->model->work_status == 3) {
-                    //         $usersId = explode(',', $this->model->recept_person_id);
-                    //         Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    //     }
-                    // }
+                    if ($this->model->work_type == 1) {
+                        if ($this->model->work_status == 2) {
+                            Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
+                        } elseif ($this->model->work_status == 3) {
+                            $usersId = explode(',', $this->model->recept_person_id);
+                            Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                        }
+                    }
 
-                    // //经手人
-                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
+                    //经手人
+                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
 
-                    //     Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    // }
+                        Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    }
 
-                    // //跟单处理
-                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
+                    //跟单处理
+                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
 
-                    //     Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    // }
+                        Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    }
 
                     $this->success();
                 } else {
@@ -748,8 +782,18 @@ class WorkOrderList extends Backend
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
 
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1  && $params['status'] == 2) {
-                        throw new Exception("措施不能为空");
+                    $userId = session('admin.id');
+                    $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+                    $warehouseArr = config('workorder.warehouse_department_rule');
+                    $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+                    if(!empty($checkIsWarehouse)){
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    }else{
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }                        
                     }
 
                     //更换镜框判断是否有库存
@@ -905,6 +949,24 @@ class WorkOrderList extends Backend
                     if (false === $updateInfo) {
                         throw new Exception('更新失败!!');
                     }
+                    //如果不是客服人员则指定审核人为客服经理(只能客服工单) start
+                    if(1 == $params['work_type']){
+                        $customerKefu = config('workorder.kefumanage');
+                        $customerArr = []; 
+                        foreach($customerKefu as $v){
+                            foreach($v as $vv){
+                                $customerArr[] =$vv;
+                            }
+                        }
+                        if(!in_array(session('admin.id'),$customerArr)){
+                            if(1 == $params['is_check']){
+                                $params['assign_user_id'] = config('workorder.customer_manager');
+                            }
+                        }else{
+                            $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        }
+                    }
+                    //如果不是客服人员则指定审核人为客服经理 end
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
                         throw new Exception("编辑失败！！");
@@ -1339,6 +1401,7 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
+		    
         $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -1408,9 +1471,14 @@ class WorkOrderList extends Backend
         if (!empty($row->problem_type_id)) {
             $this->assignconfig('problem_type_id', $row->problem_type_id);
         }
-
-        //求出工单选择的措施传递到js页面
-        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+		//$ids = 520;
+		$workOrderNote = WorkOrderNote::where('work_id', $ids)->select(); //回复内容
+        $this->view->assign('workOrderNote', $workOrderNote); 
+		
+		
+		
+		//求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);  
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
@@ -1430,7 +1498,8 @@ class WorkOrderList extends Backend
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
-        //查询工单处理备注
+		
+		//查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
         //获取处理的措施
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
@@ -1447,8 +1516,7 @@ class WorkOrderList extends Backend
      
         $this->view->assign('url',$url);
         $this->view->assign('remarkList', $remarkList);
-        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
-        $this->view->assign('workOrderNote', $workOrderNote);
+       
         return $this->view->fetch();
     }
 
