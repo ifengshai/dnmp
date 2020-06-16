@@ -3128,7 +3128,7 @@ class Test extends Backend
     {
         ini_set('memory_limit', '512M');
         //查询order_node_detail表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_detail')->where('shipment_type', 'USPS')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node_detail')->where('shipment_type', 'USPS')->where('shipment_data_type is null')->field('shipment_type,id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
             if (strtolower($item['shipment_type']) == 'usps') {
