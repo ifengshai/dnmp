@@ -284,18 +284,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (rows) {
-                                        if(rows.id == 4801){
-                                           console.log(rows.work_type);
-                                           console.log(rows.is_after_deal_with);
-                                           console.log(rows.work_status);
-                                           console.log(rows.has_recept); 
-                                        }
-                                        if(rows.id == 7092){
-                                            console.log(rows.work_type);
-                                            console.log(rows.is_after_deal_with);
-                                            console.log(rows.work_status);
-                                            console.log(rows.has_recept);    
-                                        }
                                         if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && (rows.work_status == 3 || rows.work_status == 5) && rows.has_recept == 1) {
                                             return true;
                                         }
