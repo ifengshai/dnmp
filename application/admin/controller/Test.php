@@ -52,7 +52,7 @@ class Test extends Backend
     public function new_track_shipment_num()
     {
 
-        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->limit(10)->select();
+        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->select();
         $order_shipment = collection($order_shipment)->toArray();
         
         $trackingConnector = new TrackingConnector($this->apiKey);
@@ -90,7 +90,7 @@ class Test extends Backend
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
 
-                if (stripos($v['title'], 'USPS') !== false) {
+                if (stripos($v['shipment_type'], 'USPS') !== false) {
                     if($v['shipment_data_type'] == 'USPS_1'){
                         //郭伟峰
                         $this->usps_1_data($trackdata, $add);
@@ -101,11 +101,11 @@ class Test extends Backend
                     }
                 }
 
-                if (stripos($v['title'], 'DHL') !== false) {
+                if (stripos($v['shipment_type'], 'DHL') !== false) {
                     $this->new_dhl_data($trackdata, $add);
                 }
 
-                if (stripos($v['title'], 'fede') !== false) {
+                if (stripos($v['shipment_type'], 'fede') !== false) {
                     $this->new_fedex_data($trackdata, $add);
                 }
 
