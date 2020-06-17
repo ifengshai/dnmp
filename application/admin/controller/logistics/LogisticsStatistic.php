@@ -60,10 +60,15 @@ class LogisticsStatistic extends Backend
             unset($result['deliverd_order_num_all']);
             unset($result['rate']);
             //所有的物流渠道
-            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->column('shipment_type');
+            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS'])->column('shipment_data_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
+                    if('USPS_1' == $v){
+                        $v = '郭伟峰';
+                    }elseif('USPS_2' == $v){
+                        $v = '加诺'; 
+                    }
                     $columnData[$k]['name'] = $v;
                     $columnData[$k]['value'] = $deliverd_order_num[$v];
                 }
@@ -488,7 +493,7 @@ class LogisticsStatistic extends Backend
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
         $orderNode['order_node'] = ['egt', 3];
-        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_type')->whereNotIn('shipment_type', ['', 'CPC', 'EYB'])->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS'])->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
@@ -500,9 +505,9 @@ class LogisticsStatistic extends Backend
             //循环所有的物流渠道
             foreach ($all_shipment_type as $k => $v) {
                 //物流渠道
-                $arr['shipment_type'][$k] = $v['shipment_type'];
+                $arr['shipment_data_type'][$k] = $v['shipment_data_type'];
                 //发货订单号
-                $delievered_order = $this->orderNode->where(['shipment_type' => $v['shipment_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
+                $delievered_order = $this->orderNode->where(['shipment_data_type' => $v['shipment_data_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 $delievered_order = collection($delievered_order)->toArray();
                 if (!$delievered_order) {
                     $arr['send_order_num'][$k] = 0;
@@ -512,7 +517,7 @@ class LogisticsStatistic extends Backend
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
                     $arr['avg_deliverd_rate'][$k] = 0;
-                    $rs[$v['shipment_type']] = 0;
+                    $rs[$v['shipment_data_type']] = 0;
                     continue;
                 }
                 //发货数量
@@ -538,7 +543,7 @@ class LogisticsStatistic extends Backend
                     }
                 }
 
-                $arr['send_order_num'][$k] = $rs[$v['shipment_type']] = $send_order_num;
+                $arr['send_order_num'][$k] = $rs[$v['shipment_data_type']] = $send_order_num;
 
                 //妥投单数
                 $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
@@ -586,8 +591,13 @@ class LogisticsStatistic extends Backend
             //设置发货总数量 妥投订单总数量数为0
             $total_send_order_num = $total_deliverd_order_num = 0;
             $info = [];
-            foreach ($arr['shipment_type'] as $ak => $av) {
-                $info[$ak]['shipment_type'] = $av;
+            foreach ($arr['shipment_data_type'] as $ak => $av) {
+                if('USPS_1' == $av){
+                    $v = '郭伟峰';
+                }elseif('USPS_2' == $av){
+                    $v = '加诺'; 
+                }
+                $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
                 $info[$ak]['deliverd_order_num'] = $arr['deliverd_order_num'][$ak];
                 $info[$ak]['serven_deliverd_rate'] = $arr['serven_deliverd_rate'][$ak];
@@ -605,7 +615,7 @@ class LogisticsStatistic extends Backend
                 $total_deliverd_order_num += $arr['deliverd_order_num'][$ak];
             }
             //求出合计的数据
-            $info[$ak + 1]['shipment_type'] = '合计';
+            $info[$ak + 1]['shipment_data_type'] = '合计';
             $info[$ak + 1]['send_order_num'] = $total_send_order_num;
             $info[$ak + 1]['deliverd_order_num'] = $total_deliverd_order_num;
             //总妥投率
@@ -636,7 +646,7 @@ class LogisticsStatistic extends Backend
             $info['deliverd_order_num_all'] = $rs;
             $info['rate'] = $rate;
         } else {
-            $info['shipment_type'] = 0;
+            $info['shipment_data_type'] = 0;
             // $info['order_num'] = 0;
             $info['send_order_num'] = 0;
             $info['deliverd_order_num'] = 0;
@@ -793,7 +803,7 @@ class LogisticsStatistic extends Backend
     //                 'gtTwenty_num' => $gtTwenty_num,
     //                 'wait_time' => $wait_time
     //             ];
-    //         }   
+    //         }
     //     }else{
     //         $arr = [
     //             'serven_num' => 0,
@@ -804,5 +814,5 @@ class LogisticsStatistic extends Backend
     //         ];
     //     }
     //     return $arr;
-    // }    	
+    // }
 }
