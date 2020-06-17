@@ -7,8 +7,13 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use fast\Excel;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
+use think\Cache;
 
 use think\Exception;
+
 
 /**
  * 表格完整示例
@@ -19,6 +24,8 @@ use think\Exception;
 class Bootstraptable extends Backend
 {
     protected $model = null;
+
+    protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
     /**
      * 无需鉴权的方法(需登录)
      * @var array
@@ -140,6 +147,8 @@ class Bootstraptable extends Backend
      */
     public function import()
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(0);
         $file = $this->request->request('file');
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
@@ -211,30 +220,82 @@ class Bootstraptable extends Backend
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
+        $trackingConnector = new TrackingConnector($this->apiKey);
+      
+        foreach ($data as &$value) {
 
-        $params = [];
-        foreach ($data as $k => $v) {
-            $params[$k]['task_status'] = 2;
-            $params[$k]['task_number'] = 'CO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $params[$k]['create_person'] = session('admin.nickname'); //创建人
-            $params[$k]['create_time']   = date("Y-m-d H:i:s", time());
-            $params[$k]['order_platform'] = 1;
-            $params[$k]['order_number'] = $v[1];
-            $params[$k]['order_status'] = 'complete';
-            $params[$k]['dept_id'] = 0;
-            $params[$k]['rep_id'] = 75;
-            $params[$k]['problem_id'] = 26;
-            $params[$k]['problem_desc'] = $v[8];
-            $params[$k]['create_person'] = $v[3];
-            $params[$k]['customer_email'] = $v[2];
-            $params[$k]['handle_scheme'] = 1;
-            $params[$k]['refund_way'] = $v[5];
-            $params[$k]['refund_money'] = $v[4];
-            $params[$k]['is_refund'] = 2;
-            $params[$k]['handle_time'] = date("Y-m-d H:i:s", time());
-            $params[$k]['complete_time'] = date("Y-m-d H:i:s", time());
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $value[0],
+                'carrier' => '03011'
+            ]]);
+            $value[1] = $trackInfo['data']['accepted'][0]['track']['e'];
+            usleep(500000);
         }
-        $result = $this->model->saveAll($params);
-        echo 'ok';
+
+        Cache::set('data_excel_001', $data);
+
+        dump($data);die;
+
+      
+    }
+
+    public function derive()
+    {
+         //从数据库查询需要的数据
+         $spreadsheet = new Spreadsheet();
+         //常规方式：利用setCellValue()填充数据
+         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "运单号")
+             ->setCellValue("B1", "状态");   //利用setCellValues()填充数据
+         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
+
+         $data = Cache::get('data_excel_001');
+         foreach ($data as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value[0]);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value[1]);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '工单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }
