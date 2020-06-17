@@ -165,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     str+='</tr>';
                     for(var i=0;i<ret.data.length;i++){
                         str+='<tr>'+
-                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].shipment_type+'</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].shipment_data_type+'</td>'+
                         // '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].send_order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].deliverd_order_num+'</td>'+
