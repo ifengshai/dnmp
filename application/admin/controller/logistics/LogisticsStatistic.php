@@ -60,15 +60,16 @@ class LogisticsStatistic extends Backend
             unset($result['deliverd_order_num_all']);
             unset($result['rate']);
             //所有的物流渠道
-            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS'])->column('shipment_data_type');
+            //$column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->column('shipment_data_type');
+            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->column('shipment_data_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
                     $columnData[$k]['value'] = $deliverd_order_num[$v];
-                    if('USPS_1' == $v){
+                    if ('USPS_1' == $v) {
                         $v = '郭伟峰';
-                    }elseif('USPS_2' == $v){
-                        $v = '加诺'; 
+                    } elseif ('USPS_2' == $v) {
+                        $v = '加诺';
                     }
                     $columnData[$k]['name'] = $v;
                 }
@@ -492,8 +493,10 @@ class LogisticsStatistic extends Backend
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
-        $orderNode['order_node'] = ['egt', 3];
-        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS'])->select();
+        //$orderNode['order_node'] = ['egt', 3];
+        $orderNode['node_type'] = ['egt', 7];
+        //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
@@ -592,10 +595,10 @@ class LogisticsStatistic extends Backend
             $total_send_order_num = $total_deliverd_order_num = 0;
             $info = [];
             foreach ($arr['shipment_data_type'] as $ak => $av) {
-                if('USPS_1' == $av){
+                if ('USPS_1' == $av) {
                     $av = '郭伟峰';
-                }elseif('USPS_2' == $av){
-                    $av = '加诺'; 
+                } elseif ('USPS_2' == $av) {
+                    $av = '加诺';
                 }
                 $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
