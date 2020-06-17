@@ -64,13 +64,13 @@ class LogisticsStatistic extends Backend
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
+                    $columnData[$k]['value'] = $deliverd_order_num[$v];
                     if('USPS_1' == $v){
                         $v = '郭伟峰';
                     }elseif('USPS_2' == $v){
                         $v = '加诺'; 
                     }
                     $columnData[$k]['name'] = $v;
-                    $columnData[$k]['value'] = $deliverd_order_num[$v];
                 }
                 $json['column'] = $column;
                 $json['columnData'] = $columnData;
@@ -593,9 +593,9 @@ class LogisticsStatistic extends Backend
             $info = [];
             foreach ($arr['shipment_data_type'] as $ak => $av) {
                 if('USPS_1' == $av){
-                    $v = '郭伟峰';
+                    $av = '郭伟峰';
                 }elseif('USPS_2' == $av){
-                    $v = '加诺'; 
+                    $av = '加诺'; 
                 }
                 $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
