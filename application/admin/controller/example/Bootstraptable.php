@@ -147,7 +147,7 @@ class Bootstraptable extends Backend
      */
     public function import()
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1512M');
         set_time_limit(0);
         $file = $this->request->request('file');
         if (!$file) {
@@ -162,66 +162,74 @@ class Bootstraptable extends Backend
         if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
             $this->error(__('Unknown data format'));
         }
-        if ($ext === 'csv') {
-            $file = fopen($filePath, 'r');
-            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
-            $fp = fopen($filePath, "w");
-            $n = 0;
-            while ($line = fgets($file)) {
-                $line = rtrim($line, "\n\r\0");
-                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
-                if ($encoding != 'utf-8') {
-                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
-                }
-                if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line . "\n");
-                } else {
-                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
-                }
-                $n++;
-            }
-            fclose($file) || fclose($fp);
 
-            $reader = new Csv();
-        } elseif ($ext === 'xls') {
-            $reader = new Xls();
-        } else {
-            $reader = new Xlsx();
+        $data =  Cache::get('data_excel');
+        if (!$data) {
+            if ($ext === 'csv') {
+                $file = fopen($filePath, 'r');
+                $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+                $fp = fopen($filePath, "w");
+                $n = 0;
+                while ($line = fgets($file)) {
+                    $line = rtrim($line, "\n\r\0");
+                    $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                    if ($encoding != 'utf-8') {
+                        $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                    }
+                    if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                        fwrite($fp, $line . "\n");
+                    } else {
+                        fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                    }
+                    $n++;
+                }
+                fclose($file) || fclose($fp);
+    
+                $reader = new Csv();
+            } elseif ($ext === 'xls') {
+                $reader = new Xls();
+            } else {
+                $reader = new Xlsx();
+            }
+    
+            //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+            //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+            //模板文件列名
+            try {
+                if (!$PHPExcel = $reader->load($filePath)) {
+                    $this->error(__('Unknown data format'));
+                }
+                $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+                $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+                $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+                $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+    
+                $fields = [];
+                for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $fields[] = $val;
+                    }
+                }
+    
+    
+                $data = [];
+                for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                    }
+                }
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
+    
         }
+        
+        // Cache::set('data_excel', $data, 86400);
 
-        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
-        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
-        //模板文件列名
-        try {
-            if (!$PHPExcel = $reader->load($filePath)) {
-                $this->error(__('Unknown data format'));
-            }
-            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
-
-            $fields = [];
-            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $fields[] = $val;
-                }
-            }
-
-
-            $data = [];
-            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
-                }
-            }
-        } catch (Exception $exception) {
-            $this->error($exception->getMessage());
-        }
         $trackingConnector = new TrackingConnector($this->apiKey);
-      
+
         foreach ($data as &$value) {
 
             $trackInfo = $trackingConnector->getTrackInfoMulti([[
@@ -229,27 +237,25 @@ class Bootstraptable extends Backend
                 'carrier' => '03011'
             ]]);
             $value[1] = $trackInfo['data']['accepted'][0]['track']['e'];
-            usleep(500000);
+            usleep(300000);
         }
-
-        Cache::set('data_excel_001', $data);
-
-        dump($data);die;
-
-      
+        unset($value);
+        Cache::set('data_excel_001', serialize($data), 86400);
+        dump(serialize($data));
+        die;
     }
 
     public function derive()
     {
-         //从数据库查询需要的数据
-         $spreadsheet = new Spreadsheet();
-         //常规方式：利用setCellValue()填充数据
-         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "运单号")
-             ->setCellValue("B1", "状态");   //利用setCellValues()填充数据
-         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "运单号")
+            ->setCellValue("B1", "状态");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
 
-         $data = Cache::get('data_excel_001');
-         foreach ($data as $key => $value) {
+        $data = Cache::get('data_excel_001');
+        foreach ($data as $key => $value) {
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value[0]);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value[1]);
