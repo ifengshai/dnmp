@@ -1015,4 +1015,15 @@ DOC;
         echo 'all ok';
         exit;
     }
+    /**
+     * zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 15:25:29 
+     * @return void
+     */
+    public function signvalue(){
+        return $this->view->fetch();
+    }
 }
