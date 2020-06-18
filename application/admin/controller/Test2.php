@@ -138,6 +138,7 @@ class Test2 extends Backend
             ->where($map)->select();
         foreach ($zeelool_data as $key => $v) {
             $list = [];
+            $data = [];
             $k = 0;
             //下单
             $list[$k]['order_node'] = 0;
@@ -430,6 +431,7 @@ class Test2 extends Backend
             ->where($map)->select();
         foreach ($zeelool_data as $key => $v) {
             $list = [];
+            $data = [];
             $k = 0;
             //下单
             $list[$k]['order_node'] = 0;
@@ -723,6 +725,7 @@ class Test2 extends Backend
             ->where($map)->select();
         foreach ($zeelool_data as $key => $v) {
             $list = [];
+            $data = [];
             $k = 0;
             //下单
             $list[$k]['order_node'] = 0;
