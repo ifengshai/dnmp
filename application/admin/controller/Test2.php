@@ -125,6 +125,7 @@ class Test2 extends Backend
      */
     public function setOrderNoteData()
     {
+        ini_set('memory_limit', '512M');
         $users = $this->user->column('id', 'nickname');
         $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
         custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
@@ -418,6 +419,7 @@ class Test2 extends Backend
      */
     public function setOrderNoteDataVoogueme()
     {
+        ini_set('memory_limit', '512M');
         $users = $this->user->column('id', 'nickname');
         $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
         custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
@@ -712,6 +714,7 @@ class Test2 extends Backend
      */
     public function setOrderNoteDataNihao()
     {
+        ini_set('memory_limit', '512M');
         $users = $this->user->column('id', 'nickname');
         $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
         custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
