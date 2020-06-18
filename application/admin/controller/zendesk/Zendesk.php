@@ -1026,4 +1026,17 @@ DOC;
     public function signvalue(){
         return $this->view->fetch();
     }
+    /**
+     * 修改zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 16:51:27 
+     * @param [type] $site
+     * @return void
+     */
+    public function signvalue_edit($site = 1){
+        $params = $this->request->post("row/a");
+        Db::name('zendesk_signvalue')->update();
+    }
 }
