@@ -31,7 +31,7 @@ class Test2 extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->user = new \app\admin\model\Admin();
-        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
+        $this->ordernodedetail = new \app\admin\model\OrderNodeDetailCopy();
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
@@ -236,6 +236,27 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+
+
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
                     $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
@@ -247,10 +268,14 @@ class Test2 extends Backend
                     $list[$k + 5]['track_number'] = $v['track_number'];
                     $list[$k + 5]['handle_user_id'] = 0;
                     $list[$k + 5]['handle_user_name'] = '';
+                    $list[$k + 5]['shipment_data_type'] = $shipment_data_type;
+
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             } else {
 
@@ -328,6 +353,25 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+
                     $list[$k + 7]['order_node'] = 2;
                     $list[$k + 7]['node_type'] = 7; //出库
                     $list[$k + 7]['create_time'] = $v['create_time'];
@@ -335,23 +379,27 @@ class Test2 extends Backend
                     $list[$k + 7]['order_id'] = $v['entity_id'];
                     $list[$k + 7]['order_number'] = $v['increment_id'];
                     $list[$k + 7]['shipment_type'] = $v['title'];
+                    $list[$k + 7]['shipment_data_type'] = $shipment_data_type;
                     $list[$k + 7]['track_number'] = $v['track_number'];
                     $list[$k + 7]['handle_user_id'] = 0;
                     $list[$k + 7]['handle_user_name'] = '';
+                   
                     $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             }
             $data['shipment_type'] = $v['title'];
             $data['track_number'] = $v['track_number'];
-            $count = Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 1])->count();
+            $count = Db::name('order_node_copy1')->where(['order_id' => $v['entity_id'], 'site' => 1])->count();
             if ($count > 0) {
-                Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 1])->update($data);
+                Db::name('order_node_copy1')->where(['order_id' => $v['entity_id'], 'site' => 1])->update($data);
             } else {
-                Db::name('order_node')->insert($data);
+                Db::name('order_node_copy1')->insert($data);
             }
             $this->ordernodedetail->saveAll($list);
             echo $key . "\n";
@@ -480,6 +528,26 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+    
+    
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
                     $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
@@ -491,10 +559,14 @@ class Test2 extends Backend
                     $list[$k + 5]['track_number'] = $v['track_number'];
                     $list[$k + 5]['handle_user_id'] = 0;
                     $list[$k + 5]['handle_user_name'] = '';
-
+                    $list[$k + 5]['shipment_data_type'] = $shipment_data_type;
+    
+    
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             } else {
 
@@ -572,6 +644,26 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+
                     $list[$k + 7]['order_node'] = 2;
                     $list[$k + 7]['node_type'] = 7; //出库
                     $list[$k + 7]['create_time'] = $v['create_time'];
@@ -583,20 +675,23 @@ class Test2 extends Backend
                     $list[$k + 7]['handle_user_id'] = 0;
                     $list[$k + 7]['handle_user_name'] = '';
                     $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
+                    $list[$k + 7]['shipment_data_type'] = $shipment_data_type;
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             }
             $data['shipment_type'] = $v['title'];
             $data['track_number'] = $v['track_number'];
 
-            $count = Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 2])->count();
+            $count = Db::name('order_node_copy1')->where(['order_id' => $v['entity_id'], 'site' => 2])->count();
             if ($count > 0) {
-                Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 2])->update($data);
+                Db::name('order_node_copy1')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
             } else {
-                Db::name('order_node')->insert($data);
+                Db::name('order_node_copy1')->insert($data);
             }
             $this->ordernodedetail->saveAll($list);
             echo $key . "\n";
@@ -726,6 +821,25 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+    
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
                     $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
@@ -737,10 +851,14 @@ class Test2 extends Backend
                     $list[$k + 5]['track_number'] = $v['track_number'];
                     $list[$k + 5]['handle_user_id'] = 0;
                     $list[$k + 5]['handle_user_name'] = '';
-
+                    $list[$k + 5]['shipment_data_type'] = $shipment_data_type;
+    
+    
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             } else {
 
@@ -818,6 +936,25 @@ class Test2 extends Backend
                 }
 
                 if ($v['track_number']) {
+                    if (strtolower($v['title']) == 'usps') {
+                        $track_num1 = substr($v['track_number'], 0, 10);
+                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                            //郭伟峰
+                            $shipment_data_type = 'USPS_1';
+                        } else {
+                            $track_num2 = substr($v['track_number'], 0, 4);
+                            if ($track_num2 == '9400') {
+                                //加诺
+                                $shipment_data_type = 'USPS_2';
+                            } else {
+                                //杜明明
+                                $shipment_data_type = 'USPS_3';
+                            }
+                        }
+                    } else {
+                        $shipment_data_type = $v['title'];
+                    }
+
                     $list[$k + 7]['order_node'] = 2;
                     $list[$k + 7]['node_type'] = 7; //出库
                     $list[$k + 7]['create_time'] = $v['create_time'];
@@ -829,21 +966,24 @@ class Test2 extends Backend
                     $list[$k + 7]['handle_user_id'] = 0;
                     $list[$k + 7]['handle_user_name'] = '';
                     $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
+                    $list[$k + 7]['shipment_data_type'] = $shipment_data_type;
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
+                    $data['delivery_time'] = $v['create_time'];
+                    $data['shipment_data_type'] = $shipment_data_type;
                 }
             }
             $data['shipment_type'] = $v['title'];
             $data['track_number'] = $v['track_number'];
 
 
-            $count = Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 3])->count();
+            $count = Db::name('order_node_copy1')->where(['order_id' =>$v['entity_id'], 'site' => 3])->count();
             if ($count > 0) {
-                Db::name('order_node')->where(['order_id', $v['entity_id'], 'site' => 3])->update($data);
+                Db::name('order_node_copy1')->where(['order_id' => $v['entity_id'], 'site' => 3])->update($data);
             } else {
-                Db::name('order_node')->insert($data);
+                Db::name('order_node_copy1')->insert($data);
             }
             $this->ordernodedetail->saveAll($list);
             echo $key . "\n";
