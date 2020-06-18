@@ -71,7 +71,7 @@ class Voogueme extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['<>', 6];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -146,7 +146,7 @@ class Voogueme extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['<>', 6];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
