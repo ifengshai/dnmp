@@ -683,9 +683,6 @@ class Voogueme extends Backend
             $data = [];
             $list = [];
             foreach ($order_res as $k => $v) {
-                $data['site'] = 2;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -735,7 +732,7 @@ class Voogueme extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
