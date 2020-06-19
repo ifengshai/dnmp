@@ -48,7 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
+                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange'},
                         {
                             field: 'Allgroup_sel',
                             title: __('All_group'),
@@ -440,13 +440,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status <= 4){
-                                            if(row.demand_del){//操作权限
-                                                return true;
-                                            }
+                                        if(row.demand_supper_edit){
+                                            return true;
                                         }else{
-                                            return false;
+                                            if(row.status <= 4){
+                                                if(row.demand_del){//操作权限
+                                                    return true;
+                                                }
+                                            }else{
+                                                return false;
+                                            }
                                         }
+                                        
                                         /* if(row.status == 1 || row.status == 2){
                                             if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
                                                 return true;

@@ -175,6 +175,7 @@ class ItWebDemand extends Backend
             $list = collection($list)->toArray();
             //检查有没有权限
             $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
             $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
             $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
@@ -270,6 +271,7 @@ class ItWebDemand extends Backend
                 //$this->user_id = $this->auth->id;
                 //权限赋值
                 $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_supper_edit'] = $permissions['demand_supper_edit'];
                 $list[$k]['demand_del'] = $permissions['demand_del'];
                 $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
                 $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
@@ -818,6 +820,19 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 超级编辑权限
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/19 16:26:07 
+     * @param [type] $ids
+     * @return void
+     */
+    public function supper_edit($ids = null)
+    {
+
+    }
     /**
      * 逻辑删除
      * */
