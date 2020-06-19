@@ -304,7 +304,7 @@ class Sample extends Backend
         }
 
         /*********************样品入库逻辑***********************/
-        $no_sku = array();
+        $sku = array();
         $no_location = array();
         $result_index = 0;
         foreach ($data as $k => $v) {
@@ -321,15 +321,21 @@ class Sample extends Backend
                     $no_location[] = $v[0];
                 }
             }else{
-                $no_sku[] = $v[0];
+                $sku['sku'] = $v[0];
+                $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
+                if($location_id){
+                    $sku['location_id'] = $location_id;
+                    $result = $this->sample->insert($sku);
+                    if ($result) {
+                        $result_index = 1;
+                    }
+                }else{
+                    $no_location[] = $v[0];
+                }
             }
         }
-        $str = '';
-        if(count($no_sku) != 0){
-            $str .= ' SKU:'.implode(',',$no_sku).'样品间没有这些sku';
-        }
         if(count($no_location) != 0){
-            $str .= ' SKU:'.implode(',',$no_location).'这些sku库位号有误';
+            $str = ' SKU:'.implode(',',$no_location).'这些sku库位号有误';
         }
         if ($result_index == 1) {
             $this->success('导入成功！！'.$str);
