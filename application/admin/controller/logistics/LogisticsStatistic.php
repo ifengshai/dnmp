@@ -496,7 +496,7 @@ class LogisticsStatistic extends Backend
         //$orderNode['order_node'] = ['egt', 3];
         $orderNode['node_type'] = ['egt', 7];
         //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
-        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
