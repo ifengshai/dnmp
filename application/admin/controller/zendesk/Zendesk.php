@@ -217,6 +217,9 @@ class Zendesk extends Backend
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
                         $createData['email_ccs'] = $email_ccs;
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$type)->value('signvalue');
+                    $sign = $sign ? $sign : '';
                     $priority = config('zendesk.priority')[$params['priority']];
                     $body = $params['content'];
                     if ($priority) {
@@ -226,7 +229,7 @@ class Zendesk extends Backend
                     if (strip_tags($body)) {
 //                        $converter = new HtmlConverter();
 //                        $createData['comment']['body'] = $converter->convert($body);
-                        $createData['comment']['html_body'] = $body;
+                        $createData['comment']['html_body'] = $body.$sign;
 
                     }
                     if ($params['image']) {
