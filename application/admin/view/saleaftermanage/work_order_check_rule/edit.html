@@ -1,0 +1,52 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Work_create_person_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-work_create_person_id" data-rule="required" data-source="work/create/person/index" class="form-control selectpage" name="row[work_create_person_id]" type="text" value="{$row.work_create_person_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Work_create_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-work_create_person" data-rule="required" class="form-control" name="row[work_create_person]" type="text" value="{$row.work_create_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Step_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-step_id" data-rule="required" data-source="step/index" class="form-control selectpage" name="row[step_id]" type="text" value="{$row.step_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Step_value')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-step_value" data-rule="required" class="form-control" name="row[step_value]" type="number" value="{$row.step_value|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Symbol')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-symbol" data-rule="required" class="form-control" name="row[symbol]" type="text" value="{$row.symbol|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_group_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_group_id" data-rule="required" data-source="check/group/index" class="form-control selectpage" name="row[check_group_id]" type="text" value="{$row.check_group_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row.weight|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
