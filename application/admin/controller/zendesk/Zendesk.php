@@ -1024,6 +1024,8 @@ DOC;
      * @return void
      */
     public function signvalue(){
+        $signarr = Db::name('zendesk_signvalue')->select();
+        $this->view->assign('signarr',$signarr);
         return $this->view->fetch();
     }
     /**
@@ -1035,8 +1037,13 @@ DOC;
      * @param [type] $site
      * @return void
      */
-    public function signvalue_edit($site = 1){
+    public function signvalue_edit(){
         $params = $this->request->post("row/a");
-        Db::name('zendesk_signvalue')->update();
+        $result = Db::name('zendesk_signvalue')->where('site',$params['site'])->update(['signvalue'=>$params['signvalue']]);
+        if($result){
+            $this->success('操作成功！！',url('zendesk/signvalue'));
+        }else{
+            $this->error('操作失败！！');
+        }
     }
 }

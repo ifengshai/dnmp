@@ -350,7 +350,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         signvalue:function(){
-            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"),function(){
+               location.reload();  
+            });
         },
         api: {
             bindevent: function () {
