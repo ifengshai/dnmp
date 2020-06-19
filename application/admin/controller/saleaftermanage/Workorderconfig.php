@@ -7,7 +7,11 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
-
+use app\admin\model\saleaftermanage\WorkOrderCheckRule;
+use app\admin\model\saleaftermanage\WorkOrderDocumentary;
+use app\admin\model\saleaftermanage\WorkOrderProblemStep;
+use app\admin\model\saleaftermanage\WorkOrderStepType;
+use app\admin\model\platformManage\MagentoPlatform;
 /**
  * 工单问题类型管理
  *
@@ -26,7 +30,6 @@ class Workorderconfig extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\Workorderconfig;
-
     }
 
     /**
@@ -77,7 +80,7 @@ class Workorderconfig extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $res = $this->model->where(['type'=>$params['type'],'problem_belong'=>$params['problem_belong'],'problem_name'=>$params['problem_name'],'is_del'=>1])->find();
-                if (!empty($res)){
+                if (!empty($res)) {
                     $this->error('当前问题已存在,请不要重复添加');
                 }
                 $params = $this->preExcludeFields($params);
@@ -167,5 +170,53 @@ class Workorderconfig extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+    /**
+     * 获取工单的配置信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/19 11:04:57
+     * @return void
+     */
+    public function getConfigInfo()
+    {
+        //所有问题类型
+        $where['is_del'] = 1;
+        $all_problem_type = $this->model->where($where)->select();
+        //所有措施类型
+        $all_step         = (new WorkOrderStepType)->where($where)->select();
+        //所有平台
+        $all_platform     = (new MagentoPlatform)->field('id,name')->select();
+        if (!$all_problem_type) {
+            //不存在问题类型
+        }
+        if(!$all_step){
+            //不存在措施
+        }
+        $all_problem_type = collection($all_problem_type)->toArray();
+        $all_step         = collection($all_step)->toArray();
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施
+        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = [];
+        foreach ($all_problem_type as $v) {
+            if (1 == $v['type']) {
+                $customer_problem_type[$v['id']] = $v['problem_name'];
+            } elseif (2 == $v['type']) {
+                $warehouse_problem_type[$v['id']] = $v['problem_name'];
+            }
+            $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
+        }
+        foreach($all_step as $sv){
+            $step[$sv['id']] = $v['step_name'];
+        }
+        foreach($all_platform as $pv){
+            $platform[$pv['id']] = $pv['name'];
+        }
+        $arr['customer_problem_type']         = $customer_problem_type;
+        $arr['warehouse_problem_type']        = $warehouse_problem_type;
+        $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
+        $arr['step']                          = $step;
+        $arr['platform']                      = $platform;    
+        return $arr;
     }
 }

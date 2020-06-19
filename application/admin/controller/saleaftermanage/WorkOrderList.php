@@ -22,6 +22,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use app\admin\model\Admin;
 use think\Loader;
 use Util\SKUHelper;
+use app\admin\controller\saleaftermanage\Workorderconfig;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
@@ -2620,5 +2621,16 @@ EOF;
             }
         }
         echo 'ok';
+    }
+    /**
+     * 
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/06/19 11:45:50 
+     * @return void
+     */
+    public function ceshi(){
+        $info = (new Workorderconfig)->getConfigInfo();
     }
 }
