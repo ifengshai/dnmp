@@ -1,0 +1,37 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_belong')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-problem_belong" class="form-control selectpicker" name="row[problem_belong]">
+                <option value="1" {eq name="1" value="$row.problem_belong"}selected{/eq}>订单修改</option>
+                <option value="2" {eq name="2" value="$row.problem_belong"}selected{/eq}>物流仓库</option>
+                <option value="3" {eq name="3" value="$row.problem_belong"}selected{/eq}>产品质量</option>
+                <option value="4" {eq name="4" value="$row.problem_belong"}selected{/eq}>客户问题</option>
+                <option value="5" {eq name="5" value="$row.problem_belong"}selected{/eq}>5</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-work_level" class="form-control selectpicker" name="row[type]">
+                <option value="1" {eq name="1" value="$row.type"}selected{/eq}>客服问题类型</option>
+                <option value="2" {eq name="2" value="$row.type"}selected{/eq}>仓库问题类型</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-problem_name" data-rule="required" class="form-control" name="row[problem_name]" type="text" value="{$row.problem_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
