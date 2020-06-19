@@ -1002,7 +1002,7 @@ class Test2 extends Backend
     public function new_track_shipment_num()
     {
         ini_set('memory_limit', '512M');
-        $order_shipment = Db::name('order_node')->where('order_node','=','0')->where('node_type','=','1')->where('track_number is not null')->select();
+        $order_shipment = Db::name('order_node')->where('order_node','=','2')->where('node_type','=','6')->where('track_number is not null')->select();
         $order_shipment = collection($order_shipment)->toArray();
         
         $trackingConnector = new TrackingConnector($this->apiKey);
