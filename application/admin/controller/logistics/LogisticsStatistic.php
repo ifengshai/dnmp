@@ -70,6 +70,8 @@ class LogisticsStatistic extends Backend
                         $v = '郭伟峰';
                     } elseif ('USPS_2' == $v) {
                         $v = '加诺';
+                    } elseif ('USPS_3' == $v) {
+                        $v = '杜明明';
                     }
                     $columnData[$k]['name'] = $v;
                 }
@@ -599,6 +601,8 @@ class LogisticsStatistic extends Backend
                     $av = '郭伟峰';
                 } elseif ('USPS_2' == $av) {
                     $av = '加诺';
+                } elseif ('USPS_3' == $av) {
+                    $av = '杜明明';
                 }
                 $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
