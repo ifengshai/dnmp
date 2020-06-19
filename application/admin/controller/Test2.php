@@ -1008,6 +1008,10 @@ class Test2 extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
+
+            if ($k < 32895) {
+                continue;
+            }
             //先把主表状态更新为2-7
             //$update['order_node'] = 2;
             //$update['node_type'] = 7;
