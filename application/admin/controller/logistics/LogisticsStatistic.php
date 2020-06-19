@@ -61,7 +61,7 @@ class LogisticsStatistic extends Backend
             unset($result['rate']);
             //所有的物流渠道
             //$column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->column('shipment_data_type');
-            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->column('shipment_data_type');
+            $column = $this->orderNode->distinct(true)->where($whereSite)->where('track_number is not null')->field('shipment_data_type')->column('shipment_data_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
