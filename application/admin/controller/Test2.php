@@ -1002,20 +1002,17 @@ class Test2 extends Backend
     public function new_track_shipment_num()
     {
         ini_set('memory_limit', '512M');
-        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->select();
+        $order_shipment = Db::name('order_node')->where('order_node','=','0')->where('node_type','=','1')->where('track_number is not null')->select();
         $order_shipment = collection($order_shipment)->toArray();
         
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
 
-            if ($k < 32895) {
-                continue;
-            }
             //先把主表状态更新为2-7
-            //$update['order_node'] = 2;
-            //$update['node_type'] = 7;
-            //Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+            $update['order_node'] = 2;
+            $update['node_type'] = 7;
+            Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
 
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
