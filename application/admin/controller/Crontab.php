@@ -313,29 +313,27 @@ order by sfoi.item_id asc limit 1000";
             if (strpos($final_params['index_type'], 'Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-
-            dump($order_item_value['order_id']);
-            dump($final_params['od_cyl']);
+            
             if ($final_params['od_cyl']) {
-                if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
+                if ((float) urldecode($final_params['od_cyl']) * 1 <= -4 || (float) urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
-                if (urldecode($final_params['os_cyl']) * 1 <= -4 || urldecode($final_params['os_cyl']) * 1 >= 4) {
+                if ((float) urldecode($final_params['os_cyl']) * 1 <= -4 || (float) urldecode($final_params['os_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
