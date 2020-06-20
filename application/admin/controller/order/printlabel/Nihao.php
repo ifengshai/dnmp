@@ -1425,7 +1425,7 @@ EOF;
                                  " . $prismcheck_os_value . $os_add . $os_pd . " 
                             </tr>
                             <tr>
-                              <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($item_res[$processing_value['sku']]) . "</td>
+                              <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($item_res[$processing_value['sku']]), -7) . "</td>
                               <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
                             </tr>  
                             </tbody></table></div>";
