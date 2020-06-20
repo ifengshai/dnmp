@@ -701,6 +701,7 @@ class Sample extends Backend
                 }
                 //更新备注
                 $workorder['description'] = $params['description'];
+                $workorder['status'] = $params['status'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
                 $this->success();
             }
@@ -774,8 +775,8 @@ class Sample extends Backend
         $row = $this->sampleworkorder->where($where)->select();
         foreach ($row as $v) {
             if ($status == 3 || $status == 4) {
-                if ($v['status'] >= 3) {
-                    $this->error('只有新建状态和待审核状态才能操作！！');
+                if ($v['status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
                     $is_update = 0;
                     break;
                 }else{
@@ -783,7 +784,7 @@ class Sample extends Backend
                 }
             }
             if($status == 5){
-                if ($v['status'] >= 2) {
+                if ($v['status'] != 1) {
                     $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
@@ -1005,6 +1006,7 @@ class Sample extends Backend
                     }
                 }
                 $workorder['description'] = $params['description'];
+                $workorder['status'] = $params['status'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
 
                 $this->success();
@@ -1078,9 +1080,18 @@ class Sample extends Backend
         $where['id'] = ['in', $ids];
         $row = $this->sampleworkorder->where($where)->select();
         foreach ($row as $v) {
-            if ($status == 3 || $status == 4 || $status == 5) {
-                if ($v['status'] >= 3) {
-                    $this->error('只有新建状态和待审核状态才能操作！！');
+            if ($status == 3 || $status == 4) {
+                if ($v['status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
+                    $is_update = 0;
+                    break;
+                }else{
+                    $is_update = 1;
+                }
+            }
+            if ($status == 5) {
+                if ($v['status'] != 1) {
+                    $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
                 }else{
