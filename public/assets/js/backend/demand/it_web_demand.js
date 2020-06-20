@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
                             operate: 'in',
-                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽', 242:'张鹏' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -628,7 +628,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
                             operate: 'in',
-                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽', 242:'张鹏' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
