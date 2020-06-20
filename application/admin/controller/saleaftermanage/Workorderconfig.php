@@ -12,6 +12,7 @@ use app\admin\model\saleaftermanage\WorkOrderDocumentary;
 use app\admin\model\saleaftermanage\WorkOrderProblemStep;
 use app\admin\model\saleaftermanage\WorkOrderStepType;
 use app\admin\model\platformManage\MagentoPlatform;
+
 /**
  * 工单问题类型管理
  *
@@ -188,16 +189,28 @@ class Workorderconfig extends Backend
         $all_step         = (new WorkOrderStepType)->where($where)->select();
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
+        //客服A组主管，B组主管
+        $where_group['a.name'] =['in',['B组客服主管','A组客服主管']];
+        $all_group =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->where($where_group)->field('a.id,a.name,s.uid')->select();
+        //所有的跟单员规则
+        $all_documentary = (new WorkOrderDocumentary)->select();
+        //不存在问题类型
         if (!$all_problem_type) {
-            //不存在问题类型
         }
-        if(!$all_step){
-            //不存在措施
+        //不存在措施
+        if (!$all_step) {
+        }
+        //不存在A、B组
+        if (!$all_group) {
+        }
+        //不存在跟单规则
+        if(!$all_documentary){
+
         }
         $all_problem_type = collection($all_problem_type)->toArray();
         $all_step         = collection($all_step)->toArray();
         //客服问题类型，仓库问题类型，大的问题类型分类,所有措施
-        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = [];
+        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = $kefumanage = [];
         foreach ($all_problem_type as $v) {
             if (1 == $v['type']) {
                 $customer_problem_type[$v['id']] = $v['problem_name'];
@@ -206,17 +219,41 @@ class Workorderconfig extends Backend
             }
             $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
         }
-        foreach($all_step as $sv){
+        foreach ($all_step as $sv) {
             $step[$sv['id']] = $v['step_name'];
         }
-        foreach($all_platform as $pv){
+        foreach ($all_platform as $pv) {
             $platform[$pv['id']] = $pv['name'];
         }
+        $a_group_id = $b_group_id = $a_uid = $b_uid = 0;
+        foreach ($all_group as $av) {
+            if ('A组客服主管' == $av['name']) {
+                $a_group_id = $av['id'];
+                $a_uid = $av['uid'];
+            } elseif ('B组客服主管' == $av['name']) {
+                $b_group_id = $av['id'];
+                $b_uid = $av['uid'];
+            }
+        }
+        //A、B下面的分组的所有的人
+        $where_group_id['a.pid'] = ['in',[$a_group_id,$b_group_id]];
+        $all_group_person =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->where($where_group_id)->field('a.id,a.pid,a.name,s.uid')->select();
+        if (!$all_group_person) {
+        }
+        foreach ($all_group_person as $gv) {
+            if ($a_group_id == $gv['pid']) {
+                $kefumanage[$a_uid][] = $gv['uid'];
+            } elseif ($b_group_id == $gv['pid']) {
+                $kefumanage[$b_uid][] = $gv['uid'];
+            }
+        }
+        
         $arr['customer_problem_type']         = $customer_problem_type;
         $arr['warehouse_problem_type']        = $warehouse_problem_type;
         $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
         $arr['step']                          = $step;
-        $arr['platform']                      = $platform;    
+        $arr['platform']                      = $platform;
+        $arr['kefumanage']                    = $kefumanage;
         return $arr;
     }
 }
