@@ -1066,16 +1066,16 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1716,7 +1716,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1750,7 +1750,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1764,7 +1764,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
             <tbody cellpadding='0'>
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1775,31 +1775,31 @@ EOF;
             </td>
             </tr>  
             <tr class='title'>      
-            <td></td>  
-            <td>SPH</td>
-            <td>CYL</td>
-            <td>AXI</td>
+            <td width='20px'></td>  
+            <td width='42px'>SPH</td>
+            <td width='50px'>CYL</td>
+            <td width='42px'>AXI</td>
             " . $prismcheck_title . "
-            <td>ADD</td>
-            <td>PD</td> 
+            <td width='42px'>ADD</td>
+            <td width='36px'>PD</td> 
             " . $coatiing_name . "
             </tr>   
             <tr>  
-            <td>Right</td>      
+            <td>R</td>      
             <td>" . $final_print['od_sph'] . "</td> 
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
                     "</tr>
             <tr>
-            <td>Left</td> 
+            <td>L</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

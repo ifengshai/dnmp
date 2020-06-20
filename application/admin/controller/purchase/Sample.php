@@ -304,7 +304,7 @@ class Sample extends Backend
         }
 
         /*********************样品入库逻辑***********************/
-        $no_sku = array();
+        $sku = array();
         $no_location = array();
         $result_index = 0;
         foreach ($data as $k => $v) {
@@ -321,15 +321,21 @@ class Sample extends Backend
                     $no_location[] = $v[0];
                 }
             }else{
-                $no_sku[] = $v[0];
+                $sku['sku'] = $v[0];
+                $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
+                if($location_id){
+                    $sku['location_id'] = $location_id;
+                    $result = $this->sample->insert($sku);
+                    if ($result) {
+                        $result_index = 1;
+                    }
+                }else{
+                    $no_location[] = $v[0];
+                }
             }
         }
-        $str = '';
-        if(count($no_sku) != 0){
-            $str .= ' SKU:'.implode(',',$no_sku).'样品间没有这些sku';
-        }
         if(count($no_location) != 0){
-            $str .= ' SKU:'.implode(',',$no_location).'这些sku库位号有误';
+            $str = ' SKU:'.implode(',',$no_location).'这些sku库位号有误';
         }
         if ($result_index == 1) {
             $this->success('导入成功！！'.$str);
@@ -695,6 +701,7 @@ class Sample extends Backend
                 }
                 //更新备注
                 $workorder['description'] = $params['description'];
+                $workorder['status'] = $params['status'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
                 $this->success();
             }
@@ -768,8 +775,8 @@ class Sample extends Backend
         $row = $this->sampleworkorder->where($where)->select();
         foreach ($row as $v) {
             if ($status == 3 || $status == 4) {
-                if ($v['status'] >= 3) {
-                    $this->error('只有新建状态和待审核状态才能操作！！');
+                if ($v['status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
                     $is_update = 0;
                     break;
                 }else{
@@ -777,7 +784,7 @@ class Sample extends Backend
                 }
             }
             if($status == 5){
-                if ($v['status'] >= 2) {
+                if ($v['status'] != 1) {
                     $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
@@ -999,6 +1006,7 @@ class Sample extends Backend
                     }
                 }
                 $workorder['description'] = $params['description'];
+                $workorder['status'] = $params['status'];
                 $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
 
                 $this->success();
@@ -1072,9 +1080,18 @@ class Sample extends Backend
         $where['id'] = ['in', $ids];
         $row = $this->sampleworkorder->where($where)->select();
         foreach ($row as $v) {
-            if ($status == 3 || $status == 4 || $status == 5) {
-                if ($v['status'] >= 3) {
-                    $this->error('只有新建状态和待审核状态才能操作！！');
+            if ($status == 3 || $status == 4) {
+                if ($v['status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
+                    $is_update = 0;
+                    break;
+                }else{
+                    $is_update = 1;
+                }
+            }
+            if ($status == 5) {
+                if ($v['status'] != 1) {
+                    $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
                 }else{

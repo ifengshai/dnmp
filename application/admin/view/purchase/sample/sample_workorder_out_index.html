@@ -7,7 +7,7 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
-                        <a href="javascript:;" class="btn btn-success btn-add {:$auth->check('purchase/sample/sample_workorder_add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        <a href="javascript:;" class="btn btn-success btn-add {:$auth->check('purchase/sample/sample_workorder_out_add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
                         <a href="javascript:;" class="btn btn-success btn-check-pass {:$auth->check('purchase/sample/sample_workorder_out_setstatus') ?'':'hide'}" title="审核通过" >审核通过</a>
                         <a href="javascript:;" class="btn btn-danger btn-check-refuse {:$auth->check('purchase/sample/sample_workorder_out_setstatus')?'':'hide'}" title="审核拒绝" >审核拒绝</a>
                         <a href="javascript:;" class="btn btn-danger btn-check-cancel {:$auth->check('purchase/sample/sample_workorder_out_setstatus')?'':'hide'}" title="审核拒绝" >取消</a>
