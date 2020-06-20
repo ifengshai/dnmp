@@ -313,7 +313,7 @@ order by sfoi.item_id asc limit 1000";
             if (strpos($final_params['index_type'], 'Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-            
+
             if ($final_params['od_cyl']) {
                 if ((float) urldecode($final_params['od_cyl']) * 1 <= -4 || (float) urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
@@ -679,26 +679,26 @@ order by sfoi.item_id asc limit 1000";
 
             if ($final_params['od_cyl']) {
                 $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
+                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
                 $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
+                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -1049,24 +1049,24 @@ order by sfoi.item_id asc limit 1000";
             }
 
             if ($tmp_lens_params['od_cyl']) {
-                if ($tmp_lens_params['od_cyl'] * 1 <= -4 || $tmp_lens_params['od_cyl'] * 1 >= 4) {
+                if ((float) $tmp_lens_params['od_cyl'] * 1 <= -4 || (float) $tmp_lens_params['od_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
             if ($tmp_lens_params['os_cyl']) {
-                if ($tmp_lens_params['os_cyl'] * 1 <= -4 || $tmp_lens_params['os_cyl'] * 1 >= 4) {
+                if ((float) $tmp_lens_params['os_cyl'] * 1 <= -4 || (float) $tmp_lens_params['os_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['od_sph']) {
-                if (urldecode($tmp_lens_params['od_sph']) * 1 < -8 || urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($tmp_lens_params['od_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['os_sph']) {
-                if (urldecode($tmp_lens_params['os_sph']) * 1 < -8 || urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($tmp_lens_params['os_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
