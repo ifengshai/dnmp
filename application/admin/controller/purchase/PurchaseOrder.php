@@ -1113,6 +1113,10 @@ class PurchaseOrder extends Backend
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
+                    if (in_array($res['purchase_status'], [7, 8, 9, 10])) {
+                        continue;
+                    }
+
                     //待发货
                     if (in_array($v['baseInfo']['status'], ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
                         $list['purchase_status'] = 5;
