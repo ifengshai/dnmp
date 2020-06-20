@@ -314,6 +314,8 @@ order by sfoi.item_id asc limit 1000";
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
+            dump($order_item_value['order_id']);
+            dump($final_params['od_cyl']);
             if ($final_params['od_cyl']) {
                 if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
