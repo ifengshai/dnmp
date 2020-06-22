@@ -1154,7 +1154,6 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $filter = json_decode($this->request->get('filter'), true);
             
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             
