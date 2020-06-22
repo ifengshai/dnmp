@@ -73,9 +73,9 @@ class WorkOrderList extends Backend
         $this->users = $admin->where('status', 'normal')->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
-        //设置工单的配置值
-        global $workOrderConfigValue;
-        $workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
+        // //设置工单的配置值
+        // global $workOrderConfigValue;
+        // $workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
     }
 
     /**
