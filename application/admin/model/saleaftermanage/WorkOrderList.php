@@ -758,8 +758,8 @@ class WorkOrderList extends Model
      */
     public function checkWork($work_id, $params = [])
     {
-        $work = self::find($work_id);
 
+        $work = self::find($work_id);
         //判断是否已审核
         if ($work->check_time) return true;
         Db::startTrans();
@@ -827,6 +827,7 @@ class WorkOrderList extends Model
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
+                     
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
@@ -839,6 +840,8 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
+                                } elseif ($measure_choose_id == 7) {
+                                    $this->deductionStock($work->id, $orderRecept->measure_id);
                                 }
                                 $key++;
                             }
