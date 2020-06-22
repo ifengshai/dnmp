@@ -4177,7 +4177,7 @@ order by sfoi.item_id asc limit 1000";
             'SN01240-02'
         ];
         foreach ($skus as $k => $v) {
-            
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
@@ -4192,7 +4192,6 @@ order by sfoi.item_id asc limit 1000";
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
             $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            echo $this->voogueme->getLastSql();
             $map['sku'] = $nihao_sku;
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
@@ -4206,7 +4205,6 @@ order by sfoi.item_id asc limit 1000";
 
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
-            echo $voogueme_sku;
             dump($v);
             dump($data);
             $res = $this->item->where($p_map)->update($data);
@@ -4295,6 +4293,7 @@ order by sfoi.item_id asc limit 1000";
             'SN01240-02'
         ];
         foreach ($skus as $k => $v) {
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
