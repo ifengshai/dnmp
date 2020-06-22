@@ -1156,7 +1156,7 @@ class Sample extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             if($filter['sku']){
-                $where['sli.sku'] = $filter['sku'];
+                $where['sli.sku'] = array('like','%'.$filter['sku'].'%');
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->samplelendlog->alias('sl')
