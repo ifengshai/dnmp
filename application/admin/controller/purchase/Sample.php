@@ -1154,18 +1154,23 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if($filter['sku']){
+                $where['sli.sku'] = $filter['sku'];
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->samplelendlog
+            $total = $this->samplelendlog->alias('sl')
+                ->join(['fa_purchase_sample_lendlog_item'=> 'sli'],'sl.id=sli.log_id')
+                ->field('sl.id')
                 ->where($where)
-                ->order($sort, $order)
                 ->count();
-
-            $list = $this->samplelendlog
+            $list = $this->samplelendlog->alias('sl')
+                ->join(['fa_purchase_sample_lendlog_item'=> 'sli'],'sl.id=sli.log_id')
+                ->field('sl.*')
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['status_id'] = $value['status'];
