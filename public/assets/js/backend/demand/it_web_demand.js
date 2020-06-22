@@ -1809,6 +1809,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             closeBtn: 1,
                             title: row.title,
                             area:['60%'],
+                            maxHeight:'800',
                             shadeClose:true,
                             anim: 0,
                             content: value
