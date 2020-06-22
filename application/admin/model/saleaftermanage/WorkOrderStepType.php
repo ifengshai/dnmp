@@ -27,8 +27,7 @@ class WorkOrderStepType extends Model
     protected $append = [
 
     ];
-    
-
+    protected $resultSetType = 'collection';
     
 
 

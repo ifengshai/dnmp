@@ -27,9 +27,11 @@ class WorkOrderProblemStep extends Model
     protected $append = [
 
     ];
-    
+    protected $resultSetType = 'collection';
 
-    
+
+
+
 
 
 

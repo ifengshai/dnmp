@@ -24,13 +24,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('Id')},
+                        {field: 'id', title: __('id')},
                         {field: 'work_create_person_id', title: __('Work_create_person_id')},
-                        {field: 'work_create_person', title: __('Work_create_person')},
-                        {field: 'step_id', title: __('Step_id')},
+                        {field: 'work_create_person', title: __('创建人')},
+                        {field: 'step_id', title: __('措施')},
                         {field: 'step_value', title: __('Step_value')},
                         {field: 'symbol', title: __('Symbol')},
-                        {field: 'check_group_id', title: __('Check_group_id')},
+                        {field: 'check_group_id', title: __('审核组')},
                         {field: 'weight', title: __('Weight')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
