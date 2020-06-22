@@ -35,7 +35,7 @@ use app\api\controller\Ding;
  */
 class WorkOrderList extends Backend
 {
-    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent'];
+    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent', 'batch_export_xls'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
@@ -125,23 +125,22 @@ class WorkOrderList extends Backend
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
                 $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
                 //如果在我的任务选项卡中 点击了措施按钮
-                if ($workIds){
+                if ($workIds) {
                     if (!empty($filter['measure_choose_id'])) {
                         $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
                         //将两个数组相同的数据取出
                         $newWorkIds = array_intersect($workIds, $measuerWorkIds);
                         $newWorkIds = implode($newWorkIds);
-                        if (strlen($newWorkIds) > 0){
+                        if (strlen($newWorkIds) > 0) {
                             //数据查询的条件
                             $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
-                        }else{
+                        } else {
                             $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                         }
-                    }
-                    else{
+                    } else {
                         $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                     }
-                }else{
+                } else {
                     $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
@@ -178,7 +177,6 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-//            dump($map);
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -466,20 +464,19 @@ class WorkOrderList extends Backend
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
-                        if(1 == $params['work_type']){
+                        if (1 == $params['work_type']) {
                             $customerKefu = config('workorder.kefumanage');
-                            $customerArr = []; 
-                            foreach($customerKefu as $v){
-                                foreach($v as $vv){
-                                    $customerArr[] =$vv;
+                            $customerArr = [];
+                            foreach ($customerKefu as $v) {
+                                foreach ($v as $vv) {
+                                    $customerArr[] = $vv;
                                 }
                             }
-                            if(!in_array(session('admin.id'),$customerArr)){
-                                if(1 == $params['is_check']){
+                            if (!in_array(session('admin.id'), $customerArr)) {
+                                if (1 == $params['is_check']) {
                                     $params['assign_user_id'] = config('workorder.customer_manager');
                                 }
-                                
-                            }else{
+                            } else {
                                 $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                             }
                         }
@@ -787,14 +784,14 @@ class WorkOrderList extends Backend
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     $warehouseArr = config('workorder.warehouse_department_rule');
                     $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-                    if(!empty($checkIsWarehouse)){
+                    if (!empty($checkIsWarehouse)) {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
                         }
-                    }else{
+                    } else {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
-                        }                        
+                        }
                     }
 
                     //更换镜框判断是否有库存
@@ -951,19 +948,19 @@ class WorkOrderList extends Backend
                         throw new Exception('更新失败!!');
                     }
                     //如果不是客服人员则指定审核人为客服经理(只能客服工单) start
-                    if(1 == $params['work_type']){
+                    if (1 == $params['work_type']) {
                         $customerKefu = config('workorder.kefumanage');
-                        $customerArr = []; 
-                        foreach($customerKefu as $v){
-                            foreach($v as $vv){
-                                $customerArr[] =$vv;
+                        $customerArr = [];
+                        foreach ($customerKefu as $v) {
+                            foreach ($v as $vv) {
+                                $customerArr[] = $vv;
                             }
                         }
-                        if(!in_array(session('admin.id'),$customerArr)){
-                            if(1 == $params['is_check']){
+                        if (!in_array(session('admin.id'), $customerArr)) {
+                            if (1 == $params['is_check']) {
                                 $params['assign_user_id'] = config('workorder.customer_manager');
                             }
-                        }else{
+                        } else {
                             $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         }
                     }
@@ -1394,7 +1391,7 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-		    
+
         $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -1464,14 +1461,14 @@ class WorkOrderList extends Backend
         if (!empty($row->problem_type_id)) {
             $this->assignconfig('problem_type_id', $row->problem_type_id);
         }
-		//$ids = 520;
-		$workOrderNote = WorkOrderNote::where('work_id', $ids)->select(); //回复内容
-        $this->view->assign('workOrderNote', $workOrderNote); 
-		
-		
-		
-		//求出工单选择的措施传递到js页面
-        $measureList = WorkOrderMeasure::workMeasureList($row->id);  
+        //$ids = 520;
+        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select(); //回复内容
+        $this->view->assign('workOrderNote', $workOrderNote);
+
+
+
+        //求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
@@ -1491,8 +1488,8 @@ class WorkOrderList extends Backend
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
-		
-		//查询工单处理备注
+
+        //查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
         //获取处理的措施
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
@@ -1500,16 +1497,16 @@ class WorkOrderList extends Backend
 
         //判断站点
         if ($row['work_platform'] == 1 && $row['replenish_money']) {
-            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' .$row['replenish_money'];
+            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'];
         } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
             $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'];
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
             $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'];
         }
-     
-        $this->view->assign('url',$url);
+
+        $this->view->assign('url', $url);
         $this->view->assign('remarkList', $remarkList);
-       
+
         return $this->view->fetch();
     }
 
