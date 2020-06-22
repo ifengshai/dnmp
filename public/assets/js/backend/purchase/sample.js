@@ -376,6 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {checkbox: true},
                         {field: 'id', title: __('借出ID'),operate:false},
                         {field: 'status', title: __('状态'),searchList: {"1": __('待审核'), "2": __('已借出'), "3": __('已拒绝'), "4": __('已归还'), "5": __('已取消')}},
+                        {field: 'sku', title: __('SKU'),visible:false},
                         {field: 'create_user', title: __('申请人')},
                         {field: 'createtime', title: __('申请时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
