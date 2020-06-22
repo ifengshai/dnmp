@@ -4192,6 +4192,7 @@ order by sfoi.item_id asc limit 1000";
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
             $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            echo $this->voogueme->getLastSql();
             $map['sku'] = $nihao_sku;
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
