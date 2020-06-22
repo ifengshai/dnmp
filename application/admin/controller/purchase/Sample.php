@@ -1154,11 +1154,9 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $filter = json_decode($this->request->get('filter'), true);
-            if($filter['sku']){
-                $where['sli.sku'] = array('like','%'.$filter['sku'].'%');
-            }
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $total = $this->samplelendlog->alias('sl')
                 ->join(['fa_purchase_sample_lendlog_item'=> 'sli'],'sl.id=sli.log_id')
                 ->field('sl.id')
