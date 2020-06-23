@@ -2156,10 +2156,11 @@ class WorkOrderList extends Backend
                     $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
                 $recept_id = $params['recept_id'];
-                $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
+                $receptInfoArr =  (new WorkOrderRecept())->getAllRecept($recept_id);
+                $receptInfo    = (new WorkOrderRecept())->getOneRecept($recept_id);
                 $result = false;
-                if (is_array($receptInfo)) {
-                    if (!in_array(session('admin.id'),$receptInfo)) {
+                if (is_array($receptInfoArr)) {
+                    if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
                     }
                     //当要处理成功时需要判断库存是否存在
