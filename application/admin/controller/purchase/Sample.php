@@ -1162,13 +1162,11 @@ class Sample extends Backend
                 ->field('sl.id')
                 ->where($where)
                 ->count();
-            $list = $this->samplelendlog->alias('sl')
-                ->join(['fa_purchase_sample_lendlog_item'=> 'sli'],'sl.id=sli.log_id')
-                ->field('sl.*')
+            $list = $this->samplelendlog
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select();
+                ->select(false);
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['status_id'] = $value['status'];
