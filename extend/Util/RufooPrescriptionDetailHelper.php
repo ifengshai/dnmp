@@ -16,11 +16,12 @@ class RufooPrescriptionDetailHelper
 		if (!$entity_id) {
 			return false;
 		}
+
 		$model = new \app\admin\model\order\printlabel\Rufoo;
 		$map['a.id'] = $entity_id;
 		$item_list = $model->field('sku,b.total,optionname,lens_data,a.createtime,ordersn,a.status,a.price,a.dispatchprice,c.title,b.unitprice')->where($map)->alias('a')
-			->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
-			->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
+			->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
+			->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
 			->select();
 		if ($item_list) {
 			$item_list = collection($item_list)->toArray();
@@ -118,35 +119,22 @@ class RufooPrescriptionDetailHelper
 			$items[$item_key]['qty_ordered'] = $item_value['total'];
 			$product_options = json_decode($item_value['lens_data'], true);
 			$final_params = array();
-			$final_params['index_type'] = $item_value['optionname'];//镜片名称
-			$final_params['unitprice'] = $item_value['unitprice'];//单价
-			$final_params['unitprice'] = $item_value['unitprice'];//单价
+			$final_params['index_type'] = $item_value['optionname']; //镜片名称
+			$final_params['unitprice'] = $item_value['unitprice']; //单价
+			$final_params['price'] = $item_value['price']; //订单总价
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
-			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
-			$items[$item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-			$items[$item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
-			$items[$item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
-			$items[$item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
-			$items[$item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
-			$items[$item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-			$items[$item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
-			$items[$item_key]['options']  = $product_options['options'];
-			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
-			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-			$prescription_params = explode("&", $prescription_params);
-			$lens_params = array();
-			foreach ($prescription_params as $key => $value) {
-				$arr_value = explode("=", $value);
-				$lens_params[$arr_value[0]] = $arr_value[1];
-			}
-			$final_params = array_merge($lens_params, $final_params);
+			$items[$item_key]['index_name'] = $final_params['index_name'] = $item_value['optionname'];
+			$items[$item_key]['lens'] = $final_params['lens'] =  $item_value['optionname'];
 
+			if ($product_options) {
+				$final_params = array_merge($product_options, $final_params);
+			}
+			
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 			$items[$item_key]['index_type'] = $final_params['index_type'];
-			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
+			$items[$item_key]['prescription_type'] = $final_params['type'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
 			$items[$item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;

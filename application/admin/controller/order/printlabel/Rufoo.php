@@ -157,32 +157,32 @@ class Rufoo extends Backend
                 [
                     'id' => 1,
                     'content' => '打标签',
-                    'createtime' => $row['custom_print_label_created_at'],
-                    'person' => $row['custom_print_label_person']
+                    'createtime' => $row['custom_print_label_created_at_new'],
+                    'person' => $row['custom_print_label_person_new']
                 ],
                 [
                     'id' => 2,
                     'content' => '配镜架',
-                    'createtime' => $row['custom_match_frame_created_at'],
-                    'person' => $row['custom_match_frame_person']
+                    'createtime' => $row['custom_match_frame_created_at_new'],
+                    'person' => $row['custom_match_frame_person_new']
                 ],
                 [
                     'id' => 3,
                     'content' => '配镜片',
-                    'createtime' => $row['custom_match_lens_created_at'],
-                    'person' => $row['custom_match_lens_person']
+                    'createtime' => $row['custom_match_lens_created_at_new'],
+                    'person' => $row['custom_match_lens_person_new']
                 ],
                 [
                     'id' => 4,
                     'content' => '加工',
-                    'createtime' => $row['custom_match_factory_created_at'],
-                    'person' => $row['custom_match_factory_person']
+                    'createtime' => $row['custom_match_factory_created_at_new'],
+                    'person' => $row['custom_match_factory_person_new']
                 ],
                 [
                     'id' => 5,
-                    'content' => '提货',
-                    'createtime' => $row['custom_match_delivery_created_at'],
-                    'person' => $row['custom_match_delivery_person']
+                    'content' => '质检',
+                    'createtime' => $row['custom_match_delivery_created_at_new'],
+                    'person' => $row['custom_match_delivery_person_new']
                 ],
             ];
             $total = count($list);
@@ -200,11 +200,11 @@ class Rufoo extends Backend
         $entity_ids = input('id_params/a');
         $label = input('label');
         if ($entity_ids) {
-            $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label'] = 1;
-            $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.nickname');
-            $connect = Db::connect('database.db_meeloog')->table('sales_flat_order');
+            $map['id'] = ['in', $entity_ids];
+            $data['custom_print_label_new'] = 1;
+            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person_new'] =  session('admin.nickname');
+            $connect = $this->model;
             $connect->startTrans();
             try {
                 $result = $connect->where($map)->update($data);
@@ -217,12 +217,6 @@ class Rufoo extends Backend
                 $this->error($e->getMessage());
             }
             if (false !== $result) {
-                $params['type'] = 1;
-                $params['num'] = count($entity_ids);
-                $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 2;
-                (new OrderLog())->setOrderLog($params);
-
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
@@ -253,7 +247,7 @@ class Rufoo extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        $res = $this->model->field('ordersn,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
@@ -313,7 +307,11 @@ class Rufoo extends Backend
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->field('sku,a.ordersn,b.total')->where($map)->alias('a')
+                    ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
+                    ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
+                    ->select();
+                $list = collection($list)->toArray();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };

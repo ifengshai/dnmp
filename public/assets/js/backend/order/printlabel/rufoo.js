@@ -53,7 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('镜片参数'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/printlabel/meeloog/detail',
+                                    url: 'order/printlabel/rufoo/detail',
                                     extend: 'data-area = \'["60%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -69,7 +69,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('操作记录'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/printlabel/meeloog/operational',
+                                    url: 'order/printlabel/rufoo/operational',
                                     extend: 'data-area = \'["60%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
