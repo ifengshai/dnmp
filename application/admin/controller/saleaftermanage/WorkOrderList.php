@@ -76,7 +76,7 @@ class WorkOrderList extends Backend
         $this->assignconfig('admin_id', session('admin.id'));
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
-        $this->users = $admin->column('nickname', 'id');
+        $this->users = $admin->where('status','normal')->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
     }
@@ -1012,6 +1012,9 @@ class WorkOrderList extends Backend
                                 $appointList[$key]['work_id'] = $work_id;
                                 $appointList[$key]['measure_id'] = $res;
                                 //如果没有承接人 默认为创建人
+                                if($appoint_users[$key] == 'undefined'){
+                                    continue;
+                                }
                                 if ($val == 'undefined') {
                                     $appointList[$key]['recept_group_id'] = $this->assign_user_id;
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
