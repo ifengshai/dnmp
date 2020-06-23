@@ -145,7 +145,7 @@ class ItWebDemand extends Backend
                 $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
                 unset($filter['test_user_id_arr']);
             }
-            
+
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -175,6 +175,7 @@ class ItWebDemand extends Backend
             $list = collection($list)->toArray();
             //检查有没有权限
             $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
             $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
             $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
@@ -270,6 +271,7 @@ class ItWebDemand extends Backend
                 //$this->user_id = $this->auth->id;
                 //权限赋值
                 $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_supper_edit'] = $permissions['demand_supper_edit'];
                 $list[$k]['demand_del'] = $permissions['demand_del'];
                 $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
                 $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
@@ -499,13 +501,13 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
 
                 //判断当前登录人是否显示应该操作的按钮
-               /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
-                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
-                        $list[$k]['is_test_record_hidden'] = 1;
-                        $list[$k]['is_test_finish_hidden'] = 1;
-                    }
-                }
-                */
+                /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                         $list[$k]['is_test_record_hidden'] = 1;
+                         $list[$k]['is_test_finish_hidden'] = 1;
+                     }
+                 }
+                 */
 
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
@@ -703,11 +705,11 @@ class ItWebDemand extends Backend
      */
     public function add()
     {
-       /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
-        $user_id[] =  '0550643549844645';//李想
-        $user_id[] =  '0333543233781107';//张晓
-        $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-        dump($res);exit;*/
+        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+         $user_id[] =  '0550643549844645';//李想
+         $user_id[] =  '0333543233781107';//张晓
+         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+         dump($res);exit;*/
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -818,6 +820,19 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 超级编辑权限
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/19 16:26:07 
+     * @param [type] $ids
+     * @return void
+     */
+    public function supper_edit($ids = null)
+    {
+
+    }
     /**
      * 逻辑删除
      * */
@@ -1055,6 +1070,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 1;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1066,6 +1082,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 2;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1108,7 +1125,14 @@ class ItWebDemand extends Backend
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
-                            Ding::dingHook(__FUNCTION__, $row);
+                            //前端点击完成 后端点击完成 其他点击完成
+                            if ($code == 1){
+                                Ding::dingHook('web_group_finish', $row);
+                            }elseif ($code == 2){
+                                Ding::dingHook('php_group_finish', $row);
+                            }else{
+                                Ding::dingHook(__FUNCTION__, $row);
+                            }
                             $this->success('成功');
                         } else {
                             $this->error('失败');
@@ -1285,16 +1309,16 @@ class ItWebDemand extends Backend
                     }
 
                 }else{
-                $params['create_time'] =  date('Y-m-d H:i',time());
-                $params['create_user_id'] =  $this->auth->id;
-                $res_status = $this->testRecordModel->allowField(true)->save($params);
+                    $params['create_time'] =  date('Y-m-d H:i',time());
+                    $params['create_user_id'] =  $this->auth->id;
+                    $res_status = $this->testRecordModel->allowField(true)->save($params);
 
-                if ($res_status) {
-                    Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
+                    if ($res_status) {
+                        Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -1502,7 +1526,7 @@ class ItWebDemand extends Backend
 
 
     /**
-    *  bug列表页面
+     *  bug列表页面
      * 是否扣除测试绩效
      */
 
@@ -1574,7 +1598,7 @@ class ItWebDemand extends Backend
 
 
     /**
-    *  bug列表页面
+     *  bug列表页面
      * 是否工作时间处理问题
      */
 

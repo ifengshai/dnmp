@@ -1,20 +1,14 @@
 <?php
 
-namespace app\admin\model\saleaftermanage;
+namespace app\admin\model;
 
 use think\Model;
 
-
-class WorkOrderProblemStep extends Model
+class OrderNodeCopy extends Model
 {
-
-    
-
-    
-
     // 表名
-    protected $name = 'work_order_problem_step';
-    
+    protected $name = 'order_node_copy1';
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -24,19 +18,8 @@ class WorkOrderProblemStep extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    protected $resultSetType = 'collection';
-
-
-
-
-
-
-
-
-
-
+    
 
 }

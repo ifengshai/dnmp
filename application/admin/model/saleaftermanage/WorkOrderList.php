@@ -839,6 +839,8 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
+                                } elseif ($measure_choose_id == 7) {
+                                    $this->deductionStock($work->id, $orderRecept->measure_id);
                                 }
                                 $key++;
                             }

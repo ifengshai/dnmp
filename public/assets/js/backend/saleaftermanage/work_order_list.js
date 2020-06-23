@@ -520,6 +520,77 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //获取是否需要审核
                         var step_is_check = $('#step' + id + '-is_check').val();
                         is_check.push(step_is_check);
+
+                        //修改地址
+                        if(id == 1){
+                            $("#user_address").show();
+                            $("#label_name").html('修改地址');
+                            $("#toolbar1").hide();
+                            var site_type = $('#work_platform').val();
+                            //id == 3修改地址
+                            //获取用户地址的信息
+                            Backend.api.ajax({
+                                url: 'saleaftermanage/work_order_list/ajaxGetAddress',
+                                data: {
+                                 increment_id: incrementId,
+                                    site_type: site_type,
+                                }
+                            }, function (json, ret) {
+                                if (json.code == 0) {
+                                    Toastr.error(json.msg);
+                                    return false;
+                                }
+                                var data = json.address;
+                                var order_pay_currency = $('#order_pay_currency').val();
+                                //修改地址
+                                var address = '';
+                                for (var i = 0; i < data.address.length; i++) {
+                                    if (i == 0) {
+                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                        //补发地址自动填充第一个
+                                        $('#c-firstname').val(data.address[i].firstname);
+                                        $('#c-lastname').val(data.address[i].lastname);
+                                        var email = data.address[i].email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
+                                        $('#c-telephone').val(data.address[i].telephone);
+                                        $('#c-country').val(data.address[i].country_id);
+                                        $('#c-country').change();
+                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                            $('#c-region').val(0);
+                                        }else{
+                                            $('#c-region').val(data.address[i].region_id);
+                                        }
+                                        $('#c-city').val(data.address[i].city);
+                                        $('#c-street').val(data.address[i].street);
+                                        $('#c-postcode').val(data.address[i].postcode);
+                                        $('#c-currency_code').val(order_pay_currency);
+                                    } else {
+                                        address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                    }
+                                }
+                                $('#address_select').html(address);
+                                //选择地址切换地址
+                                $('#address_select').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#c-firstname').val(address.firstname);
+                                    $('#c-lastname').val(address.lastname);
+                                    $('#c-email').val(address.email);
+                                    $('#c-telephone').val(address.telephone);
+                                    $('#c-country').val(address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(address.region_id);
+                                    $('#c-city').val(address.city);
+                                    $('#c-street').val(address.street);
+                                    $('#c-postcode').val(address.postcode);
+                                })
+
+                                $('.selectpicker ').selectpicker('refresh');
+                            });
+                        }
                     });
                     //判断如果存在1 则改为需要审核
                     if ($.inArray("1", is_check) != -1) {

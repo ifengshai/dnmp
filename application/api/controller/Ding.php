@@ -71,7 +71,7 @@ class Ding extends Controller
      * @author mjj
      * @since 2020/06/15 15:52:31 
      * @param [type] 客服的钉钉id集合，格式'246806095338604104,285168290324340480,225802421126255952'
-     * @param [type] 时间戳  
+     * @param [type] 时间戳
      * @return void
      */
     public function getRestList($userlist_str,$time){
@@ -340,7 +340,7 @@ class Ding extends Controller
             'userid_list' => join(',', $userIds),
             'msg' => json_encode($link)
         ];
-    
+
         //$params = send_ding_message(['0550643549844645'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
         $return_date = $this->app->conversation->sendCorporationMessage($params);
         return $return_date;
@@ -372,7 +372,7 @@ class Ding extends Controller
                 unset($users[$k]);
             }
         }
-        
+
         if (!$title) {
             $title = '您有一条新消息';
         }
@@ -408,12 +408,12 @@ class Ding extends Controller
     public static function siteType($type_id)
     {
         return [
-            'zeelool',
-            'voogueme',
-            'nihao',
-            'wesee',
-            'orther'
-        ][$type_id - 1]?? '';
+                'zeelool',
+                'voogueme',
+                'nihao',
+                'wesee',
+                'orther'
+            ][$type_id - 1]?? '';
     }
 
     /**
@@ -478,10 +478,20 @@ class Ding extends Controller
                 $send_ids = explode(',', $demand ->test_user_id); // 测试负责人
                 $msg = '任务已完成, 等待测试';
                 break;
+            case 'web_group_finish':
+                //通知前端人员
+                $send_ids = explode(',', $demand ->web_designer_user_id); // 前端负责人
+                $msg = '任务已完成, 等待测试';
+                break;
+            case 'php_group_finish':
+                //通知后端人员
+                $send_ids = explode(',', $demand ->phper_user_id); // 后端负责人
+                $msg = '任务已完成, 等待测试';
+                break;
             case 'test_record_bug':         // 测试组记录问题 - 通知相关负责人(关联fa_it_test_record表)
                 // $record = ItTestRecord::get(['pid' =>$demand ->id]);
                 $record = \think\Db::name('it_test_record') // 刚刚填的测试问题
-                    ->where('pid', $demand ->id)
+                ->where('pid', $demand ->id)
                     ->order('id', 'desc')
                     ->find();
                 $send_ids = array_merge(
@@ -545,18 +555,18 @@ class Ding extends Controller
         $msg = ''; // 消息内容
         switch ($name) { //type =1 BUG    type =2 需求
             case 'add':                     // 添加内容通知, 需求管理通知产品经理审核，产品经理审核通过通知 开发主管审核，  开发主管分配完成 通知开发负责人，  开发人员点击开发完成，通知测试人，测试通过通知产品经理确认，产品经理确认完成 通知测试进行回归测试。中间节点，测试记录问题通知责任人
-               if ($demand->type==1) {
-                   $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
-                   $entry_user = Admin::get($demand ->create_person_id) ->nickname;
-                   $msg =$entry_user .'刚刚录入了一个新的['. self::demandType($demand ->type). '], 请关注';
-                   break;
-               } elseif ($demand->type==2) {
-                   $send_ids = Auth::getUsersId('demand/develop_demand/review') ?: [];
-                   $entry_user = Admin::get($demand ->create_person_id) ->nickname;
-                   $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 等待您的审核';
-                   break;
-               }
-               // no break
+                if ($demand->type==1) {
+                    $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                    $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                    $msg =$entry_user .'刚刚录入了一个新的['. self::demandType($demand ->type). '], 请关注';
+                    break;
+                } elseif ($demand->type==2) {
+                    $send_ids = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                    $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                    $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 等待您的审核';
+                    break;
+                }
+            // no break
             case 'review':             // 产品经理审核通过
                 if ($demand->review_status_manager==1) {
                     $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: []; // 所有有权限点击测试确认的用户
