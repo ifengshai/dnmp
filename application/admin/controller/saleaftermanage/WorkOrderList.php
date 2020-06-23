@@ -45,6 +45,12 @@ class WorkOrderList extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        //设置工单的配置值
+        ##### start ######
+        global $workOrderConfigValue;
+        $workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
+        $this->assignconfig('workOrderConfigValue',$workOrderConfigValue);
+        ###### end ######
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->order_change = new \app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -70,12 +76,9 @@ class WorkOrderList extends Backend
         $this->assignconfig('admin_id', session('admin.id'));
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
-        $this->users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $this->users = $admin->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
-        // //设置工单的配置值
-        // global $workOrderConfigValue;
-        // $workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
     }
 
     /**
@@ -250,7 +253,7 @@ class WorkOrderList extends Backend
     /**
      * 添加(原先)
      */
-    public function add($ids = null)
+    public function add_yuan($ids = null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -714,7 +717,7 @@ class WorkOrderList extends Backend
      * @param [type] $ids
      * @return void
      */
-    public function add_yuan($ids = null)
+    public function add($ids = null)
     {
         global $workOrderConfigValue;
         if ($this->request->isPost()) {

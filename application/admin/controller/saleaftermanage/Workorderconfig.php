@@ -194,9 +194,8 @@ class Workorderconfig extends Backend
         $all_step         = (new WorkOrderStepType)->where($where)->select();
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
-        //客服A组主管，B组主管
-        $where_group['a.name'] =['in',['B组客服主管','A组客服主管']];
-        $all_group =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->where($where_group)->field('a.id,a.name,s.uid')->select();
+        //所有的组分别对应的用户
+        $all_group =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
         //所有的跟单员规则
         $all_documentary = (new WorkOrderDocumentary)->select();
         //所有工单类型措施关系表
@@ -209,9 +208,14 @@ class Workorderconfig extends Backend
         $warehouse_department_rule = config('workorder.warehouse_department_rule');
         //财务角色组
         $finance_department_rule   = config('workorder.finance_department_rule');
-        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two
-        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = $kefumanage = $documentary_group = $documentary_person = $customer_problem_classify =[];
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合
+        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr 
+        = $step = $platform = $kefumanage = $documentary_group = $documentary_person
+        = $customer_problem_classify = $relation_problem_step = $group = [];
+        //a,b组ID a,b组的主管ID
         $a_group_id = $b_group_id = $a_uid = $b_uid = 0;
+        //所有的组分别对应的有哪些用户
+        //$all_group_user = Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
         //不存在问题类型
         if (!empty($all_problem_type)) {
             $all_problem_type = collection($all_problem_type)->toArray();
@@ -243,14 +247,14 @@ class Workorderconfig extends Backend
 
             }
         }
-        //不存在措施
+        //存在措施
         if (!empty($all_step)) {
             $all_step         = collection($all_step)->toArray();      
             foreach ($all_step as $sv) {
                 $step[$sv['id']] = $sv['step_name'];
             }
         }
-        //不存在A、B组
+        //存在A、B组
         if (!empty($all_group)) {
             foreach ($all_group as $av) {
                 if ('A组客服主管' == $av['name']) {
@@ -260,6 +264,7 @@ class Workorderconfig extends Backend
                     $b_group_id = $av['id'];
                     $b_uid = $av['uid'];
                 }
+                $group[$av['id']][] = $av['uid'];
             }
             //A、B下面的分组的所有的人
             $where_group_id['a.pid'] = ['in',[$a_group_id,$b_group_id]];
@@ -292,9 +297,10 @@ class Workorderconfig extends Backend
         }
         //不存在工单类型措施关系表
         if(!empty($all_problem_step)){
-            $all_problem_step = collection($all_problem_step)->toArray();  
-        }else{
-            $all_problem_step = [];
+            $all_problem_step = collection($all_problem_step)->toArray();
+            foreach($all_problem_step as $fv){
+                $relation_problem_step[$fv['problem_id']][] = $fv;
+            }  
         }
         //不存在工单规则审核表
         if(!empty($all_check_rule)){
@@ -313,11 +319,12 @@ class Workorderconfig extends Backend
         $arr['step']                          = $step;
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
-        $arr['all_problem_step']              = $all_problem_step;
+        $arr['all_problem_step']              = $relation_problem_step;
         $arr['all_check_rule']                = $all_check_rule;
         $arr['customer_department_rule']      = $customer_department_rule;
         $arr['warehouse_department_rule']     = $warehouse_department_rule;
         $arr['finance_department_rule']       = $finance_department_rule;
+        $arr['group']                         = $group;  
         Cache::set('Workorderconfig_getConfigInfo', $arr);  
         return $arr;
     }

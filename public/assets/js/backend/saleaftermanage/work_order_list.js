@@ -395,28 +395,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#after_user_id').val(Config.workorder.copy_group);
                     $('#after_user').html(Config.users[Config.workorder.copy_group]);
                 } else { //如果是客服人员添加的工单
-                    console.log(Config.workorder);
+                    //选择的问题类型ID
                     var id = $(this).val();
-                    //id大于5 默认措施4
-                    if (id > 5) {
-                        var steparr = Config.workorder['step04'];
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
-                    } else {
-                        var step = Config.workorder.customer_problem_group[id].step;
-                        var steparr = Config.workorder[step];
-                        //console.log(steparr);
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
+                    var all_group = Config.workOrderConfigValue.group;
+                    //所有的问题类型对应措施表
+                    var all_problem_step = Config.workOrderConfigValue.all_problem_step;
+                    //求出选择的问题类型对应的措施
+                    var choose_problem_step = all_problem_step[id];
+                    if(choose_problem_step == undefined){
+                        Toastr.error('选择的问题类型没有对应的措施，请重新选择问题类型或者添加措施');
+                        return false;
                     }
+                    //循环列出对应的措施
+                    for(var j=0;j<choose_problem_step.length;j++){
+                        //console.log(choose_problem_step[j].step_id);
+                        $('#step' + choose_problem_step[j].step_id).parent().show();
+                        $('#step' + choose_problem_step[j].step_id + '-is_check').val(choose_problem_step[j].is_check);
+                        if(choose_problem_step[j].extend_group_id !=undefined && choose_problem_step[j].extend_group_id !=0){
+                            $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
+                        }    
+                    }
+                    //id大于5 默认措施4
+                    // if (id > 5) {
+                    //     var steparr = Config.workorder['step04'];
+                    //     for (var j = 0; j < steparr.length; j++) {
+                    //         $('#step' + steparr[j].step_id).parent().show();
+                    //         //读取对应措施配置
+                    //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                    //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    //     }
+                    // } else {
+                    //     var step = Config.workorder.customer_problem_group[id].step;
+                    //     var steparr = Config.workorder[step];
+                    //     //console.log(steparr);
+                    //     for (var j = 0; j < steparr.length; j++) {
+                    //         $('#step' + steparr[j].step_id).parent().show();
+                    //         //读取对应措施配置
+                    //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                    //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    //     }
+                    // }
                     var checkID = [];//定义一个空数组
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
@@ -469,27 +487,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_group = '';
                     var input_content = '';
                     var is_check = [];
+                    //选中的问题类型
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
                         //获取承接组
-                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                         var group_id = $('#step' + id + '-appoint_group').val();
+                        // var group_arr = group.split(',')
+                        // var appoint_users = [];
+                        // var appoint_val = [];
+                        // for (var i = 0; i < group_arr.length; i++) {
+                        //     //循环根据承接组Key获取对应承接人id
+                        //     appoint_users.push(Config.workorder[group_arr[i]]);
+                        //     appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                        // }
 
-                        var group = $('#step' + id + '-appoint_group').val();
-                        var group_arr = group.split(',')
-                        var appoint_users = [];
-                        var appoint_val = [];
-                        for (var i = 0; i < group_arr.length; i++) {
-                            //循环根据承接组Key获取对应承接人id
-                            appoint_users.push(Config.workorder[group_arr[i]]);
-                            appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
-                        }
 
                         //循环根据承接人id获取对应人名称
-                        for (var j = 0; j < appoint_users.length; j++) {
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                        // for (var j = 0; j < appoint_users.length; j++) {
+                        //     input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                        //     input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                        //     input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                        // }
+                        var choose_group = Config.workOrderConfigValue.group[group_id];
+                        for(var j = 0;j< choose_group.length;j++){
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                         }
 
                         //获取是否需要审核
