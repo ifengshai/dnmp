@@ -1166,7 +1166,7 @@ class Sample extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select(false);
+                ->select();
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['status_id'] = $value['status'];
