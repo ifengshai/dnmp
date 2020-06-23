@@ -153,7 +153,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: Config.moduleurl + '/order/printlabel/meeloog/setOrderStatus',
+                            url: Config.moduleurl + '/order/printlabel/rufoo/setOrderStatus',
                             data: { id_params: ids, status: status },
                             type: 'post'
                         }, function (data, ret) {
@@ -182,7 +182,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 showToggle: false,
                 pagination: false,
                 extend: {
-                    index_url: 'order/printlabel/meeloog/operational' + location.search + '&ids=' + Config.ids,
+                    index_url: 'order/printlabel/rufoo/operational' + location.search + '&ids=' + Config.ids,
                 }
             });
 
@@ -216,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 showColumns: false,
                 showToggle: false,
                 extend: {
-                    index_url: 'order/printlabel/meeloog/_list' + location.search,
+                    index_url: 'order/printlabel/rufoo/_list' + location.search,
                     table: 'sales_flat_order',
                 }
             });

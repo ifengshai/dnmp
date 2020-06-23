@@ -9,7 +9,7 @@ use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Exception;
 use think\exception\PDOException;
-use Util\MeeloogPrescriptionDetailHelper;
+use Util\RufooPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
@@ -138,7 +138,7 @@ class Rufoo extends Backend
             $this->error(__('No Results were found'));
         }
         //解析处方
-        $result = MeeloogPrescriptionDetailHelper::get_one_by_entity_id($ids);
+        $result = RufooPrescriptionDetailHelper::get_one_by_entity_id($ids);
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -564,7 +564,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         list($where) = $this->buildparams();
 
-        $resultList = $this->model->field('a.status,sku,b.total,optionname,lens_data,a.createtime,ordersn')->where($map)->alias('a')
+        $resultList = $this->model->field('a.status,sku,b.total,optionname,lens_data,a.createtime,ordersn')
+            ->where($where)
+            ->where($map)
+            ->alias('a')
             ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
             ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
             ->select();
@@ -576,12 +579,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['created_at'] = date('Y-m-d', $value['createtime']);
 
             $tmp_lens_params = json_decode($value['lens_data'], true);
-            // dump($product_options);
-            $finalResult[$key]['coatiing_name'] = $tmp_lens_params['info_buyRequest']['tmplens']['coatiing_name'];
-            $finalResult[$key]['index_type'] = $tmp_lens_params['info_buyRequest']['tmplens']['index_type'];
-
-
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['index_type'] = $value['optionname'];
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['type']) ? $tmp_lens_params['type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
             $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
             $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
@@ -613,26 +612,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             //用户留言
             $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
 
-            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
-            $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
-            $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
-            $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+            // $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
+            // $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
+            // $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
+            // $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-        // dump($finalResult);
-        // exit;
-        //从数据库查询需要的数据
-        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
-        // Create new Spreadsheet object
-        $spreadsheet = new Spreadsheet();
-        // Add title
-        // $spreadsheet->setActiveSheetIndex(0)
-        // ->setCellValue('A1', 'ID')
-        // ->setCellValue('B1', '用户')
-        // ->setCellValue('C1', '详情')
-        // ->setCellValue('D1', '结果')
-        // ->setCellValue('E1', '时间')
-        // ->setCellValue('F1', 'IP');
 
+        $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
             ->setCellValue("B1", "订单号")
@@ -658,16 +644,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
-        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-
-        //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
-
         foreach ($finalResult as $key => $value) {
 
-            //网站SKU转换仓库SKU
-            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 4);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -699,7 +677,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), '');
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
 
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
