@@ -157,7 +157,8 @@
             <li><a href="{:url('/admin/order/printlabel/voogueme/_list')}">Voogueme</a></li>
             <li><a href="{:url('/admin/order/printlabel/nihao/_list')}">Nihao</a></li>
             <li><a href="{:url('/admin/order/printlabel/weseeoptical/_list')}">Weseeoptical</a></li>
-            <li  class="active"><a href="{:url('/admin/order/printlabel/meeloog/_list')}">Meeloog</a></li>
+            <li><a href="{:url('/admin/order/printlabel/meeloog/_list')}">Meeloog</a></li>
+            <li class="active"><a href="{:url('/admin/order/printlabel/rufoo/_list')}">Rufoo</a></li>
         </ul>
     </div>
     <div class="form-horizontal">
@@ -194,19 +195,19 @@
                             title="{:__('标记(已打印)')}"> {:__('标记状态(已打印)')}</a> -->
 
                         <a href="javascript:;" data-status="1"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/rufoo/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜架')}"> {:__('配镜架')}</a>
 
                         <a href="javascript:;" data-status="2"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/rufoo/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜片')}"> {:__('配镜片')}</a>
 
                         <a href="javascript:;" data-status="3"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/rufoo/setOrderStatus')?'':'hide'}"
                             title="{:__('加工')}"> {:__('加工')}</a>
 
                         <a href="javascript:;" data-status="4"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/rufoo/setOrderStatus')?'':'hide'}"
                             title="{:__('质检通过')}"> {:__('质检通过')}</a>
 
                         <!-- <a href="javascript:;"

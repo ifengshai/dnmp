@@ -216,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 showColumns: false,
                 showToggle: false,
                 extend: {
-                    index_url: 'order/printlabel/rufoo/_list' + location.search,
+                    index_url: 'order/printlabel/nihao/_list' + location.search,
                     table: 'sales_flat_order',
                 }
             });
@@ -226,31 +226,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'entity_id',
+                pk: 'id',
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'entity_id', title: __('记录标识'), operate: false },
-                        { field: 'increment_id', title: __('订单号') },
-                        { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "paypal_reversed": "paypal_reversed", "creditcard_proccessing": "creditcard_proccessing", 'complete': 'complete' } },
-                        { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
-                        { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
-
-                        { field: 'total_qty_ordered', title: __('SKU数量'), operate: false, formatter: Controller.api.formatter.int_format },
-                        { field: 'custom_print_label', title: __('打印标签'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_send_factory', title: __('加工'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'custom_is_delivery', title: __('质检'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-
-                        {
-                            field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
-                                if (value) {
-                                    return '<a href="' + Config.moduleurl + '/saleaftermanage/work_order_list/index?platform_order=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-dialog" data-table-id="table" target="_blank" data-field-index="11" data-row-index="0" data-button-index="3" title="工单"><i class="fa fa-list"></i> 工单</a>'
-                                }
-                            }
-                        },
-                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'id', title: __('记录标识'), operate: false },
+                        { field: 'ordersn', title: __('订单号'), operate: 'like' },
+                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "-1": __('取消'), "0": __('待付款'), "1": "待发货", "2": "已发货", "3": "已完成" }, custom: { '-1': 'danger', 0: 'green', 1: 'green', 2: 'green', 3: 'green' }, formatter: Table.api.formatter.status },
+                        { field: 'price', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'dispatchprice', title: __('运费'), operate: false},
+                        { field: 'custom_print_label_new', title: __('打印标签'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_frame_new', title: __('配镜架'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_lens_new', title: __('配镜片'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_send_factory_new', title: __('加工'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_delivery_new', title: __('质检'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'createtime', title: __('创建时间'), sortable: true, operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime },
+                        
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -259,7 +250,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('镜片参数'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/printlabel/meeloog/detail',
+                                    url: 'order/printlabel/rufoo/detail',
                                     extend: 'data-area = \'["60%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -275,7 +266,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('操作记录'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/printlabel/meeloog/operational',
+                                    url: 'order/printlabel/rufoo/operational',
                                     extend: 'data-area = \'["60%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -295,83 +286,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            //批量打印标签    
-            $('.btn-batch-printed').click(function () {
-                var ids = Table.api.selectedids(table);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    id_params += row['entity_id'] + ',';
-                });
-
-                window.open(Config.moduleurl + '/order/printlabel/meeloog/batch_print_label/id_params/' + id_params, '_blank');
-            });
-
-            //批量导出xls 
-            $('.btn-batch-export-xls').click(function () {
-                var ids = Table.api.selectedids(table);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    id_params += row['entity_id'] + ',';
-                });
-                window.open(Config.moduleurl + '/order/printlabel/meeloog/batch_export_xls/id_params/' + id_params, '_blank');
-            });
-
-            //批量标记已打印    
-            $('.btn-tag-printed').click(function () {
-                var ids = Table.api.selectedids(table);
-                var data = table.bootstrapTable("getAllSelections");
-                var newdata = $.extend(true, [], data); //复制一份数据
-                Layer.confirm(
-                    __('确定要这%s条记录 标记为 【已打印标签】吗?', ids.length),
-                    { icon: 3, title: __('Warning'), shadeClose: true },
-                    function (index) {
-                        Layer.close(index);
-                        Backend.api.ajax({
-                            url: Config.moduleurl + '/order/printlabel/meeloog/tag_printed',
-                            data: { id_params: ids, label: 'list' },
-                            type: 'post'
-                        }, function (data) {
-                            //移除所有
-                            table.bootstrapTable("removeAll");
-                            for (var i in newdata) {
-                                newdata[i].custom_is_delivery = data[i].custom_is_delivery;
-                                newdata[i].custom_is_match_frame = data[i].custom_is_match_frame;
-                                newdata[i].custom_is_match_lens = data[i].custom_is_match_lens;
-                                newdata[i].custom_is_send_factory = data[i].custom_is_send_factory;
-                                newdata[i].custom_print_label = data[i].custom_print_label;
-                            }
-                            //追加
-                            table.bootstrapTable("append", newdata);
-                            //取消选中
-                            table.bootstrapTable('uncheckAll');
-
-                            $('.btn-set-status').addClass('disabled');
-                            $('.btn-tag-printed').addClass('disabled');
-                            $('.btn-batch-printed').addClass('disabled');
-                        });
-
-                    }
-                );
-            })
-
-
+           
             //配镜架 配镜片 加工 质检通过 
             $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
                 var status = $(this).data('status');
                 var data = table.bootstrapTable("getData");
                 var newdata = $.extend(true, [], data); //复制一份数据
+
                 Layer.confirm(
                     __('确定要修改这%s条记录配货状态吗?', ids.length),
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: Config.moduleurl + '/order/printlabel/meeloog/setOrderStatus',
+                            url: Config.moduleurl + '/order/printlabel/rufoo/setOrderStatus',
                             data: { id_params: ids, status: status, label: 'list' },
                             type: 'post'
                         }, function (row) {
-
                             //移除所有
                             table.bootstrapTable("removeAll");
                             //取消选中
@@ -379,11 +311,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             for (var i in newdata) {
                                 for (var k in row) {
                                     if (row[k].entity_id == newdata[i].entity_id) {
-                                        newdata[i].custom_is_delivery = row[k].custom_is_delivery;
-                                        newdata[i].custom_is_match_frame = row[k].custom_is_match_frame;
-                                        newdata[i].custom_is_match_lens = row[k].custom_is_match_lens;
-                                        newdata[i].custom_is_send_factory = row[k].custom_is_send_factory;
-                                        newdata[i].custom_print_label = row[k].custom_print_label;
+                                        newdata[i].custom_is_delivery_new = row[k].custom_is_delivery_new;
+                                        newdata[i].custom_is_match_frame_new = row[k].custom_is_match_frame_new;
+                                        newdata[i].custom_is_match_lens_new = row[k].custom_is_match_lens_new;
+                                        newdata[i].custom_is_send_factory_new = row[k].custom_is_send_factory_new;
+                                        newdata[i].custom_print_label_new = row[k].custom_print_label_new;
                                     }
                                 }
                             }
@@ -395,7 +327,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             $('.btn-set-status').addClass('disabled');
                             $('.btn-tag-printed').addClass('disabled');
                             $('.btn-batch-printed').addClass('disabled');
-
                         });
 
                     }
@@ -404,9 +335,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             //搜索
             $(document).on('input', '#search_val', function (events) {
-                if (event.target.value.length == 9) {
+                if (event.target.value.length >= 9) {
                     Backend.api.ajax({
-                        url: Config.moduleurl + '/order/printlabel/meeloog/_list',
+                        url: Config.moduleurl + '/order/printlabel/rufoo/_list',
                         data: { increment_id: event.target.value },
                         type: 'post'
                     }, function (data, ret) {

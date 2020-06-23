@@ -98,33 +98,13 @@ class Rufoo extends Backend
         if ($this->request->isAjax()) {
             //订单号
             $increment_id = $this->request->post('increment_id');
-            if ($increment_id) {
-                $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-                $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,store_id,base_grand_total,
-                     total_qty_ordered,custom_is_match_frame,custom_is_match_lens,
-                     custom_is_send_factory,custom_is_delivery,custom_print_label,created_at';
-                $list = $this->model
-                    ->field($field)
-                    ->where($map)
-                    ->find();
-
-                if ($list) {
-                    //查询订单是否存在协同任务
-                    $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-                    $swhere['platform_order'] = $increment_id;
-                    $swhere['work_platform'] = 4;
-                    $swhere['work_status'] = ['not in', [0, 4, 6]];
-                    $count = $workorder->where($swhere)->count();
-                    //查询是否存在协同任务
-                    if ($count > 0) {
-                        $list['task_info'] = 1;
-                    }
-                }
-                $result = ['code' => 1, 'data' => $list ?? []];
-            } else {
-                $result = array("total" => 0, "rows" => []);
+            if (!$increment_id) {
+                return json([]);
             }
+            $map['ordersn'] = $increment_id;
+            $map['status'] = ['in', [1, 2, 3]];
+            $list = $this->model->where($map)->find();
+            $result = ['code' => 1, 'data' => $list ?? []];
             return json($result);
         }
         return $this->view->fetch('_list');
@@ -246,8 +226,9 @@ class Rufoo extends Backend
         }
         $status = input('status');
         $label = input('label');
-        $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('ordersn,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        $where['a.id'] =  ['in', $entity_ids];
+        $map['id'] = ['in', $entity_ids];
+        $res = $this->model->alias('a')->field('ordersn,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
@@ -307,7 +288,7 @@ class Rufoo extends Backend
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
-                $list = $this->model->field('sku,a.ordersn,b.total')->where($map)->alias('a')
+                $list = $this->model->field('sku,a.ordersn,b.total')->where($where)->alias('a')
                     ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
                     ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
                     ->select();
@@ -315,28 +296,18 @@ class Rufoo extends Backend
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
-                //sku映射表
-                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
 
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
-                    //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
-                    if (!$trueSku) {
+                    if (!$v['sku']) {
                         throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
 
-                    $qty = $v['qty_ordered'];
-
-                    // //判断是否有实时库存
-                    // $realStock = $item->getRealStock($trueSku);
-                    // if ($qty > $realStock) {
-                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
-                    // }
+                    $qty = $v['total'];
 
                     $map = [];
-                    $map['sku'] = $trueSku;
+                    $map['sku'] = $v['sku'];
                     $map['is_del'] = 1;
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
@@ -353,10 +324,10 @@ class Rufoo extends Backend
 
                     //插入日志表
                     (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 5,
+                        'increment_id'            => $v['ordersn'],
+                        'site'                     => 6, //如弗小程序
                         'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
+                        'sku'                     => $v['sku'],
                         'distribution_change_num' => $qty,
                         'operation_person'        => session('admin.nickname'),
                         'create_time'             => date('Y-m-d H:i:s')
@@ -369,26 +340,26 @@ class Rufoo extends Backend
             //质检通过扣减库存
             if ($status == 4) {
                 //查询出质检通过的订单
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->field('sku,a.ordersn,b.total')->where($where)->alias('a')
+                    ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
+                    ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
+                    ->select();
+                $list = collection($list)->toArray();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
-                //sku映射表
-                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
-                    //查出订单SKU映射表对应的仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
-                    if (!$trueSku) {
+                    if (!$v['sku']) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
                     }
-                    $qty = $v['qty_ordered'];
+                    $qty = $v['total'];
                     if ($qty == 0) {
                         continue;
                     }
 
                     //总库存
-                    $item_map['sku'] = $trueSku;
+                    $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
@@ -403,10 +374,10 @@ class Rufoo extends Backend
                     }
                     //插入日志表
                     (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 5,
+                        'increment_id'            => $v['ordersn'],
+                        'site'                    => 6,
                         'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
+                        'sku'                     => $v['sku'],
                         'stock_change_num'        => $qty,
                         'occupy_change_num'       => $qty,
                         'distribution_change_num' => $qty,
@@ -429,16 +400,11 @@ class Rufoo extends Backend
             $this->error($e->getMessage());
         }
         if (false !== $result) {
-            $params['num'] = count($entity_ids);
-            $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 5;
-            (new OrderLog())->setOrderLog($params);
-
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
                 //订单号
                 $map = [];
-                $map['entity_id'] = ['in', $entity_ids];
+                $map['id'] = ['in', $entity_ids];
                 $list = $this->model
                     ->where($map)
                     ->select();
@@ -691,9 +657,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
             if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
-                // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
                 //数值在上一行合并有效，数值在下一行合并后为空
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
@@ -908,8 +873,8 @@ EOF;
                 //处理ADD  当ReadingGlasses时 是 双ADD值
                 if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['od_add'] * 1 != 0 &&  (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
-                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
-                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    $od_add = "<td>" . $final_print['od_add'] . "</td> ";
+                    $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                 } else {
                     // echo '单ADD值';
                     $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
