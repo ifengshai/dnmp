@@ -25,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'type', title: __('Type')},
+                        {field: 'type', title: __('创建者类型'),custom: { 1: 'blue', 2: 'danger'}, searchList: { 1: '组创建', 2: '人创建' }, formatter: Table.api.formatter.status },
                         {field: 'create_id', title: __('Create_id')},
                         {field: 'create_name', title: __('Create_name')},
                         {field: 'documentary_group_id', title: __('Documentary_group_id')},
