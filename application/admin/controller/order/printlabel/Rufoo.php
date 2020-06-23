@@ -13,6 +13,7 @@ use Util\MeeloogPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+
 /**
  * Sales Flat Order
  *
@@ -64,7 +65,7 @@ class Rufoo extends Backend
             // } elseif (!$filter['status']) {
             //     $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             // }
-       
+
 
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -78,7 +79,7 @@ class Rufoo extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-                
+
 
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -113,7 +114,7 @@ class Rufoo extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 4;
-                    $swhere['work_status'] = ['not in', [0,4,6]];
+                    $swhere['work_status'] = ['not in', [0, 4, 6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     if ($count > 0) {
@@ -252,62 +253,50 @@ class Rufoo extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
+        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
         foreach ($res as $v) {
-            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+            if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
-            if ($v['custom_is_delivery'] == 1) {
+            if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
 
-            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+            if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
-        }
-
-        //判断订单是否存在未处理完成的工单
-        $arr = array_column($res, 'increment_id');
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $count = $workorder->where([
-            'platform_order' => ['in', $arr],
-            'work_status' => ['in', [1, 2, 3, 5]],
-            'work_platform' => 4 //平台
-        ])->count();
-        if ($count > 0) {
-            $this->error('存在未处理的工单');
         }
 
         switch ($status) {
             case 1:
                 //配镜架
-                $data['custom_is_match_frame'] = 1;
-                $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_frame_person'] = session('admin.nickname');
+                $data['custom_is_match_frame_new'] = 1;
+                $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_frame_person_new'] = session('admin.nickname');
                 $params['type'] = 2;
                 break;
             case 2:
                 //配镜片
-                $data['custom_is_match_lens'] = 1;
-                $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_lens_person'] = session('admin.nickname');
+                $data['custom_is_match_lens_new'] = 1;
+                $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_lens_person_new'] = session('admin.nickname');
                 $params['type'] = 3;
                 break;
             case 3:
                 //移送加工
-                $data['custom_is_send_factory'] = 1;
-                $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_factory_person'] = session('admin.nickname');
+                $data['custom_is_send_factory_new'] = 1;
+                $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_factory_person_new'] = session('admin.nickname');
                 $params['type'] = 4;
                 break;
             case 4:
                 //质检通过
-                $data['custom_is_delivery'] = 1;
-                $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                $data['custom_match_delivery_person'] = session('admin.nickname');
+                $data['custom_is_delivery_new'] = 1;
+                $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_delivery_person_new'] = session('admin.nickname');
                 $params['type'] = 5;
                 break;
             default:
@@ -330,71 +319,17 @@ class Rufoo extends Backend
                 };
                 //sku映射表
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
-                //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
-                    ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 4, //平台类型
-                    ])
-                    ->group('change_sku')
-                    ->select();
-                $sku = [];
-                if ($infoRes) {
-                    foreach ($infoRes as $k => $v) {
-                        //sku转换
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 4);
-                        if (!$trueSku) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
-                        }
-                        // //判断是否有实时库存
-                        // $realStock = $item->getRealStock($trueSku);
-                        // if ($v['qty'] > $realStock) {
-                        //     throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
-                        // }
-                        //增加配货占用
-                        $map = [];
-                        $map['sku'] = $trueSku;
-                        $map['is_del'] = 1;
-                        $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
-                        if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
-                        }
-                        $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
-
-                        //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 4,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
-                        ]);
-                    }
-                }
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
                     //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
                     if (!$trueSku) {
                         throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
 
-                    //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
-                    if ($sku[$v['increment_id']][$v['sku']]) {
-                        $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
-                    } else {
-                        $qty = $v['qty_ordered'];
-                    }
-
-                    if ($qty == 0) {
-                        continue;
-                    }
+                    $qty = $v['qty_ordered'];
 
                     // //判断是否有实时库存
                     // $realStock = $item->getRealStock($trueSku);
@@ -421,7 +356,7 @@ class Rufoo extends Backend
                     //插入日志表
                     (new WorkChangeSkuLog())->setData([
                         'increment_id'            => $v['increment_id'],
-                        'site'                     => 4,
+                        'site'                     => 5,
                         'type'                     => 5, //配镜架
                         'sku'                     => $trueSku,
                         'distribution_change_num' => $qty,
@@ -442,60 +377,14 @@ class Rufoo extends Backend
                 };
                 //sku映射表
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
-                //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
-                    ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 4, //平台类型
-                    ])
-                    ->group('change_sku')
-                    ->select();
-                $sku = [];
-                if ($infoRes) {
-                    foreach ($infoRes as $k => $v) {
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 4);
-                        if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
-                        }
-                        //扣减总库存 扣减占用库存 扣减配货占用
-                        $map = [];
-                        $map['sku'] = $trueSku;
-                        $map['is_del'] = 1;
-                        $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
-                        if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
-                        }
-                        $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
-
-                        //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 4,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
-                        ]);
-                    }
-                }
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
                     //查出订单SKU映射表对应的仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
                     if (!$trueSku) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
                     }
-                    //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
-                    if ($sku[$v['increment_id']][$v['sku']]) {
-                        $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
-                    } else {
-                        $qty = $v['qty_ordered'];
-                    }
+                    $qty = $v['qty_ordered'];
                     if ($qty == 0) {
                         continue;
                     }
@@ -517,7 +406,7 @@ class Rufoo extends Backend
                     //插入日志表
                     (new WorkChangeSkuLog())->setData([
                         'increment_id'            => $v['increment_id'],
-                        'site'                    => 4,
+                        'site'                    => 5,
                         'type'                    => 6, //质检通过
                         'sku'                     => $trueSku,
                         'stock_change_num'        => $qty,
@@ -544,7 +433,7 @@ class Rufoo extends Backend
         if (false !== $result) {
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 4;
+            $params['site'] = 5;
             (new OrderLog())->setOrderLog($params);
 
             //用来判断是否从_list列表页进来
@@ -869,7 +758,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1011,18 +900,14 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     public function batch_print_label()
     {
         ob_start();
-        // echo 'batch_print_label';
-        $entity_ids = rtrim(input('id_params'), ',');
-        // dump($entity_ids);
-        if ($entity_ids) {
-            $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
-from sales_flat_order_item sfoi
-left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by NUM asc;";
-            $processing_order_list = Db::connect('database.db_meeloog')->query($processing_order_querySql);
-            // dump($processing_order_list);
-            $processing_order_list = $this->qty_order_check($processing_order_list);
+        $ids = rtrim(input('id_params'), ',');
+        if ($ids) {
+            $map['a.id'] = ['in', $ids];
+            $processing_order_list = $this->model->where($map)->alias('a')
+                ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
+                ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
+                ->select();
+            $processing_order_list = collection($processing_order_list)->toArray();
 
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -1041,60 +926,35 @@ EOF;
             $store_sku = new \app\admin\model\warehouse\StockHouse;
             $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
-            //查询sku映射表
-            $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->cache(3600)->column('sku', 'platform_sku');
-
             $file_content = '';
-            $temp_increment_id = 0;
+            $temp_increment_id = [];
             foreach ($processing_order_list as $processing_key => $processing_value) {
-                if ($temp_increment_id != $processing_value['increment_id']) {
-                    $temp_increment_id = $processing_value['increment_id'];
-
-                    $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "meeloog" . DS . "$date" . DS . "$temp_increment_id.png";
+                if (!in_array($processing_value['ordersn'], $temp_increment_id)) {
+                    $temp_increment_id[] = $processing_value['ordersn'];
+                    $date = substr($processing_value['createtime'], 0, strpos($processing_value['createtime'], " "));
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "rufoo" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "meeloog" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "rufoo" . DS . "$date";
+
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/meeloog/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/rufoo/$date/$temp_increment_id.png";
                     //生成条形码
-                    $this->generate_barcode($temp_increment_id, $fileName);
+                    $this->generate_barcode($processing_value['ordersn'], $fileName);
                     // echo '<br>需要打印'.$temp_increment_id;
                     $file_content .= "<div  class = 'single_box'>
                 <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
-                <tr><td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . str_replace(" ", "<br>", $processing_value['created_at']) . "</td>
+                <tr><td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . str_replace(" ", "<br>", date('Y-m-d H:i:s', $processing_value['createtime'])) . "</td>
                 <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
                 </table></div>";
                 }
-
-                $final_print = array();
-                $product_options = unserialize($processing_value['product_options']);
-                // dump($product_options);
-                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
-                // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
-                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-
-                $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-                if ($prescription_params) {
-                    $prescription_params = explode("&", $prescription_params);
-                    $lens_params = array();
-                    foreach ($prescription_params as $key => $value) {
-                        // dump($value);
-                        $arr_value = explode("=", $value);
-                        $lens_params[$arr_value[0]] = $arr_value[1];
-                    }
-                    // dump($lens_params);
-                    $final_print = array_merge($lens_params, $final_print);
-                }
-
-                // dump($final_print);
-
-                $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
+                $final_print = json_decode($processing_value['lens_data'], true);
+                $final_print['index_type'] = $processing_value['optionname'];
+                $final_print['prescription_type'] = $final_print['type'];
 
                 $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
                 $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
@@ -1111,11 +971,9 @@ EOF;
                 $final_print['pd_l'] = isset($final_print['pd_l']) ? $final_print['pd_l'] : '';
                 $final_print['pd'] = isset($final_print['pd']) ? $final_print['pd'] : '';
 
-                $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
-
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add']*1 != 0 && $final_print['os_add']*1 != 0) {
+                if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['od_add'] * 1 != 0 &&  (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1136,9 +994,6 @@ EOF;
                     $os_pd = "";
                 }
 
-                // dump($os_add);
-                // dump($od_add);
-
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {
                     $prismcheck_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
@@ -1156,8 +1011,8 @@ EOF;
                 $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
 
                 //判断货号是否存在
-                if ($item_res[$processing_value['sku']] && $cargo_number[$item_res[$processing_value['sku']]]) {
-                    $cargo_number_str = "<b>" . $cargo_number[$item_res[$processing_value['sku']]] . "</b><br>";
+                if ($cargo_number[$processing_value['sku']]) {
+                    $cargo_number_str = "<b>" . $cargo_number[$processing_value['sku']] . "</b><br>";
                 } else {
                     $cargo_number_str = "";
                 }
@@ -1170,7 +1025,7 @@ EOF;
             <span>" . $final_print['prescription_type'] . "</span>
             &nbsp;&nbsp;Order:" . $processing_value['increment_id'] . "
             <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
-            <span style=' margin-left:5px;'>Num:<strong>" . $processing_order_list[$processing_key]['NUM'] . "</strong></span>
+            <span style=' margin-left:5px;'>Num:<strong>" . $processing_value['total'] . "</strong></span>
             </td>
             </tr>  
             <tr class='title'>      

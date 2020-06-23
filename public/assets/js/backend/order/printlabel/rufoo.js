@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'ordersn', title: __('订单号'), operate: 'like' },
                         { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "-1": __('取消'), "0": __('待付款'), "1": "待发货", "2": "已发货", "3": "已完成" }, custom: { '-1': 'danger', 0: 'green', 1: 'green', 2: 'green', 3: 'green' }, formatter: Table.api.formatter.status },
                         { field: 'price', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
-                        { field: 'dispatchprice：', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'dispatchprice', title: __('运费'), operate: false},
 
                       
                         { field: 'custom_print_label_new', title: __('打印标签'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
@@ -36,7 +36,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'custom_is_match_lens_new', title: __('配镜片'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_send_factory_new', title: __('加工'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_delivery_new', title: __('质检'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-
+                        { field: 'custom_order_prescription_type', title: __('处方类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
+                        { field: 'createtime', title: __('创建时间'), sortable: true, operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime },
                         // {
                         //     field: 'category_id', title: __('任务分类'), searchList: function (column) {
                         //         return Template('categorytpl', {});
@@ -100,19 +101,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             //批量打印标签    
             $('.btn-batch-printed').click(function () {
-                console.log('id_params');
                 var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id'] + ',';
-                });
-                console.log(id_params);
-
-                // var ids = Table.api.selectedids(table);
-
-                window.open(Config.moduleurl + '/order/printlabel/meeloog/batch_print_label/id_params/' + id_params, '_blank');
+                window.open(Config.moduleurl + '/order/printlabel/rufoo/batch_print_label/id_params/' + ids, '_blank');
             });
 
 
@@ -120,13 +110,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/order/printlabel/meeloog/batch_export_xls?id_params=' + ids, '_blank');
+                    window.open(Config.moduleurl + '/order/printlabel/rufoo/batch_export_xls?id_params=' + ids, '_blank');
                 } else {
                     var options = table.bootstrapTable('getOptions');
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
-                    window.open(Config.moduleurl + '/order/printlabel/meeloog/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    window.open(Config.moduleurl + '/order/printlabel/rufoo/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
 
             });
@@ -140,7 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: Config.moduleurl + '/order/printlabel/meeloog/tag_printed',
+                            url: Config.moduleurl + '/order/printlabel/rufoo/tag_printed',
                             data: { id_params: ids },
                             type: 'post'
                         }, function (data, ret) {
