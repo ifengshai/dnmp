@@ -58,7 +58,7 @@ class Rufoo extends Backend
                 return $this->selectpage();
             }
 
-            $filter = json_decode($this->request->get('filter'), true);
+            // $filter = json_decode($this->request->get('filter'), true);
 
             // if ($filter['increment_id']) {
             //     $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
@@ -545,38 +545,14 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         $ids = input('id_params');
 
+        //默认状态为待发货
         $filter = json_decode($this->request->get('filter'), true);
-
-        if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        } elseif (!$filter['status'] && !$ids) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-        }
-
-        //是否有协同任务
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-            $swhere['work_platform'] = 4;
-            $swhere['work_status'] = ['<>', 0];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            if ($filter['task_label'] == 1) {
-                $map['increment_id'] = ['in', $order_arr];
-            } elseif ($filter['task_label'] == '0') {
-                $map['increment_id'] = ['not in', $order_arr];
-            }
-            unset($filter['task_label']);
-            $this->request->get(['filter' => json_encode($filter)]);
+        if (!$filter['status'] && !$ids && !$filter['ordersn']) {
+            $map['a.status'] = 1;
         }
 
         if ($ids) {
-            $map['sfo.entity_id'] = ['in', $ids];
-        }
-
-        if ($filter['created_at']) {
-            $created_at = explode(' - ', $filter['created_at']);
-            $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];
-            unset($filter['created_at']);
-            $this->request->get(['filter' => json_encode($filter)]);
+            $map['a.id'] = ['in', $ids];
         }
 
         //SKU搜索
@@ -587,43 +563,23 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         }
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
-        $resultList = $this->model->alias('sfo')
-            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
-            ->field($field)
-            ->where($map)
-            ->where($where)
-            ->order('sfoi.order_id desc')
+
+        $resultList = $this->model->field('a.status,sku,b.total,optionname,lens_data,a.createtime,ordersn')->where($map)->alias('a')
+            ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
+            ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
             ->select();
-
         $resultList = collection($resultList)->toArray();
-
-        $resultList = $this->qty_order_check($resultList);
-
         $finalResult = array();
-
         foreach ($resultList as $key => $value) {
-            $finalResult[$key]['increment_id'] = $value['increment_id'];
+            $finalResult[$key]['increment_id'] = $value['ordersn'];
             $finalResult[$key]['sku'] = $value['sku'];
-            $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
+            $finalResult[$key]['created_at'] = date('Y-m-d', $value['createtime']);
 
-            $tmp_product_options = unserialize($value['product_options']);
+            $tmp_lens_params = json_decode($value['lens_data'], true);
             // dump($product_options);
-            $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
-            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            $finalResult[$key]['coatiing_name'] = $tmp_lens_params['info_buyRequest']['tmplens']['coatiing_name'];
+            $finalResult[$key]['index_type'] = $tmp_lens_params['info_buyRequest']['tmplens']['index_type'];
 
-            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
-            if (isset($tmp_prescription_params)) {
-                $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                $tmp_lens_params = array();
-                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    // dump($value);
-                    $arr_value = explode("=", $tmp_value);
-                    if (isset($arr_value[1])) {
-                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                    }
-                }
-            }
 
             $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
@@ -903,7 +859,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $ids = rtrim(input('id_params'), ',');
         if ($ids) {
             $map['a.id'] = ['in', $ids];
-            $processing_order_list = $this->model->where($map)->alias('a')
+            $processing_order_list = $this->model->field('sku,b.total,optionname,lens_data,a.createtime,ordersn')->where($map)->alias('a')
                 ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
                 ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
                 ->select();
@@ -931,8 +887,9 @@ EOF;
             foreach ($processing_order_list as $processing_key => $processing_value) {
                 if (!in_array($processing_value['ordersn'], $temp_increment_id)) {
                     $temp_increment_id[] = $processing_value['ordersn'];
+                    $processing_value['ordersn'] = substr($processing_value['ordersn'], -12);
                     $date = substr($processing_value['createtime'], 0, strpos($processing_value['createtime'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "rufoo" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "rufoo" . DS . "$date" . DS . $processing_value['ordersn'] . ".png";
                     // dump($fileName);
                     $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "rufoo" . DS . "$date";
 
@@ -942,7 +899,7 @@ EOF;
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/rufoo/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/rufoo/$date/{$processing_value['ordersn']}.png";
                     //生成条形码
                     $this->generate_barcode($processing_value['ordersn'], $fileName);
                     // echo '<br>需要打印'.$temp_increment_id;
@@ -1023,7 +980,7 @@ EOF;
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
             <span>" . $final_print['prescription_type'] . "</span>
-            &nbsp;&nbsp;Order:" . $processing_value['increment_id'] . "
+            &nbsp;&nbsp;Order:" . $processing_value['ordersn'] . "
             <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
             <span style=' margin-left:5px;'>Num:<strong>" . $processing_value['total'] . "</strong></span>
             </td>
