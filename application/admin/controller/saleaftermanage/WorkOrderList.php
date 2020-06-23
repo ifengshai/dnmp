@@ -1009,12 +1009,13 @@ class WorkOrderList extends Backend
                             //循环插入承接人
                             $appointList = [];
                             foreach ($appoint_ids as $key => $val) {
-                                $appointList[$key]['work_id'] = $work_id;
-                                $appointList[$key]['measure_id'] = $res;
-                                //如果没有承接人 默认为创建人
                                 if($appoint_users[$key] == 'undefined'){
                                     continue;
                                 }
+                                $appointList[$key]['work_id'] = $work_id;
+                                $appointList[$key]['measure_id'] = $res;
+                                //如果没有承接人 默认为创建人
+
                                 if ($val == 'undefined') {
                                     $appointList[$key]['recept_group_id'] = $this->assign_user_id;
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
@@ -2156,8 +2157,8 @@ class WorkOrderList extends Backend
                 $recept_id = $params['recept_id'];
                 $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
                 $result = false;
-                if ($receptInfo) {
-                    if ($receptInfo->recept_person_id != session('admin.id')) {
+                if (is_array($receptInfo)) {
+                    if (!in_array(session('admin.id'),$receptInfo)) {
                         $this->error(__('您不能处理此工单'));
                     }
                     //当要处理成功时需要判断库存是否存在

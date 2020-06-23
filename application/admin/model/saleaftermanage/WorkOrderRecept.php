@@ -58,7 +58,13 @@ class WorkOrderRecept extends Model
      */
     public function getOneRecept($id)
     {
-        return $this->where(['id'=>$id])->find();
+         $info = $this->where(['id'=>$id])->field('work_id,measure_id')->find();
+         if(!$info){
+             return false;
+         }
+         $where['work_id'] = $info->work_id;
+         $where['measure_id'] = $info->measure_id;
+         return $this->where($where)->column('recept_person_id');
     }
     /**
      * 导出措施

@@ -651,15 +651,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }*/
                     var arr = array_filter(appoint_group.split(','));
-
+                     console.log(arr);
                     var username = [];
                     var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
                     for (var i = 0; i < arr.length - 1; i++) {
                         //循环根据承接组Key获取对应承接人id
-                        appoint_users.push(Config.workorder[arr[i]]);
+                        //appoint_users.push(Config.workorder[arr[i]]);
+                        appoint_users.push(Config.workOrderConfigValue.group[arr[i]]);
                     }
-
+                    console.log(appoint_users);
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
