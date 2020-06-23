@@ -1031,10 +1031,11 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
 
-                            //更改镜片，补发，赠品
+                            //更改镜片，补发，赠品，地址
                             $this->model->changeLens($params, $work_id, $v, $res);
                             $this->model->changeFrame($params, $work_id, $v, $res);
                             $this->model->cancelOrder($params, $work_id, $v, $res);
+                            $this->model->changeAddress($params, $work_id, $v, $res);
                         }
                     }
 

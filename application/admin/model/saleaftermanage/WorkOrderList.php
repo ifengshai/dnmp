@@ -300,7 +300,130 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
+    
+    /**
+     * 更改地址
+     * @param $params
+     * @param $work_id
+     * @throws \Exception
+     */
+    public function changeAddress($params, $work_id, $measure_choose_id, $measure_id)
+    {
+        $work = $this->find($work_id);
+        $measure = '';
+        //修改镜片
+        if (($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)) {
+            $measure = 1;
+        } elseif ($measure_choose_id == 6) { //赠品
+            $measure = 2;
+        } elseif ($measure_choose_id == 7) { //补发
+            $measure = 3;
+        }
+        if ($measure) {
+            Db::startTrans();
+            try {
+                //如果是更改镜片
+                if ($measure == 1) {
+                    $changeLens = $params['change_lens'];
+                    $change_type = 2;
+                } elseif ($measure == 2) { //赠品
+                    $changeLens = $params['gift'];
+                    $change_type = 4;
+                } elseif ($measure == 3) { //补发
+                    $changeLens = $params['replacement'];
+                    $change_type = 5;
+                    if (!$params['address']['shipping_type']) {
+                        exception('请选择运输方式');
+                    }
+                }
+                $original_skus = $changeLens['original_sku'];
+                if (!is_array($original_skus)) {
+                    exception('sss');
+                }
+                //循环插入数据
+                $changeSkuIds = [];
+                $changeSkuData = [];
+                foreach ($original_skus as $key => $val) {
+                    if (!$val) {
+                        exception('sku不能为空');
+                    }
+                    $recipe_type = $changeLens['recipe_type'][$key];
+                    if (!$recipe_type) {
+                        exception('处方类型不能为空');
+                    }
+                    $type = $params['work_platform'];
+                    $lensId = $changeLens['lens_type'][$key];
+                    $colorId = $changeLens['color_id'][$key];
+                    $coatingId = $changeLens['coating_type'][$key];
 
+                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
+                    $data = [
+                        'work_id' => $work_id,
+                        'increment_id' => $params['platform_order'],
+                        'platform_type' => $type,
+                        'original_name' => $changeLens['original_name'][$key] ?? '',
+                        'original_sku' => $changeLens['original_sku'][$key],
+                        'original_number' => intval($changeLens['original_number'][$key]),
+                        'change_type' => $change_type,
+                        'change_sku' => $changeLens['original_sku'][$key],
+                        'change_number' => intval($changeLens['original_number'][$key]),
+                        'recipe_type' => $recipe_type,
+                        'lens_type' => $lensCoatName['lensName'],
+                        'coating_type' => $lensCoatName['coatingName'],
+                        'od_sph' => $changeLens['od_sph'][$key],
+                        'od_cyl' => $changeLens['od_cyl'][$key],
+                        'od_axis' => $changeLens['od_axis'][$key],
+                        'od_add' => $changeLens['od_add'][$key],
+                        'pd_r' => $changeLens['pd_r'][$key],
+                        'od_pv' => $changeLens['od_pv'][$key],
+                        'od_bd' => $changeLens['od_bd'][$key],
+                        'od_pv_r' => $changeLens['od_pv_r'][$key],
+                        'od_bd_r' => $changeLens['od_bd_r'][$key],
+                        'os_sph' => $changeLens['os_sph'][$key],
+                        'os_cyl' => $changeLens['os_cyl'][$key],
+                        'os_axis' => $changeLens['os_axis'][$key],
+                        'os_add' => $changeLens['os_add'][$key],
+                        'pd_l' => $changeLens['pd_l'][$key],
+                        'os_pv' => $changeLens['os_pv'][$key],
+                        'os_bd' => $changeLens['os_bd'][$key],
+                        'os_pv_r' => $changeLens['os_pv_r'][$key],
+                        'os_bd_r' => $changeLens['os_bd_r'][$key],
+                        'measure_id' => $measure_id,
+                        'create_person' => session('admin.nickname'),
+                        'update_time' => date('Y-m-d H:i:s'),
+                        'create_time' => date('Y-m-d H:i:s')
+                    ];
+                    //补发
+
+                    $data['email'] = $params['address']['email'];
+                    if ($change_type == 5) {
+                        if (!$params['address']['country_id']) {
+                            exception('国家不能为空');
+                        }
+                    }
+                    $data['userinfo_option'] = serialize($params['address']);
+                    $prescriptionOption = [
+                        'prescription_type' => $recipe_type,
+                        'lens_id' => $lensId,
+                        'lens_name' => $lensCoatName['lensName'],
+                        'lens_type' => $lensCoatName['lensType'],
+                        'coating_id' => $coatingId,
+                        'coating_name' => $lensCoatName['coatingName'],
+                        'color_id' => $colorId,
+                        'color_name' => $lensCoatName['colorName'],
+                    ];
+                    $data['prescription_option'] = serialize($prescriptionOption);
+                    //}
+                    WorkOrderChangeSku::create($data);
+                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
+                }
+                Db::commit();
+            } catch (\Exception $e) {
+                Db::rollback();
+                exception($e->getMessage());
+            }
+        }
+    }
     /**
      * 更改镜片，赠品，
      * @param $params
