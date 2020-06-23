@@ -1113,6 +1113,10 @@ class PurchaseOrder extends Backend
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
+                    if (in_array($res['purchase_status'], [7, 8, 9, 10])) {
+                        continue;
+                    }
+
                     //待发货
                     if (in_array($v['baseInfo']['status'], ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
                         $list['purchase_status'] = 5;
@@ -1704,7 +1708,7 @@ class PurchaseOrder extends Backend
                 foreach ($list as $keys => $vals) {
                     if (array_key_exists($vals['id'], $returnMoney['thisPageArr'])) {
                         //采购单的退款金额 
-                        $list[$keys]['refund_amount']  = round($returnMoney['thisPageArr'][$vals['id']], 2);
+                        $list[$keys]['refund_amount']  = round($returnMoney['thisPageArr'][$vals['id']], 2) ?: 0;
                     }
                 }
             }
@@ -1712,16 +1716,16 @@ class PurchaseOrder extends Backend
                 foreach ($list as $key => $val) {
                     if (array_key_exists($val['id'], $purchaseMoney['thisPageArr'])) {
                         //采购单的实际采购金额 
-                        $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']] + $val['purchase_freight'], 2);
+                        $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']] + $val['purchase_freight'], 2) ?: 0;
                         //采购单实际结算金额(如果存在实际采购金额要从实际采购金额扣减)
-                        $list[$key]['purchase_settle_money']  = round($list[$key]['purchase_virtual_total'] - $list[$key]['refund_amount'], 2);
+                        $list[$key]['purchase_settle_money']  = round($list[$key]['purchase_virtual_total'] - $list[$key]['refund_amount'], 2) ?: 0;
                     } else {
                         //采购单实际结算金额(如果不存在实际采购金额要从采购金额中扣减) 
-                        $list[$key]['purchase_settle_money']  = round(($list[$key]['purchase_total'] - $list[$key]['refund_amount']), 2);
+                        $list[$key]['purchase_settle_money']  = round(($list[$key]['purchase_total'] - $list[$key]['refund_amount']), 2) ?: 0;
                     }
                 }
             }
-            $result = array("total" => $total, "rows" => $list, "total_money" => $purchaseMoney['total_money'], "return_money" => $returnMoney['return_money']);
+            $result = array("total" => $total, "rows" => $list, "total_money" => $purchaseMoney['total_money'] ?: 0, "return_money" => $returnMoney['return_money'] ?: 0);
 
             return json($result);
         }
@@ -1749,9 +1753,9 @@ class PurchaseOrder extends Backend
             $this->view->assign("item", $info);
         }
         $this->view->assign("row", $row);
-        $this->view->assign("refund_amount", $refund_amount);
-        $this->view->assign("purchase_settle_money", $purchase_settle_money);
-        $this->view->assign("purchase_virtual_total", $purchase_virtual_total);
+        $this->view->assign("refund_amount", $refund_amount ?: 0);
+        $this->view->assign("purchase_settle_money", $purchase_settle_money ?: 0);
+        $this->view->assign("purchase_virtual_total", $purchase_virtual_total ?: 0);
         return $this->view->fetch();
     }
 
@@ -1765,9 +1769,11 @@ class PurchaseOrder extends Backend
             $row = $this->model->get($ids);
             if (1 == $row['purchase_type']) {
                 $resultInfo = $this->model->where(['id' => $row['id']])->setInc('payment_money', $params['pay_money']);
+                echo $this->model->getLastSql();die;
             } else {
                 $resultInfo = true;
             }
+            die;
             if (false !== $resultInfo) {
                 $this->model->save(['payment_status' => 3], ['id' => $row['id']]);
                 $params['purchase_id']   = $row['id'];

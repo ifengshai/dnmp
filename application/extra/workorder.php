@@ -194,7 +194,7 @@ return [
             'step' => 'step08' //措施key
         ],
         4 => [ //镜片缺货
-            'step' => '' //为空没有后续
+            'step' => 'step04' //为空没有后续
         ],
         5 => [
             'step' => 'step04' //措施key

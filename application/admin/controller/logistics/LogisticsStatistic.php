@@ -61,7 +61,7 @@ class LogisticsStatistic extends Backend
             unset($result['rate']);
             //所有的物流渠道
             //$column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->column('shipment_data_type');
-            $column = $this->orderNode->distinct(true)->where($whereSite)->field('shipment_data_type')->column('shipment_data_type');
+            $column = $this->orderNode->distinct(true)->where($whereSite)->where($map)->where('track_number is not null')->field('shipment_data_type')->column('shipment_data_type');
             if ('echart1' == $params['key']) {
                 //妥投订单数
                 foreach ($column as $k => $v) {
@@ -70,6 +70,8 @@ class LogisticsStatistic extends Backend
                         $v = '郭伟峰';
                     } elseif ('USPS_2' == $v) {
                         $v = '加诺';
+                    } elseif ('USPS_3' == $v) {
+                        $v = '杜明明';
                     }
                     $columnData[$k]['name'] = $v;
                 }
@@ -496,7 +498,7 @@ class LogisticsStatistic extends Backend
         //$orderNode['order_node'] = ['egt', 3];
         $orderNode['node_type'] = ['egt', 7];
         //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
-        $all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
@@ -599,6 +601,8 @@ class LogisticsStatistic extends Backend
                     $av = '郭伟峰';
                 } elseif ('USPS_2' == $av) {
                     $av = '加诺';
+                } elseif ('USPS_3' == $av) {
+                    $av = '杜明明';
                 }
                 $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];

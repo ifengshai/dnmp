@@ -254,4 +254,26 @@ class Weseeoptical extends Model
         }
         return $arr;
     }
+
+    /**
+     * 根据SKU查询订单号ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 14:51:20 
+     * @return void
+     */
+    public function getOrderId($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_weseeoptical')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
+    }
 }
