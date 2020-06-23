@@ -15,6 +15,8 @@ use app\admin\model\saleaftermanage\WorkOrderProblemStep;
 use app\admin\model\saleaftermanage\WorkOrderStepType;
 use app\admin\model\platformManage\MagentoPlatform;
 
+use think\Cache;
+
 /**
  * 工单问题类型管理
  *
@@ -276,44 +278,171 @@ class Workorderconfig extends Backend
      */
     public function getConfigInfo()
     {
+        $arrConfig = Cache::get('Workorderconfig_getConfigInfo');
+        if ($arrConfig) {
+            return $arrConfig;
+        }
         //所有问题类型
         $where['is_del'] = 1;
         $all_problem_type = $this->model->where($where)->select();
         //所有措施类型
         $all_step = (new WorkOrderStepType)->where($where)->select();
         //所有平台
-        $all_platform = (new MagentoPlatform)->field('id,name')->select();
-        if (!$all_problem_type) {
-            //不存在问题类型
-        }
-        if (!$all_step) {
-            //不存在措施
-        }
-        $all_problem_type = collection($all_problem_type)->toArray();
-        $all_step = collection($all_step)->toArray();
-        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施
-        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = [];
-        foreach ($all_problem_type as $v) {
-            if (1 == $v['type']) {
-                $customer_problem_type[$v['id']] = $v['problem_name'];
-            } elseif (2 == $v['type']) {
-                $warehouse_problem_type[$v['id']] = $v['problem_name'];
+        $all_platform     = (new MagentoPlatform)->field('id,name')->select();
+        //客服A组主管，B组主管
+        $where_group['a.name'] =['in',['B组客服主管','A组客服主管']];
+        $all_group =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->where($where_group)->field('a.id,a.name,s.uid')->select();
+        //所有的跟单员规则
+        $all_documentary = (new WorkOrderDocumentary)->select();
+        //所有工单类型措施关系表
+        $all_problem_step = (new WorkOrderProblemStep)->select();
+        //所有工单规则审核表
+        $all_check_rule   = (new WorkOrderCheckRule)->select();
+        //客服部门角色组ID
+        $customer_department_rule = config('workorder.customer_department_rule');
+        //仓库部门角色组ID
+        $warehouse_department_rule = config('workorder.warehouse_department_rule');
+        //财务角色组
+        $finance_department_rule   = config('workorder.finance_department_rule');
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two
+        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr = $step = $platform = $kefumanage = $documentary_group = $documentary_person = $customer_problem_classify =[];
+        $a_group_id = $b_group_id = $a_uid = $b_uid = 0;
+        //不存在问题类型
+        if (!empty($all_problem_type)) {
+            $all_problem_type = collection($all_problem_type)->toArray();
+            foreach ($all_problem_type as $v) {
+                if (1 == $v['type']) {
+                    $customer_problem_type[$v['id']] = $v['problem_name'];
+                } elseif (2 == $v['type']) {
+                    $warehouse_problem_type[$v['id']] = $v['problem_name'];
+                }
+                switch($v['problem_belong']){
+                    case 1:
+                        $customer_problem_classify['订单修改'][] = $v['id'];
+                    break;
+                    case 2:
+                        $customer_problem_classify['物流仓库'][] = $v['id'];
+                    break;
+                    case 3:
+                        $customer_problem_classify['产品质量'][] = $v['id'];
+                    break;
+                    case 4:
+                        $customer_problem_classify['客户问题'][] = $v['id'];
+                    break;
+                    case 5:
+                        $customer_problem_classify['仓库问题'][] = $v['id'];
+                    break;             
+                }
+                $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
+
+
             }
-            $customer_problem_classify_arr[$v['problem_belong']][] = $v['id'];
         }
-        foreach ($all_step as $sv) {
-            $step[$sv['id']] = $v['step_name'];
+        //不存在措施
+        if (!empty($all_step)) {
+            $all_step         = collection($all_step)->toArray();      
+            foreach ($all_step as $sv) {
+                $step[$sv['id']] = $sv['step_name'];
+            }
         }
+        //不存在A、B组
+        if (!empty($all_group)) {
+            foreach ($all_group as $av) {
+                if ('A组客服主管' == $av['name']) {
+                    $a_group_id = $av['id'];
+                    $a_uid = $av['uid'];
+                } elseif ('B组客服主管' == $av['name']) {
+                    $b_group_id = $av['id'];
+                    $b_uid = $av['uid'];
+                }
+            }
+            //A、B下面的分组的所有的人
+            $where_group_id['a.pid'] = ['in',[$a_group_id,$b_group_id]];
+            $all_group_person =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->where($where_group_id)->field('a.id,a.pid,a.name,s.uid')->select();
+            if (!$all_group_person) {
+            }
+            foreach ($all_group_person as $gv) {
+                if ($a_group_id == $gv['pid']) {
+                    $kefumanage[$a_uid][] = $gv['uid'];
+                } elseif ($b_group_id == $gv['pid']) {
+                    $kefumanage[$b_uid][] = $gv['uid'];
+                }
+            }
+
+        }
+        //不存在跟单规则
+        if(!empty($all_documentary)){
+            $all_documentary = collection($all_documentary)->toArray();
+            //循环读取所有的跟单规则
+            foreach($all_documentary as $dv){
+                //组创建
+                if(1 == $dv['type']){
+                    $documentary_group[] = $dv;
+                //人创建    
+                }elseif(2 == $dv['type']){
+                    $documentary_person[] = $dv;
+
+                }
+            }
+        }
+        //不存在工单类型措施关系表
+        if(!empty($all_problem_step)){
+            $all_problem_step = collection($all_problem_step)->toArray();  
+        }else{
+            $all_problem_step = [];
+        }
+        //不存在工单规则审核表
+        if(!empty($all_check_rule)){
+            $all_check_rule = collection($all_check_rule)->toArray();
+        }else{
+            $all_check_rule = [];
+        }
+        //所有的平台
         foreach ($all_platform as $pv) {
             $platform[$pv['id']] = $pv['name'];
         }
         $arr['customer_problem_type'] = $customer_problem_type;
         $arr['warehouse_problem_type'] = $warehouse_problem_type;
         $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
-        $arr['step'] = $step;
-        $arr['platform'] = $platform;
+        $arr['customer_problem_classify']     = $customer_problem_classify;
+        $arr['step']                          = $step;
+        $arr['platform']                      = $platform;
+        $arr['kefumanage']                    = $kefumanage;
+        $arr['all_problem_step']              = $all_problem_step;
+        $arr['all_check_rule']                = $all_check_rule;
+        $arr['customer_department_rule']      = $customer_department_rule;
+        $arr['warehouse_department_rule']     = $warehouse_department_rule;
+        $arr['finance_department_rule']       = $finance_department_rule;
+        Cache::set('Workorderconfig_getConfigInfo', $arr);  
         return $arr;
     }
-
-
+    /**
+     * 测试返回配置信息
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-22 16:26:59
+     * @return void
+     */
+    public function test()
+    {
+        $info = $this->getConfigInfo();
+        echo '<pre>';
+        print_r($info);
+    }
+    /**
+     * 清除工单配置缓存
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-22 16:27:29
+     * @return void
+     */
+    public function clear()
+    {
+        $info = Cache::rm('Workorderconfig_getConfigInfo');
+        if($info){
+            $this->success('清除成功');
+        }else{
+            $this->error('清除失败');
+        }
+    }
 }

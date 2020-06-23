@@ -395,7 +395,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#after_user_id').val(Config.workorder.copy_group);
                     $('#after_user').html(Config.users[Config.workorder.copy_group]);
                 } else { //如果是客服人员添加的工单
-
+                    console.log(Config.workorder);
                     var id = $(this).val();
                     //id大于5 默认措施4
                     if (id > 5) {
