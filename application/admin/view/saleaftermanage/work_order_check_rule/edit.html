@@ -1,11 +1,20 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
-    <input type="hidden" name="work_create_person_id" value="{$create_person['id']}"/>
-    <input type="hidden" name="work_create_person" value="{$create_person['nickname']}"/>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-problem_belong" class="form-control selectpicker" name="row[create_belong]">
+                {if condition="$row.is_group_create eq 1"}
+                <option value="0">组创建</option>
+                {else /} <option value="1">人创建</option>
+                {/if}
+            </select>
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('创建组')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[create_group_name]', $row['create_group_name'], null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
+            {:build_select('row[create_group_name]', $row['work_create_person'], null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
         </div>
     </div>
     <div class="form-group">

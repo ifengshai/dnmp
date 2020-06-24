@@ -65,9 +65,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'is_check',
                             title: __('Is_check'),
-                            searchList: {1: '需要审核', 2: '无需审核'},
+                            searchList: {1: '需要审核', 0: '无需审核'},
                             formatter: Table.api.formatter.status
                         },
+                        // {
+                        //     field: 'is_auto_complete',
+                        //     title: __('是否自动完成'),
+                        //     searchList: {1: '是', 0: '否'},
+                        //     formatter: Table.api.formatter.status
+                        // },
                         {
                             field: 'operate',
                             title: __('Operate'),

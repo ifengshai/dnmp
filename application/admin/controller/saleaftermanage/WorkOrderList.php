@@ -929,7 +929,7 @@ class WorkOrderList extends Backend
                         $content = $params['content'];
                         unset($params['content']);
                     }
-
+                    
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -1053,7 +1053,7 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
-
+                            
                             //更改镜片，补发，赠品，地址
                             $this->model->changeLens($params, $work_id, $v, $res);
                             $this->model->changeFrame($params, $work_id, $v, $res);
@@ -1061,7 +1061,7 @@ class WorkOrderList extends Backend
                             $this->model->changeAddress($params, $work_id, $v, $res);
                         }
                     }
-
+                    
 
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {

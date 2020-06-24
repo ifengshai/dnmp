@@ -40,6 +40,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $("#c-problem_belong").change(function () {
+                var checkValue=$("#c-problem_belong").val();
+                if (checkValue == 1){
+                    $("#step").hide();
+                    $("#create_person").show();
+                }else{
+                    $("#step").show();
+                    $("#create_person").hide();
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();

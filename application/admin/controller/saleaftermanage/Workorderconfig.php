@@ -77,9 +77,9 @@ class Workorderconfig extends Backend
     }
 
     /**
-     * 添加
+     * 添加（弃用）
      */
-    public function add()
+    public function add1()
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -122,6 +122,84 @@ class Workorderconfig extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 新增问题类型 措施
+     *
+     * @return string
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @Description
+     * @throws Exception
+     * @since 2020/6/24 15:43
+     * @author jhh
+     */
+    public function add()
+    {
+        $step = $this->model->getAllStep();
+        $extend_team = $this->model->getAllExtend();
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a", [], 'strip_tags');
+            $res = $this->model->where(['type' => $params['type'], 'problem_belong' => $params['problem_belong'], 'problem_name' => $params['problem_name'], 'is_del' => 1])->find();
+            if (!empty($res)) {
+                $this->error('当前问题已存在,请不要重复添加');
+            }
+            if (empty($params['choose_id'])) {
+                $params['choose_id'] = array();
+            }
+
+            //所有的措施遍历
+            $all_step = Db::name('work_order_step_type')->where('is_del', 1)->field('id,step_name')->select();
+            Db::startTrans();
+            try {
+                if ($this->modelValidate) {
+                    $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                    $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                    $this->model->validateFailException(true)->validate($validate);
+                }
+                $data['type'] = $params['type'];
+                $data['problem_belong'] = $params['type'];
+                $data['problem_name'] = $params['problem_name'];
+                $result = $this->model->insertGetId($data);
+                foreach ($all_step as $k => $v) {
+                    //不存在就新增一条某个问题对应的措施 存在判断是否更新 是否由审核变成不审核 承接组是否改变
+                    if (in_array($v['id'], array_keys($params['choose_id']))) {
+                        $data = array();
+                        $data['problem_id'] = $result;
+                        $data['step_id'] = $v['id'];
+                        $data['extend_group_id'] = $params['extend'][$v['id'] - 1];
+                        if ($params['choose_id'][$v['id']]['is_checked'] == 'on') {
+                            $data['is_check'] = 1;
+                        }else{
+                            $data['is_check'] = 0;
+                        }
+                        if ($params['choose_id'][$v['id']]['is_auto_complete'] == 'on') {
+                            $data['is_auto_complete'] = 1;
+                        }else{
+                            $data['is_auto_complete'] = 0;
+                        }
+                        Db::name('work_order_problem_step')->insert($data);
+                    }
+                }
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            $this->success();
+        }
+        $this->view->assign("step", $step);
+        $this->view->assign("extend_team", $extend_team);
         return $this->view->fetch();
     }
 
@@ -195,10 +273,12 @@ class Workorderconfig extends Backend
                 $step[$k]['is_selected'] = 1;
                 $step[$k]['is_check'] = $result['is_check'];
                 $step[$k]['extend_group_id'] = $result['extend_group_id'];
+                $step[$k]['is_auto_complete'] = $result['is_auto_complete'];
             } else {
                 $step[$k]['is_selected'] = 0;
                 $step[$k]['is_check'] = '';
                 $step[$k]['extend_group_id'] = '';
+                $step[$k]['is_auto_complete'] = '';
             }
         }
         $extend_team = $this->model->getAllExtend();
@@ -228,6 +308,9 @@ class Workorderconfig extends Backend
                         if ($params['choose_id'][$v['id']]['is_checked'] = 'on') {
                             $data['is_check'] = 1;
                         }
+                        if ($params['choose_id'][$v['id']]['is_auto_complete'] = 'on') {
+                            $data['is_auto_complete'] = 1;
+                        }
                         Db::name('work_order_problem_step')->insert($data);
                     } else if (!$problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
                         //不存在也没有选择不进行任何操作
@@ -244,9 +327,14 @@ class Workorderconfig extends Backend
                         } else {
                             $is_check = 0;
                         }
+                        if (isset($params['choose_id'][$v['id']]['is_auto_complete'])) {
+                            $is_auto_complete = 1;
+                        } else {
+                            $is_auto_complete = 0;
+                        }
                         Db::name('work_order_problem_step')
                             ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
-                            ->update(['extend_group_id' => $params['extend'][$v['id'] - 1], 'is_check' => $is_check]);
+                            ->update(['extend_group_id' => $params['extend'][$v['id'] - 1], 'is_check' => $is_check, 'is_auto_complete' => $is_auto_complete]);
                     }
                 }
                 Db::commit();
