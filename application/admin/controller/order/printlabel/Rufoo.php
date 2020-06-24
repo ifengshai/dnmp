@@ -62,7 +62,7 @@ class Rufoo extends Backend
 
             if (!$filter['ordersn'] && !$filter['status']) {
                 $map['status'] = 1;
-            } 
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -530,8 +530,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->where($map)
             ->alias('a')
-            ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
-            ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
+            ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
+            ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
             ->select();
         $resultList = collection($resultList)->toArray();
         $finalResult = array();
@@ -799,8 +799,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         if ($ids) {
             $map['a.id'] = ['in', $ids];
             $processing_order_list = $this->model->field('sku,b.total,optionname,lens_data,a.createtime,ordersn')->where($map)->alias('a')
-                ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid')
-                ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id')
+                ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
+                ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
                 ->select();
             $processing_order_list = collection($processing_order_list)->toArray();
 
