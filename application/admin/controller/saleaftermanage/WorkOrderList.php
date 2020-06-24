@@ -924,7 +924,7 @@ class WorkOrderList extends Backend
                         $content = $params['content'];
                         unset($params['content']);
                     }
-
+                    
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -986,7 +986,7 @@ class WorkOrderList extends Backend
 
 
                     $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
-
+                    
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
                         //措施
@@ -1008,32 +1008,34 @@ class WorkOrderList extends Backend
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
                             //循环插入承接人
                             $appointList = [];
-                            foreach ($appoint_ids as $key => $val) {
-                                $appointList[$key]['work_id'] = $work_id;
-                                $appointList[$key]['measure_id'] = $res;
-                                //如果没有承接人 默认为创建人
-                                if($appoint_users[$key] == 'undefined'){
-                                    continue;
+                            if(!empty($appoint_ids)){
+                                foreach ($appoint_ids as $key => $val) {
+                                    $appointList[$key]['work_id'] = $work_id;
+                                    $appointList[$key]['measure_id'] = $res;
+                                    //如果没有承接人 默认为创建人
+                                    if($appoint_users[$key] == 'undefined'){
+                                        continue;
+                                    }
+                                    if ($val == 'undefined') {
+                                        $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                                        $appointList[$key]['recept_person_id'] = session('admin.id');
+                                        $appointList[$key]['recept_person'] = session('admin.nickname');
+                                    } else {
+    
+                                        $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                        $appointList[$key]['recept_person_id'] = $val;
+                                        $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                    }
+    
+                                    $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
                                 }
-                                if ($val == 'undefined') {
-                                    $appointList[$key]['recept_group_id'] = $this->assign_user_id;
-                                    $appointList[$key]['recept_person_id'] = session('admin.id');
-                                    $appointList[$key]['recept_person'] = session('admin.nickname');
-                                } else {
-
-                                    $appointList[$key]['recept_group_id'] = $appoint_group[$key];
-                                    $appointList[$key]['recept_person_id'] = $val;
-                                    $appointList[$key]['recept_person'] = $appoint_users[$key];
-                                }
-
-                                $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
                             }
                             //插入承接人表
                             $receptRes = $this->recept->saveAll($appointList);
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
-
+                            
                             //更改镜片，补发，赠品，地址
                             $this->model->changeLens($params, $work_id, $v, $res);
                             $this->model->changeFrame($params, $work_id, $v, $res);
@@ -1041,7 +1043,7 @@ class WorkOrderList extends Backend
                             $this->model->changeAddress($params, $work_id, $v, $res);
                         }
                     }
-
+                    
 
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
