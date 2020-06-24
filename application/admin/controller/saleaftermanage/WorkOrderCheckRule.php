@@ -133,10 +133,10 @@ class WorkOrderCheckRule extends Backend
                                 $data['symbol'] = 'lt';
                                 break;
                             case 3:
-                                $data['symbol'] = 'elt';
+                                $data['symbol'] = 'egt';
                                 break;
                             default:
-                                $data['symbol'] = 'egt';
+                                $data['symbol'] = 'elt';
                         }
 
                         $data['check_group_id'] = $params['check_group_id'];
@@ -159,10 +159,10 @@ class WorkOrderCheckRule extends Backend
                                 $data['symbol'] = 'lt';
                                 break;
                             case 3:
-                                $data['symbol'] = 'elt';
+                                $data['symbol'] = 'egt';
                                 break;
                             default:
-                                $data['symbol'] = 'egt';
+                                $data['symbol'] = 'elt';
                         }
                         $data['check_group_id'] = $params['check_group_id'];
                         $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
