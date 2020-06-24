@@ -765,7 +765,8 @@ class WorkOrderList extends Backend
                     }
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
-                    $warehouseArr = config('workorder.warehouse_department_rule');
+                    //$warehouseArr = config('workorder.warehouse_department_rule');
+                    $warehouseArr = $workOrderConfigValue['warehouse_department_rule'];
                     $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
                     if (!empty($checkIsWarehouse)) {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
@@ -807,9 +808,11 @@ class WorkOrderList extends Backend
 
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
-                        $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
+                        //$params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
+                        $params['problem_type_content'] = $workOrderConfigValue['customer_problem_type'][$params['problem_type_id']];
                     } elseif ($params['work_type'] == 2) {
-                        $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
+                        //$params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
+                        $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
                         $params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
                     }
                     //判断是否选择退款措施
@@ -851,7 +854,7 @@ class WorkOrderList extends Backend
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
 
-                        foreach (config('workorder.check_coupon') as $v) {
+                        foreach ($workOrderConfigValue['check_coupon'] as $v) {
                             if ($v['id'] == $params['coupon_id']) {
                                 $params['coupon_describe'] = $v['desc'];
                                 break;
@@ -861,7 +864,7 @@ class WorkOrderList extends Backend
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        foreach (config('workorder.need_check_coupon') as $v) {
+                        foreach ($workOrderConfigValue['need_check_coupon'] as $v) {
                             if ($v['id'] == $params['coupon_id']) {
                                 $params['coupon_describe'] = $v['desc'];
                                 break;
@@ -899,12 +902,14 @@ class WorkOrderList extends Backend
                          * 3、补发数量大于1 经理审核
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
-                        $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
+                        //$coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
+                        $coupon = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
                         $giftOriginalNumber = $params['gift']['original_number'] ?: [];
                         $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
                         if ($params['refund_money'] > 30 || array_sum($giftOriginalNumber) > 1 || array_sum($replacementOriginalNumber) > 1 || $coupon == 100) {
                             //客服经理
-                            $params['assign_user_id'] = config('workorder.customer_manager');
+                            //$params['assign_user_id'] = config('workorder.customer_manager');
+                            $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
                         } else {
                             //创建人对应主管
                             $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
@@ -944,7 +949,8 @@ class WorkOrderList extends Backend
                             }
                             if(!in_array(session('admin.id'),$customerArr)){
                                 if(1 == $params['is_check']){
-                                    $params['assign_user_id'] = config('workorder.customer_manager');
+                                    $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                                    //$params['assign_user_id'] = config('workorder.customer_manager');
                                 }
                                 
                             }else{
@@ -952,6 +958,7 @@ class WorkOrderList extends Backend
                             }
                         }
                         //如果不是客服人员则指定审核人为客服经理 end
+                        
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
@@ -986,7 +993,6 @@ class WorkOrderList extends Backend
 
 
                     $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
-
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
                         //措施
@@ -1002,33 +1008,46 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
 
-                            //根据措施读取承接组、承接人 默认是客服问题组配置
+                            //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
                             $appoint_ids = $params['order_recept']['appoint_ids'][$v];
                             $appoint_users = $params['order_recept']['appoint_users'][$v];
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            $auto_complete = $params['order_recept']['auto_complete'][$v];
                             //循环插入承接人
                             $appointList = [];
-                            foreach ($appoint_ids as $key => $val) {
-                                if($appoint_users[$key] == 'undefined'){
-                                    continue;
+                            if(is_array($appoint_ids) && count($appoint_ids)>0){
+                                foreach ($appoint_ids as $key => $val) {
+                                    if($appoint_users[$key] == 'undefined'){
+                                        continue;
+                                    }
+                                    $appointList[$key]['work_id'] = $work_id;
+                                    $appointList[$key]['measure_id'] = $res;
+                                    $appointList[$key]['is_auto_complete'] = $auto_complete;
+                                    //如果没有承接人 默认为创建人
+    
+                                    if ($val == 'undefined') {
+                                        $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                                        $appointList[$key]['recept_person_id'] = session('admin.id');
+                                        $appointList[$key]['recept_person'] = session('admin.nickname');
+                                    } else {
+    
+                                        $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                        $appointList[$key]['recept_person_id'] = $val;
+                                        $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                    }
+    
+                                    $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
                                 }
-                                $appointList[$key]['work_id'] = $work_id;
-                                $appointList[$key]['measure_id'] = $res;
-                                //如果没有承接人 默认为创建人
-
-                                if ($val == 'undefined') {
-                                    $appointList[$key]['recept_group_id'] = $this->assign_user_id;
-                                    $appointList[$key]['recept_person_id'] = session('admin.id');
-                                    $appointList[$key]['recept_person'] = session('admin.nickname');
-                                } else {
-
-                                    $appointList[$key]['recept_group_id'] = $appoint_group[$key];
-                                    $appointList[$key]['recept_person_id'] = $val;
-                                    $appointList[$key]['recept_person'] = $appoint_users[$key];
-                                }
-
-                                $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                            }else{
+                                $appointList[0]['work_id'] = $work_id;
+                                $appointList[0]['measure_id'] = $res;
+                                $appointList[0]['recept_group_id'] = 0;
+                                $appointList[0]['recept_person_id'] = session('admin.id');
+                                $appointList[0]['recept_person'] = session('admin.nickname');
+                                $appointList[0]['create_time'] = date('Y-m-d H:i:s');
+                                $appointList[0]['is_auto_complete'] = $auto_complete;
                             }
+
                             //插入承接人表
                             $receptRes = $this->recept->saveAll($appointList);
                             if (false === $receptRes) {
@@ -1075,23 +1094,23 @@ class WorkOrderList extends Backend
                     //通知
                     if ($this->model->work_type == 1) {
                         if ($this->model->work_status == 2) {
-                            Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
+                            //Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
                         } elseif ($this->model->work_status == 3) {
                             $usersId = explode(',', $this->model->recept_person_id);
-                            Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                            //Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                         }
                     }
 
                     //经手人
                     if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
 
-                        Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                        //Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                     }
 
                     //跟单处理
                     if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
 
-                        Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                        //Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                     }
 
                     $this->success();
@@ -2156,9 +2175,14 @@ class WorkOrderList extends Backend
                     $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
                 $recept_id = $params['recept_id'];
+                //获取所有可以处理的人
                 $receptInfoArr =  (new WorkOrderRecept())->getAllRecept($recept_id);
-                $receptInfo    = (new WorkOrderRecept())->getOneRecept($recept_id);
+                //本次处理的人
+                $receptInfo    = (new WorkOrderRecept())->getOneRecept($recept_id,session('admin.id'));
                 $result = false;
+                if(empty($receptInfo)){
+                    $this->error(__('您无权限处理此工单'));
+                }
                 if (is_array($receptInfoArr)) {
                     if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));

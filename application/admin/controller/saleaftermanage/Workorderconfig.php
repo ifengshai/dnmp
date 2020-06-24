@@ -30,7 +30,7 @@ class Workorderconfig extends Backend
      * @var \app\admin\model\saleaftermanage\Workorderconfig
      */
     protected $model = null;
-
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         parent::_initialize();
@@ -303,12 +303,12 @@ class Workorderconfig extends Backend
         $warehouse_department_rule = config('workorder.warehouse_department_rule');
         //财务角色组
         $finance_department_rule   = config('workorder.finance_department_rule');
-        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr 
         = $step = $platform = $kefumanage = $documentary_group = $documentary_person
-        = $customer_problem_classify = $relation_problem_step = $group = [];
-        //a,b组ID a,b组的主管ID
-        $a_group_id = $b_group_id = $a_uid = $b_uid = 0;
+        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight =[];
+        //客服a,b组ID a,b组的主管ID,客服经理ID 
+        $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
         //$all_group_user = Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
         //不存在问题类型
@@ -358,6 +358,8 @@ class Workorderconfig extends Backend
                 } elseif ('B组客服主管' == $av['name']) {
                     $b_group_id = $av['id'];
                     $b_uid = $av['uid'];
+                }elseif('客服经理' == $av['name']){
+                    $customer_manager_id = $av['uid'];
                 }
                 $group[$av['id']][] = $av['uid'];
             }
@@ -382,10 +384,10 @@ class Workorderconfig extends Backend
             foreach($all_documentary as $dv){
                 //组创建
                 if(1 == $dv['type']){
-                    $documentary_group[] = $dv;
+                    $documentary_group[$dv['create_id']] = $dv;
                 //人创建    
                 }elseif(2 == $dv['type']){
-                    $documentary_person[] = $dv;
+                    $documentary_person[$dv['create_id']] = $dv;
 
                 }
             }
@@ -400,6 +402,9 @@ class Workorderconfig extends Backend
         //不存在工单规则审核表
         if(!empty($all_check_rule)){
             $all_check_rule = collection($all_check_rule)->toArray();
+            foreach($all_check_rule as $kv){
+                $check_person_weight[$kv['weight']][$kv['work_create_person_id']] = $kv;
+            }
         }else{
             $all_check_rule = [];
         }
@@ -407,6 +412,10 @@ class Workorderconfig extends Backend
         foreach ($all_platform as $pv) {
             $platform[$pv['id']] = $pv['name'];
         }
+        //不需要审核的优惠券
+        $check_coupon = config('workorder.check_coupon');
+        //需要审核的优惠券
+        $need_check_coupon = config('workorder.need_check_coupon');
         $arr['customer_problem_type'] = $customer_problem_type;
         $arr['warehouse_problem_type'] = $warehouse_problem_type;
         $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
@@ -415,11 +424,16 @@ class Workorderconfig extends Backend
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
-        $arr['all_check_rule']                = $all_check_rule;
+        $arr['all_check_rule']                = $check_person_weight;
         $arr['customer_department_rule']      = $customer_department_rule;
         $arr['warehouse_department_rule']     = $warehouse_department_rule;
         $arr['finance_department_rule']       = $finance_department_rule;
-        $arr['group']                         = $group;  
+        $arr['documentary_group']             = $documentary_group;
+        $arr['documentary_person']            = $documentary_person;
+        $arr['group']                         = $group;
+        $arr['check_coupon']                  = $check_coupon;
+        $arr['need_check_coupon']             = $need_check_coupon;
+        $arr['customer_manager']              = $customer_manager_id;      
         Cache::set('Workorderconfig_getConfigInfo', $arr);  
         return $arr;
     }

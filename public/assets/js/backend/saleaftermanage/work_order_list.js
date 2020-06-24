@@ -411,8 +411,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //console.log(choose_problem_step[j].step_id);
                         $('#step' + choose_problem_step[j].step_id).parent().show();
                         $('#step' + choose_problem_step[j].step_id + '-is_check').val(choose_problem_step[j].is_check);
+                        $('#step' + choose_problem_step[j].step_id + '-is_auto_complete').val(choose_problem_step[j].is_auto_complete);
                         if(choose_problem_step[j].extend_group_id !=undefined && choose_problem_step[j].extend_group_id !=0){
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
+                        }else{
+                            $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
                         }    
                     }
                     //id大于5 默认措施4
@@ -485,6 +488,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
                     var appoint_group = '';
+                    var username = [];
+                    var appoint_users = [];
                     var input_content = '';
                     var is_check = [];
                     //选中的问题类型
@@ -517,11 +522,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                             }
+                        }else{
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
                         }
                         //获取是否需要审核
                         var step_is_check = $('#step' + id + '-is_check').val();
                         is_check.push(step_is_check);
-
+                        //是否自动审核完成 start
+                        var step_is_auto_complete = $('#step' + id + '-is_auto_complete').val();
+                        input_content +='<input type="hidden" name="row[order_recept][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
+                        //是否自动审核完成  end
                         //修改地址
                         if(id == 1){
                             $("#user_address").show();
@@ -651,14 +663,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }*/
                     var arr = array_filter(appoint_group.split(','));
-                     console.log(arr);
-                    var username = [];
-                    var appoint_users = [];
+                    console.log(arr);
                     //循环根据承接组Key获取对应承接人id
                     for (var i = 0; i < arr.length - 1; i++) {
                         //循环根据承接组Key获取对应承接人id
                         //appoint_users.push(Config.workorder[arr[i]]);
-                        appoint_users.push(Config.workOrderConfigValue.group[arr[i]]);
+                        if(Config.workOrderConfigValue.group[arr[i]] !=undefined){
+                            appoint_users.push(Config.workOrderConfigValue.group[arr[i]]);
+                        }
+                        
                     }
                     console.log(appoint_users);
                     //循环根据承接人id获取对应人名称
