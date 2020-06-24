@@ -25,9 +25,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('id')},
-                        {field: 'work_create_person_id', title: __('Work_create_person_id')},
-                        {field: 'work_create_person', title: __('创建人')},
-                        {field: 'create_group_id', title: __('创建组')},
+                        {field: 'is_group_create', title: __('创建者类型'),custom: { 1: 'blue', 0: 'danger'}, searchList: { 1: '组创建', 0: '人创建' }, formatter: Table.api.formatter.status },
+                        {field: 'work_create_person_id', title: __('创建人或创建组的id')},
+
+                        {field: 'work_create_person', title: __('创建人或创建组名称')},
 
                         {field: 'step_id', title: __('措施')},
                         {field: 'step_value', title: __('Step_value')},
@@ -44,6 +45,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $("#c-problem_belong").change(function () {
+                var checkValue=$("#c-problem_belong").val();
+                if (checkValue == 1){
+                    $("#step").hide();
+                    $("#create_person").show();
+                }else{
+                    $("#step").show();
+                    $("#create_person").hide();
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();

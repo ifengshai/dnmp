@@ -73,8 +73,6 @@ class WorkOrderCheckRule extends Backend
 
             foreach ($list as $k=>$v){
                 $list[$k]['step_id'] = Db::name('work_order_step_type')->where('id',$v['step_id'])->value('step_name');
-                $list[$k]['check_group_id'] = Db::name('auth_group')->where('id',$v['check_group_id'])->value('name');
-                $list[$k]['create_group_id'] = Db::name('auth_group')->where('id',$v['create_group_id'])->value('name');
             }
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -99,12 +97,11 @@ class WorkOrderCheckRule extends Backend
         //获取所有措施
         $step = $workordersteptype->getAllStep();
         $step = array_column($step->toArray(), 'step_name', 'id');
-        //获取创建人信息
-        $create_person = ['id'=>session('admin.id'),'nickname'=>session('admin.nickname')];
+        //获取所有创建人
+        $admin = new \app\admin\model\Admin();
+        $create_person = $admin->getAllStaff();
         //获取所有审核组
         $extend_team = $workordersteptype->getAllExtend();
-        $create_team = $workordersteptype->getAllExtend();
-        array_push($create_team,'非组创建');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a", [], 'strip_tags');
 
@@ -116,15 +113,13 @@ class WorkOrderCheckRule extends Backend
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
                 $result = false;
-                $add_team = db('auth_group')->where('id',$params['add_group_id'])->find();
-//                dump($params);die;
                 Db::startTrans();
                 try {
-                    //创建组不为空代表为组创建 为空表示为当前登录人员创建
-                    if (empty($add_team)){
+                    //0代表为组创建 1人员创建
+                    if ($params['create_belong'] == 1){
                         $data['is_group_create'] = 0;
-                        $data['work_create_person_id'] = $create_person['id'];
-                        $data['work_create_person'] = $create_person['nickname'];
+                        $data['work_create_person_id'] = $params['person'];
+                        $data['work_create_person'] = db('admin')->where('id',$params['person'])->value('nickname');
                         $data['step_id'] = $params['step_id'];
                         $data['step_value'] = $params['step_value'];
                         $data['symbol'] = $params['symbol'];
@@ -133,7 +128,8 @@ class WorkOrderCheckRule extends Backend
                         $data['weight'] = $params['weight'];
                     }else{
                         $data['is_group_create'] = 1;
-                        $data['create_group_id'] = $params['add_group_id'];
+                        $data['work_create_person_id'] = $params['add_group_id'];
+                        $data['work_create_person'] = db('auth_group')->where('id',$data['work_create_person_id'])->value('name');
                         $data['step_id'] = $params['step_id'];
                         $data['step_value'] = $params['step_value'];
                         $data['symbol'] = $params['symbol'];
@@ -163,7 +159,6 @@ class WorkOrderCheckRule extends Backend
         }
         $this->view->assign("step", $step);
         $this->view->assign("extend_team", $extend_team);
-        $this->view->assign("create_team", $create_team);
         $this->view->assign("create_person", $create_person);
         return $this->view->fetch();
     }
@@ -183,8 +178,8 @@ class WorkOrderCheckRule extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
-        $row['create_group_name'] = db('auth_group')->where('id',$row['create_group_id'])->value('name');
         $row['step_name'] = db('work_order_step_type')->where('id',$row['step_id'])->value('step_name');
+//        dump($row->toArray());die;
         //获取所有审核组
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         $extend_team = $workordersteptype->getAllExtend();
