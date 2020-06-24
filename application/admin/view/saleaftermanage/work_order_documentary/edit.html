@@ -1,33 +1,40 @@
-<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-problem_belong" class="form-control selectpicker" name="row[create_belong]">
+                {if condition="$row.type eq 1"}
+                <option value="0">组创建</option>
+                {else /} <option value="1">人创建</option>
+                {/if}
+            </select>
+        </div>
+    </div>
 
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+
+    {if condition="$row.type eq 1"}
+    <div class="form-group" id="step">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建组')}:</label>
+
         <div class="col-xs-12 col-sm-8">
-            <input id="c-type" data-rule="required" class="form-control" name="row[type]" type="number" value="{$row.type|htmlentities}">
+            {:build_select('row[extend]', $extend_team, $row.create_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_id')}:</label>
+    {/if}
+    {if condition="$row.type eq 2"}
+    <div class="form-group" id="create_person">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建人')}:</label>
+
         <div class="col-xs-12 col-sm-8">
-            <input id="c-create_id" data-rule="required" data-source="create/index" class="form-control selectpage" name="row[create_id]" type="text" value="{$row.create_id|htmlentities}">
+            {:build_select('row[person]', $create_person, $row.create_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_name')}:</label>
+    {/if}
+
+    <div class="form-group" id="follow">
+        <label class="control-label col-xs-12 col-sm-2">{:__('跟单组')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-create_name" data-rule="required" class="form-control" name="row[create_name]" type="text" value="{$row.create_name|htmlentities}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Documentary_group_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-documentary_group_id" data-rule="required" data-source="documentary/group/index" class="form-control selectpage" name="row[documentary_group_id]" type="text" value="{$row.documentary_group_id|htmlentities}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Documentary_group_name')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-documentary_group_name" data-rule="required" class="form-control" name="row[documentary_group_name]" type="text" value="{$row.documentary_group_name|htmlentities}">
+            {:build_select('row[follow]', $extend_team, $row.documentary_group_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
     <div class="form-group layer-footer">

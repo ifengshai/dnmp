@@ -2,8 +2,13 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\controller\auth\Admin;
+use app\api\controller\Ding;
 use app\common\controller\Backend;
 use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 工单规则审核管理
@@ -68,14 +73,166 @@ class WorkOrderCheckRule extends Backend
 
             foreach ($list as $k=>$v){
                 $list[$k]['step_id'] = Db::name('work_order_step_type')->where('id',$v['step_id'])->value('step_name');
+                $list[$k]['check_group_id'] = Db::name('auth_group')->where('id',$v['check_group_id'])->value('name');
+                $list[$k]['create_group_id'] = Db::name('auth_group')->where('id',$v['create_group_id'])->value('name');
             }
             $list = collection($list)->toArray();
-//            dump($list);die;
             $result = array("total" => $total, "rows" => $list);
 
 
             return json($result);
         }
+        return $this->view->fetch();
+    }
+
+    /**
+     * @return string
+     * @return void
+     * @throws Exception
+     * @Description
+     * @since 2020/6/23 11:16
+     * @author jhh
+     */
+    public function add()
+    {
+        $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
+        //获取所有措施
+        $step = $workordersteptype->getAllStep();
+        $step = array_column($step->toArray(), 'step_name', 'id');
+        //获取创建人信息
+        $create_person = ['id'=>session('admin.id'),'nickname'=>session('admin.nickname')];
+        //获取所有审核组
+        $extend_team = $workordersteptype->getAllExtend();
+        $create_team = $workordersteptype->getAllExtend();
+        array_push($create_team,'非组创建');
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a", [], 'strip_tags');
+
+
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                $add_team = db('auth_group')->where('id',$params['add_group_id'])->find();
+//                dump($params);die;
+                Db::startTrans();
+                try {
+                    //创建组不为空代表为组创建 为空表示为当前登录人员创建
+                    if (empty($add_team)){
+                        $data['is_group_create'] = 0;
+                        $data['work_create_person_id'] = $create_person['id'];
+                        $data['work_create_person'] = $create_person['nickname'];
+                        $data['step_id'] = $params['step_id'];
+                        $data['step_value'] = $params['step_value'];
+                        $data['symbol'] = $params['symbol'];
+                        $data['check_group_id'] = $params['check_group_id'];
+                        $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
+                        $data['weight'] = $params['weight'];
+                    }else{
+                        $data['is_group_create'] = 1;
+                        $data['create_group_id'] = $params['add_group_id'];
+                        $data['step_id'] = $params['step_id'];
+                        $data['step_value'] = $params['step_value'];
+                        $data['symbol'] = $params['symbol'];
+                        $data['check_group_id'] = $params['check_group_id'];
+                        $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
+                        $data['weight'] = $params['weight'];
+                    }
+                    $result = Db::name('work_order_check_rule')->insert($data);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("step", $step);
+        $this->view->assign("extend_team", $extend_team);
+        $this->view->assign("create_team", $create_team);
+        $this->view->assign("create_person", $create_person);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑措施对应的审核规则
+     *
+     * @param null $ids
+     * @return string
+     * @return void
+     * @throws \think\exception\DbException
+     * @Description
+     * @throws Exception
+     * @since 2020/6/23 14:09
+     * @author jhh
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        $row['create_group_name'] = db('auth_group')->where('id',$row['create_group_id'])->value('name');
+        $row['step_name'] = db('work_order_step_type')->where('id',$row['step_id'])->value('step_name');
+        //获取所有审核组
+        $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
+        $extend_team = $workordersteptype->getAllExtend();
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $params['check_group_name'] = db('auth_group')->where('id',$params['check_group_id'])->value('name');
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("extend_team", $extend_team);
+        $this->view->assign("row", $row);
         return $this->view->fetch();
     }
 

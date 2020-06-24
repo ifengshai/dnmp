@@ -1008,26 +1008,23 @@ class WorkOrderList extends Backend
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
                             //循环插入承接人
                             $appointList = [];
-                            if(!empty($appoint_ids)){
-                                foreach ($appoint_ids as $key => $val) {
-                                    $appointList[$key]['work_id'] = $work_id;
-                                    $appointList[$key]['measure_id'] = $res;
-                                    //如果没有承接人 默认为创建人
-                                    if($appoint_users[$key] == 'undefined'){
-                                        continue;
-                                    }
-                                    if ($val == 'undefined') {
-                                        $appointList[$key]['recept_group_id'] = $this->assign_user_id;
-                                        $appointList[$key]['recept_person_id'] = session('admin.id');
-                                        $appointList[$key]['recept_person'] = session('admin.nickname');
-                                    } else {
-    
-                                        $appointList[$key]['recept_group_id'] = $appoint_group[$key];
-                                        $appointList[$key]['recept_person_id'] = $val;
-                                        $appointList[$key]['recept_person'] = $appoint_users[$key];
-                                    }
-    
-                                    $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                            foreach ($appoint_ids as $key => $val) {
+                                if($appoint_users[$key] == 'undefined'){
+                                    continue;
+                                }
+                                $appointList[$key]['work_id'] = $work_id;
+                                $appointList[$key]['measure_id'] = $res;
+                                //如果没有承接人 默认为创建人
+
+                                if ($val == 'undefined') {
+                                    $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                                    $appointList[$key]['recept_person_id'] = session('admin.id');
+                                    $appointList[$key]['recept_person'] = session('admin.nickname');
+                                } else {
+
+                                    $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                    $appointList[$key]['recept_person_id'] = $val;
+                                    $appointList[$key]['recept_person'] = $appoint_users[$key];
                                 }
                             }
                             //插入承接人表
@@ -2157,10 +2154,11 @@ class WorkOrderList extends Backend
                     $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
                 $recept_id = $params['recept_id'];
-                $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
+                $receptInfoArr =  (new WorkOrderRecept())->getAllRecept($recept_id);
+                $receptInfo    = (new WorkOrderRecept())->getOneRecept($recept_id);
                 $result = false;
-                if ($receptInfo) {
-                    if ($receptInfo->recept_person_id != session('admin.id')) {
+                if (is_array($receptInfoArr)) {
+                    if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
                     }
                     //当要处理成功时需要判断库存是否存在

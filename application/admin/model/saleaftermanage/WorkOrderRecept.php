@@ -48,7 +48,7 @@ class WorkOrderRecept extends Model
         return $this->hasOne(WorkOrderMeasure::class,'id','measure_id');
     }
     /**
-     * 获取承接的记录ID
+     * 获取所有承接的记录ID
      *
      * @Description
      * @author lsw
@@ -58,7 +58,24 @@ class WorkOrderRecept extends Model
      */
     public function getOneRecept($id)
     {
-        return $this->where(['id'=>$id])->find();
+        return  $this->where(['id'=>$id])->find();
+    }
+    /**
+     * 获取所有可以承接的记录ID
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-23 18:56:58
+     * @param [type] $id
+     * @return void
+     */
+    public function getAllRecept($id){
+        $info = $this->where(['id'=>$id])->field('work_id,measure_id')->find();
+        if(!$info){
+            return false;
+        }
+        $where['work_id'] = $info->work_id;
+        $where['measure_id'] = $info->measure_id;
+        return $this->where($where)->column('recept_person_id');
     }
     /**
      * 导出措施

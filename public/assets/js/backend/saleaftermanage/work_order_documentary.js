@@ -25,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'type', title: __('Type')},
+                        {field: 'type', title: __('创建者类型'),custom: { 1: 'blue', 2: 'danger'}, searchList: { 1: '组创建', 2: '人创建' }, formatter: Table.api.formatter.status },
                         {field: 'create_id', title: __('Create_id')},
                         {field: 'create_name', title: __('Create_name')},
                         {field: 'documentary_group_id', title: __('Documentary_group_id')},
@@ -40,6 +40,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $("#c-problem_belong").change(function () {
+                var checkValue=$("#c-problem_belong").val();
+                if (checkValue == 1){
+                    $("#step").hide();
+                    $("#create_person").show();
+                }else{
+                    $("#step").show();
+                    $("#create_person").hide();
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();
