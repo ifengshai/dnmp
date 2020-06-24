@@ -324,7 +324,25 @@ class SelfApi extends Api
         return $track;
     }
 
+    public function query_order_node(){
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
 
+
+
+        $order_data['order_data'] = '';
+
+        if ($other_order_number) {
+            $orther_where['site'] = $site;
+
+            foreach ($other_order_number as $val) {
+
+                $order_data['other_order_data'][$val] = '';
+            }
+        }
+        $this->success('成功', $order_data, 200);
+    }
 
     /**
      * 获取订单节点流程
