@@ -358,29 +358,30 @@ class SelfApi extends Api
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
         
-        $order_data['order_data'] = Db::name('order_node_detail')
-                                    ->where('order_number',$order_number)
-                                    ->where('site',$site)
-                                    ->where('node_type','<=',7)
-                                    ->select();
-        $order_data['order_data']['node'] = Db::name('order_node_courier')
-                                           ->where('order_number',$order_number)
-                                           ->where('site',$site)
-                                           ->select();
-
+        $order_node1 = Db::name('order_node_detail')
+                    ->where('order_number',$order_number)
+                    ->where('site',$site)
+                    ->where('node_type','<=',7)
+                    ->select();
+        $order_node2 = Db::name('order_node_courier')
+                   ->where('order_number',$order_number)
+                   ->where('site',$site)
+                   ->select();
+        $order_data['order_data'] = array_merge($order_node1,$order_node2);
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
 
-                $order_data['other_order_data'][$val] = Db::name('order_node_detail')
-                                                        ->where('order_number',$val)
-                                                        ->where('site',$site)
-                                                        ->where('node_type','<=',7)
-                                                        ->select();
-                $order_data['other_order_data'][$val]['node'] = Db::name('order_node_courier')
-                                                                ->where('order_number',$val)
-                                                                ->where('site',$site)
-                                                                ->select();
+                $other_order_node1 = Db::name('order_node_detail')
+                                    ->where('order_number',$val)
+                                    ->where('site',$site)
+                                    ->where('node_type','<=',7)
+                                    ->select();
+                $other_order_node2 = Db::name('order_node_courier')
+                                    ->where('order_number',$val)
+                                    ->where('site',$site)
+                                    ->select();
+                $order_data['other_order_data'][$val] = array_merge($other_order_node1,$other_order_node2);
             }
         }
         $this->success('成功', $order_data, 200);
