@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\model\Admin;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -59,26 +60,32 @@ class WorkOrderDocumentary extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-//            dump($list);die;
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
         return $this->view->fetch();
     }
+
     /**
-     * 添加
+     * 添加工单跟单规则
+     *
+     * @return string
+     * @return void
+     * @throws Exception
+     * @Description
+     * @since 2020/6/24 9:29
+     * @author jhh
      */
     public function add()
     {
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         //获取创建人信息
-        $create_person = ['id'=>session('admin.id'),'nickname'=>session('admin.nickname')];
-        //获取所有跟单组
+        $admin = new Admin();
+        $create_person = $admin->getAllStaff();
+        //获取所有创建组
         $extend_team = $workordersteptype->getAllExtend();
-        //创建组
-        $create_team = $workordersteptype->getAllExtend();
-        array_push($create_team,'非组创建');
+
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -96,7 +103,31 @@ class WorkOrderDocumentary extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $result = $this->model->allowField(true)->save($params);
+                    //当前登录人创建
+                    if ($params['create_belong'] == 1){
+                        //此人对应的跟单规则是否存在
+                        $info = db('work_order_documentary')->where(['type'=>2,'create_id'=>$params['person']])->find();
+                        if (!empty($info)){
+                            $this->error(__('当前人对应的跟单规则已存在', ''));
+                        }
+                        $data['type'] = 2;
+                        $data['create_id'] = $params['person'];
+                        $data['create_name'] = db('admin')->where('id',$params['person'])->value('nickname');
+                        $data['documentary_group_id'] = $params['follow'];
+                        $data['documentary_group_name'] = db('auth_group')->where('id',$params['follow'])->value('name');
+                    }else{
+                        //组创建 此组对应的跟单规则是否存在
+                        $info = db('work_order_documentary')->where(['type'=>1,'create_id'=>$params['extend']])->find();
+                        if (!empty($info)){
+                            $this->error(__('当前组对应的跟单规则已存在', ''));
+                        }
+                        $data['type'] = 1;
+                        $data['create_id'] = $params['extend'];
+                        $data['create_name'] = db('auth_group')->where('id',$params['extend'])->value('name');
+                        $data['documentary_group_id'] = $params['follow'];
+                        $data['documentary_group_name'] = db('auth_group')->where('id',$params['follow'])->value('name');
+                    }
+                    $result = $this->model->allowField(true)->save($data);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -118,16 +149,30 @@ class WorkOrderDocumentary extends Backend
         }
 
         $this->view->assign("extend_team", $extend_team);
-        $this->view->assign("create_team", $create_team);
         $this->view->assign("create_person", $create_person);
         return $this->view->fetch();
     }
 
     /**
-     * 编辑
+     * 工单跟单规则编辑
+     *
+     * @param null $ids
+     * @return string
+     * @return void
+     * @throws \think\exception\DbException
+     * @Description
+     * @throws Exception
+     * @since 2020/6/24 10:17
+     * @author jhh
      */
     public function edit($ids = null)
     {
+        $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
+        //获取创建人信息
+        $admin = new Admin();
+        $create_person = $admin->getAllStaff();
+        //获取所有创建组
+        $extend_team = $workordersteptype->getAllExtend();
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -151,7 +196,22 @@ class WorkOrderDocumentary extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-                    $result = $row->allowField(true)->save($params);
+                    //当前登录人创建
+                    if ($params['create_belong'] == 1){
+                        $data['type'] = 2;
+                        $data['create_id'] = $params['person'];
+                        $data['create_name'] = db('admin')->where('id',$params['person'])->value('nickname');
+                        $data['documentary_group_id'] = $params['follow'];
+                        $data['documentary_group_name'] = db('auth_group')->where('id',$params['follow'])->value('name');
+                    }else{
+                        //组创建 此组对应的跟单规则是否存在
+                        $data['type'] = 1;
+                        $data['create_id'] = $params['extend'];
+                        $data['create_name'] = db('auth_group')->where('id',$params['extend'])->value('name');
+                        $data['documentary_group_id'] = $params['follow'];
+                        $data['documentary_group_name'] = db('auth_group')->where('id',$params['follow'])->value('name');
+                    }
+                    $result = $row->allowField(true)->save($data);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -171,6 +231,9 @@ class WorkOrderDocumentary extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        $this->view->assign("extend_team", $extend_team);
+        $this->view->assign("create_person", $create_person);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
