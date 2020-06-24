@@ -101,7 +101,7 @@ class Rufoo extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         $ids = $ids ?? $this->request->get('id');
-    
+
         //查询订单详情
         $row = $this->rufoo->where('id', '=', $ids)->find();
         if (!$row) {
@@ -114,20 +114,31 @@ class Rufoo extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
         }
 
+        if ($row['status'] == -1) {
+            $status = '取消';
+        } elseif($row['status'] == 0) {
+            $status = '待付款';
+        } elseif($row['status'] == 1) {
+            $status = '待发货';
+        } elseif($row['status'] == 2) {
+            $status = '已发货';
+        } elseif($row['status'] == 3) {
+            $status = '已完成';
+        }
         //获取订单收货信息
-        // $address = $this->zeelool->getOrderDetail($label, $ids);
+        $address = unserialize($row->address);
 
         //获取订单处方信息
-        $goods = RufooPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        $goods = RufooPrescriptionDetailHelper::get_one_by_entity_id($ids);
 
         //获取支付信息
-        // $pay = $this->zeelool->getPayDetail($label, $ids);
-
-        $this->view->assign("label", $label);
+        $pay = Db::connect('database.db_rufoo')->table('ims_core_paylog')->where('tid', $row->ordersn)->find();
+       
         $this->view->assign("row", $row);
-        $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
+        $this->view->assign("address", $address);
         $this->view->assign("pay", $pay);
+        $this->view->assign("status", $status);
         return $this->view->fetch();
     }
 

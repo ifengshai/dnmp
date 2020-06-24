@@ -99,10 +99,8 @@
 <div class="panel-heading">
     {:build_heading()}
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
-        <li class="active"><a href="{:url('detail')}?id={$row.id}&label={$label}">订单信息</a></li>
-		<li><a href="{:url('orderDetail')}?order_number={$row.increment_id}&id={$row.id}&label={$label}">订单节点</a></li> 
-        <!-- <li><a href="{:url('checkDetail')}?id={$row.entity_id}&label={$label}">订单执行信息</a></li> -->
-        <!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
+        <li class="active"><a href="{:url('detail')}?id={$row.id}&ref=addtabs">订单信息</a></li>
+		<!-- <li><a href="{:url('orderDetail')}?order_number={$row.ordersn}&id={$row.id}&label={$label}">订单节点</a></li>  -->
     </ul>
 </div>
 
@@ -121,7 +119,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">订单状态:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.status}"
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$status}"
                         type="text" readonly>
                 </div>
             </div>
@@ -134,38 +132,9 @@
             </div>
 
             <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">客户邮箱:</label>
+                <label class="control-label col-xs-12 col-sm-2">手机号:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$address.email}"
-                        type="text" readonly>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">订单来源:</label>
-                <div class="col-xs-12 col-sm-8">
-                    {if $row['store_id'] == 1}
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="PC端" type="text"
-                        readonly>
-                    {elseif $row['store_id'] == 2 && $label == 3}
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
-                        readonly>
-
-                    {elseif $row['store_id'] == 4 && $label != 3}
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
-                        readonly>
-                    {elseif $row['store_id'] == 5}
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="app" type="text"
-                        readonly>
-                    {/if}
-
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">shipping:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input  class="form-control"  value="{$row.shipping_description}"
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$address.mobile}"
                         type="text" readonly>
                 </div>
             </div>
@@ -180,38 +149,16 @@
                 <label class="control-label col-xs-12 col-sm-2">收件人:</label>
                 <div class="col-xs-12 col-sm-8">
                     <input id="c-purchase_freight" class="form-control contract_name" readonly name=""
-                        value="{$address.firstname} {$address.lastname}" type="text">
+                        value="{$address.realname}" type="text">
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">国家:</label>
+                <label class="control-label col-xs-12 col-sm-2">省份:</label>
                 <div class="col-xs-12 col-sm-8">
                     <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
-                        value="{$address.country_id}">
+                        value="{$address.province}">
                 </div>
             </div>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">邮编:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
-                        value="{$address.postcode}">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">电话:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
-                        value="{$address.telephone}">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">地址:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input id="c-purchase_freight" class="form-control contract_name" readonly name="" type="text"
-                        value="{$address.street}">
-                </div>
-            </div>
-
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">城市:</label>
                 <div class="col-xs-12 col-sm-8">
@@ -220,13 +167,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">省州:</label>
+                <label class="control-label col-xs-12 col-sm-2">区域:</label>
                 <div class="col-xs-12 col-sm-8">
                     <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
-                        value="{$address.region}">
+                        value="{$address.area}">
                 </div>
             </div>
-
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">地址:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_freight" class="form-control contract_name" readonly name="" type="text"
+                        value="{$address.address}">
+                </div>
+            </div>
         </div>
 
     </div>
@@ -239,40 +192,20 @@
                     <th>序号</td>
                     <th>SKU</td>
                     <th>商品名称</td>
-                    <th>平台SKU</td>
                     <th>数量</td>
                     <th>颜色</td>
-                    <th>镀膜类型</td>
-                    <th>镀膜价格</td>
-                    <th>镜片类型</td>
-                    <th>镜片价格</td>
-                    <th>镜框价格</td>
-                    <th>币种</td>
-                    <th>折扣金额</td>
+                    <th>单价</td>
+                    <th>总价</td>
                 </tr>
                 {foreach $goods as $k => $v}
                 <tr>
                     <td>{:$k+1}</td>
                     <td>{$v.sku}</td>
                     <td>{$v.name}</td>
-                    <td>{$v.sku}</td>
-                    <td>{:round($v['qty_ordered'])}</td>
-                    <td>{$v.options.0.value}</td>
-                    {if $label== 1 || $label == 2}
-                    <td>{$v.coatiing_name}</td>
-                    <td>{$v.coatiing_price}</td>
-                    <td>{$v.index_type}</td>
-                    <td>{$v.index_price}</td>
-                    <td>{$v.frame_price}</td>
-                    {else/}
-                    <td>{$v.four_name}</td>
-                    <td>{$v.four_price}</td>
-                    <td>{$v.third_name}</td>
-                    <td>{$v.third_price}</td>
-                    <td>{$v.frame_price}</td>
-                    {/if}
-                    <td>{$v.cart_currency}</td>
-                    <td>{$v.discount_amount}</td>
+                    <td>{$v.total}</td>
+                    <td>{$v.colour}</td>
+                    <td>{$v.unitprice}</td>
+                    <td>{$v.price}</td>
                 </tr>
                 {/foreach}
 
@@ -287,33 +220,21 @@
             <table id="caigou-table">
                 <tr>
                     <th>订单号</th>
-                    <th>货币</th>
                     <th>支付金额</th>
                     <th>订单金额</th>
-                    <th>积分</th>
-                    <th>抵扣金额</th>
                     <th>运费</th>
                     <th>支付方式</th>
-                    <th>last_trans_id</th>
-                    <th>paypal_payer_email</th>
-                    <th>paypal_payer_id</th>
-                    <th>paypal_payer_status</th>
-                    <th>paypal_payment_status</th>
+                    <th>支付状态</th>
+                
                 </tr>
                 <tr>
-                    <td>{$row.increment_id} </td>
-                    <td>{$row.order_currency_code} </td>
-                    <td>{:round(($row['base_total_paid'] + $row['base_total_due'])*$row['base_to_order_rate'],3)}</td>
-                    <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
-                    <td>{$row.mw_rewardpoint} </td>
-                    <td>{$row.mw_rewardpoint_discount_show|sprintf='%.2f',###} </td>
-                    <td>{$row.base_shipping_amount|sprintf='%.2f',###} </td>
-                    <td>{$pay.method} </td>
-                    <td>{$pay.last_trans_id}</td>
-                    <td>{$pay.additional_information.paypal_payer_email}</td>
-                    <td>{$pay.additional_information.paypal_payer_id}</td>
-                    <td>{$pay.additional_information.paypal_payer_status}</td>
-                    <td>{$pay.additional_information.paypal_payment_status}</td>
+                    <td>{$row.ordersn} </td>
+                    <td>{$pay.fee}</td>
+                    <td>{$row.price|sprintf='%.2f',###} </td>
+                    <td>{$row.discountprice} </td>
+                    <td>{$pay.type} </td>
+                    <td>{$status}</td>
+  
                 </tr>
 
             </table>
@@ -357,7 +278,6 @@
                         border-color: #a9c6c9;
                     }
                 </style>
-                {if $label == 1 || $label == 2}
                 <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
                     <tbody>
                         {foreach $goods as $sku}
@@ -377,7 +297,7 @@
                                         </tr>
                                         <tr>
                                             <td>数量：</td>
-                                            <td>{:round($sku['qty_ordered'])}</td>
+                                            <td>{$sku.total}</td>
                                         </tr>
                                         <tr>
                                             <td>处方类型：</td>
@@ -430,7 +350,7 @@
                                             <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
                                             {else/}
 
-                                            <td>{:$sku['os_add']}</td>
+                                            <td>{:$sku['od_add']}</td>
                                             {/if}
                                             {if $sku['pdcheck'] == 'on'}
                                             <td>{:$sku['pd_r'] ?? ''}</td>
@@ -448,7 +368,7 @@
                                             <td>{:$sku['os_cyl'] ?? ''}</td>
                                             <td>{:$sku['os_axis'] ?? ''}</td>
                                             {if !$sku['total_add']}
-                                            <td>{:$sku['od_add']}</td>
+                                            <td>{:$sku['os_add']}</td>
                                             {/if}
                                             {if $sku['pdcheck'] == 'on'}
                                             <td>{:$sku['pd_l'] ?? ''}</td>
@@ -466,117 +386,6 @@
                     </tbody>
                 </table>
 
-                {else/}
-                <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
-                    <tbody>
-                        {foreach $goods as $sku}
-                        <tr>
-                            <td>
-                                <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
-                                    <tbody>
-                                        <tr></tr>
-
-                                        <tr>
-                                            <td>商品名称：</td>
-                                            <td>{$sku.name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>SKU：</td>
-                                            <td>{$sku.sku}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>数量：</td>
-                                            <td>{:round($sku['qty_ordered'])}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>处方类型：</td>
-                                            <td>{$sku.prescription_type}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>基片类型：</td>
-                                            <td>{$sku.second_name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>镜片类型：</td>
-                                            <td>{$sku.third_name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>折射率：</td>
-                                            <td>{$sku.zsl}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>镀膜类型：</td>
-                                            <td>{$sku.four_name}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-
-                            <td>
-                                <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
-                                    style="margin:0 auto;margin-top:18px;width:90%;">
-                                    <tbody cellpadding="0">
-                                        <tr class="title">
-                                            <td colspan="10">处方参数</td>
-                                        </tr>
-                                        <tr class="title">
-                                            <td></td>
-                                            <td>SPH</td>
-                                            <td>CYL</td>
-                                            <td>AXI</td>
-                                            <td>ADD</td>
-                                            <td>PD</td>
-                                            <td>Prism Horizontal</td>
-                                            <td>Base Direction</td>
-                                            <td>Prism Vertical</td>
-                                            <td>Base Direction</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Right(OD)</td>
-                                            <td>{:$sku['od_sph'] ?? ''}</td>
-                                            <td>{:$sku['od_cyl'] ?? ''}</td>
-                                            <td>{:$sku['od_axis'] ?? ''}</td>
-
-                                            {if $sku['prescription_type'] == 'Reading Glasses' && strlen($sku['os_add']) > 0 && strlen($sku['od_add']) > 0}
-                                            <td>{:$sku.od_add ?? ''}</td>
-                                            {else/}
-                                            <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
-                                            {/if}
-
-                                            {if @$sku['pdcheck'] == 'on'}
-                                            <td>{:$sku['pd_r'] ?? ''}</td>
-                                            {else/}
-                                            <td rowspan="2">{:$sku['pd'] ?? ''}</td>
-                                            {/if}
-                                            <td>{:$sku['od_pv'] ?? ''}</td>
-                                            <td>{:$sku['od_bd'] ?? ''}</td>
-                                            <td>{:$sku['od_pv_r'] ?? ''}</td>
-                                            <td>{:$sku['od_bd_r'] ?? ''}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Left(OS)</td>
-                                            <td>{:$sku['os_sph'] ?? ''}</td>
-                                            <td>{:$sku['os_cyl'] ?? ''}</td>
-                                            <td>{:$sku['os_axis'] ?? ''}</td>
-                                            {if $sku['prescription_type'] == 'Reading Glasses' && strlen($sku['os_add']) > 0 && strlen($sku['od_add']) > 0}
-                                            <td>{:$sku.os_add ?? ''}</td>
-                                            {/if}
-                                            {if @$sku['pdcheck'] == 'on'}
-                                            <td>{:$sku['pd_l'] ?? ''}</td>
-                                            {/if}
-                                            <td>{:$sku['os_pv'] ?? ''}</td>
-                                            <td>{:$sku['os_bd'] ?? ''}</td>
-                                            <td>{:$sku['os_pv_r'] ?? ''}</td>
-                                            <td>{:$sku['os_bd_r'] ?? ''}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        {/foreach}
-                    </tbody>
-                </table>
-                {/if}
             </div>
         </form>
     </div>

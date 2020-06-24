@@ -19,7 +19,7 @@ class RufooPrescriptionDetailHelper
 
 		$model = new \app\admin\model\order\printlabel\Rufoo;
 		$map['a.id'] = $entity_id;
-		$item_list = $model->field('sku,b.total,optionname,lens_data,a.createtime,ordersn,a.status,a.price,a.dispatchprice,c.title,b.unitprice')->where($map)->alias('a')
+		$item_list = $model->field('sku,b.total,optionname,lens_data,a.createtime,ordersn,a.status,a.price,a.dispatchprice,c.title,b.unitprice,c.colour')->where($map)->alias('a')
 			->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
 			->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
 			->select();
