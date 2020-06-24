@@ -47,22 +47,22 @@ class TrackReg extends Backend
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
             //区分usps运营商
-            if(strtolower($title) == 'usps'){
-                $track_num1 = substr($v['track_number'] , 0 , 10);
-                if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+            if (strtolower($title) == 'usps') {
+                $track_num1 = substr($v['track_number'], 0, 10);
+                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
                     //郭伟峰
                     $shipment_data_type = 'USPS_1';
-                }else{
-                    $track_num2 = substr($v['track_number'] , 0 , 4);
-                    if($track_num2 == '9400'){
+                } else {
+                    $track_num2 = substr($v['track_number'], 0, 4);
+                    if ($track_num2 == '9400') {
                         //加诺
                         $shipment_data_type = 'USPS_2';
-                    }else{
+                    } else {
                         //杜明明
                         $shipment_data_type = 'USPS_3';
                     }
                 }
-            }else{
+            } else {
                 $shipment_data_type = $title;
             }
             $carrier = $this->getCarrier($title);
@@ -89,7 +89,7 @@ class TrackReg extends Backend
             $data['shipment_data_type'] = $shipment_data_type;
             $data['track_number'] = $v['track_number'];
             $data['delivery_time'] = $v['created_at'];
-            Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
+            Db::name('order_node')->where(['order_id', $v['order_id'], 'site' => $site_type])->update($data);
         }
         if ($list) {
             $this->ordernodedetail->saveAll($list);

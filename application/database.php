@@ -193,4 +193,19 @@ return [
         'charset'     => Env::get('db_stock.charset'),
         'prefix'      => Env::get('db_stock.prefix'),
     ],
+    'db_rufoo' => [
+        // 数据库类型
+        'type'        => Env::get('db_rufoo.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_rufoo.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_rufoo.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_rufoo.username'),
+        // 密码
+        'password'    => Env::get('db_rufoo.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_rufoo.charset'),
+        'prefix'      => Env::get('db_rufoo.prefix'),
+    ],
 ];

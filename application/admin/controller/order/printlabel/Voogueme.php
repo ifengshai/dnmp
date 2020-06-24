@@ -72,7 +72,7 @@ class Voogueme extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0,4,6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -147,7 +147,7 @@ class Voogueme extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0,4,6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -201,7 +201,7 @@ class Voogueme extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 2;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0,4,6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -330,9 +330,6 @@ class Voogueme extends Backend
                 $data = [];
                 $list = [];
                 foreach ($res as $k => $v) {
-                    $data['site'] = 2;
-                    $data['order_id'] = $v['entity_id'];
-                    $data['order_number'] = $v['increment_id'];
                     $data['update_time'] = date('Y-m-d H:i:s');
                     //打标签
                     $list[$k]['order_node'] = 1;
@@ -347,7 +344,7 @@ class Voogueme extends Backend
 
                     $data['order_node'] = 1;
                     $data['node_type'] = 2;
-                    Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
                 }
                 if ($list) {
                     $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -637,6 +634,7 @@ class Voogueme extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -698,9 +696,6 @@ class Voogueme extends Backend
             $data = [];
             $list = [];
             foreach ($order_res as $k => $v) {
-                $data['site'] = 2;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -750,7 +745,7 @@ class Voogueme extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -1086,16 +1081,16 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1736,7 +1731,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1770,7 +1765,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1784,7 +1779,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
             <tbody cellpadding='0'>
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1795,31 +1790,31 @@ EOF;
             </td>
             </tr>  
             <tr class='title'>      
-            <td></td>  
-            <td>SPH</td>
-            <td>CYL</td>
-            <td>AXI</td>
+            <td width='20px'></td>  
+            <td width='42px'>SPH</td>
+            <td width='50px'>CYL</td>
+            <td width='42px'>AXI</td>
             " . $prismcheck_title . "
-            <td>ADD</td>
-            <td>PD</td> 
+            <td width='42px'>ADD</td>
+            <td width='36px'>PD</td> 
             " . $coatiing_name . "
             </tr>   
             <tr>  
-            <td>Right</td>      
+            <td>R</td>      
             <td>" . $final_print['od_sph'] . "</td> 
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
                     "</tr>
             <tr>
-            <td>Left</td> 
+            <td>L</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

@@ -92,7 +92,7 @@ class Notice extends Controller
         }
         //存在已创建的则跳过流程
         if(Zendesk::where(['ticket_id' => $id,'type' => $type])->find()){
-            return false;
+            return 'success';
         }
         $via = $ticket->via;
         $priority = 0;
@@ -181,8 +181,9 @@ class Notice extends Controller
         } catch (Exception $e) {
             Db::rollback();
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            echo $e->getMessage();
+            //echo $e->getMessage();
         }
+        return 'success';
     }
 
     /**
@@ -224,7 +225,7 @@ class Notice extends Controller
         }catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
         //开启事务
@@ -1011,7 +1012,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-06-01T01:00:00Z updated_at<=2020-06-01T11:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-06-17T07:00:00Z updated_at<=2020-06-17T23:00:00Z order_by:updated_at sort:asc';
          //Get all tickets
         $tickets = $this->client->search()->find($params);
 

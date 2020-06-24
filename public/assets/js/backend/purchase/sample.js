@@ -53,7 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                         return true;
                                     }
                                 },
-                                {
+                                /* {
                                     name: 'del',
                                     text: __('删除'),
                                     title: __('删除'),
@@ -65,7 +65,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     visible: function(row){
                                         return true;
                                     }
-                                },
+                                }, */
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -172,7 +172,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status_id < 3){
+                                        if(row.status_id == 1){
                                             return true;
                                         }else{
                                             return false;
@@ -284,7 +284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status_id < 3){
+                                        if(row.status_id == 1){
                                             return true;
                                         }else{
                                             return false;

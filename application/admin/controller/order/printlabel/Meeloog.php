@@ -77,7 +77,7 @@ class Meeloog extends Backend
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
                 $swhere['work_platform'] = 4;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0,4,6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['task_label'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -122,7 +122,7 @@ class Meeloog extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 4;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0,4,6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
             //查询是否存在协同任务
             foreach ($list as $k => $v) {
@@ -163,7 +163,7 @@ class Meeloog extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 4;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0,4,6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     if ($count > 0) {
