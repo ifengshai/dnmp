@@ -84,6 +84,7 @@ class Rufoo extends Backend  /*这里继承的是app\common\controller\Backend*/
             $list = collection($list)->toArray();
             foreach ($list as &$v) {
                 $address = unserialize($v['address']);
+                unset($address['id']);
                 $v = array_merge($v, $address);
             }
             unset($v);
@@ -114,13 +115,13 @@ class Rufoo extends Backend  /*这里继承的是app\common\controller\Backend*/
         }
 
         //获取订单收货信息
-        $address = $this->zeelool->getOrderDetail($label, $ids);
+        // $address = $this->zeelool->getOrderDetail($label, $ids);
 
         //获取订单处方信息
         $goods = RufooPrescriptionDetailHelper::get_list_by_entity_ids($ids);
 
         //获取支付信息
-        $pay = $this->zeelool->getPayDetail($label, $ids);
+        // $pay = $this->zeelool->getPayDetail($label, $ids);
 
         $this->view->assign("label", $label);
         $this->view->assign("row", $row);

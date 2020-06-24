@@ -99,8 +99,8 @@
 <div class="panel-heading">
     {:build_heading()}
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
-        <li class="active"><a href="{:url('detail')}?id={$row.entity_id}&label={$label}">订单信息</a></li>
-		<li><a href="{:url('orderDetail')}?order_number={$row.increment_id}&id={$row.entity_id}&label={$label}">订单节点</a></li> 
+        <li class="active"><a href="{:url('detail')}?id={$row.id}&label={$label}">订单信息</a></li>
+		<li><a href="{:url('orderDetail')}?order_number={$row.increment_id}&id={$row.id}&label={$label}">订单节点</a></li> 
         <!-- <li><a href="{:url('checkDetail')}?id={$row.entity_id}&label={$label}">订单执行信息</a></li> -->
         <!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
     </ul>
@@ -115,7 +115,7 @@
                 <label class="control-label col-xs-12 col-sm-2">订单编号:</label>
                 <div class="col-xs-12 col-sm-8">
                     <input id="c-purchase_number" class="form-control" name="row[increment_id]"
-                        value="{$row.increment_id}" type="text" readonly>
+                        value="{$row.ordersn}" type="text" readonly>
                 </div>
             </div>
             <div class="form-group">
@@ -128,7 +128,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.created_at}"
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.createtime}"
                         type="text" readonly>
                 </div>
             </div>
