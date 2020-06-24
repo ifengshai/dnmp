@@ -473,6 +473,16 @@ class Ding extends Controller
                 $send_ids = explode(',', $demand ->test_user_id); // 测试负责人
                 $msg = '任务已完成, 等待测试';
                 break;
+            case 'web_group_finish':
+                //通知前端人员
+                $send_ids = explode(',', $demand ->web_designer_user_id); // 前端负责人
+                $msg = '任务已完成, 等待测试';
+                break;
+            case 'php_group_finish':
+                //通知后端人员
+                $send_ids = explode(',', $demand ->phper_user_id); // 后端负责人
+                $msg = '任务已完成, 等待测试';
+                break;
             case 'test_record_bug':         // 测试组记录问题 - 通知相关负责人(关联fa_it_test_record表)
                 // $record = ItTestRecord::get(['pid' =>$demand ->id]);
                 $record = \think\Db::name('it_test_record') // 刚刚填的测试问题

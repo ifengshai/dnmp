@@ -50,15 +50,35 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        $res_node = (new OrderNode())->allowField(true)->save([
+        //判断如果子节点大于等于0时  不插入
+        $order_count = (new OrderNode)->where([
             'order_number' => $order_number,
             'order_id' => $order_id,
             'site' => $site,
-            'create_time' => date('Y-m-d H:i:s'),
+            'node_type' => ['>=', 0]
+        ])->count();
+        if ($order_count <= 0) {
+            $res_node = (new OrderNode())->allowField(true)->save([
+                'order_number' => $order_number,
+                'order_id' => $order_id,
+                'site' => $site,
+                'create_time' => date('Y-m-d H:i:s'),
+                'order_node' => 0,
+                'node_type' => 0,
+                'update_time' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $count = (new OrderNodeDetail())->where([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'site' => $site,
             'order_node' => 0,
-            'node_type' => 0,
-            'update_time' => date('Y-m-d H:i:s'),
-        ]);
+            'node_type' => 0
+        ])->count();
+        if ($count > 0) {
+            $this->error('已存在', [], 400);
+        }
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
@@ -110,11 +130,20 @@ class SelfApi extends Api
             $this->error(__('非支付成功状态'), [], 400);
         }
 
-        $res_node = (new OrderNode())->save([
-            'order_node' => 0,
-            'node_type' => 1,
-            'update_time' => date('Y-m-d H:i:s'),
-        ], ['order_id' => $order_id, 'site' => $site]);
+        //判断如果子节点大于等于1时  不更新
+        $order_count = (new OrderNode)->where([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'site' => $site,
+            'node_type' => ['>=', 1]
+        ])->count();
+        if ($order_count < 0) {
+            $res_node = (new OrderNode())->save([
+                'order_node' => 0,
+                'node_type' => 1,
+                'update_time' => date('Y-m-d H:i:s'),
+            ], ['order_id' => $order_id, 'site' => $site]);
+        }
 
         $count = (new OrderNodeDetail())->where([
             'order_number' => $order_number,
@@ -203,24 +232,24 @@ class SelfApi extends Api
         if (!$row) {
             $this->error(__('订单记录不存在'), [], 400);
         }
-        
+
         //区分usps运营商
-        if(strtolower($title) == 'usps'){
-            $track_num1 = substr($track_number , 0 , 10);
-            if($track_num1 == '9200190255' || $track_num1 == '9205990255'){
+        if (strtolower($title) == 'usps') {
+            $track_num1 = substr($track_number, 0, 10);
+            if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
                 //郭伟峰
                 $shipment_data_type = 'USPS_1';
-            }else{
-                $track_num2 = substr($track_number , 0 , 4);
-                if($track_num2 == '9400'){
+            } else {
+                $track_num2 = substr($track_number, 0, 4);
+                if ($track_num2 == '9400') {
                     //加诺
                     $shipment_data_type = 'USPS_2';
-                }else{
+                } else {
                     //杜明明
                     $shipment_data_type = 'USPS_3';
                 }
             }
-        }else{
+        } else {
             $shipment_data_type = $title;
         }
         //更新节点主表
@@ -248,7 +277,7 @@ class SelfApi extends Api
             'track_number' => $track_number,
         ]);
 
-      
+
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
@@ -324,7 +353,39 @@ class SelfApi extends Api
         return $track;
     }
 
+    public function query_order_node_processing(){
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
+        
+        $order_node1 = Db::name('order_node_detail')
+                    ->where('order_number',$order_number)
+                    ->where('site',$site)
+                    ->where('node_type','<=',7)
+                    ->select();
+        $order_node2 = Db::name('order_node_courier')
+                   ->where('order_number',$order_number)
+                   ->where('site',$site)
+                   ->select();
+        $order_data['order_data'] = array_merge($order_node1,$order_node2);
+        if ($other_order_number) {
 
+            foreach ($other_order_number as $val) {
+
+                $other_order_node1 = Db::name('order_node_detail')
+                                    ->where('order_number',$val)
+                                    ->where('site',$site)
+                                    ->where('node_type','<=',7)
+                                    ->select();
+                $other_order_node2 = Db::name('order_node_courier')
+                                    ->where('order_number',$val)
+                                    ->where('site',$site)
+                                    ->select();
+                $order_data['other_order_data'][$val] = array_merge($other_order_node1,$other_order_node2);
+            }
+        }
+        $this->success('成功', $order_data, 200);
+    }
 
     /**
      * 获取订单节点流程

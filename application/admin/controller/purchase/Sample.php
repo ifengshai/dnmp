@@ -1154,18 +1154,26 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = Db::name('purchase_sample_lendlog_item')->where($smap)->column('log_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $total = $this->samplelendlog
                 ->where($where)
-                ->order($sort, $order)
+                ->where($map)
                 ->count();
-
             $list = $this->samplelendlog
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['status_id'] = $value['status'];
