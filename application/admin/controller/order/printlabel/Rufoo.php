@@ -58,24 +58,22 @@ class Rufoo extends Backend
                 return $this->selectpage();
             }
 
-            // $filter = json_decode($this->request->get('filter'), true);
+            $filter = json_decode($this->request->get('filter'), true);
 
-            // if ($filter['increment_id']) {
-            //     $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            // } elseif (!$filter['status']) {
-            //     $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-            // }
-
-
+            if (!$filter['ordersn'] && !$filter['status']) {
+                $map['status'] = 1;
+            } 
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -200,7 +198,7 @@ class Rufoo extends Backend
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
-                    $map['entity_id'] = ['in', $entity_ids];
+                    $map['id'] = ['in', $entity_ids];
                     $list = $this->model
                         ->where($map)
                         ->select();
