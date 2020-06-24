@@ -105,7 +105,6 @@ class WorkOrderCheckRule extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a", [], 'strip_tags');
 
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
@@ -122,7 +121,24 @@ class WorkOrderCheckRule extends Backend
                         $data['work_create_person'] = db('admin')->where('id',$params['person'])->value('nickname');
                         $data['step_id'] = $params['step_id'];
                         $data['step_value'] = $params['step_value'];
-                        $data['symbol'] = $params['symbol'];
+
+                        switch ($params['symbol']){
+                            case 0:
+                                $data['symbol'] = 'gt';
+                                break;
+                            case 1:
+                                $data['symbol'] = 'eq';
+                                break;
+                            case 2:
+                                $data['symbol'] = 'lt';
+                                break;
+                            case 3:
+                                $data['symbol'] = 'elt';
+                                break;
+                            default:
+                                $data['symbol'] = 'egt';
+                        }
+
                         $data['check_group_id'] = $params['check_group_id'];
                         $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
                         $data['weight'] = $params['weight'];
@@ -132,7 +148,22 @@ class WorkOrderCheckRule extends Backend
                         $data['work_create_person'] = db('auth_group')->where('id',$data['work_create_person_id'])->value('name');
                         $data['step_id'] = $params['step_id'];
                         $data['step_value'] = $params['step_value'];
-                        $data['symbol'] = $params['symbol'];
+                        switch ($params['symbol']){
+                            case 0:
+                                $data['symbol'] = 'gt';
+                                break;
+                            case 1:
+                                $data['symbol'] = 'eq';
+                                break;
+                            case 2:
+                                $data['symbol'] = 'lt';
+                                break;
+                            case 3:
+                                $data['symbol'] = 'elt';
+                                break;
+                            default:
+                                $data['symbol'] = 'egt';
+                        }
                         $data['check_group_id'] = $params['check_group_id'];
                         $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
                         $data['weight'] = $params['weight'];

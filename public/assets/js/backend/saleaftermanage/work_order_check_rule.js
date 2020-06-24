@@ -31,8 +31,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'work_create_person', title: __('创建人或创建组名称')},
 
                         {field: 'step_id', title: __('措施')},
+                        {field: 'symbol', title: __('Symbol'),searchList: { 'gt': '大于', 'egt': '大于等于', 'lt': '小于', 'elt': '小于等于', 'eq': '等于',}, formatter: Table.api.formatter.status },
                         {field: 'step_value', title: __('Step_value')},
-                        {field: 'symbol', title: __('Symbol')},
                         {field: 'check_group_name', title: __('审核组')},
                         {field: 'weight', title: __('Weight')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
