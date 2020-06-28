@@ -649,6 +649,7 @@ class WorkOrderList extends Model
                     'color_id' => $prescriptions['color_id'],
                     'color_name' => $prescriptions['color_name'],
                 ];
+                $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
@@ -657,8 +658,10 @@ class WorkOrderList extends Model
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-                self::where(['id' => $work_id])->setField('replacement_order',$increment_id);
- 
+                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+
+                //补发扣库存
+                $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
                 exception($e->getMessage());
             }
@@ -827,11 +830,11 @@ class WorkOrderList extends Model
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
-                     
+
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (in_array($measure_choose_id, [7,8, 9, 10])) {
+                        if (in_array($measure_choose_id, [7, 8, 9, 10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -840,8 +843,6 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
-                                } elseif ($measure_choose_id == 7) {
-                                    $this->deductionStock($work->id, $orderRecept->measure_id);
                                 }
                                 $key++;
                             }
