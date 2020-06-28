@@ -97,7 +97,7 @@ class WorkOrderCheckRule extends Backend
         //获取所有措施
         $step = $workordersteptype->getAllStep();
         $step = array_column($step->toArray(), 'step_name', 'id');
-        array_unshift($step,'无');
+        $step[0] = '无';
 //        dump($step);die;
         //获取所有创建人
         $admin = new \app\admin\model\Admin();
@@ -229,10 +229,16 @@ class WorkOrderCheckRule extends Backend
             default:
                 $row['symbol'] = 4;
         }
-//        dump($row->toArray());die;
+//        dump($row->toArray());
+
         //获取所有审核组
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         $extend_team = $workordersteptype->getAllExtend();
+        //获取所有措施
+        $step = $workordersteptype->getAllStep();
+        $step = array_column($step->toArray(), 'step_name', 'id');
+        $step[0] = '无';
+//        dump($step);die;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -295,6 +301,7 @@ class WorkOrderCheckRule extends Backend
         }
         $this->view->assign("extend_team", $extend_team);
         $this->view->assign("row", $row);
+        $this->view->assign("step", $step);
         return $this->view->fetch();
     }
 

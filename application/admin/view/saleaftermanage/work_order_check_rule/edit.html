@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('创建组')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者')}:</label>
         <div class="col-xs-12 col-sm-8">
             {:build_select('row[create_group_name]', $row['work_create_person'], null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
         </div>
@@ -20,7 +20,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[step_name]', $row['step_name'], null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
+            {:build_select('row[step_name]', $step, $row['step_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
         </div>
     </div>
     <div class="form-group">
