@@ -97,6 +97,8 @@ class WorkOrderCheckRule extends Backend
         //获取所有措施
         $step = $workordersteptype->getAllStep();
         $step = array_column($step->toArray(), 'step_name', 'id');
+        array_unshift($step,'无');
+//        dump($step);die;
         //获取所有创建人
         $admin = new \app\admin\model\Admin();
         $create_person = $admin->getAllStaff();
@@ -107,7 +109,6 @@ class WorkOrderCheckRule extends Backend
 
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -121,7 +122,6 @@ class WorkOrderCheckRule extends Backend
                         $data['work_create_person'] = db('admin')->where('id',$params['person'])->value('nickname');
                         $data['step_id'] = $params['step_id'];
                         $data['step_value'] = $params['step_value'];
-
                         switch ($params['symbol']){
                             case 0:
                                 $data['symbol'] = 'gt';
@@ -138,7 +138,6 @@ class WorkOrderCheckRule extends Backend
                             default:
                                 $data['symbol'] = 'elt';
                         }
-
                         $data['check_group_id'] = $params['check_group_id'];
                         $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
                         $data['weight'] = $params['weight'];
@@ -167,6 +166,10 @@ class WorkOrderCheckRule extends Backend
                         $data['check_group_id'] = $params['check_group_id'];
                         $data['check_group_name'] = db('auth_group')->where('id',$data['check_group_id'])->value('name');
                         $data['weight'] = $params['weight'];
+                    }
+                    $list = db('work_order_check_rule')->where($data)->find();
+                    if (!empty($list)){
+                        $this->error('此条规则已存在，请检查');
                     }
                     $result = Db::name('work_order_check_rule')->insert($data);
                     Db::commit();
@@ -210,6 +213,22 @@ class WorkOrderCheckRule extends Backend
     {
         $row = $this->model->get($ids);
         $row['step_name'] = db('work_order_step_type')->where('id',$row['step_id'])->value('step_name');
+        switch ($row['symbol']){
+            case 'gt':
+                $row['symbol'] = 0;
+                break;
+            case 'eq':
+                $row['symbol'] = 1;
+                break;
+            case 'lt':
+                $row['symbol'] = 2;
+                break;
+            case 'egt':
+                $row['symbol'] = 3;
+                break;
+            default:
+                $row['symbol'] = 4;
+        }
 //        dump($row->toArray());die;
         //获取所有审核组
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
@@ -225,6 +244,23 @@ class WorkOrderCheckRule extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            switch ($params['symbol']){
+                case 0:
+                    $params['symbol'] = 'gt';
+                    break;
+                case 1:
+                    $params['symbol'] = 'eq';
+                    break;
+                case 2:
+                    $params['symbol'] = 'lt';
+                    break;
+                case 3:
+                    $params['symbol'] = 'egt';
+                    break;
+                default:
+                    $params['symbol'] = 'elt';
+            }
+//            dump($params);die;
             $params['check_group_name'] = db('auth_group')->where('id',$params['check_group_id'])->value('name');
             if ($params) {
                 $params = $this->preExcludeFields($params);
