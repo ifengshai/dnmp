@@ -867,9 +867,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'stock', title: __('总库存'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
-                            field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false
-                        },
-                        {
                             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
                                 return row.stock - row.distribution_occupy_stock;
                             }
