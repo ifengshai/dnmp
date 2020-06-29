@@ -1135,22 +1135,15 @@ class Item extends Backend
         //在途库存列表
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $where['a.purchase_status'] = ['in', [2, 5, 6, 9]];
         $where['a.stock_status'] = ['in', [0, 1]];
         $where['a.is_del'] = 1;
         $where['b.sku'] = $row['sku'];
 
-        $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num')
+        $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num,a.arrival_time,receiving_time')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->group('b.id')
             ->select();
-
-        //查询生产周期
-        $supplier_sku = new \app\admin\model\purchase\SupplierSku;
-        $supplier_where['sku'] = $row['sku'];
-        $supplier_where['status'] = 1;
-        $supplier_where['label'] = 1;
-        $product_cycle = $supplier_sku->where($supplier_where)->value('product_cycle');
 
         $check = new \app\admin\model\warehouse\Check;
         foreach ($info as $k => $v) {
@@ -1165,13 +1158,9 @@ class Item extends Backend
                 continue;
             }
             $info[$k]['arrivals_num'] = $arrivals_num;
-            $product_cycle = $product_cycle ? $product_cycle : 7;
-            $info[$k]['product_cycle_time'] = date('Y-m-d H:i:s', strtotime('+' . $product_cycle . ' day', strtotime($v['createtime'])));
-
         }
 
         $this->assign('info', $info);
-        $this->assign('product_cycle', $product_cycle);
 
 
         /**
