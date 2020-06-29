@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('序号'),operate:false},
-                        {field: 'sku', title: __('SKU')},
+                        {field: 'sku', title: __('SKU'),operate:'LIKE'},
                         {field: 'product_name', title: __('商品名称'),operate:false},
                         {field: 'location', title: __('库位号'),operate:false},
                         {field: 'stock', title: __('留样库存'),operate:false},
