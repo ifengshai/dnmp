@@ -576,6 +576,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         }else{
                                             $('#c-region').val(data.address[i].region_id);
                                         }
+                                        $('#c-region1').val(data.address[i].region);
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
@@ -595,6 +596,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-telephone').val(address.telephone);
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
+                                    $('#c-region1').val(address.region);
                                     $('#c-region').val(address.region_id);
                                     $('#c-city').val(address.city);
                                     $('#c-street').val(address.street);

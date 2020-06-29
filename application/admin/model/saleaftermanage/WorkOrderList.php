@@ -318,18 +318,19 @@ class WorkOrderList extends Model
                 $changeAddress = $params['address'];
                 $postData = array(
                     'increment_id'=>$params['platform_order'],
-                    'address_id'=>$changeAddress['address_id'],
-                    'firstname'=>$changeAddress['firstname'],
-                    'lastname'=>$changeAddress['lastname'],
+                    'type'=>$changeAddress['address_id'],
+                    'first_name'=>$changeAddress['firstname'],
+                    'last_name'=>$changeAddress['lastname'],
                     'email'=>$changeAddress['email'],
                     'telephone'=>$changeAddress['telephone'],
-                    'country_id'=>$changeAddress['country_id'],
+                    'country'=>$changeAddress['country_id'],
                     'region_id'=>$changeAddress['region_id'],
+                    'region'=>$changeAddress['region'],
                     'city'=>$changeAddress['city'],
                     'street'=>$changeAddress['street'],
                     'postcode'=>$changeAddress['postcode'],
                 );
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
                 Db::commit();
             } catch (\Exception $e) {
                 Db::rollback();
