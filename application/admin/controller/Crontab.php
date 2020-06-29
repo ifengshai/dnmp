@@ -2061,7 +2061,7 @@ order by sfoi.item_id asc limit 1000";
             $sku = $arr[0] . '-' . $arr[1];
             $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
-            $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
+            $zeelool_list[$k]['zeelool_sku'] = $sku;
         }
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
@@ -2072,7 +2072,7 @@ order by sfoi.item_id asc limit 1000";
             $sku = $arr[0] . '-' . $arr[1];
             $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
-            $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
+            $voogueme_list[$k]['voogueme_sku'] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
@@ -2084,7 +2084,7 @@ order by sfoi.item_id asc limit 1000";
             $sku = $arr[0] . '-' . $arr[1];
             $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
-            $nihao_list[$k]['nihao_sku'] = $v['sku'];
+            $nihao_list[$k]['nihao_sku'] = $sku;
         }
 
         //合并数组
