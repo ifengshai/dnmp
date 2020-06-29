@@ -77,7 +77,8 @@ class WorkOrderList extends Backend
         $this->assignconfig('admin_id', session('admin.id'));
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
-        $this->users = $admin->where('status','normal')->column('nickname', 'id');
+        //$this->users = $admin->where('status','normal')->column('nickname', 'id');
+        $this->users = $admin->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
     }
@@ -196,7 +197,16 @@ class WorkOrderList extends Backend
                 if ($v['after_user_id'] != 0) {
                     $list[$k]['after_user_name'] = $user_list[$v['after_user_id']];
                 }
-
+                //指定经手人
+                if($v['all_after_user_id'] !=0){
+                    $all_after_user_arr = explode(',',$v['all_after_user_id']);
+                    foreach($all_after_user_arr as $aa){
+                        $list[$k]['all_after_user_name'][] = $user_list[$aa]; 
+                    }
+                    $list[$k]['all_after_user_arr'] = $all_after_user_arr;
+                }else{
+                    $list[$k]['all_after_user_name'][] = $user_list[$v['after_user_id']];
+                }
                 //工单类型
                 if ($v['work_type'] == 1) {
                     $list[$k]['work_type_str'] = '客服工单';
@@ -219,7 +229,8 @@ class WorkOrderList extends Backend
                 // if($v['after_user_id']){
                 //     array_unshift($receptPersonIds,$v['after_user_id']);
                 // }
-
+                //跟单客服处理权限
+                $documentaryIds = explode(',',$v['']);    
                 //仓库工单并且经手人未处理
                 //1、仓库类型：经手人未处理||已处理未审核||
                 if (($v['work_type'] == 2 && $v['is_after_deal_with'] == 0) || in_array($v['work_status'], [0, 1, 2, 4, 6, 7]) || !in_array(session('admin.id'), $receptPersonIds)) {
@@ -806,7 +817,8 @@ class WorkOrderList extends Backend
                             $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
                         }
                     }
-
+                    //所有的成员组
+                    $all_group  = $workOrderConfigValue['group'];
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
                         //$params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
@@ -814,7 +826,53 @@ class WorkOrderList extends Backend
                     } elseif ($params['work_type'] == 2) {
                         //$params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
                         $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
-                        $params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
+                        // 更改跟单规则 lsw start
+                        //创建组跟单
+                        $documentary_group  = $workOrderConfigValue['documentary_group'];
+                        //创建人跟单
+                        $documentary_person = $workOrderConfigValue['documentary_person'];
+                        if(!empty($documentary_group)){
+                            foreach($documentary_group as $dgv){
+                                $documentary_info = (new AuthGroup)->getAllNextGroup($dgv['create_id']);
+                                if($documentary_info){
+                                       array_push($documentary_info, $dgv['create_id']);
+                                    foreach($documentary_info as $av){
+                                        if(is_array($all_group[$av])){
+                                            foreach($all_group[$av] as $vk){
+                                                $documentary_all_person[] = $vk;
+                                            }
+                                        }
+                                        
+                                    }  
+                                }else{
+                                    $documentary_all_person = $all_group[$dgv['create_id']];
+                                }
+                                $documentary_true_all_person = array_unique($documentary_all_person);
+                                if(in_array(session('admin.id'),$documentary_true_all_person)){
+                                    if(is_array($all_group[$dgv['documentary_group_id']])){
+                                        $params['all_after_user_id'] = implode(',',$all_group[$dgv['documentary_group_id']]);
+                                    }else{
+                                        $this->error('选择的跟单部门没有人，请重新选择');
+                                    }
+                                    break; 
+                                }         
+                            }
+                        }
+                        if(!empty($documentary_person)){
+                            foreach($documentary_person as $dpv){
+                                if(session('admin.id') ==$dpv['create_id']){
+                                    if(is_array($all_group[$dpv['documentary_group_id']])){
+                                        $params['all_after_user_id'] = implode(',',$all_group[$dpv['documentary_group_id']]);
+                                    }else{
+                                        $this->error('选择的跟单部门没有人，请重新选择');
+                                    }
+                                    break; 
+                                }
+                            }
+
+                        }
+                        // 更改跟单规则 lsw end 
+                        //$params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
                     }
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
@@ -917,18 +975,17 @@ class WorkOrderList extends Backend
                     //判断审核人表 lsw create start
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];
-                    $all_group           = $workOrderConfigValue['group'];
                     //先核算团队的，在核算个人的
                     if(!empty($check_group_weight)){
                         foreach($check_group_weight as $gv){
                             //所有的
-                            $arr = $all_person = [];
+                            $all_person = [];
                             $result = false;
                             $median_value = 0;
                             $info = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
                             if($info){
-                                  $arr = array_reduce($info, 'array_merge', array());
-                                foreach($arr as $av){
+                                  array_push($info,$gv['work_create_person_id']);
+                                foreach($info as $av){
                                     if(is_array($all_group[$av])){
                                         foreach($all_group[$av] as $vk){
                                             $all_person[] = $vk;
@@ -3285,9 +3342,11 @@ EOF;
             foreach($check_group_weight as $gv){
                 //所有的
                 $arr = $all_person = [];
-                $info = (new AuthGroup)->getAllNextGroup(31);
+                $info = (new AuthGroup)->getAllNextGroup(42);
                 if($info){
-                    $arr = array_reduce($info, 'array_merge', array());
+                    $arr = array_push($info,42);
+                    dump($info);
+                    exit;
                     foreach($arr as $av){
                         if(is_array($all_group[$av])){
                             foreach($all_group[$av] as $ak){

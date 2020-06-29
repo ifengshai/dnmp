@@ -103,7 +103,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var all_user_name = '';
 
                                 if (rows.work_type == 2 && rows.is_after_deal_with == 0) {
-                                    all_user_name += '<div class="step_recept"><b class="recept">' + rows.after_user_name + '</b></div>';
+                                    for (i = 0, len = rows.all_after_user_name.length; i < len; i++) {
+                                        all_user_name += '<div class="step_recept"><b class="recept">' + rows.all_after_user_name[i] + '</b></div>';
+                                    }
+                                    //all_user_name += '<div class="step_recept"><b class="recept">' + rows.after_user_name + '1111</b></div>';
                                 } else {
                                     if (rows.step_num) {
                                         for (i = 0, len = rows.step_num.length; i < len; i++) {

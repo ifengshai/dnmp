@@ -40,13 +40,13 @@ class AuthGroup extends Model
      * @DateTime 2020-06-29 10:24:34
      * @return void
      */
-    public function getAllNextGroup($group_id)
+    public function getAllNextGroup_yuan($group_id)
     {
-        $info = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
-        if($info){
-            return $info;
-        }
-        static $arr;
+        // $info = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
+        // if($info){
+        //     return $info;
+        // }
+        //static $arr;
         $where['pid'] = ['in',$group_id];
         $where['status'] = 'normal';
         $result =$this->where($where)->column('id');
@@ -54,8 +54,21 @@ class AuthGroup extends Model
             return false;
         }
         $arr[] = $result;
-        $this->getAllNextGroup($result);
+        $this->getAllNextGroup($arr);
         Cache::set('AuthGroup_getAllNextGroup_'.$group_id, $arr); 
         return $arr;
-    } 
+    }
+    public function getAllNextGroup($group_id) 
+    {
+        $rs = $this->where('pid','in',$group_id)->field('id')->select();
+        if(!$rs){
+            return false;
+        }
+        static $arr = [];
+        foreach ($rs as $v){
+            $arr[] = $v['id'];
+            $this->getAllNextGroup($v['id']);
+        }
+        return $arr;
+    }
 }
