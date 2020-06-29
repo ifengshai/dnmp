@@ -2041,14 +2041,14 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
         $meeloog_model = new \app\admin\model\order\order\Meeloog;
-        $intelligent_purchase_query_sql = "SELECT substring_index(a.sku,'-',2) as skus, a.sku,if(counter,counter,0) as counter, 
+        $intelligent_purchase_query_sql = "SELECT a.sku,if(counter,counter,0) as counter, 
         IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
         FROM catalog_product_entity a 
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.skus = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
+      
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
