@@ -2056,7 +2056,10 @@ order by sfoi.item_id asc limit 1000";
 
         //查询产品库sku
         foreach ($zeelool_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
             $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
         }
@@ -2064,7 +2067,10 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($voogueme_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
             $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
         }
@@ -2073,7 +2079,10 @@ order by sfoi.item_id asc limit 1000";
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($nihao_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
             $nihao_list[$k]['nihao_sku'] = $v['sku'];
         }
