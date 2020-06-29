@@ -34,17 +34,19 @@
         <div class="col-xs-12 col-sm-8">
             {foreach name="step" item="vo" key='k'}
             <div class="col-xs-12 col-sm-8">
-                <span class="text-muted"><input type="checkbox" name="row[choose_id][{$vo.id}][is_on]" id=name{$vo.id}/> {$vo.step_name}</span>
-                <span class="text-muted"><input type="checkbox" name="row[choose_id][{$vo.id}][is_checked]" id=step{$vo.id}/> 是否需要审核</span>
-                <span class="text-muted"><input type="checkbox" name="row[choose_id][{$vo.id}][is_auto_complete]" id=auto{$vo.id}/> 是否自动完成</span>
-
-            </div>
-            <div class="col-xs-12 col-sm-8">
+                <span class="text-muted is_on"><input type="checkbox" name="row[choose_id][{$vo.id}][is_on]" id=name{$vo.id}/> {$vo.step_name}</span>
+                <span class="text-muted is_checked"><input type="checkbox" name="row[choose_id][{$vo.id}][is_checked]" id=step{$vo.id}/> 是否需要审核</span>
+                <span class="text-muted is_auto_complete"><input type="checkbox" name="row[choose_id][{$vo.id}][is_auto_complete]" id=auto{$vo.id}/> 是否自动完成</span>
                 <p>承接组：</p>
-                {:build_select('row[extend][]', $extend_team, $vo, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+                <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
+                    {foreach name="extend_team" item="vv" key='kk'}
+                    <option value="{$vv.id}">{$vv.name}</option>
+                    {/foreach}
+                </select>
             </div>
+
+<!--                {:build_select('row[extend][]', $extend_team, $vo, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
             {/foreach}
-            </br>
         </div>
     </div>
 <!--    <div class="form-group">-->
