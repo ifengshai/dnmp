@@ -623,7 +623,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
             //如果为太阳镜 拼接颜色
             if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-                $finalResult[$key]['third_name'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                $finalResult[$key]['third_name'] .= ' ' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
             }
          
             $tmp_lens_params = array();
@@ -985,7 +985,7 @@ EOF;
 
                 //如果为太阳镜 拼接颜色
                 if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                    $final_print['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
                 }
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';

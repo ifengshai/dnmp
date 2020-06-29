@@ -140,7 +140,7 @@ class WeseeopticalPrescriptionDetailHelper
 
 			//如果为太阳镜 拼接颜色
 			if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-				$items[$item_key]['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+				$items[$item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
 			}
 
 			$items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
