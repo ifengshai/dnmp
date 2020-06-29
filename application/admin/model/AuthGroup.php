@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use think\Model;
+use think\Cache;
 
 class AuthGroup extends Model
 {
@@ -32,4 +33,29 @@ class AuthGroup extends Model
         }
         return $result ? $resultArr : false;
     }
+    /**
+     * 获取一个分组的所有下级分组
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-29 10:24:34
+     * @return void
+     */
+    public function getAllNextGroup($group_id)
+    {
+        $info = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
+        if($info){
+            return $info;
+        }
+        static $arr;
+        $where['pid'] = ['in',$group_id];
+        $where['status'] = 'normal';
+        $result =$this->where($where)->column('id');
+        if(!$result){
+            return false;
+        }
+        $arr[] = $result;
+        $this->getAllNextGroup($result);
+        Cache::set('AuthGroup_getAllNextGroup_'.$group_id, $arr); 
+        return $arr;
+    } 
 }
