@@ -39,7 +39,13 @@
                 <p>{$vo.step_name}--承接组：</p>
             </div>
             <div class="col-xs-12 col-sm-8">
-                {:build_select('row[extend][]', $extend_team, $vo.extend_group_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+                <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
+                    {foreach name="extend_team" item="vv" key='kk'}
+                    <option value="{$vv.id}" {eq name="$vv.id" value="$vo.extend_group_id" }selected{/eq}>{$vv.name}</option>
+                    {/foreach}
+                </select>
+
+<!--                {:build_select("row[choose_id][extend]", $extend_team, $vo.extend_group_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
             </div>
             {/foreach}
             </br>

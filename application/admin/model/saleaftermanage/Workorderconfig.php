@@ -136,5 +136,24 @@ class Workorderconfig extends Model
         return $return ? $return : [];
     }
 
+    /**
+     * @return array
+     * @return void
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @Description 获取所有承接组数组
+     * @throws \think\db\exception\DataNotFoundException
+     * @since 2020/6/29 9:43
+     * @author jhh
+     */
+    public function getAllExtendArr()
+    {
+        $return = Db::name('auth_group')
+            ->where('status', 'normal')
+            ->where('id', '>', 1)
+            ->field('id,name')
+            ->select();
+        return $return ? $return : [];
+    }
 
 }

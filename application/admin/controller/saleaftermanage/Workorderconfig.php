@@ -142,6 +142,8 @@ class Workorderconfig extends Backend
     {
         $step = $this->model->getAllStep();
         $extend_team = $this->model->getAllExtend();
+        $extend_team = $this->model->getAllExtendArr();
+        array_unshift($extend_team,['id'=>0,'name'=>'不选择']);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a", [], 'strip_tags');
             $res = $this->model->where(['type' => $params['type'], 'problem_belong' => $params['problem_belong'], 'problem_name' => $params['problem_name'], 'is_del' => 1])->find();
@@ -151,7 +153,6 @@ class Workorderconfig extends Backend
             if (empty($params['choose_id'])) {
                 $params['choose_id'] = array();
             }
-
             //所有的措施遍历
             $all_step = Db::name('work_order_step_type')->where('is_del', 1)->field('id,step_name')->select();
             Db::startTrans();
@@ -162,16 +163,17 @@ class Workorderconfig extends Backend
                     $this->model->validateFailException(true)->validate($validate);
                 }
                 $data['type'] = $params['type'];
-                $data['problem_belong'] = $params['type'];
+                $data['problem_belong'] = $params['problem_belong'];
                 $data['problem_name'] = $params['problem_name'];
                 $result = $this->model->insertGetId($data);
                 foreach ($all_step as $k => $v) {
                     //不存在就新增一条某个问题对应的措施 存在判断是否更新 是否由审核变成不审核 承接组是否改变
-                    if (in_array($v['id'], array_keys($params['choose_id']))) {
+                    if (in_array($v['id'], array_keys($params['choose_id'])) && $params['choose_id'][$v['id']]['is_on'] == 'on') {
                         $data = array();
                         $data['problem_id'] = $result;
                         $data['step_id'] = $v['id'];
-                        $data['extend_group_id'] = $params['extend'][$v['id'] - 1];
+//                        $data['extend_group_id'] = $params['extend'][$v['id'] - 1];
+                        $data['extend_group_id'] = $params['choose_id'][$v['id']]['extend'];
                         if ($params['choose_id'][$v['id']]['is_checked'] == 'on') {
                             $data['is_check'] = 1;
                         }else{
@@ -282,6 +284,10 @@ class Workorderconfig extends Backend
             }
         }
         $extend_team = $this->model->getAllExtend();
+        $extend_team[0] = '不选择';
+        $extend_team = $this->model->getAllExtendArr();
+        array_unshift($extend_team,['id'=>0,'name'=>'不选择']);
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -291,8 +297,10 @@ class Workorderconfig extends Backend
             if (empty($params['choose_id'])) {
                 $params['choose_id'] = array();
             }
+
             //所有的措施遍历
             $all_step = Db::name('work_order_step_type')->where('is_del', 1)->field('id,step_name')->select();
+
             Db::startTrans();
             try {
                 foreach ($all_step as $k => $v) {
@@ -301,40 +309,52 @@ class Workorderconfig extends Backend
 
                     //不存在就新增一条某个问题对应的措施 存在判断是否更新 是否由审核变成不审核 承接组是否改变
                     if (!$problem_step && in_array($v['id'], array_keys($params['choose_id']))) {
-                        $data = array();
-                        $data['problem_id'] = $params['problem_id'];
-                        $data['step_id'] = $v['id'];
-                        $data['extend_group_id'] = $params['extend'][$v['id'] - 1];
-                        if ($params['choose_id'][$v['id']]['is_checked'] = 'on') {
-                            $data['is_check'] = 1;
+                        if ($params['choose_id'][$v['id']]['is_on'] == 'on') {
+                            $data = array();
+                            $data['problem_id'] = $params['problem_id'];
+                            $data['step_id'] = $v['id'];
+                            $data['extend_group_id'] = $params['choose_id'][$v['id']]['extend'];
+                            if ($params['choose_id'][$v['id']]['is_checked'] == 'on') {
+                                $data['is_check'] = 1;
+                            }
+                            if ($params['choose_id'][$v['id']]['is_auto_complete'] == 'on') {
+                                $data['is_auto_complete'] = 1;
+                            }
+//                            dump($data);
+                            Db::name('work_order_problem_step')->insert($data);
                         }
-                        if ($params['choose_id'][$v['id']]['is_auto_complete'] = 'on') {
-                            $data['is_auto_complete'] = 1;
-                        }
-                        Db::name('work_order_problem_step')->insert($data);
                     } else if (!$problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
                         //不存在也没有选择不进行任何操作
 
                     } else if ($problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
+                        if ($params['choose_id'][$v['id']]['is_on'] != 'on') {
                         //存在但是没有选择 就把他从记录中删除掉
                         Db::name('work_order_problem_step')
                             ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
                             ->delete();
+                        }
                     } else if ($problem_step && in_array($v['id'], array_keys($params['choose_id']))) {
-                        //存在这个问题类型对应的措施 也选择了 看是否需要更新
-                        if (isset($params['choose_id'][$v['id']]['is_checked'])) {
-                            $is_check = 1;
-                        } else {
-                            $is_check = 0;
+                        //存在但是没有勾选 就把他从记录中删除掉
+                        if (!isset($params['choose_id'][$v['id']]['is_on'])) {
+                            Db::name('work_order_problem_step')
+                                ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
+                                ->delete();
+                        }else{
+                            //存在这个问题类型对应的措施 也选择了 看是否需要更新
+                            if (isset($params['choose_id'][$v['id']]['is_checked'])) {
+                                $is_check = 1;
+                            } else {
+                                $is_check = 0;
+                            }
+                            if (isset($params['choose_id'][$v['id']]['is_auto_complete'])) {
+                                $is_auto_complete = 1;
+                            } else {
+                                $is_auto_complete = 0;
+                            }
+                            Db::name('work_order_problem_step')
+                                ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
+                                ->update(['extend_group_id' =>$params['choose_id'][$v['id']]['extend'], 'is_check' => $is_check, 'is_auto_complete' => $is_auto_complete]);
                         }
-                        if (isset($params['choose_id'][$v['id']]['is_auto_complete'])) {
-                            $is_auto_complete = 1;
-                        } else {
-                            $is_auto_complete = 0;
-                        }
-                        Db::name('work_order_problem_step')
-                            ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
-                            ->update(['extend_group_id' => $params['extend'][$v['id'] - 1], 'is_check' => $is_check, 'is_auto_complete' => $is_auto_complete]);
                     }
                 }
                 Db::commit();
@@ -392,7 +412,7 @@ class Workorderconfig extends Backend
         //财务角色组
         $finance_department_rule   = config('workorder.finance_department_rule');
         //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则
-        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr 
+        $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
         = $step = $platform = $kefumanage = $documentary_group = $documentary_person
         = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID 
@@ -423,7 +443,7 @@ class Workorderconfig extends Backend
                     break;
                     case 5:
                         $customer_problem_classify['仓库问题'][] = $v['id'];
-                    break;             
+                    break;
                 }
                 $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
 
@@ -432,7 +452,7 @@ class Workorderconfig extends Backend
         }
         //存在措施
         if (!empty($all_step)) {
-            $all_step         = collection($all_step)->toArray();      
+            $all_step         = collection($all_step)->toArray();
             foreach ($all_step as $sv) {
                 $step[$sv['id']] = $sv['step_name'];
             }
@@ -473,7 +493,7 @@ class Workorderconfig extends Backend
                 //组创建
                 if(1 == $dv['type']){
                     $documentary_group[$dv['create_id']] = $dv;
-                //人创建    
+                //人创建
                 }elseif(2 == $dv['type']){
                     $documentary_person[$dv['create_id']] = $dv;
 
@@ -485,7 +505,7 @@ class Workorderconfig extends Backend
             $all_problem_step = collection($all_problem_step)->toArray();
             foreach($all_problem_step as $fv){
                 $relation_problem_step[$fv['problem_id']][] = $fv;
-            }  
+            }
         }
         //存在工单规则审核表
         if(!empty($all_check_rule)){
@@ -496,7 +516,7 @@ class Workorderconfig extends Backend
                 }elseif( 0 == $kv['is_group_create']){
                     $check_person_weight[] = $kv;
                 }
-                
+
             }
         }else{
             $all_check_rule = [];
@@ -518,7 +538,7 @@ class Workorderconfig extends Backend
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
         $arr['check_group_weight']            = $check_group_weight;
-        $arr['check_person_weight']           = $check_person_weight;  
+        $arr['check_person_weight']           = $check_person_weight;
         $arr['customer_department_rule']      = $customer_department_rule;
         $arr['warehouse_department_rule']     = $warehouse_department_rule;
         $arr['finance_department_rule']       = $finance_department_rule;
@@ -527,8 +547,8 @@ class Workorderconfig extends Backend
         $arr['group']                         = $group;
         $arr['check_coupon']                  = $check_coupon;
         $arr['need_check_coupon']             = $need_check_coupon;
-        $arr['customer_manager']              = $customer_manager_id;      
-        Cache::set('Workorderconfig_getConfigInfo', $arr);  
+        $arr['customer_manager']              = $customer_manager_id;
+        Cache::set('Workorderconfig_getConfigInfo', $arr);
         return $arr;
     }
     /**
