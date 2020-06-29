@@ -1709,6 +1709,14 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
 
 
+
+            //如果为太阳镜 拼接颜色
+            if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $items[$order_item_key]['index_name'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                $items[$order_item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+
+
             /**
              * 判断定制现片逻辑
              * 1、渐进镜 Progressive
