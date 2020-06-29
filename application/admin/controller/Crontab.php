@@ -2064,6 +2064,7 @@ order by sfoi.item_id asc limit 1000";
             $zeelool_list[$k]['zeelool_sku'] = $sku;
         }
 
+        
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($voogueme_list as $k => $v) {
@@ -2089,6 +2090,8 @@ order by sfoi.item_id asc limit 1000";
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
+
+        dump($lists);die;
 
         $data = [];
         foreach ($lists as $k => $v) {
