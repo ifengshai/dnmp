@@ -384,17 +384,17 @@ class Workorderconfig extends Backend
         //所有工单类型措施关系表
         $all_problem_step = (new WorkOrderProblemStep)->select();
         //所有工单规则审核表
-        $all_check_rule   = (new WorkOrderCheckRule)->select();
+        $all_check_rule   = (new WorkOrderCheckRule)->order('weight desc')->select();
         //客服部门角色组ID
         $customer_department_rule = config('workorder.customer_department_rule');
         //仓库部门角色组ID
         $warehouse_department_rule = config('workorder.warehouse_department_rule');
         //财务角色组
         $finance_department_rule   = config('workorder.finance_department_rule');
-        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr 
         = $step = $platform = $kefumanage = $documentary_group = $documentary_person
-        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight =[];
+        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID 
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
@@ -480,18 +480,23 @@ class Workorderconfig extends Backend
                 }
             }
         }
-        //不存在工单类型措施关系表
+        //存在工单类型措施关系表
         if(!empty($all_problem_step)){
             $all_problem_step = collection($all_problem_step)->toArray();
             foreach($all_problem_step as $fv){
                 $relation_problem_step[$fv['problem_id']][] = $fv;
             }  
         }
-        //不存在工单规则审核表
+        //存在工单规则审核表
         if(!empty($all_check_rule)){
             $all_check_rule = collection($all_check_rule)->toArray();
             foreach($all_check_rule as $kv){
-                $check_person_weight[$kv['weight']][$kv['work_create_person_id']] = $kv;
+                if(1 == $kv['is_group_create']){
+                    $check_group_weight[] = $kv;
+                }elseif( 0 == $kv['is_group_create']){
+                    $check_person_weight[] = $kv;
+                }
+                
             }
         }else{
             $all_check_rule = [];
@@ -512,7 +517,8 @@ class Workorderconfig extends Backend
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
-        $arr['all_check_rule']                = $check_person_weight;
+        $arr['check_group_weight']            = $check_group_weight;
+        $arr['check_person_weight']           = $check_person_weight;  
         $arr['customer_department_rule']      = $customer_department_rule;
         $arr['warehouse_department_rule']     = $warehouse_department_rule;
         $arr['finance_department_rule']       = $finance_department_rule;

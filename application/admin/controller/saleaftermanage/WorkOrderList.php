@@ -737,10 +737,10 @@ class WorkOrderList extends Backend
 
                     if (!$ids) {
                         //限制不能存在两个相同的未完成的工单
-                        $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
-                        if ($count > 0) {
-                            throw new Exception("此订单存在未处理完成的工单");
-                        }
+                        // $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+                        // if ($count > 0) {
+                        //     throw new Exception("此订单存在未处理完成的工单");
+                        // }
                     }
 
                     if (!$params['platform_order']) {
@@ -915,6 +915,110 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
                         }
                     }
+                    //判断审核人表 lsw create
+                    //if(1 == $params['is_check']){
+                        //首先判断是否存在指定创建人的情况，如果存在指定创建人的话则按照创建人优先级最高的指定审核人
+                        $check_person_weight = $workOrderConfigValue['check_person_weight'];
+                        $all_group           = $workOrderConfigValue['group'];
+                        if(!empty($check_person_weight)){
+                            foreach($check_person_weight as $wkv){
+                                if(session('admin.id') == $wkv['work_create_person_id']){
+                                    if(0 == $wkv['step_id']){
+                                        //不需要判断措施只需要判断创建人
+                                        $params['is_check'] = 1;
+                                        $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                        break;    
+                                    }elseif(2 == $wkv['step_id']){ //退款
+                                        switch ($wkv['symbol']){
+                                            case 'gt':
+                                                $result = $params['refund_money'] > $wkv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $params['refund_money'] = $wkv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $params['refund_money'] < $wkv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $params['refund_money'] >= $wkv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $params['refund_money'] <= $wkv['step_value'];
+                                                break;
+                                        }
+                                       if($result){
+                                           $params['is_check'] = 1;
+                                           $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                           break;
+                                       } 
+                                    }elseif(3 == $wkv['step_id']){ //取消
+                                        switch ($wkv['symbol']){
+                                            case 'gt':
+                                                $result = $params['refund_money'] > $wkv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $params['refund_money'] = $wkv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $params['refund_money'] < $wkv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $params['refund_money'] >= $wkv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $params['refund_money'] <= $wkv['step_value'];
+                                                break;
+                                        }
+
+                                    }elseif(6 == $wkv['step_id']){ //赠品
+                                        switch ($wkv['symbol']){
+                                            case 'gt':
+                                                $result = $params['refund_money'] > $wkv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $params['refund_money'] = $wkv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $params['refund_money'] < $wkv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $params['refund_money'] >= $wkv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $params['refund_money'] <= $wkv['step_value'];
+                                                break;
+                                        }
+
+                                    }elseif(10 == $wkv['step_id']){ //积分
+                                        switch ($wkv['symbol']){
+                                            case 'gt':
+                                                $result = $params['integral'] > $wkv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $params['integral'] = $wkv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $params['integral'] < $wkv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $params['integral'] >= $wkv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $params['integral'] <= $wkv['step_value'];
+                                                break;
+                                        }
+                                        if($result){
+                                            $params['is_check'] = 1;
+                                            $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                            break;
+                                        } 
+
+                                    }
+                                }
+
+                            }   
+                        }
+                    //}
                     //提交时间
                     if ($params['work_status'] == 2) {
                         $params['submit_time'] = date('Y-m-d H:i:s');
@@ -939,24 +1043,24 @@ class WorkOrderList extends Backend
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
-                        if(1 == $params['work_type']){
-                            $customerKefu = config('workorder.kefumanage');
-                            $customerArr = []; 
-                            foreach($customerKefu as $v){
-                                foreach($v as $vv){
-                                    $customerArr[] =$vv;
-                                }
-                            }
-                            if(!in_array(session('admin.id'),$customerArr)){
-                                if(1 == $params['is_check']){
-                                    $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
-                                    //$params['assign_user_id'] = config('workorder.customer_manager');
-                                }
+                        // if(1 == $params['work_type']){
+                        //     $customerKefu = config('workorder.kefumanage');
+                        //     $customerArr = []; 
+                        //     foreach($customerKefu as $v){
+                        //         foreach($v as $vv){
+                        //             $customerArr[] =$vv;
+                        //         }
+                        //     }
+                        //     if(!in_array(session('admin.id'),$customerArr)){
+                        //         if(1 == $params['is_check']){
+                        //             $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                        //             //$params['assign_user_id'] = config('workorder.customer_manager');
+                        //         }
                                 
-                            }else{
-                                $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
-                            }
-                        }
+                        //     }else{
+                        //         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        //     }
+                        // }
                         //如果不是客服人员则指定审核人为客服经理 end
                         
                         $result = $this->model->allowField(true)->save($params);
