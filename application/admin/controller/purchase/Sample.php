@@ -603,6 +603,10 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'],'sku');
                 $stock_arr = array_column($params['goods'],'stock');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
                 if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
                 }
