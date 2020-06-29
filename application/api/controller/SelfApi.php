@@ -352,7 +352,14 @@ class SelfApi extends Api
         $track = $trackingConnector->registerMulti($params);
         return $track;
     }
-
+    /**
+     * 获取订单节点流程 -- 新
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/29 16:16:43 
+     * @return void
+     */
     public function query_order_node_processing(){
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
@@ -388,7 +395,7 @@ class SelfApi extends Api
     }
 
     /**
-     * 获取订单节点流程
+     * 获取订单节点流程 -- 旧（暂时不用）
      *
      * @Description
      * @author Lx
