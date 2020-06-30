@@ -102,6 +102,16 @@ class DevelopDemand extends Backend
                 unset($filter['nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
+
+            //搜索责任人
+            if ($filter['duty_nickname']) {
+                //查询用户表id
+                $admin = new \app\admin\model\Admin();
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
+                unset($filter['duty_nickname']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
           
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -126,6 +136,16 @@ class DevelopDemand extends Backend
             $admin = new \app\admin\model\Admin();
             $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
             foreach ($list as $k => $val) {
+                $duty_userid = explode(',', $val['duty_user_id']);
+                $duty_nickname = [];
+                foreach ($duty_userid as $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $duty_nickname[] = $userInfo[$v];
+                }
+                $list[$k]['duty_nickname'] = implode(',', $duty_nickname);
+
                 $userids = explode(',', $val['assign_developer_ids']);
                 $nickname = [];
                 foreach ($userids as $v) {
@@ -280,6 +300,17 @@ class DevelopDemand extends Backend
                 unset($filter['nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
+
+
+            //搜索责任人
+            if ($filter['duty_nickname']) {
+                //查询用户表id
+                $admin = new \app\admin\model\Admin();
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
+                unset($filter['duty_nickname']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -304,6 +335,16 @@ class DevelopDemand extends Backend
             $admin = new \app\admin\model\Admin();
             $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
             foreach ($list as $k => $val) {
+                $duty_userid = explode(',', $val['duty_user_id']);
+                $duty_nickname = [];
+                foreach ($duty_userid as $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $duty_nickname[] = $userInfo[$v];
+                }
+                $list[$k]['duty_nickname'] = implode(',', $duty_nickname);
+
                 $userids = explode(',', $val['assign_developer_ids']);
                 $nickname = [];
                 foreach ($userids as $v) {
@@ -417,6 +458,7 @@ class DevelopDemand extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['duty_user_id'] = implode(',', $params['duty_user_id']);
                     $params['create_person'] = session('admin.nickname');
                     $params['create_person_id'] = session('admin.id');
                     $params['createtime'] = date('Y-m-d H:i:s');
@@ -447,6 +489,12 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        $admin = new \app\admin\model\Admin();
+        $userlist = $admin->where('status', 'normal')->column('nickname','id');
+        $userlist = collection($userlist)->toArray();
+
+        $this->view->assign('userlist', $userlist);
         $this->view->assign('demand_type', input('demand_type'));
         return $this->view->fetch();
     }
