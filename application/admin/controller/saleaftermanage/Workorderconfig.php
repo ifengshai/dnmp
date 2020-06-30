@@ -140,6 +140,12 @@ class Workorderconfig extends Backend
      */
     public function add()
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $step = $this->model->getAllStep();
         $extend_team = $this->model->getAllExtend();
         $extend_team = $this->model->getAllExtendArr();
@@ -267,6 +273,12 @@ class Workorderconfig extends Backend
      */
     public function detail($ids = null)
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $row = $this->model->getQuetionMeasure($ids);
         $step = $this->model->getAllStep();
         foreach ($step as $k => $v) {

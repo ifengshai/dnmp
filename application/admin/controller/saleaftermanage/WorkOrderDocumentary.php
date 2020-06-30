@@ -4,6 +4,7 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\Admin;
 use app\common\controller\Backend;
+use think\Cache;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -79,6 +80,12 @@ class WorkOrderDocumentary extends Backend
      */
     public function add()
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         //获取创建人信息
         $admin = new Admin();
@@ -167,6 +174,12 @@ class WorkOrderDocumentary extends Backend
      */
     public function edit($ids = null)
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         //获取创建人信息
         $admin = new Admin();
