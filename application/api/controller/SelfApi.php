@@ -235,8 +235,8 @@ class SelfApi extends Api
 
         //区分usps运营商
         if (strtolower($title) == 'usps') {
-            $track_num1 = substr($track_number, 0, 10);
-            if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+            $track_num1 = substr($track_number, 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
                 //郭伟峰
                 $shipment_data_type = 'USPS_1';
             } else {
@@ -507,13 +507,14 @@ class SelfApi extends Api
     {
         //校验参数
         $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
         if (!$order_number) {
             $this->error(__('缺少订单号参数'), [], 400);
         }
 
         //根据订单号查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3])->field('create_user_id,id')->find();
+        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3,'work_platform'=>$site])->field('create_user_id,id')->find();
         if ($list) {
             Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
         } else {
