@@ -5,6 +5,7 @@ namespace app\admin\controller\saleaftermanage;
 use app\admin\controller\auth\Admin;
 use app\api\controller\Ding;
 use app\common\controller\Backend;
+use think\Cache;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -93,6 +94,12 @@ class WorkOrderCheckRule extends Backend
      */
     public function add()
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $workordersteptype = new \app\admin\model\saleaftermanage\Workorderconfig();
         //获取所有措施
         $step = $workordersteptype->getAllStep();
@@ -211,6 +218,12 @@ class WorkOrderCheckRule extends Backend
      */
     public function edit($ids = null)
     {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
         $row = $this->model->get($ids);
         $row['step_name'] = db('work_order_step_type')->where('id',$row['step_id'])->value('step_name');
         switch ($row['symbol']){
