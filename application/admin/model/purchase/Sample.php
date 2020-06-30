@@ -28,7 +28,8 @@ class Sample extends Model
 
     ];
     /**
-     * 获取样品间列表
+     * 借出,出库使用
+     * 获取样品间列表 -- 条件：库存-借出数量>0
      *
      * @Description
      * @author mjj
@@ -36,11 +37,17 @@ class Sample extends Model
      * @return void
      */
     public function getlenddata(){
-        $data = collection($this->order('id asc')->field('sku,location_id')->select())->toArray();
+        $arr = array();
+        $i = 0;
+        $data = collection($this->order('id asc')->field('sku,location_id,stock,lend_num')->select())->toArray();
         foreach($data as $key=>$value){
-            $data[$key]['location'] = Db::name('purchase_sample_location')->where('id',$value['location_id'])->value('location');
+            if($value['stock'] - $value['lend_num'] > 0){
+                $arr[$i]['sku'] = $value['sku'];
+                $arr[$i]['location'] = Db::name('purchase_sample_location')->where('id',$value['location_id'])->value('location');
+                $i++;
+            }
         }
-        return $data;
+        return $arr;
     }
     /**
      * 通过sku获取库位号
