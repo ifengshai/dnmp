@@ -1528,6 +1528,13 @@ class PurchaseOrder extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
+        //添加供货商名称搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['c.supplier_name'] = $filter['supplier.supplier_name'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
             ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time')
