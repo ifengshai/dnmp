@@ -1532,7 +1532,7 @@ class PurchaseOrder extends Backend
 
         //添加供货商名称搜索
         if ($filter['supplier.supplier_name']) {
-            $map['c.supplier_name'] = $filter['supplier.supplier_name'];
+            $map['c.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
             unset($filter['supplier.supplier_name']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
