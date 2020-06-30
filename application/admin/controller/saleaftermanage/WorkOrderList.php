@@ -48,21 +48,24 @@ class WorkOrderList extends Backend
         parent::_initialize();
         //设置工单的配置值
         ##### start ######
-        global $workOrderConfigValue;
-        $workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
-        $this->assignconfig('workOrderConfigValue',$workOrderConfigValue);
+        //global $workOrderConfigValue;
+        $workOrderConfigValue = $this->workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
+        $this->assignconfig('workOrderConfigValue',$this->workOrderConfigValue);
         ###### end ######
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->order_change = new \app\admin\model\saleaftermanage\WorkOrderChangeSku;
         $this->order_remark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
         $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote; 
-        $this->view->assign('step', config('workorder.step')); //措施
-        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
+        //$this->view->assign('step', config('workorder.step')); //措施
+        $this->view->assign('step',$workOrderConfigValue['step']);
+        //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
+        $this->assignconfig('workorder',$workOrderConfigValue);
         
-        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
-        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
-
+        //$this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
+        //$this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
+        $this->view->assign('check_coupon',$workOrderConfigValue['check_coupon']);
+        $this->view->assign('need_check_coupon',$workOrderConfigValue['need_check_coupon']);
         //获取所有的国家
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
         $this->view->assign('country', $country);
@@ -70,7 +73,8 @@ class WorkOrderList extends Backend
         $this->item = new \app\admin\model\itemmanage\Item;
 
         //获取当前登录用户所属主管id
-        $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
+        //$this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
+        $this->assign_user_id = searchForId(session('admin.id'), $workOrderConfigValue['kefumanage']);
         //选项卡
         $this->view->assign('getTabList', $this->model->getTabList());
 
@@ -81,6 +85,8 @@ class WorkOrderList extends Backend
         $this->users = $admin->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
+        //查询当前登录用户所在A/B组
+        $this->customer_group = session('admin.group_id') ?: 0;
     }
 
     /**
@@ -206,6 +212,7 @@ class WorkOrderList extends Backend
                     $list[$k]['all_after_user_arr'] = $all_after_user_arr;
                 }else{
                     $list[$k]['all_after_user_name'][] = $user_list[$v['after_user_id']];
+                    $list[$k]['all_after_user_arr'] = [];
                 }
                 //工单类型
                 if ($v['work_type'] == 1) {
@@ -728,7 +735,7 @@ class WorkOrderList extends Backend
      */
     public function add($ids = null)
     {
-        global $workOrderConfigValue;
+         $workOrderConfigValue = $this->workOrderConfigValue;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -826,53 +833,18 @@ class WorkOrderList extends Backend
                     } elseif ($params['work_type'] == 2) {
                         //$params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
                         $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
-                        // 更改跟单规则 lsw start
-                        //创建组跟单
-                        $documentary_group  = $workOrderConfigValue['documentary_group'];
-                        //创建人跟单
-                        $documentary_person = $workOrderConfigValue['documentary_person'];
-                        if(!empty($documentary_group)){
-                            foreach($documentary_group as $dgv){
-                                $documentary_info = (new AuthGroup)->getAllNextGroup($dgv['create_id']);
-                                if($documentary_info){
-                                       array_push($documentary_info, $dgv['create_id']);
-                                    foreach($documentary_info as $av){
-                                        if(is_array($all_group[$av])){
-                                            foreach($all_group[$av] as $vk){
-                                                $documentary_all_person[] = $vk;
-                                            }
-                                        }
-                                        
-                                    }  
-                                }else{
-                                    $documentary_all_person = $all_group[$dgv['create_id']];
-                                }
-                                $documentary_true_all_person = array_unique($documentary_all_person);
-                                if(in_array(session('admin.id'),$documentary_true_all_person)){
-                                    if(is_array($all_group[$dgv['documentary_group_id']])){
-                                        $params['all_after_user_id'] = implode(',',$all_group[$dgv['documentary_group_id']]);
-                                    }else{
-                                        $this->error('选择的跟单部门没有人，请重新选择');
-                                    }
-                                    break; 
-                                }         
-                            }
-                        }
-                        if(!empty($documentary_person)){
-                            foreach($documentary_person as $dpv){
-                                if(session('admin.id') ==$dpv['create_id']){
-                                    if(is_array($all_group[$dpv['documentary_group_id']])){
-                                        $params['all_after_user_id'] = implode(',',$all_group[$dpv['documentary_group_id']]);
-                                    }else{
-                                        $this->error('选择的跟单部门没有人，请重新选择');
-                                    }
-                                    break; 
-                                }
-                            }
-
-                        }
                         // 更改跟单规则 lsw end 
                         //$params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
+                        //如果存在，则说明是在处理任务，不存在则是添加任务
+                        if(!$params['id']){
+                            if(!empty(array_filter($params['all_after_user_id']))){
+                                $params['all_after_user_id'] = implode(',',array_filter($params['all_after_user_id']));
+                            }else{
+                                $this->error('找不到承接人,请重新选择');
+                            }
+                        }
+
+                        
                     }
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
@@ -1141,6 +1113,7 @@ class WorkOrderList extends Backend
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                        $params['customer_group'] = $this->customer_group;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
                         // if(1 == $params['work_type']){
                         //     $customerKefu = config('workorder.kefumanage');
@@ -1202,7 +1175,8 @@ class WorkOrderList extends Backend
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $work_id;
                             $measureList['measure_choose_id'] = $v;
-                            $measureList['measure_content'] = config('workorder.step')[$v];
+                            //$measureList['measure_content'] = config('workorder.step')[$v];
+                            $measureList['measure_content'] = $workOrderConfigValue['step'][$v];
                             $measureList['create_time'] = date('Y-m-d H:i:s');
 
                             //插入措施表
@@ -1342,11 +1316,13 @@ class WorkOrderList extends Backend
             if (1 == $row->work_type) { //判断工单类型，客服工单
                 $this->view->assign('work_type', 1);
                 $this->assignconfig('work_type', 1);
-                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+                //$this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+                $this->view->assign('problem_type',$workOrderConfigValue['customer_problem_type']);          
             } else { //仓库工单
                 $this->view->assign('work_type', 2);
                 $this->assignconfig('work_type', 2);
-                $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+                //$this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+                $this->view->assign('problem_type',$workOrderConfigValue['warehouse_problem_type']);
             }
 
             //把问题类型传递到js页面
@@ -2093,14 +2069,14 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-
+        $workOrderConfigValue = $this->workOrderConfigValue;
         $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
 
         if ($operateType == 2) {
-            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
+            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, $$workOrderConfigValue['customer_manager']])) {
                 $this->error('没有审核权限');
             }
         } elseif ($operateType == 3) {
@@ -2126,8 +2102,8 @@ class WorkOrderList extends Backend
         if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
-            $customer_problem_classifys = config('workorder.customer_problem_classify');
-            $problem_types = config('workorder.customer_problem_type');
+            $customer_problem_classifys = $workOrderConfigValue['customer_problem_classify'];
+            $problem_types = $workOrderConfigValue['customer_problem_type'];
             $problem_type = [];
             $i = 0;
             foreach ($customer_problem_classifys as $key => $customer_problem_classify) {
@@ -2144,7 +2120,8 @@ class WorkOrderList extends Backend
         } else { //仓库工单
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
-            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+            //$this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+            $this->view->assign('problem_type', $workOrderConfigValue['warehouse_problem_type']);
         }
         //求出订单sku列表,传输到页面当中
         $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
@@ -3335,35 +3312,8 @@ EOF;
      * @return void
      */
     public function ceshi(){
-        global $workOrderConfigValue;
-        $check_group_weight = $workOrderConfigValue['check_group_weight'];
-        $all_group = $workOrderConfigValue['group'];
-        if(!empty($check_group_weight)){
-            foreach($check_group_weight as $gv){
-                //所有的
-                $arr = $all_person = [];
-                $info = (new AuthGroup)->getAllNextGroup(42);
-                if($info){
-                    $arr = array_push($info,42);
-                    dump($info);
-                    exit;
-                    foreach($arr as $av){
-                        if(is_array($all_group[$av])){
-                            foreach($all_group[$av] as $ak){
-                                $all_person[] = $ak;
-                            }
-                        }
-                        
-                    }
-                }else{
-                    $all_person = $all_group[$gv['work_create_person_id']];
-                }
-                dump($all_person);
-                dump(array_unique($all_person));
-                exit;
-            }
+        dump(session('admin'));
 
-        }
     }
     /**
      * 获取审核人
@@ -3502,5 +3452,66 @@ EOF;
 
             }
         }
+    }
+    /**
+     * 获取跟单规则
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-30 10:11:23
+     * @return void
+     */
+    public function getDocumentaryRule()
+    {   
+        if($this->request->isAjax()){
+            $workOrderConfigValue = $this->workOrderConfigValue;
+            $all_group = $workOrderConfigValue['group'];
+            $documentary_group  = $workOrderConfigValue['documentary_group'];
+            //创建人跟单
+            $documentary_person = $workOrderConfigValue['documentary_person'];
+            if(!empty($documentary_group)){
+                foreach($documentary_group as $dgv){
+                    $documentary_info = (new AuthGroup)->getAllNextGroup($dgv['create_id']);
+                    if($documentary_info){
+                           array_push($documentary_info, $dgv['create_id']);
+                        foreach($documentary_info as $av){
+                            if(is_array($all_group[$av])){
+                                foreach($all_group[$av] as $vk){
+                                    $documentary_all_person[] = $vk;
+                                }
+                            }
+                            
+                        }  
+                    }else{
+                        $documentary_all_person = $all_group[$dgv['create_id']];
+                    }
+                    $documentary_true_all_person = array_unique($documentary_all_person);
+                    if(in_array(session('admin.id'),$documentary_true_all_person)){
+                        if(is_array($all_group[$dgv['documentary_group_id']])){
+                            $all_after_user_id = $all_group[$dgv['documentary_group_id']];
+                            $this->success('','',$all_after_user_id);
+                        }else{
+                            $this->error('选择的跟单部门没有人，请重新选择');
+                        }
+                        break; 
+                    }         
+                }
+            }
+            if(!empty($documentary_person)){
+                foreach($documentary_person as $dpv){
+                    if(session('admin.id') ==$dpv['create_id']){
+                        if(is_array($all_group[$dpv['documentary_group_id']])){
+                            $all_after_user_id = $all_group[$dpv['documentary_group_id']];
+                            $this->success('','',$all_after_user_id);
+                        }else{
+                            $this->error('选择的跟单部门没有人，请重新选择');
+                        }
+                        break; 
+                    }
+                }
+    
+            }
+            $this->error('选择的跟单部门没有人，请重新选择');
+        }
+
     }
 }

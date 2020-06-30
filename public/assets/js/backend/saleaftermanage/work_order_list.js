@@ -252,7 +252,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && row.after_user_id == Config.userid && row.work_status == 3) {
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && (row.all_after_user_arr.includes(Config.userid.toString()) || row.after_user_id == Config.userid) && row.work_status == 3) {
                                             return true;
                                         } else {
                                             return false;
@@ -395,8 +395,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#step_id').hide();
                     $('#recept_person_group').hide();
                     $('#after_user_group').show();
-                    $('#after_user_id').val(Config.workorder.copy_group);
-                    $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                    // $('#after_user_id').val(Config.workorder.copy_group);
+                    // $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                    //异步获取跟单人员
+                    Backend.api.ajax({
+                        url: 'saleaftermanage/work_order_list/getDocumentaryRule',
+                    }, function (data, ret) {
+                        $('#all_after_user_id').val(data.join(','));
+                        var content = '';
+                        for(i=0;i<data.length;i++){
+                            //$('#all_after_user').html(Config.users[data[i]]);
+                            content += Config.users[data[i]]+' ';   
+                        }
+                        $('#all_after_user').html(content);
+                    },function(data,ret){
+                        Toastr.error(ret.msg);
+                        return false;
+                    });
                 } else { //如果是客服人员添加的工单
                     //选择的问题类型ID
                     var id = $(this).val();
@@ -668,25 +683,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }*/
                     var arr = array_filter(appoint_group.split(','));
-                    console.log(arr);
+                    //console.log(arr);
                     //循环根据承接组Key获取对应承接人id
+
                     for (var i = 0; i < arr.length - 1; i++) {
                         //循环根据承接组Key获取对应承接人id
                         //appoint_users.push(Config.workorder[arr[i]]);
                         if(Config.workOrderConfigValue.group[arr[i]] !=undefined){
-                            appoint_users.push(Config.workOrderConfigValue.group[arr[i]]);
+                            console.log(Config.workOrderConfigValue.group[arr[i]]);
+                            for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
+                                appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
+                            }
+                            
                         }
                         
                     }
                     console.log(appoint_users);
                     //循环根据承接人id获取对应人名称
+                    appoint_users = array_filter(appoint_users);
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
                     }
+                    //console.log(Config.users);
+                    //console.log(appoint_users);
+                    //console.log(appoint_users[0]);
                     var users = array_filter(username);
-                    var appoint_users = array_filter(appoint_users);
+                    //var appoint_users_content = '';
+                    // for(i=0;i<appoint_users.length;i++){
+                    //     appoint_users_content+=Config.users[appoint_users[i]];
+                    // }
                     $('#appoint_group_users').html(users.join(','));
-
+                    //$('#appoint_group_users').html(appoint_users_content);
                     //判断如果为补价 优惠券 积分 追加自己id为承接人
                     if ($(this).val() == 8 || $(this).val() == 9 || $(this).val() == 10) {
                         appoint_users.push(Config.userid);

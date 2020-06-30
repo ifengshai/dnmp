@@ -40,25 +40,7 @@ class AuthGroup extends Model
      * @DateTime 2020-06-29 10:24:34
      * @return void
      */
-    public function getAllNextGroup_yuan($group_id)
-    {
-        // $info = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
-        // if($info){
-        //     return $info;
-        // }
-        //static $arr;
-        $where['pid'] = ['in',$group_id];
-        $where['status'] = 'normal';
-        $result =$this->where($where)->column('id');
-        if(!$result){
-            return false;
-        }
-        $arr[] = $result;
-        $this->getAllNextGroup($arr);
-        Cache::set('AuthGroup_getAllNextGroup_'.$group_id, $arr); 
-        return $arr;
-    }
-    public function getAllNextGroup($group_id) 
+    public function getAllNextGroup_yuan($group_id) 
     {
         $rs = $this->where('pid','in',$group_id)->field('id')->select();
         if(!$rs){
@@ -71,4 +53,29 @@ class AuthGroup extends Model
         }
         return $arr;
     }
+    public function getAllNextGroup($group_id) 
+    {   //$arr = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
+        // if($arr){
+        //     return $arr;
+        // }
+        $rs = $this->field('id,pid')->select();
+        if(!$rs){
+            return false;
+        }
+        $info = $this->get_all_child($rs,$group_id);
+        //Cache::set('AuthGroup_getAllNextGroup_'.$group_id,$info);
+        return $info;
+    }
+
+    function get_all_child($array,$id){
+        $arr = array();
+        foreach($array as $v){
+            if($v['pid'] == $id){
+                $arr[] = $v['id'];
+                $arr = array_merge($arr,$this->get_all_child($array,$v['id']));
+            };
+        };
+        return $arr;
+    }
+
 }
