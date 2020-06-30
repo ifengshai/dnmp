@@ -615,10 +615,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
             $tmp_product_options = unserialize($value['product_options']);
 
+
             $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
             $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+
+            //如果为太阳镜 拼接颜色
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['third_name'] .= ' ' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
          
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
@@ -977,6 +983,10 @@ EOF;
                     $final_print = array_merge($lens_params, $final_print);
                 }
 
+                //如果为太阳镜 拼接颜色
+                if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                    $final_print['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                }
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 

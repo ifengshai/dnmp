@@ -108,7 +108,7 @@ class LogisticsInfo extends Backend
                 } else {
                     $data['purchase_status'] = 7;
                 }
-                $data['arrival_time'] = date('Y-m-d H:i:s');
+                $data['receiving_time'] = date('Y-m-d H:i:s');
                 $this->purchase->save($data, ['id' => $row['purchase_id']]);
 
                 //签收扣减在途库存

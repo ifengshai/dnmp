@@ -1709,6 +1709,14 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
 
 
+
+            //如果为太阳镜 拼接颜色
+            if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $items[$order_item_key]['index_name'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                $items[$order_item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+
+
             /**
              * 判断定制现片逻辑
              * 1、渐进镜 Progressive
@@ -2041,14 +2049,14 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
         $meeloog_model = new \app\admin\model\order\order\Meeloog;
-        $intelligent_purchase_query_sql = "SELECT a.sku, if(counter,counter,0) as counter, 
+        $intelligent_purchase_query_sql = "SELECT a.sku,if(counter,counter,0) as counter, 
         IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
         FROM catalog_product_entity a 
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
+      
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -2056,31 +2064,40 @@ order by sfoi.item_id asc limit 1000";
 
         //查询产品库sku
         foreach ($zeelool_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
-            $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
+            $zeelool_list[$k]['zeelool_sku'] = $sku;
         }
+
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($voogueme_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
-            $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
+            $voogueme_list[$k]['voogueme_sku'] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($nihao_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
-            $nihao_list[$k]['nihao_sku'] = $v['sku'];
+            $nihao_list[$k]['nihao_sku'] = $sku;
         }
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
-
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -4333,7 +4350,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function set_product_sotck()
     {
-        
+
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 

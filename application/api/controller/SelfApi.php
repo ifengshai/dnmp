@@ -352,7 +352,14 @@ class SelfApi extends Api
         $track = $trackingConnector->registerMulti($params);
         return $track;
     }
-
+    /**
+     * 获取订单节点流程 -- 新
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/29 16:16:43 
+     * @return void
+     */
     public function query_order_node_processing(){
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
@@ -388,7 +395,7 @@ class SelfApi extends Api
     }
 
     /**
-     * 获取订单节点流程
+     * 获取订单节点流程 -- 旧（暂时不用）
      *
      * @Description
      * @author Lx
@@ -500,13 +507,14 @@ class SelfApi extends Api
     {
         //校验参数
         $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
         if (!$order_number) {
             $this->error(__('缺少订单号参数'), [], 400);
         }
 
         //根据订单号查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3])->field('create_user_id,id')->find();
+        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3,'work_platform'=>$site])->field('create_user_id,id')->find();
         if ($list) {
             Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
         } else {

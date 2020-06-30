@@ -867,9 +867,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'stock', title: __('总库存'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
-                            field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false
-                        },
-                        {
                             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
                                 return row.stock - row.distribution_occupy_stock;
                             }
@@ -895,7 +892,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
+                                        //返回true时按钮显示,返回false隐藏+
                                         return true;
                                     }
                                 }
