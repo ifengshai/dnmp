@@ -42,7 +42,7 @@ class Item extends Backend
         $this->view->assign('categoryList', $this->category->categoryList());
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
-        $this->view->assign('AllDecorationColor',$this->itemAttribute->getFrameColor(3));
+        $this->view->assign('AllDecorationColor', $this->itemAttribute->getFrameColor(3));
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
@@ -55,7 +55,7 @@ class Item extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax()) {// 判断是否为Ajax调用
+        if ($this->request->isAjax()) { // 判断是否为Ajax调用
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -144,20 +144,20 @@ class Item extends Backend
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
-                if(3 == $item_type){ //配饰
-                    if(is_array($itemName) && !in_array("",$itemName)){
+                if (3 == $item_type) { //配饰
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出对应的sku编码规则
-                       $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
-                       $textureEncodeInfo = $resultEncode['typeResult'];
-                       if(false !== strpos($textureEncodeInfo, '-')){
-                            $textureArr = explode('-',$textureEncodeInfo);
+                        $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
+                        $textureEncodeInfo = $resultEncode['typeResult'];
+                        if (false !== strpos($textureEncodeInfo, '-')) {
+                            $textureArr = explode('-', $textureEncodeInfo);
                             $textureEncode = $textureArr[0];
-                       }else{
+                        } else {
                             $textureEncode = $textureEncodeInfo;
-                       } 
-                       if(!$textureEncode){
-                        $this->error(__('The corresponding encoding rule does not exist, please try again'));
-                       }
+                        }
+                        if (!$textureEncode) {
+                            $this->error(__('The corresponding encoding rule does not exist, please try again'));
+                        }
                         //如果是后来添加的
                         if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
                             $count = $params['item-count'];
@@ -184,7 +184,7 @@ class Item extends Backend
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
                         }
-    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -229,11 +229,10 @@ class Item extends Backend
                             $this->success();
                         } else {
                             $this->error(__('No rows were inserted'));
-                        }                       
-
+                        }
                     }
-                }else{ //镜架
-                    if (is_array($itemName) && !in_array("", $itemName)) {                        
+                } else { //镜架
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出材质对应的编码
                         if ($params['frame_texture']) {
                             $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
@@ -266,7 +265,7 @@ class Item extends Backend
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
                         }
-    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -361,19 +360,19 @@ class Item extends Backend
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
-                if(3 == $item_type){ //配饰
-                    if(is_array($itemName) && !in_array("",$itemName)){
+                if (3 == $item_type) { //配饰
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出对应的sku编码规则
                         $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
                         $textureEncodeInfo = $resultEncode['typeResult'];
-                        if(false !== strpos($textureEncodeInfo, '-')){
-                            $textureArr = explode('-',$textureEncodeInfo);
+                        if (false !== strpos($textureEncodeInfo, '-')) {
+                            $textureArr = explode('-', $textureEncodeInfo);
                             $textureEncode = $textureArr[0];
-                        }else{
+                        } else {
                             $textureEncode = $textureEncodeInfo;
-                        } 
-                        if(!$textureEncode){
-                        $this->error(__('The corresponding encoding rule does not exist, please try again'));
+                        }
+                        if (!$textureEncode) {
+                            $this->error(__('The corresponding encoding rule does not exist, please try again'));
                         }
                         //如果是后来添加的
                         if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
@@ -401,7 +400,7 @@ class Item extends Backend
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
                         }
-    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -446,11 +445,10 @@ class Item extends Backend
                             $this->success();
                         } else {
                             $this->error(__('No rows were inserted'));
-                        }                       
-
+                        }
                     }
-                }else{ //镜架
-                    if (is_array($itemName) && !in_array("", $itemName)) {                        
+                } else { //镜架
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出材质对应的编码
                         if ($params['frame_texture']) {
                             $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
@@ -483,7 +481,7 @@ class Item extends Backend
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
                         }
-    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -593,9 +591,9 @@ class Item extends Backend
                 }
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
-                if(3 == $item_type){
+                if (3 == $item_type) {
                     if (is_array($itemName) && !in_array("", $itemName)) {
-                    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -620,7 +618,6 @@ class Item extends Backend
                             Db::rollback();
                             $this->error($e->getMessage());
                         }
-                       
                     } else {
                         $this->error(__('Please add product name and color'));
                     }
@@ -630,9 +627,8 @@ class Item extends Backend
                     } else {
                         $this->error(__('No rows were updated'));
                     }
-
-                }else{
-                    if (is_array($itemName) && !in_array("", $itemName)) { 
+                } else {
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -676,7 +672,6 @@ class Item extends Backend
                             Db::rollback();
                             $this->error($e->getMessage());
                         }
-                       
                     } else {
                         $this->error(__('Please add product name and color'));
                     }
@@ -687,16 +682,15 @@ class Item extends Backend
                         $this->error(__('No rows were updated'));
                     }
                 }
-
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $result = $this->category->getAttrCategoryById($row['category_id']);
-        if(3 <= $result){
+        if (3 <= $result) {
             $info = $this->category->getCategoryTexture($row['category_id']);
             $this->assign('AllTexture', $info['textureResult']);
-            $this->assign('AllFrameColor',$info['colorResult']);
-        }else{
+            $this->assign('AllFrameColor', $info['colorResult']);
+        } else {
             $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
             $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
             $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
@@ -762,9 +756,9 @@ class Item extends Backend
                 }
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
-                if(3 == $item_type){
+                if (3 == $item_type) {
                     if (is_array($itemName) && !in_array("", $itemName)) {
-                    
+
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -789,7 +783,6 @@ class Item extends Backend
                             Db::rollback();
                             $this->error($e->getMessage());
                         }
-                       
                     } else {
                         $this->error(__('Please add product name and color'));
                     }
@@ -799,9 +792,8 @@ class Item extends Backend
                     } else {
                         $this->error(__('No rows were updated'));
                     }
-
-                }else{
-                    if (is_array($itemName) && !in_array("", $itemName)) { 
+                } else {
+                    if (is_array($itemName) && !in_array("", $itemName)) {
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
@@ -845,7 +837,6 @@ class Item extends Backend
                             Db::rollback();
                             $this->error($e->getMessage());
                         }
-                       
                     } else {
                         $this->error(__('Please add product name and color'));
                     }
@@ -856,16 +847,15 @@ class Item extends Backend
                         $this->error(__('No rows were updated'));
                     }
                 }
-
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $result = $this->category->getAttrCategoryById($row['category_id']);
-        if(3 <= $result){
+        if (3 <= $result) {
             $info = $this->category->getCategoryTexture($row['category_id']);
             $this->assign('AllTexture', $info['textureResult']);
-            $this->assign('AllFrameColor',$info['colorResult']);
-        }else{
+            $this->assign('AllFrameColor', $info['colorResult']);
+        } else {
             $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
             $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
             $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
@@ -900,7 +890,7 @@ class Item extends Backend
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
-    }    
+    }
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -990,7 +980,7 @@ class Item extends Backend
             } elseif ($result >= 3) { //商品是饰品类型
                 $info = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $info['textureResult']);
-                $this->assign('AllFrameColor',$info['colorResult']);
+                $this->assign('AllFrameColor', $info['colorResult']);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
@@ -1055,15 +1045,15 @@ class Item extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result >= 3) { //商品是饰品类型
-                $row  = $this->model->getItemInfo($sku,$result);
+                $row  = $this->model->getItemInfo($sku, $result);
                 $result = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $result['textureResult']);
-                $this->assign('AllFrameColor',$result['colorResult']);
+                $this->assign('AllFrameColor', $result['colorResult']);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
             }
-              return  $this->success('ok', '', $row);
+            return  $this->success('ok', '', $row);
         } else {
             return $this->error(__('404 Not Found'));
         }
@@ -1230,11 +1220,11 @@ class Item extends Backend
             }
         }
         $result = $this->category->getAttrCategoryById($row['category_id']);
-        if(3 <= $result){
+        if (3 <= $result) {
             $info = $this->category->getCategoryTexture($row['category_id']);
             $this->assign('AllTexture', $info['textureResult']);
-            $this->assign('AllFrameColor',$info['colorResult']);
-        }else{
+            $this->assign('AllFrameColor', $info['colorResult']);
+        } else {
             $allShape = $this->itemAttribute->getAllShape();
             //获取所有材质
             $allTexture = $this->itemAttribute->getAllTexture();
@@ -1257,7 +1247,7 @@ class Item extends Backend
             $this->assign('AllFrameGender', $allFrameGender);
             $this->assign('AllFrameShape', $allFrameShape);
             $this->assign('AllShape', $allShape);
-            $this->assign('AllTexture', $allTexture);            
+            $this->assign('AllTexture', $allTexture);
         }
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
@@ -2166,8 +2156,8 @@ class Item extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $whereData['item_status'] = 3;
-            $whereData['is_open'] = ['LT',3];
-            $whereData['presell_create_time'] = ['NEQ','0000-00-00 00:00:00'];
+            $whereData['is_open'] = ['LT', 3];
+            $whereData['presell_create_time'] = ['NEQ', '0000-00-00 00:00:00'];
             $total = $this->model->where($whereData)
                 ->where($where)
                 ->order($sort, $order)
@@ -2215,10 +2205,10 @@ class Item extends Backend
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
-                if(!$row['sku']){
+                if (!$row['sku']) {
                     $this->error('商品sku不存在,请重新尝试');
                 }
-                if('0000-00-00 00:00:00' != $row['presell_create_time']){
+                if ('0000-00-00 00:00:00' != $row['presell_create_time']) {
                     $log['sku'] = $row['sku'];
                     $log['presell_num'] = $row['presell_num'];
                     $log['presell_residue_num'] = $row['presell_residue_num'];
@@ -2336,10 +2326,10 @@ class Item extends Backend
     /***
      * 编辑预售
      */
-    public function edit_presell($ids=null)
+    public function edit_presell($ids = null)
     {
         $row = $this->model->get($ids);
-        if($this->request->isPost()){
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
@@ -2387,117 +2377,115 @@ class Item extends Backend
                     $this->error(__('No rows were inserted'));
                 }
             }
-
-        }else{
-            $this->view->assign('row',$row);
+        } else {
+            $this->view->assign('row', $row);
             return $this->view->fetch();
         }
     }
     /***
      * 预售历史记录
      */
-    public function presell_history($ids=null)
+    public function presell_history($ids = null)
     {
         $row = $this->model->get($ids);
-        if(!$row){
-            $this->error(__('此SKU不存在,请重新尝试')); 
+        if (!$row) {
+            $this->error(__('此SKU不存在,请重新尝试'));
         }
         $result = (new Item_presell_log())->getHistoryRecord($row['sku']);
-        if($result){
-            $this->view->assign('result',$result);
+        if ($result) {
+            $this->view->assign('result', $result);
         }
-            return $this->view->fetch();
+        return $this->view->fetch();
     }
 
-    
-	public function batch_export_xls()
+
+    public function batch_export_xls()
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
-            $addWhere.= " AND id IN ({$ids})";
+            $addWhere .= " AND id IN ({$ids})";
         }
         list($where) = $this->buildparams();
-		$list = $this->model->where('is_open', '<', 3)
-			->where($addWhere)
-			->where($where)
-			->select();
-		//分类列表	
-		$categoryArr = $this->category->getItemCategoryList();	
+        $list = $this->model->where('is_open', '<', 3)
+            ->where($addWhere)
+            ->where($where)
+            ->select();
+        //分类列表	
+        $categoryArr = $this->category->getItemCategoryList();
         $list = collection($list)->toArray();
-		if(!$list){
-			return false;
-		}
+        if (!$list) {
+            return false;
+        }
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "自增ID")
             ->setCellValue("B1", "商品名称")
-			->setCellValue("C1", "原始SKU")
-			->setCellValue("D1", "商品SKU")
-			->setCellValue("E1", "参考进价");
+            ->setCellValue("C1", "原始SKU")
+            ->setCellValue("D1", "商品SKU")
+            ->setCellValue("E1", "参考进价");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "商品分类")
             ->setCellValue("G1", "SKU状态")
-			->setCellValue("H1", "商品库存")
-			->setCellValue("I1", "SKU启用状态")
-			->setCellValue("J1", "是否新品");
+            ->setCellValue("H1", "商品库存")
+            ->setCellValue("I1", "SKU启用状态")
+            ->setCellValue("J1", "是否新品");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建人")
-            ->setCellValue("L1", "创建时间");			
+            ->setCellValue("L1", "创建时间");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('商品SKU数据');
 
         foreach ($list as $key => $value) {
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['id']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['name']);
-			$spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['origin_sku']);
-			$spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
-			$spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['price']);
-			if ($value['category_id']) {
-				$value['category_name'] = $categoryArr[$v['category_id']];
-				$spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['category_name']);
-			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), '暂无分类');
-			}
-			switch($value['item_status']){
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['origin_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['price']);
+            if ($value['category_id']) {
+                $value['category_name'] = $categoryArr[$v['category_id']];
+                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['category_name']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), '暂无分类');
+            }
+            switch ($value['item_status']) {
                 case 1:
-                $value['item_status'] = '新建';
-                break;
+                    $value['item_status'] = '新建';
+                    break;
                 case 2:
-                $value['item_status'] = '待审核';
-                break;
+                    $value['item_status'] = '待审核';
+                    break;
                 case 3:
-                $value['item_status'] = '审核通过';
-                break;
+                    $value['item_status'] = '审核通过';
+                    break;
                 case 4:
-                $value['item_status'] = '审核拒绝';
-                break;
+                    $value['item_status'] = '审核拒绝';
+                    break;
                 case 5:
-                $value['item_status'] = '取消';
-                break;                                                                                                                                                                     
+                    $value['item_status'] = '取消';
+                    break;
             }
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['item_status']);
-			$spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['stock']);
-		  if(1 == $value['is_open']){
-			$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),'启用');
-		  }elseif(2 == $value['is_open']){
-			$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),'禁用');  
-		  }
-		  if(1 == $value['is_new']){
-			 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2),'是'); 
-		  }else{
-			 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2),'不是'); 
-		  }
-			 $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2),$value['create_person']);
-			 $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2),$value['create_time']);
-			
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['stock']);
+            if (1 == $value['is_open']) {
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '启用');
+            } elseif (2 == $value['is_open']) {
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '禁用');
+            }
+            if (1 == $value['is_new']) {
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '是');
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '不是');
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(80);
-		$spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-		$spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(30);
@@ -2505,7 +2493,7 @@ class Item extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);		
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
         //设置边框
         $border = [
             'borders' => [
@@ -2519,6 +2507,70 @@ class Item extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
         $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '商品数据' . date("YmdHis", time());;
+        if ($format == 'xls') {
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+
+
+
+    public function batch_export_xls_test()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $list = $this->model->alias('a')->field('a.sku,a.available_stock')
+            ->where('a.is_open', 1)
+            ->where('a.is_del', 1)
+            ->where('b.platform_type', 1)
+            ->where('b.outer_sku_status', 2)
+            ->where('a.available_stock', '>', 0)
+            ->join(['fa_item_platform_sku' => 'b'], 'a.sku=b.sku')
+            ->select();
+        $list = collection($list)->toArray();
+       
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "SKU")
+            ->setCellValue("B1", "库存");
+      
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['available_stock']);
+           
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(10);
+    
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:B' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
         $savename = '商品数据' . date("YmdHis", time());;
