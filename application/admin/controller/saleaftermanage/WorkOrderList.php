@@ -2076,7 +2076,7 @@ class WorkOrderList extends Backend
         }
 
         if ($operateType == 2) {
-            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, $$workOrderConfigValue['customer_manager']])) {
+            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, $workOrderConfigValue['customer_manager']])) {
                 $this->error('没有审核权限');
             }
         } elseif ($operateType == 3) {
@@ -2103,6 +2103,7 @@ class WorkOrderList extends Backend
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
             $customer_problem_classifys = $workOrderConfigValue['customer_problem_classify'];
+            unset($customer_problem_classifys['仓库问题']);
             $problem_types = $workOrderConfigValue['customer_problem_type'];
             $problem_type = [];
             $i = 0;
@@ -3314,144 +3315,6 @@ EOF;
     public function ceshi(){
         dump(session('admin'));
 
-    }
-    /**
-     * 获取审核人
-     *
-     * @Author lsw 1461069578@qq.com
-     * @DateTime 2020-06-29 09:09:09
-     * @return void
-     */
-    public function getAuditor($params,$workOrderConfigValue)
-    {
-        $check_person_weight = $workOrderConfigValue['check_person_weight'];
-        $all_group           = $workOrderConfigValue['group'];
-        if(!empty($check_person_weight)){
-            foreach($check_person_weight as $wkv){
-                if(session('admin.id') == $wkv['work_create_person_id']){
-                    if(0 == $wkv['step_id']){
-                        //不需要判断措施只需要判断创建人
-                        $params['is_check'] = 1;
-                        $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
-                        break;    
-                    }elseif(2 == $wkv['step_id']){ //退款
-                        //中间值
-                        $median_value = $params['refund_money']; 
-                    }elseif(3 == $wkv['step_id']){ //取消
-                        $median_value = $params['refund_money'];
-
-                    }elseif(6 == $wkv['step_id']){ //赠品
-                        $giftOriginalNumber = $params['gift']['original_number'] ?: [];
-                        $median_value = array_sum($giftOriginalNumber); 
-
-                    }elseif(7 == $wkv['step_id']){ //补发
-                        $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
-                        $median_value = array_sum($replacementOriginalNumber);
-
-
-                    }elseif(10 == $wkv['step_id']){ //积分
-                        $median_value = $params['integral'];
-
-                    }
-                    switch ($wkv['symbol']){
-                        case 'gt':
-                            $result = $median_value > $wkv['step_value'];
-                            break;
-                        case 'eq':
-                            $result = $median_value = $wkv['step_value'];
-                            break;
-                        case 'lt':
-                            $result = $median_value < $wkv['step_value'];
-                            break;
-                        case 'egt':
-                            $result = $median_value >= $wkv['step_value'];
-                            break;
-                        case 'elt':
-                            $result = $median_value <= $wkv['step_value'];
-                            break;
-                    }
-                   if($result){
-                       $params['is_check'] = 1;
-                       $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
-                       break;
-                   }
-                }
-
-            }   
-        }else{ //核算团队的
-            $check_group_weight = $workOrderConfigValue['check_group_weight'];
-            if(!empty($check_group_weight)){
-                foreach($check_group_weight as $gv){
-                    //所有的
-                    $arr = [];
-                    $info = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
-                    if($info){
-                        foreach($info as $k => $v){
-                            foreach($v as $kv){
-                                $arr[] = $kv;
-                            }
-                          }
-                          $all_person = [];
-                        foreach($arr as $av){
-                            $all_person[] = $all_group[$av];
-                        }  
-                    }else{
-                        $all_person = $all_group[$gv['work_create_person_id']];
-                    }
-                    $true_all_person = array_filter($all_person);
-                    //如果符合创建组的话
-                    if(in_array(session('admin.id'),$true_all_person)){
-                        if(0 == $gv['step_id']){
-                            //不需要判断措施只需要判断创建人
-                            $params['is_check'] = 1;
-                            $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                            break;    
-                        }elseif(2 == $gv['step_id']){ //退款
-                            //中间值
-                            $median_value = $params['refund_money']; 
-                        }elseif(3 == $gv['step_id']){ //取消
-                            $median_value = $params['refund_money'];
-    
-                        }elseif(6 == $gv['step_id']){ //赠品
-                            $giftOriginalNumber = $params['gift']['original_number'] ?: [];
-                            $median_value = array_sum($giftOriginalNumber); 
-    
-                        }elseif(7 == $gv['step_id']){ //补发
-                            $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
-                            $median_value = array_sum($replacementOriginalNumber);
-    
-    
-                        }elseif(10 == $gv['step_id']){ //积分
-                            $median_value = $params['integral'];
-    
-                        }
-                        switch ($gv['symbol']){
-                            case 'gt':
-                                $result = $median_value > $gv['step_value'];
-                                break;
-                            case 'eq':
-                                $result = $median_value = $gv['step_value'];
-                                break;
-                            case 'lt':
-                                $result = $median_value < $gv['step_value'];
-                                break;
-                            case 'egt':
-                                $result = $median_value >= $gv['step_value'];
-                                break;
-                            case 'elt':
-                                $result = $median_value <= $gv['step_value'];
-                                break;
-                        }
-                       if($result){
-                           $params['is_check'] = 1;
-                           $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                           break;
-                       }
-                    }
-                }
-
-            }
-        }
     }
     /**
      * 获取跟单规则

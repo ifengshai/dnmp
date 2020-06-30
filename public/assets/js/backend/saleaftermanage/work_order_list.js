@@ -1788,40 +1788,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
 
                     //判断是客服创建还是仓库创建
-                    if (Config.work_type == 1) {
-                        var temp_id = 5;
-                    } else if (Config.work_type == 2) {
-                        var temp_id = 4;
-                    }
+                    // if (Config.work_type == 1) {
+                    //     var temp_id = 5;
+                    // } else if (Config.work_type == 2) {
+                    //     var temp_id = 4;
+                    // }
 
-                    //id大于5 默认措施4
-                    if (id > temp_id) {
-                        var steparr = Config.workorder['step04'];
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
-                    } else {
-                        //判断是客服创建还是仓库创建
-                        if (Config.work_type == 1) {
-                            var step = Config.workorder.customer_problem_group[id].step;
-                        } else if (Config.work_type == 2) {
-                            $('#step_id').hide();
-                            $('#recept_person_group').hide();
-                            $('#after_user_group').show();
-                            $('#after_user_id').val(Config.workorder.copy_group);
-                            $('#after_user').html(Config.users[Config.workorder.copy_group]);
-                            var step = Config.workorder.warehouse_problem_group[id].step;
-                        }
-                        var steparr = Config.workorder[step];
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
+                    // //id大于5 默认措施4
+                    // if (id > temp_id) {
+                    //     var steparr = Config.workorder['step04'];
+                    //     for (var j = 0; j < steparr.length; j++) {
+                    //         $('#step' + steparr[j].step_id).parent().show();
+                    //         //读取对应措施配置
+                    //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                    //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    //     }
+                    // } else {
+                    //     //判断是客服创建还是仓库创建
+                    //     if (Config.work_type == 1) {
+                    //         var step = Config.workorder.customer_problem_group[id].step;
+                    //     } else if (Config.work_type == 2) {
+                    //         $('#step_id').hide();
+                    //         $('#recept_person_group').hide();
+                    //         $('#after_user_group').show();
+                    //         $('#after_user_id').val(Config.workorder.copy_group);
+                    //         $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                    //         var step = Config.workorder.warehouse_problem_group[id].step;
+                    //     }
+                    //     var steparr = Config.workorder[step];
+                    //     for (var j = 0; j < steparr.length; j++) {
+                    //         $('#step' + steparr[j].step_id).parent().show();
+                    //         //读取对应措施配置
+                    //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                    //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    //     }
+                    // }
+                    //var id = $(this).val();
+                    var all_group = Config.workOrderConfigValue.group;
+                    //所有的问题类型对应措施表
+                    var all_problem_step = Config.workOrderConfigValue.all_problem_step;
+                    //求出选择的问题类型对应的措施
+                    var choose_problem_step = all_problem_step[id];
+                    // if(choose_problem_step == undefined){
+                    //     Toastr.error('选择的问题类型没有对应的措施，请重新选择问题类型或者添加措施');
+                    //     return false;
+                    // }
+                    //循环列出对应的措施
+                    for(var j=0;j<choose_problem_step.length;j++){
+                        //console.log(choose_problem_step[j].step_id);
+                        $('#step' + choose_problem_step[j].step_id).parent().show();
+                        $('#step' + choose_problem_step[j].step_id + '-is_check').val(choose_problem_step[j].is_check);
+                        $('#step' + choose_problem_step[j].step_id + '-is_auto_complete').val(choose_problem_step[j].is_auto_complete);
+                        if(choose_problem_step[j].extend_group_id !=undefined && choose_problem_step[j].extend_group_id !=0){
+                            $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
+                        }else{
+                            $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
+                        }    
                     }
                     if (Config.measureList) {
                         var id = Config.problem_type_id;
@@ -1830,35 +1852,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
 
                         //判断是客服创建还是仓库创建
-                        if (Config.work_type == 1) {
-                            var temp_id = 5;
-                        } else if (Config.work_type == 2) {
-                            var temp_id = 4;
-                        }
-                        //id大于5 默认措施4
-                        if (id > temp_id) {
-                            var steparr = Config.workorder['step04'];
-                            for (var j = 0; j < steparr.length; j++) {
-                                $('#step' + steparr[j].step_id).parent().show();
-                                //读取对应措施配置
-                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                            }
-                        } else {
-                            //判断是客服创建还是仓库创建
-                            if (Config.work_type == 1) {
-                                var step = Config.workorder.customer_problem_group[id].step;
-                            } else if (Config.work_type == 2) {
-                                var step = Config.workorder.warehouse_problem_group[id].step;
-                            }
-                            var steparr = Config.workorder[step];
-                            for (var j = 0; j < steparr.length; j++) {
-                                $('#step' + steparr[j].step_id).parent().show();
-                                //读取对应措施配置
-                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                            }
-                        }
+                        // if (Config.work_type == 1) {
+                        //     var temp_id = 5;
+                        // } else if (Config.work_type == 2) {
+                        //     var temp_id = 4;
+                        // }
+                        // //id大于5 默认措施4
+                        // if (id > temp_id) {
+                        //     var steparr = Config.workorder['step04'];
+                        //     for (var j = 0; j < steparr.length; j++) {
+                        //         $('#step' + steparr[j].step_id).parent().show();
+                        //         //读取对应措施配置
+                        //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        //     }
+                        // } else {
+                        //     //判断是客服创建还是仓库创建
+                        //     if (Config.work_type == 1) {
+                        //         var step = Config.workorder.customer_problem_group[id].step;
+                        //     } else if (Config.work_type == 2) {
+                        //         var step = Config.workorder.warehouse_problem_group[id].step;
+                        //     }
+                        //     var steparr = Config.workorder[step];
+                        //     for (var j = 0; j < steparr.length; j++) {
+                        //         $('#step' + steparr[j].step_id).parent().show();
+                        //         //读取对应措施配置
+                        //         $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        //         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        //     }
+                        // }
                         if (Config.measureList) {
                             var checkIDss = Config.measureList;//措施列表赋值给checkID
                             //console.log(checkIDss);

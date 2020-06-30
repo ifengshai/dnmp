@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use think\Cache;
 use think\Validate;
 use think\Db;
 use think\Exception;
@@ -374,6 +375,7 @@ class Admin extends Backend
                     $dataset[] = ['uid' => $row->id, 'group_id' => $value];
                 }
                 model('AuthGroupAccess')->saveAll($dataset);
+                Cache::rm('Workorderconfig_getConfigInfo');
                 $this->success();
             }
             $this->error();
