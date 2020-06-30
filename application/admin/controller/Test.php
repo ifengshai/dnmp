@@ -906,7 +906,7 @@ class Test extends Backend
     //usps
     public function usps_data($data, $add)
     {
-        $track_num = substr($add['track_number'], 0, 10);
+        $track_num = substr($add['track_number'], 0, 4);
 
         $trackdetail = array_reverse($data['z1']);
         $time = '';
@@ -1046,7 +1046,7 @@ class Test extends Backend
                 }
             }
         } else {
-            if ($track_num == '9200190255' || $track_num == '9205990255') {
+            if ($track_num == '9200' || $track_num == '9205') {
                 //郭伟峰
                 foreach ($trackdetail as $k => $v) {
                     $add['create_time'] = $v['a'];
@@ -2732,31 +2732,16 @@ class Test extends Backend
     public function add_shipment_data_type1()
     {
         //查询order_node表中有运营商的数据信息
-        $node_track_list = Db::name('order_node')->where('shipment_type', '<>', '')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
-            } else {
-                //更新魔晶运营商数据
-                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => $item['shipment_type']]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                //郭伟峰
+                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             }
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;
@@ -2773,29 +2758,15 @@ class Test extends Backend
     {
         ini_set('memory_limit', '512M');
         //查询order_node_courier表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_courier')->where('shipment_type', 'USPS')->where('shipment_data_type is null')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node_courier')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-           
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node_courier')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                Db::name('order_node_courier')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             } 
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;
@@ -2812,28 +2783,15 @@ class Test extends Backend
     {
         ini_set('memory_limit', '512M');
         //查询order_node_detail表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_detail')->where('shipment_type', 'USPS')->where('shipment_data_type is null')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node_detail')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node_detail')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                Db::name('order_node_detail')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             } 
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;

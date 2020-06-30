@@ -1449,6 +1449,7 @@ class PurchaseOrder extends Backend
      */
     public function process()
     {
+        $this->relationSearch = true;
         $this->model = new \app\admin\model\warehouse\Check;
         $this->check_item = new \app\admin\model\warehouse\CheckItem;
         //设置过滤方法
@@ -1477,6 +1478,7 @@ class PurchaseOrder extends Backend
             $map['check.status'] = 2;
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->with(['purchaseorder', 'supplier'])
                 ->where($where)
