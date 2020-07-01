@@ -195,4 +195,31 @@ class TrackReg extends Backend
         $res = json_decode($stringBody);
         return $res;
     }
+    /**
+     * zendesk10分钟更新前20分钟的数据
+     * @return [type] [description]
+     */
+    public function asyncTicketHttps()
+    {
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        
+        //求交集的更新
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+        foreach($intersects as $intersect){
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            echo $intersect.'is ok'."\n";
+        }
+        //新增
+        foreach($diffs as $diff){
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            echo $diff.'ok'."\n";
+        }
+        echo 'all ok';
+        exit;
+    }
 }
