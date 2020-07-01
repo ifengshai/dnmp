@@ -212,7 +212,7 @@ class Test3 extends Backend
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = ['in', $skus];
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
         $purchase_map['stock_status'] = ['in', [0, 1]];
         $purchase_map['is_del'] = 1;
         $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)

@@ -13,6 +13,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -188,10 +189,11 @@ class Weseeoptical extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        $res = $this->model->field('entity_id,increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -203,6 +205,7 @@ class Weseeoptical extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         switch ($status) {
@@ -289,14 +292,17 @@ class Weseeoptical extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 5,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 5,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                     ]);
                 }
                 unset($v);
@@ -339,16 +345,19 @@ class Weseeoptical extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 5,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 5,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -606,10 +615,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
             $tmp_product_options = unserialize($value['product_options']);
 
+
             $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
             $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+
+            //如果为太阳镜 拼接颜色
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['third_name'] .= ' ' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
          
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
@@ -968,6 +983,10 @@ EOF;
                     $final_print = array_merge($lens_params, $final_print);
                 }
 
+                //如果为太阳镜 拼接颜色
+                if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                    $final_print['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                }
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 

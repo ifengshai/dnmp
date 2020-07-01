@@ -240,8 +240,8 @@ class Test2 extends Backend
                 if ($v['track_number']) {
 
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
@@ -356,8 +356,8 @@ class Test2 extends Backend
 
                 if ($v['track_number']) {
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
@@ -533,8 +533,8 @@ class Test2 extends Backend
 
                 if ($v['track_number']) {
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
@@ -650,8 +650,8 @@ class Test2 extends Backend
                 if ($v['track_number']) {
 
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
@@ -828,8 +828,8 @@ class Test2 extends Backend
 
                 if ($v['track_number']) {
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
@@ -943,8 +943,8 @@ class Test2 extends Backend
 
                 if ($v['track_number']) {
                     if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 10);
-                        if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                        $track_num1 = substr($v['track_number'], 0, 4);
+                        if ($track_num1 == '9200' || $track_num1 == '9205') {
                             //郭伟峰
                             $shipment_data_type = 'USPS_1';
                         } else {
