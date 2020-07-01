@@ -2,9 +2,11 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\common\controller\Backend;
+use fast\Tree;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -35,6 +37,19 @@ class Workorderconfig extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\Workorderconfig;
+        $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+        $groupList = collection(AuthGroup::where('id', 'in', $this->childrenGroupIds)->select())->toArray();
+
+        Tree::instance()->init($groupList);
+        $groupdata = [];
+        //加载承接组树形图
+        $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+        //填充空值 做不选择承接组用
+        array_unshift($result,['id'=>0,'name'=>'不选择']);
+        $groupdata = $result;
+//        dump($result);die;
+
+        $this->view->assign('groupdata', $groupdata);
     }
 
     /**
@@ -309,7 +324,6 @@ class Workorderconfig extends Backend
             if (empty($params['choose_id'])) {
                 $params['choose_id'] = array();
             }
-
             //所有的措施遍历
             $all_step = Db::name('work_order_step_type')->where('is_del', 1)->field('id,step_name')->select();
 
@@ -332,7 +346,6 @@ class Workorderconfig extends Backend
                             if ($params['choose_id'][$v['id']]['is_auto_complete'] == 'on') {
                                 $data['is_auto_complete'] = 1;
                             }
-//                            dump($data);
                             Db::name('work_order_problem_step')->insert($data);
                         }
                     } else if (!$problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
