@@ -91,6 +91,7 @@ class WorkOrderList extends Backend
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
             $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
+            $step_arr[$k]['recept_person_id'] = implode(',', array_column($recept_arr, 'recept_person_id'));
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
@@ -205,9 +206,10 @@ class WorkOrderList extends Backend
                     }
                 }
 
-                $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
+                $recept = $this->sel_order_recept($v['id']); //获取措施相关记录
+                $list[$k]['step_num'] = $recept;
                 //是否有处理权限
-                $receptPersonIds = explode(',', $v['recept_person_id']);
+                $receptPersonIds = explode(',', implode(',',array_column($recept, 'recept_person_id')));
                 //跟单客服跟单处理之后不需要显示处理权限
                 // if($v['after_user_id']){
                 //     array_unshift($receptPersonIds,$v['after_user_id']);
