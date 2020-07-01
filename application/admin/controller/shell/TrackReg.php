@@ -201,7 +201,18 @@ class TrackReg extends Backend
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $this->zendeskUpateData('zeelool');
+        $this->zendeskUpateData('voogueme');
+        echo 'all ok';
+        exit;
+    }
+    /**
+     * zendesk10分钟更新前20分钟的数据方法
+     * @return [type] [description]
+     */
+    public function zendeskUpateData($siteType)
+    {
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->asyncUpdate();
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
         
@@ -211,12 +222,12 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType,'id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType,'id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
