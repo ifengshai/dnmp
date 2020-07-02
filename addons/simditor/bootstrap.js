@@ -12,7 +12,7 @@ require(['form'], function (Form) {
     var _bindevent = Form.events.bindevent;
     Form.events.bindevent = function (form) {
         _bindevent.apply(this, [form]);
-        if ($(".editor", form).size() > 0) {
+        if ($(".editor_simditor", form).size() > 0) {
             //修改上传的接口调用
             require(['upload', 'simditor'], function (Upload, Simditor) {
                 var editor, mobileToolbar, toolbar;
@@ -20,7 +20,7 @@ require(['form'], function (Form) {
                 Simditor.list = {};
                 toolbar = ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'];
                 mobileToolbar = ["bold", "underline", "strikethrough", "color", "ul", "ol"];
-                $(".editor", form).each(function () {
+                $(".editor_simditor", form).each(function () {
                     var id = $(this).attr("id");
                     editor = new Simditor({
                         textarea: this,
