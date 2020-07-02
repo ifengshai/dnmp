@@ -208,18 +208,21 @@
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' }  id="lens_type" class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
-                        {if condition="$vo['color_id']"}
-                            {foreach name="lensColorList" item="val"}
                             {if condition="isset($info[$keys]['prescription_options']['lens_name'])"}
                             <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
                             {/if}
+                        {if condition="!empty($vo['color_id'])"}
+                            {foreach name="lensColorList" item="val"}
+                            <!-- {if condition="isset($info[$keys]['prescription_options']['lens_name'])"}
+                            <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
+                            {/if} -->
                             <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['lens_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
                             {/foreach}
                         {else /}
                             {foreach name="prescription[$vo['prescription_type']]" item="val"}
-                            {if condition="isset($info[$keys]['prescription_options']['lens_name'])"}
+                            <!-- {if condition="isset($info[$keys]['prescription_options']['lens_name'])"}
                             <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
-                            {/if}
+                            {/if} -->
                             <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['lens_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
                             {/foreach}
                         {/if}
