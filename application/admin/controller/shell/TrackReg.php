@@ -202,7 +202,7 @@ class TrackReg extends Backend
     public function asyncTicketHttps()
     {
         $this->zendeskUpateData('zeelool');
-        $this->zendeskUpateData('voogueme');
+        //$this->zendeskUpateData('voogueme');
         echo 'all ok';
         exit;
     }
