@@ -379,6 +379,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
+                console.log(Config.work_type);
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
                     Toastr.error('请先点击载入数据');
@@ -401,6 +402,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/getDocumentaryRule',
                     }, function (data, ret) {
+                        console.log(data);
                         $('#all_after_user_id').val(data.join(','));
                         var content = '';
                         for(i=0;i<data.length;i++){
@@ -409,6 +411,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         $('#all_after_user').html(content);
                     },function(data,ret){
+                        console.log(ret);
                         Toastr.error(ret.msg);
                         return false;
                     });
@@ -510,6 +513,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_group = '';
                     var username = [];
                     var appoint_users = [];
+                    //判断是否出现没有承接组的情况
+                    var count = 0;
                     //选中的问题类型
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
@@ -541,6 +546,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                             }
                         }else{
+                            count = 1;
                             input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
@@ -689,7 +695,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     // var appoint_users = [];
                     var arr = array_filter(appoint_group.split(','));
                     //循环根据承接组Key获取对应承接人id
-
+                    //console.log(notEmpty(arr));
                     for (var i = 0; i < arr.length - 1; i++) {
                         //循环根据承接组Key获取对应承接人id
                         //appoint_users.push(Config.workorder[arr[i]]);
@@ -702,15 +708,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         
                     }
-                    //判断如果为补价 优惠券 积分 追加自己id为承接人
-                    var self = ["8","9","10"];
-                    var intersection = checkID.filter(function(v){ return self.indexOf(v) > -1 });
-                    if (intersection.length>0) {
+
+                    if(count == 1){
                         appoint_users.push(Config.userid);
                     }else{
+                         if(appoint_users[Config.userid]){
+                            delOne(Config.userid,appoint_users);
+                        }                         
+                    }
+                    if(checkID.length>0 && appoint_users.length === 0){
+                        if(!appoint_users[Config.userid]){
+                            appoint_users.push(Config.userid);
+                        }
+                    }else if(checkID.length === 0){
                         if(appoint_users[Config.userid]){
                             delOne(Config.userid,appoint_users);
-                        }   
+                        } 
                     }
                     //循环根据承接人id获取对应人名称
                     appoint_users = array_filter(appoint_users);
@@ -967,8 +980,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //更加镜架的更改
                     var question = $('input[name="row[problem_type_id]"]:checked').val();
-                    console.log(value);
-                    console.log(question);
                     if ((Config.work_type == 1 && value == 12  && check === true) || (Config.work_type == 2 && value == 12  && check === true)) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
@@ -1378,6 +1389,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_group = '';
                     var input_content = '';
                     var is_check = [];
+                    var count = 0;
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
@@ -1408,6 +1420,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                             }
                         }else{
+                            count =1;
                             input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
@@ -1542,6 +1555,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             
                         }
                         
+                    }
+                    if(count == 1){
+                        appoint_users.push(Config.userid);
+                    }else{
+                         if(appoint_users[Config.userid]){
+                            delOne(Config.userid,appoint_users);
+                        }                         
                     }
                     //判断如果为补价 优惠券 积分 追加自己id为承接人
                     var self = ["8","9","10"];
@@ -2574,3 +2594,4 @@ function delOne(str,arr){
     arr.splice(index,1);
     //document.write(arr);
 }
+
