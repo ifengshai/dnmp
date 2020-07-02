@@ -46,7 +46,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('审核组')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[check_group_id]', $extend_team, $row['check_group_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:build_select('row[check_group_id]', $groupdata, $row['check_group_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
     <div class="form-group">
