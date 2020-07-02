@@ -212,7 +212,7 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType)
     {
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->asyncUpdate();
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
         
