@@ -469,6 +469,9 @@ class Workorderconfig extends Backend
                     case 5:
                         $customer_problem_classify['仓库问题'][] = $v['id'];
                     break;
+                    case 6:
+                        $customer_problem_classify['其他'][]    = $v['id'];
+                    break;    
                 }
                 $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
 

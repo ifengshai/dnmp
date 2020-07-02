@@ -1374,7 +1374,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
                 }
             })
-
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
                 $("#input-hidden").html('');

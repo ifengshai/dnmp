@@ -939,9 +939,17 @@ class WorkOrderList extends Backend
                             //客服经理
                             //$params['assign_user_id'] = config('workorder.customer_manager');
                             $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                            // dump(session('admin.id'));
+                            // dump($workOrderConfigValue['kefumanage']);
+                            // dump(searchForId(session('admin.id'), $workOrderConfigValue['kefumanage']));
+                            // exit;
                         } elseif($coupon == 50) {
                             //创建人对应主管
                             $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
+                            // dump(session('admin.id'));
+                            // dump($workOrderConfigValue['kefumanage']);
+                            // dump(searchForId(session('admin.id'), $workOrderConfigValue['kefumanage']));
+                            // exit;
                         }
                     }
                     //判断审核人表 lsw create start
