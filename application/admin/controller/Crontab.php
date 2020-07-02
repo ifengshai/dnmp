@@ -481,11 +481,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || stripos($v['index_type'], 'FRAME ONLY') !== false || stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -2056,7 +2056,7 @@ order by sfoi.item_id asc limit 1000";
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-      
+
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;

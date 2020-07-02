@@ -91,6 +91,7 @@ class WorkOrderList extends Backend
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
             $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
+            $step_arr[$k]['recept_person_id'] = implode(',', array_column($recept_arr, 'recept_person_id'));
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
@@ -205,9 +206,10 @@ class WorkOrderList extends Backend
                     }
                 }
 
-                $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
+                $recept = $this->sel_order_recept($v['id']); //获取措施相关记录
+                $list[$k]['step_num'] = $recept;
                 //是否有处理权限
-                $receptPersonIds = explode(',', $v['recept_person_id']);
+                $receptPersonIds = explode(',', implode(',',array_column($recept, 'recept_person_id')));
                 //跟单客服跟单处理之后不需要显示处理权限
                 // if($v['after_user_id']){
                 //     array_unshift($receptPersonIds,$v['after_user_id']);
@@ -1411,18 +1413,20 @@ class WorkOrderList extends Backend
             if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
                 $this->error('没有审核权限');
             }
-        } elseif ($operateType == 3) {
-            //找出工单的所有承接人
-            $receptPersonIds = explode(',', $row->recept_person_id);
-            if ($row->after_user_id) {
-                array_unshift($receptPersonIds, $row->after_user_id);
-            }
-            //仓库工单并且经手人未处理
-            //1、仓库类型：经手人未处理||已处理未审核||
-            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || in_array($row->work_status, [0, 1, 2, 4, 6, 7]) || !in_array(session('admin.id'), $receptPersonIds)) {
-                $this->error('没有处理的权限');
-            }
         }
+        
+        // elseif ($operateType == 3) {
+        //     //找出工单的所有承接人
+        //     $receptPersonIds = explode(',', $row->recept_person_id);
+        //     if ($row->after_user_id) {
+        //         array_unshift($receptPersonIds, $row->after_user_id);
+        //     }
+        //     //仓库工单并且经手人未处理
+        //     //1、仓库类型：经手人未处理||已处理未审核||
+        //     if (($row->work_type == 2 && $row->is_after_deal_with == 0) || in_array($row->work_status, [0, 1, 2, 4, 6, 7]) || !in_array(session('admin.id'), $receptPersonIds)) {
+        //         $this->error('没有处理的权限');
+        //     }
+        // }
 
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {

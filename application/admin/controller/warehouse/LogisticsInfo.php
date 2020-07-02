@@ -68,7 +68,9 @@ class LogisticsInfo extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             foreach ($list as $k => $v) {
                 if ($v['purchase_id']) {
-                    $list[$k]['purchase_name'] = $purchase->where(['id' => $v['purchase_id']])->value('purchase_name');
+                    $res = $purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product')->find();
+                    $list[$k]['purchase_name'] = $res->purchase_name;
+                    $list[$k]['is_new_product'] = $res->is_new_product;
                 }
             }
             $result = array("total" => $total, "rows" => $list);

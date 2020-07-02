@@ -44,6 +44,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: { 1: '已质检', 0: '未质检' },
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'is_new_product', title: __('是否为选品采购单'), custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '是', 0: '否' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('创建人') },
                         {
