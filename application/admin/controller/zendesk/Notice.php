@@ -1003,7 +1003,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-01T12:00:00Z updated_at<=2020-07-01T23:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-01T23:00:00Z updated_at<=2020-07-02T07:00:00Z order_by:updated_at sort:asc';
          //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1011,6 +1011,8 @@ class Notice extends Controller
         if(!$tickets->count){
             return true;
         }
+
+        echo $tickets->count."\n";
 
         $page = ceil($tickets->count / 100 );
         if($page >= 1){
