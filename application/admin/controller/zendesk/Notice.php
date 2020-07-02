@@ -1012,8 +1012,6 @@ class Notice extends Controller
             return true;
         }
 
-        echo $tickets->count;
-
         $page = ceil($tickets->count / 100 );
         if($page >= 1){
             //获取后续的
@@ -1026,5 +1024,37 @@ class Notice extends Controller
             }
         }
          return array_filter($ticketIds);
+    }
+
+
+    /**
+     * shell脚本自动同步丢失数据使用 20分钟以内
+     * @return array|bool
+     * @throws \Zendesk\API\Exceptions\MissingParametersException
+     * @throws \Zendesk\API\Exceptions\RouteException
+     */
+    public function autoAsyncUpdate()
+    {
+        $params = 'type:ticket updated_at>=20minutes order_by:updated_at sort:asc';
+        //Get all tickets
+        $tickets = $this->client->search()->find($params);
+
+        $ticketIds = [];
+        if(!$tickets->count){
+            return true;
+        }
+
+        $page = ceil($tickets->count / 100 );
+        if($page >= 1){
+            //获取后续的
+            for($i=1;$i<= $page;$i++){
+                $search = $this->client->search()->find($params,['page' => $i]);
+                foreach($search->results as $ticket){
+                    $ticketIds[] = $ticket->id;
+                }
+
+            }
+        }
+        return array_filter($ticketIds);
     }
 }
