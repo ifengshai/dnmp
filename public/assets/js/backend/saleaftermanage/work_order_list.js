@@ -380,6 +380,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 console.log(Config.work_type);
+
+                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
+                var vip_str = incrementId.substring(1, 4);
+                if(vip_str == 'VIP'){
+                    $('#order_pay_currency').val('USD');
+                    $('#step2_pay_currency').val('USD');
+                    $('#c-refund_money').val(29.8);
+                    $('#c-refund_way').val('原路退回');
+                    var site = incrementId.substring(0, 1);
+                    if(site == 'Z'){
+                        $("#work_platform").val(1);
+                    }else if(site == 'V'){
+                        $("#work_platform").val(2);
+                    }
+                }
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
                     Toastr.error('请先点击载入数据');
@@ -407,7 +422,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var content = '';
                         for(i=0;i<data.length;i++){
                             //$('#all_after_user').html(Config.users[data[i]]);
-                            content += Config.users[data[i]]+' ';   
+                            content += Config.users[data[i]]+' ';
                         }
                         $('#all_after_user').html(content);
                     },function(data,ret){
@@ -437,7 +452,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
                         }else{
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
-                        }    
+                        }
                     }
                     //id大于5 默认措施4
                     // if (id > 5) {
@@ -486,7 +501,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 }
             })
 
@@ -629,6 +644,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                 $('.selectpicker ').selectpicker('refresh');
                             });
+                        }
+                        //vip退款
+                        if(id == 15){
+                            $(".step2").show()
                         }
                     });
                     //判断如果存在1 则改为需要审核
@@ -851,6 +870,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#step2_pay_currency').val('USD');
                     $('#c-refund_money').val(29.8);
                     $('#c-refund_way').val('原路退回');
+                    var site = incrementId.substring(0, 1);
+                    if(site == 'Z'){
+                        $("#work_platform").val(1);
+                    }else if(site == 'V'){
+                        $("#work_platform").val(2);
+                    }
                 }
                 else{
                     //判断站点
@@ -1504,6 +1529,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                 $('.selectpicker ').selectpicker('refresh');
                             });
+                        }
+                        //vip退款
+                        if(id == 15){
+                            $(".step2").show()
                         }
                         //获取是否需要审核
                         var step_is_check = $('#step' + id + '-is_check').val();
