@@ -60,23 +60,33 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['location']) {
+                $smap['location'] = ['like', '%' . $filter['location'] . '%'];
+                $ids = Db::name('purchase_sample_location')->where($smap)->column('id');
+                $map['location_id'] = ['in', $ids];
+                unset($filter['location']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->sample
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->sample
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
-                $list[$key]['location'] = $this->samplelocation->getLocationName($value['location_id']);
+                $list[$key]['location_id'] = $this->samplelocation->getLocationName($value['location_id']);
                 $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
                 $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
             }
@@ -540,6 +550,14 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = Db::name('purchase_sample_workorder_item')->where($smap)->column('parent_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $where_arr['type'] = 1;
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -547,12 +565,14 @@ class Sample extends Backend
             $total = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -603,6 +623,10 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'],'sku');
                 $stock_arr = array_column($params['goods'],'stock');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
                 if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
                 }

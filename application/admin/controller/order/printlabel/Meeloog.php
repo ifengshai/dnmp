@@ -13,6 +13,8 @@ use Util\MeeloogPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
+
 /**
  * Sales Flat Order
  *
@@ -293,10 +295,11 @@ class Meeloog extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
+        $res = $this->model->field('entity_id,increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
         if (!$res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($res as $v) {
             if ($status == 1 && $v['custom_is_match_frame'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -308,6 +311,7 @@ class Meeloog extends Backend
             if ($status == 4 && $v['custom_is_match_frame'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -406,14 +410,17 @@ class Meeloog extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 4,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 4,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -423,7 +430,7 @@ class Meeloog extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -449,7 +456,7 @@ class Meeloog extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
                     }
 
                     $number++;
@@ -460,14 +467,17 @@ class Meeloog extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 4,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 4,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -511,16 +521,19 @@ class Meeloog extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 4,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 4,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -556,16 +569,19 @@ class Meeloog extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 4,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 4,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -910,7 +926,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1156,7 +1172,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add']*1 != 0 && $final_print['os_add']*1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";

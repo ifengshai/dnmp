@@ -1449,6 +1449,7 @@ class PurchaseOrder extends Backend
      */
     public function process()
     {
+        $this->relationSearch = true;
         $this->model = new \app\admin\model\warehouse\Check;
         $this->check_item = new \app\admin\model\warehouse\CheckItem;
         //设置过滤方法
@@ -1477,6 +1478,7 @@ class PurchaseOrder extends Backend
             $map['check.status'] = 2;
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->with(['purchaseorder', 'supplier'])
                 ->where($where)
@@ -1528,9 +1530,16 @@ class PurchaseOrder extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
+        //添加供货商名称搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['c.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -1567,7 +1576,6 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
 
         foreach ($list as $key => $value) {
-
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchase_name']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
@@ -1580,8 +1588,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
-            $product_cycle = $info[$value['sku']] ?: 7;
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), date('Y-m-d H:i:s', strtotime('+' . $product_cycle . ' day', strtotime($value['createtime']))));
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
         }
 
@@ -1769,11 +1776,9 @@ class PurchaseOrder extends Backend
             $row = $this->model->get($ids);
             if (1 == $row['purchase_type']) {
                 $resultInfo = $this->model->where(['id' => $row['id']])->setInc('payment_money', $params['pay_money']);
-                echo $this->model->getLastSql();die;
             } else {
                 $resultInfo = true;
             }
-            die;
             if (false !== $resultInfo) {
                 $this->model->save(['payment_status' => 3], ['id' => $row['id']]);
                 $params['purchase_id']   = $row['id'];

@@ -52,16 +52,16 @@ class Test extends Backend
     public function new_track_shipment_num()
     {
 
-        $order_shipment = Db::name('order_node')->where('node_type','>=','7')->select();
+        $order_shipment = Db::name('order_node')->where('node_type','<','7')->where('delivery_time is not null')->select();
         $order_shipment = collection($order_shipment)->toArray();
         
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
             //先把主表状态更新为2-7
-            //$update['order_node'] = 2;
-            //$update['node_type'] = 7;
-            //Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+            $update['order_node'] = 2;
+            $update['node_type'] = 7;
+            Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
 
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
@@ -906,7 +906,7 @@ class Test extends Backend
     //usps
     public function usps_data($data, $add)
     {
-        $track_num = substr($add['track_number'], 0, 10);
+        $track_num = substr($add['track_number'], 0, 4);
 
         $trackdetail = array_reverse($data['z1']);
         $time = '';
@@ -1046,7 +1046,7 @@ class Test extends Backend
                 }
             }
         } else {
-            if ($track_num == '9200190255' || $track_num == '9205990255') {
+            if ($track_num == '9200' || $track_num == '9205') {
                 //郭伟峰
                 foreach ($trackdetail as $k => $v) {
                     $add['create_time'] = $v['a'];
@@ -2691,10 +2691,10 @@ class Test extends Backend
 
     public function demo()
     {
-        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3816";s:8:"form_key";s:16:"kBKeaNnnilMUXGtc";s:3:"qty";i:1;s:7:"options";a:1:{i:3751;s:4:"4447";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:30:{s:19:"frame_regural_price";d:26.949999999999999;s:11:"frame_price";d:26.949999999999999;s:12:"prescription";s:200:"prescription_type=Frameonly&od_sph=&od_cyl=&od_axis=&os_sph=&os_cyl=&os_axis=&pdcheck=&pd_r=&pd_l=&pd=&os_add=&od_add=&prismcheck=&od_pv=&od_bd=&od_pv_r=&od_bd_r=&os_pv=&os_bd=&os_pv_r=&os_bd_r=&save=";s:11:"lenstype_id";s:0:"";s:13:"lenstype_name";N;s:18:"lenstype_data_name";N;s:21:"lenstype_regual_price";N;s:14:"lenstype_price";i:0;s:19:"lenstype_base_price";N;s:7:"lens_id";s:13:"refractive_63";s:9:"lens_name";s:10:"Frame Only";s:14:"lens_data_name";s:10:"Frame Only";s:10:"lens_index";s:4:"1.57";s:17:"lens_regual_price";i:0;s:10:"lens_price";d:0;s:15:"lens_base_price";d:0;s:8:"color_id";s:0:"";s:10:"color_name";N;s:15:"color_data_name";N;s:18:"color_regual_price";N;s:11:"color_price";i:0;s:16:"color_base_price";N;s:10:"coating_id";s:0:"";s:12:"coating_name";N;s:13:"coating_price";i:0;s:18:"coating_base_price";N;s:19:"sungless_color_name";s:0:"";s:3:"rid";N;s:4:"lens";d:0;s:5:"total";d:26.949999999999999;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:4:"Blue";s:11:"print_value";s:4:"Blue";s:9:"option_id";s:4:"3751";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"4447";s:11:"custom_view";b:0;}}}';
+       
         $str1 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3410";s:8:"form_key";s:16:"1xAFB996YzQgwr4k";s:3:"qty";i:1;s:7:"options";a:1:{i:3342;s:4:"4038";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:29:{s:19:"frame_regural_price";d:26.949999999999999;s:11:"frame_price";d:26.949999999999999;s:12:"prescription";s:261:"prescription_type=SingleVision&od_sph=-1.25&od_cyl=0.75&od_axis=90&os_sph=-1.25&os_cyl=1.50&os_axis=90&pdcheck=on&pd_r=30.00&pd_l=31.50&pd=&os_add=0.00&od_add=0.00&prismcheck=&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=";s:11:"lenstype_id";s:10:"lenstype_4";s:13:"lenstype_name";s:19:"Blue Light Blocking";s:18:"lenstype_data_name";s:19:"Blue Light Blocking";s:21:"lenstype_regual_price";i:20;s:14:"lenstype_price";d:20;s:19:"lenstype_base_price";d:20;s:7:"lens_id";s:13:"refractive_11";s:9:"lens_name";s:9:"Recommend";s:14:"lens_data_name";s:24:"1.61 Blue Light Blocking";s:10:"lens_index";s:4:"1.61";s:17:"lens_regual_price";i:10;s:10:"lens_price";d:10;s:15:"lens_base_price";d:10;s:8:"color_id";s:0:"";s:10:"color_name";N;s:15:"color_data_name";N;s:18:"color_regual_price";N;s:11:"color_price";i:0;s:16:"color_base_price";N;s:10:"coating_id";s:0:"";s:12:"coating_name";N;s:13:"coating_price";i:0;s:18:"coating_base_price";N;s:3:"rid";N;s:4:"lens";d:30;s:5:"total";d:56.950000000000003;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3342";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"4038";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        dump($arr);
+        $arr = serialize($str);
+        echo $arr;
         die;
     }
     public function ceshi()
@@ -2732,31 +2732,16 @@ class Test extends Backend
     public function add_shipment_data_type1()
     {
         //查询order_node表中有运营商的数据信息
-        $node_track_list = Db::name('order_node')->where('shipment_type', '<>', '')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
-            } else {
-                //更新魔晶运营商数据
-                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => $item['shipment_type']]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                //郭伟峰
+                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             }
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;
@@ -2773,29 +2758,15 @@ class Test extends Backend
     {
         ini_set('memory_limit', '512M');
         //查询order_node_courier表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_courier')->where('shipment_type', 'USPS')->where('shipment_data_type is null')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node_courier')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-           
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node_courier')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                Db::name('order_node_courier')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             } 
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;
@@ -2812,28 +2783,15 @@ class Test extends Backend
     {
         ini_set('memory_limit', '512M');
         //查询order_node_detail表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_detail')->where('shipment_type', 'USPS')->where('shipment_data_type is null')->field('shipment_type,id,track_number')->order('id asc')->select();
+        $node_track_list = Db::name('order_node_detail')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
         $node_track_list = collection($node_track_list)->toArray();
         foreach ($node_track_list as $item) {
-            if (strtolower($item['shipment_type']) == 'usps') {
-                $track_num1 = substr($item['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
-                    //郭伟峰
-                    $usps_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($item['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $usps_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $usps_type = 'USPS_3';
-                    }
-                }
-                Db::name('order_node_detail')->where('id', $item['id'])->update(['shipment_data_type' => $usps_type]);
+            $track_num1 = substr($item['track_number'], 0, 4);
+            if ($track_num1 == '9200' || $track_num1 == '9205') {
+                Db::name('order_node_detail')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
+                echo $item['id'] . "\n";
+                usleep(20000);
             } 
-            echo $item['id'] . "\n";
-            usleep(20000);
         }
         echo "ok";
         exit;
