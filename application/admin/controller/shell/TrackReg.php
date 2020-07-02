@@ -201,8 +201,8 @@ class TrackReg extends Backend
      */
     public function asyncTicketHttps()
     {
-        $this->zendeskUpateData('zeelool');
-        //$this->zendeskUpateData('voogueme');
+        $this->zendeskUpateData('zeelool',1);
+        //$this->zendeskUpateData('voogueme',2);
         echo 'all ok';
         exit;
     }
@@ -210,14 +210,14 @@ class TrackReg extends Backend
      * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]
      */
-    public function zendeskUpateData($siteType)
+    public function zendeskUpateData($siteType,$type)
     {
         file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type", 1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
