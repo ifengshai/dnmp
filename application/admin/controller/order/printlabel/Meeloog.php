@@ -70,7 +70,7 @@ class Meeloog extends Backend
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
                 $swhere['work_platform'] = 4;
-                $swhere['work_status'] = ['not in', [0,4,6]];
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['task_label'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -115,7 +115,7 @@ class Meeloog extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 4;
-            $swhere['work_status'] = ['not in', [0,4,6]];
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
             //查询是否存在协同任务
             foreach ($list as $k => $v) {
@@ -156,7 +156,7 @@ class Meeloog extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 4;
-                    $swhere['work_status'] = ['not in', [0,4,6]];
+                    $swhere['work_status'] = ['not in', [0, 4, 6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     if ($count > 0) {
@@ -264,6 +264,34 @@ class Meeloog extends Backend
                 $params['order_ids'] = implode(',', $entity_ids);
                 $params['site'] = 2;
                 (new OrderLog())->setOrderLog($params);
+
+
+                $map['entity_id'] = ['in', $entity_ids];
+                $res = $this->model->field('entity_id,increment_id')->where($map)->select();
+                //插入订单节点
+                $data = [];
+                $list = [];
+                foreach ($res as $k => $v) {
+                    $data['update_time'] = date('Y-m-d H:i:s');
+                    //打标签
+                    $list[$k]['order_node'] = 1;
+                    $list[$k]['node_type'] = 2; //打标签
+                    $list[$k]['content'] = 'Order is under processing';
+                    $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                    $list[$k]['site'] = 4;
+                    $list[$k]['order_id'] = $v['entity_id'];
+                    $list[$k]['order_number'] = $v['increment_id'];
+                    $list[$k]['handle_user_id'] = session('admin.id');
+                    $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                    $data['order_node'] = 1;
+                    $data['node_type'] = 2;
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 4])->update($data);
+                }
+                if ($list) {
+                    $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                    $ordernodedetail->saveAll($list);
+                }
 
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
@@ -603,6 +631,66 @@ class Meeloog extends Backend
             $params['order_ids'] = implode(',', $entity_ids);
             $params['site'] = 4;
             (new OrderLog())->setOrderLog($params);
+
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($res as $k => $v) {
+                $data['update_time'] = date('Y-m-d H:i:s');
+
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 4;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');
+
+                //配镜架
+                if ($status == 1) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 3; //配镜架
+                    $list[$k]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                }
+
+                //配镜片
+                if ($status == 2) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 4; //配镜片
+                    $list[$k]['content'] = 'Lenses production completed, waiting for customizing';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                }
+
+                //加工
+                if ($status == 3) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 5; //加工
+                    $list[$k]['content'] = 'Customizing completed, waiting for Quality Inspection';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                }
+
+                //质检
+                if ($status == 4) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 6; //加工
+                    $list[$k]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                }
+
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 4])->update($data);
+            }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
 
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
