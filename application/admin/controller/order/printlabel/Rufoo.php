@@ -324,7 +324,7 @@ class Rufoo extends Backend
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
-                        'site'                      => 1,
+                        'site'                      => 6,
                         'two_type'                  => 1,
                         'sku'                       => $v['sku'],
                         'order_number'              => $v['ordersn'],
