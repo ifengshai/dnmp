@@ -1270,7 +1270,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                 if (!$('.step12-12').is(':hidden')) {
-                    changeOrder(work_id, 2);
+                    if(!checkIDss.includes(15)){
+                        changeOrder(work_id, 2);
+                    }
                 }
                 //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                 //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
@@ -2151,6 +2153,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 //     }
                                 // }
                                 var secondNode = $('.step' + checkIDss[m] + '-' + checkIDss[m]); 
+                                console.log(secondNode);
                                 if (secondNode.is(':hidden')) {
                                     secondNode.show();
                                 } else {
@@ -2236,7 +2239,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                         //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                         if (!$('.step12-12').is(':hidden')) {
-                            changeOrder(work_id, 2);
+                            if(!checkIDss.includes(15)){
+                                changeOrder(work_id, 2);
+                            }
+                            
                         }
                         //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                         //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
