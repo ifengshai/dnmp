@@ -180,7 +180,7 @@ class Notice extends Controller
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             //echo $e->getMessage();
         }
         return 'success';
@@ -223,8 +223,8 @@ class Notice extends Controller
                 return 'success';
             }
         }catch (Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -352,8 +352,8 @@ class Notice extends Controller
             }
             Db::commit();
         } catch (Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
             //return true;
             //写入日志
