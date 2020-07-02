@@ -136,7 +136,7 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email,a.order_type')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
@@ -147,6 +147,7 @@ class WorkOrderList extends Model
         $result['grand_total']    = $orderInfo['grand_total'];
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
         $result['customer_email'] = $orderInfo['customer_email'];
+        $result['order_type']     = $orderInfo['order_type'];
         return $result ? $result : [];
     }
 
@@ -349,8 +350,8 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $measure = '';
         //修改镜片
-        if (($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)) {
-            $measure = 1;
+        if (($work->work_type == 1  && $measure_choose_id == 12) || ($work->work_type == 2  && $measure_choose_id == 12)) {
+            $measure = 12;
         } elseif ($measure_choose_id == 6) { //赠品
             $measure = 2;
         } elseif ($measure_choose_id == 7) { //补发
@@ -360,7 +361,7 @@ class WorkOrderList extends Model
             Db::startTrans();
             try {
                 //如果是更改镜片
-                if ($measure == 1) {
+                if ($measure == 12) {
                     $changeLens = $params['change_lens'];
                     $change_type = 2;
                 } elseif ($measure == 2) { //赠品

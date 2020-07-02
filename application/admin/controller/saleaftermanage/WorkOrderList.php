@@ -660,9 +660,9 @@ class WorkOrderList extends Backend
                     $arrSkus[$val] = $val;
                 }
                 //查询用户id对应姓名
-                $admin = new \app\admin\model\Admin();
-                $users = $admin->where('status', 'normal')->column('nickname', 'id');
-                $this->assignconfig('users', $users); //返回用户            
+                // $admin = new \app\admin\model\Admin();
+                // $users = $admin->column('nickname', 'id');
+                $this->assignconfig('users', $this->users); //返回用户            
                 $this->view->assign('skus', $arrSkus);
             }
 
@@ -1134,7 +1134,6 @@ class WorkOrderList extends Backend
                         //     }
                         // }
                         //如果不是客服人员则指定审核人为客服经理 end
-                        
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
@@ -1306,10 +1305,10 @@ class WorkOrderList extends Backend
                 foreach ($skus['sku'] as $val) {
                     $arrSkus[$val] = $val;
                 }
-                //查询用户id对应姓名
-                $admin = new \app\admin\model\Admin();
-                $users = $admin->where('status', 'normal')->column('nickname', 'id');
-                $this->assignconfig('users', $users); //返回用户            
+                // //查询用户id对应姓名
+                // $admin = new \app\admin\model\Admin();
+                // $users = $admin->where('status', 'normal')->column('nickname', 'id');
+                $this->assignconfig('users', $this->users); //返回用户            
                 $this->view->assign('skus', $arrSkus);
             }
 
@@ -1423,7 +1422,7 @@ class WorkOrderList extends Backend
      * @param [type] $ids
      * @return void
      */
-    public function edit($ids = null)
+    public function edit_yuan($ids = null)
     {
         $row = $this->model->get($ids);
         if (!$row) {
@@ -1800,7 +1799,596 @@ class WorkOrderList extends Backend
         }
         return $this->view->fetch();
     }
+    /**
+     * 修改之后的编辑
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-07-01 11:29:24
+     * @param [type] $ids
+     * @return void
+     */
+    public function edit($ids = null)
+    {
+        $workOrderConfigValue = $this->workOrderConfigValue;
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
 
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    if (!$params['problem_description']) {
+                        throw new Exception("问题描述不能为空");
+                    }
+                    if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
+                        throw new Exception("Sku不能为空");
+                    }
+                    //判断是否选择措施
+                    $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
+
+                    $userId = session('admin.id');
+                    $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+                    //$warehouseArr = config('workorder.warehouse_department_rule');
+                    $warehouseArr = $workOrderConfigValue['warehouse_department_rule'];
+                    $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+                    if (!empty($checkIsWarehouse)) {
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    } else {
+                        if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
+                            throw new Exception("措施不能为空");
+                        }
+                    }
+
+                    //更换镜框判断是否有库存
+                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                        $skus = $params['change_frame']['change_sku'];
+                        $num = $params['change_frame']['change_number'];
+                        if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
+                        //判断SKU是否有库存
+                        $this->skuIsStock($skus, $params['work_platform'], $num);
+                    }
+                    //判断赠品是否有库存
+                    //判断补发是否有库存
+                    if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
+                        if (in_array(7, array_filter($params['measure_choose_id']))) {
+                            $originalSkus = $params['replacement']['original_sku'];
+                            $originalNums = $params['replacement']['original_number'];
+                        } else {
+                            $originalSkus = $params['gift']['original_sku'];
+                            $originalNums = $params['gift']['original_number'];
+                        }
+
+                        foreach ($originalSkus as $key => $originalSku) {
+                            if (!$originalSku) exception('sku不能为空');
+                            if (!$originalNums[$key]) exception('数量必须大于0');
+                            $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
+                        }
+                    }
+                    //所有的成员组
+                    $all_group  = $workOrderConfigValue['group'];
+                    //判断工单类型 1客服 2仓库
+                    if ($params['work_type'] == 1) {
+                        //$params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
+                        $params['problem_type_content'] = $workOrderConfigValue['customer_problem_type'][$params['problem_type_id']];
+                    } elseif ($params['work_type'] == 2) {
+                        //$params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
+                        $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
+                        //$params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
+                        if(!$params['id']){
+                            if(!empty(array_filter($params['all_after_user_id']))){
+                                $params['all_after_user_id'] = implode(',',array_filter($params['all_after_user_id']));
+                            }else{
+                                $this->error('找不到承接人,请重新选择');
+                            }
+                        }
+                    }
+                    //判断是否选择退款措施
+                    if (!in_array(2, array_filter($params['measure_choose_id']))) {
+                        unset($params['refund_money']);
+                    } else {
+                        if (!$params['refund_money']) {
+                            throw new Exception("退款金额不能为空");
+                        }
+                    }
+
+                    //判断是否选择补价措施
+                    if (!in_array(8, array_filter($params['measure_choose_id']))) {
+                        unset($params['replenish_money']);
+                    } else {
+                        if (!$params['replenish_money']) {
+                            throw new Exception("补差价金额不能为空");
+                        }
+                    }
+
+                    //判断是否选择积分措施
+                    if (!in_array(10, array_filter($params['measure_choose_id']))) {
+                        unset($params['integral']);
+                        unset($params['integral_describe']);
+                    } else {
+                        if (!$params['integral'] || !$params['email']) {
+                            throw new Exception("积分和邮箱不能为空");
+                        }
+                    }
+
+                    //判断是否选择退件措施
+                    if (!in_array(11, array_filter($params['measure_choose_id']))) {
+                        unset($params['refund_logistics_num']);
+                    } else {
+                        if (!$params['refund_logistics_num']) {
+                            throw new Exception("退回物流单号不能为空");
+                        }
+                    }
+
+                    //判断优惠券 不需要审核的优惠券
+                    if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
+                        foreach (config('workorder.check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
+                    }
+                    //判断优惠券 需要审核的优惠券
+                    if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
+                        $params['coupon_id'] = $params['need_coupon_id'];
+                        foreach (config('workorder.need_check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
+                        $params['is_check'] = 1;
+                    }
+
+                    //选择有优惠券时 值必须为真
+                    if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
+                        throw new Exception("优惠券不能为空");
+                    }
+
+                    //如果积分大于200需要审核
+                    // if ($params['integral'] > 200) {
+                    //     //需要审核
+                    //     $params['is_check'] = 1;
+                    //     //创建人对应主管
+                    //     $params['assign_user_id'] = $this->assign_user_id;
+                    // }
+
+                    //如果退款金额大于30 需要审核
+                    // if ($params['refund_money'] > 30) {
+                    //     $params['is_check'] = 1;
+                    // }
+                    if ($params['refund_money'] > 0) {
+                        $params['is_refund'] = 1;
+                    }
+                    //判断审核人
+                    if ($params['is_check'] == 1 || $params['need_coupon_id']) {
+                        /**
+                         * 1、退款金额大于30 经理审核
+                         * 2、赠品数量大于1 经理审核
+                         * 3、补发数量大于1 经理审核
+                         * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
+                         */
+                        //$coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
+                        $coupon = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
+                        //$giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                        //$replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                        if ($coupon == 100) {
+                            //客服经理
+                            //$params['assign_user_id'] = config('workorder.customer_manager');
+                            $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                        } elseif($coupon == 50) {
+                            //创建人对应主管
+                            $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
+                        }
+                    }
+                    //判断审核人表 lsw create start
+                    $check_person_weight = $workOrderConfigValue['check_person_weight'];
+                    $check_group_weight = $workOrderConfigValue['check_group_weight'];
+                    //先核算团队的，在核算个人的
+                    if(!empty($check_group_weight)){
+                        foreach($check_group_weight as $gv){
+                            //所有的
+                            $all_person = [];
+                            $result = false;
+                            $median_value = 0;
+                            $info = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
+                            if($info){
+                                    array_push($info,$gv['work_create_person_id']);
+                                foreach($info as $av){
+                                    if(is_array($all_group[$av])){
+                                        foreach($all_group[$av] as $vk){
+                                            $all_person[] = $vk;
+                                        }
+                                    }
+                                    
+                                }  
+                            }else{
+                                $all_person = $all_group[$gv['work_create_person_id']];
+                            }
+                            $true_all_person = array_unique($all_person);
+                            //如果符合创建组的话
+                            if(in_array(session('admin.id'),$true_all_person)){
+                                if(0 == $gv['step_id']){
+                                    //不需要判断措施只需要判断创建人
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                    break;    
+                                }elseif((2 == $gv['step_id']) && in_array(2, array_filter($params['measure_choose_id']))){ //退款
+                                    //中间值
+                                    $median_value = $params['refund_money']; 
+                                }elseif((3 == $gv['step_id']) && in_array(3, array_filter($params['measure_choose_id']))){ //取消
+                                    $median_value = $params['refund_money'];
+            
+                                }elseif(6 == $gv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+                                    $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                                    $median_value = array_sum($giftOriginalNumber); 
+            
+                                }elseif(7 == $gv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
+                                    $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                                    $median_value = array_sum($replacementOriginalNumber);
+            
+            
+                                }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
+                                    $median_value = $params['integral'];
+            
+                                }
+                                if(!empty($median_value)){
+                                    switch ($gv['symbol']){
+                                        case 'gt':
+                                            $result = $median_value > $gv['step_value'];
+                                            break;
+                                        case 'eq':
+                                            $result = $median_value = $gv['step_value'];
+                                            break;
+                                        case 'lt':
+                                            $result = $median_value < $gv['step_value'];
+                                            break;
+                                        case 'egt':
+                                            $result = $median_value >= $gv['step_value'];
+                                            break;
+                                        case 'elt':
+                                            $result = $median_value <= $gv['step_value'];
+                                            break;
+                                    }
+                                }else{
+                                    $result = false;
+                                }
+
+                                if($result){
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                    break;
+                                }
+                            }
+                        }
+        
+                    }
+                    if(!empty($check_person_weight)){
+                        foreach($check_person_weight as $wkv){
+                            if(session('admin.id') == $wkv['work_create_person_id']){
+                                $result = false;
+                                $median_value = 0;
+                                if(0 == $wkv['step_id']){
+                                    //不需要判断措施只需要判断创建人
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                    break;    
+                                }elseif(2 == $wkv['step_id'] && in_array(2, array_filter($params['measure_choose_id']))){ //退款
+                                    //中间值
+                                    $median_value = $params['refund_money']; 
+                                }elseif(3 == $wkv['step_id'] && in_array(3, array_filter($params['measure_choose_id']))){ //取消
+                                    $median_value = $params['refund_money'];
+            
+                                }elseif(6 == $wkv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+                                    $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                                    $median_value = array_sum($giftOriginalNumber); 
+            
+                                }elseif(7 == $wkv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
+                                    $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                                    $median_value = array_sum($replacementOriginalNumber);
+            
+            
+                                }elseif(10 == $wkv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
+                                    $median_value = $params['integral'];
+            
+                                }
+                                if(!empty($median_value)){
+                                    switch ($wkv['symbol']){
+                                        case 'gt':
+                                            $result = $median_value > $wkv['step_value'];
+                                            break;
+                                        case 'eq':
+                                            $result = $median_value = $wkv['step_value'];
+                                            break;
+                                        case 'lt':
+                                            $result = $median_value < $wkv['step_value'];
+                                            break;
+                                        case 'egt':
+                                            $result = $median_value >= $wkv['step_value'];
+                                            break;
+                                        case 'elt':
+                                            $result = $median_value <= $wkv['step_value'];
+                                            break;
+                                    }
+                                }else{
+                                    $result = false;
+                                }
+
+                                if($result){
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                    break;
+                                }
+                            }
+            
+                        }   
+                    }
+                    if(!$params['assign_user_id']){
+                        $params['is_check'] = 0;
+                    }
+                    //提交时间
+                    if ($params['work_status'] == 2) {
+                        $params['submit_time'] = date('Y-m-d H:i:s');
+                    }
+
+                    $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
+                    //更新之前的措施全部去掉
+                    $updateData['replenish_money'] = '';
+                    $updateData['replenish_increment_id'] = '';
+                    $updateData['coupon_id'] = 0;
+                    $updateData['coupon_describe'] = '';
+                    $updateData['coupon_str'] = '';
+                    $updateData['integral'] = '';
+                    $updateData['refund_logistics_num'] = '';
+                    $updateData['refund_money'] = '';
+                    $updateData['is_refund'] = 0;
+                    $updateData['replacement_order'] = '';
+                    $updateData['integral_describe'] = '';
+                    $updateInfo = $row->allowField(true)->save($updateData);
+                    if (false === $updateInfo) {
+                        throw new Exception('更新失败!!');
+                    }
+                    //如果不是客服人员则指定审核人为客服经理(只能客服工单) start
+                    // if (1 == $params['work_type']) {
+                    //     //$customerKefu = config('workorder.kefumanage');
+                    //     $customerKefu = $workOrderConfigValue['kefumanage'];
+                    //     $customerArr = [];
+                    //     foreach ($customerKefu as $v) {
+                    //         foreach ($v as $vv) {
+                    //             $customerArr[] = $vv;
+                    //         }
+                    //     }
+                    //     if (!in_array(session('admin.id'), $customerArr)) {
+                    //         if (1 == $params['is_check']) {
+                    //             $params['assign_user_id'] = config('workorder.customer_manager');
+                    //         }
+                    //     } else {
+                    //         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
+                    //     }
+                    // }
+                    //如果不是客服人员则指定审核人为客服经理 end
+                    // dump($params);
+                    // exit;
+                    $result = $row->allowField(true)->save($params);
+                    if (false === $result) {
+                        throw new Exception("编辑失败！！");
+                    }
+                    //循环插入措施
+                    if (count(array_filter($params['measure_choose_id'])) > 0) {
+
+                        //措施
+                        WorkOrderMeasure::where(['work_id' => $row->id])->delete();
+                        WorkOrderRecept::where(['work_id' => $row->id])->delete();
+                        WorkOrderChangeSku::where(['work_id' => $row->id])->delete();
+                        foreach ($params['measure_choose_id'] as $k => $v) {
+                            $measureList['work_id'] = $row->id;
+                            $measureList['measure_choose_id'] = $v;
+                            //$measureList['measure_content'] = config('workorder.step')[$v];
+                            $measureList['measure_content'] = $workOrderConfigValue['step'][$v];
+                            $measureList['create_time']     = date('Y-m-d H:i:s');
+                            //插入措施表
+                            $res = $this->step->insertGetId($measureList);
+                            if (false === $res) {
+                                throw new Exception("添加失败！！");
+                            }
+
+                            // //根据措施读取承接组、承接人 默认是客服问题组配置
+                            // $appoint_ids = $params['order_recept']['appoint_ids'][$v];
+                            // $appoint_users = $params['order_recept']['appoint_users'][$v];
+                            // $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            // //循环插入承接人
+                            // $appointList = [];
+                            // foreach ($appoint_ids as $key => $val) {
+                            //     $appointList[$key]['work_id'] = $row->id;
+                            //     $appointList[$key]['measure_id'] = $res;
+                            //     //如果没有承接人 默认为创建人
+                            //     if ($val == 'undefined') {
+                            //         $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                            //         $appointList[$key]['recept_person_id'] = session('admin.id');
+                            //         $appointList[$key]['recept_person'] = session('admin.nickname');
+                            //     } else {
+
+                            //         $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                            //         $appointList[$key]['recept_person_id'] = $val;
+                            //         $appointList[$key]['recept_person'] = $appoint_users[$key];
+                            //     }
+
+                            //     $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                            // }
+                            //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
+                            $appoint_ids = $params['order_recept']['appoint_ids'][$v];
+                            $appoint_users = $params['order_recept']['appoint_users'][$v];
+                            $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            $auto_complete = $params['order_recept']['auto_complete'][$v];
+                            //循环插入承接人
+                            $appointList = [];
+                            if(is_array($appoint_ids) && count($appoint_ids)>0){
+                                foreach ($appoint_ids as $key => $val) {
+                                    if($appoint_users[$key] == 'undefined'){
+                                        continue;
+                                    }
+                                    $appointList[$key]['work_id'] = $row->id;
+                                    $appointList[$key]['measure_id'] = $res;
+                                    $appointList[$key]['is_auto_complete'] = $auto_complete;
+                                    //如果没有承接人 默认为创建人
+    
+                                    if ($val == 'undefined') {
+                                        $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                                        $appointList[$key]['recept_person_id'] = session('admin.id');
+                                        $appointList[$key]['recept_person'] = session('admin.nickname');
+                                    } else {
+    
+                                        $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                        $appointList[$key]['recept_person_id'] = $val;
+                                        $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                    }
+    
+                                    $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                                }
+                            }else{
+                                $appointList[0]['work_id'] = $row->id;
+                                $appointList[0]['measure_id'] = $res;
+                                $appointList[0]['recept_group_id'] = 0;
+                                $appointList[0]['recept_person_id'] = session('admin.id');
+                                $appointList[0]['recept_person'] = session('admin.nickname');
+                                $appointList[0]['create_time'] = date('Y-m-d H:i:s');
+                                $appointList[0]['is_auto_complete'] = $auto_complete;
+                            }
+                            //插入承接人表
+                            $receptRes = $this->recept->saveAll($appointList);
+                            if (false === $receptRes) {
+                                throw new Exception("添加失败！！");
+                            }
+                            //更改镜片，补发，赠品
+                            $this->model->changeLens($params, $row->id, $v, $res);
+                            $this->model->changeFrame($params, $row->id, $v, $res);
+                            $this->model->cancelOrder($params, $row->id, $v, $res);
+                        }
+                    }
+
+
+                    //不需要审核时直接发送积分，赠送优惠券
+                    if (!$params['is_check']  && $params['work_status'] != 1) {
+                        //赠送积分
+                        if (in_array(10, array_filter($params['measure_choose_id']))) {
+                            $this->model->presentIntegral($row->id);
+                        }
+                        //直接发送优惠券
+                        if (in_array(9, array_filter($params['measure_choose_id']))) {
+                            $this->model->presentCoupon($row->id);
+                        }
+                    }
+                    //非草稿状态进入审核阶段
+                    if ($params['work_status'] != 1) {
+                        $this->model->checkWork($row->id);
+                    }
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+
+                    //通知
+                    if ($row->work_type == 1) {
+                        if ($row->work_status == 2) {
+                            //Ding::cc_ding($row->assign_user_id, '', '工单ID:' . $row->id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
+                        } elseif ($row->work_status == 3) {
+                            $usersId = explode(',', $row->recept_person_id);
+                            //Ding::cc_ding($usersId, '', '工单ID:' . $row->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                        }
+                    }
+                    //经手人
+                    if ($row->work_type == 2 && $row->work_status == 3) {
+
+                        //Ding::cc_ding($row->after_user_id, '', '工单ID:' . $row->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    }
+
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        if (1 == $row->work_type) { //判断工单类型，客服工单
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
+            //$customer_problem_classifys = config('workorder.customer_problem_classify');
+            $customer_problem_classifys = $workOrderConfigValue['customer_problem_classify'];
+            unset($customer_problem_classifys['仓库问题']);
+            //$problem_types = config('workorder.customer_problem_type');
+            $problem_types = $workOrderConfigValue['customer_problem_type'];
+            $problem_type = [];
+            $i = 0;
+            foreach ($customer_problem_classifys as $key => $customer_problem_classify) {
+                $problem_type[$i]['name'] = $key;
+                foreach ($customer_problem_classify as $k => $v) {
+                    $problem_type[$i]['type'][$k] = [
+                        'id' => $v,
+                        'name' => $problem_types[$v]
+                    ];
+                }
+                $i++;
+            }
+            $this->view->assign('problem_type', $problem_type); //客服问题类型
+        } else { //仓库工单
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);
+            //$this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+            $this->view->assign('problem_type',$workOrderConfigValue['warehouse_problem_type']);
+        }
+        //求出订单sku列表,传输到页面当中
+        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+        if (is_array($skus['sku'])) {
+            $arrSkus = [];
+            foreach ($skus['sku'] as $val) {
+                $arrSkus[$val] = $val;
+            }
+            // //查询用户id对应姓名
+            // $admin = new \app\admin\model\Admin();
+            // $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $this->users); //返回用户            
+            $this->view->assign('skus', $arrSkus);
+        }
+        //把问题类型传递到js页面
+        if (!empty($row->problem_type_id)) {
+            $this->assignconfig('problem_type_id', $row->problem_type_id);
+        }
+
+        //求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+        if (!empty($measureList)) {
+            $this->assignconfig('measureList', $measureList);
+        }
+        return $this->view->fetch();
+    }
     /**
      * 获取订单sku数据
      *
@@ -2131,10 +2719,10 @@ class WorkOrderList extends Backend
             foreach ($skus['sku'] as $val) {
                 $arrSkus[$val] = $val;
             }
-            //查询用户id对应姓名
-            $admin = new \app\admin\model\Admin();
-            $users = $admin->where('status', 'normal')->column('nickname', 'id');
-            $this->assignconfig('users', $users); //返回用户            
+            // //查询用户id对应姓名
+            // $admin = new \app\admin\model\Admin();
+            // $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $this->users); //返回用户            
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面

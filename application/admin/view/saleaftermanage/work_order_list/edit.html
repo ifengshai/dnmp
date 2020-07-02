@@ -362,6 +362,7 @@
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <!--订单支付的货币类型 根据订单号读出来-->
     <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
+    <input type="hidden" name="row[order_type]" id='order_type' value="{$row.order_type}" />
     <!--订单支付的支付方式 根据订单号读出来-->
     <input type="hidden" id='work_platform' name="row[work_platform]" value="{$row.work_platform}" />
     <!-- 承接人id -->
@@ -483,7 +484,7 @@
                     <span>{$v2}</span>
 
                     <input type="hidden" id="step{$k2}-is_check" value="">
-
+                    <input type="hidden" id="step{$k2}-is_auto_complete" value="">
                     <input type="hidden" id="step{$k2}-appoint_group" value="">
                 </label>
                 {/foreach}
@@ -508,8 +509,10 @@
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
 
-                <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
-                <input type="hidden" name="row[after_user_id]" id="after_user_id" value="{$row.after_user_id}">
+                <!-- <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[after_user_id]" id="after_user_id" value="{$row.after_user_id}"> -->
+                <label class="control-label col-xs-12 col-sm-2" id="all_after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[all_after_user_id][]" id="all_after_user_id" value=""> 
             </div>
         </div>
     </div>
@@ -668,7 +671,7 @@
     <!--更换镜框 end-->
 
     <!--更换处方 start-->
-    <div class="form-group-child4 measure step2-1" style="display:none;">
+    <div class="form-group-child4 measure step12-12" style="display:none;">
         <div class="col-xs-12 col-sm-8" style="width: 100%">
             <p style="font-size: 16px;"><b>更改镜片</b></p>
 
