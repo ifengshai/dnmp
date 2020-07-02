@@ -11,7 +11,7 @@
     <div class="form-group" id="step">
         <label class="control-label col-xs-12 col-sm-2">{:__('创建组')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[add_group_id]', $extend_team, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:build_select('row[add_group_id]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
     <div class="form-group" id="create_person" style="display: none">
@@ -49,7 +49,9 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('审核组')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[check_group_id]', $extend_team, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:build_select('row[check_group_id]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+<!--            {:build_select('row[check_group_id]', $extend_team, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
+
         </div>
     </div>
     <div class="form-group">

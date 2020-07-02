@@ -3,7 +3,9 @@
 namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\Admin;
+use app\admin\model\AuthGroup;
 use app\common\controller\Backend;
+use fast\Tree;
 use think\Cache;
 use think\Db;
 use think\Exception;
@@ -28,6 +30,31 @@ class WorkOrderDocumentary extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderDocumentary;
+        $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+        $groupList = collection(AuthGroup::where('id', 'in', $this->childrenGroupIds)->select())->toArray();
+
+        Tree::instance()->init($groupList);
+        $groupdata = [];
+        if ($this->auth->isSuperAdmin()) {
+            $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+            foreach ($result as $k => $v) {
+                $groupdata[$v['id']] = $v['name'];
+            }
+        } else {
+            $result = [];
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $childlist = Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['id']));
+                $temp = [];
+                foreach ($childlist as $k => $v) {
+                    $temp[$v['id']] = $v['name'];
+                }
+                $result[__($n['name'])] = $temp;
+            }
+            $groupdata = $result;
+        }
+
+        $this->view->assign('groupdata', $groupdata);
 
     }
 
