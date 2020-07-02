@@ -967,6 +967,8 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
             $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+            $finalResult[$key]['lens_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_type'];
+            $finalResult[$key]['color_name'] = $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
 
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
@@ -1133,7 +1135,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
                 $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['zsl'] . ' ' . $value['third_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['third_name'] . ' ' . $value['lens_type'] . ' ' . $value['color_name']);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
@@ -1343,8 +1345,10 @@ EOF;
                 $final_print['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
                 $final_print['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
                 $final_print['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+                $final_print['lens_type'] = $product_options['info_buyRequest']['tmplens']['lens_type'];
+                $final_print['color_name'] = $product_options['info_buyRequest']['tmplens']['color_name'];
 
-                $final_print['index_type'] = $final_print['zsl'] . ' ' . $final_print['third_name'];
+                $final_print['index_type'] = $final_print['third_name'] . ' ' . $final_print['lens_type'] . ' ' . $final_print['color_name'];
 
                 $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
 
