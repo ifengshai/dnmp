@@ -36,7 +36,7 @@ use app\admin\model\AuthGroup;
  */
 class WorkOrderList extends Backend
 {
-    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent', 'batch_export_xls'];
+    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
@@ -3919,6 +3919,9 @@ EOF;
             $documentary_group  = $workOrderConfigValue['documentary_group'];
             //创建人跟单
             $documentary_person = $workOrderConfigValue['documentary_person'];
+            // dump($documentary_group);
+            // dump($documentary_person);
+            // exit;
             if(!empty($documentary_group)){
                 foreach($documentary_group as $dgv){
                     $documentary_info = (new AuthGroup)->getAllNextGroup($dgv['create_id']);
@@ -3940,10 +3943,8 @@ EOF;
                         if(is_array($all_group[$dgv['documentary_group_id']])){
                             $all_after_user_id = $all_group[$dgv['documentary_group_id']];
                             $this->success('','',$all_after_user_id);
-                        }else{
-                            $this->error('选择的跟单部门没有人，请重新选择');
+                            break;
                         }
-                        break; 
                     }         
                 }
             }
@@ -3953,10 +3954,8 @@ EOF;
                         if(is_array($all_group[$dpv['documentary_group_id']])){
                             $all_after_user_id = $all_group[$dpv['documentary_group_id']];
                             $this->success('','',$all_after_user_id);
-                        }else{
-                            $this->error('选择的跟单部门没有人，请重新选择');
-                        }
-                        break; 
+                            break; 
+                        }                        
                     }
                 }
     
