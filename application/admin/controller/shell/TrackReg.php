@@ -212,26 +212,29 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType)
     {
+        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
-        
+        $nowTicketsIds = $this->model->where("type", 1)->column('ticket_id');
+
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
-        foreach($intersects as $intersect){
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType,'id' => $intersect]))->update();
-            echo $intersect.'is ok'."\n";
+        foreach ($intersects as $intersect) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            echo $intersect . 'is ok' . "\n";
         }
         //新增
-        foreach($diffs as $diff){
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType,'id' => $diff]))->create();
-            echo $diff.'ok'."\n";
+        foreach ($diffs as $diff) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
+        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
 }
