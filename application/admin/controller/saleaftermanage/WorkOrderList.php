@@ -847,7 +847,7 @@ class WorkOrderList extends Backend
                         
                     }
                     //判断是否选择退款措施
-                    if (!in_array(2, array_filter($params['measure_choose_id']))) {
+                    if (!array_intersect([2,15], array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
                     } else {
                         if (!$params['refund_money']) {
@@ -1002,6 +1002,8 @@ class WorkOrderList extends Backend
                                 }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
                                     $median_value = $params['integral'];
             
+                                }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){ //vip退款
+                                    $median_value = $params['refund_money']; 
                                 }
                                 if(!empty($median_value)){
                                     switch ($gv['symbol']){
@@ -1062,6 +1064,8 @@ class WorkOrderList extends Backend
                                 }elseif(10 == $wkv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
                                     $median_value = $params['integral'];
             
+                                }elseif(15 == $wkv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){
+                                    $median_value = $params['refund_money'];
                                 }
                                 if(!empty($median_value)){
                                     switch ($wkv['symbol']){
@@ -1910,7 +1914,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     //判断是否选择退款措施
-                    if (!in_array(2, array_filter($params['measure_choose_id']))) {
+                    if (!array_intersect([2,15], array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
                     } else {
                         if (!$params['refund_money']) {
@@ -2058,6 +2062,8 @@ class WorkOrderList extends Backend
                                 }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
                                     $median_value = $params['integral'];
             
+                                }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){
+                                    $median_value = $params['refund_money']; 
                                 }
                                 if(!empty($median_value)){
                                     switch ($gv['symbol']){
@@ -2118,6 +2124,8 @@ class WorkOrderList extends Backend
                                 }elseif(10 == $wkv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
                                     $median_value = $params['integral'];
             
+                                }elseif(15 == $wkv['step_id'] && in_array(15,array_filter($params['measure_choose_id']))){
+                                    $median_value = $params['refund_money']; 
                                 }
                                 if(!empty($median_value)){
                                     switch ($wkv['symbol']){
