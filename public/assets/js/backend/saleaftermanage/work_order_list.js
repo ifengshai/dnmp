@@ -832,53 +832,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     return false;
                 }
                 var str = incrementId.substring(0, 3);
-                console.log(str);
-                //判断站点
-                if (str == '100' || str == '400' || str == '500') {
-                    $("#work_platform").val(1);
-                } else if (str == '130' || str == '430') {
-                    $('#work_platform').val(2);
-                } else if (str == '300' || str == '600') {
-                    $('#work_platform').val(3);
+                var vip_str = incrementId.substring(1, 4);
+                if(vip_str == 'VIP'){
+                    $('#order_pay_currency').val('USD');
+                    $('#step2_pay_currency').val('USD');
+                    $('#c-refund_money').val(29.8);
+                    $('#c-refund_way').val('原路退回');
                 }
+                else{
+                    //判断站点
+                    if (str == '100' || str == '400' || str == '500') {
+                        $("#work_platform").val(1);
+                    } else if (str == '130' || str == '430') {
+                        $('#work_platform').val(2);
+                    } else if (str == '300' || str == '600') {
+                        $('#work_platform').val(3);
+                    }
 
-                var sitetype = $('#work_platform').val();
-                $('#c-order_sku').html('');
-                Layer.load();
-                Backend.api.ajax({
-                    url: 'saleaftermanage/work_order_list/get_sku_list',
-                    data: {
-                        sitetype: sitetype,
-                        order_number: incrementId
-                    }
-                }, function (data, ret) {
-                    Layer.closeAll();
-                    $('#order_pay_currency').val(data.base_currency_code);
-                    $('#step2_pay_currency').val(data.base_currency_code);
-                    $('#grand_total').val(data.grand_total);
-                    $('#base_grand_total').val(data.base_grand_total);
-                    $('#base_to_order_rate').val(data.base_to_order_rate); 
-                    $('#order_pay_method').val(data.method);
-                    $('#c-refund_way').val(data.method);
-                    $('#customer_email').val(data.customer_email);
-                    $('#order_type').val(data.order_type);
-                    var shtml = '';
-                    for (var i in data.sku) {
-                        shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
-                    }
-                    $('#c-order_sku').append(shtml);
-                    $('.selectpicker ').selectpicker('refresh');
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step1-1').is(':hidden')) {
-                        changeFrame()
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden')) {
-                        cancelOrder();
-                    }
-                    // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
-                });
+                    var sitetype = $('#work_platform').val();
+                    $('#c-order_sku').html('');
+                    Layer.load();
+                    Backend.api.ajax({
+                        url: 'saleaftermanage/work_order_list/get_sku_list',
+                        data: {
+                            sitetype: sitetype,
+                            order_number: incrementId
+                        }
+                    }, function (data, ret) {
+                        Layer.closeAll();
+                        $('#order_pay_currency').val(data.base_currency_code);
+                        $('#step2_pay_currency').val(data.base_currency_code);
+                        $('#grand_total').val(data.grand_total);
+                        $('#base_grand_total').val(data.base_grand_total);
+                        $('#base_to_order_rate').val(data.base_to_order_rate); 
+                        $('#order_pay_method').val(data.method);
+                        $('#c-refund_way').val(data.method);
+                        $('#customer_email').val(data.customer_email);
+                        $('#order_type').val(data.order_type);
+                        var shtml = '';
+                        for (var i in data.sku) {
+                            shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
+                        }
+                        $('#c-order_sku').append(shtml);
+                        $('.selectpicker ').selectpicker('refresh');
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step1-1').is(':hidden')) {
+                            changeFrame()
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step3').is(':hidden')) {
+                            cancelOrder();
+                        }
+                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
+                    });
+                }
             })
 
             //补发点击填充数据
