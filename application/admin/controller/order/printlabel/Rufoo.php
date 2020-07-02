@@ -13,6 +13,7 @@ use Util\RufooPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -286,7 +287,7 @@ class Rufoo extends Backend
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
-                $list = $this->model->field('sku,a.ordersn,b.total')->where($where)->alias('a')
+                $list = $this->model->field('sku,a.ordersn,b.total,b.orderid')->where($where)->alias('a')
                     ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
                     ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
                     ->select();
@@ -321,15 +322,19 @@ class Rufoo extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['ordersn'],
-                        'site'                     => 6, //如弗小程序
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $v['sku'],
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 1,
+                        'two_type'                  => 1,
+                        'sku'                       => $v['sku'],
+                        'order_number'              => $v['ordersn'],
+                        'public_id'                 => $v['orderid'],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
+
                 }
                 unset($v);
                 $item->commit();
@@ -338,7 +343,7 @@ class Rufoo extends Backend
             //质检通过扣减库存
             if ($status == 4) {
                 //查询出质检通过的订单
-                $list = $this->model->field('sku,a.ordersn,b.total')->where($where)->alias('a')
+                $list = $this->model->field('sku,a.ordersn,b.total,b.orderid')->where($where)->alias('a')
                     ->join(['ims_ewei_shop_order_goods' => 'b'], 'a.id=b.orderid', 'left')
                     ->join(['ims_ewei_shop_goods' => 'c'], 'b.goodsid=c.id', 'left')
                     ->select();
@@ -370,17 +375,21 @@ class Rufoo extends Backend
                         $item->commit();
                         $number = 0;
                     }
+               
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['ordersn'],
-                        'site'                    => 6,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $v['sku'],
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 6,
+                        'two_type'                  => 2,
+                        'sku'                       => $v['sku'],
+                        'order_number'              => $v['ordersn'],
+                        'public_id'                 => $v['orderid'],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
