@@ -196,48 +196,33 @@ class TrackReg extends Backend
         return $res;
     }
     /**
-     * zeelool站zendesk10分钟更新前20分钟的数据方法
+     * zendesk10分钟更新前20分钟的数据
      * @return [type] [description]
      */
-    public function zeelool_zendeskUpateData()
+    public function zeelool_zendesk()
     {
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
-
-        $this->model = new \app\admin\model\zendesk\Zendesk;
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'zeelool']))->autoAsyncUpdate();
-        //判断是否存在
-        $nowTicketsIds = $this->model->where("type", 1)->column('ticket_id');
-
-        //求交集的更新
-        $intersects = array_intersect($ticketIds, $nowTicketsIds);
-        //求差集新增
-        $diffs = array_diff($ticketIds, $nowTicketsIds);
-        //更新
-        foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'zeelool', 'id' => $intersect]))->update();
-            echo $intersect . 'is ok' . "\n";
-        }
-        //新增
-        foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'zeelool', 'id' => $diff]))->create();
-            echo $diff . 'ok' . "\n";
-        }
+        $this->zendeskUpateData('zeelool',1);
         echo 'all ok';
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        exit;
+    }
+    public function voogueme_zendesk()
+    {
+        $this->zendeskUpateData('voogueme',2);
+        echo 'all ok';
         exit;
     }
     /**
-     * voogueme站zendesk10分钟更新前20分钟的数据方法
+     * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]
      */
-    public function voogueme_zendeskUpateData()
+    public function zendeskUpateData($siteType,$type)
     {
         file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'voogueme']))->autoAsyncUpdate();
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type", 2)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
@@ -245,12 +230,12 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'voogueme', 'id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
             echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => 'voogueme', 'id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
