@@ -116,6 +116,7 @@ class WorkOrderList extends Backend
      */
     public function index()
     {
+        $workOrderConfigValue = $this->workOrderConfigValue;
         $platform_order = input('platform_order');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -252,16 +253,20 @@ class WorkOrderList extends Backend
         }
         //所有承接人的id
         //客服的所有承接人
-        $kefumanages = config('workorder.kefumanage');
-        foreach ($kefumanages as $key => $kefumanage) {
-            $kefumanageIds[] = $key;
-            foreach ($kefumanage as $k => $v) {
-                $kefumanageIds[] = $v;
-            }
-        }
-        array_unshift($kefumanageIds, config('workorder.customer_manager'));
-        $receptPersonAllIds = array_merge(config('workorder.warehouse_group'), config('workorder.warehouse_lens_group'), config('workorder.cashier_group'), config('workorder.copy_group'), $kefumanageIds);
-        $admins = Admin::where('id', 'in', $receptPersonAllIds)->select();
+        //$kefumanages = config('workorder.kefumanage');
+        // $kefumanages = $workOrderConfigValue['kefumanage'];
+        // foreach ($kefumanages as $key => $kefumanage) {
+        //     $kefumanageIds[] = $key;
+        //     foreach ($kefumanage as $k => $v) {
+        //         $kefumanageIds[] = $v;
+        //     }
+        // }
+        //array_unshift($kefumanageIds, config('workorder.customer_manager'));
+        //array_unshift($kefumanageIds,$workOrderConfigValue['customer_manager']);
+       // $receptPersonAllIds = array_merge(config('workorder.warehouse_group'), config('workorder.warehouse_lens_group'), config('workorder.cashier_group'), config('workorder.copy_group'), $kefumanageIds);
+        //$admins = Admin::where('id', 'in', $receptPersonAllIds)->select();
+        $receptPersonAllIds = $workOrderConfigValue['all_extend_person'];
+        $admins = Admin::where('id', 'in', $receptPersonAllIds)->field('id,nickname')->select();
         $this->assign('admins', $admins);
         $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();
@@ -1952,17 +1957,29 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
-                        foreach (config('workorder.check_coupon') as $v) {
-                            if ($v['id'] == $params['coupon_id']) {
+                        // foreach (config('workorder.check_coupon') as $v) {
+                        //     if ($v['id'] == $params['coupon_id']) {
+                        //         $params['coupon_describe'] = $v['desc'];
+                        //         break;
+                        //     }
+                        // }
+                        foreach($workOrderConfigValue['check_coupon'] as $v){
+                             if ($v['id'] == $params['coupon_id']) {
                                 $params['coupon_describe'] = $v['desc'];
                                 break;
-                            }
+                            }                           
                         }
                     }
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        foreach (config('workorder.need_check_coupon') as $v) {
+                        // foreach (config('workorder.need_check_coupon') as $v) {
+                        //     if ($v['id'] == $params['coupon_id']) {
+                        //         $params['coupon_describe'] = $v['desc'];
+                        //         break;
+                        //     }
+                        // }
+                        foreach ($workOrderConfigValue['need_check_coupon'] as $v) {
                             if ($v['id'] == $params['coupon_id']) {
                                 $params['coupon_describe'] = $v['desc'];
                                 break;
@@ -3408,7 +3425,8 @@ EOF;
      */
     public function getProblemTypeContent()
     {
-        return array_merge(config('workorder.warehouse_problem_type'), config('workorder.customer_problem_type'));
+        //return array_merge(config('workorder.warehouse_problem_type'), config('workorder.customer_problem_type'));
+        return  array_merge($this->workOrderConfigValue['warehouse_problem_type'],$this->workOrderConfigValue['customer_problem_type']);
     }
 
     /**
@@ -3421,7 +3439,8 @@ EOF;
      */
     public function getMeasureContent()
     {
-        return config('workorder.step');
+        //return config('workorder.step');
+        return $this->workOrderConfigValue['step'];
     }
     /**
      * 工单备注
@@ -3429,6 +3448,7 @@ EOF;
 
     public function workordernote($ids = null)
     {
+        $workOrderConfigValue = $this->workOrderConfigValue;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -3446,15 +3466,27 @@ EOF;
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
 
-                    if (array_intersect($authGroupIds, config('workorder.customer_department_rule'))) {
+                    // if (array_intersect($authGroupIds, config('workorder.customer_department_rule'))) {
+                    //     //客服组
+                    //     $work_order_note_status = 1;
+                    // }
+                    // if (array_intersect($authGroupIds, config('workorder.warehouse_department_rule'))) {
+                    //     //仓库部
+                    //     $work_order_note_status = 2;
+                    // }
+                    // if (array_intersect($authGroupIds, config('workorder.finance_department_rule'))) {
+                    //     //财务组
+                    //     $work_order_note_status = 3;
+                    // }
+                    if (array_intersect($authGroupIds, $workOrderConfigValue['customer_department_rule'])) {
                         //客服组
                         $work_order_note_status = 1;
                     }
-                    if (array_intersect($authGroupIds, config('workorder.warehouse_department_rule'))) {
+                    if (array_intersect($authGroupIds, $workOrderConfigValue['warehouse_department_rule'])) {
                         //仓库部
                         $work_order_note_status = 2;
                     }
-                    if (array_intersect($authGroupIds, config('workorder.finance_department_rule'))) {
+                    if (array_intersect($authGroupIds, $workOrderConfigValue['finance_department_rule'])) {
                         //财务组
                         $work_order_note_status = 3;
                     }

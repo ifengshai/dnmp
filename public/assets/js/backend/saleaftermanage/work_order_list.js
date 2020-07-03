@@ -2200,7 +2200,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             //追加到元素之后
                             $("#input-hidden").append(input_content);
                             var arr = array_filter(appoint_group.split(','));
-                            console.log(arr);
+                            //console.log(arr);
                             //循环根据承接组Key获取对应承接人id
                             // for (var i = 0; i < arr.length - 1; i++) {
                             //     //循环根据承接组Key获取对应承接人id
@@ -2210,7 +2210,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 //循环根据承接组Key获取对应承接人id
                                 //appoint_users.push(Config.workorder[arr[i]]);
                                 if(Config.workOrderConfigValue.group[arr[i]] !=undefined){
-                                    console.log(Config.workOrderConfigValue.group[arr[i]]);
+                                    //console.log(Config.workOrderConfigValue.group[arr[i]]);
                                     for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                         appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                                     }

@@ -436,10 +436,11 @@ class Workorderconfig extends Backend
         $warehouse_department_rule = config('workorder.warehouse_department_rule');
         //财务角色组
         $finance_department_rule   = config('workorder.finance_department_rule');
-        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则
+        //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,
+        //跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则,所有的承接组,所有的承接人
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
         = $step = $platform = $kefumanage = $documentary_group = $documentary_person
-        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = [];
+        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID 
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
@@ -533,7 +534,15 @@ class Workorderconfig extends Backend
             $all_problem_step = collection($all_problem_step)->toArray();
             foreach($all_problem_step as $fv){
                 $relation_problem_step[$fv['problem_id']][] = $fv;
+                if(0 != $fv['extend_group_id']){
+                    $all_extend_group[] = $fv['extend_group_id'];
+                } 
             }
+        }
+        //根据所有的承接组求出所有的承接人
+        if(!empty($all_extend_group)){
+            $all_extend_group = array_unique($all_extend_group);
+            $all_extend_person = Db::name('auth_group_access')->where('group_id','in',$all_extend_group)->column('uid');
         }
         //存在工单规则审核表
         if(!empty($all_check_rule)){
@@ -576,6 +585,8 @@ class Workorderconfig extends Backend
         $arr['check_coupon']                  = $check_coupon;
         $arr['need_check_coupon']             = $need_check_coupon;
         $arr['customer_manager']              = $customer_manager_id;
+        $arr['all_extend_person']             = $all_extend_person;
+        $arr['all_extend_group']              = $all_extend_group;
         Cache::set('Workorderconfig_getConfigInfo', $arr);
         return $arr;
     }
