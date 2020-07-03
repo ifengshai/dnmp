@@ -394,6 +394,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if(site == 'V'){
                         $("#work_platform").val(2);
                     }
+                    $('#order_type').val(100);
                 }
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
@@ -876,6 +877,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if(site == 'V'){
                         $("#work_platform").val(2);
                     }
+                    $('#order_type').val(100);
                 }
                 else{
                     //判断站点

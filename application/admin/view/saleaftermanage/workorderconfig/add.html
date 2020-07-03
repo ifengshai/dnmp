@@ -1,3 +1,11 @@
+<div>
+    <p style="text-align: left;margin-left: 4rem;">1、添加问题首先选择是客服工单还是仓库工单</p>
+    <p style="text-align: left;margin-left: 4rem;">2、选择此条问题所对应的大类</p>
+    <p style="text-align: left;margin-left: 4rem;">3、填写此条问题的名称</p>
+    <p style="text-align: left;margin-left: 4rem;">4、选择此问题对应的措施</p>
+    <p style="text-align: left;margin-left: 4rem;">(1)注意：勾选某个措施会生成此条问题下的此措施，勾选是否需要审核（会按照工单审核规则管理的规则进行匹配），勾选是否自动完成。</p>
+    <p style="text-align: left;margin-left: 4rem;">(2)注意：选择承接组请注意需要选择组内有承接人的组。</p>
+</div>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
@@ -14,7 +22,7 @@
         <div class="col-xs-12 col-sm-8">
             <select class="form-control selectpicker" name="row[problem_belong]">
 <!--                <option value="0">请选择</option>-->
-                <option value="1">订单修改</option>
+<!--                <option value="1">订单修改</option>-->
                 <option value="2">物流仓库</option>
                 <option value="3">产品质量</option>
                 <option value="4">客户问题</option>

@@ -1175,4 +1175,16 @@ class WorkOrderList extends Model
         $data['replenish_list'] = $replenish_list;
         return $data;
     }
+    /**
+     * vip退款
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/03 11:43:04 
+     * @return void
+     */
+    public function vipOrderRefund($siteType,$order_number){
+        $res = $this->httpRequest($siteType, 'magic/order/editAddress', $order_number, 'POST');
+        return $res;
+    }
 }
