@@ -1602,15 +1602,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }                         
                     }
                     //判断如果为补价 优惠券 积分 追加自己id为承接人
-                    var self = ["8","9","10"];
-                    var intersection = checkID.filter(function(v){ return self.indexOf(v) > -1 });
-                    if (intersection.length>0) {
-                        appoint_users.push(Config.userid);
-                    }else{
-                        if(appoint_users[Config.userid]){
-                            delOne(Config.userid,appoint_users);
-                        }   
-                    }
+                    // var self = ["8","9","10"];
+                    // var intersection = checkID.filter(function(v){ return self.indexOf(v) > -1 });
+                    // if (intersection.length>0) {
+                    //     appoint_users.push(Config.userid);
+                    // }else{
+                    //     if(appoint_users[Config.userid]){
+                    //         delOne(Config.userid,appoint_users);
+                    //     }   
+                    // }
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);

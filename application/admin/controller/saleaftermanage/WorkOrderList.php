@@ -81,8 +81,8 @@ class WorkOrderList extends Backend
         $this->assignconfig('admin_id', session('admin.id'));
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
-        //$this->users = $admin->where('status','normal')->column('nickname', 'id');
-        $this->users = $admin->column('nickname', 'id');
+        $this->users = $admin->where('status','normal')->column('nickname', 'id');
+        //$this->users = $admin->column('nickname', 'id');
         $this->assignconfig('users', $this->users); //返回用户
         $this->assignconfig('userid', session('admin.id'));
         //查询当前登录用户所在A/B组
@@ -266,7 +266,7 @@ class WorkOrderList extends Backend
        // $receptPersonAllIds = array_merge(config('workorder.warehouse_group'), config('workorder.warehouse_lens_group'), config('workorder.cashier_group'), config('workorder.copy_group'), $kefumanageIds);
         //$admins = Admin::where('id', 'in', $receptPersonAllIds)->select();
         $receptPersonAllIds = $workOrderConfigValue['all_extend_person'];
-        $admins = Admin::where('id', 'in', $receptPersonAllIds)->field('id,nickname')->select();
+        $admins = Admin::where('id', 'in', $receptPersonAllIds)->where('status','normal')->field('id,nickname')->select();
         $this->assign('admins', $admins);
         $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();

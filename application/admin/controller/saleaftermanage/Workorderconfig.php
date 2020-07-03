@@ -422,8 +422,10 @@ class Workorderconfig extends Backend
         $all_step = (new WorkOrderStepType)->where($where)->select();
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
+        //所有的可用用户
+        $usable_user = Db::name('admin')->where('status', 'normal')->column('id');
         //所有的组分别对应的用户
-        $all_group =  Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
+        $all_group =  Db::name('auth_group')->alias('a')->where('uid','in',$usable_user)->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
         //所有的跟单员规则
         $all_documentary = (new WorkOrderDocumentary)->select();
         //所有工单类型措施关系表
