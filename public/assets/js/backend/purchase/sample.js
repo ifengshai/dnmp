@@ -372,7 +372,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
