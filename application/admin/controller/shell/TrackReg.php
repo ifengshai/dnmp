@@ -212,10 +212,10 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType,$type)
     {
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
@@ -234,7 +234,7 @@ class TrackReg extends Backend
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
 }
