@@ -323,12 +323,12 @@ class Meeloog extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('entity_id,increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
-        if (!$res) {
+        $order_res = $this->model->field('entity_id,increment_id,custom_is_match_frame,custom_is_delivery,custom_is_match_frame')->where($map)->select();
+        if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
         $orderList = [];
-        foreach ($res as $v) {
+        foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
@@ -343,7 +343,7 @@ class Meeloog extends Backend
         }
 
         //判断订单是否存在未处理完成的工单
-        $arr = array_column($res, 'increment_id');
+        $arr = array_column($order_res, 'increment_id');
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
@@ -635,7 +635,7 @@ class Meeloog extends Backend
             //插入订单节点
             $data = [];
             $list = [];
-            foreach ($res as $k => $v) {
+            foreach ($order_res as $k => $v) {
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
