@@ -1394,7 +1394,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" .  $final_print['second_name'] . '<br>' . $final_print['four_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" .  $final_print['second_name'] . '<br>' . $final_print['four_name'] . "</td>";
                 }
 
                 //处方字符串截取
