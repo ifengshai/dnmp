@@ -199,10 +199,15 @@ class TrackReg extends Backend
      * zendesk10分钟更新前20分钟的数据
      * @return [type] [description]
      */
-    public function asyncTicketHttps()
+    public function zeelool_zendesk()
     {
         $this->zendeskUpateData('zeelool',1);
-        //$this->zendeskUpateData('voogueme',2);
+        echo 'all ok';
+        exit;
+    }
+    public function voogueme_zendesk()
+    {
+        $this->zendeskUpateData('voogueme',2);
         echo 'all ok';
         exit;
     }

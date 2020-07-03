@@ -27,7 +27,7 @@ class Check extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['uploads'];
+    protected $noNeedRight = ['uploads','getItemData'];
 
     protected $relationSearch = true;
 
