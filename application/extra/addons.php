@@ -16,6 +16,10 @@ return array (
     array (
       0 => 'loginvideo',
     ),
+    'testhook' => 
+    array (
+      0 => 'markdown',
+    ),
   ),
   'route' => 
   array (

@@ -353,7 +353,7 @@ class PurchaseOrder extends Backend
             $this->error(__('No Results were found'));
         }
         //判断状态是否为新建
-        if ($row['purchase_status'] > 0 && $row['purchase_type'] == 1) {
+        if (!in_array($row['purchase_status'], [0, 1, 2, 5]) && $row['purchase_type'] == 1) {
             $this->error('只有新建状态才能编辑！！', url('index'));
         }
 
@@ -432,9 +432,11 @@ class PurchaseOrder extends Backend
 
                         //添加分批数据
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        
                         $batch_id = $this->request->post("batch_id/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $batch_item_id = $this->request->post("batch_item_id/a");
+                      
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {
                             $i = 0;
@@ -450,7 +452,8 @@ class PurchaseOrder extends Backend
                                     $batch_data['batch'] = $i + 1;
                                     $batch_data['create_person'] = session('admin.nickname');
                                     $batch_data['create_time'] = date('Y-m-d H:i:s');
-                                    $batch_id = $this->batch->insertGetId($batch_data);
+                                   
+                                    $batch_get_id = $this->batch->insertGetId($batch_data);
                                 }
                                 $i++;
                                 $list = [];
@@ -461,12 +464,11 @@ class PurchaseOrder extends Backend
                                     if ($batch_item_id[$k][$key]) {
                                         $list[$key]['id'] = $batch_item_id[$k][$key];
                                     } else {
-                                        $list[$key]['purchase_batch_id'] = $batch_id;
+                                        $list[$key]['purchase_batch_id'] = $batch_get_id;
                                         $list[$key]['sku'] = $val;
                                     }
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                 }
-
                                 $this->batch_item->allowField(true)->saveAll($list);
                             }
                         }

@@ -353,14 +353,14 @@ class SelfApi extends Api
         return $track;
     }
     /**
-     * 获取订单节点流程 -- 新
+     * 获取订单加工/物流节点流程 -- 新
      *
      * @Description
      * @author mjj
      * @since 2020/06/29 16:16:43 
      * @return void
      */
-    public function query_order_node_processing(){
+    public function query_order_node_track_processing(){
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
@@ -389,6 +389,65 @@ class SelfApi extends Api
                                     ->where('site',$site)
                                     ->select();
                 $order_data['other_order_data'][$val] = array_merge($other_order_node1,$other_order_node2);
+            }
+        }
+        $this->success('成功', $order_data, 200);
+    }
+    /**
+     * 获取订单物流节点流程 -- 新
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/29 16:16:43 
+     * @return void
+     */
+    public function query_order_node_track(){
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
+
+        $order_data['order_data'] = Db::name('order_node_courier')
+            ->where('order_number',$order_number)
+            ->where('site',$site)
+            ->select();
+        if ($other_order_number) {
+
+            foreach ($other_order_number as $val) {
+                $order_data['other_order_data'][$val] = Db::name('order_node_courier')
+                    ->where('order_number',$val)
+                    ->where('site',$site)
+                    ->select();
+            }
+        }
+        $this->success('成功', $order_data, 200);
+    }
+    /**
+     * 获取订单加工节点流程 -- 新
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/29 16:16:43 
+     * @return void
+     */
+    public function query_order_node_processing(){
+        $order_number = $this->request->request('order_number'); //订单号
+        $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
+        $site = $this->request->request('site'); //站点
+
+        $order_data['order_data'] = Db::name('order_node_detail')
+            ->where('order_number',$order_number)
+            ->where('site',$site)
+            ->where('node_type','<=',7)
+            ->select();
+        if ($other_order_number) {
+
+            foreach ($other_order_number as $val) {
+
+                $order_data['other_order_data'][$val] = Db::name('order_node_detail')
+                    ->where('order_number',$val)
+                    ->where('site',$site)
+                    ->where('node_type','<=',7)
+                    ->select();
             }
         }
         $this->success('成功', $order_data, 200);

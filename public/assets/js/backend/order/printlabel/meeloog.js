@@ -425,7 +425,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             //搜索
             $(document).on('input', '#search_val', function (events) {
-                if (event.target.value.length == 9) {
+                if (event.target.value.length >= 9) {
                     Backend.api.ajax({
                         url: Config.moduleurl + '/order/printlabel/meeloog/_list',
                         data: { increment_id: event.target.value },
