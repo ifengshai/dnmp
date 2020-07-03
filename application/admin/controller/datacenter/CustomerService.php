@@ -30,11 +30,14 @@ class CustomerService extends Backend
      */
     public function index()
     {
-        //分组数据
+        //分组数据  韩雨薇组成员
         $infoOne = $this->customers_by_group(1);
+
+        //白青青组成员
         $infoTwo = $this->customers_by_group(2);
+
         //总览数据start
-        //1.今天数据
+        //1.今天数据  10 => 默认全部
         $todayData = $this->workload->gettodayData(10);
         //昨天数据
         $yesterdayData = $this->workload->getyesterdayData(10);
