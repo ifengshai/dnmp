@@ -23,7 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'id', title: __('id')},
                         {field: 'is_group_create', title: __('创建者类型'),custom: { 1: 'blue', 0: 'danger'}, searchList: { 1: '组创建', 0: '人创建' }, formatter: Table.api.formatter.status },
                         {field: 'work_create_person_id', title: __('创建人或创建组的id')},
