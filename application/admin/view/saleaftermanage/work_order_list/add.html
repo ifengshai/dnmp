@@ -375,12 +375,15 @@
     <input type="hidden" name="row[id]" id="work_id" value="{$row.id}">
     <!-- 问题类型id传递 -->
     <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
+
+    <input type="hidden" name="row[is_new_version]" id="is_new_version" value="0">
     <!-- 订单的base_grand_total -->
     <input type="hidden" name="row[base_grand_total]" id='base_grand_total' value="{$row.base_grand_total}" />
     <!-- 订单的grand_total -->
     <input type="hidden" name="row[grand_total]" id='grand_total' value="{$row.grand_total}" />
     <!-- 订单的base_to_order_rate -->
     <input type="hidden" name="row[base_to_order_rate]" id='base_to_order_rate' value="{$row.base_to_order_rate}" />
+
 
     <div class="form-group">
         <div class="form-group-child">
