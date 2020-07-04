@@ -79,7 +79,7 @@ class WorkloadStatistics extends Model
             $where['type']  = $whereComments['platform'] = $type;
         }
             //$where['is_admin'] = 1;
-        //zendesk
+        //zendesk 过滤掉王伟
         $whereComments['author_id']    = ['neq','382940274852'];
         $zendesk_model = Db::name('zendesk');
         $zendesk_comments = Db::name('zendesk_comments');
@@ -93,13 +93,17 @@ class WorkloadStatistics extends Model
         $map['create_time']  = $update['zendesk_update_time'] =  ['between', [$stime, $etime]];
         //获取昨天待处理的open、new量
         $wait_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->count("*");
+        
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
+      
         //获取昨天已回复量
         $reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1,'is_admin'=>1])->where($whereComments)->count("*");
+       
         //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where(['assign_id'=>0])->where($update)->count("*");
+        
         //获取昨天的pendding量
         $pending_num = $zendesk_model->where($where)->where(['status' => ['eq','3'],'channel' => ['neq','voice']])->where($update)->count("*");
         $data['wait_num']       = $wait_num;
