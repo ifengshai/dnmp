@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 
+
 class Test extends Backend
 {
     protected $noNeedLogin = ['*'];
@@ -20,6 +21,7 @@ class Test extends Backend
     protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
     protected $str40 = 'Delivered successfully.'; //投递成功
     protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
+
 
     public function _initialize()
     {
@@ -1765,10 +1767,14 @@ class Test extends Backend
     }
 
     /**
-     * 批量 注册物流
-     * 莫删除
+     * 更新采购负责人
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/29 15:43:38 
+     * @return void
      */
-    public function reg_shipment()
+    public function test()
     {
         $order_shipment = Db::connect('database.db_zeelool')
             ->table('sales_flat_shipment_track')
