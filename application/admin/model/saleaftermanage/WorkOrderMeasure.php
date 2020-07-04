@@ -64,7 +64,8 @@ class WorkOrderMeasure extends Model
                     $v['operation_type'] = '未处理';
                     break;        
                 }
-				$arrInfo[$v['work_id']].= $v['measure_content'].' '.$v['operation_type'].' '.$v['operation_time'].' | ';
+                $arrInfo['step'][$v['work_id']].=$v['measure_content'].' | ';
+				$arrInfo['detail'][$v['work_id']].= $v['measure_content'].' '.$v['operation_type'].' '.$v['operation_time'].' | ';
 			}
 		}
 		return $arrInfo;

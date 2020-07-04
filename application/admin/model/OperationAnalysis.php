@@ -43,6 +43,9 @@ class OperationAnalysis extends Model
             case 3:
             $model = Db::connect('database.db_nihao');
             break;
+            case 4:
+            $model = Db::connect('database.db_meeloog');
+            break;    
             default:
             $model = false;
             break;            
@@ -370,42 +373,178 @@ class OperationAnalysis extends Model
         $voogueme_data = $this->getList(2);
         //求出nihao今天的总和
         $nihao_data    = $this->getList(3);
+        //求出meeloog的总和
+        $meeloog_data  = $this->getList(4); 
         //总和
-        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money']),2);
-        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num']);
-        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success']);
-        $arr['today_unit_price']                            = @round(($zeelool_data['today_unit_price'] + $voogueme_data['today_unit_price'] + $nihao_data['today_unit_price'])/3,2);
-        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total']);
-        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new']);
-        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer']);
-        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer']);
-        $arr['today_shoppingcart_conversion']               = @round(($zeelool_data['today_shoppingcart_conversion'] + $voogueme_data['today_shoppingcart_conversion'] + $nihao_data['today_shoppingcart_conversion'])/3,2);
-        $arr['today_shoppingcart_newconversion']            = @round(($zeelool_data['today_shoppingcart_newconversion'] + $voogueme_data['today_shoppingcart_newconversion'] + $nihao_data['today_shoppingcart_newconversion'])/3,2);
+        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money'] + $meeloog_data['today_sales_money']),2);
+        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num'] + $meeloog_data['today_order_num']);
+        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success'] + $meeloog_data['today_order_success']);
+        if($arr['today_order_success']>0){
+            $arr['today_unit_price']                        = round($arr['today_sales_money'] /$arr['today_order_success'],2); 
+        }else{
+            $arr['today_unit_price']                        = 0;
+        }
+        //$arr['today_unit_price']                            = @round(($zeelool_data['today_unit_price'] + $voogueme_data['today_unit_price'] + $nihao_data['today_unit_price'] + $meeloog_data['today_unit_price'])/4,2);
+        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total'] + $meeloog_data['today_shoppingcart_total']);
+        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new']);
+        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer']);
+        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer']);
+       if($arr['today_shoppingcart_total']>0){
+         $arr['today_shoppingcart_conversion']              = round($arr['today_order_success']/$arr['today_shoppingcart_total']*100,2);
+         $arr['today_shoppingcart_newconversion']           = round($arr['today_order_success']/$arr['today_shoppingcart_new']*100,2);
+        }else{
+         $arr['today_shoppingcart_conversion']              = 0;
+         $arr['today_shoppingcart_newconversion']           = 0;
+       }
+        //$arr['today_shoppingcart_conversion']               = @round(($zeelool_data['today_shoppingcart_conversion'] + $voogueme_data['today_shoppingcart_conversion'] + $nihao_data['today_shoppingcart_conversion'] + $meeloog_data['today_shoppingcart_conversion'])/4,2);
+        //$arr['today_shoppingcart_newconversion']            = @round(($zeelool_data['today_shoppingcart_newconversion'] + $voogueme_data['today_shoppingcart_newconversion'] + $nihao_data['today_shoppingcart_newconversion'] + $meeloog_data['today_shoppingcart_newconversion'])/4,2);
         //保留2位小数点
-        $arr['yesterday_unit_price']                        = round($arr['yesterday_unit_price']/3,2);
-        $arr['pastsevenday_unit_price']                     = round($arr['pastsevenday_unit_price']/3,2);
-        $arr['pastthirtyday_unit_price']                    = round($arr['pastthirtyday_unit_price']/3,2);
-        $arr['thismonth_unit_price']                        = round($arr['thismonth_unit_price']/3,2);
-        $arr['lastmonth_unit_price']                        = round($arr['lastmonth_unit_price']/3,2);
-        $arr['thisyear_unit_price']                         = round($arr['thisyear_unit_price']/3,2);
-        $arr['lastyear_unit_price']                         = round($arr['lastyear_unit_price']/3,2);
-        $arr['total_unit_price']                            = round($arr['total_unit_price']/3 ,2);
-        $arr['yesterday_shoppingcart_conversion']           = round($arr['yesterday_shoppingcart_conversion']/3,2);
-        $arr['pastsevenday_shoppingcart_conversion']        = round($arr['pastsevenday_shoppingcart_conversion']/3,2);
-        $arr['pastthirtyday_shoppingcart_conversion']       = round($arr['pastthirtyday_shoppingcart_conversion']/3,2);
-        $arr['thismonth_shoppingcart_conversion']           = round($arr['thismonth_shoppingcart_conversion']/3,2);
-        $arr['lastmonth_shoppingcart_conversion']           = round($arr['lastmonth_shoppingcart_conversion']/3,2);  
-        $arr['thisyear_shoppingcart_conversion']            = round($arr['thisyear_shoppingcart_conversion']/3,2);
-        $arr['lastyear_shoppingcart_conversion']            = round($arr['lastyear_shoppingcart_conversion']/3,2); 
-        $arr['total_shoppingcart_conversion']               = round($arr['total_shoppingcart_conversion']/3,2);
-        $arr['yesterday_shoppingcart_newconversion']        = round($arr['yesterday_shoppingcart_newconversion']/3,2);
-        $arr['pastsevenday_shoppingcart_newconversion']     = round($arr['pastsevenday_shoppingcart_newconversion']/3,2);
-        $arr['pastthirtyday_shoppingcart_newconversion']    = round($arr['pastthirtyday_shoppingcart_newconversion']/3,2);
-        $arr['thismonth_shoppingcart_newconversion']        = round($arr['thismonth_shoppingcart_newconversion']/3,2);
-        $arr['lastmonth_shoppingcart_newconversion']        = round($arr['lastmonth_shoppingcart_newconversion']/3,2);  
-        $arr['thisyear_shoppingcart_newconversion']         = round($arr['thisyear_shoppingcart_newconversion']/3,2);
-        $arr['lastyear_shoppingcart_newconversion']         = round($arr['lastyear_shoppingcart_newconversion']/3,2); 
-        $arr['total_shoppingcart_newconversion']            = round($arr['total_shoppingcart_newconversion']/3,2);
+        // $arr['yesterday_unit_price']                        = round($arr['yesterday_unit_price']/3,2);
+        // $arr['pastsevenday_unit_price']                     = round($arr['pastsevenday_unit_price']/3,2);
+        // $arr['pastthirtyday_unit_price']                    = round($arr['pastthirtyday_unit_price']/3,2);
+        // $arr['thismonth_unit_price']                        = round($arr['thismonth_unit_price']/3,2);
+        // $arr['lastmonth_unit_price']                        = round($arr['lastmonth_unit_price']/3,2);
+        // $arr['thisyear_unit_price']                         = round($arr['thisyear_unit_price']/3,2);
+        // $arr['lastyear_unit_price']                         = round($arr['lastyear_unit_price']/3,2);
+        // $arr['total_unit_price']                            = round($arr['total_unit_price']/3 ,2);
+        if($arr['yesterday_order_success']>0){
+            $arr['yesterday_unit_price']                    = round($arr['yesterday_sales_money']/$arr['yesterday_order_success'],2);
+        }else{
+            $arr['yesterday_unit_price']                    = 0;
+        }
+        if($arr['pastsevenday_order_success']>0){
+            $arr['pastsevenday_unit_price']                 = round($arr['pastsevenday_sales_money']/$arr['pastsevenday_order_success'],2);
+        }else{
+            $arr['pastsevenday_unit_price']                 = 0;
+        }
+        if($arr['pastthirtyday_order_success']>0){
+            $arr['pastthirtyday_unit_price']                = round($arr['pastthirtyday_sales_money']/$arr['pastthirtyday_order_success'],2);
+        }else{
+            $arr['pastthirtyday_unit_price']                = 0;
+        }
+        if($arr['thismonth_order_success']>0){
+            $arr['thismonth_unit_price']                    = round($arr['thismonth_sales_money']/$arr['thismonth_order_success'],2);
+        }else{
+            $arr['thismonth_unit_price']                    = 0;
+        }
+        if($arr['lastmonth_order_success']>0){
+            $arr['lastmonth_unit_price']                    = round($arr['lastmonth_sales_money']/$arr['lastmonth_order_success'],2);
+        }else{
+            $arr['lastmonth_unit_price']                    = 0;
+        }
+        if($arr['thisyear_order_success']>0){
+            $arr['thisyear_unit_price']                    = round($arr['thisyear_sales_money']/$arr['thisyear_order_success'],2);
+        }else{
+            $arr['thisyear_unit_price']                    = 0;
+        }
+        if($arr['lastyear_order_success']>0){
+            $arr['lastyear_unit_price']                    = round($arr['lastyear_sales_money']/$arr['lastyear_order_success'],2);
+        }else{
+            $arr['lastyear_unit_price']                    = 0;
+        }
+        if($arr['total_order_success']>0){
+            $arr['total_unit_price']                       = round($arr['total_sales_money']/$arr['total_order_success'],2);
+        }else{
+            $arr['total_unit_price']                       = 0;
+        }                                                
+        // $arr['yesterday_shoppingcart_conversion']           = round($arr['yesterday_shoppingcart_conversion']/3,2);
+        // $arr['pastsevenday_shoppingcart_conversion']        = round($arr['pastsevenday_shoppingcart_conversion']/3,2);
+        // $arr['pastthirtyday_shoppingcart_conversion']       = round($arr['pastthirtyday_shoppingcart_conversion']/3,2);
+        // $arr['thismonth_shoppingcart_conversion']           = round($arr['thismonth_shoppingcart_conversion']/3,2);
+        // $arr['lastmonth_shoppingcart_conversion']           = round($arr['lastmonth_shoppingcart_conversion']/3,2);  
+        // $arr['thisyear_shoppingcart_conversion']            = round($arr['thisyear_shoppingcart_conversion']/3,2);
+        // $arr['lastyear_shoppingcart_conversion']            = round($arr['lastyear_shoppingcart_conversion']/3,2); 
+        // $arr['total_shoppingcart_conversion']               = round($arr['total_shoppingcart_conversion']/3,2);
+        // $yesterday_order_success_data / $yesterday_shoppingcart_total_data
+        if($arr['yesterday_shoppingcart_total']>0){
+            $arr['yesterday_shoppingcart_conversion']      = round($arr['yesterday_order_success']/$arr['yesterday_shoppingcart_total']*100,2);
+        }else{
+            $arr['yesterday_shoppingcart_conversion']      = 0;
+        }    
+        if($arr['pastsevenday_shoppingcart_total']>0){
+            $arr['pastsevenday_shoppingcart_conversion']   = round($arr['pastsevenday_order_success']/$arr['pastsevenday_shoppingcart_total']*100,2);
+        }else{
+            $arr['pastsevenday_shoppingcart_conversion']   = 0; 
+        }
+        if($arr['pastthirtyday_shoppingcart_total']>0){
+            $arr['pastthirtyday_shoppingcart_conversion']   = round($arr['pastthirtyday_order_success']/$arr['pastthirtyday_shoppingcart_total']*100,2);
+        }else{
+            $arr['pastthirtyday_shoppingcart_conversion']   = 0; 
+        }
+        if($arr['thismonth_shoppingcart_total']>0){
+            $arr['thismonth_shoppingcart_conversion']   = round($arr['thismonth_order_success']/$arr['thismonth_shoppingcart_total']*100,2);
+        }else{
+            $arr['thismonth_shoppingcart_conversion']   = 0; 
+        }        
+        if($arr['lastmonth_shoppingcart_total']>0){
+            $arr['lastmonth_shoppingcart_conversion']   = round($arr['lastmonth_order_success']/$arr['lastmonth_shoppingcart_total']*100,2);
+        }else{
+            $arr['lastmonth_shoppingcart_conversion']   = 0; 
+        }
+        if($arr['thisyear_shoppingcart_total']>0){
+            $arr['thisyear_shoppingcart_conversion']    = round($arr['thisyear_order_success']/$arr['thisyear_shoppingcart_total']*100,2);
+        }else{
+            $arr['thisyear_shoppingcart_conversion']    = 0; 
+        }
+        if($arr['lastyear_shoppingcart_total']>0){
+            $arr['lastyear_shoppingcart_conversion']   = round($arr['lastyear_order_success']/$arr['lastyear_shoppingcart_total']*100,2);
+        }else{
+            $arr['lastyear_shoppingcart_conversion']   = 0; 
+        }
+        if($arr['total_shoppingcart_total']>0){
+            $arr['total_shoppingcart_conversion']   = round($arr['total_order_success']/$arr['total_shoppingcart_total']*100,2);
+        }else{
+            $arr['total_shoppingcart_conversion']   = 0; 
+        }
+
+        if($arr['yesterday_shoppingcart_new']>0){
+            $arr['yesterday_shoppingcart_newconversion']      = round($arr['yesterday_order_success']/$arr['yesterday_shoppingcart_new']*100,2);
+        }else{
+            $arr['yesterday_shoppingcart_newconversion']      = 0;
+        }    
+        if($arr['pastsevenday_shoppingcart_new']>0){
+            $arr['pastsevenday_shoppingcart_newconversion']   = round($arr['pastsevenday_order_success']/$arr['pastsevenday_shoppingcart_new']*100,2);
+        }else{
+            $arr['pastsevenday_shoppingcart_newconversion']   = 0; 
+        }
+        if($arr['pastthirtyday_shoppingcart_new']>0){
+            $arr['pastthirtyday_shoppingcart_newconversion']   = round($arr['pastthirtyday_order_success']/$arr['pastthirtyday_shoppingcart_new']*100,2);
+        }else{
+            $arr['pastthirtyday_shoppingcart_newconversion']   = 0; 
+        }
+        if($arr['thismonth_shoppingcart_new']>0){
+            $arr['thismonth_shoppingcart_newconversion']   = round($arr['thismonth_order_success']/$arr['thismonth_shoppingcart_new']*100,2);
+        }else{
+            $arr['thismonth_shoppingcart_newconversion']   = 0; 
+        }        
+        if($arr['lastmonth_shoppingcart_new']>0){
+            $arr['lastmonth_shoppingcart_newconversion']   = round($arr['lastmonth_order_success']/$arr['lastmonth_shoppingcart_new']*100,2);
+        }else{
+            $arr['lastmonth_shoppingcart_newconversion']   = 0; 
+        }
+        if($arr['thisyear_shoppingcart_new']>0){
+            $arr['thisyear_shoppingcart_newconversion']    = round($arr['thisyear_order_success']/$arr['thisyear_shoppingcart_new']*100,2);
+        }else{
+            $arr['thisyear_shoppingcart_newconversion']    = 0; 
+        }
+        if($arr['lastyear_shoppingcart_new']>0){
+            $arr['lastyear_shoppingcart_newconversion']   = round($arr['lastyear_order_success']/$arr['lastyear_shoppingcart_new']*100,2);
+        }else{
+            $arr['lastyear_shoppingcart_newconversion']   = 0; 
+        }
+        if($arr['total_shoppingcart_new']>0){
+            $arr['total_shoppingcart_newconversion']   = round($arr['total_order_success']/$arr['total_shoppingcart_new']*100,2);
+        }else{
+            $arr['total_shoppingcart_newconversion']   = 0; 
+        }                                          
+        // $arr['yesterday_shoppingcart_newconversion']        = round($arr['yesterday_shoppingcart_newconversion']/3,2);
+        // $arr['pastsevenday_shoppingcart_newconversion']     = round($arr['pastsevenday_shoppingcart_newconversion']/3,2);
+        // $arr['pastthirtyday_shoppingcart_newconversion']    = round($arr['pastthirtyday_shoppingcart_newconversion']/3,2);
+        // $arr['thismonth_shoppingcart_newconversion']        = round($arr['thismonth_shoppingcart_newconversion']/3,2);
+        // $arr['lastmonth_shoppingcart_newconversion']        = round($arr['lastmonth_shoppingcart_newconversion']/3,2);  
+        // $arr['thisyear_shoppingcart_newconversion']         = round($arr['thisyear_shoppingcart_newconversion']/3,2);
+        // $arr['lastyear_shoppingcart_newconversion']         = round($arr['lastyear_shoppingcart_newconversion']/3,2); 
+        // $arr['total_shoppingcart_newconversion']            = round($arr['total_shoppingcart_newconversion']/3,2);
         $arr['yesterday_sales_money']                       = round($arr['yesterday_sales_money'],2);
         $arr['pastsevenday_sales_money']                    = round($arr['pastsevenday_sales_money'],2);
         $arr['pastthirtyday_sales_money']                   = round($arr['pastthirtyday_sales_money'],2);

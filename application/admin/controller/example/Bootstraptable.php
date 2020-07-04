@@ -7,8 +7,13 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use fast\Excel;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
+use think\Cache;
 
 use think\Exception;
+
 
 /**
  * 表格完整示例
@@ -19,6 +24,8 @@ use think\Exception;
 class Bootstraptable extends Backend
 {
     protected $model = null;
+
+    protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
     /**
      * 无需鉴权的方法(需登录)
      * @var array
@@ -140,6 +147,8 @@ class Bootstraptable extends Backend
      */
     public function import()
     {
+        ini_set('memory_limit', '1512M');
+        set_time_limit(0);
         $file = $this->request->request('file');
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
@@ -153,88 +162,146 @@ class Bootstraptable extends Backend
         if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
             $this->error(__('Unknown data format'));
         }
-        if ($ext === 'csv') {
-            $file = fopen($filePath, 'r');
-            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
-            $fp = fopen($filePath, "w");
-            $n = 0;
-            while ($line = fgets($file)) {
-                $line = rtrim($line, "\n\r\0");
-                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
-                if ($encoding != 'utf-8') {
-                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
-                }
-                if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line . "\n");
-                } else {
-                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
-                }
-                $n++;
-            }
-            fclose($file) || fclose($fp);
 
-            $reader = new Csv();
-        } elseif ($ext === 'xls') {
-            $reader = new Xls();
-        } else {
-            $reader = new Xlsx();
+        $data =  Cache::get('data_excel');
+        if (!$data) {
+            if ($ext === 'csv') {
+                $file = fopen($filePath, 'r');
+                $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+                $fp = fopen($filePath, "w");
+                $n = 0;
+                while ($line = fgets($file)) {
+                    $line = rtrim($line, "\n\r\0");
+                    $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                    if ($encoding != 'utf-8') {
+                        $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                    }
+                    if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                        fwrite($fp, $line . "\n");
+                    } else {
+                        fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                    }
+                    $n++;
+                }
+                fclose($file) || fclose($fp);
+    
+                $reader = new Csv();
+            } elseif ($ext === 'xls') {
+                $reader = new Xls();
+            } else {
+                $reader = new Xlsx();
+            }
+    
+            //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+            //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+            //模板文件列名
+            try {
+                if (!$PHPExcel = $reader->load($filePath)) {
+                    $this->error(__('Unknown data format'));
+                }
+                $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+                $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+                $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+                $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+    
+                $fields = [];
+                for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $fields[] = $val;
+                    }
+                }
+    
+    
+                $data = [];
+                for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                    }
+                }
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
+    
+        }
+        
+        // Cache::set('data_excel', $data, 86400);
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($data as &$value) {
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $value[0],
+                'carrier' => '03011'
+            ]]);
+            $value[1] = $trackInfo['data']['accepted'][0]['track']['e'];
+            usleep(300000);
+        }
+        unset($value);
+        Cache::set('data_excel_001', serialize($data), 86400);
+        dump(serialize($data));
+        die;
+    }
+
+    public function derive()
+    {
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "运单号")
+            ->setCellValue("B1", "状态");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
+
+        $data = Cache::get('data_excel_001');
+        foreach ($data as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value[0]);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value[1]);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '工单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
 
-        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
-        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
-        //模板文件列名
-        try {
-            if (!$PHPExcel = $reader->load($filePath)) {
-                $this->error(__('Unknown data format'));
-            }
-            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
 
-            $fields = [];
-            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $fields[] = $val;
-                }
-            }
-
-
-            $data = [];
-            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
-                }
-            }
-        } catch (Exception $exception) {
-            $this->error($exception->getMessage());
-        }
-
-        $params = [];
-        foreach ($data as $k => $v) {
-            $params[$k]['task_status'] = 2;
-            $params[$k]['task_number'] = 'CO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $params[$k]['create_person'] = session('admin.nickname'); //创建人
-            $params[$k]['create_time']   = date("Y-m-d H:i:s", time());
-            $params[$k]['order_platform'] = 1;
-            $params[$k]['order_number'] = $v[1];
-            $params[$k]['order_status'] = 'complete';
-            $params[$k]['dept_id'] = 0;
-            $params[$k]['rep_id'] = 75;
-            $params[$k]['problem_id'] = 26;
-            $params[$k]['problem_desc'] = $v[8];
-            $params[$k]['create_person'] = $v[3];
-            $params[$k]['customer_email'] = $v[2];
-            $params[$k]['handle_scheme'] = 1;
-            $params[$k]['refund_way'] = $v[5];
-            $params[$k]['refund_money'] = $v[4];
-            $params[$k]['is_refund'] = 2;
-            $params[$k]['handle_time'] = date("Y-m-d H:i:s", time());
-            $params[$k]['complete_time'] = date("Y-m-d H:i:s", time());
-        }
-        $result = $this->model->saveAll($params);
-        echo 'ok';
+        $writer->save('php://output');
     }
 }

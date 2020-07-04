@@ -13,7 +13,677 @@ class ItDemandReport extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
         $this->itWebTaskItem = new \app\admin\model\demand\ItWebTaskItem;
+        $this->itWebTask = new \app\admin\model\demand\ItWebTask;
+
+        $this->developmodel = new \app\admin\model\demand\DevelopDemand;
+        $this->developWebTaskItem = new \app\admin\model\demand\DevelopWebTaskItem;
+        $this->developWebTask = new \app\admin\model\demand\DevelopWebTask;
     }
+
+    /**
+     * 统计列表
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/23 15:53:16 
+     */
+    public function statistical(){       				
+		/*new  start*/		
+		$month_num = 6; /*这边修改任意数来统计出不同月份*/ 
+		$month_data = [];
+		for($i = 1; $i<=$month_num; $i++){
+			
+			$month_data_ifon[$i - 1] = date('Y-m', strtotime(-($i - 1).' month'));
+			$month_data[$i - 1]['first'] = date('Y-m-01', strtotime(-($i - 1).' month'));
+			$month_data[$i - 1]['last'] = date('Y-m-01', strtotime((-($i - 1) + 1).' month'));
+		}
+		$new_month_data_ifon = array_reverse($month_data_ifon);
+		foreach($new_month_data_ifon as $k=>$v){			
+			if($k == (count($month_data_ifon) - 1)){
+				$new_month_data_ifon[$k] = '本月'; 
+			}
+		}	
+		if ($this->request->isAjax()) { 
+            $web_type = input('web_type');
+            if($web_type == 'web'){ 
+				/* new start */
+				$task_month = [];
+				$bug0_month = [];
+				$bug1_month = [];
+				$bug_month = [];
+				$demand1_month = [];
+				$demand2_month = [];
+				$demand3_month = [];
+				$demand_month = [];
+				$all = [];				
+				$new_month_data = array_reverse($month_data);
+				foreach($new_month_data as $k=>$v){
+					//网站组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
+					$task_month[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10;					
+					//网站组--目标--end			
+					//网站组--BUG(普通：1个,小概率：2个)--start
+					$bug0_month[$k] = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 0)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count();
+					$bug1_month[$k] = $this->model->where('is_del', 1)->where('type', 1)->where('is_small_probability', 1)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*2;
+					$bug_month[$k] = $bug0_month[$k]+$bug1_month[$k];
+					//网站组--BUG--end					
+					//网站组--需求(普通：1个,中等：3个,复杂：5个)--start
+					$demand1_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 1)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count();
+					$demand2_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 2)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*3;
+					$demand3_month[$k] = $this->model->where('is_del', 1)->where('type', 2)->where('all_complexity', 3)->whereTime('create_time', 'between', [$v['first'], $v['last']])->count()*5;
+					$demand_month[$k] = $demand1_month[$k]+$demand2_month[$k]+$demand3_month[$k];	
+					//网站组--需求--end
+					
+					//合计--start
+					$all[$k] = $task_month[$k]+$bug_month[$k]+$demand_month[$k];
+					//合计--end
+				}			
+				/* new end */									
+            }else{					
+				/* new start */
+				$task_month = [];				
+				$bug_month = [];
+				$demand1_month = [];
+				$demand2_month = [];
+				$demand3_month = [];
+				$demand_month = [];
+				$all = [];				
+				$new_month_data = array_reverse($month_data);
+				foreach($new_month_data as $k=>$v){
+					//开发组--目标(短期任务：10个,中期任务：20个,长期任务：30个)--start
+					$task_month[$k] = $this->developWebTaskItem->alias('ti')->join('fa_develop_web_task t','ti.task_id=t.id')->where('t.is_del', 1)->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10;					
+					//开发组--目标--end					
+					//开发组--BUG(普通：1个,小概率：2个)--start					
+					$bug_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 1)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count();
+					//开发组--BUG--end					
+					//开发组--需求(普通：1个,中等：3个,复杂：5个)--start
+					$demand1_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 1)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count();
+					$demand2_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 2)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count()*3;
+					$demand3_month[$k] = $this->developmodel->where('is_del', 1)->where('type', 2)->where('complexity', 3)->whereTime('createtime', 'between', [$v['first'], $v['last']])->count()*5;
+					$demand_month[$k] = $demand1_month[$k]+$demand2_month[$k]+$demand3_month[$k];	
+					//开发组--需求--end					
+					//合计--start
+					$all[$k] = $task_month[$k]+$bug_month[$k]+$demand_month[$k];
+					//合计--end
+				}			
+				/* new end */	
+            }
+            /*new start*/	
+			$json['columnData'] = [ 
+                [
+                    'name'=> '开发',
+                    'type'=>'bar',
+                    'data'=> $task_month
+                ],
+                [
+                    'name'=> 'BUG',
+                    'type'=>'bar',
+                    'data'=>  $bug_month
+                ],
+                [
+                    'name'=> '需求',
+                    'type'=>'bar',
+                    'data'=> $demand_month
+                ],
+                [
+                    'name'=> '合计',
+                    'type'=>'bar',
+                    'data'=> $all
+                ],
+ 
+            ];	 		
+			$json['xColumnName'] = $new_month_data_ifon;
+            //$json['column'] = ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'];
+            return json(['code' => 1, 'data' => $json]);			
+			/*new end*/
+        }
+	
+		$date_arr = $month_data_ifon;		
+				
+		$month = input('month') ? input('month') : 0;
+        $type = input('type') ? input('type') : 'web';
+        if($type == 'web'){
+            $web_score_statistics = $this->web_score_statistics($month);
+            $web_outtime_statistics = $this->web_outtime_statistics($month);
+            //统计站点任务量				
+				foreach($month_data as $k=>$v){
+					//bug统计 
+					$zeelool_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=1 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];					
+					$voogueme_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=2 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$nihao_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=3 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$wesee_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=4 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$others_bug[$k] = $this->model->query("select sum(case is_small_probability when 0 then 1 when 1 then 2 end) as count from fa_it_web_demand where is_del=1 and type=1 and site_type=5 and is_small_probability in (0,1) and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					//需求统计 
+					$zeelool_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=1 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$voogueme_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=2 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$nihao_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=3 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$wesee_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=4 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					$others_demand[$k] = $this->model->query("select sum(case all_complexity when 1 then 1 when 2 then 3 else 5 end) as count from fa_it_web_demand where is_del=1 and type=2 and site_type=5 and create_time between '".$v['first']."' and '".$v['last']."'")[0]['count'];
+					//开发任务统计
+					$zeelool_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 1])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$voogueme_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 2])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$nihao_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 3])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$wesee_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 4])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+					$others_task[$k] = $this->itWebTaskItem->alias('ti')->join('fa_it_web_task t','ti.task_id=t.id')->where(['t.is_del' => 1,'t.site_type' => 5])->whereTime('ti.plan_date', 'between', [$v['first'], $v['last']])->sum('ti.type')*10; 				
+			 
+					$sum_total[$k] = array(
+						'date'=>$month_data_ifon[$k],
+						'total1' => $zeelool_bug[$k]+$zeelool_demand[$k]+$zeelool_task[$k],
+						'total2' => $voogueme_bug[$k]+$voogueme_demand[$k]+$voogueme_task[$k], 
+                        'total3' => $nihao_bug[$k]+$nihao_demand[$k]+$nihao_task[$k],
+                        'total4' => $wesee_bug[$k]+$wesee_demand[$k]+$wesee_task[$k],
+                        'total5' => $others_bug[$k]+$others_demand[$k]+$others_task[$k],
+					);
+				}			
+                $this->assign('sum_total',$sum_total);         
+        }else{
+            $web_score_statistics = $this->develop_score_statistics($month);
+            $web_outtime_statistics = $this->develop_outtime_statistics($month);
+			
+        }
+		
+        $this->assign('web_score_statistics',$web_score_statistics);
+        $this->assign('web_outtime_statistics',$web_outtime_statistics);
+        $this->assign('date_arr',$date_arr);
+        $this->assign('month',$month);
+        $this->assign('type',$type);
+        return $this->view->fetch();		
+		/*new end*/ 
+				
+    }
+    /**
+     * 网站统计任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:11:21 
+     * @return void
+     */
+    public function web_score_statistics($month){
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month"));//本月最后一天
+        }else{
+            $last_month = $month-1;
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
+        }
+        $smap['create_time'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
+
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $web_designer_user_arr = config('demand.' . 'web_designer_user');
+        $phper_user_arr = config('demand.' . 'phper_user');
+        $app_user_arr = config('demand.' . 'app_user');
+        $test_user_arr = config('demand.' . 'test_user');
+
+        $list = $this->model
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取一个月的需求与bug
+
+        $task_item_list = $this->itWebTaskItem
+            ->with("itWebTask")
+            ->where('is_del', 1)
+            ->where($task_smap)
+            ->select();
+
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
+        
+        $web_user_total = $this->PersonalJobNum($web_designer_user_arr,'web_designer_user_id','前端',$list,$task_item_list);
+        $php_user_total = $this->PersonalJobNum($phper_user_arr,'phper_user_id','后端',$list,$task_item_list);
+        $app_user_total = $this->PersonalJobNum($app_user_arr,'app_user_id','APP',$list,$task_item_list);
+        $test_user_total =$this->PersonalJobNum($test_user_arr,'test_user_id','测试',$list,$task_item_list);
+        $personal_total=array_merge($web_user_total,$php_user_total,$app_user_total,$test_user_total);
+        return $personal_total;
+    }
+    /**
+     * 网站统计逾期任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 17:55:38 
+     * @return void
+     */
+    public function web_outtime_statistics($month){
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+        }else{
+            $last_month = $month-1;
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
+        }
+        $smap['create_time'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
+
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $web_designer_user_arr = config('demand.' . 'web_designer_user');
+        $phper_user_arr = config('demand.' . 'phper_user');
+        $app_user_arr = config('demand.' . 'app_user');
+
+        $list = $this->model
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取一个月的需求与bug
+
+        $task_item_list = $this->itWebTaskItem
+            ->with("itWebTask")
+            ->where('is_del', 1)
+            ->where($task_smap)
+            ->select();
+
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
+
+        $web_user_total = $this->PersonalOuttimeNum($web_designer_user_arr,'web_designer_user_id','前端',$list,$task_item_list);
+        $php_user_total = $this->PersonalOuttimeNum($phper_user_arr,'phper_user_id','后端',$list,$task_item_list);
+        $app_user_total = $this->PersonalOuttimeNum($app_user_arr,'app_user_id','APP',$list,$task_item_list);
+        $personal_total=array_merge($web_user_total,$php_user_total,$app_user_total);
+        return $personal_total;
+    }
+    /**
+     * 开发统计任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:11:21 
+     * @return void
+     */
+    public function develop_score_statistics($month){
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+        }else{
+            $last_month = $month-1;
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
+        }
+        $smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
+
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $phper_user_arr = config('develop_demand.phper_user');
+        
+        $list = $this->developmodel
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取一个月的需求与bug
+
+        $task_item_list = $this->developWebTaskItem
+            ->with("developwebtask")
+            ->where('is_del', 1)
+            ->where($task_smap)
+            ->select();
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
+        $php_user_total = $this->DevelopJobNum($phper_user_arr,'assign_developer_ids','开发',$list,$task_item_list);
+        return $php_user_total;
+    }
+    /**
+     * 开发统计逾期任务量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 17:55:38 
+     * @return void
+     */
+    public function develop_outtime_statistics($month){
+        if($month == 0){
+            $stime = date("Y-m-01",time());//本月第一天
+            $etime = date('Y-m-d', strtotime("$stime +1 month -1 day"));//本月最后一天
+        }else{
+            $last_month = $month-1;
+            $stime = date('Y-m-01', strtotime('-'.$month.' month'));//上月第一天
+            $etime = date('Y-m-01', strtotime('-'.$last_month.' month'));//上月最后一天
+        }
+        $smap['createtime'] = ['between', [$stime, $etime]];
+        $task_smap['plan_date'] = ['between', [$stime, $etime]];
+
+        //统计个人 需求数量，bug数量，开发任务数量，疑难数量，总数量
+        //遍历每个人获取相应数据
+        $phper_user_arr = config('develop_demand.phper_user');
+
+        $list = $this->developmodel
+            ->where('is_del', 1)
+            ->where($smap)
+            ->select();
+
+        $list = collection($list)->toArray();//获取一个月的需求与bug
+
+        $task_item_list = $this->developWebTaskItem
+        ->with("developwebtask")
+        ->where('is_del', 1)
+        ->where($task_smap)
+        ->select();
+        $task_item_list = collection($task_item_list)->toArray();//获取一个月的开发任务
+		
+        $php_user_total = $this->DevelopOuttimeNum($phper_user_arr,'assign_developer_ids','开发',$list,$task_item_list);
+      
+        return $php_user_total;
+    }
+    /**
+     * 获取复杂度/时间
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 16:07:57 
+     * @return void
+     */
+    public function getcomplexity($usertype){
+        $arr = array();
+        switch ($usertype)
+        {
+            case 'web_designer_user_id':
+                $arr['complexity'] = 'web_designer_complexity' ;
+                $arr['completetime'] = 'web_designer_finish_time' ;
+                $arr['experttetime'] = 'web_designer_expect_time' ;
+                break;  
+            case 'phper_user_id':
+                $arr['complexity'] = 'phper_complexity' ;
+                $arr['completetime'] = 'phper_finish_time' ;
+                $arr['experttetime'] = 'phper_expect_time' ;
+                break;
+            case 'app_user_id':
+                $arr['complexity'] = 'app_complexity' ;
+                $arr['completetime'] = 'app_finish_time' ;
+                $arr['experttetime'] = 'app_expect_time' ;
+                break;
+            case 'test_user_id':
+                $arr['complexity'] = 'test_complexity' ;
+                $arr['completetime'] = 'test_finish_time' ;
+                break;
+        }
+        return $arr;
+    }
+    /**
+     * 获取网站每个人的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function PersonalJobNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_total = 0;      //bug总量
+                $demand_num = 0;   //需求总数量
+                $demand_total = 0;   //需求总量
+                $task_num = 0;     //开发总数量
+                $task_total = 0;     //开发总量
+                $score_total = 0;    //总量
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        if ($v['type'] == 1) {
+                            $bug_num++;
+                            if($v['is_small_probability'] == 1){
+                                $bug_total+=2;
+                                $score_total+=2;
+                            }else{
+                                $bug_total++;
+                                $score_total++;
+                            }
+                        } elseif ($v['type'] == 2) {
+                            $complexity = $this->getcomplexity($field_name)['complexity'];
+                            $demand_num++;
+                            if($v[$complexity] == 1){
+                                $demand_total++;
+                                $score_total++;
+                            }elseif($v[$complexity] == 2){
+                                $demand_total += 3;
+                                $score_total += 3;
+                            }
+                            elseif($v[$complexity] == 3){
+                                $demand_total += 5;
+                                $score_total += 5;
+                            }   
+                        }
+                    }
+                }
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        $task_num++;
+                        if($v['type'] == 1){
+                            $task_total += 10;
+                            $score_total += 10;
+                        }elseif($v['type'] == 2){
+                            $task_total += 20;
+                            $score_total += 20;
+                        }else{
+                            $task_total += 30;
+                            $score_total += 30;
+                        }
+                    }
+                }
+                $web_user[$i]['bug_num'] = $bug_num;
+                $web_user[$i]['bug_total'] = $bug_total;
+                $web_user[$i]['demand_num'] = $demand_num;
+                $web_user[$i]['demand_total'] = $demand_total;
+                $web_user[$i]['task_num'] = $task_num;
+                $web_user[$i]['task_total'] = $task_total;
+                $web_user[$i]['score_total'] = $score_total;
+                $i++;
+            }
+        }
+        return $web_user;
+    }
+     /**
+     * 获取网站每个人逾期的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function PersonalOuttimeNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_person_num = 0;      //个人bug逾期数量
+                $demand_num = 0;   //需求总数量
+                $demand_person_num = 0;   //个人需求逾期数量
+                $task_num = 0;     //开发总数量
+                $task_person_num = 0;     //个人开发逾期数量
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        $arr = $this->getcomplexity($field_name);
+                        if ($v['type'] == 1) {
+                            $bug_num++;
+                            $bug_date = $v['create_time'];
+                            $createtime = date('Y-m-d H:i:s',strtotime("$bug_date+1day"));
+                            if($createtime < $v[$arr['completetime']]){
+                                $bug_person_num++;
+                            }
+                        } elseif ($v['type'] == 2) {
+                            $demand_num++;
+                            if($v[$arr['experttetime']]<$v[$arr['completetime']]){
+                                $demand_person_num++;
+                            } 
+                        }
+                    }
+                }
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        $task_num++;
+                        if($v['plan_date'] < $v['complete_date']){
+                            $task_person_num++;
+                        }
+                    }
+                }
+                $web_user[$i]['bug_num'] = $bug_num;
+                $web_user[$i]['bug_person_num'] = $bug_person_num;
+                $web_user[$i]['demand_num'] = $demand_num;
+                $web_user[$i]['demand_person_num'] = $demand_person_num;
+                $web_user[$i]['task_num'] = $task_num;
+                $web_user[$i]['task_person_num'] = $task_person_num;
+                $i++;
+            }
+        }
+        return $web_user;
+    }
+    /**
+     * 获取开发每个人的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function DevelopJobNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_total = 0;      //bug总量
+                $demand_num = 0;   //需求总数量
+                $demand_total = 0;   //需求总量
+                $task_num = 0;     //开发总数量
+                $task_total = 0;     //开发总量
+                $score_total = 0;    //总量
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        if ($v['type'] == 1) {
+                            $bug_num++;
+                            if($v['is_small_probability'] == 1){
+                                $bug_total+=2;
+                                $score_total+=2;
+                            }else{
+                                $bug_total++;
+                                $score_total++;
+                            }
+                        } elseif ($v['type'] == 2) {
+                            $complexity = $v['complexity'];
+                            $demand_num++;														
+                            if($complexity == 1){								
+                                $demand_total++;
+                                $score_total++;
+                            }elseif($complexity == 2){								
+                                $demand_total += 3;
+                                $score_total += 3;
+                            }
+                            elseif($complexity == 3){								
+                                $demand_total += 5;
+                                $score_total += 5;
+                            }   
+                        }
+                    }
+                }
+				
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        $task_num++;
+                        if($v['type'] == 1){
+							
+                            $task_total += 10;
+                            $score_total += 10;
+                        }elseif($v['type'] == 2){
+							
+                            $task_total += 20;
+                            $score_total += 20;
+                        }else{
+							
+                            $task_total += 30;
+                            $score_total += 30;
+                        }
+                    }
+                }
+				
+                $web_user[$i]['bug_num'] = $bug_num;
+                $web_user[$i]['bug_total'] = $bug_total;
+                $web_user[$i]['demand_num'] = $demand_num;
+                $web_user[$i]['demand_total'] = $demand_total;
+                $web_user[$i]['task_num'] = $task_num;
+                $web_user[$i]['task_total'] = $task_total;
+                $web_user[$i]['score_total'] = $score_total;
+                $i++;
+            }
+        }
+        return $web_user;
+    }
+     /**
+     * 获取网站每个人逾期的工作量
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/27 15:40:22 
+     * @return void
+     */
+    public function DevelopOuttimeNum($user_arr=[],$field_name='',$group_name='',$demand_list=[],$item_list=[]){
+        $web_user = array();
+        $i = 0;
+        foreach ($user_arr as $uk => $uv) {
+            if ($uk) {
+                $bug_num = 0;      //bug总数量
+                $bug_person_num = 0;      //个人bug逾期数量
+                $demand_num = 0;   //需求总数量
+                $demand_person_num = 0;   //个人需求逾期数量
+                $task_num = 0;     //开发总数量
+                $task_person_num = 0;     //个人开发逾期数量
+                $web_user[$i]['user_name'] = $uv;
+                $web_user[$i]['user_id'] = $uk;
+                $web_user[$i]['group_name'] = $group_name;
+                foreach ($demand_list as $k => $v) {
+                    if (in_array($uk, explode(',', $v[$field_name]))) {
+                        if ($v['type'] == 1) {
+                            $bug_num++;
+                            $bug_date = $v['createtime'];
+                            $createtime = date('Y-m-d H:i:s',strtotime("$bug_date+1day"));
+                            if($createtime < $v['finish_time']){
+                                $bug_person_num++;
+                            }
+                        } elseif ($v['type'] == 2) {
+                            $demand_num++;
+                            if($v['estimated_time']<$v['finish_time']){
+                                $demand_person_num++;
+                            } 
+                        }
+                    }
+                }
+                foreach ($item_list as $k => $v) {
+                    if ($v['person_in_charge'] == $uk) {
+                        $task_num++;
+                        if($v['plan_date'] < $v['complete_date']){
+                            $task_person_num++;
+                        }
+                    }
+                }
+                $web_user[$i]['bug_num'] = $bug_num;
+                $web_user[$i]['bug_person_num'] = $bug_person_num;
+                $web_user[$i]['demand_num'] = $demand_num;
+                $web_user[$i]['demand_person_num'] = $demand_person_num;
+                $web_user[$i]['task_num'] = $task_num;
+                $web_user[$i]['task_person_num'] = $task_person_num;
+                $i++;
+            }
+        }
+		
+        return $web_user;
+    }
+
+
+
 
     /*
      * 取出配置文件的数据，
@@ -316,7 +986,7 @@ class ItDemandReport extends Backend
                 }
 
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = array("total" => $total, "rows" => $list); 
             return json($result);
         }
         return $this->view->fetch();
@@ -438,6 +1108,5 @@ class ItDemandReport extends Backend
     }
 
     */
-
 
 }

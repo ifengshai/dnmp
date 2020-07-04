@@ -1,0 +1,97 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Email')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-email" data-rule="required" class="form-control" name="row[email]" type="text" value="">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-customer_name"  class="form-control" name="row[customer_name]" type="text" value="">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mobile')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mobile" class="form-control" name="row[mobile]" type="text">
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('Country')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-country" class="form-control" name="row[country]" type="text" value="">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[site_type]', $siteType, null, ['class'=>'form-control site-type selectpicker','data-title'=>'请选择', 'data-rule'=>'required','data-live-search' => false,'id'=>'site_type'])}
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('Intention_level')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select class="form-control site-type" data-rule="required" data-live-search="1"  name="row[intention_level]" data-rule="required">
+                <option value="1">低</option>
+                <option value="2">中</option>
+                <option value="3">高</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_behalf_of')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select class="form-control site-type" data-live-search="1"  name="row[is_behalf_of]" >
+                <option value="1">否</option>
+                <option value="2">是</option>
+            </select>
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select class="form-control site-type" data-live-search="1"  name="row[is_order]" >
+                <option value="1">否</option>
+                <option value="2">是</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_logo')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select class="form-control site-type" data-live-search="1"  name="row[is_logo]" >
+                <option value="1">否</option>
+                <option value="2">是</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Logo_images')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-logo_images" class="form-control work_picture" size="200" name="row[logo_images]" type="hidden" value="" >
+                <div class="input-group-addon no-border no-padding" style="background-color:transparent;width: 130px;">
+                    <span><button type="button" id="plupload-logo_images" class="btn btn-danger plupload" data-input-id="c-logo_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-preview-id="p-logo_images"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                    <span><button type="button" id="fachoose-logo_images" class="btn btn-primary fachoose" data-input-id="c-logo_images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-logo_images"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-logo_images"></ul>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-content" class="form-control editor" rows="5" name="row[remark]" cols="50"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

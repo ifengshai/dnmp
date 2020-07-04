@@ -99,23 +99,34 @@ class ZendeskAccount extends Backend
     {
         if($this->request->isAjax()){
             //求出所有的account_id
-            $accountIdArr = $this->model->column('account_id');
+            $zee_accountIdArr = $this->model->where('account_type',1)->column('account_id');
+            $voo_accountIdArr = $this->model->where('account_type',2)->column('account_id');
+
             $zeelool_res = (new Notice(request(),['type' => 'zeelool']))->fetchUser(['role'=>'agent']);
             $voogueme_res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'agent']);
             $zeelool_info = $this->object_array($zeelool_res);
             $voogueme_info = $this->object_array($voogueme_res);
+
             if(!$zeelool_info && !$voogueme_info){
                 return $this->error('账户配置错误，请联系开发人员');
             }
-            $data = [];
+            $data = array();
             foreach($zeelool_info['users'] as $k=> $v){
                 //已经存在的进行更新
-                if(in_array($v['id'],$accountIdArr)){
+                if(in_array($v['id'],$zee_accountIdArr)){
+
                     $updateData = [
                         'user_type' => 2,
                         'account_user' => $v['name'],
                         'account_email' => $v['email'],
                     ];
+                    //判断是否已绑定
+                    $agent = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$v['id'])->find();
+                    if(!$agent){
+                        $updateData['is_used'] = 1;
+                    }else{
+                        $updateData['is_used'] = 2;
+                    }
                     $this->model->where('account_id',$v['id'])->update($updateData);
                     continue;
                 }
@@ -124,16 +135,28 @@ class ZendeskAccount extends Backend
                 $data[$k]['account_type']   = 1;
                 $data[$k]['account_user']   = $v['name'];
                 $data[$k]['account_email']  = $v['email'];
-                
             }
+            if(!empty($data)){
+                Db::name('zendesk_account')->insertAll($data);
+                $data = array();
+            }
+
             foreach($voogueme_info['users'] as $vk=> $vv){
-                if(in_array($vv['id'],$accountIdArr)){
+                //已经存在的进行更新
+                if(in_array($vv['id'],$voo_accountIdArr)){
                     $updateData = [
                         'user_type' => 2,
-                        'account_user' => $v['name'],
-                        'account_email' => $v['email'],
+                        'account_user' => $vv['name'],
+                        'account_email' => $vv['email'],
                     ];
-                    $this->model->where('account_id',$v['id'])->update($updateData);
+                    //判断是否已绑定
+                    $agent = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$vv['id'])->find();
+                    if(!$agent){
+                        $updateData['is_used'] = 1;
+                    }else{
+                        $updateData['is_used'] = 2;
+                    }
+                    $this->model->where('account_id',$vv['id'])->update($updateData);
                     continue;
                 }
                 $data[$vk]['user_type']      = 2;
@@ -141,7 +164,6 @@ class ZendeskAccount extends Backend
                 $data[$vk]['account_type']   = 2;
                 $data[$vk]['account_user']   = $vv['name'];
                 $data[$vk]['account_email']  = $vv['email'];
-                
             }
             if(!empty($data)){
                 Db::name('zendesk_account')->insertAll($data);
@@ -151,6 +173,35 @@ class ZendeskAccount extends Backend
             return $this->error('404 Not found');
         }
 
+    }
+    /**
+     * 
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/22 13:56:10 
+     * @return void
+     */
+    public function test()
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => "https://api.simplesat.io/api/answers/?page_size=3",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => array(
+            "X-Simplesat-Token: 83722ccb715d404c122464b6b072077812e6991c"
+        ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        $arr = json_decode($response,true);
+        var_dump($arr);
     }
 
 }

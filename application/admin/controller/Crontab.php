@@ -9,44 +9,13 @@ use think\Db;
 use fast\Alibaba;
 use fast\Trackingmore;
 
-
-
 /**
  * 定时任务
  * @internal
  */
 class Crontab extends Backend
 {
-
-    protected $noNeedLogin = [
-        'get_sales_order_num',
-        'zeelool_order_custom_order_prescription',
-        'zeelool_order_item_process',
-        'voogueme_order_custom_order_prescription',
-        'voogueme_order_item_process',
-        'nihao_order_custom_order_prescription',
-        'nihao_order_item_process',
-        'set_purchase_order_logistics',
-        'product_grade_list_crontab',
-        'changeItemNewToOld',
-        'get_sku_stock',
-        'get_sku_price',
-        'get_sku_allstock',
-        'get_sales_order_data',
-        'update_ashboard_data_one',
-        'update_ashboard_data_two',
-        'purchase_data',
-        'stock_data',
-        'warehouse_data',
-        'select_product_data',
-        'get_sales_order_update',
-        'get_sales_order_update_two',
-        'warehouse_data_everyday',
-        'calculate_order_item_num',
-        'get_stock_data',
-        'set_stock_change'
-
-    ];
+    protected $noNeedLogin = ['*'];
 
     public function _initialize()
     {
@@ -62,6 +31,7 @@ class Crontab extends Backend
 
     protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
+
     /**
      * 定时处理 订单列表分类
      * 1：仅镜架
@@ -71,7 +41,7 @@ class Crontab extends Backend
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  zeelool_order_custom_order_prescription()
+    public function zeelool_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id asc limit 1000";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
@@ -95,7 +65,6 @@ class Crontab extends Backend
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -104,11 +73,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only' || $v['index_type'] == 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && !$v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && !$v['options_color'])) {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && $v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only' && $v['index_type'] != 'Frameonly' || ($v['index_type'] == '1.57 Sunglasses Non Prescription' && $v['options_color']) || ($v['index_type'] == 'Sunglasses Frameonly' && $v['options_color'])) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -203,21 +172,39 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_zeelool')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
             // dump($product_options);
-            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+
+            if ($product_options['info_buyRequest']['tmplens']['coating_name']) {
+                $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
+            } else {
+                $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            }
+
+            if ($product_options['info_buyRequest']['tmplens']['lens_data_name']) {
+                $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['lens_data_name'], 0, 100);
+            } else {
+                $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            }
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
-            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            if ($product_options['info_buyRequest']['tmplens']['lens_base_price']) {
+                $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            } else {
+                $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            }
+
+            if ($product_options['info_buyRequest']['tmplens']['coating_base_price']) {
+                $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
+            } else {
+                $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            }
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
             $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
-            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] =  $final_params['index_type'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'] ?: $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
@@ -234,7 +221,7 @@ order by sfoi.item_id asc limit 1000";
             }
             // dump($lens_params);
             $final_params = array_merge($lens_params, $final_params);
-            // dump($final_params);            
+            // dump($final_params);
 
             $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
             $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
@@ -248,6 +235,7 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
             $items[$order_item_key]['index_type'] = $final_params['index_type'];
             $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+            $items[$order_item_key]['options_color'] = $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
 
             $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
             $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
@@ -267,11 +255,20 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
             $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
 
-            if ($final_params['os_add'] && $final_params['od_add']) {
+            $final_params['os_add'] = urldecode($final_params['os_add']);
+            $final_params['od_add'] = urldecode($final_params['od_add']);
+
+            //判断双ADD还是单ADD
+            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
+                //如果新处方add 对调 因为旧处方add左右眼颠倒
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                $items[$order_item_key]['total_add'] = $final_params['os_add'];
+                if ($items[$order_item_key]['od_add'] && $final_params['od_add'] * 1 != 0) {
+                    $items[$order_item_key]['total_add'] = $final_params['od_add'];
+                } else {
+                    $items[$order_item_key]['total_add'] = $final_params['os_add'];
+                }
             }
 
             if ($final_params['pdcheck'] == 'on') {
@@ -313,26 +310,30 @@ order by sfoi.item_id asc limit 1000";
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
+            if (strpos($final_params['index_type'], 'Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
             if ($final_params['od_cyl']) {
-                if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
+                if ((float) urldecode($final_params['od_cyl']) * 1 <= -4 || (float) urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
-                if (urldecode($final_params['os_cyl']) * 1 <= -4 || urldecode($final_params['os_cyl']) * 1 >= 4) {
+                if ((float) urldecode($final_params['os_cyl']) * 1 <= -4 || (float) urldecode($final_params['os_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -402,12 +403,13 @@ order by sfoi.item_id asc limit 1000";
                     . "'" . $value['os_bd'] . "',"
                     . "'" . $value['os_pv_r'] . "',"
                     . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
+                    . "'" . $value['is_custom_lens'] . "',"
+                    . "'" . $value['options_color'] . "'"
                     . "),";
             }
 
             $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
+                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens,options_color) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
             $result = Db::connect('database.db_zeelool')->execute($batch_order_item_prescription_insertSql);
             if ($result) {
@@ -447,7 +449,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  voogueme_order_custom_order_prescription()
+    public function voogueme_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_voogueme')->query($order_entity_id_querySql);
@@ -471,7 +473,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_voogueme')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -480,11 +481,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || stripos($v['index_type'], 'FRAME ONLY') !== false || stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') !== false) {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -569,7 +570,6 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_voogueme')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
@@ -678,25 +678,27 @@ order by sfoi.item_id asc limit 1000";
             }
 
             if ($final_params['od_cyl']) {
-                if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
+                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
+                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
-                if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
+                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
+                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -816,7 +818,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  nihao_order_custom_order_prescription()
+    public function nihao_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000";
         $order_entity_id_list = Db::connect('database.db_nihao')->query($order_entity_id_querySql);
@@ -840,7 +842,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -851,9 +852,9 @@ order by sfoi.item_id asc limit 1000";
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['third_name'] == '' || $v['third_name'] == 'Plastic Lenses' || $v['third_name'] == 'FRAME ONLY') {
                     $label[] = 1; //仅镜架
-                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -925,7 +926,6 @@ order by sfoi.item_id asc limit 1000";
      */
     public function nihao_order_item_process()
     {
-
         $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
         $max_item_id_list = Db::connect('database.db_nihao')->query($max_item_id_querySql);
         if ($max_item_id_list) {
@@ -992,7 +992,7 @@ order by sfoi.item_id asc limit 1000";
 
             //处理ADD  当ReadingGlasses时 是 双ADD值
             if ($tmp_lens_params['prescription_type'] == 'Reading Glasses' &&  strlen($tmp_lens_params['os_add']) > 0 && strlen($tmp_lens_params['od_add']) > 0) {
-                // echo '双ADD值';         
+                // echo '双ADD值';
                 $finalResult[$key]['od_add'] = $tmp_lens_params['od_add'];
                 $finalResult[$key]['os_add'] = $tmp_lens_params['os_add'];
             } else {
@@ -1049,24 +1049,24 @@ order by sfoi.item_id asc limit 1000";
             }
 
             if ($tmp_lens_params['od_cyl']) {
-                if ($tmp_lens_params['od_cyl'] * 1 <= -4 || $tmp_lens_params['od_cyl'] * 1 >= 4) {
+                if ((float) $tmp_lens_params['od_cyl'] * 1 <= -4 || (float) $tmp_lens_params['od_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
             if ($tmp_lens_params['os_cyl']) {
-                if ($tmp_lens_params['os_cyl'] * 1 <= -4 || $tmp_lens_params['os_cyl'] * 1 >= 4) {
+                if ((float) $tmp_lens_params['os_cyl'] * 1 <= -4 || (float) $tmp_lens_params['os_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['od_sph']) {
-                if (urldecode($tmp_lens_params['od_sph']) * 1 < -8 || urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
+                if ((float) urldecode($tmp_lens_params['od_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['os_sph']) {
-                if (urldecode($tmp_lens_params['os_sph']) * 1 < -8 || urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
+                if ((float) urldecode($tmp_lens_params['os_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
@@ -1184,7 +1184,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  meeloog_order_custom_order_prescription()
+    public function meeloog_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_meeloog')->query($order_entity_id_querySql);
@@ -1208,7 +1208,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_meeloog')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -1219,9 +1218,9 @@ order by sfoi.item_id asc limit 1000";
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1306,7 +1305,6 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_meeloog')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
@@ -1545,6 +1543,218 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
+     * 定时处理 订单列表分类 meeloog站点
+     * 1：仅镜架
+     * 2：仅现货处方镜
+     * 3：仅定制处方镜
+     * 4：镜架+现货
+     * 5：镜架+定制
+     * 6：现片+定制片
+     */
+    public function wesee_order_custom_order_prescription()
+    {
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type > 0 order by entity_id desc limit 1000 ";
+        $order_entity_id_list = Db::connect('database.db_weseeoptical')->query($order_entity_id_querySql);
+        if (empty($order_entity_id_list)) {
+            echo '处理完毕！';
+            exit;
+        }
+
+        /**
+         * 1：仅镜架
+         * 2：仅现货处方镜
+         * 3：仅定制处方镜
+         * 4：镜架+现货
+         * 5：镜架+定制
+         * 6：现片+定制片
+         */
+        $type_1_entity_id = [];
+        $type_2_entity_id = [];
+        $type_3_entity_id = [];
+        $type_4_entity_id = [];
+        $type_5_entity_id = [];
+        $type_6_entity_id = [];
+        foreach ($order_entity_id_list as $key => $value) {
+            $items = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($items as $k => $v) {
+                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
+                if (($v['index_type'] == '' || !$v['index_type']) && !$v['sph_degree']) {
+                    $label[] = 1; //仅镜架
+                } elseif ($v['index_type'] && $v['is_custom_lens'] == 0) {
+                    $label[] = 2; //现片含处方
+                } elseif ($v['sph_degree'] && $v['is_custom_lens'] == 1) {
+                    $label[] = 3; //定制含处方
+                }
+            }
+
+            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
+            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
+                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
+
+                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
+            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
+
+                //如果订单只有 仅镜架 类型则为 仅镜架
+            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+
+                //如果订单只有 现货 类型则为 现货处方镜
+            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
+                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
+
+                //如果订单只有 定制 类型则为 仅定制处方镜
+            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
+            } elseif (in_array(2, $label) && in_array(3, $label)) {
+                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
+            } else {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+            }
+        }
+
+        if ($type_1_entity_id) {
+            $map['entity_id'] = ['in', $type_1_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+        }
+
+        if ($type_2_entity_id) {
+            $map['entity_id'] = ['in', $type_2_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+        }
+
+        if ($type_3_entity_id) {
+            $map['entity_id'] = ['in', $type_3_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+        }
+
+
+        if ($type_4_entity_id) {
+            $map['entity_id'] = ['in', $type_4_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+        }
+
+
+        if ($type_5_entity_id) {
+            $map['entity_id'] = ['in', $type_5_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+        }
+
+
+        if ($type_6_entity_id) {
+            $map['entity_id'] = ['in', $type_6_entity_id];
+            Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+        }
+
+        echo "执行成功！！";
+    }
+
+    /**
+     * 定时处理订单处方表序列化数据
+     */
+    public function wesee_order_item_process()
+    {
+        $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
+        $max_item_id_list = Db::connect('database.db_weseeoptical')->query($max_item_id_querySql);
+        if ($max_item_id_list) {
+            $max_item_id = $max_item_id_list[0]['max_item_id'];
+        }
+
+        $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
+from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
+order by sfoi.item_id asc limit 1000";
+        $order_item_list = Db::connect('database.db_weseeoptical')->query($order_item_prescription_querySql);
+        foreach ($order_item_list as $order_item_key => $order_item_value) {
+            $product_options = unserialize($order_item_value['product_options']);
+
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+            $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+            $items[$order_item_key]['sph_degree'] = $final_params['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
+
+            $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
+            $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
+            $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
+            $items[$order_item_key]['name'] = $order_item_value['name'];
+            $items[$order_item_key]['sku'] = $order_item_value['sku'];
+            $items[$order_item_key]['created_at'] = $order_item_value['created_at'];
+            $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
+            $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
+
+            $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
+            $items[$order_item_key]['index_type'] = $final_params['index_type'];
+            $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+
+            $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
+            $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
+            $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
+
+
+
+            //如果为太阳镜 拼接颜色
+            if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $items[$order_item_key]['index_name'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                $items[$order_item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+
+
+            /**
+             * 判断定制现片逻辑
+             * 1、渐进镜 Progressive
+             * 2、偏光镜 镜片类型包含Polarized
+             * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、当cyl<=-4或cyl>=4
+             */
+
+            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
+            }
+
+            if ($final_params['degrees']) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            } else {
+                $items[$order_item_key]['is_custom_lens'] = 0;
+            }
+
+            unset($final_params);
+            unset($prescription_params);
+            unset($product_options);
+        }
+        if ($items) {
+            $result = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item_prescription')->insertAll($items);
+            if ($result) {
+                echo '<br>执行成功';
+            } else {
+                echo '<br>执行失败';
+            }
+        } else {
+            echo '执行完毕！';
+        }
+    }
+
+
+    /**
      * 定时统计每天的销量(弃用)
      */
     public function get_sales_order_num()
@@ -1587,7 +1797,7 @@ order by sfoi.item_id asc limit 1000";
      *之后修改添加
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/09 09:32:05 
+     * @since 2020/03/09 09:32:05
      * @return void
      */
     public function get_sales_order_data()
@@ -1595,6 +1805,7 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_model = Db::connect('database.db_zeelool');
         $voogueme_model = Db::connect('database.db_voogueme');
         $nihao_model    = Db::connect('database.db_nihao');
+        $meeloog_model  = Db::connect('database.db_meeloog');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -1604,6 +1815,9 @@ order by sfoi.item_id asc limit 1000";
         $nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $meeloog_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -1612,77 +1826,158 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
-        $zeelool_unit_price = @round(($zeelool_total / $zeelool_count), 2);
+        if ($zeelool_count > 0) {
+            $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);
+        } else {
+            $zeelool_unit_price = 0;
+        }
+
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
         $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车更新数
         $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车转化率
-        $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
+        if ($zeelool_shoppingcart_total > 0) {
+            $zeelool_shoppingcart_conversion = round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
+        } else {
+            $zeelool_shoppingcart_conversion = 0;
+        }
         //zeelool购物车更新转化率
-        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
+        if ($zeelool_shoppingcart_update_total > 0) {
+            $zeelool_shoppingcart_update_conversion = round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
+        } else {
+            $zeelool_shoppingcart_update_conversion = 0;
+        }
+
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //voogueme客单价
-        $voogueme_unit_price = @round(($voogueme_total / $voogueme_count), 2);
+        if ($voogueme_count > 0) {
+            $voogueme_unit_price = round(($voogueme_total / $voogueme_count), 2);
+        } else {
+            $voogueme_unit_price = 0;
+        }
         //voogueme购物车数
         $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车更新数
         $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车转化率
-        $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
+        if ($voogueme_shoppingcart_total > 0) {
+            $voogueme_shoppingcart_conversion = round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
+        } else {
+            $voogueme_shoppingcart_conversion = 0;
+        }
         //voogueme购物车更新转化率
-        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
+        if ($voogueme_shoppingcart_update_total > 0) {
+            $voogueme_shoppingcart_update_conversion = round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
+        } else {
+            $voogueme_shoppingcart_update_conversion = 0;
+        }
+
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
         $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //nihao客单价
-        $nihao_unit_price = @round(($nihao_total / $nihao_count), 2);
+        if ($nihao_count > 0) {
+            $nihao_unit_price = round(($nihao_total / $nihao_count), 2);
+        } else {
+            $nihao_unit_price = 0;
+        }
+
         //nihao购物车数
         $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao站购物车更新数
         $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao购物车转化率
-        $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
+        if ($nihao_shoppingcart_total > 0) {
+            $nihao_shoppingcart_conversion = round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
+        } else {
+            $nihao_shoppingcart_conversion = 0;
+        }
+
         //nihao站购物车更新转化率
-        $nihao_shoppingcart_update_conversion = @round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
+        if ($nihao_shoppingcart_update_total > 0) {
+            $nihao_shoppingcart_update_conversion = round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
+        } else {
+            $nihao_shoppingcart_update_conversion = 0;
+        }
+
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
+        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
+        $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
+        $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //meeloog客单价
+        if ($meeloog_count > 0) {
+            $meeloog_unit_price = round(($meeloog_total / $meeloog_count), 2);
+        } else {
+            $meeloog_unit_price = 0;
+        }
+
+        //meeloog购物车数
+        $meeloog_shoppingcart_total = $meeloog_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //meeloog购物车更新数
+        $meeloog_shoppingcart_update_total = $meeloog_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        //meeloog购物车转化率
+        if ($meeloog_shoppingcart_total > 0) {
+            $meeloog_shoppingcart_conversion = round(($meeloog_count / $meeloog_shoppingcart_total) * 100, 2);
+        } else {
+            $meeloog_shoppingcart_conversion = 0;
+        }
+
+        //meeloog购物车更新转化率
+        if ($meeloog_shoppingcart_update_total > 0) {
+            $meeloog_shoppingcart_update_conversion = round(($meeloog_count / $meeloog_shoppingcart_update_total) * 100, 2);
+        } else {
+            $meeloog_shoppingcart_update_conversion = 0;
+        }
+
+        //meeloog注册用户数
+        $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
+
         $data['zeelool_sales_num']                          = $zeelool_count;
         $data['voogueme_sales_num']                         = $voogueme_count;
         $data['nihao_sales_num']                            = $nihao_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count;
+        $data['meeloog_sales_num']                          = $meeloog_count;
+        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
         $data['zeelool_sales_money']                        = $zeelool_total;
         $data['voogueme_sales_money']                       = $voogueme_total;
         $data['nihao_sales_money']                          = $nihao_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total;
+        $data['meeloog_sales_money']                        = $meeloog_total;
+        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
         $data['zeelool_unit_price']                         = $zeelool_unit_price;
         $data['voogueme_unit_price']                        = $voogueme_unit_price;
         $data['nihao_unit_price']                           = $nihao_unit_price;
-        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price) / 3, 2);
+        $data['meeloog_unit_price']                         = $meeloog_unit_price;
+        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price + $meeloog_unit_price) / 4, 2);
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
-        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
+        $data['meeloog_shoppingcart_total']                 = $meeloog_shoppingcart_total;
+        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total;
         $data['zeelool_shoppingcart_conversion']            = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion']           = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
+        $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
+        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion + $meeloog_shoppingcart_conversion) / 4, 2);
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
         $data['voogueme_register_customer']                 = $voogueme_register_customer;
         $data['nihao_register_customer']                    = $nihao_register_customer;
-        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+        $data['meeloog_register_customer']                  = $meeloog_register_customer;
+        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer;
         $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
         $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
         $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
+        $data['meeloog_shoppingcart_update_total']          = $meeloog_shoppingcart_update_total;
+        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total;
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
+        $data['meeloog_shoppingcart_update_conversion']     = $meeloog_shoppingcart_update_conversion;
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion) / 4, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -1723,6 +2018,8 @@ order by sfoi.item_id asc limit 1000";
                 $params[$k]['purchase_id'] = $v['id'];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s');
                 $params[$k]['create_person'] = 'Admin';
+                $params[$k]['logistics_company_no'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyNo;
+                $params[$k]['source'] = 2;
             }
         }
 
@@ -1752,49 +2049,57 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
         $meeloog_model = new \app\admin\model\order\order\Meeloog;
-        $intelligent_purchase_query_sql = "SELECT a.sku, if(counter,counter,0) as counter, 
+        $intelligent_purchase_query_sql = "SELECT a.sku,if(counter,counter,0) as counter, 
         IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
         FROM catalog_product_entity a 
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE '%Price%' ORDER BY counter DESC";
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
-        //查询sku映射关系表 
+        //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
 
         //查询产品库sku
         foreach ($zeelool_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
-            $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
+            $zeelool_list[$k]['zeelool_sku'] = $sku;
         }
+
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($voogueme_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
-            $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
+            $voogueme_list[$k]['voogueme_sku'] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($nihao_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
-            $nihao_list[$k]['nihao_sku'] = $v['sku'];
+            $nihao_list[$k]['nihao_sku'] = $sku;
         }
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
-
         $data = [];
         foreach ($lists as $k => $v) {
-
             if ($v['true_sku'] == 'Express Shipping') {
                 continue;
             }
@@ -1820,10 +2125,10 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $where['a.label'] = 1;
+        // $where['a.label'] = 1;
         $where['a.status'] = 1;
         $where['b.status'] = 1;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
+        $supplier_list = $supplier->alias('a')->where($where)->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
         //查询产品库正常SKU
         $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
@@ -2013,7 +2318,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/19 16:23:27 
+     * @since 2020/02/19 16:23:27
      * @return void
      */
     public function get_sku_stock()
@@ -2032,7 +2337,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/19 16:23:27 
+     * @since 2020/02/19 16:23:27
      * @return void
      */
     public function get_sku_price()
@@ -2082,7 +2387,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/29 16:13:16 
+     * @since 2020/02/29 16:13:16
      * @return void
      */
     public function get_sku_allstock()
@@ -2099,7 +2404,7 @@ order by sfoi.item_id asc limit 1000";
      * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/02 17:39:31 
+     * @since 2020/03/02 17:39:31
      * @return void
      */
     public function update_ashboard_data_one()
@@ -2118,6 +2423,9 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
                 break;
             default:
                 $model = false;
@@ -2338,21 +2646,21 @@ order by sfoi.item_id asc limit 1000";
         //总共支付成功数data
         $total_order_success_data                   = $total_order_success_rs[0]['counter'];
         //昨日客单价data
-        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
+        $yesterday_unit_price_data                  = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
         //过去7天客单价data
-        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
+        $pastsevenday_unit_price_data               = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
+        $pastthirtyday_unit_price_data              = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
         //当月客单价data
-        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
+        $thismonth_unit_price_data                  = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
+        $lastmonth_unit_price_data                  = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
         //今年客单价data
-        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
+        $thisyear_unit_price_data                   = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
+        $lastyear_unit_price_data                   = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
         //总共客单价data
-        $total_unit_price_data                      = round(($total_sales_money_data / $total_order_success_data), 2);
+        $total_unit_price_data                      = @round(($total_sales_money_data / $total_order_success_data), 2);
         //昨天新增注册人数
         $yesterday_register_customer_data           = $yesterday_register_customer_rs[0]['counter'];
         //过去7天新增注册人数
@@ -2385,59 +2693,59 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_sign_customer_data                = $lastyear_sign_customer_rs[0]['counter'];
         //总共新增登录人数
         $total_sign_customer_data                   = $total_sign_customer_rs[0]['counter'];
-        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data;
-        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data;
-        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data;
-        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data;
-        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data;
-        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data;
-        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data;
-        $updateData['total_sales_money']            = $total_sales_money_data;
+        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data ?? 0;
+        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data ?? 0;
+        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data ?? 0;
+        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data ?? 0;
+        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data ?? 0;
+        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data ?? 0;
+        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data ?? 0;
+        $updateData['total_sales_money']            = $total_sales_money_data ?? 0;
 
-        $updateData['yesterday_order_num']         = $yesterday_order_num_data;
-        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data;
-        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data;
-        $updateData['thismonth_order_num']         = $thismonth_order_num_data;
-        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data;
-        $updateData['thisyear_order_num']          = $thisyear_order_num_data;
-        $updateData['lastyear_order_num']          = $lastyear_order_num_data;
-        $updateData['total_order_num']             = $total_order_num_data;
+        $updateData['yesterday_order_num']         = $yesterday_order_num_data ?? 0;
+        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data ?? 0;
+        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data ?? 0;
+        $updateData['thismonth_order_num']         = $thismonth_order_num_data ?? 0;
+        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data ?? 0;
+        $updateData['thisyear_order_num']          = $thisyear_order_num_data ?? 0;
+        $updateData['lastyear_order_num']          = $lastyear_order_num_data ?? 0;
+        $updateData['total_order_num']             = $total_order_num_data ?? 0;
 
-        $updateData['yesterday_order_success']      = $yesterday_order_success_data;
-        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data;
-        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data;
-        $updateData['thismonth_order_success']      = $thismonth_order_success_data;
-        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data;
-        $updateData['thisyear_order_success']       = $thisyear_order_success_data;
-        $updateData['lastyear_order_success']       = $lastyear_order_success_data;
-        $updateData['total_order_success']          = $total_order_success_data;
+        $updateData['yesterday_order_success']      = $yesterday_order_success_data ?? 0;
+        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data ?? 0;
+        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data ?? 0;
+        $updateData['thismonth_order_success']      = $thismonth_order_success_data ?? 0;
+        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data ?? 0;
+        $updateData['thisyear_order_success']       = $thisyear_order_success_data ?? 0;
+        $updateData['lastyear_order_success']       = $lastyear_order_success_data ?? 0;
+        $updateData['total_order_success']          = $total_order_success_data ?? 0;
 
-        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data;
-        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data;
-        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data;
-        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data;
-        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data;
-        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data;
-        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data;
-        $updateData['total_unit_price']             = $total_unit_price_data;
+        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data ?? 0;
+        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data ?? 0;
+        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data ?? 0;
+        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data ?? 0;
+        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data ?? 0;
+        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data ?? 0;
+        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data ?? 0;
+        $updateData['total_unit_price']             = $total_unit_price_data ?? 0;
 
-        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data;
-        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data;
-        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data;
-        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data;
-        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data;
-        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data;
-        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data;
-        $updateData['total_register_customer']          = $total_register_customer_data;
+        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data ?? 0;
+        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data ?? 0;
+        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data ?? 0;
+        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data ?? 0;
+        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data ?? 0;
+        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data ?? 0;
+        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data ?? 0;
+        $updateData['total_register_customer']          = $total_register_customer_data ?? 0;
 
-        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data;
-        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data;
-        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data;
-        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data;
-        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data;
-        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data;
-        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data;
-        $updateData['total_sign_customer']          = $total_sign_customer_data;
+        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data ?? 0;
+        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data ?? 0;
+        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data ?? 0;
+        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data ?? 0;
+        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data ?? 0;
+        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data ?? 0;
+        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data ?? 0;
+        $updateData['total_sign_customer']          = $total_sign_customer_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
@@ -2460,7 +2768,7 @@ order by sfoi.item_id asc limit 1000";
      * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/02 17:39:31 
+     * @since 2020/03/02 17:39:31
      * @return void
      */
     public function update_ashboard_data_two()
@@ -2479,6 +2787,9 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
                 break;
             default:
                 $model = false;
@@ -2619,21 +2930,21 @@ order by sfoi.item_id asc limit 1000";
         //总共购物车总数data
         $total_shoppingcart_total_data              = $total_shoppingcart_total_rs[0]['counter'];
         //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
+        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
+        $pastsevenday_shoppingcart_conversion_data  = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
         //过去30天购物车转化率data
-        $pastthirtyday_shoppingcart_conversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
+        $pastthirtyday_shoppingcart_conversion_data = @round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
         //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
+        $thismonth_shoppingcart_conversion_data     = @round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
         //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
+        $lastmonth_shoppingcart_conversion_data     = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
         //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
+        $thisyear_shoppingcart_conversion_data      = @round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
         //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
+        $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
-        $total_shoppingcart_conversion_data         = round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
+        $total_shoppingcart_conversion_data         = @round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
         //昨天新增购物车数
         $yesterday_shoppingcart_new_data            = $yesterday_shoppingcart_new_rs[0]['counter'];
         //过去7天新增购物车数
@@ -2651,57 +2962,57 @@ order by sfoi.item_id asc limit 1000";
         //总共新增购物车数
         $total_shoppingcart_new_data                = $total_shoppingcart_new_rs[0]['counter'];
         //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_data  = round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
+        $yesterday_shoppingcart_newconversion_data  = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
         //过去7天新增购物车转化率
-        $pastsevenday_shoppingcart_newconversion_data = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
+        $pastsevenday_shoppingcart_newconversion_data = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
         //过去30天新增购物车转化率
-        $pastthirtyday_shoppingcart_newconversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_new_data), 4) * 100;
+        $pastthirtyday_shoppingcart_newconversion_data = @round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_new_data), 4) * 100;
         //当月新增购物车转化率
-        $thismonth_shoppingcart_newconversion_data = round(($thismonth_order_success_data / $thismonth_shoppingcart_new_data), 4) * 100;
+        $thismonth_shoppingcart_newconversion_data = @round(($thismonth_order_success_data / $thismonth_shoppingcart_new_data), 4) * 100;
         //上月新增购物车转化率
-        $lastmonth_shoppingcart_newconversion_data = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
+        $lastmonth_shoppingcart_newconversion_data = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
         //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_data  = round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
+        $thisyear_shoppingcart_newconversion_data  = @round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
         //上年新增购物车总数sql
-        $lastyear_shoppingcart_newconversion_data  = round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
+        $lastyear_shoppingcart_newconversion_data  = @round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
         //总共新增购物车转化率
-        $total_shoppingcart_newconversion_data     = round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
+        $total_shoppingcart_newconversion_data     = @round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
 
-        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data;
-        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data;
-        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data;
-        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data;
-        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data;
-        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data;
-        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data;
-        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data;
+        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data ?? 0;
+        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data ?? 0;
+        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data ?? 0;
+        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data ?? 0;
+        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data ?? 0;
+        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data;
-        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data;
-        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data;
-        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data;
-        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data;
-        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data;
-        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data;
-        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data;
+        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data ?? 0;
+        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data;
-        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data;
-        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data;
-        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data;
-        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data;
-        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data;
-        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data;
-        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data;
+        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data ?? 0;
+        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data ?? 0;
+        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data ?? 0;
+        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data ?? 0;
+        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data ?? 0;
+        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data;
-        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data;
-        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data;
-        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data;
-        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data;
-        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data;
-        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data;
-        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data;
+        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
@@ -2723,7 +3034,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/09 11:35:05 
+     * @since 2020/03/09 11:35:05
      * @return void
      */
     public function purchase_data()
@@ -2837,7 +3148,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/09 11:42:50 
+     * @since 2020/03/09 11:42:50
      * @return void
      */
     public function stock_data()
@@ -2861,7 +3172,7 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'frameStock')->update($data);
 
-        //镜架总金额 
+        //镜架总金额
         $frameStockPrice = $this->item->getFrameStockPrice();
         $data['value'] = $frameStockPrice;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -3011,7 +3322,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/04 17:05:15 
+     * @since 2020/03/04 17:05:15
      * @return void
      */
     public function warehouse_data()
@@ -3132,7 +3443,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/24 14:04:27 
+     * @since 2020/03/24 14:04:27
      * @return void
      */
     protected function getTrackingMoreStatusNumberCount()
@@ -3152,7 +3463,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/10 09:56:39 
+     * @since 2020/03/10 09:56:39
      * @return void
      */
     public function select_product_data()
@@ -3222,7 +3533,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/14 14:15:37 
+     * @since 2020/03/14 14:15:37
      * @return void
      */
     public function warehouse_data_everyday()
@@ -3293,7 +3604,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_all_stock()
@@ -3325,7 +3636,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_all_stock_price()
@@ -3358,7 +3669,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_frame_all_stock()
@@ -3396,7 +3707,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_frame_all_stock_price()
@@ -3437,7 +3748,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_ornament_all_stock()
@@ -3475,7 +3786,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_ornament_all_stock_price()
@@ -3518,7 +3829,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/11 17:11:21 
+     * @since 2020/03/11 17:11:21
      * @return void
      */
     public function get_sales_order_update()
@@ -3576,7 +3887,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/11 17:11:21 
+     * @since 2020/03/11 17:11:21
      * @return void
      */
     public function get_sales_order_update_two()
@@ -3625,7 +3936,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/20 17:15:36 
+     * @since 2020/03/20 17:15:36
      * @return void
      */
     public function calculate_order_item_num()
@@ -3643,6 +3954,9 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
                 break;
             default:
                 $model = false;
@@ -3684,7 +3998,7 @@ order by sfoi.item_id asc limit 1000";
      * @todo 待定
      * @Description
      * @author wpl
-     * @since 2020/03/10 17:16:04 
+     * @since 2020/03/10 17:16:04
      * @return void
      */
     public function getSkuSalesNum()
@@ -3733,19 +4047,14 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OT02018-02
-        VFP0236-01';
-        $skus = explode('
-        ', $str);
 
-        $stock = [
-            30,
-            0
+        $skus = [
+            'FX0206-02'
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = $stock[$k];
+            $data['real_time_qty'] = 0;
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -3757,7 +4066,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_process()
@@ -3766,18 +4075,19 @@ order by sfoi.item_id asc limit 1000";
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
-        $skus = explode('
-        ', $str);
+        $skus = [
+            'FX0206-02'
+        ];
         foreach ($skus as $k => $v) {
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
             $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
@@ -3791,9 +4101,15 @@ order by sfoi.item_id asc limit 1000";
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
             $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            $map['custom_is_match_frame'] = 1; //是否配镜架
+            unset($map['custom_is_delivery_new']);
+            unset($map['custom_is_match_frame_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
 
             $p_map['sku'] = $v;
-            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             dump($v);
             dump($data);
             $res = $this->item->where($p_map)->update($data);
@@ -3810,7 +4126,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_process_order()
@@ -3819,18 +4135,19 @@ order by sfoi.item_id asc limit 1000";
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
-        $skus = explode('
-        ', $str);
+        $skus = [
+            'FX0206-02'
+        ];
         foreach ($skus as $k => $v) {
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
             $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
@@ -3843,9 +4160,12 @@ order by sfoi.item_id asc limit 1000";
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
             $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            unset($map['custom_is_delivery_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $p_map['sku'] = $v;
-            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             $res = $this->item->where($p_map)->update($data);
         }
         dump($res);
@@ -3857,22 +4177,18 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_sotck()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-02
-        VFP0236-01';
-        $skus = explode('
-        ', $str);
+        $skus = [
+            'FX0206-02'
+        ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
@@ -3889,7 +4205,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/27 09:48:05 
+     * @since 2020/04/27 09:48:05
      * @return void
      */
     public function get_stock_data()
@@ -3930,7 +4246,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/27 10:34:10 
+     * @since 2020/04/27 10:34:10
      * @return void
      */
     public function set_stock_change()
@@ -3955,7 +4271,7 @@ order by sfoi.item_id asc limit 1000";
                 Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
                     'stock' => $res[$v['sku']],
                     'type'  => 2
-                    ]);
+                ]);
             }
             //从无到有
             if ($v['type'] == 2 && $res[$v['sku']] > 0) {
@@ -3969,9 +4285,51 @@ order by sfoi.item_id asc limit 1000";
                     'type'  => 1
                 ]);
             }
-           
         }
-    
+
         Db::table('fa_goods_stock_change')->insertAll(array_values($info));
+    }
+    public function get_workload_data()
+    {
+        //求出平台
+        $platform = $this->request->get('platform');
+        if (!$platform) {
+            return false;
+        }
+        $where['type'] = $whereComments['platform'] = $platform;
+        $whereComments['author_id']    = ['neq', '382940274852'];
+        $whereComments['is_admin']  = 1;
+        //zendesk
+        $zendesk_model = Db::name('zendesk');
+        $zendesk_comments = Db::name('zendesk_comments');
+        $zendesk_model->query("set time_zone='+8:00'");
+        $zendesk_comments->query("set time_zone='+8:00'");
+        //zendesk_comments
+        //$zendesk_comments = Db::name('zendesk_comments');
+        //计算前一天的销量
+        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $map['create_time'] = $date['c.create_time'] = $update['zendesk_update_time'] =  ['between', [$stime, $etime]];
+        //获取昨天待处理的open、new量
+        $wait_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->count("*");
+        //获取昨天新增的open、new量
+        $increment_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
+        //获取昨天已回复量
+        $reply_num  = $zendesk_comments->where($map)->where(['is_public' => 1])->where($whereComments)->count('*');
+        //获取昨天待分配的open、new量
+        $waiting_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where(['assign_id' => 0])->where($update)->count("*");
+        //获取昨天的pendding量
+        $pending_num = $zendesk_model->where($where)->where(['status' => ['eq', '3'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
+        $data['platform']       = $platform;
+        $data['wait_num']       = $wait_num;
+        $data['increment_num']  = $increment_num;
+        $data['reply_num']      = $reply_num;
+        $data['waiting_num']    = $waiting_num;
+        $data['pending_num']    = $pending_num;
+        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        $data['createtime'] = date("Y-m-d H:i:s");
+        Db::name('workload_statistics')->insert($data);
+        echo 'ok';
+        die;
     }
 }

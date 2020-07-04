@@ -348,9 +348,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().parent().remove();
+            })
         },
         edit: function () {
             Controller.api.bindevent();
+
+             //删除商品数据
+             $(document).on('click', '.btn-del', function () {
+                var id = $(this).parent().parent().find('.item_id').val();
+                if (id) {
+                    Layer.confirm(
+                        __('确定要删除吗'),
+                        function (index) {
+                            Backend.api.ajax({
+                                url: Config.moduleurl + '/demand/develop_web_task/deleteItem',
+                                data: { id: id }
+                            }, function (data, ret) {
+                                $(this).parent().parent().remove();
+                                location.reload();
+                                Layer.closeAll();
+                            });
+                        }
+                    );
+
+                }
+            })
         },
         detail: function () {
             Controller.api.bindevent();
@@ -538,9 +562,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     Form.api.bindevent($("form[role=form]"));
                 })
 
-                $(document).on('click', '.btn-del', function () {
-                    $(this).parent().parent().remove();
-                })
+               
 
                 //选择分组类型
                 $(document).on('change', '.group_type', function () {

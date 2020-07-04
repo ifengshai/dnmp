@@ -13,6 +13,7 @@ use Util\VooguemePrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -71,7 +72,7 @@ class Voogueme extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0,4,6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -99,6 +100,19 @@ class Voogueme extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            //任务分类id搜索
+            if ($filter['category_id']) {
+                $swhere = [];
+                $swhere['problem_type_id'] = $filter['category_id'];
+                $swhere['work_type'] = $filter['p_id'];
+                $swhere['work_platform'] = 1;
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['category_id']);
+                unset($filter['p_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            
 
             //SKU搜索
             if ($filter['sku']) {
@@ -133,7 +147,7 @@ class Voogueme extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0,4,6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -187,7 +201,7 @@ class Voogueme extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 2;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0,4,6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -303,12 +317,39 @@ class Voogueme extends Backend
                 $connect->rollback();
                 $this->error($e->getMessage());
             }
-            if ($result) {
+            if (false !== $result) {
                 $params['type'] = 1;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
                 $params['site'] = 2;
                 (new OrderLog())->setOrderLog($params);
+
+                $map['entity_id'] = ['in', $entity_ids];
+                $res = $this->model->field('entity_id,increment_id')->where($map)->select();
+                //插入订单节点
+                $data = [];
+                $list = [];
+                foreach ($res as $k => $v) {
+                    $data['update_time'] = date('Y-m-d H:i:s');
+                    //打标签
+                    $list[$k]['order_node'] = 1;
+                    $list[$k]['node_type'] = 2; //配镜架
+                    $list[$k]['content'] = 'Order is under processing';
+                    $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                    $list[$k]['site'] = 2;
+                    $list[$k]['order_id'] = $v['entity_id'];
+                    $list[$k]['order_number'] = $v['increment_id'];
+                    $list[$k]['handle_user_id'] = session('admin.id');
+                    $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                    $data['order_node'] = 1;
+                    $data['node_type'] = 2;
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
+                }
+                if ($list) {
+                    $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                    $ordernodedetail->saveAll($list);
+                }
 
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
@@ -340,11 +381,12 @@ class Voogueme extends Backend
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
-        if (!$res) {
+        $order_res = $this->model->field('entity_id,increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
-        foreach ($res as $v) {
+        $orderList = [];
+        foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
@@ -355,10 +397,11 @@ class Voogueme extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
-        $arr = array_column($res, 'increment_id');
+        $arr = array_column($order_res, 'increment_id');
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
@@ -435,7 +478,7 @@ class Voogueme extends Backend
                         //sku转换
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
                         if (!$trueSku) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
                         // //判断是否有实时库存
                         // $realStock = $item->getRealStock($trueSku);
@@ -448,19 +491,22 @@ class Voogueme extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
                         if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 2,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 2,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -470,12 +516,13 @@ class Voogueme extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -496,7 +543,7 @@ class Voogueme extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -507,14 +554,17 @@ class Voogueme extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 2,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 2,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -545,7 +595,7 @@ class Voogueme extends Backend
                     foreach ($infoRes as $k => $v) {
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
                         if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         //扣减总库存 扣减占用库存 扣减配货占用
                         $map = [];
@@ -553,21 +603,24 @@ class Voogueme extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
                         if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 2,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 2,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -576,11 +629,12 @@ class Voogueme extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -594,7 +648,7 @@ class Voogueme extends Backend
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
                     if (false === $res) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     $number++;
                     //100条提交一次
@@ -603,16 +657,19 @@ class Voogueme extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 2,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 2,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -634,6 +691,66 @@ class Voogueme extends Backend
             $params['order_ids'] = implode(',', $entity_ids);
             $params['site'] = 2;
             (new OrderLog())->setOrderLog($params);
+
+            //插入订单节点
+            $data = [];
+            $list = [];
+            foreach ($order_res as $k => $v) {
+                $data['update_time'] = date('Y-m-d H:i:s');
+
+                $list[$k]['create_time'] = date('Y-m-d H:i:s');
+                $list[$k]['site'] = 2;
+                $list[$k]['order_id'] = $v['entity_id'];
+                $list[$k]['order_number'] = $v['increment_id'];
+                $list[$k]['handle_user_id'] = session('admin.id');
+                $list[$k]['handle_user_name'] = session('admin.nickname');;
+
+                //配镜架
+                if ($status == 1) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 3; //配镜架
+                    $list[$k]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                }
+
+                //配镜片
+                if ($status == 2) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 4; //配镜片
+                    $list[$k]['content'] = 'Lenses production completed, waiting for customizing';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                }
+
+                //加工
+                if ($status == 3) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 5; //加工
+                    $list[$k]['content'] = 'Customizing completed, waiting for Quality Inspection';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                }
+
+                //质检
+                if ($status == 4) {
+                    $list[$k]['order_node'] = 2;
+                    $list[$k]['node_type'] = 6; //加工
+                    $list[$k]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                }
+
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
+            }
+            if ($list) {
+                $ordernodedetail = new \app\admin\model\OrderNodeDetail();
+                $ordernodedetail->saveAll($list);
+            }
 
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
@@ -748,7 +865,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        } elseif (!$filter['status']) {
+        } elseif (!$filter['status'] && !$ids) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
@@ -929,10 +1046,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
+            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
                 $value['od_axis'] =  $value['od_axis'];
             } else {
@@ -945,8 +1062,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $value['os_axis'] = '';
             }
 
-            $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
-            $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
+            $value['od_add'] = isset($value['od_add']) ? urldecode($value['od_add']) : '';
+            $value['os_add'] = isset($value['os_add']) ? urldecode($value['os_add']) : '';
 
             $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
             $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
@@ -964,16 +1081,16 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1368,7 +1485,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 &&  $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1595,15 +1712,15 @@ EOF;
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
-                $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-                $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                $final_print['od_sph'] = isset($final_print['od_sph']) ? urldecode($final_print['od_sph']) : '';
+                $final_print['os_sph'] = isset($final_print['os_sph']) ? urldecode($final_print['os_sph']) : '';
+                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? urldecode($final_print['od_cyl']) : '';
+                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? urldecode($final_print['os_cyl']) : '';
                 $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
                 $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
 
-                $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-                $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+                $final_print['od_add'] = isset($final_print['od_add']) ? urldecode($final_print['od_add']) : '';
+                $final_print['os_add'] = isset($final_print['os_add']) ? urldecode($final_print['os_add']) : '';
 
                 $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
                 $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
@@ -1614,7 +1731,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1648,7 +1765,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1662,7 +1779,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
             <tbody cellpadding='0'>
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1673,31 +1790,31 @@ EOF;
             </td>
             </tr>  
             <tr class='title'>      
-            <td></td>  
-            <td>SPH</td>
-            <td>CYL</td>
-            <td>AXI</td>
+            <td width='20px'></td>  
+            <td width='42px'>SPH</td>
+            <td width='50px'>CYL</td>
+            <td width='42px'>AXI</td>
             " . $prismcheck_title . "
-            <td>ADD</td>
-            <td>PD</td> 
+            <td width='42px'>ADD</td>
+            <td width='36px'>PD</td> 
             " . $coatiing_name . "
             </tr>   
             <tr>  
-            <td>Right</td>      
+            <td>R</td>      
             <td>" . $final_print['od_sph'] . "</td> 
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
                     "</tr>
             <tr>
-            <td>Left</td> 
+            <td>L</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

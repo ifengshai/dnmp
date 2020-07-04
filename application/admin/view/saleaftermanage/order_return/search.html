@@ -1,9 +1,9 @@
 <style>
-    .content{
-        max-width:100%;
+    .content {
+        max-width: 100%;
     }
 </style>
-
+<link rel="stylesheet" href="/assets/css/control.css">
 <style type="text/css">
     table.altrowstable {
         margin: 0 auto;
@@ -33,6 +33,7 @@
         border-style: solid;
         border-color: #ddd;
     }
+
     table.altrowstable1 {
         margin: 0 auto;
         width: 100%;
@@ -61,587 +62,170 @@
         border-style: solid;
         border-color: #ddd;
     }
-    table.altrowstable tr:nth-child(odd){
-        background-color:#eeeeee;
+
+    table.altrowstable tr:nth-child(odd) {
+        background-color: #eeeeee;
     }
-    table.altrowstable tr:nth-child(even){
+
+    table.altrowstable tr:nth-child(even) {
         background-color: #ffffff;
     }
+
     .class-body:nth-child(odd) {
         background-color: #ffffff;
     }
-    .class-body:nth-child(even){
+
+    .class-body:nth-child(even) {
         background-color: #eeeeee;
     }
+
+    body {
+        font-size: 14px;
+    }
+
+    .detail-wrap {
+        display: none;
+    }
+
+    .panel-body {
+        padding: 0;
+    }
+
+    .content {
+        background-color: #f1f4f6;
+        padding: 0;
+    }
+
+    .panel-intro {
+        background-color: #f1f4f6;
+    }
+
+    #ribbon {
+        padding: 15px;
+    }
+
+    body .control-wrap,
+    .infos-wrap,
+    .order-list-wrap {
+        margin: 10px 22px;
+        padding: 33px 22px !important;
+    }
+
+    body .order-list-wrap {
+        padding-top: 0 !important;
+    }
+
+    body .order-list-wrap h2 {
+        border-bottom: 1px solid #ddd;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap table tr td .pres-type td,
+    body .order-list-wrap ul.order-list .detail-wrap table .pres-type th {
+        padding: 4px !important;
+        font-size: 12px;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap table tr td {
+        font-size: 12px;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap table tr td.pd span {
+        font-size: 12px;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap table tr .pres-type {
+        padding: 15px;
+    }
+
+    dl {
+        margin-bottom: 0px;
+    }
+
+    .address-pay-info ul,
+    body .order-list-wrap ul.order-list .detail-wrap .address-pay-info dl {
+        padding: 15px;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap .address-pay-info dl dt:last-of-type {
+        padding-top: 10px;
+    }
+
+    body .order-list-wrap ul.order-list .detail-wrap .address-pay-info dl {
+        padding-bottom: 5px;
+    }
+
+    .num,.order-list {
+        word-wrap: break-word;
+        word-break: break-all;
+    }
 </style>
+
+
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
     <div class="panel-body">
-        <div id="myTabContent" class="tab-content">
-            <div class="tab-pane fade active in" id="one">
-                <div class="widget-body no-padding" style="overflow:scroll">
-                    <form id = "form1" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
-                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">订单平台</label>
-                                        <div class="col-xs-8">
-                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
-                                                {foreach name="orderPlatformList" item="vo" key='k'}
-                                                {if $k == $order_platform}
-                                                <option value="{$k}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$k}">{$vo}</option>
-                                                {/if}
-                                                {present name="default"}
-                                                {if condition="$default == $k && !isset($order_platform)"}
-                                                <option value="{$k}" selected="selected">{$vo}</option>
-                                                {/if}
-                                                {/present}
-                                                {/foreach}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">订单号</label>
-                                        <div class="col-xs-8">
-                                            <input id="increment_id" type="text" class="form-control" autocomplete="off" name="increment_id" value="{$increment_id}" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">客户邮箱</label>
-                                        <div class="col-xs-8">
-                                            <input type="text" id="customer_email" class="form-control" name="customer_email" value="{$customer_email}"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!--<div class="col-xs-12 col-sm-6 col-md-3">-->
-                                <!--<div class="form-group">-->
-                                <!--<label class="control-label col-xs-4">创建时间</label>-->
-                                <!--<div class="col-xs-8">-->
-                                <!--{:Form::datetimerange('create_time', '')}-->
-                                <!--</div>-->
-                                <!--</div>-->
-                                <!--</div>-->
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">客户姓名</label>
-                                        <div class="col-xs-8">
-                                            <input type="text" id="customer_name" class="form-control" name="customer_name" value="{$customer_name}"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">客户电话</label>
-                                        <div class="col-xs-8">
-                                            <input type="text" id="customer_phone" class="form-control" name="customer_phone" value="{$customer_phone}"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <label class="control-label col-xs-4">快递单号</label>
-                                        <div class="col-xs-8">
-                                            <input type="text" id="track_number" class="form-control" name="track_number" value="{$track_number}"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-6 col-md-3">
-                                    <div class="form-group">
-                                        <div class="col-xs-8 col-xs-offset-4">
-                                            <input type="submit" class="btn" value="搜索"/>
-                                            <input type="reset" class="btn btn-default btn-embossed"  value="重置"/>
-                                            <!-- <input type="reset" class="btn btn-primary"  value="重置"/> -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
+        <div class="tab-pane fade active in" id="one">
+
+            <section class="content">
+                <div class="part-wrap control-wrap">
+                    <ul class="type">
+                        <li>订单平台</li>
+                        <li class="{:$order_platform == 1 ? 'active' : ''} site">Zeelool</li>
+                        <li class="site {:$order_platform == 2 ? 'active' : ''}">Voogueme</li>
+                        <li class="site {:$order_platform == 3 ? 'active' : ''}">Nihao</li>
+                        <!-- <li class="site">Wesee</li> -->
+                    </ul>
+                    <form id="form1" role="form" action="{:url('/admin/saleaftermanage/order_return/search')}"
+                        class="form-commonsearch form-horizontal" method="post">
+                        <input type="hidden" name="order_platform" id="order_platform" value="{$order_platform}" />
+                        <div class="input-list">
+                            <ul class="order-list">
+                                <li>
+                                    <span>订单号</span>
+                                    <input id="increment_id" type="text" class="form-control" autocomplete="off"
+                                        name="increment_id" value="{$increment_id}" />
+                                </li>
+                                <li>
+                                    <span for="orderNum">快递单号</span>
+                                    <input type="text" id="track_number" class="form-control" name="track_number"
+                                        value="{$track_number}" />
+                                </li>
+                            </ul>
+                            <ul class="order-list">
+                                <li>
+                                    <span>客户邮箱</span>
+                                    <input type="text" id="customer_email" class="form-control" name="customer_email"
+                                        value="{$customer_email}" />
+                                </li>
+                                <li>
+                                    <span>客户电话</span>
+                                    <input type="text" id="customer_phone" class="form-control" name="customer_phone"
+                                        value="{$customer_phone}" />
+                                </li>
+                                <li>
+                                    <span>客户姓名</span>
+                                    <input type="text" id="customer_name" class="form-control" name="customer_name"
+                                        value="{$customer_name}" />
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="btn-wrap">
+                            <button type="submit" class="btn btn-submit">提交</button>
+                            <button type="reset" class="btn btn-default btn-embossed">重置</button>
                         </div>
                     </form>
-                    <table id="info-customer-task" class="altrowstable" style="margin-bottom: 0px;"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">用户个人信息</th></tr>
-                        </thead>
-                    </table>
-                    <div class="row item_info" style="background:#f5f5f5;" >
-                        <div class="col-lg-12">
-                        </div>
-                        <div class="col-xs-6 col-md-4">
-                            <div>
-                                <table id="caigou-table" class="handle_table1" style="width: 650px;">
-                                    <tr>
-                                        <td>客户邮箱</td>
-                                        <td style="width:70%;">{$customerInfo.customer_email}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>姓名</td>
-                                        <td style="width:70%;">{$customerInfo.customer_name}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Customer Group</td>
-                                        <td style="width:70%;">{$customerInfo.customer_group_code}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>支付成功数量</td>
-                                        <td style="width:70%;">{$customerInfo.success_counter}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>支付成功金额($)</td>
-                                        <td style="width:70%;">{$customerInfo.success_total}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>支付失败数量</td>
-                                        <td style="width:70%;">{$customerInfo.failed_counter}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>支付失败金额($)</td>
-                                        <td style="width:70%;">{$customerInfo.failed_total}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-xs-6 col-md-7" style="float:right; background:#f5f5f5;">
-                            <table id="caigou-table" style="width:800px;" class="handle_table2">
-                                <tr>
-                                    <td colspan="10" style="text-align: center;">地址信息列表</td>
-                                </tr>
-                                <tr>
-                                    <td>序号</td>
-                                    <td>订单号</td>
-                                    <td>Shipping Address</td>
-                                </tr>
-                                {notempty name="orderInfoResult"}
-                                {foreach name="orderInfoResult" item="orderInfoList"}
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td>
-                                    <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                                    <td colspan="3" style="text-align:left;">Name：{$orderInfoList.firstname} {$orderInfoList.lastname}<br/>Address：{$orderInfoList.street}，{$orderInfoList.city}，{$orderInfoList.region}，{$orderInfoList.postcode}，{$orderInfoList.country_id}<br/>Tel:{$orderInfoList.telephone}</td>
-                                </tr>
-                                {/foreach}
-                                {/notempty}
-                            </table>
-                        </div>
-                    </div>
-                    <!-- <table id="info-customer-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                    <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">用户个人信息</th></tr>                           
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">姓名</th>
-                            <th style="text-align: center; vertical-align: middle;">邮箱</th>
-                            <th style="text-align: center; vertical-align: middle;">支付成功次数</th>
-                            <th style="text-align: center; vertical-align: middle;">支付成功金额</th>
-                            <th style="text-align: center; vertical-align: middle;">支付失败次数</th>
-                            <th style="text-align: center; vertical-align: middle;">支付失败金额</th>
-                        </tr>
-                    </thead>
-                        {notempty name="customerInfo"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_counter}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_total}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_counter}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_total}</td>
-                        </tr>
-                        {/notempty}
-                    </table> -->
-                    {notempty name="workOrderListResult"}
-                    <table id="info-synergy-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">售后工单列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">工单状态</th>
-                            <th style="text-align: center; vertical-align: middle;">工单类型</th>
-                            <th style="text-align: center; vertical-align: middle;">关联单号</th>
-                            <th style="text-align: center; vertical-align: middle;">订单SKUS</th>
-                            <th style="text-align: center; vertical-align: middle;">平台类型</th>
-                            <th style="text-align: center; vertical-align: middle;">工单级别</th>
-                            <th style="text-align: center; vertical-align: middle;">问题类型</th>
-                            <th style="text-align: center; vertical-align: middle;">问题描述</th>
-                            <th style="text-align: center; vertical-align: middle;">承接人</th>
-                            <th style="text-align: center; vertical-align: middle;">工单措施</th>
-                            <th style="text-align: center; vertical-align: middle;">创建人</th>
-                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
-                            <th style="text-align: center; vertical-align: middle;">操作</th>
-                        </tr>
-                        </thead>
-                        {foreach name="workOrderListResult" item="workOrderList" }
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_status_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_type_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.platform_order}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.order_sku}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_platform_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_level_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.problem_type_content}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.problem_description}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.recept_persons}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.measure}</td>
-                            <th style="text-align: center; vertical-align: middle;">{$workOrderList.create_user_name}</th>
-                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/work_order_list/index')}?work_id={$workOrderList.id}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后工单列表"><i class="fa fa-list"></i>查看</a></td>
-                        </tr>
-                        {/foreach}
-                    </table>
-                    {/notempty}
-                    {notempty name="infoSynergyTaskResult"}
-                    <table id="info-synergy-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">协同任务列表</th></tr>
-                        <tr>
-                            <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
-                            <th style="text-align: center; vertical-align: middle;">任务状态</th>
-                            <!-- <th style="text-align: center; vertical-align: middle;">协同任务单号</th> -->
-                            <th style="text-align: center; vertical-align: middle;">关联单据类型</th>
-                            <th style="text-align: center; vertical-align: middle;">关联单号</th>
-                            <th style="text-align: center; vertical-align: middle;">订单SKUS</th>
-                            <th style="text-align: center; vertical-align: middle;">平台类型</th>
-                            <th style="text-align: center; vertical-align: middle;">承接部门</th>
-                            <th style="text-align: center; vertical-align: middle;">承接人</th>
-                            <th style="text-align: center; vertical-align: middle;">任务优先级</th>
-                            <th style="text-align: center; vertical-align: middle;">任务分类</th>
-                            <th style="text-align: center; vertical-align: middle;">问题描述</th>
-                            <th style="text-align: center; vertical-align: middle;">创建人</th>
-                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
-                            <th style="text-align: center; vertical-align: middle;">操作</th>
-                        </tr>
-                        </thead>
-                        {foreach name="infoSynergyTaskResult" item="synergyTaskList" }
-                        <tr>
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.id}</td> -->
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_status}</td>
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_number}</td> -->
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_number}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_platform}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.dept_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.rep_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.prty_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_task_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.problem_desc}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_person}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
-                        </tr>
-                        {/foreach}
-                    </table>
-                    {/notempty}
-                    {notempty name="saleAfterTaskResult"}
-                    <table id="sale-after-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">售后任务列表</th></tr>
-                        <tr>
-                            <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
-                            <!-- <th style="text-align: center; vertical-align: middle;">任务单号</th> -->
-                            <th style="text-align: center; vertical-align: middle;">任务状态</th>
-                            <th style="text-align: center; vertical-align: middle;">订单平台</th>
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">订单SKU</th>
-                            <th style="text-align: center; vertical-align: middle;">客户姓名</th>
-                            <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
-                            <th style="text-align: center; vertical-align: middle;">订单状态</th>
-                            <th style="text-align: center; vertical-align: middle;">责任部门</th>
-                            <th style="text-align: center; vertical-align: middle;">承接人</th>
-                            <!-- <th style="text-align: center; vertical-align: middle;">任务优先级</th> -->
-                            <th style="text-align: center; vertical-align: middle;">问题分类</th>
-                            <th style="text-align: center; vertical-align: middle;">问题描述</th>
-                            <th style="text-align: center; vertical-align: middle;">解决方案</th>
-                            <th style="text-align: center; vertical-align: middle;">创建人</th>
-                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
-                            <th style="text-align: center; vertical-align: middle;">操作</th>
-                        </tr>
-                        </thead>
-                        {foreach name="saleAfterTaskResult" item="saleTaskList"}
-                        <tr>
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.id}</td> -->
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_number}</td> -->
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_platform}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_number}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_skus}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.customer_name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.dept_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.rep_id}</td>
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.prty_id}</td> -->
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_desc}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.handle_scheme}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_person}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/sale_after_task/index')}?task_number={$saleTaskList.task_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后任务"><i class="fa fa-list"></i>查看</a></td>
-                        </tr>
-                        {/foreach}
-                    </table>
-                    {/notempty}
-                    {notempty name="orderReturnResult"}
-                    <table id="order-return-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">退货任务列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">序号</th>
-                            <th style="text-align: center; vertical-align: middle;">退货单号</th>
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">订单平台</th>
-                            <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
-                            <th style="text-align: center; vertical-align: middle;">问题描述</th>
-                            <th style="text-align: center; vertical-align: middle;">退件状态</th>
-                            <th style="text-align: center; vertical-align: middle;">记录创建人</th>
-                            <th style="text-align: center; vertical-align: middle;">创建日期</th>
-                        </tr>
-                        </thead>
-                        {foreach name="orderReturnResult" item="orderReturnList"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.return_order_number}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.order_platform}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.return_remark}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.create_person}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderReturnList.create_time}</td>
-                        </tr>
-                        {/foreach}
-                    </table>
-                    {/notempty}
-                    <table id="order-info-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="19" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">订单信息列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">订单类型</th>
-                            <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">快递单号</th>
-                            <th style="text-align: center; vertical-align: middle;">快递名称</th>
-                            <th style="text-align: center; vertical-align: middle;">平台</th>
-                            <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
-                            <th style="text-align: center; vertical-align: middle;">支付货币</th>
-                            <th style="text-align: center; vertical-align: middle;">订单状态</th>
-                            <th style="text-align: center; vertical-align: middle;">原币种支付金额</th>
-                            <th style="text-align: center; vertical-align: middle;">美金支付金额($)</th>
-                            <th style="text-align: center; vertical-align: middle;">优惠券</th>
-                            <th style="text-align: center; vertical-align: middle;">优惠码</th>
-                            <th style="text-align: center; vertical-align: middle;">积分(参考)</th>
-                            <th style="text-align: center; vertical-align: middle;">抵扣金额(参考)</th>
-                            <th style="text-align: center; vertical-align: middle;">运费</th>
-                            <th style="text-align: center; vertical-align: middle;">快递方式</th>
-                            <th style="text-align: center; vertical-align: middle;">购买数量</th>
-                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
-
-                        </tr>
-                        </thead>
-                        {notempty name="orderInfoResult"}
-                        {foreach name="orderInfoResult" item="orderInfoList"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_type}</td>
-                            <!-- <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td> -->
-                            <input type="hidden"  value="{$orderInfoList.entity_id}"/>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="javascript:void(0)" class="track-number">{$orderInfoList.track_number}</a></td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.title}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderPlatform}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_currency_code}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.grand_total,3)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.shipping_description}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.total_qty_ordered}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
-                        </tr>
-                        {/foreach}
-                        {/notempty}
-                    </table>
-                    <table id="order-item-list" class="altrowstable1"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="20" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">订单商品信息列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">ID</th>
-                            <th style="text-align: center; vertical-align: middle;">SKU</th>
-                            <th style="text-align: center; vertical-align: middle;">name</th>
-                            <th style="text-align: center; vertical-align: middle;">Qty</th>
-                            <th style="text-align: center; vertical-align: middle;">Frame<br/>Price</th>
-                            <th style="text-align: center; vertical-align: middle;">Orig<br/>inal<br/>Price</th>
-                            <th style="text-align: center; vertical-align: middle;">Dis<br/>count</th>
-                            <th style="text-align: center; vertical-align: middle;">Coating</th>
-                            <th style="text-align: center; vertical-align: middle;">Coat<br/>iing<br/>Price</th>
-                            <th style="text-align: center; vertical-align: middle;">Index<br/>Type</th>
-                            <th style="text-align: center; vertical-align: middle;">Index<br/>Price</th>
-                            <th style="text-align: center; vertical-align: middle;">Prescription</th>
-                            <th style="text-align: center; vertical-align: middle;">OD/OS</th>
-                            <th style="text-align: center; vertical-align: middle;">SPH</th>
-                            <th style="text-align: center; vertical-align: middle;">CYL</th>
-                            <th style="text-align: center; vertical-align: middle;">AXI</th>
-                            <th style="text-align: center; vertical-align: middle;">ADD</th>
-                            <th style="text-align: center; vertical-align: middle;">PD</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism(out/in)</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism(up/down)</th>
-                        </tr>
-                        </thead>
-                        {notempty name="orderInfoResult"}
-                        {foreach name="orderInfoResult" item="orderInfoList" key="k"}
-                        <tbody class='class-body'>
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;" rowspan="{$orderInfoList.total_qty_ordered}">{$orderInfoList.increment_id}</td>
-                            {foreach name="orderInfoList.item" item="itemInfoList"}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.sku}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.name}</td>
-                            <td style="width:20px;">{:round($itemInfoList.qty_ordered)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.frame_price,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.original_price,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.discount_amount,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_price}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_price}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
-                            <td style="text-align: center; vertical-align: middle;">right<br>left</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_sph}<br>{$itemInfoList.os_sph}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_cyl}<br>{$itemInfoList.os_cyl}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_axis}<br>{$itemInfoList.os_axis}</td>
-                            {if $orderPlatformId lt 3}
-                            {if $itemInfoList.total_add}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.total_add}</td>
-                            {else/}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_add}<br>{$itemInfoList.od_add}</td>
-                            {/if}
-                            {else/}
-                            {if $itemInfoList.prescription_type eq 'Reading Glasses' && $itemInfoList.os_add>0 && $itemInfoList.od_add>0}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_add}<br>{$itemInfoList.os_add}</td>
-                            {else/}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.total_add}</td>
-                            {/if}
-                            {/if}
-                            {if $itemInfoList.pdcheck == 'on'}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd_r}<br>{$itemInfoList.pd_l}</td>
-                            {else/}
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd}</td>
-                            {/if}
-
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv}({$itemInfoList.od_bd})<br>{$itemInfoList.od_pv_r}({$itemInfoList.od_bd_r})</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_pv}({$itemInfoList.os_bd})<br>{$itemInfoList.os_pv_r}({$itemInfoList.os_bd_r})</td>
-                        </tr>
-                        {/foreach}
-                        </tbody>
-                        {/foreach}
-                        {/notempty}
-                    </table>
-                    <table id="order-pay-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">支付信息列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">原币种支付金额</th>
-                            <th style="text-align: center; vertical-align: middle;">美金支付金额</th>
-                            <th style="text-align: center; vertical-align: middle;">支付方式</th>
-                            <th style="text-align: center; vertical-align: middle;">last_trans_id</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_email</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_id</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_status</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payment_status</th>
-                        </tr>
-                        </thead>
-                        {notempty name="orderInfoResult"}
-                        {foreach name="orderInfoResult" item="orderInfoList"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.grand_total,3)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.method}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.last_trans_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payer_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payer_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payment_status}</td>
-                        </tr>
-                        {/foreach}
-                        {/notempty}
-                    </table>
-                    <table id="order-address-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>
-                        <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">vip订单信息列表</th></tr>
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">id</th>
-                            <th style="text-align: center; vertical-align: middle;">customer_email</th>
-                            <th style="text-align: center; vertical-align: middle;">order_number</th>
-                            <th style="text-align: center; vertical-align: middle;">order_amount</th>
-                            <th style="text-align: center; vertical-align: middle;">order_status</th>
-                            <th style="text-align: center; vertical-align: middle;">order_type</th>
-                            <th style="text-align: center; vertical-align: middle;">start_time</th>
-                            <th style="text-align: center; vertical-align: middle;">end_time</th>
-                            <th style="text-align: center; vertical-align: middle;">is_active_status</th>
-                            <th style="text-align: center; vertical-align: middle;">admin_name</th>
-                        </tr>
-                        </thead>
-                        {notempty name="customerInfo.order_vip"}
-                        {foreach name="customerInfo.order_vip" item="order_vip"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_number}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_amount}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_type}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.is_active_status}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$order_vip.admin_name}</td>
-                        </tr>
-                        {/foreach}
-                        {/notempty}
-                    </table>
                 </div>
-            </div>
+               <div id='div-list'>
 
+               </div>
+            </section>
+
+            
         </div>
+
     </div>
+
+
 </div>

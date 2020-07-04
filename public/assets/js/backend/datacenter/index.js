@@ -38,7 +38,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         { field: 'v_num', title: __('V站销量'), operate: false },
                         { field: 'n_sku', title: __('Nihao_SKU'), operate: false },
                         { field: 'n_num', title: __('Nihao站销量'), operate: false },
-                        { field: 'available_stock', title: __('实时库存'), operate: false },
+                        { field: 'm_sku', title: __('Meeloog_SKU'), operate: false },
+                        { field: 'm_num', title: __('Meeloog站销量'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'all_num', title: __('汇总销量'), operate: false },
                         { field: 'created_at', visible: false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
 
@@ -124,7 +126,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         { field: 'sku', title: __('SKU'), operate: false },
                         { field: 'name', title: __('商品名称'), operate: false },
                         { field: 'type_name', title: __('分类'), operate: false },
-                        { field: 'available_stock', title: __('实时库存'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'sales_num', title: __('销量'), operate: false },
                         {
                             field: 'is_up', title: __('平台上下架状态'), operate: false,

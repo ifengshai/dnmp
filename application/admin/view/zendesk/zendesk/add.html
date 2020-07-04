@@ -111,7 +111,22 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
                             <div class="col-xs-12 col-sm-8">
-                                {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                                <select id="Entry_status_select" class="form-control selectpicker macro-apply" data-live-search="true" title="选择模板">
+                                    <optgroup label="常用模板">
+                                        {foreach name="templates" item="vo" key="key"}
+                                        {if condition="$key <= 4"}
+                                        <option value="{$vo.id}">{$vo.title}</option>
+                                        {/if}
+                                        {/foreach}
+                                    </optgroup>
+                                    <optgroup label="所有模板">
+                                        {foreach name="templates" item="vo" key="key"}
+                                        {if condition="$key > 4"}
+                                        <option value="{$vo.id}">{$vo.title}</option>
+                                        {/if}
+                                        {/foreach}
+                                    </optgroup>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group layer-footer">

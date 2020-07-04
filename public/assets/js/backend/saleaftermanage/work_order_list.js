@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'recept_person', title: __('承接人'), searchList: function (column) {
                                 return Template('receptpersontpl', {});
-                            },visible: false
+                            }, visible: false
                         },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
@@ -66,8 +66,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             align: 'left',
                             searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
                         },
+                        {
+                            field: 'measure_choose_id',
+                            title: __('措施'),
+                            align: 'left',
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getMeasureContent'),
+                            visible:false
+                        },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
-
+                        { field: 'is_refund', title: __('是否有退款'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         /*{ field: 'create_user_name', title: __('create_user_name') },*/
                         {
                             field: 'create_user_name',
@@ -87,6 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 return all_user_name;
                             },
                         },
+                        { field: 'assign_user_id', title: __('直接审核人'), searchList: { 75: '王伟', 95: '白青青', 117: '韩雨薇' }, formatter: Table.api.formatter.status ,visible:false},
                         {
                             field: 'after_user_id',
                             title: __('recept_user'),
@@ -204,9 +212,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.work_status == 1) {
-                                            return false;
-                                        }
+                                        // if (row.work_status == 1) {
+                                        //     return false;
+                                        // }
                                         return true;
                                     }
                                 },
@@ -224,7 +232,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 1 && row.create_user_id == Config.userid) {//操作权限
+                                        if (row.work_status == 1) {//操作权限
                                             return true;
                                         } else {
                                             return false;
@@ -241,7 +249,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && row.after_user_id == Config.userid && row.work_status != 1) {
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && row.after_user_id == Config.userid && row.work_status == 3) {
                                             return true;
                                         } else {
                                             return false;
@@ -441,7 +449,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             })
 
             //更改单号清空
-            $('#c-platform_order').change(function(){
+            $('#c-platform_order').change(function () {
                 $('#order_pay_currency').val('');
             })
 
@@ -454,7 +462,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 } else {
-                   
+
                     $('.measure').hide();
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
@@ -466,7 +474,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var id = $(this).val();
                         //获取承接组
                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                        
+
                         var group = $('#step' + id + '-appoint_group').val();
                         var group_arr = group.split(',')
                         var appoint_users = [];
@@ -517,15 +525,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         //判断如果为处理任务时
                         if (Config.ids) {
-                            if(problem_type_id == 1 && checkID[m] == 1){
+                            if (problem_type_id == 1 && checkID[m] == 1) {
                                 $('.step1-1').hide();
                                 $('.step2-1').show();
                             }
-                            if(problem_type_id == 2 && checkID[m] == 1){
+                            if (problem_type_id == 2 && checkID[m] == 1) {
                                 $('.step2-1').hide();
                                 $('.step1-1').show();
                             }
-                            if(problem_type_id == 3 && checkID[m] == 1){
+                            if (problem_type_id == 3 && checkID[m] == 1) {
                                 $('.step2-1').hide();
                                 $('.step1-1').show();
                             }
@@ -546,7 +554,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }*/
                     var arr = array_filter(appoint_group.split(','));
-                   
+
                     var username = [];
                     var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
@@ -554,7 +562,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //循环根据承接组Key获取对应承接人id
                         appoint_users.push(Config.workorder[arr[i]]);
                     }
-                   
+
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
@@ -562,6 +570,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var users = array_filter(username);
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
+
+                    //判断如果为补价 优惠券 积分 追加自己id为承接人
+                    if ($(this).val() == 8 || $(this).val() == 9 || $(this).val() == 10) {
+                        appoint_users.push(Config.userid);
+                    }
                     $('#recept_person_id').val(appoint_users.join(','));
 
                 }
@@ -666,6 +679,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     return false;
                 }
                 var str = incrementId.substring(0, 3);
+                console.log(str);
                 //判断站点
                 if (str == '100' || str == '400' || str == '500') {
                     $("#work_platform").val(1);
@@ -674,7 +688,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 } else if (str == '300' || str == '600') {
                     $('#work_platform').val(3);
                 }
-                
+
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
                 Layer.load();
@@ -688,6 +702,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Layer.closeAll();
                     $('#order_pay_currency').val(data.base_currency_code);
                     $('#step2_pay_currency').val(data.base_currency_code);
+                    $('#grand_total').val(data.grand_total);
+                    $('#base_grand_total').val(data.base_grand_total);
+                    $('#base_to_order_rate').val(data.base_to_order_rate); 
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
@@ -752,14 +769,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(data.address[i].firstname);
                                     $('#c-lastname').val(data.address[i].lastname);
                                     var email = data.address[i].email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);
                                     $('#c-telephone').val(data.address[i].telephone);
                                     $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
-                                    $('#c-region').val(data.address[i].region_id);
+                                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                        $('#c-region').val(0);
+                                    }else{
+                                        $('#c-region').val(data.address[i].region_id);
+                                    }
+
                                     $('#c-city').val(data.address[i].city);
                                     $('#c-street').val(data.address[i].street);
                                     $('#c-postcode').val(data.address[i].postcode);
@@ -842,7 +864,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var val = $(this).val();
                 var is_new_version = $('#is_new_version').val();
                 var prescription = prescriptions[val];
-
+                console.log(prescription);
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
                 prescription_div.find('input').val('');
                 prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
@@ -875,10 +897,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
-                if (prescription.pd) {
+
+                if (prescription.hasOwnProperty("pd") && (prescription.pd != '')) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                } else {
+                }else{
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                     prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
                 }
@@ -1209,6 +1232,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
+                    //判断如果为补价 优惠券 积分 追加自己id为承接人
+                    if ($(this).val() == 8 || $(this).val() == 9 || $(this).val() == 10) {
+                        appoint_users.push(Config.userid);
+                    }
                     $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
@@ -1270,14 +1297,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
                                         var email = data.address[i].email;
-                                        if(email == null){
+                                        if (email == null) {
                                             email = $('#customer_email').val();
                                         }
                                         $('#c-email').val(email);
                                         $('#c-telephone').val(data.address[i].telephone);
                                         $('#c-country').val(data.address[i].country_id);
                                         $('#c-country').change();
-                                        $('#c-region').val(data.address[i].region_id);
+                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                            $('#c-region').val(0);
+                                        }else{
+                                            $('#c-region').val(data.address[i].region_id);
+                                        }
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
@@ -1295,7 +1326,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(address.firstname);
                                     $('#c-lastname').val(address.lastname);
                                     var email = address.email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);
@@ -1365,8 +1396,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (is_add == 1) {
                     var val = $(this).val();
                     var prescription = prescriptions_add_edit[val];
-
                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                    console.log(prescription);
                     prescription_div.find('input').val('');
                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
@@ -1395,7 +1426,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                     }
-                    if (prescription.pd) {
+
+                    if (prescription.hasOwnProperty("pd") && prescription.pd != '') {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                     } else {
@@ -1701,7 +1733,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         if (Config.measureList) {
                             var checkIDss = Config.measureList;//措施列表赋值给checkID
-                            console.log(checkIDss);
+                            //console.log(checkIDss);
                             for (var m = 0; m < checkIDss.length; m++) {
                                 $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
                                 var node = $('.step' + checkIDss[m]);
@@ -1842,7 +1874,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(real_address.firstname);
                                     $('#c-lastname').val(real_address.lastname);
                                     var email = real_address.email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);
@@ -1985,11 +2017,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             is_new_version: is_new_version
                         }
                     }, function (data, ret) {
+                        //console.log(data);
                         var prescription_div = that.parents('.prescription_type_step').next('div');
                         var lens_type;
                         for (var i = 0; i < data.length; i++) {
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
+                        //console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         if(is_new_version == 0){
                             prescription_div.find('#color_type').val('');
@@ -2052,7 +2086,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         success: function (json) {
                             var data = json.province;
-                            var province = '';
+                            var province = '<option value="0">请选择</option>';
                             for (var i = 0; i < data.length; i++) {
                                 province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
                             }

@@ -338,12 +338,28 @@ class Ajax extends Backend
     public function cxselect()
     {
         $pid = $this->request->get('pid', 0);
-        $c_id = $this->request->get('c_id');
-        $pid = $c_id ?? $pid;
-    
         $list = null;
-        if ($pid !== '') {
-            $list = \app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory::where('pid', '=', $pid)->field('id as value, name')->select();
+        if ($pid == 1) {
+            $list = config('workorder.customer_problem_type');
+            //转二维
+            $list = arrayConversion($list);
+            
+        } elseif ($pid == 2) {
+            $list = config('workorder.warehouse_problem_type');
+            //转二维
+            $list = arrayConversion($list);
+            
+        } elseif ($pid == 0) {
+            $list = [
+                [
+                    'value' => 1,
+                    'name' => '客服分类',
+                ],
+                [
+                    'value' => 2,
+                    'name' => '仓库分类',
+                ],
+            ];
         }
         
         $this->success('', null, $list);

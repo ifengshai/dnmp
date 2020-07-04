@@ -37,17 +37,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Controller.api.formatter.getcontent,
                         },
 
-                        { field: 'create_person', title: __('提出人'), operate: false },
+                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+
                         {
+                            field: 'department_group',
+                            title: __('所属部门'),
+                            custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black' },
+                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部',4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'duty_nickname', title: __('责任人'), operate: 'like'},
+
+
+                        { field: 'nickname', title: __('负责人'), operate: 'like', visible:false },
+                        /*{
                             field: 'priority',
                             title: __('Priority'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger' },
                             searchList: { 1: '低', 2: '中', 3: '高' },
                             formatter: Table.api.formatter.status
-                        },
+                        },*/
                         {
                             field: 'complexity',
                             title: __('Complexity'),
+                            operate: false,
                             custom: { 1: 'success', 2: 'blue', 3: 'danger' },
                             searchList: { 1: '简单', 2: '中等', 3: '复杂' },
                             formatter: Table.api.formatter.status
@@ -132,7 +145,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'expected_time',
                             title: __('Expected_time'),
-                            operate: 'RANGE',
+                            operate: false,
                             addclass: 'datetimerange',
 
                         },
@@ -497,7 +510,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
-                                {
+                                /*{
                                     name: 'ajax',
                                     text: __(''),
                                     title: __('删除'),
@@ -523,7 +536,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                },
+                                },*/
                             ],
                             formatter: Table.api.formatter.operate
                         }
@@ -657,7 +670,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'title', title: __('标题'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
@@ -665,19 +678,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        { field: 'create_person', title: __('提出人'), operate: false },
+                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+
                         {
+                            field: 'department_group',
+                            title: __('所属部门'),
+                            custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black' },
+                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部',4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'duty_nickname', title: __('责任人'), operate: 'like'},
+
+                        { field: 'nickname', title: __('开发负责人'), operate: 'like', visible:false },
+                        /*{
                             field: 'priority',
                             title: __('Priority'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger' },
                             searchList: { 1: '低', 2: '中', 3: '高' },
                             formatter: Table.api.formatter.status
-                        },
+                        },*/
                         {
                             field: 'complexity',
                             title: __('Complexity'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger' },
                             searchList: { 1: '简单', 2: '中等', 3: '复杂' },
+                            operate: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -736,7 +761,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'estimated_time',
                             title: __('Estimated_time'),
-                            operate: 'RANGE',
+                            operate: false,
                             addclass: 'datetimerange',
 
                         },

@@ -54,7 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
                         { field: 'custom_order_prescription_type', title: __('处方类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue',6:'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价',6:'一键代发' }, addClass: 'selectpicker', data: 'multiple', operate: 'IN',formatter: Table.api.formatter.status },
                         { field: 'created_at', title: __('创建时间'), sortable: true, operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         {
@@ -114,9 +114,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             });
 
             // 监听下拉列表改变的事件
-            $(document).on('change', 'select[name=category_id]', function () {
-                $("input[name='category_id']").val($(this).val());
+            $(document).on('change', 'select[name=pid]', function () {
+                $("input[name='p_id']").val($(this).val());
             });
+
 
             //批量打印标签    
             $('.btn-batch-printed').click(function () {

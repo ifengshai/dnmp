@@ -19,6 +19,7 @@ use fast\Trackingmore;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+
 /**
  * 退货列管理
  *
@@ -35,14 +36,9 @@ class OrderReturn extends Backend
     protected $zeelool = null;
     protected $modelItem = null;
     protected $relationSearch = true;
-    // protected $noNeedLogin = [
-    //     'zeelool_order_return',
-    //     'voogueme_order_return',
-    //     'nihao_order_return',
-    //     'zeelool_order_return_item',
-    //     'voogueme_order_return_item',
-    //     'nihao_order_return_item'
-    // ];
+    protected $noNeedRight = [
+        'machining'
+    ];
     public function _initialize()
     {
         parent::_initialize();
@@ -134,7 +130,7 @@ class OrderReturn extends Backend
                 }
                 if ($result !== false) {
                     $item = $params['item'];
-                    if($item){
+                    if ($item) {
                         foreach ($item as $arr) {
                             $data = [];
                             $data['order_return_id'] = $this->model->id;
@@ -172,8 +168,8 @@ class OrderReturn extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if(2 < $row['order_status']){
-            $this->error(__('Cannot edit in this state'),'saleaftermanage/order_return');
+        if (2 < $row['order_status']) {
+            $this->error(__('Cannot edit in this state'), 'saleaftermanage/order_return');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -285,155 +281,27 @@ class OrderReturn extends Backend
      * 新建退货单审核不通过
      */
     public function checkNoPass()
-    { }
-    /***
-     * 新建订单检索功能(原先)
-     * 
-     */
-    // public function search(Request $request)
-    // {
-    //     if ($request->isPost()) {
-    //         //获取输入的订单号
-    //         $increment_id = $request->post('increment_id');
-    //         //            dump($increment_id);
-    //         //            exit;
-    //         //获取输入的平台
-    //         $order_platform = $request->post('order_platform');
-    //         //获取客户邮箱地址
-    //         $customer_email = $request->post('customer_email');
-    //         //获取客户姓名
-    //         $customer_name  = $request->post('customer_name');
-    //         //获取客户电话
-    //         $customer_phone = $request->post('customer_phone');
-    //         //获取运单号
-    //         $track_number   = $request->post('track_number');
-    //         if ($order_platform < 1) {
-    //             return $this->error('请选择正确的订单平台');
-    //         }
-    //         if ($customer_name) {
-    //             $customer_name = explode(' ', $customer_name);
-    //         }
-    //         //求出用户的所有订单信息
-    //         $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-    //         //            dump($customer);
-    //         //            exit;
-    //         if (!$customer) {
-    //             $this->error('找不到订单信息，请重新尝试', '/admin/saleaftermanage/order_return/search?ref=addtabs');
-    //         }
-    //         //求出所有的订单号
-    //         $allIncrementOrder = $customer['increment_id'];
-    //         //求出会员的个人信息
-    //         $customerInfo = $customer['info'];
-    //         unset($customer['info']);
-    //         unset($customer['increment_id']);
-    //         $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-    //         $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-    //         $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
-    //         //求出承接部门和承接人
-    //         $deptArr = (new AuthGroup())->getAllGroup();
-    //         $repArr  = (new Admin())->getAllStaff();
-    //         //求出订单平台
-    //         $orderPlatformList = (new MagentoPlatform())->getOrderPlatformList();
-    //         //求出任务优先级
-    //         $prtyIdList     = (new SaleAfterTask())->getPrtyIdList();
-    //         //求出售后问题分类列表
-    //         $issueList      = (new SaleAfterIssue())->getAjaxIssueList();
-    //         //求出信息协同任务分类列表
-    //         $synergyTaskList = (new InfoSynergyTaskCategory())->getSynergyTaskCategoryList();
-    //         //求出关联单据类型
-    //         $relateOrderType = (new InfoSynergyTask())->orderType();
-    //         if (!empty($infoSynergyTaskResult)) {
-    //             foreach ($infoSynergyTaskResult as $k => $v) {
-    //                 if ($v['dept_id']) {
-    //                     $deptNumArr = explode('+', $v['dept_id']);
-    //                     $infoSynergyTaskResult[$k]['dept_id'] = '';
-    //                     foreach ($deptNumArr as $values) {
-    //                         $infoSynergyTaskResult[$k]['dept_id'] .= $deptArr[$values] . ' ';
-    //                     }
-    //                 }
-    //                 if ($v['rep_id']) {
-    //                     $repNumArr = explode('+', $v['rep_id']);
-    //                     $infoSynergyTaskResult[$k]['rep_id'] = '';
-    //                     foreach ($repNumArr as $vals) {
-    //                         $infoSynergyTaskResult[$k]['rep_id'] .= $repArr[$vals] . ' ';
-    //                     }
-    //                 }
-    //                 if ($v['order_platform']) {
-    //                     $infoSynergyTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
-    //                 }
-    //                 if ($v['prty_id']) {
-    //                     $infoSynergyTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
-    //                 }
-    //                 if ($v['synergy_task_id']) {
-    //                     $infoSynergyTaskResult[$k]['synergy_task_id'] = $synergyTaskList[$v['synergy_task_id']];
-    //                 }
-    //                 if ($v['synergy_order_id']) {
-    //                     $infoSynergyTaskResult[$k]['synergy_order_id'] = $relateOrderType[$v['synergy_order_id']];
-    //                 }
-    //             }
-    //         }
-    //         if (!empty($saleAfterTaskResult)) {
-    //             foreach ($saleAfterTaskResult as $k => $v) {
-    //                 if ($v['dept_id']) {
-    //                     $saleAfterTaskResult[$k]['dept_id'] = $deptArr[$v['dept_id']];
-    //                 }
-    //                 if ($v['rep_id']) {
-    //                     $saleAfterTaskResult[$k]['rep_id'] = $repArr[$v['rep_id']];
-    //                 }
-    //                 if ($v['order_platform']) {
-    //                     $saleAfterTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
-    //                 }
-    //                 if ($v['task_status'] == 1) {
-    //                     $saleAfterTaskResult[$k]['task_status'] = '处理中';
-    //                 } elseif ($v['task_status'] == 2) {
-    //                     $saleAfterTaskResult[$k]['task_status'] = '处理完成';
-    //                 } else {
-    //                     $saleAfterTaskResult[$k]['task_status'] = '未处理';
-    //                 }
-    //                 if ($v['prty_id']) {
-    //                     $saleAfterTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
-    //                 }
-    //                 if ($v['problem_id']) {
-    //                     $saleAfterTaskResult[$k]['problem_id'] = $issueList[$v['problem_id']];
-    //                 }
-    //             }
-    //         }
-    //         if (!empty($orderReturnResult)) {
-    //             foreach ($orderReturnResult as $k1 => $v1) {
-    //                 if ($v1['order_platform']) {
-    //                     $orderReturnResult[$k1]['order_platform'] = $orderPlatformList[$v1['order_platform']];
-    //                 }
-    //             }
-    //         }
-    //         $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
-    //         $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
-    //         $this->view->assign('orderReturnResult', $orderReturnResult);
-    //         $this->view->assign('orderInfoResult', $customer);
-    //         $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
-    //         $this->view->assign('customerInfo', $customerInfo);
-    //     }
-    //     $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
-    //     return $this->view->fetch();
-    // }
+    {
+    }
+
     /***
      * 订单检索功能(修改之后)
      */
     public function search(Request $request)
     {
-        $order_platform = intval(input('type',0));
-        $customer_email = input('email','');
-        if ($request->isPost() || ( $order_platform && $customer_email)) {
+        $order_platform = intval(input('order_platform', 1));
+        $customer_email = input('email', '');
+        if ($request->isPost()) {
             //获取输入的订单号
             $increment_id = trim($request->post('increment_id'));
-            //            dump($increment_id);
-            //            exit;
+           
             //获取输入的平台
-            if(!$order_platform){
+            if (!$order_platform) {
                 $order_platform = trim($request->post('order_platform'));
             }
 
             //获取客户邮箱地址
-            if(!$customer_email){
+            if (!$customer_email) {
                 $customer_email = trim($request->post('customer_email'));
             }
             //获取客户姓名
@@ -443,17 +311,17 @@ class OrderReturn extends Backend
             //获取运单号
             $track_number   = trim($request->post('track_number'));
             if ($order_platform < 1) {
-                return $this->error('请选择正确的订单平台');
+                
+                return json(['code' => 0,'msg' => '请选择正确的订单平台']);
             }
             if ($customer_name) {
                 $customer_name = explode(' ', $customer_name);
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-            // dump($customer);
-            // exit;
             if (!$customer) {
-                $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
+                return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
+                // $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
@@ -461,22 +329,20 @@ class OrderReturn extends Backend
             $customerInfo = $customer['info'];
             unset($customer['info']);
             unset($customer['increment_id']);
-			Db::name('info_synergy_task')->query("set time_zone='+8:00'");
-			Db::name('sale_after_task')->query("set time_zone='+8:00'");
+            Db::name('info_synergy_task')->query("set time_zone='+8:00'");
+            Db::name('sale_after_task')->query("set time_zone='+8:00'");
             Db::name('order_return')->query("set time_zone='+8:00'");
-             //如果存在vip订单的话查询这个订单是否在协同任务当中
-            if($customerInfo['arr_order_vip']){
+            //如果存在vip订单的话查询这个订单是否在协同任务当中
+            if ($customerInfo['arr_order_vip']) {
                 $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->whereOr('synergy_order_number', 'in', $customerInfo['arr_order_vip'])->order('id desc')->select();
-            }else{
+            } else {
                 $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             }
-            
+
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-            // dump($saleAfterTaskResult);
-            // exit;
+
             $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
-            //工单列表
-            $workOrderListResult = \app\admin\model\saleaftermanage\WorkOrderList::workOrderListResult($allIncrementOrder);
+
             //求出承接部门和承接人
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
@@ -518,19 +384,19 @@ class OrderReturn extends Backend
                     if ($v['synergy_order_id']) {
                         $infoSynergyTaskResult[$k]['synergy_order_id'] = $relateOrderType[$v['synergy_order_id']];
                     }
-                    switch($v['synergy_status']){
+                    switch ($v['synergy_status']) {
                         case 1:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#f39c12">处理中</span>';
-                        break;
+                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#f39c12">处理中</span>';
+                            break;
                         case 2:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#18bc9c">处理完成</span>';
-                        break;
+                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#18bc9c">处理完成</span>';
+                            break;
                         case 3:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#e74c3c">取消</span>';
-                        break;
+                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#e74c3c">取消</span>';
+                            break;
                         default:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#0073b7">新建</span>';
-                        break;                                
+                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#0073b7">新建</span>';
+                            break;
                     }
                 }
             }
@@ -549,9 +415,9 @@ class OrderReturn extends Backend
                         $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#f39c12">处理中</span>';
                     } elseif ($v['task_status'] == 2) {
                         $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#18bc9c">处理完成</span>';
-                    } elseif($v['task_status'] == 3){
+                    } elseif ($v['task_status'] == 3) {
                         $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#e74c3c">取消</span>';
-                    }else {
+                    } else {
                         $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#0073b7">新建</span>';
                     }
                     if ($v['prty_id']) {
@@ -560,37 +426,37 @@ class OrderReturn extends Backend
                     if ($v['problem_id']) {
                         $saleAfterTaskResult[$k]['problem_id'] = $issueList[$v['problem_id']];
                     }
-                    switch($v['handle_scheme']){
+                    switch ($v['handle_scheme']) {
                         case 1:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '部分退款';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '部分退款';
+                            break;
                         case 2:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '退全款';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '退全款';
+                            break;
                         case 3:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '补发';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '补发';
+                            break;
                         case 4:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '加钱补发';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '加钱补发';
+                            break;
                         case 5:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '退款+补发';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '退款+补发';
+                            break;
                         case 6:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '折扣买新';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '折扣买新';
+                            break;
                         case 7:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '发放积分';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '发放积分';
+                            break;
                         case 8:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '安抚';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '安抚';
+                            break;
                         case 9:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '长时间未回复';
-                        break;
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '长时间未回复';
+                            break;
                         default:
-                        $saleAfterTaskResult[$k]['handle_scheme'] = '请选择';
-                        break;                            
+                            $saleAfterTaskResult[$k]['handle_scheme'] = '请选择';
+                            break;
                     }
                 }
             }
@@ -602,53 +468,117 @@ class OrderReturn extends Backend
                 }
             }
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
-            $this->view->assign('workOrderListResult', $workOrderListResult);
+            // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
-            $this->view->assign('orderPlatformId',$order_platform);
+
+        
+            $this->view->assign('orderPlatformId', $order_platform);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);
             //如果查询订单
-            if($increment_id){
-                $this->view->assign('increment_id',$increment_id);
+            if ($increment_id) {
+                $this->view->assign('increment_id', $increment_id);
             }
             //如果查询邮箱
-            if($customer_email){
-                $this->view->assign('customer_email',$customer_email);    
+            if ($customer_email) {
+                $this->view->assign('customer_email', $customer_email);
             }
             //如果查询客户姓名
-            if($customer_name){
-                $this->view->assign('customer_name',$input_name);
+            if ($customer_name) {
+                $this->view->assign('customer_name', $input_name);
             }
             //如果查询客户电话
-            if($customer_phone){
-                $this->view->assign('customer_phone',$customer_phone);
+            if ($customer_phone) {
+                $this->view->assign('customer_phone', $customer_phone);
             }
             //如果查询运单号
-            if($track_number){
-                $this->view->assign('track_number',$track_number);
+            if ($track_number) {
+                $this->view->assign('track_number', $track_number);
             }
             //上传订单平台
-                $this->view->assign('order_platform',$order_platform);
-
+            $this->view->assign('order_platform', $order_platform);
+            $this->view->engine->layout(false);
+            $html = $this->view->fetch('test');
+            return json(['code' => 1,'data' => $html]);
         }
-        $serviceArr = config('search.platform');
-        $sessionId  = session('admin.id');
-        foreach($serviceArr as $key => $kv){
-             if(in_array($sessionId,$kv)){
-                    $default= $key; 
-             }   
-        }
-        //默认的客服分组值
-        if($default){
-            $this->view->assign("default",$default);
-        }
-        $this->view->assign("order_platform",$order_platform);
-        $this->view->assign("customer_email",$customer_email);
+        // $serviceArr = config('search.platform');
+        // $sessionId  = session('admin.id');
+        // foreach ($serviceArr as $key => $kv) {
+        //     if (in_array($sessionId, $kv)) {
+        //         $default = $key;
+        //     }
+        // }
+        // //默认的客服分组值
+        // if ($default) {
+        //     $this->view->assign("default", $default);
+        // }
+        $this->view->assign("order_platform", $order_platform);
+        $this->view->assign("customer_email", $customer_email);
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
+
+    /***
+     * 配货记录
+     * @param Request $request
+     */
+    public function machining(Request $request)
+    {
+        $order_number = $request->get('order_number');
+        $order_platform = $request->get('order_platform');
+        if ($order_platform == 1) {
+            $model = new \app\admin\model\order\order\Zeelool();
+        } elseif ($order_platform == 2) {
+            $model = new \app\admin\model\order\order\Voogueme();
+        } elseif ($order_platform == 3) {
+            $model = new \app\admin\model\order\order\Nihao();
+        }
+        $field = 'custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,
+        custom_is_match_frame_new,custom_match_frame_person_new,custom_match_frame_created_at_new,
+        custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,
+        custom_is_send_factory_new,custom_match_factory_person_new,custom_match_factory_created_at_new,
+        custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new';
+        $row = $model->where(['increment_id' => $order_number])->field($field)->find();
+        $list = [
+            [
+                'id' => 1,
+                'content' => '打标签',
+                'createtime' => $row['custom_print_label_created_at_new'],
+                'person' => $row['custom_print_label_person_new']
+            ],
+            [
+                'id' => 2,
+                'content' => '配镜架',
+                'createtime' => $row['custom_match_frame_created_at_new'],
+                'person' => $row['custom_match_frame_person_new']
+            ],
+            [
+                'id' => 3,
+                'content' => '配镜片',
+                'createtime' => $row['custom_match_lens_created_at_new'],
+                'person' => $row['custom_match_lens_person_new']
+            ],
+            [
+                'id' => 4,
+                'content' => '加工',
+                'createtime' => $row['custom_match_factory_created_at_new'],
+                'person' => $row['custom_match_factory_person_new']
+            ],
+            [
+                'id' => 5,
+                'content' => '提货',
+                'createtime' => $row['custom_match_delivery_created_at_new'],
+                'person' => $row['custom_match_delivery_person_new']
+            ],
+        ];
+        $this->assign('list', $list);
+        $this->assign('row', $row);
+        return $this->view->fetch();
+    }
+
+
     /***
      * 异步查询模糊订单
      * @param Request $request
@@ -837,7 +767,7 @@ class OrderReturn extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,order_status')->select();
             foreach ($row as $v) {
-                if ( 1 != $v['order_status']) {
+                if (1 != $v['order_status']) {
                     $this->error('只有新建状态才能操作！！');
                 }
             }
@@ -859,7 +789,7 @@ class OrderReturn extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,order_status')->select();
             foreach ($row as $v) {
-                if ( 1 != $v['order_status']) {
+                if (1 != $v['order_status']) {
                     $this->error('只有新建状态才能操作！！');
                 }
             }
@@ -874,7 +804,7 @@ class OrderReturn extends Backend
             $this->error('404 Not found');
         }
     }
-        /***
+    /***
      * 多个一起审核通过
      */
     public function morePassAudit($ids = null)
@@ -883,7 +813,7 @@ class OrderReturn extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,order_status')->select();
             foreach ($row as $v) {
-                if ( 2 != $v['order_status']) {
+                if (2 != $v['order_status']) {
                     $this->error('只有待审核状态才能操作！！');
                 }
             }
@@ -907,7 +837,7 @@ class OrderReturn extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,order_status')->select();
             foreach ($row as $v) {
-                if ( 2 != $v['order_status']) {
+                if (2 != $v['order_status']) {
                     $this->error('只有待审核状态才能操作！！');
                 }
             }
@@ -925,52 +855,51 @@ class OrderReturn extends Backend
     /***
      * 获取订单物流信息
      */
-    public function get_logistics_info($track_number=null,$entity_id=null,$order_platform=null)
+    public function get_logistics_info($track_number = null, $entity_id = null, $order_platform = null)
     {
-        if(!empty($track_number) && !empty($entity_id) && !empty($order_platform)){
+        if (!empty($track_number) && !empty($entity_id) && !empty($order_platform)) {
             $this->zeelool = new \app\admin\model\order\order\Zeelool;
             $express = $this->zeelool->getExpressData($order_platform, $entity_id);
-            if($express){
-                 //缓存一个小时
+            if ($express) {
+                //缓存一个小时
                 // $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
-                $express_data = Cache::get('orderReturn_get_logistics_info_'.$express['track_number']);
+                $express_data = Cache::get('orderReturn_get_logistics_info_' . $express['track_number']);
                 if (!$express_data) {
                     try {
-                    //查询物流信息
+                        //查询物流信息
                         //$title = str_replace(' ', '-', $express['title']);
-                        switch($express['title']){
+                        switch ($express['title']) {
                             case 'DHL (Deprecated)':
-                            $title = 'dhl';
-                            break;
+                                $title = 'dhl';
+                                break;
                             case 'China Post':
-                            $title = 'china-ems';
-                            break;
+                                $title = 'china-ems';
+                                break;
                             case 'china-ems':
-                            $title = 'china-ems';
-                            break;
+                                $title = 'china-ems';
+                                break;
                             case 'DHL':
-                            $title = 'dhl';
-                            break;
+                                $title = 'dhl';
+                                break;
                             case 'USPS':
-                            $title = 'usps';
-                            break;              
+                                $title = 'usps';
+                                break;
                         }
                         $track = new Trackingmore();
                         $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
                         $express_data = $track['data']['items'][0];
                         //session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
-                        Cache::get('orderReturn_get_logistics_info_'.$express['track_number'],$express_data,3600);
-                        } catch (\Exception $e) {
+                        Cache::get('orderReturn_get_logistics_info_' . $express['track_number'], $express_data, 3600);
+                    } catch (\Exception $e) {
                         $this->error($e->getMessage());
-                     }
+                    }
                 }
-            $this->view->assign("express_data", $express_data);
+                $this->view->assign("express_data", $express_data);
             }
             return $this->view->fetch();
-        }else{
+        } else {
             $this->error('参数错误,请重新尝试');
         }
-
     }
     /***
      * 导入退件数据 zeelool
@@ -979,35 +908,35 @@ class OrderReturn extends Backend
     {
         $result = Db::table('zeelool_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
         ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
-                $arr[$k]['order_id']        = $v['id'];
-                $arr[$k]['increment_id']    = $v['increment_id'];
-                $arr[$k]['customer_email']  = $v['customer_email'];
-                $arr[$k]['customer_name']   = $v['customer_name'];
-                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
-                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
-                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
-                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
-                $arr[$k]['create_person']    = $v['created_operator'];
-                $arr[$k]['create_time']    = $v['created_at'];
-                $arr[$k]['order_platform'] = 1;
-                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
-                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
-            if(0 == $v['is_visable']){
+        foreach ($result as $k => $v) {
+            $arr[$k]['order_id']        = $v['id'];
+            $arr[$k]['increment_id']    = $v['increment_id'];
+            $arr[$k]['customer_email']  = $v['customer_email'];
+            $arr[$k]['customer_name']   = $v['customer_name'];
+            $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+            $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+            $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+            $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+            $arr[$k]['create_person']    = $v['created_operator'];
+            $arr[$k]['create_time']    = $v['created_at'];
+            $arr[$k]['order_platform'] = 1;
+            $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+            $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
+            if (0 == $v['is_visable']) {
                 $arr[$k]['is_del'] = 2;
-            }else{
+            } else {
                 $arr[$k]['is_del'] = 1;
             }
-            if('new' == $v['status']){
+            if ('new' == $v['status']) {
                 $arr[$k]['order_status'] = 1;
-            }elseif('check' == $v['status']){
+            } elseif ('check' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
-            }elseif('stock' == $v['status']){
+            } elseif ('stock' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
                 $arr[$k]['in_stock_status'] = 1;
@@ -1018,12 +947,12 @@ class OrderReturn extends Backend
     //导入退件商品数据 zeelool
     public function zeelool_order_return_item()
     {
-        $result = Db::table('zeelool_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>1])->field('m.*,o.id as oid')->select();
-        if(!$result){
+        $result = Db::table('zeelool_order_return_item')->alias('m')->join('fa_order_return o', 'o.order_id=m.order_return_id')->where(['o.order_platform' => 1])->field('m.*,o.id as oid')->select();
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
+        foreach ($result as $k => $v) {
             //echo $v['return_sku'].'<br/>';
             $arr[$k]['order_return_id'] = $v['oid'];
             $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';
@@ -1041,51 +970,51 @@ class OrderReturn extends Backend
     {
         $result = Db::table('voogueme_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
         ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
-                $arr[$k]['order_id']        = $v['id'];
-                $arr[$k]['increment_id']    = $v['increment_id'];
-                $arr[$k]['customer_email']  = $v['customer_email'];
-                $arr[$k]['customer_name']   = $v['customer_name'];
-                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
-                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
-                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
-                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
-                $arr[$k]['create_person']    = $v['created_operator'];
-                $arr[$k]['create_time']    = $v['created_at'];
-                $arr[$k]['order_platform'] = 2;
-                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
-                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
-            if(0 == $v['is_visable']){
+        foreach ($result as $k => $v) {
+            $arr[$k]['order_id']        = $v['id'];
+            $arr[$k]['increment_id']    = $v['increment_id'];
+            $arr[$k]['customer_email']  = $v['customer_email'];
+            $arr[$k]['customer_name']   = $v['customer_name'];
+            $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+            $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+            $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+            $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+            $arr[$k]['create_person']    = $v['created_operator'];
+            $arr[$k]['create_time']    = $v['created_at'];
+            $arr[$k]['order_platform'] = 2;
+            $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+            $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
+            if (0 == $v['is_visable']) {
                 $arr[$k]['is_del'] = 2;
-            }else{
+            } else {
                 $arr[$k]['is_del'] = 1;
             }
-            if('new' == $v['status']){
+            if ('new' == $v['status']) {
                 $arr[$k]['order_status'] = 1;
-            }elseif('check' == $v['status']){
+            } elseif ('check' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
-            }elseif('stock' == $v['status']){
+            } elseif ('stock' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
                 $arr[$k]['in_stock_status'] = 1;
             }
         }
-        $this->model->allowField(true)->saveAll($arr);       
+        $this->model->allowField(true)->saveAll($arr);
     }
     //导入退件商品数据 voogueme
     public function voogueme_order_return_item()
     {
-        $result = Db::table('voogueme_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>2])->field('m.*,o.id as oid')->select();
-        if(!$result){
+        $result = Db::table('voogueme_order_return_item')->alias('m')->join('fa_order_return o', 'o.order_id=m.order_return_id')->where(['o.order_platform' => 2])->field('m.*,o.id as oid')->select();
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
+        foreach ($result as $k => $v) {
             //echo $v['return_sku'].'<br/>';
             $arr[$k]['order_return_id'] = $v['oid'];
             $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';
@@ -1103,51 +1032,51 @@ class OrderReturn extends Backend
     {
         $result = Db::table('nihao_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
         ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
-                $arr[$k]['order_id']        = $v['id'];
-                $arr[$k]['increment_id']    = $v['increment_id'];
-                $arr[$k]['customer_email']  = $v['customer_email'];
-                $arr[$k]['customer_name']   = $v['customer_name'];
-                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
-                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
-                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
-                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
-                $arr[$k]['create_person']    = $v['created_operator'];
-                $arr[$k]['create_time']    = $v['created_at'];
-                $arr[$k]['order_platform'] = 3;
-                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
-                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
-            if(0 == $v['is_visable']){
+        foreach ($result as $k => $v) {
+            $arr[$k]['order_id']        = $v['id'];
+            $arr[$k]['increment_id']    = $v['increment_id'];
+            $arr[$k]['customer_email']  = $v['customer_email'];
+            $arr[$k]['customer_name']   = $v['customer_name'];
+            $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+            $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+            $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+            $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+            $arr[$k]['create_person']    = $v['created_operator'];
+            $arr[$k]['create_time']    = $v['created_at'];
+            $arr[$k]['order_platform'] = 3;
+            $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+            $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
+            if (0 == $v['is_visable']) {
                 $arr[$k]['is_del'] = 2;
-            }else{
+            } else {
                 $arr[$k]['is_del'] = 1;
             }
-            if('new' == $v['status']){
+            if ('new' == $v['status']) {
                 $arr[$k]['order_status'] = 1;
-            }elseif('check' == $v['status']){
+            } elseif ('check' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
-            }elseif('stock' == $v['status']){
+            } elseif ('stock' == $v['status']) {
                 $arr[$k]['order_status'] = 3;
                 $arr[$k]['quality_status'] = 1;
                 $arr[$k]['in_stock_status'] = 1;
             }
         }
-        $this->model->allowField(true)->saveAll($arr);       
+        $this->model->allowField(true)->saveAll($arr);
     }
     //导入退件商品数据 nihao
     public function nihao_order_return_item()
     {
-        $result = Db::table('nihao_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>3])->field('m.*,o.id as oid')->select();
-        if(!$result){
+        $result = Db::table('nihao_order_return_item')->alias('m')->join('fa_order_return o', 'o.order_id=m.order_return_id')->where(['o.order_platform' => 3])->field('m.*,o.id as oid')->select();
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach($result as $k =>$v){
+        foreach ($result as $k => $v) {
             //echo $v['return_sku'].'<br/>';
             $arr[$k]['order_return_id'] = $v['oid'];
             $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';

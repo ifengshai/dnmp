@@ -354,6 +354,7 @@ class ZendeskOne extends Controller
                                                 'status' => $reply_detail_data['status'],
                                                 'tags' => join(',',$params['tags'])
                                             ]);
+
                                         }
                                     }
                                 }

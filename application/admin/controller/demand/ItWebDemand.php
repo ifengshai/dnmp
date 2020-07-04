@@ -79,6 +79,19 @@ class ItWebDemand extends Backend
             if ($filter['Allgroup_sel'] == 4) {
                 $smap['test_group'] = 1;
             }
+
+            if ($filter['entry_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                if (!empty($id)){
+                    $smap['entry_user_id'] = $id;
+                }else{
+                    $smap['entry_user_id'] =  trim($filter['entry_user_name']);
+                }
+                unset($filter['entry_user_name']);
+                unset($smap['nickname']);
+            }
             $meWhere = '';
             //我的
             if(isset($filter['me_task'])){
@@ -107,7 +120,32 @@ class ItWebDemand extends Backend
                     $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
                 unset($filter['me_task']);
+            } elseif(isset($filter['none_complete'])){//未完成
+                $meWhere="status !=7";
+                unset($filter['none_complete']);
             }
+
+            $user_map='';
+            if ($filter['all_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $admin_user['nickname'] = ['like', '%' . trim($filter['all_user_name']) . '%'];
+                $id = $admin->where($admin_user)->value('id');
+                if (!empty($id)){
+                    $user_map = "FIND_IN_SET({$id},web_designer_user_id) or FIND_IN_SET({$id},phper_user_id) or FIND_IN_SET({$id},app_user_id) ";
+                }else{
+                    $user_map="web_designer_user_id =  '".trim($filter['all_user_name'])."'";
+                }
+                unset($filter['all_user_name']);
+                unset($admin_user['nickname']);
+            }
+
+            //测试负责人筛选
+            $testuser = array();
+            if ($filter['test_user_id_arr']) {
+                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
+                unset($filter['test_user_id_arr']);
+            }
+            
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -117,15 +155,18 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($user_map)
+                ->where($testuser)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($user_map)
+                ->where($testuser)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -134,6 +175,7 @@ class ItWebDemand extends Backend
             $list = collection($list)->toArray();
             //检查有没有权限
             $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
             $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
             $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
@@ -229,6 +271,7 @@ class ItWebDemand extends Backend
                 //$this->user_id = $this->auth->id;
                 //权限赋值
                 $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_supper_edit'] = $permissions['demand_supper_edit'];
                 $list[$k]['demand_del'] = $permissions['demand_del'];
                 $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
                 $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
@@ -312,7 +355,17 @@ class ItWebDemand extends Backend
                     $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
                 unset($filter['me_task']);
+            } elseif(isset($filter['none_complete'])){//未完成
+                $meWhere="status !=7";
+                unset($filter['none_complete']);
             }
+            //测试负责人筛选
+            $testuser = array();
+            if ($filter['test_user_id_arr']) {
+                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
+                unset($filter['test_user_id_arr']);
+            }
+
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -322,6 +375,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($testuser)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -331,6 +385,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($smap)
                 ->where($meWhere)
+                ->where($testuser)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -766,6 +821,19 @@ class ItWebDemand extends Backend
     }
 
     /**
+     * 超级编辑权限
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/19 16:26:07 
+     * @param [type] $ids
+     * @return void
+     */
+    public function supper_edit($ids = null)
+    {
+
+    }
+    /**
      * 逻辑删除
      * */
     public function del($ids = "")
@@ -1002,6 +1070,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 1;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1013,6 +1082,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 2;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1055,7 +1125,14 @@ class ItWebDemand extends Backend
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
-                            Ding::dingHook(__FUNCTION__, $row);
+                            //前端点击完成 后端点击完成 其他点击完成
+                            if ($code == 1){
+                                Ding::dingHook('web_group_finish', $row);
+                            }elseif ($code == 2){
+                                Ding::dingHook('php_group_finish', $row);
+                            }else{
+                                Ding::dingHook(__FUNCTION__, $row);
+                            }
                             $this->success('成功');
                         } else {
                             $this->error('失败');
