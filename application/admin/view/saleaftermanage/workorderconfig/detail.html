@@ -1,3 +1,52 @@
+<style>
+    #add-form{
+        margin-top: 20px;
+    }
+    .information p{
+        margin-bottom: 4px;
+    }
+    .list-inner .text-muted{
+        /*margin-right: 15px;*/
+    }
+    .list-inner p{
+        width: 130px;
+        margin-top: 10px;
+    }
+    .list-inner{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 2px dashed #ccc;
+    }
+    .text-muted-box{
+        display: flex;
+        align-items: center;
+    }
+    .text-muted-box p {
+        display: flex;
+        flex-direction: column;
+    }
+    .list-inner > p{
+        width: 130px;
+    }
+    .text-muted-box > .text-muted{
+        width: 80px;
+    }
+    .text-muted{
+        display: inline-block;
+        width: 100px;
+    }
+    .text-muted input{
+        cursor: pointer;
+    }
+    .text-muted label{
+        cursor: pointer;
+    }
+    .btn-group{
+        width: 50%;
+    }
+</style>
 <form id="edit-form" class="form-horizontal form-ajax" role="form" method="POST" action="">
     <input type="hidden" name="row[id]" value="{$row['id']}"/>
     <input type="hidden" name="row[problem_id]" value="{$row['id']}"/>
@@ -30,24 +79,34 @@
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-12 col-sm-8 nav-list">
             {foreach name="step" item="vo" key='k'}
-            <div class="col-xs-12 col-sm-8">
-                <span class="text-muted"><input type="checkbox" {if $vo.is_selected==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_on]" id=name{$vo.id}/> {$vo.step_name}</span>
-                <span class="text-muted"><input type="checkbox" {if $vo.is_check==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_checked]" id=step{$vo.id}/> 是否需要审核</span>
-                <span class="text-muted"><input type="checkbox" {if $vo.is_auto_complete==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_auto_complete]" id=auto{$vo.id}/> 是否自动完成</span>
-                <p>{$vo.step_name}--承接组：</p>
-            </div>
-            <div class="col-xs-12 col-sm-8">
+            <div class="col-xs-12 col-sm-8 list-inner">
+                <div class="text-muted-box">
+                    <span class="text-muted">
+                        <input type="checkbox" {if $vo.is_selected==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_on]" id="name{$vo.id}" />
+                        <label for="name{$vo.id}">{$vo.step_name}</label>
+                    </span>
+                    <p>
+                        <span class="text-muted">
+                        <input type="checkbox" {if $vo.is_check==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_checked]" id="step{$vo.id}" />
+                            <label for="step{$vo.id}">是否需要审核</label>
+                        </span>
+                        <span class="text-muted">
+                        <input type="checkbox" {if $vo.is_auto_complete==1} checked="" {/if} name="row[choose_id][{$vo.id}][is_auto_complete]" id="auto{$vo.id}" />
+                        <label for="auto{$vo.id}">是否自动完成</label>
+                    </span>
+                    </p>
+                </div>
+                <p>承接组：</p>
                 <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
                     {foreach name="groupdata" item="vv" key='kk'}
                     <option value="{$vv.id}" {eq name="$vv.id" value="$vo.extend_group_id" }selected{/eq}>{$vv.name}</option>
                     {/foreach}
-<!--                    {foreach name="extend_team" item="vv" key='kk'}-->
-<!--                    <option value="{$vv.id}" {eq name="$vv.id" value="$vo.extend_group_id" }selected{/eq}>{$vv.name}</option>-->
-<!--                    {/foreach}-->
+                    <!--                    {foreach name="extend_team" item="vv" key='kk'}-->
+                    <!--                    <option value="{$vv.id}" {eq name="$vv.id" value="$vo.extend_group_id" }selected{/eq}>{$vv.name}</option>-->
+                    <!--                    {/foreach}-->
                 </select>
-<!--                {:build_select("row[choose_id][extend]", $extend_team, $vo.extend_group_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
             </div>
             {/foreach}
             </br>
