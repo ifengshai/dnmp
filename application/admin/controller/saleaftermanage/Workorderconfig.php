@@ -15,7 +15,7 @@ use app\admin\model\saleaftermanage\WorkOrderCheckRule;
 use app\admin\model\saleaftermanage\WorkOrderDocumentary;
 use app\admin\model\saleaftermanage\WorkOrderProblemStep;
 use app\admin\model\saleaftermanage\WorkOrderStepType;
-use app\admin\model\platformManage\MagentoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 
 use think\Cache;
 
