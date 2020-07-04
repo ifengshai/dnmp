@@ -1871,6 +1871,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         detail: function () {
             Controller.api.bindevent();
+            $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                var id = $(this).val();
+                if(id == 15){
+                    $(".step2").show();
+                }
+            })
+
         },
         //处理任务
         process: function () {
