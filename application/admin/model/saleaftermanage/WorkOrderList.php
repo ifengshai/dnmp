@@ -990,7 +990,7 @@ class WorkOrderList extends Model
      * @author lsw
      * @since 2020/04/21 10:13:28
      */
-    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note)
+    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete)
     {
         $work = self::find($work_id);
 
@@ -1044,6 +1044,14 @@ class WorkOrderList extends Model
         WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
         if ($resultInfo  && (1 == $data['recept_status'])) {
             $this->deductionStock($work_id, $measure_id);
+        }
+        //不是自动处理完成
+        if($is_auto_complete != 1){
+            if ($measure_id == 9) {
+                $this->presentCoupon($work->id);
+            } elseif ($measure_id == 10) {
+                $this->presentIntegral($work->id);
+            }
         }
         return true;
     }
