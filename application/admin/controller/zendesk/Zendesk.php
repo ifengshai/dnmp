@@ -997,7 +997,7 @@ DOC;
         $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
-        $nowTicketsIds = '142471';
+
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
