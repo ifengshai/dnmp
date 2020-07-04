@@ -163,7 +163,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 0 || row.purchase_type == 2) {
+                                        var arr = [0, 1, 2, 5];
+                                        if (arr.includes(row.purchase_status) || row.purchase_type == 2) {
                                             return true;
                                         } else {
                                             return false;
@@ -1313,19 +1314,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         if (row.purchase_virtual_total) {
                                             purchase_virtual_total = row.purchase_virtual_total;
                                         }
-                                        
+
                                         //退款金额
                                         var refund_amount = 0;
                                         if (row.refund_amount) {
-                                            refund_amount =  row.refund_amount;
+                                            refund_amount = row.refund_amount;
                                         }
 
-                                         //退款金额
-                                         var purchase_settle_money = 0;
-                                         if (row.purchase_settle_money) {
-                                            purchase_settle_money =  row.purchase_settle_money;
-                                         }
-                                   
+                                        //退款金额
+                                        var purchase_settle_money = 0;
+                                        if (row.purchase_settle_money) {
+                                            purchase_settle_money = row.purchase_settle_money;
+                                        }
+
                                         return "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total=" + purchase_virtual_total + "&refund_amount=" + refund_amount + "&purchase_settle_money=" + purchase_settle_money + "&ids=" + row.id;
                                     },
                                     extend: 'data-area = \'["100%","100%"]\'',

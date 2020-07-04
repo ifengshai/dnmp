@@ -27,7 +27,7 @@ class Check extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['uploads'];
+    protected $noNeedRight = ['uploads','getItemData'];
 
     protected $relationSearch = true;
 
@@ -455,6 +455,7 @@ class Check extends Backend
             //查询质检信息
             $check_map['Check.purchase_id'] = $id;
             $check_map['type'] = 1;
+            $check_map['status'] = 2;
             $check = new \app\admin\model\warehouse\Check;
             $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
                 ->where($check_map)

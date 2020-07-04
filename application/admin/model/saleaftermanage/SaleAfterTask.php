@@ -590,7 +590,7 @@ class SaleAfterTask extends Model
             //如果输入的是订单号
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id', $increment_id)->value('customer_email');
             //如果输入的是vip订单号
-            if (!$customer_email) {
+            if (!$customer_email && $order_platform != 3) {
                 $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number', $increment_id)->value('customer_email');
             }
         }
