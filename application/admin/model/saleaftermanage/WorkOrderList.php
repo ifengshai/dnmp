@@ -485,7 +485,7 @@ class WorkOrderList extends Model
         $orderChangeList = [];
         //判断是否选中更改镜框问题类型
         if ($params['change_frame']) {
-            if (($params['problem_type_id'] == 1 && $params['work_type'] == 1 && $measure_choose_id == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2 && $measure_choose_id == 1) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2 && $measure_choose_id == 1)) {
+            if (( $params['work_type'] == 1 && $measure_choose_id == 1) || ($params['work_type'] == 2 && $measure_choose_id == 1)) {
                 $original_sku = $params['change_frame']['original_sku'];
                 $original_number = $params['change_frame']['original_number'];
                 $change_sku = $params['change_frame']['change_sku'];
