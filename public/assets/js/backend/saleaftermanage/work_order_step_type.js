@@ -23,7 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'step_name', title: __('Step_name')},
                         // {field: 'is_del', title: __('Is_del')},
@@ -31,7 +31,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
+            table.on('post-body.bs.table',function () {
+                $(".btn-editone").data("area",["600px","300px"]);
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },

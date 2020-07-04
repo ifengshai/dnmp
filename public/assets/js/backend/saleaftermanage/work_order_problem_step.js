@@ -24,7 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 searchFormVisible: true,
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'id', title: __('Id')},
                         // {field: 'problem_id', title: __('Problem_id')},
                         {
