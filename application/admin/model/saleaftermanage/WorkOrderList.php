@@ -1227,7 +1227,7 @@ class WorkOrderList extends Model
      * @return void
      */
     public function vipOrderRefund($siteType,$order_number){
-        $res = $this->httpRequest($siteType, 'magic/order/editAddress', $order_number, 'POST');
+        $res = $this->httpRequest($siteType, 'magic/order/cancelVip', $order_number, 'POST');
         return $res;
     }
 }
