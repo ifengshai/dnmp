@@ -1,0 +1,79 @@
+<div>
+    <p style="text-align: left;margin-left: 4rem;">1、添加审核规则首选选择某个组或者某个人对应的规则</p>
+    <p style="text-align: left;margin-left: 4rem;">2、选择此条规则对应的某个措施</p>
+    <p style="text-align: left;margin-left: 4rem;">3、填写此措施对应的措施值（可以对应金额、积分、数量）</p>
+    <p style="text-align: left;margin-left: 4rem;">4、选择此规则对应的条件</p>
+    <p style="text-align: left;margin-left: 4rem;">5、选择审核组 填写权重 权重越大 此条规则越被优先匹配</p>
+    <p style="text-align: left;margin-left: 4rem;">注意：审核规则按照权重、人、组优先匹配</p>
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-problem_belong" class="form-control selectpicker" name="row[create_belong]">
+                <option value="0">组创建</option>
+                <option value="1">人创建</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" id="step">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建组')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[add_group_id]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
+    </div>
+    <div class="form-group" id="create_person" style="display: none">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建人')}:</label>
+
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[person]', $create_person, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[step_id]', $step, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Step_value')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-step_value" data-rule="required" class="form-control" name="row[step_value]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Symbol')}:</label>
+        <div class="col-xs-12 col-sm-8">
+<!--            <input id="c-symbol" data-rule="required" class="form-control" name="row[symbol]" type="text" value="">-->
+            <select class="form-control selectpicker" name="row[symbol]">
+                <option value="0">大于</option>
+                <option value="1">等于</option>
+                <option value="2">小于</option>
+                <option value="3">大于等于</option>
+                <option value="4">小于等于</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('审核组')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[check_group_id]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+<!--            {:build_select('row[check_group_id]', $extend_team, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
+
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

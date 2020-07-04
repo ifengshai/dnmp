@@ -139,7 +139,7 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email,a.order_type')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
@@ -151,6 +151,7 @@ class WorkOrderList extends Model
         $result['grand_total']    = $orderInfo['grand_total'];
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
         $result['customer_email'] = $orderInfo['customer_email'];
+        $result['order_type']     = $orderInfo['order_type'];
         return $result ? $result : [];
     }
 
@@ -309,7 +310,44 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
-
+    
+    /**
+     * 更改地址
+     * @param $params
+     * @param $work_id
+     * @throws \Exception
+     */
+    public function changeAddress($params, $work_id, $measure_choose_id, $measure_id)
+    {
+        $work = $this->find($work_id);
+        $siteType = $params['work_platform'];
+        //修改地址
+        if (($work->work_type == 1 && $work->problem_type_id == 3 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 3 && $measure_choose_id == 1)) {
+            Db::startTrans();
+            try {
+                $changeAddress = $params['address'];
+                $postData = array(
+                    'increment_id'=>$params['platform_order'],
+                    'type'=>$changeAddress['address_id'],
+                    'first_name'=>$changeAddress['firstname'],
+                    'last_name'=>$changeAddress['lastname'],
+                    'email'=>$changeAddress['email'],
+                    'telephone'=>$changeAddress['telephone'],
+                    'country'=>$changeAddress['country_id'],
+                    'region_id'=>$changeAddress['region_id'],
+                    'region'=>$changeAddress['region'],
+                    'city'=>$changeAddress['city'],
+                    'street'=>$changeAddress['street'],
+                    'postcode'=>$changeAddress['postcode'],
+                );
+                $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
+                Db::commit();
+            } catch (\Exception $e) {
+                Db::rollback();
+                exception($e->getMessage());
+            }
+        } 
+    }
     /**
      * 更改镜片，赠品，
      * @param $params
@@ -321,8 +359,8 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $measure = '';
         //修改镜片
-        if (($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)) {
-            $measure = 1;
+        if (($work->work_type == 1  && $measure_choose_id == 12) || ($work->work_type == 2  && $measure_choose_id == 12)) {
+            $measure = 12;
         } elseif ($measure_choose_id == 6) { //赠品
             $measure = 2;
         } elseif ($measure_choose_id == 7) { //补发
@@ -332,7 +370,7 @@ class WorkOrderList extends Model
             Db::startTrans();
             try {
                 //如果是更改镜片
-                if ($measure == 1) {
+                if ($measure == 12) {
                     $changeLens = $params['change_lens'];
                     $change_type = 2;
                 } elseif ($measure == 2) { //赠品
@@ -725,6 +763,7 @@ class WorkOrderList extends Model
             $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
             return true;
         } catch (Exception $e) {
+            //exception('赠送积分失败');
             exception($e->getMessage());
         }
     }
@@ -827,8 +866,8 @@ class WorkOrderList extends Model
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
-                    //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [9, 10])) {
+                    //承接人的自动完成状态
+                    if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                         $key++;
@@ -877,7 +916,7 @@ class WorkOrderList extends Model
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (in_array($measure_choose_id, [7, 8, 9, 10])) {
+                        if ((1 == $orderRecept->is_auto_complete)) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -927,7 +966,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    //Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -993,13 +1032,16 @@ class WorkOrderList extends Model
                 $dataWorkOrder['work_status'] = 6;
 
                 //通知
-                Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
+                //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
             } else {
                 $dataWorkOrder['work_status'] = 5;
             }
             $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-            WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+            
+        }else{
+            $dataWorkOrder['work_status'] = 5;
         }
+        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
         if ($resultInfo  && (1 == $data['recept_status'])) {
             $this->deductionStock($work_id, $measure_id);
         }
@@ -1175,5 +1217,17 @@ class WorkOrderList extends Model
         $data['list'] = $workOrderLists;
         $data['replenish_list'] = $replenish_list;
         return $data;
+    }
+    /**
+     * vip退款
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/03 11:43:04 
+     * @return void
+     */
+    public function vipOrderRefund($siteType,$order_number){
+        $res = $this->httpRequest($siteType, 'magic/order/editAddress', $order_number, 'POST');
+        return $res;
     }
 }

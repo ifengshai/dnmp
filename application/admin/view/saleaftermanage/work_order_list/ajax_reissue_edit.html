@@ -46,6 +46,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
+                        <option value="0">请选择</option>
                         {if condition="$is_new_version == 1"}
                             {foreach name="lensColorList" item="val"}
                             {if condition="$vo.prescription_options.color_id eq $val.lens_id"}
@@ -69,6 +70,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="lens_type" class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
+                        <option value="0">请选择</option>
                         {if condition="isset($vo.prescription_options.lens_name)"}
                         <option value="{$vo.prescription_options.lens_id}" selected>{$vo.prescription_options.lens_name}</option>
                         {/if}
@@ -81,6 +83,7 @@
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[replacement][coating_type][]"  title="请选择">
+                        <option value="0">请选择</option>
                         {if condition="$is_new_version == 1"}
                             {foreach name="coating_type" item="val"}
                             {if condition="$vo.prescription_options.coating_id eq $val.coating_id"}
@@ -218,6 +221,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[change_lens][color_id][]"  title="请选择">
+                        <option value="0">请选择</option>
                     {if condition="$is_new_version == 1"}
                         {foreach name="lensColorList" item="val"}
                         <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['color_id'] ? 'selected' : ''}>{$val["lens_data_name"]}</option>
@@ -234,6 +238,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' }  id="lens_type" class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
+                    <option value="0">请选择</option>
                     {if condition="$is_new_version == 1"}
                         {foreach name="prescription[$vo['prescription_type']]" item="val"}
                         {if condition="isset($info[$keys]['prescription_options']['lens_name'])"}
@@ -267,12 +272,12 @@
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[change_lens][coating_type][]" title="请选择">
+                        <option value="0">请选择</option>
                     {if condition="$is_new_version == 1"}
                         {foreach name="coating_type" item="val"}
                         <option value='{$val["coating_id"]}' {$val["coating_id"] == $info[$keys]['prescription_options']['coating_id'] ? 'selected' : ''}>{$val["coating_name"]}</option>
                         {/foreach}
                     {else/}
-
                         {foreach name="coating_type" item="val"}
                         <option value='{$val["id"]}' {$val["id"] == $info[$keys]['prescription_options']['coating_id'] ? 'selected' : ''}>{$val["name"]}</option>
                         {/foreach}
@@ -414,6 +419,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
+                    <option value="0">请选择</option>
                     {if condition="$is_new_version == 1"}
                         {foreach name="lensColorList" item="val"}
                         {if condition="$vo.prescription_options.color_id eq $val.lens_id"}
@@ -436,7 +442,7 @@
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="lens_type" class="form-control selectpicker" name="row[gift][lens_type][]"  title="请选择">
-
+                        <option value="0">请选择</option>
                         {if condition="isset($vo.prescription_options.lens_name)"}
                         <option value="{$vo.prescription_options.lens_id}" selected>{$vo.prescription_options.lens_name}</option>
                         {/if}
@@ -448,6 +454,7 @@
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[gift][coating_type][]"  title="请选择">
+                        <option value="0">请选择</option>
                     {if condition="$is_new_version == 1"}
                         {foreach name="coating_type" item="val"}
                         {if condition="$vo.prescription_options.coating_id eq $val.coating_id"}
@@ -456,7 +463,6 @@
                         <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
                         {/foreach}
                     {else/}
-
                         {foreach name="coating_type" item="val"}
                         {if condition="$vo.prescription_options.coating_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>

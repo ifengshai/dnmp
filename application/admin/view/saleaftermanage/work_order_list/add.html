@@ -362,6 +362,7 @@
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
     <!--工单类型，1 客服工单，2 仓库工单-->
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
+    <input type="hidden" name="row[order_type]" id='order_type' value="{$row.order_type}" />
     <!--订单支付的货币类型 根据订单号读出来-->
     <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
     <!--订单支付的支付方式 根据订单号读出来-->
@@ -377,7 +378,6 @@
     <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
 
     <input type="hidden" name="row[is_new_version]" id="is_new_version" value="0">
-
 
     <!-- 订单的base_grand_total -->
     <input type="hidden" name="row[base_grand_total]" id='base_grand_total' value="{$row.base_grand_total}" />
@@ -510,7 +510,7 @@
                     <span>{$v2}</span>
 
                     <input type="hidden" id="step{$k2}-is_check" value="">
-
+                    <input type="hidden" id="step{$k2}-is_auto_complete" value="">
                     <input type="hidden" id="step{$k2}-appoint_group" value="">
                 </label>
                 {/foreach}
@@ -535,8 +535,10 @@
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
 
-                <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
-                <input type="hidden" name="row[after_user_id]" id="after_user_id" value="">
+                <!-- <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[after_user_id]" id="after_user_id" value=""> -->
+                <label class="control-label col-xs-12 col-sm-2" id="all_after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[all_after_user_id][]" id="all_after_user_id" value="">                
             </div>
         </div>
     </div>
@@ -712,7 +714,7 @@
     <!--更换镜框 end-->
 
     <!--更换处方 start-->
-    <div class="form-group-child4 measure step2-1" style="display:none;">
+    <div class="form-group-child4 measure step12-12" style="display:none;">
         <div class="col-xs-12 col-sm-8" style="width: 100%">
             <p style="font-size: 16px;"><b>更改镜片</b></p>
 
@@ -755,9 +757,9 @@
     <!--取消 end-->
 
     <!--补发 start-->
-    <div class="form-group-child4 measure step7" style="display:none;">
+    <div class="form-group-child4 measure step7" style="display:none;" id="user_address">
         <div class="col-xs-12 col-sm-8" style="width: 100%;margin-left: 1%;">
-            <p style="font-size: 16px;"><b>补发</b></p>
+            <p style="font-size: 16px;"><b id="label_name">补发</b></p>
 
             <div class="step7_function1">
                 <div class="step7_function1_child">
@@ -832,6 +834,12 @@
                     </div>
                 </div>
                 <div class="step7_function1_child">
+                    <label class="control-label col-xs-12 col-sm-3">{:__('Region')}：</label>
+                    <div class="col-xs-12 col-sm-8">
+                        <input id="c-region1" class="form-control" name="row[address][region]" type="text" value="">
+                    </div>
+                </div>
+                <div class="step7_function1_child">
                     <label class="control-label col-xs-12 col-sm-3">{:__('City')}：</label>
                     <div class="col-xs-12 col-sm-8">
                         <input id="c-city" class="form-control" name="row[address][city]" type="text" value="">
@@ -854,7 +862,7 @@
             <div class="form-group-child4_add">
 
             </div>
-            <div id="toolbar" class="toolbar">
+            <div id="toolbar1" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add-supplement-reissue" style="float: left;" title="增加"><i class="fa fa-plus"></i>增加</a>
             </div>
             <div id="supplement-order">
@@ -864,7 +872,6 @@
         </div>
     </div>
     <!--补发 end-->
-
     </div>
 
     <input type='hidden' name="row[work_status]" class="status" value="1">

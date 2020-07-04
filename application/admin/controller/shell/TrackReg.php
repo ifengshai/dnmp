@@ -199,10 +199,15 @@ class TrackReg extends Backend
      * zendesk10分钟更新前20分钟的数据
      * @return [type] [description]
      */
-    public function asyncTicketHttps()
+    public function zeelool_zendesk()
     {
         $this->zendeskUpateData('zeelool',1);
-        //$this->zendeskUpateData('voogueme',2);
+        echo 'all ok';
+        exit;
+    }
+    public function voogueme_zendesk()
+    {
+        $this->zendeskUpateData('voogueme',2);
         echo 'all ok';
         exit;
     }
@@ -212,10 +217,10 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType,$type)
     {
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate();
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
@@ -234,7 +239,7 @@ class TrackReg extends Backend
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
 }

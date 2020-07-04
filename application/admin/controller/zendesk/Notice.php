@@ -1002,7 +1002,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-01T23:00:00Z updated_at<=2020-07-02T23:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-02T23:00:00Z updated_at<=2020-07-03T23:00:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1033,7 +1033,7 @@ class Notice extends Controller
      * @throws \Zendesk\API\Exceptions\MissingParametersException
      * @throws \Zendesk\API\Exceptions\RouteException
      */
-    public function autoAsyncUpdate()
+    public function autoAsyncUpdate($siteType)
     {
         $params = 'type:ticket updated_at>=20minutes order_by:updated_at sort:asc';
         //Get all tickets
@@ -1045,8 +1045,8 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '失败starttime:' . date('Y-m-d H:i:s', time() - 20 * 60) . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 20 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 
         $page = ceil($tickets->count / 100);
