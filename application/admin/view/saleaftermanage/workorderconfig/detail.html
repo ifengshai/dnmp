@@ -28,7 +28,7 @@
         flex-direction: column;
     }
     .list-inner > p{
-        width: 330px;
+        width: 130px;
     }
     .text-muted-box > .text-muted{
         width: 80px;
@@ -98,7 +98,7 @@
                     </span>
                     </p>
                 </div>
-                <p>{$vo.step_name}--承接组：</p>
+                <p>承接组：</p>
                 <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
                     {foreach name="groupdata" item="vv" key='kk'}
                     <option value="{$vv.id}" {eq name="$vv.id" value="$vo.extend_group_id" }selected{/eq}>{$vv.name}</option>
