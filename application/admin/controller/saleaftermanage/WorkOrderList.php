@@ -983,62 +983,64 @@ class WorkOrderList extends Backend
                             }else{
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
-                            $true_all_person = array_unique($all_person);
-                            //如果符合创建组的话
-                            if(in_array(session('admin.id'),$true_all_person)){
-                                if(0 == $gv['step_id']){
-                                    //不需要判断措施只需要判断创建人
-                                    $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                    break;    
-                                }elseif((2 == $gv['step_id']) && in_array(2, array_filter($params['measure_choose_id']))){ //退款
-                                    //中间值
-                                    $median_value = $params['refund_money']; 
-                                }elseif((3 == $gv['step_id']) && in_array(3, array_filter($params['measure_choose_id']))){ //取消
-                                    $median_value = $params['refund_money'];
-            
-                                }elseif(6 == $gv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
-                                    $giftOriginalNumber = $params['gift']['original_number'] ?: [];
-                                    $median_value = array_sum($giftOriginalNumber); 
-            
-                                }elseif(7 == $gv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
-                                    $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
-                                    $median_value = array_sum($replacementOriginalNumber);
-            
-            
-                                }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
-                                    $median_value = $params['integral'];
-            
-                                }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){ //vip退款
-                                    $median_value = $params['refund_money']; 
-                                }
-                                if(!empty($median_value)){
-                                    switch ($gv['symbol']){
-                                        case 'gt':
-                                            $result = $median_value > $gv['step_value'];
-                                            break;
-                                        case 'eq':
-                                            $result = $median_value = $gv['step_value'];
-                                            break;
-                                        case 'lt':
-                                            $result = $median_value < $gv['step_value'];
-                                            break;
-                                        case 'egt':
-                                            $result = $median_value >= $gv['step_value'];
-                                            break;
-                                        case 'elt':
-                                            $result = $median_value <= $gv['step_value'];
-                                            break;
+                            if(count(array_filter($all_person))>=1){
+                                $true_all_person = array_unique($all_person);
+                                //如果符合创建组的话
+                                if(in_array(session('admin.id'),$true_all_person)){
+                                    if(0 == $gv['step_id']){
+                                        //不需要判断措施只需要判断创建人
+                                        $params['is_check'] = 1;
+                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                        break;    
+                                    }elseif((2 == $gv['step_id']) && in_array(2, array_filter($params['measure_choose_id']))){ //退款
+                                        //中间值
+                                        $median_value = $params['refund_money']; 
+                                    }elseif((3 == $gv['step_id']) && in_array(3, array_filter($params['measure_choose_id']))){ //取消
+                                        $median_value = $params['refund_money'];
+                
+                                    }elseif(6 == $gv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+                                        $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                                        $median_value = array_sum($giftOriginalNumber); 
+                
+                                    }elseif(7 == $gv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
+                                        $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                                        $median_value = array_sum($replacementOriginalNumber);
+                
+                
+                                    }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
+                                        $median_value = $params['integral'];
+                
+                                    }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){ //vip退款
+                                        $median_value = $params['refund_money']; 
                                     }
-                                }else{
-                                    $result = false;
+                                    if(!empty($median_value)){
+                                        switch ($gv['symbol']){
+                                            case 'gt':
+                                                $result = $median_value > $gv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $median_value = $gv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $median_value < $gv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $median_value >= $gv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $median_value <= $gv['step_value'];
+                                                break;
+                                        }
+                                    }else{
+                                        $result = false;
+                                    }
+    
+                                   if($result){
+                                       $params['is_check'] = 1;
+                                       $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                       break;
+                                   }
                                 }
-
-                               if($result){
-                                   $params['is_check'] = 1;
-                                   $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                   break;
-                               }
                             }
                         }
         
@@ -2055,61 +2057,63 @@ class WorkOrderList extends Backend
                             }else{
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
-                            $true_all_person = array_unique($all_person);
-                            //如果符合创建组的话
-                            if(in_array(session('admin.id'),$true_all_person)){
-                                if(0 == $gv['step_id']){
-                                    //不需要判断措施只需要判断创建人
-                                    $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                    break;    
-                                }elseif((2 == $gv['step_id']) && in_array(2, array_filter($params['measure_choose_id']))){ //退款
-                                    //中间值
-                                    $median_value = $params['refund_money']; 
-                                }elseif((3 == $gv['step_id']) && in_array(3, array_filter($params['measure_choose_id']))){ //取消
-                                    $median_value = $params['refund_money'];
-            
-                                }elseif(6 == $gv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
-                                    $giftOriginalNumber = $params['gift']['original_number'] ?: [];
-                                    $median_value = array_sum($giftOriginalNumber); 
-            
-                                }elseif(7 == $gv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
-                                    $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
-                                    $median_value = array_sum($replacementOriginalNumber);
-            
-            
-                                }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
-                                    $median_value = $params['integral'];
-            
-                                }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){
-                                    $median_value = $params['refund_money']; 
-                                }
-                                if(!empty($median_value)){
-                                    switch ($gv['symbol']){
-                                        case 'gt':
-                                            $result = $median_value > $gv['step_value'];
-                                            break;
-                                        case 'eq':
-                                            $result = $median_value = $gv['step_value'];
-                                            break;
-                                        case 'lt':
-                                            $result = $median_value < $gv['step_value'];
-                                            break;
-                                        case 'egt':
-                                            $result = $median_value >= $gv['step_value'];
-                                            break;
-                                        case 'elt':
-                                            $result = $median_value <= $gv['step_value'];
-                                            break;
+                            if(count(array_filter($all_group))>=1){
+                                $true_all_person = array_unique($all_person);
+                                //如果符合创建组的话
+                                if(in_array(session('admin.id'),$true_all_person)){
+                                    if(0 == $gv['step_id']){
+                                        //不需要判断措施只需要判断创建人
+                                        $params['is_check'] = 1;
+                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                        break;    
+                                    }elseif((2 == $gv['step_id']) && in_array(2, array_filter($params['measure_choose_id']))){ //退款
+                                        //中间值
+                                        $median_value = $params['refund_money']; 
+                                    }elseif((3 == $gv['step_id']) && in_array(3, array_filter($params['measure_choose_id']))){ //取消
+                                        $median_value = $params['refund_money'];
+                
+                                    }elseif(6 == $gv['step_id'] && in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+                                        $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                                        $median_value = array_sum($giftOriginalNumber); 
+                
+                                    }elseif(7 == $gv['step_id'] && in_array(7, array_filter($params['measure_choose_id']))){ //补发
+                                        $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                                        $median_value = array_sum($replacementOriginalNumber);
+                
+                
+                                    }elseif(10 == $gv['step_id'] && in_array(10, array_filter($params['measure_choose_id']))){ //积分
+                                        $median_value = $params['integral'];
+                
+                                    }elseif(15 == $gv['step_id'] && in_array(15, array_filter($params['measure_choose_id']))){
+                                        $median_value = $params['refund_money']; 
                                     }
-                                }else{
-                                    $result = false;
-                                }
-
-                                if($result){
-                                    $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                    break;
+                                    if(!empty($median_value)){
+                                        switch ($gv['symbol']){
+                                            case 'gt':
+                                                $result = $median_value > $gv['step_value'];
+                                                break;
+                                            case 'eq':
+                                                $result = $median_value = $gv['step_value'];
+                                                break;
+                                            case 'lt':
+                                                $result = $median_value < $gv['step_value'];
+                                                break;
+                                            case 'egt':
+                                                $result = $median_value >= $gv['step_value'];
+                                                break;
+                                            case 'elt':
+                                                $result = $median_value <= $gv['step_value'];
+                                                break;
+                                        }
+                                    }else{
+                                        $result = false;
+                                    }
+    
+                                    if($result){
+                                        $params['is_check'] = 1;
+                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -4007,14 +4011,16 @@ EOF;
                     }else{
                         $documentary_all_person = $all_group[$dgv['create_id']];
                     }
-                    $documentary_true_all_person = array_unique($documentary_all_person);
-                    if(in_array(session('admin.id'),$documentary_true_all_person)){
-                        if(is_array($all_group[$dgv['documentary_group_id']])){
-                            $all_after_user_id = $all_group[$dgv['documentary_group_id']];
-                            $this->success('','',$all_after_user_id);
-                            break;
+                    if(count(array_filter($documentary_all_person))>=1){
+                        $documentary_true_all_person = array_unique($documentary_all_person);
+                        if(in_array(session('admin.id'),$documentary_true_all_person)){
+                            if(is_array($all_group[$dgv['documentary_group_id']])){
+                                $all_after_user_id = $all_group[$dgv['documentary_group_id']];
+                                $this->success('','',$all_after_user_id);
+                                break;
+                            }
                         }
-                    }         
+                    }
                 }
             }
             if(!empty($documentary_person)){
