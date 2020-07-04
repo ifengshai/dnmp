@@ -1047,7 +1047,7 @@ class WorkOrderList extends Model
         }
         //不是自动处理完成
         if($is_auto_complete != 1){
-            $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->column('measure_choose_id');
+            $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
             if ($measure_choose_id == 9) {
                 $this->presentCoupon($work->id);
             } elseif ($measure_choose_id == 10) {
