@@ -277,5 +277,57 @@ class WorkOrderDocumentary extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+    //删除修改之后
+    public function del($ids = "")
+    {
+        $judge = Cache::has('Workorderconfig_getConfigInfo');
+        //判断缓存是否存在
+        if ($judge === true) {
+            //清除单个缓存文件
+            $result = Cache::rm('Workorderconfig_getConfigInfo');
+        }
+        if ($ids) {
+            $pk = $this->model->getPk();
+            $adminIds = $this->getDataLimitAdminIds();
+            if (is_array($adminIds)) {
+                $this->model->where($this->dataLimitField, 'in', $adminIds);
+            }
+            $list = $this->model->where($pk, 'in', $ids)->select();
+
+            $count = 0;
+            Db::startTrans();
+            try {
+                if (!empty($this->model)) {
+                    $fieldArr = $this->model->getTableFields();
+                    if (in_array('is_del', $fieldArr)) {
+                        $this->model->where($pk, 'in', $ids)->update(['is_del' => 2]);
+                        $count = 1;
+                    } else {
+                        foreach ($list as $k => $v) {
+                            $count += $v->delete();
+                        }
+                    }
+                } else {
+                    foreach ($list as $k => $v) {
+                        $count += $v->delete();
+                    }
+                }
+
+                Db::commit();
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            if ($count) {
+                $this->success();
+            } else {
+                $this->error(__('No rows were deleted'));
+            }
+        }
+        $this->error(__('Parameter %s can not be empty', 'ids'));
+    }
 
 }
