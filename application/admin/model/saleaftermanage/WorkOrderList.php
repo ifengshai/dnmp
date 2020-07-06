@@ -994,7 +994,8 @@ class WorkOrderList extends Model
     public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete)
     {
         $work = self::find($work_id);
-
+        Db::startTrans();
+        try {
         if (1 == $success) {
             $data['recept_status'] = 1;
         } else {
@@ -1055,8 +1056,13 @@ class WorkOrderList extends Model
                 $this->presentIntegral($work->id);
             }
         }
+        Db::commit();
         return true;
-    }
+    } catch (Exception $e) {
+        Db::rollback();
+        exception($e->getMessage());
+    }        
+  }
     //扣减库存逻辑
     public function deductionStock($work_id, $measure_id)
     {
