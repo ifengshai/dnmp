@@ -4016,7 +4016,7 @@ EOF;
                         if(in_array(session('admin.id'),$documentary_true_all_person)){
                             if(is_array($all_group[$dgv['documentary_group_id']])){
                                 $all_after_user_id = $all_group[$dgv['documentary_group_id']];
-                                $this->success('','',$all_after_user_id);
+                                //$this->success('','',$all_after_user_id);
                                 break;
                             }
                         }
@@ -4028,14 +4028,17 @@ EOF;
                     if(session('admin.id') ==$dpv['create_id']){
                         if(is_array($all_group[$dpv['documentary_group_id']])){
                             $all_after_user_id = $all_group[$dpv['documentary_group_id']];
-                            $this->success('','',$all_after_user_id);
+                            //$this->success('','',$all_after_user_id);
                             break; 
                         }                        
                     }
                 }
-    
             }
-            $this->error('选择的跟单部门没有人，请重新选择');
+            if($all_after_user_id){
+                $this->success('','',$all_after_user_id);
+            }else{
+                $this->error('选择的跟单部门没有人，请重新选择');
+            }    
         }
 
     }
