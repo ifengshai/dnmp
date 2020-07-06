@@ -212,34 +212,15 @@ class Test3 extends Backend
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = ['in', $skus];
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
         $purchase_map['is_del'] = 1;
         $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->group('sku')
             ->column('sum(purchase_num) as purchase_num', 'sku');
 
-        //查询出满足条件的采购单号
-        $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->where($purchase_map)
-            ->group('PurchaseOrder.id')
-            ->column('PurchaseOrder.id');
-
-        //查询留样库存
-        //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-        $check_map['status'] = 2;
-        $check_map['type'] = 1;
-        $check_map['Check.purchase_id'] = ['in', $ids];
-        $check = new \app\admin\model\warehouse\Check;
-        $hasWhere['sku'] = ['in', $skus];
-        $check_list = $check->hasWhere('checkItem', $hasWhere)
-            ->where($check_map)
-            ->group('sku')
-            ->column('sum(arrivals_num) as arrivals_num', 'sku');
         foreach ($result as &$v) {
-            $on_way_stock = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
-            $v['on_way_stock'] = $on_way_stock > 0 ? $on_way_stock : 0;
+            $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
         }
         unset($v);
         $res = $item->saveAll($result);
