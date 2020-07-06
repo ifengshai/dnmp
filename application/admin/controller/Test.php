@@ -2803,9 +2803,10 @@ class Test extends Backend
 
     public function test1()
     {
+        $this->orderNode = new \app\admin\model\OrderNode;
         $sql = "SELECT `order_number`,`delivery_time`,`signing_time` FROM `fa_order_node` WHERE `shipment_data_type` = 'USPS_2' AND `node_type` >= 7 AND `delivery_time` BETWEEN '2020-06-16 00:00:00' AND '2020-06-16 23:59:59'";
 
-        $data = Db::name('order_node')->query($sql);
+        $data = $this->orderNode->query($sql);
         dump($data);die;
     }
 }
