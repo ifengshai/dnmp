@@ -427,11 +427,11 @@ class Workorderconfig extends Backend
         //所有的组分别对应的用户
         $all_group =  Db::name('auth_group')->alias('a')->where('uid','in',$usable_user)->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
         //所有的跟单员规则
-        $all_documentary = (new WorkOrderDocumentary)->select();
+        $all_documentary = (new WorkOrderDocumentary)->where($where)->select();
         //所有工单类型措施关系表
-        $all_problem_step = (new WorkOrderProblemStep)->select();
+        $all_problem_step = (new WorkOrderProblemStep)->where($where)->select();
         //所有工单规则审核表
-        $all_check_rule   = (new WorkOrderCheckRule)->order('weight desc')->select();
+        $all_check_rule   = (new WorkOrderCheckRule)->where($where)->order('weight desc')->select();
         //客服部门角色组ID
         $customer_department_rule = config('workorder.customer_department_rule');
         //仓库部门角色组ID
