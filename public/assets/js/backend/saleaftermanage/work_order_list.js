@@ -902,6 +902,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         Layer.closeAll();
                         $('#order_pay_currency').val(data.base_currency_code);
                         $('#step2_pay_currency').val(data.base_currency_code);
+                        $('#c-rewardpoint_discount_money').val(data.mw_rewardpoint_discount);
                         $('#grand_total').val(data.grand_total);
                         $('#base_grand_total').val(data.base_grand_total);
                         $('#base_to_order_rate').val(data.base_to_order_rate); 

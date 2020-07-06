@@ -139,7 +139,7 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email,a.order_type')->find();
+            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email,a.order_type,a.mw_rewardpoint_discount')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
@@ -152,6 +152,7 @@ class WorkOrderList extends Model
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
         $result['customer_email'] = $orderInfo['customer_email'];
         $result['order_type']     = $orderInfo['order_type'];
+        $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
         return $result ? $result : [];
     }
 
