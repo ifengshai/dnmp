@@ -4,11 +4,7 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use fast\Trackingmore;
-use Util\NihaoPrescriptionDetailHelper;
-use Util\ZeeloolPrescriptionDetailHelper;
-use Util\VooguemePrescriptionDetailHelper;
-use Util\WeseeopticalPrescriptionDetailHelper;
-use Util\MeeloogPrescriptionDetailHelper;
+use Util\RufooPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -22,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 /**
  * 订单列表
  */
-class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
+class Rufoo extends Backend  /*这里继承的是app\common\controller\Backend*/
 {
     protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls'];
     protected $model = null;
@@ -30,11 +26,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function _initialize()
     {
         parent::_initialize();
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->rufoo = new \app\admin\model\order\order\Rufoo;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
@@ -59,34 +50,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            //根据传的标签切换对应站点数据库
-            $label = $this->request->get('label', 1);
-            switch ($label) {
-                case 1:
-                    $db = 'database.db_zeelool';
-                    $model = $this->zeelool;
-                    break;
-                case 2:
-                    $db = 'database.db_voogueme';
-                    $model = $this->voogueme;
-                    break;
-                case 3:
-                    $db = 'database.db_nihao';
-                    $model = $this->nihao;
-                    break;
-                case 4:
-                    $db = 'database.db_weseeoptical';
-                    $model = $this->weseeoptical;
-                    break;
-                case 5:
-                    $db = 'database.db_meeloog';
-                    $model = $this->meeloog;
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-
+            $model = $this->rufoo;
             $filter = json_decode($this->request->get('filter'), true);
             //SKU搜索
             if ($filter['sku']) {
@@ -95,7 +59,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $smap['status'] = ['in', $filter['status']];
                 }
                 $ids = $model->getOrderId($smap);
-                $map['entity_id'] = ['in', $ids];
+                $map['id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -112,50 +76,22 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $list = $model
                 ->where($where)
                 ->where($map)
+                ->field('id,ordersn,address,status,price,dispatchprice,createtime,paytime')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
-
-            $arr = [
-                'Business express(4-7 business days)',
-                'Expedited',
-                'Business express(7-14 Days)',
-                'Business express(7-12 Days)',
-                'Business express',
-                'Business express (7-12 days)',
-                'Business express(7-12 days)',
-                'Express Shipping (3-5 Days)',
-                'Express Shipping (5-8Days)',
-                'Express Shipping (3-5 Business Days)',
-                'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)',
-                'Business express(7-12 business days)'
-            ];
             foreach ($list as &$v) {
-                if (in_array($v['shipping_description'], $arr)) {
-                    $v['label'] = 1;
-                } else {
-                    $v['label'] = 0;
-                }
-                $smap = [];
-                $smap['parent_id'] = $v['entity_id'];
-                $smap['address_type'] = 'shipping';
-                $country_id = Db::connect($db)
-                    ->table('sales_flat_order_address')
-                    ->where($smap)
-                    ->value('country_id');
-                $v['country_id'] = $country_id;
+                $address = unserialize($v['address']);
+                unset($address['id']);
+                $v = array_merge($v, $address);
             }
             unset($v);
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
-        $this->assign('label', $label);
-        $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
 
@@ -165,22 +101,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         $ids = $ids ?? $this->request->get('id');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
-        }
 
         //查询订单详情
-        $row = $model->where('entity_id', '=', $ids)->find();
+        $row = $this->rufoo->where('id', '=', $ids)->find();
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -191,30 +114,31 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
         }
 
+        if ($row['status'] == -1) {
+            $status = '取消';
+        } elseif($row['status'] == 0) {
+            $status = '待付款';
+        } elseif($row['status'] == 1) {
+            $status = '待发货';
+        } elseif($row['status'] == 2) {
+            $status = '已发货';
+        } elseif($row['status'] == 3) {
+            $status = '已完成';
+        }
         //获取订单收货信息
-        $address = $this->zeelool->getOrderDetail($label, $ids);
+        $address = unserialize($row->address);
 
         //获取订单处方信息
-        if ($label == 1) {
-            $goods = ZeeloolPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 2) {
-            $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 3) {
-            $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 4) {
-            $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 5) {
-            $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        }
+        $goods = RufooPrescriptionDetailHelper::get_one_by_entity_id($ids);
 
         //获取支付信息
-        $pay = $this->zeelool->getPayDetail($label, $ids);
-
-        $this->view->assign("label", $label);
+        $pay = Db::connect('database.db_rufoo')->table('ims_core_paylog')->where('tid', $row->ordersn)->find();
+       
         $this->view->assign("row", $row);
-        $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
+        $this->view->assign("address", $address);
         $this->view->assign("pay", $pay);
+        $this->view->assign("status", $status);
         return $this->view->fetch();
     }
 
@@ -1079,5 +1003,4 @@ EOF;
 
         $writer->save('php://output');
     }
-
 }
