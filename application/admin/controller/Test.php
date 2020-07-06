@@ -2804,13 +2804,17 @@ class Test extends Backend
     public function test1()
     {
         $this->orderNode = new \app\admin\model\OrderNode;
-        $sql = "SELECT `order_number`,`delivery_time`,`signing_time` FROM `fa_order_node` WHERE `shipment_data_type` = 'USPS_2' AND `node_type` >= 7 AND `delivery_time` BETWEEN '2020-06-16 00:00:00' AND '2020-06-16 23:59:59'";
-
-        $data = $this->orderNode->where(['shipment_data_type' => 'USPS_2', 'node_type' => ['>=', 7], 'delivery_time' => ['BETWEEN', ['2020-06-16 00:00:00', '2020-06-16 23:59:59']]])->select();
+        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail;
+        $data = $this->orderNode->where('delivery_time>=signing_time')->select();
         $data = collection($data)->toArray();
-        $num = count(array_column($data, 'order_number'));
-        dump($num);
-        dump($data);
-        die;
+        foreach ($data as $k => $v) {
+            $res = Db::name('order_node_courier')->field('create_time')->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->order('id desc')->find();
+            $this->orderNode->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->update(['signing_time' => $res['create_time']]);
+            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number'], 'order_node' => 4, 'node_type' => 40])->update(['create_time' => $res['create_time']]);
+
+            echo $k . "\n";
+        }
+
+        echo 'ok';die;
     }
 }
