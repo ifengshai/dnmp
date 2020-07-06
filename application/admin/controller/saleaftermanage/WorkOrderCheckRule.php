@@ -132,7 +132,6 @@ class WorkOrderCheckRule extends Backend
         $step = $workordersteptype->getAllStep();
         $step = array_column($step->toArray(), 'step_name', 'id');
         $step[0] = '无';
-//        dump($step);die;
         //获取所有创建人
         $admin = new \app\admin\model\Admin();
         $create_person = $admin->getAllStaff();
@@ -140,7 +139,9 @@ class WorkOrderCheckRule extends Backend
         $extend_team = $workordersteptype->getAllExtend();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a", [], 'strip_tags');
-
+            if ($params['step_id'] == 0){
+                $this->error('请选择措施');
+            }
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
