@@ -311,7 +311,8 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order_address')->where("replace(telephone,'-','')", 'like', "%{$customer_phone}%")->field('telephone')->limit(10)->select();
+        $map[] = ['exp', Db::raw("replace(telephone,'-','') like '%{$customer_phone}%'")];
+        $result = Db::connect($db)->table('sales_flat_order_address')->where($map)->field('telephone')->limit(10)->select();
         if (!$result) {
             return false;
         }
