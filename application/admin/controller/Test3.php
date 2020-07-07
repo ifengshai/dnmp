@@ -206,7 +206,7 @@ class Test3 extends Backend
     public function proccess_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $result = $item->where(['is_open' => 1, 'is_del' => 1, 'on_way_stock' => ['<', 0]])->field('sku,id')->select();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
         $result = collection($result)->toArray();
         $skus = array_column($result, 'sku');
         //计算SKU总采购数量
@@ -224,7 +224,7 @@ class Test3 extends Backend
         }
         unset($v);
         $res = $item->saveAll($result);
-        echo $res;
+        dump($res);
         die;
     }
 
