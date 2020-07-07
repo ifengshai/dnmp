@@ -221,10 +221,11 @@ class Test3 extends Backend
 
         foreach ($result as &$v) {
             $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
+            unset($v['sku']);
         }
         unset($v);
         $res = $item->saveAll($result);
-        dump($res);
+        echo  'ok';
         die;
     }
 
