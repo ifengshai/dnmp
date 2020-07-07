@@ -209,11 +209,19 @@ class Test3 extends Backend
         $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
         $result = collection($result)->toArray();
         $skus = array_column($result, 'sku');
+
+
+        //查询签收的采购单
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+
+
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = ['in', $skus];
         $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
         $purchase_map['is_del'] = 1;
+        $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
         $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->group('sku')
@@ -228,6 +236,4 @@ class Test3 extends Backend
         echo  'ok';
         die;
     }
-
-  
 }
