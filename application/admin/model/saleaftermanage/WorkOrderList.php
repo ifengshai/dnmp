@@ -290,6 +290,7 @@ class WorkOrderList extends Model
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
+            echo $url;exit;
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
             } else {
@@ -323,9 +324,6 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $siteType = $params['work_platform'];
         //修改地址
-        dump($work->work_type);
-        dump($work->problem_type_id);
-        dump($measure_choose_id);exit;
         if (($work->work_type == 1 && $work->problem_type_id == 52 && $measure_choose_id == 13) || ($work->work_type == 2 && $work->problem_type_id == 52 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
