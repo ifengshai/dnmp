@@ -576,7 +576,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //是否自动审核完成  end
                         //修改地址
                         if(id == 13){
-                            $("#user_address").show();
+                            $(".step7").show()
+                            $(".step7 .step-container div").hide()
+                            $(".step7 #user_address").show();
                             $("#label_name").html('修改地址');
                             $("#toolbar1").hide();
                             var site_type = $('#work_platform').val();
