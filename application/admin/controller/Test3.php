@@ -215,7 +215,7 @@ class Test3 extends Backend
         $logistics = new \app\admin\model\LogisticsInfo();
         $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
+        $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
 
 
 
@@ -236,7 +236,7 @@ class Test3 extends Backend
         // }
         // unset($v);
         // $res = $item->saveAll($result);
-        echo  'ok';
+        echo  $res;
         die;
     }
 }
