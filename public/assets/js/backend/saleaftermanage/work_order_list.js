@@ -579,6 +579,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $(".step7").show()
                             $(".step7 .step-container div").hide()
                             $(".step7 #user_address").show();
+                            $(".step7 #user_address div:not(.dropdown-menu)").show();
                             $("#label_name").html('修改地址');
                             $("#toolbar1").hide();
                             var site_type = $('#work_platform').val();
@@ -1482,6 +1483,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $(".step7").show()
                             $(".step7 .step-container div").hide()
                             $(".step7 #user_address").show();
+                            $(".step7 #user_address div:not(.dropdown-menu)").show();
                             $("#label_name").html('修改地址');
                             $("#toolbar1").hide();
                             var site_type = $('#work_platform').val();
