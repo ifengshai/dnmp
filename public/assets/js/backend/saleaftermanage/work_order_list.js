@@ -846,16 +846,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 var str = incrementId.substring(0, 3);
                 //判断站点
-                if (str == '100' || str == '400' || str == '500') {
+                if (str == '10' || str == '40' || str == '50') {
                     $("#work_platform").val(1);
-                } else if (str == '130' || str == '430') {
+                } else if (str == '13' || str == '43') {
                     $('#work_platform').val(2);
-                } else if (str == '300' || str == '600') {
+                } else if (str == '30' || str == '60') {
                     $('#work_platform').val(3);
-                } else if( str == '450' || str == '150'){
+                } else if( str == '45' || str == '15'){
                     //meeloog站
                     $('#work_platform').val(4);
-                } else if( str == '200' || str == '270'){
+                } else if( str == '20' || str == '27'){
                     //wesee站
                     $('#work_platform').val(5);
                 }
@@ -888,16 +888,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 else{
                     //判断站点
-                    if (str == '100' || str == '400' || str == '500') {
+                    if (str == '10' || str == '40' || str == '50') {
                         $("#work_platform").val(1);
-                    } else if (str == '130' || str == '430') {
+                    } else if (str == '13' || str == '43') {
                         $('#work_platform').val(2);
-                    } else if (str == '300' || str == '600') {
+                    } else if (str == '30' || str == '60') {
                         $('#work_platform').val(3);
-                    }else if( str == '450' || str == '150'){
+                    }else if( str == '45' || str == '15'){
                         //meeloog站
                         $('#work_platform').val(4);
-                    } else if( str == '200' || str == '270'){
+                    } else if( str == '20' || str == '27'){
                         //wesee站
                         $('#work_platform').val(5);
                     }
