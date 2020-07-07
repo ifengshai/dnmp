@@ -2070,7 +2070,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var work_id = $('#work_id').val();
                     //row[problem_type_id]
                     $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
-
+                    //如果是仓库工单并且是草稿状态的话
+                    if(1 == Config.work_status && 2 == Config.work_type){
+                        $('#step_id').hide();
+                        $('#recept_person_group').hide();
+                        $('#after_user_group').show();
+                        // $('#after_user_id').val(Config.workorder.copy_group);
+                        // $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                        //异步获取跟单人员
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/getDocumentaryRule',
+                        }, function (data, ret) {
+                            //console.log(data);
+                            $('#all_after_user_id').val(data.join(','));
+                            var content = '';
+                            for(i=0;i<data.length;i++){
+                                //$('#all_after_user').html(Config.users[data[i]]);
+                                content += Config.users[data[i]]+' ';
+                            }
+                            $('#all_after_user').html(content);
+                        },function(data,ret){
+                            console.log(ret);
+                            Toastr.error(ret.msg);
+                            return false;
+                        });
+                        if(2 == Config.work_type){
+                            //提交审核按钮
+                            $('.btn-status').click(function () {
+                                $('.status').val(3);
+                            })
+                        }
+                    }
                     //判断是客服创建还是仓库创建
                     // if (Config.work_type == 1) {
                     //     var temp_id = 5;
@@ -2134,7 +2164,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var work_id = $('#work_id').val();
                         //row[problem_type_id]
                         $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
-
                         //判断是客服创建还是仓库创建
                         // if (Config.work_type == 1) {
                         //     var temp_id = 5;
@@ -2200,41 +2229,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             var checkID = [];//定义一个空数组
                             var appoint_group = '';
                             var input_content = '';
+                            var appoint_users = [];
                             var lens_click_data_edit;
                             var gift_click_data_edit;
                             var username = [];
                             var appoint_users = [];
+                            var count = 0;
                             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                                 checkID[i] = $(this).val();
                                 var id = $(this).val();
                                 //获取承接组
                                 appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                                var group = $('#step' + id + '-appoint_group').val();
-                                var group_arr = group.split(',')
-                                var appoint_users = [];
-                                var appoint_val = [];
-                                for (var i = 0; i < group_arr.length; i++) {
-                                    //循环根据承接组Key获取对应承接人id
-                                    appoint_users.push(Config.workorder[group_arr[i]]);
-                                    appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
-                                }
+                                //var group = $('#step' + id + '-appoint_group').val();
+                                //var group_arr = group.split(',')
+                                //var appoint_users = [];
+                                //var appoint_val = [];
+                                // for (var i = 0; i < group_arr.length; i++) {
+                                //     //循环根据承接组Key获取对应承接人id
+                                //     appoint_users.push(Config.workorder[group_arr[i]]);
+                                //     appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                                // }
 
-                                //循环根据承接人id获取对应人名称
-                                for (var j = 0; j < appoint_users.length; j++) {
-                                    input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
-                                    input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
-                                    input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
-                                }
+                                // //循环根据承接人id获取对应人名称
+                                // for (var j = 0; j < appoint_users.length; j++) {
+                                //     input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                                //     input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                                //     input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                                // }
+                                var group_id = $('#step' + id + '-appoint_group').val();
+                                var choose_group = Config.workOrderConfigValue.group[group_id];
+                                if(choose_group){
+                                    for(var j = 0;j<choose_group.length;j++){
+                                        input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
+                                        input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
+                                        input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
+                                    }
+                                }else{
+                                    count =1;
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
+                                }                                
 
                                 //获取是否需要审核
                                 if ($('#step' + id + '-is_check').val() > 0) {
                                     $('#is_check').val(1);
                                 }
+                                //是否自动审核完成 start
+                                var step_is_auto_complete = $('#step' + id + '-is_auto_complete').val();
+                                input_content +='<input type="hidden" name="row[order_recept][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
+                        //是否自动审核完成  end
                             });
                             //追加到元素之后
                             $("#input-hidden").append(input_content);
                             var arr = array_filter(appoint_group.split(','));
-                            //console.log(arr);
+                            console.log(arr);
                             //循环根据承接组Key获取对应承接人id
                             // for (var i = 0; i < arr.length - 1; i++) {
                             //     //循环根据承接组Key获取对应承接人id
@@ -2252,13 +2301,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 }
                                 
                             }
+                            if(count == 1){
+                                appoint_users.push(Config.userid);
+                            }else{
+                                 if(appoint_users[Config.userid]){
+                                    delOne(Config.userid,appoint_users);
+                                }                         
+                            }
+                            if(checkID.length>0 && appoint_users.length === 0){
+                                if(!appoint_users[Config.userid]){
+                                    appoint_users.push(Config.userid);
+                                }
+                            }else if(checkID.length === 0){
+                                if(appoint_users[Config.userid]){
+                                    delOne(Config.userid,appoint_users);
+                                } 
+                            }
+
                             //循环根据承接人id获取对应人名称
+                            var appoint_users = array_filter(appoint_users);
+                            console.log(appoint_users);
                             for (var j = 0; j < appoint_users.length; j++) {
                                 username.push(Config.users[appoint_users[j]]);
                             }
 
                             var users = array_filter(username);
-                            var appoint_users = array_filter(appoint_users);
+                            
                             $('#appoint_group_users').html(users.join(','));
                             $('#recept_person_id').val(appoint_users.join(','));
                         }
