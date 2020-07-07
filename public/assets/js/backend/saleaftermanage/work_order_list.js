@@ -844,7 +844,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 3);
+                var str = incrementId.substring(0, 2);
                 //判断站点
                 if (str == '10' || str == '40' || str == '50') {
                     $("#work_platform").val(1);
@@ -870,7 +870,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 3);
+                var str = incrementId.substring(0, 2);
                 var vip_str = incrementId.substring(1, 4);
                 if(vip_str == 'VIP'){
                     $('#order_pay_currency').val('USD');
