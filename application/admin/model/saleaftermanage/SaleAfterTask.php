@@ -311,7 +311,7 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order_address')->where('telephone', 'like', "%{$customer_phone}%")->field('telephone')->limit(10)->select();
+        $result = Db::connect($db)->table('sales_flat_order_address')->where("replace(telephone,'-','')", 'like', "%{$customer_phone}%")->field('telephone')->limit(10)->select();
         if (!$result) {
             return false;
         }
@@ -651,7 +651,7 @@ class SaleAfterTask extends Model
 
                 //补差价列表
                 $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
-               
+
                 $result[$k]['workOrderList'] = $workOrderListResult['list'];
                 $result[$k]['differencePriceList'] = $differencePriceList;
                 switch ($v['order_type']) {
@@ -716,7 +716,7 @@ class SaleAfterTask extends Model
         } else {
             $result = false;
         }
-      
+
         return $result;
     }
     /***
