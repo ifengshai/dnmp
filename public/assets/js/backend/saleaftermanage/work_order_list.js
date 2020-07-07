@@ -576,7 +576,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //是否自动审核完成  end
                         //修改地址
                         if(id == 13){
-                            $("#user_address").show();
+                            $(".step7").show()
+                            $(".step7 .step-container div").hide()
+                            $(".step7 #user_address").show();
+                            $(".step7 #user_address div:not(.dropdown-menu)").show();
                             $("#label_name").html('修改地址');
                             $("#toolbar1").hide();
                             var site_type = $('#work_platform').val();
@@ -844,18 +847,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 3);
+                var str = incrementId.substring(0, 2);
                 //判断站点
-                if (str == '100' || str == '400' || str == '500') {
+                if (str == '10' || str == '40' || str == '50') {
                     $("#work_platform").val(1);
-                } else if (str == '130' || str == '430') {
+                } else if (str == '13' || str == '43') {
                     $('#work_platform').val(2);
-                } else if (str == '300' || str == '600') {
+                } else if (str == '30' || str == '60') {
                     $('#work_platform').val(3);
-                } else if( str == '450' || str == '150'){
+                } else if( str == '45' || str == '15'){
                     //meeloog站
                     $('#work_platform').val(4);
-                } else if( str == '200' || str == '270'){
+                } else if( str == '20' || str == '27'){
                     //wesee站
                     $('#work_platform').val(5);
                 }
@@ -870,7 +873,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 3);
+                var str = incrementId.substring(0, 2);
                 var vip_str = incrementId.substring(1, 4);
                 if(vip_str == 'VIP'){
                     $('#order_pay_currency').val('USD');
@@ -887,16 +890,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 else{
                     //判断站点
-                    if (str == '100' || str == '400' || str == '500') {
+                    if (str == '10' || str == '40' || str == '50') {
                         $("#work_platform").val(1);
-                    } else if (str == '130' || str == '430') {
+                    } else if (str == '13' || str == '43') {
                         $('#work_platform').val(2);
-                    } else if (str == '300' || str == '600') {
+                    } else if (str == '30' || str == '60') {
                         $('#work_platform').val(3);
-                    }else if( str == '450' || str == '150'){
+                    }else if( str == '45' || str == '15'){
                         //meeloog站
                         $('#work_platform').val(4);
-                    } else if( str == '200' || str == '270'){
+                    } else if( str == '20' || str == '27'){
                         //wesee站
                         $('#work_platform').val(5);
                     }
@@ -1485,7 +1488,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }                        
                         //编辑页面的修改地址
                         if(id == 13){
-                            $("#user_address").show();
+                            $(".step7").show()
+                            $(".step7 .step-container div").hide()
+                            $(".step7 #user_address").show();
+                            $(".step7 #user_address div:not(.dropdown-menu)").show();
                             $("#label_name").html('修改地址');
                             $("#toolbar1").hide();
                             var site_type = $('#work_platform').val();

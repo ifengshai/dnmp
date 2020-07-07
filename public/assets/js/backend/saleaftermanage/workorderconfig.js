@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jstree'], function ($
                         // {checkbox: true},
                         {field: 'id', title: __('Id')},
                         { field: 'type', title: __('类型'), searchList: { 1: '客服工单', 2: '仓库工单' }, formatter: Table.api.formatter.status },
-                        { field: 'problem_belong', title: __('Problem_belong'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 2: '物流仓库', 3: '产品质量',4: '客户问题' ,5:'其他',6:'其他'}, formatter: Table.api.formatter.status },
+                        { field: 'problem_belong', title: __('Problem_belong'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 2: '物流仓库', 3: '产品质量',4: '客户问题' ,5:'仓库其他',6:'客服其他'}, formatter: Table.api.formatter.status },
 
                         {field: 'problem_name', title: __('问题类型')},
                         {
@@ -72,6 +72,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jstree'], function ($
         },
         add: function () {
             Controller.api.bindevent();
+            $("#bumen").change(function () {
+                var checkValue=$("#bumen").val();
+                console.log(checkValue);
+                if (checkValue == 1){
+                    $("#cangku").hide();
+                    $("#kefu").show();
+                }
+                if (checkValue == 2){
+                    $("#cangku").show();
+                    $("#kefu").hide();
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();
