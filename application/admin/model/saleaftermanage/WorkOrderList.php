@@ -326,7 +326,7 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $siteType = $params['work_platform'];
         //修改地址
-        if (($work->work_type == 1 && $work->problem_type_id == 3 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 3 && $measure_choose_id == 1)) {
+        if (($work->work_type == 1 && $work->problem_type_id == 52 && $measure_choose_id == 13) || ($work->work_type == 2 && $work->problem_type_id == 52 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
                 $changeAddress = $params['address'];
