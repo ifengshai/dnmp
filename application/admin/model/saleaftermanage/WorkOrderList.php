@@ -323,6 +323,9 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $siteType = $params['work_platform'];
         //修改地址
+        dump($work->work_type);
+        dump($work->problem_type_id);
+        dump($measure_choose_id);exit;
         if (($work->work_type == 1 && $work->problem_type_id == 52 && $measure_choose_id == 13) || ($work->work_type == 2 && $work->problem_type_id == 52 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
