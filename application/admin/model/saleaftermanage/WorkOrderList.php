@@ -126,6 +126,9 @@ class WorkOrderList extends Model
             case 3:
                 $this->model = new \app\admin\model\order\order\Nihao();
                 break;
+            case 4:
+                $this->model = new \app\admin\model\order\order\Meeloog();
+                break;    
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
                 break;
