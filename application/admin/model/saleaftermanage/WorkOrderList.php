@@ -126,6 +126,9 @@ class WorkOrderList extends Model
             case 3:
                 $this->model = new \app\admin\model\order\order\Nihao();
                 break;
+            case 4:
+                $this->model = new \app\admin\model\order\order\Meeloog();
+                break;    
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
                 break;
@@ -323,7 +326,7 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $siteType = $params['work_platform'];
         //修改地址
-        if (($work->work_type == 1 && $work->problem_type_id == 3 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 3 && $measure_choose_id == 1)) {
+        if (($work->work_type == 1 && $work->problem_type_id == 52 && $measure_choose_id == 13) || ($work->work_type == 2 && $work->problem_type_id == 52 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
                 $changeAddress = $params['address'];
