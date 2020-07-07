@@ -2238,6 +2238,8 @@ class WorkOrderList extends Backend
                         WorkOrderMeasure::where(['work_id' => $row->id])->delete();
                         WorkOrderRecept::where(['work_id' => $row->id])->delete();
                         WorkOrderChangeSku::where(['work_id' => $row->id])->delete();
+                        // dump($params['measure_choose_id']);
+                        // exit;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $row->id;
                             $measureList['measure_choose_id'] = $v;
@@ -2379,6 +2381,7 @@ class WorkOrderList extends Backend
         if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
+
             //$customer_problem_classifys = config('workorder.customer_problem_classify');
             $customer_problem_classifys = $workOrderConfigValue['customer_problem_classify'];
             unset($customer_problem_classifys['仓库问题']);
@@ -2426,6 +2429,7 @@ class WorkOrderList extends Backend
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
+        $this->assignconfig('work_status',$row->work_status);
         return $this->view->fetch();
     }
     /**
@@ -2758,6 +2762,7 @@ class WorkOrderList extends Backend
         } else { //仓库工单
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
+           
             //$this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
             $this->view->assign('problem_type', $workOrderConfigValue['warehouse_problem_type']);
         }
@@ -2793,6 +2798,7 @@ class WorkOrderList extends Backend
         if (2 <= $row->work_status) {
             $row->assign_user = Admin::where(['id' => $row->assign_user_id])->value('nickname');
         } else {
+            if($row->all_after_user_id)
             $row->assign_user  = Admin::where(['id' => $row->operation_user_id])->value('nickname');
         }
         $this->view->assign("row", $row);
@@ -2823,7 +2829,7 @@ class WorkOrderList extends Backend
 
         $this->view->assign('url', $url);
         $this->view->assign('remarkList', $remarkList);
-
+        $this->assignconfig('work_status',$row->work_status);
         return $this->view->fetch();
     }
 
