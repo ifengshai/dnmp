@@ -345,6 +345,45 @@
         padding: 0 10px;
         margin: 0;
     }
+    .step52_function1 {
+        background-color: #f4f4f4;
+        border: solid 1px #d2d6de;
+        width: 96%;
+        float: left;
+        padding: 20px;
+    }
+
+    .step52_function1_child {
+        float: left;
+        width: 32%;
+        padding: 8px;
+    }
+
+    .step52_function1_child label {
+        width: 40%;
+    }
+
+    .step52_function1_child div {
+        width: 58%;
+    }
+    .step52_function2_child label {
+        width: 40%;
+    }
+    .step52_function2_child div {
+        width: 58%;
+    }
+    .step52_function3_child label {
+        width: 40%;
+    }
+
+    .step52_function3_child div {
+        width: 58%;
+    }
+
+    .step52_function3 table {
+        float: left;
+        margin-top: 2px;
+    }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/process')}">
@@ -1170,6 +1209,92 @@
             </div>
         </div>
         <!--补发 end-->
+        <!--修改地址 start-->
+        <div class="form-group-child4 measure step52" style="display:none;" id="user_address">
+            <div class="col-xs-12 col-sm-8" style="width: 100%;margin-left: 1%;">
+                <p style="font-size: 16px;"><b>修改地址</b></p>
+
+                <div class="step52_function1">
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="address_select1" class="form-control selectpicker" name="row[modify_address][address_id]">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('First name')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-firstname1" class="form-control" name="row[modify_address][firstname]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Last name')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-lastname1" class="form-control" name="row[modify_address][lastname]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Email')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-email1" class="form-control" name="row[modify_address][email]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Telephone')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-telephone1" class="form-control" name="row[modify_address][telephone]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Country')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="c-country1" class="form-control selectpicker" name="row[modify_address][country_id]" disabled>
+                                <option value="">请选择</option>
+                                {foreach name="country" item="vo" key="key"}
+                                <option value="{$key}">{$vo['country']}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('State/Province')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="c-region2" class="form-control selectpicker" name="row[modify_address][region_id]" disabled>
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Region')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-region12" class="form-control" name="row[modify_address][region]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('City')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-city1" class="form-control" name="row[modify_address][city]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Street Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-street1" class="form-control" name="row[modify_address][street]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Zip/Postal Code')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-postcode1" class="form-control" name="row[modify_address][postcode]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!--修改地址 end-->
     </div>
 </form>
 
