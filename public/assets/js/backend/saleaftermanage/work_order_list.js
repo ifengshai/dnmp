@@ -920,6 +920,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#c-refund_way').val(data.method);
                         $('#customer_email').val(data.customer_email);
                         $('#order_type').val(data.order_type);
+                        $('#is_new_version').val(data.is_new_version);
                         var shtml = '';
                         for (var i in data.sku) {
                             shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
