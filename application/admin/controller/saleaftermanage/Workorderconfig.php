@@ -184,7 +184,11 @@ class Workorderconfig extends Backend
                     $this->model->validateFailException(true)->validate($validate);
                 }
                 $data['type'] = $params['type'];
-                $data['problem_belong'] = $params['problem_belong'];
+                if($params['type'] == 2){
+                    $data['problem_belong'] = $params['problem_belong1'];
+                }else{
+                    $data['problem_belong'] = $params['problem_belong'];
+                }
                 $data['problem_name'] = $params['problem_name'];
                 $result = $this->model->insertGetId($data);
                 foreach ($all_step as $k => $v) {
