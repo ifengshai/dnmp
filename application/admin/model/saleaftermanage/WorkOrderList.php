@@ -406,7 +406,11 @@ class WorkOrderList extends Model
                     $lensId = $changeLens['lens_type'][$key];
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
-
+                    dump($type);
+                    dump($lensId);
+                    dump($coatingId);
+                    dump($work->is_new_version);
+                    dump($colorId);exit;
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     // var_dump($type,$lensId,$coatingId,$colorId,$recipe_type,$work->is_new_version);
                     // var_dump($lensCoatName);
