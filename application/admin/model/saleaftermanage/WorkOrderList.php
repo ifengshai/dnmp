@@ -193,9 +193,9 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        if($siteType < 3){
-            foreach($prescriptions as $key => $val){
-                if(!isset($val['total_add'])){
+        if ($siteType < 3) {
+            foreach ($prescriptions as $key => $val) {
+                if (!isset($val['total_add'])) {
                     $prescriptions[$key]['os_add'] = $val['od_add'];
                     $prescriptions[$key]['od_add'] = $val['os_add'];
                 }
@@ -300,10 +300,10 @@ class WorkOrderList extends Model
             }
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
-            $stringBody = (string)$body;
+            $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
-            if($res === null){
+            if ($res === null) {
                 exception('网络异常');
             }
             if ($res['status'] == 200) {
@@ -1108,19 +1108,19 @@ class WorkOrderList extends Model
      */
     public static function workOrderListResult($allIncrementOrder)
     {
-        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)->select();
-        foreach($workOrderLists as &$workOrderList){
+        $workOrderLists = self::where('platform_order', 'in', $allIncrementOrder)->select();
+        foreach ($workOrderLists as &$workOrderList) {
             $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
             //承接人
-            $workOrderList->recept_persons = join(',',$receptPerson);
-            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id',$workOrderList->id)->column('measure_content');
-            $measures = join(',',$measures);
+            $workOrderList->recept_persons = join(',', $receptPerson);
+            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id', $workOrderList->id)->column('measure_content');
+            $measures = join(',', $measures);
             $workOrderList->measure = $measures;
-
         }
         return $workOrderLists;
     }
+
 
     /**
      * 客户订单检索工单 新
