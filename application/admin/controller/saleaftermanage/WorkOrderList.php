@@ -1192,6 +1192,7 @@ class WorkOrderList extends Backend
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
                         //措施
+                        $integral_auto_complete = $coupon_auto_complete = 0;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $work_id;
                             $measureList['measure_choose_id'] = $v;
@@ -1210,6 +1211,11 @@ class WorkOrderList extends Backend
                             $appoint_users = $params['order_recept']['appoint_users'][$v];
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
                             $auto_complete = $params['order_recept']['auto_complete'][$v];
+                            if(10 == $v){
+                                $integral_auto_complete = $auto_complete; 
+                            }elseif( 9 == $v){
+                                $coupon_auto_complete   = $auto_complete;
+                            }
                             //循环插入承接人
                             $appointList = [];
                             if(is_array($appoint_ids) && count($appoint_ids)>0){
@@ -1263,11 +1269,11 @@ class WorkOrderList extends Backend
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
-                        if (in_array(10, array_filter($params['measure_choose_id']))) {
+                        if (in_array(10, array_filter($params['measure_choose_id'])) && (1 == $integral_auto_complete)) {
                             $this->model->presentIntegral($work_id);
                         }
                         //直接发送优惠券
-                        if (in_array(9, array_filter($params['measure_choose_id']))) {
+                        if (in_array(9, array_filter($params['measure_choose_id'])) && (1 == $coupon_auto_complete)) {
                             $this->model->presentCoupon($work_id);
                         }
                     }
