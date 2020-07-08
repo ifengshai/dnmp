@@ -2610,6 +2610,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     });
                 });
+                //省市二级联动
+                $(document).on('change', '#c-country1', function () {
+                    var id = $(this).val();
+                    if (!id) {
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            country_id: id,
+                        },
+                        success: function (json) {
+                            var data = json.province;
+                            var province = '<option value="0">请选择</option>';
+                            for (var i = 0; i < data.length; i++) {
+                                province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                            }
+                            $('#c-region2').html(province);
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+                    });
+                });
             },
         }
     };
