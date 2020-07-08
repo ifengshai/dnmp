@@ -3729,19 +3729,19 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['integral_describe']);
             $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['replacement_order']);
             //措施
-            if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
+            if (array_key_exists($value['id'], $info['step'])) {
                 $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $info['step'][$value['id']]);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), '');
             }
             //措施详情
-            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
+            if (array_key_exists($value['id'], $info['detail'])) {
                 $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $info['detail'][$value['id']]);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
             }
             //承接
-            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+            if (array_key_exists($value['id'], $receptInfo)) {
 
                 $value['result'] = $receptInfo[$value['id']];
                 $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['result']);
@@ -3749,7 +3749,7 @@ EOF;
                 $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
             }
             //回复
-            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
+            if (array_key_exists($value['id'], $noteInfo)) {
                 $value['note'] = $noteInfo[$value['id']];
                 $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
             } else {
