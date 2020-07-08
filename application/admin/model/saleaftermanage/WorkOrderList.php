@@ -610,7 +610,7 @@ class WorkOrderList extends Model
             }
 
             //lensName
-            foreach ($lensColorList as $val) {
+            foreach ($lens as $val) {
                 if ($val['lens_id'] == $lens_id) {
                     $lensName = $val['lens_data_name'] . "({$colorName})";
                     $lensType = $val['lens_data_index'];
