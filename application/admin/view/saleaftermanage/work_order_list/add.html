@@ -418,13 +418,13 @@
     <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
 
     <input type="hidden" name="row[is_new_version]" id="is_new_version" value="0">
-
     <!-- 订单的base_grand_total -->
     <input type="hidden" name="row[base_grand_total]" id='base_grand_total' value="{$row.base_grand_total}" />
     <!-- 订单的grand_total -->
     <input type="hidden" name="row[grand_total]" id='grand_total' value="{$row.grand_total}" />
     <!-- 订单的base_to_order_rate -->
     <input type="hidden" name="row[base_to_order_rate]" id='base_to_order_rate' value="{$row.base_to_order_rate}" />
+
 
     <div class="form-group">
         <div class="form-group-child">
@@ -806,6 +806,7 @@
     <div class="form-group-child4 measure step7" style="display:none;">
         <div class="col-xs-12 col-sm-8" style="width: 100%;margin-left: 1%;">
             <p style="font-size: 16px;"><b>补发</b></p>
+
             <div class="step7_function1">
                 <div class="step7_function1_child">
                     <label class="control-label col-xs-12 col-sm-3">{:__('Address')}：</label>
