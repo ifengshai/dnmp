@@ -992,7 +992,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }else{
                                         $('#c-region').val(data.address[i].region_id);
                                     }
-
+                                    $('#c-region1').val(data.address[i].region);
                                     $('#c-city').val(data.address[i].city);
                                     $('#c-street').val(data.address[i].street);
                                     $('#c-postcode').val(data.address[i].postcode);
@@ -1700,6 +1700,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         }else{
                                             $('#c-region').val(data.address[i].region_id);
                                         }
+                                        $('#c-region1').val(data.address[i].region);
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
@@ -2383,6 +2384,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-country').val(real_address.country_id);
                                     $('#c-country').change();
                                     $('#c-region').val(real_address.region_id);
+                                    $('#c-region1').val(real_address.region);
                                     $('#c-city').val(real_address.city);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
@@ -2407,6 +2409,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-country').val(data.address[i].country_id);
                                             $('#c-country').change();
                                             $('#c-region').val(data.address[i].region_id);
+                                            $('#c-region1').val(data.address[i].region);
                                             $('#c-city').val(data.address[i].city);
                                             $('#c-street').val(data.address[i].street);
                                             $('#c-postcode').val(data.address[i].postcode);
@@ -2585,6 +2588,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
                             }
                             $('#c-region').html(province);
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+                    });
+                });
+                //省市二级联动
+                $(document).on('change', '#c-country1', function () {
+                    var id = $(this).val();
+                    if (!id) {
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            country_id: id,
+                        },
+                        success: function (json) {
+                            var data = json.province;
+                            var province = '<option value="0">请选择</option>';
+                            for (var i = 0; i < data.length; i++) {
+                                province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                            }
+                            $('#c-region2').html(province);
                             $('.selectpicker ').selectpicker('refresh');
                         }
                     });
