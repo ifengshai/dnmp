@@ -329,7 +329,7 @@ class WorkOrderList extends Model
         if (($work->work_type == 1 && $measure_choose_id == 13) || ($work->work_type == 2 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
-                $changeAddress = $params['address'];
+                $changeAddress = $params['modify_address'];
                 $postData = array(
                     'increment_id'=>$params['platform_order'],
                     'type'=>$changeAddress['address_id'],
