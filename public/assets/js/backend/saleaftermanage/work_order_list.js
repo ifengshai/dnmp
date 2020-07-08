@@ -993,7 +993,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }else{
                                         $('#c-region').val(data.address[i].region_id);
                                     }
-
+                                    $('#c-region1').val(data.address[i].region);
                                     $('#c-city').val(data.address[i].city);
                                     $('#c-street').val(data.address[i].street);
                                     $('#c-postcode').val(data.address[i].postcode);
@@ -1710,6 +1710,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         }else{
                                             $('#c-region').val(data.address[i].region_id);
                                         }
+                                        $('#c-region1').val(data.address[i].region);
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
@@ -2397,6 +2398,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-country').val(real_address.country_id);
                                     $('#c-country').change();
                                     $('#c-region').val(real_address.region_id);
+                                    $('#c-region1').val(real_address.region);
                                     $('#c-city').val(real_address.city);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
@@ -2421,6 +2423,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-country').val(data.address[i].country_id);
                                             $('#c-country').change();
                                             $('#c-region').val(data.address[i].region_id);
+                                            $('#c-region1').val(data.address[i].region);
                                             $('#c-city').val(data.address[i].city);
                                             $('#c-street').val(data.address[i].street);
                                             $('#c-postcode').val(data.address[i].postcode);
