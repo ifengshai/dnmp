@@ -161,7 +161,7 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
             $items[$item_key]['second_name'] = $final_params['second_name'];
-            $items[$item_key]['third_name'] = $final_params['third_name'];
+            $items[$item_key]['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'] . ' ' . $product_options['info_buyRequest']['tmplens']['prescription_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['lens_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['color_name'];
             $items[$item_key]['four_name'] = $final_params['four_name'];
 
             $items[$item_key]['od_sph'] = $final_params['od_sph'];

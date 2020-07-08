@@ -1125,8 +1125,8 @@ class Item extends Backend
         //在途库存列表
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $where['a.purchase_status'] = ['in', [2, 5, 6, 9]];
-        $where['a.stock_status'] = ['in', [0, 1]];
+        $where['a.purchase_status'] = ['in', [2, 5, 6]];
+        // $where['a.stock_status'] = ['in', [0, 1]];
         $where['a.is_del'] = 1;
         $where['b.sku'] = $row['sku'];
 
@@ -1135,20 +1135,20 @@ class Item extends Backend
             ->group('b.id')
             ->select();
 
-        $check = new \app\admin\model\warehouse\Check;
-        foreach ($info as $k => $v) {
-            //计算质检单到货数量
-            $map['a.purchase_id'] = $v['id'];
-            $map['a.status'] = 2;
-            $map['b.sku'] = $v['sku'];
-            $map['a.type'] = 1;
-            $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
-            if ($v['purchase_num'] - $arrivals_num == 0) {
-                unset($info[$k]);
-                continue;
-            }
-            $info[$k]['arrivals_num'] = $arrivals_num;
-        }
+        // $check = new \app\admin\model\warehouse\Check;
+        // foreach ($info as $k => $v) {
+        //     //计算质检单到货数量
+        //     $map['a.purchase_id'] = $v['id'];
+        //     $map['a.status'] = 2;
+        //     $map['b.sku'] = $v['sku'];
+        //     $map['a.type'] = 1;
+        //     $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
+        //     if ($v['purchase_num'] - $arrivals_num == 0) {
+        //         unset($info[$k]);
+        //         continue;
+        //     }
+        //     $info[$k]['arrivals_num'] = $arrivals_num;
+        // }
 
         $this->assign('info', $info);
 

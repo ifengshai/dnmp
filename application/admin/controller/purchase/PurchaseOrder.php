@@ -42,7 +42,7 @@ class PurchaseOrder extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['batch_export_xls', 'deleteLogisticsItem'];
+    protected $noNeedRight = ['batch_export_xls', 'deleteLogisticsItem', 'process_export_xls'];
 
     public function _initialize()
     {
@@ -432,11 +432,11 @@ class PurchaseOrder extends Backend
 
                         //添加分批数据
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
-                        
+
                         $batch_id = $this->request->post("batch_id/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $batch_item_id = $this->request->post("batch_item_id/a");
-                      
+
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {
                             $i = 0;
@@ -452,7 +452,7 @@ class PurchaseOrder extends Backend
                                     $batch_data['batch'] = $i + 1;
                                     $batch_data['create_person'] = session('admin.nickname');
                                     $batch_data['create_time'] = date('Y-m-d H:i:s');
-                                   
+
                                     $batch_get_id = $this->batch->insertGetId($batch_data);
                                 }
                                 $i++;
@@ -616,13 +616,15 @@ class PurchaseOrder extends Backend
                     }
                     $params['is_add_logistics'] = 1;
                     $params['purchase_status'] = 6; //待收货
-                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
+                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids], 'purchase_status' => ['in', [2, 5, 6]]])->save($params);
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
                     $logistics_company_no = $params['logistics_company_no'];
                     $logistics_number = $params['logistics_number'];
                     $logistics_ids = $params['logistics_ids'];
 
+
+                    //添加物流单明细表
                     if ($params['batch_id']) {
                         foreach ($logistics_company_no as $k => $v) {
                             foreach ($v as $key => $val) {
@@ -1501,6 +1503,170 @@ class PurchaseOrder extends Backend
         }
         return $this->view->fetch();
     }
+
+
+    //批量导出xls
+    public function process_export_xls()
+    {
+        $this->model = new \app\admin\model\warehouse\Check;
+        $this->check_item = new \app\admin\model\warehouse\CheckItem;
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids_all = input('ids');
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['sku']) {
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $ids = $this->check_item->where($smap)->column('check_id');
+            $map['check.id'] = ['in', $ids];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['createtime']) {
+            $arr = explode(' ', $filter['createtime']);
+            $map['check.createtime'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
+            unset($filter['createtime']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        //是否存在需要退回产品
+        $check_map['unqualified_num'] = ['>', 0];
+        $ids = $this->check_item->where($check_map)->column('check_id');
+        $map['check.id'] = ['in', $ids];
+        $map['check.is_return'] = 0;
+        $map['check.status'] = 2;
+
+        if ($ids_all) {
+            $map['check.id'] = ['in', $ids_all];
+        }
+
+        list($where) = $this->buildparams();
+        $list = $this->model->alias('check')
+            ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
+            ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
+            ->where($where)
+            ->where($map)
+            ->order('check.id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier();
+        $supplier_data = $supplier->getSupplierData();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "质检单号")
+            ->setCellValue("B1", "质检单类型")
+            ->setCellValue("C1", "采购单号");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "采购创建人")
+            ->setCellValue("E1", "退货单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "供应商")
+            ->setCellValue("G1", "采购备注");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "质检备注")
+            ->setCellValue("I1", "SKU")
+            ->setCellValue("J1", "供应商SKU")
+            ->setCellValue("K1", "单价");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "采购数量")
+            ->setCellValue("M1", "到货数量")
+            ->setCellValue("N1", "合格数量")
+            ->setCellValue("O1", "不合格数量")
+            ->setCellValue("P1", "创建人")
+            ->setCellValue("Q1", "创建时间");
+
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('质检单数据');
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '');
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $supplier_data[$value['supplier_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrivals_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['quantity_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['unqualified_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['createtime']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '质检单数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
 
 
     /**

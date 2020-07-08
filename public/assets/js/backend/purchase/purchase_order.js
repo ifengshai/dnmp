@@ -999,13 +999,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?ids=' + ids, '_blank');
+                    window.open(Config.moduleurl + '/purchase/purchase_order/process_export_xls?ids=' + ids, '_blank');
                 } else {
                     var options = table.bootstrapTable('getOptions');
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
-                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    window.open(Config.moduleurl + '/purchase/purchase_order/process_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
 
             });

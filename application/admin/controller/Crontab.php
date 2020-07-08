@@ -4049,7 +4049,8 @@ order by sfoi.item_id asc limit 1000";
     {
 
         $skus = [
-            'FX0206-02'
+            'OP049594-01',
+            'OP01860-04',
         ];
 
         foreach ($skus as $k => $v) {
@@ -4079,7 +4080,8 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FX0206-02'
+            'OP049594-01',
+            'OP01860-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4139,7 +4141,8 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FX0206-02'
+            'OP049594-01',
+            'OP01860-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4187,7 +4190,8 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'FX0206-02'
+            'OP049594-01',
+            'OP01860-04',
         ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {

@@ -2794,4 +2794,21 @@ class Test extends Backend
         echo "ok";
         exit;
     }
+
+    public function test1()
+    {
+        $this->orderNode = new \app\admin\model\OrderNode;
+        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail;
+        $data = $this->orderNode->where('delivery_time>=signing_time')->select();
+        $data = collection($data)->toArray();
+        foreach ($data as $k => $v) {
+            $res = Db::name('order_node_courier')->field('create_time')->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->order('id asc')->find();
+            $this->orderNode->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->update(['delivery_time' => $res['create_time']]);
+            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number'], 'order_node' => 2, 'node_type' => 7])->update(['create_time' => $res['create_time']]);
+
+            echo $k . "\n";
+        }
+
+        echo 'ok';die;
+    }
 }
