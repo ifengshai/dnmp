@@ -250,8 +250,6 @@ class WorkOrderList extends Model
             foreach ($showPrescriptions as $key => $val) {
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
-            dump($prescription);
-            dump($colorList);exit;
             //拼接html页面
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         } elseif ($type == 2) {
