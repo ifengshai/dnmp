@@ -389,9 +389,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#c-refund_money').val(29.8);
                     $('#c-refund_way').val('原路退回');
                     var site = incrementId.substring(0, 1);
-                    if(site == 'Z'){
+                    if(site =='Z'){
                         $("#work_platform").val(1);
-                    }else if(site == 'V'){
+                    }else if(site =='V'){
                         $("#work_platform").val(2);
                     }
                     $('#order_type').val(100);
@@ -576,73 +576,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //是否自动审核完成  end
                         //修改地址
                         if(id == 13){
-                            $("#user_address").show();
-                            var site_type = $('#work_platform').val();
-                            //id == 3修改地址
-                            //获取用户地址的信息
-                            Backend.api.ajax({
-                                url: 'saleaftermanage/work_order_list/ajaxGetAddress',
-                                data: {
-                                 increment_id: incrementId,
-                                    site_type: site_type,
-                                }
-                            }, function (json, ret) {
-                                if (json.code == 0) {
-                                    Toastr.error(json.msg);
-                                    return false;
-                                }
-                                var data = json.address;
-                                var order_pay_currency = $('#order_pay_currency').val();
-                                //修改地址
-                                var address1 = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                        //补发地址自动填充第一个
-                                        $('#c-firstname1').val(data.address[i].firstname);
-                                        $('#c-lastname1').val(data.address[i].lastname);
-                                        var email = data.address[i].email;
-                                        if (email == null) {
-                                            email = $('#customer_email1').val();
-                                        }
-                                        $('#c-email1').val(email);
-                                        $('#c-telephone1').val(data.address[i].telephone);
-                                        $('#c-country1').val(data.address[i].country_id);
-                                        $('#c-country1').change();
-                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
-                                            $('#c-region2').val(0);
-                                        }else{
-                                            $('#c-region2').val(data.address[i].region_id);
-                                        }
-                                        $('#c-region12').val(data.address[i].region);
-                                        $('#c-city1').val(data.address[i].city);
-                                        $('#c-street1').val(data.address[i].street);
-                                        $('#c-postcode1').val(data.address[i].postcode);
-                                        $('#c-currency_code1').val(order_pay_currency);
-                                    } else {
-                                        address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                    }
-                                }
-                                $('#address_select1').html(address1);
-                                //选择地址切换地址
-                                $('#address_select1').change(function () {
-                                    var address_id = $(this).val();
-                                    var address = data.address[address_id];
-                                    $('#c-firstname1').val(address.firstname);
-                                    $('#c-lastname1').val(address.lastname);
-                                    $('#c-email1').val(address.email);
-                                    $('#c-telephone1').val(address.telephone);
-                                    $('#c-country1').val(address.country_id);
-                                    $('#c-country1').change();
-                                    $('#c-region12').val(address.region);
-                                    $('#c-region2').val(address.region_id);
-                                    $('#c-city1').val(address.city);
-                                    $('#c-street1').val(address.street);
-                                    $('#c-postcode1').val(address.postcode);
-                                })
-
-                                $('.selectpicker ').selectpicker('refresh');
-                            });
+                            changeOrderAddress();
                         }
                         //vip退款
                         if(id == 15){
@@ -1016,6 +950,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#c-country').val(address.country_id);
                                 $('#c-country').change();
                                 $('#c-region').val(address.region_id);
+                                $('#c-region1').val(address.region);
                                 $('#c-city').val(address.city);
                                 $('#c-street').val(address.street);
                                 $('#c-postcode').val(address.postcode);
@@ -1484,73 +1419,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }                        
                         //编辑页面的修改地址
                         if(id == 13){
-                            $("#user_address").show();
-                            var site_type = $('#work_platform').val();
-                            //id == 3修改地址
-                            //获取用户地址的信息
-                            Backend.api.ajax({
-                                url: 'saleaftermanage/work_order_list/ajaxGetAddress',
-                                data: {
-                                    increment_id: incrementId,
-                                    site_type: site_type,
-                                }
-                            }, function (json, ret) {
-                                if (json.code == 0) {
-                                    Toastr.error(json.msg);
-                                    return false;
-                                }
-                                var data = json.address;
-                                var order_pay_currency = $('#order_pay_currency').val();
-                                //修改地址
-                                var address1 = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                        //补发地址自动填充第一个
-                                        $('#c-firstname1').val(data.address[i].firstname);
-                                        $('#c-lastname1').val(data.address[i].lastname);
-                                        var email = data.address[i].email;
-                                        if (email == null) {
-                                            email = $('#customer_email1').val();
-                                        }
-                                        $('#c-email1').val(email);
-                                        $('#c-telephone1').val(data.address[i].telephone);
-                                        $('#c-country1').val(data.address[i].country_id);
-                                        $('#c-country1').change();
-                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
-                                            $('#c-region2').val(0);
-                                        }else{
-                                            $('#c-region2').val(data.address[i].region_id);
-                                        }
-                                        $('#c-region12').val(data.address[i].region);
-                                        $('#c-city1').val(data.address[i].city);
-                                        $('#c-street1').val(data.address[i].street);
-                                        $('#c-postcode1').val(data.address[i].postcode);
-                                        $('#c-currency_code1').val(order_pay_currency);
-                                    } else {
-                                        address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                    }
-                                }
-                                $('#address_select1').html(address1);
-                                //选择地址切换地址
-                                $('#address_select1').change(function () {
-                                    var address_id = $(this).val();
-                                    var address = data.address[address_id];
-                                    $('#c-firstname1').val(address.firstname);
-                                    $('#c-lastname1').val(address.lastname);
-                                    $('#c-email1').val(address.email);
-                                    $('#c-telephone1').val(address.telephone);
-                                    $('#c-country1').val(address.country_id);
-                                    $('#c-country1').change();
-                                    $('#c-region12').val(address.region);
-                                    $('#c-region2').val(address.region_id);
-                                    $('#c-city1').val(address.city);
-                                    $('#c-street1').val(address.street);
-                                    $('#c-postcode1').val(address.postcode);
-                                })
-
-                                $('.selectpicker ').selectpicker('refresh');
-                            });
+                            changeOrderAddress();
                         }
                         //vip退款
                         if(id == 15){
@@ -1737,6 +1606,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
                                     $('#c-region').val(address.region_id);
+                                    $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
@@ -1887,12 +1757,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if(id == 15){
                     $(".step2").show();
                 }
+                if(id == 13){
+                    changeOrderAddress();
+                }
             })
 
         },
         //处理任务
         process: function () {
             Controller.api.bindevent();
+            $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                var id = $(this).val();
+                if(id == 15){
+                    $(".step2").show();
+                }
+                if(id == 13){
+                    changeOrderAddress();
+                }
+            })
         },
         workordernote: function () {
             Form.api.bindevent($("form[role=form]"), function (data, ret) {
@@ -2447,6 +2329,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
                                     $('#c-region').val(address.region_id);
+                                    $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
@@ -2775,5 +2658,81 @@ function delOne(str,arr){
     var index = arr.indexOf(str);
     arr.splice(index,1);
     //document.write(arr);
+}
+//修改地址
+function changeOrderAddress(){
+    $("#user_address").show();
+    var incrementId = $('#c-platform_order').val();
+    if (!incrementId) {
+        Toastr.error('订单号不能为空');
+        return false;
+    } else {
+        var site_type = $('#work_platform').val();
+        //id == 3修改地址
+        //获取用户地址的信息
+        Backend.api.ajax({
+            url: 'saleaftermanage/work_order_list/ajaxGetAddress',
+            data: {
+                increment_id: incrementId,
+                site_type: site_type,
+            }
+        }, function (json, ret) {
+            if (json.code == 0) {
+                Toastr.error(json.msg);
+                return false;
+            }
+            var data = json.address;
+            var order_pay_currency = $('#order_pay_currency').val();
+            //修改地址
+            var address1 = '';
+            for (var i = 0; i < data.address.length; i++) {
+                if (i == 0) {
+                    address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                    //补发地址自动填充第一个
+                    $('#c-firstname1').val(data.address[i].firstname);
+                    $('#c-lastname1').val(data.address[i].lastname);
+                    var email = data.address[i].email;
+                    if (email == null) {
+                        email = $('#customer_email1').val();
+                    }
+                    $('#c-email1').val(email);
+                    $('#c-telephone1').val(data.address[i].telephone);
+                    $('#c-country1').val(data.address[i].country_id);
+                    $('#c-country1').change();
+                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                        $('#c-region2').val(0);
+                    }else{
+                        $('#c-region2').val(data.address[i].region_id);
+                    }
+                    $('#c-region12').val(data.address[i].region);
+                    $('#c-city1').val(data.address[i].city);
+                    $('#c-street1').val(data.address[i].street);
+                    $('#c-postcode1').val(data.address[i].postcode);
+                    $('#c-currency_code1').val(order_pay_currency);
+                } else {
+                    address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                }
+            }
+            $('#address_select1').html(address1);
+            //选择地址切换地址
+            $('#address_select1').change(function () {
+                var address_id = $(this).val();
+                var address = data.address[address_id];
+                $('#c-firstname1').val(address.firstname);
+                $('#c-lastname1').val(address.lastname);
+                $('#c-email1').val(address.email);
+                $('#c-telephone1').val(address.telephone);
+                $('#c-country1').val(address.country_id);
+                $('#c-country1').change();
+                $('#c-region12').val(address.region);
+                $('#c-region2').val(address.region_id);
+                $('#c-city1').val(address.city);
+                $('#c-street1').val(address.street);
+                $('#c-postcode1').val(address.postcode);
+            })
+
+            $('.selectpicker ').selectpicker('refresh');
+        });
+    }
 }
 
