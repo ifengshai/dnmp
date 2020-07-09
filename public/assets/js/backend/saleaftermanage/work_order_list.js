@@ -396,6 +396,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(2);
                     }
                     $('#order_type').val(100);
+                    $('#c-order_type').val(100);
+                    $('.selectpicker ').selectpicker('refresh');
                 }
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
@@ -817,6 +819,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(2);
                     }
                     $('#order_type').val(100);
+                    $('#c-order_type').val(100);
+                    $('.selectpicker ').selectpicker('refresh');
                 }
                 else{
                     //判断站点
