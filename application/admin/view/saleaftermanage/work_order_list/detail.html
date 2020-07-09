@@ -428,7 +428,19 @@
                 </select>                
             </div>
         </div>
-
+        <div class="form-group-child">
+            <label class="control-label col-xs-12 col-sm-2">{:__('订单类型')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-order_type" class="form-control selectpicker" disabled  name="row[work_order_type]">
+                    <option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>普通订单</option>
+                    <option value="2" {eq name="2" value="$row.order_type"}selected{/eq}>批发单</option>
+                    <option value="3" {eq name="3" value="$row.order_type"}selected{/eq}>网红单</option>
+                    <option value="4" {eq name="4" value="$row.order_type"}selected{/eq}>补发单</option>
+                    <option value="5" {eq name="5" value="$row.order_type"}selected{/eq}>补差价订单</option>
+                    <option value="100" {eq name="100" value="$row.order_type"}selected{/eq}>VIP订单</option>
+                </select>
+            </div>
+        </div>
         <div class="form-group-child2" style="margin-left: 1%;width: 47%;">
             <label class="control-label col-xs-12 col-sm-2">{:__('problem_description')}：</label>
             <div class="col-xs-12 col-sm-8" style="width: 83%;">
