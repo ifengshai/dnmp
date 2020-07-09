@@ -38,6 +38,76 @@ class Test extends Backend
     }
 
 
+    public function new_track_test()
+    {
+
+        $order_shipment = Db::name('order_node')->where(['node_type' => 11, 'order_node' => 3])->limit(10)->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+            //先把主表状态更新为2-7
+            // $update['order_node'] = 2;
+            // $update['node_type'] = 7;
+            // Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+                /* 'number' => '92001902551559000101352584', //usps郭伟峰
+                'carrier' => '21051' */
+            ]]);
+
+            $add['site'] = $v['site'];
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $v['order_number'];
+            $add['shipment_type'] = $v['shipment_type'];
+            $add['shipment_data_type'] = $v['shipment_data_type'];
+            $add['track_number'] = $v['track_number'];
+
+            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+                dump($trackdata);die;
+
+                if (stripos($v['shipment_type'], 'USPS') !== false) {
+                    if ($v['shipment_data_type'] == 'USPS_1') {
+                        //郭伟峰
+                        $this->usps_1_data($trackdata, $add);
+                    }
+                    if ($v['shipment_data_type'] == 'USPS_2') {
+                        //加诺
+                        $this->usps_2_data($trackdata, $add);
+                    }
+                }
+
+                if (stripos($v['shipment_type'], 'DHL') !== false) {
+                    $this->new_dhl_data($trackdata, $add);
+                }
+
+                if (stripos($v['shipment_type'], 'fede') !== false) {
+                    $this->new_fedex_data($trackdata, $add);
+                }
+            }
+            echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
+            usleep(200000);
+        }
+        echo 'ok';
+    }
+
+
+
+
 
     /**
      * 批量 获取物流明细
@@ -2813,6 +2883,7 @@ class Test extends Backend
             echo $k . "\n";
         }
 
-        echo 'ok';die;
+        echo 'ok';
+        die;
     }
 }
