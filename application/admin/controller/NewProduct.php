@@ -754,6 +754,7 @@ class NewProduct extends Backend
                         $this->item->allowField(true)->isUpdate(false)->data($params, true)->save();
                         $attributeParams = $val['newproductattribute'];
                         unset($attributeParams['id']);
+                        unset($attributeParams['frame_images']);
                         $attributeParams['item_id'] = $this->item->id;
                         //添加商品属性表信息
                         $this->itemAttribute->allowField(true)->isUpdate(false)->data($attributeParams, true)->save();
