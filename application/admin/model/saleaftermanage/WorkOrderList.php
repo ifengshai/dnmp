@@ -146,6 +146,7 @@ class WorkOrderList extends Model
         if (!$sku && !$orderInfo) {
             return [];
         }
+        $register_email = $this->model->alias('m')->where('m.increment_id',$increment_id)->join(['customer_entity' => 'r'], 'm.customer_id=r.entity_id')->value('email');
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
@@ -153,7 +154,7 @@ class WorkOrderList extends Model
         $result['base_grand_total'] = $orderInfo['base_grand_total'];
         $result['grand_total']    = $orderInfo['grand_total'];
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
-        $result['customer_email'] = $orderInfo['customer_email'];
+        $result['customer_email'] = $register_email ?: $orderInfo['customer_email'];
         $result['order_type']     = $orderInfo['order_type'];
         $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
         return $result ? $result : [];
