@@ -399,6 +399,9 @@ class WorkOrderList extends Backend
                         if (!$params['integral']) {
                             throw new Exception("积分不能为空");
                         }
+                        if(!is_numeric($params['integral'])){
+                            throw new Exception("积分只能是数字");
+                        }
                     }
 
                     //判断是否选择退件措施
@@ -877,6 +880,9 @@ class WorkOrderList extends Backend
                     } else {
                         if (!$params['integral']) {
                             throw new Exception("积分不能为空");
+                        }
+                        if(!is_numeric($params['integral'])){
+                            throw new Exception("积分只能是数字");
                         }
                     }
 
@@ -1557,6 +1563,9 @@ class WorkOrderList extends Backend
                         if (!$params['integral']) {
                             throw new Exception("积分不能为空");
                         }
+                        if(!is_numeric($params['integral'])){
+                            throw new Exception("积分只能是数字");
+                        }
                     }
 
                     //判断是否选择退件措施
@@ -1953,6 +1962,9 @@ class WorkOrderList extends Backend
                     } else {
                         if (!$params['integral']) {
                             throw new Exception("积分不能为空");
+                        }
+                        if(!is_numeric($params['integral'])){
+                            throw new Exception("积分只能是数字");
                         }
                     }
 
