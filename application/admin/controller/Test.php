@@ -69,6 +69,8 @@ class Test extends Backend
                 'carrier' => '21051' */
             ]]);
 
+            dump($trackInfo);
+                die;
             $add['site'] = $v['site'];
             $add['order_id'] = $v['order_id'];
             $add['order_number'] = $v['order_number'];
@@ -78,26 +80,28 @@ class Test extends Backend
 
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-                dump($trackdata);die;
+                
 
-                if (stripos($v['shipment_type'], 'USPS') !== false) {
-                    if ($v['shipment_data_type'] == 'USPS_1') {
-                        //郭伟峰
-                        $this->usps_1_data($trackdata, $add);
-                    }
-                    if ($v['shipment_data_type'] == 'USPS_2') {
-                        //加诺
-                        $this->usps_2_data($trackdata, $add);
-                    }
-                }
+                $this->tongyong($trackdata, $add);
 
-                if (stripos($v['shipment_type'], 'DHL') !== false) {
-                    $this->new_dhl_data($trackdata, $add);
-                }
+                // if (stripos($v['shipment_type'], 'USPS') !== false) {
+                //     if ($v['shipment_data_type'] == 'USPS_1') {
+                //         //郭伟峰
+                //         $this->usps_1_data($trackdata, $add);
+                //     }
+                //     if ($v['shipment_data_type'] == 'USPS_2') {
+                //         //加诺
+                //         $this->usps_2_data($trackdata, $add);
+                //     }
+                // }
 
-                if (stripos($v['shipment_type'], 'fede') !== false) {
-                    $this->new_fedex_data($trackdata, $add);
-                }
+                // if (stripos($v['shipment_type'], 'DHL') !== false) {
+                //     $this->new_dhl_data($trackdata, $add);
+                // }
+
+                // if (stripos($v['shipment_type'], 'fede') !== false) {
+                //     $this->new_fedex_data($trackdata, $add);
+                // }
             }
             echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
             usleep(200000);
@@ -106,7 +110,58 @@ class Test extends Backend
     }
 
 
+    //usps_1  郭伟峰
+    public function tongyong($data, $add)
+    {
+        $order_node_detail['order_node'] = 3;
+        $order_node_detail['handle_user_id'] = 0;
+        $order_node_detail['handle_user_name'] = 'system';
+        $order_node_detail['site'] = $add['site'];
+        $order_node_detail['order_id'] = $add['order_id'];
+        $order_node_detail['order_number'] = $add['order_number'];
+        $order_node_detail['shipment_type'] = $add['shipment_type'];
+        $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
+        $order_node_detail['track_number'] = $add['track_number'];
 
+        if ($data['e'] == 40) {
+
+            $add['create_time'] = $data['z0']['a'];
+            $add['content'] = $data['z0']['z'];
+            $add['courier_status'] = $data['e'];
+            $count = Db::name('order_node_courier')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'content' => $add['content']])->count();
+            if ($count < 1) {
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
+            }
+
+            $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+            $update_order_node['order_node'] = 4;
+            $update_order_node['node_type'] = $data['e'];
+            $update_order_node['update_time'] = $data['z0']['a'];
+            $update_order_node['signing_time'] = $data['z0']['a']; //更新签收时间
+            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+
+            $order_node_detail['order_node'] = 4;
+            $order_node_detail['node_type'] = $data['e'];
+            switch ($data['e']) {
+                case 30:
+                    $order_node_detail['content'] = $this->str30;
+                    break;
+                case 35:
+                    $order_node_detail['content'] = $this->str35;
+                    break;
+                case 40:
+                    $order_node_detail['content'] = $this->str40;
+                    break;
+                case 50:
+                    $order_node_detail['content'] = $this->str50;
+                    break;
+            }
+
+            $order_node_detail['create_time'] = $data['z0']['a'];
+            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+        }
+    }
 
 
     /**

@@ -34,9 +34,10 @@ class ThirdApi extends Api
         $track_arr = json_decode($track_info,true);
         $verify_sign = $track_arr['event'].'/'.json_encode($track_arr['data']).'/'.$this->apiKey;
         $verify_sign = hash("sha256",$verify_sign);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
         if($verify_sign == $track_arr['sign']){
             if($track_arr['event'] != 'TRACKING_STOPPED'){
-                file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
+                // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
                 $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number',$track_arr['data']['number'])->find();
                 $add['site'] = $order_node['site'];
                 $add['order_id'] = $order_node['order_id'];
