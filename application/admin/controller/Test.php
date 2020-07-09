@@ -41,7 +41,7 @@ class Test extends Backend
     public function new_track_test()
     {
 
-        $order_shipment = Db::name('order_node')->where(['node_type' => 11, 'order_node' => 3, 'shipment_type' => 'USPS'])->select();
+        $order_shipment = Db::name('order_node')->where(['node_type' => ['<>', 40], 'order_node' => 4, 'shipment_type' => 'USPS'])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
