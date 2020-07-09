@@ -87,6 +87,11 @@ class Test4 extends Backend
                         //加诺
                         $this->usps_2_data($trackdata, $add);
                     }
+
+                    if ($v['shipment_data_type'] == 'USPS_3') {
+                        //临时杜明明
+                        $this->usps_3_data($trackdata, $add);
+                    }
                 }
 
                 if (stripos($v['shipment_type'], 'DHL') !== false) {
