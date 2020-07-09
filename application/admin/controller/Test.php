@@ -41,7 +41,7 @@ class Test extends Backend
     public function new_track_test()
     {
 
-        $order_shipment = Db::name('order_node')->where(['node_type' => 11, 'order_node' => 3])->limit(10)->select();
+        $order_shipment = Db::name('order_node')->where(['node_type' => 11, 'order_node' => 3, 'shipment_type' => 'USPS'])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
@@ -69,8 +69,6 @@ class Test extends Backend
                 'carrier' => '21051' */
             ]]);
 
-            dump($trackInfo);
-                die;
             $add['site'] = $v['site'];
             $add['order_id'] = $v['order_id'];
             $add['order_number'] = $v['order_number'];
@@ -80,7 +78,7 @@ class Test extends Backend
 
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-                
+
 
                 $this->tongyong($trackdata, $add);
 
@@ -113,7 +111,6 @@ class Test extends Backend
     //usps_1  郭伟峰
     public function tongyong($data, $add)
     {
-        $order_node_detail['order_node'] = 3;
         $order_node_detail['handle_user_id'] = 0;
         $order_node_detail['handle_user_name'] = 'system';
         $order_node_detail['site'] = $add['site'];
