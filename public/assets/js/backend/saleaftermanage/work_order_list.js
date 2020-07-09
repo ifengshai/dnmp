@@ -2445,7 +2445,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var color_id = $(this).val();
                     var is_new_version = $('#is_new_version').val();
                     var that = $(this);
-                    if(is_new_version == 0){
+                    if(is_new_version == 0 && sitetype == 1){
                         Backend.api.ajax({
                                 url: 'saleaftermanage/work_order_list/ajaxGetLensType',
                                 data: {

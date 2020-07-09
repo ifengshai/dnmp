@@ -396,8 +396,8 @@ class WorkOrderList extends Backend
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
                     } else {
-                        if (!$params['integral'] || !$params['email']) {
-                            throw new Exception("积分和邮箱不能为空");
+                        if (!$params['integral']) {
+                            throw new Exception("积分不能为空");
                         }
                     }
 
@@ -875,8 +875,8 @@ class WorkOrderList extends Backend
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
                     } else {
-                        if (!$params['integral'] || !$params['email']) {
-                            throw new Exception("积分和邮箱不能为空");
+                        if (!$params['integral']) {
+                            throw new Exception("积分不能为空");
                         }
                     }
 
@@ -1554,8 +1554,8 @@ class WorkOrderList extends Backend
                         unset($params['integral']);
                         unset($params['integral_describe']);
                     } else {
-                        if (!$params['integral'] || !$params['email']) {
-                            throw new Exception("积分和邮箱不能为空");
+                        if (!$params['integral']) {
+                            throw new Exception("积分不能为空");
                         }
                     }
 
@@ -1951,8 +1951,8 @@ class WorkOrderList extends Backend
                         unset($params['integral']);
                         unset($params['integral_describe']);
                     } else {
-                        if (!$params['integral'] || !$params['email']) {
-                            throw new Exception("积分和邮箱不能为空");
+                        if (!$params['integral']) {
+                            throw new Exception("积分不能为空");
                         }
                     }
 

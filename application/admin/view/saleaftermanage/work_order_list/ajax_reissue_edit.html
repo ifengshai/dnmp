@@ -31,8 +31,9 @@
                     {foreach name="prescription" item="val" key="key"}
                         {if condition="$vo.recipe_type == $key"}
                         <option value='{$key}' selected >{$key}</option>
-                        {/if}
+                        {else/}
                         <option value='{$key}'>{$key}</option>
+                        {/if}
                     {/foreach}
                 </select>
             </div>
@@ -51,16 +52,18 @@
                             {foreach name="lensColorList" item="val"}
                             {if condition="$vo.prescription_options.color_id eq $val.lens_id"}
                             <option value='{$val["lens_id"]}' selected>{$val["lens_data_name"]}</option>
-                            {/if}
+                            {else/}
                             <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
+                            {/if}
                             {/foreach}
                         {else/}
 
                             {foreach name="colorList" item="val"}
                             {if condition="$vo.prescription_options.color_id eq $val.id"}
                             <option value='{$val["id"]}' selected>{$val["name"]}</option>
-                            {/if}
+                            {else/}
                             <option value='{$val["id"]}'>{$val["name"]}</option>
+                            {/if}
                             {/foreach}
                         {/if}
                     </select>
@@ -73,8 +76,9 @@
                         <option value="0">请选择</option>
                         {if condition="isset($vo.prescription_options.lens_name)"}
                         <option value="{$vo.prescription_options.lens_id}" selected>{$vo.prescription_options.lens_name}</option>
-                        {/if}
+                        {else/}
                         <option value="{$vo.prescription_options.lens_id}">{$vo.prescription_options.lens_name}</option>
+                        {/if}
                     </select>
                 </div>
             </div>
@@ -88,15 +92,17 @@
                             {foreach name="coating_type" item="val"}
                             {if condition="$vo.prescription_options.coating_id eq $val.coating_id"}
                             <option value='{$val["coating_id"]}' selected>{$val["coating_name"]}</option>
-                            {/if}
+                            {else/}
                             <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
+                            {/if}
                             {/foreach}
                         {else/}
                             {foreach name="coating_type" item="val"}
                             {if condition="$vo.prescription_options.coating_id eq $val.id"}
                             <option value='{$val["id"]}' selected>{$val["name"]}</option>
-                            {/if}
+                            {else/}
                             <option value='{$val["id"]}'>{$val["name"]}</option>
+                            {/if}
                             {/foreach}
                         {/if}
 
@@ -407,8 +413,9 @@
                     {foreach name="prescription" item="val" key="key"}
                     {if condition="$vo.recipe_type == $key"}
                     <option value='{$key}' selected >{$key}</option>
-                    {/if}
+                    {else/}
                     <option value='{$key}'>{$key}</option>
+                    {/if}
                     {/foreach}
                 </select>
             </div>
@@ -427,15 +434,17 @@
                         {foreach name="lensColorList" item="val"}
                         {if condition="$vo.prescription_options.color_id eq $val.lens_id"}
                         <option value='{$val["lens_id"]}' selected>{$val["lens_data_name"]}</option>
-                        {/if}
+                        {else/}
                         <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
+                        {/if}
                         {/foreach}
                     {else/}
                         {foreach name="colorList" item="val"}
                         {if condition="$vo.prescription_options.color_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
-                        {/if}
+                        {else/}
                         <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/if}
                         {/foreach}
                     {/if}
                     </select>
@@ -462,15 +471,17 @@
                         {foreach name="coating_type" item="val"}
                         {if condition="$vo.prescription_options.coating_id eq $val.coating_id"}
                         <option value='{$val["coating_id"]}' selected>{$val["coating_name"]}</option>
-                        {/if}
+                        {else/}
                         <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
+                        {/if}
                         {/foreach}
                     {else/}
                         {foreach name="coating_type" item="val"}
                         {if condition="$vo.prescription_options.coating_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
-                        {/if}
+                        {else/}
                         <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/if}
                         {/foreach}
                     {/if}
                     </select>
