@@ -144,7 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
 
                         { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'orange', 4: 'warning', 3: 'purple', 5: 'primary', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
-                        { field: 'order_type', title: __('订单类型'), searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价订单', 6:'paypal手动补单', 100: 'VIP订单' }, formatter: Table.api.formatter.status,visible:false},
+                        { field: 'order_type', title: __('订单类型'), searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价订单', 7:'paypal手动补单', 100: 'VIP订单' }, formatter: Table.api.formatter.status,visible:false},
                         { field: 'work_order_note_status', title: __('回复状态'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无', 1: '客服已回复', 2: '仓库已回复', 3: '财务已回复' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
