@@ -47,6 +47,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'category_name', title: __('分类名称'), operate: false },
                         { field: 'link', title: __('产品链接'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         { field: 'price', title: __('单价'), operate: false },
+                        { field: 'sales_num', title: __('90天总销量'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
                         { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },

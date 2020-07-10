@@ -79,19 +79,31 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
             //查询商品分类
             $category = $this->category->where('is_del', 1)->column('name', 'id');
-            foreach($list as &$v) {
+            //查询90天总销量
+            $productgrade = new \app\admin\model\ProductGrade();
+            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter', 'true_sku');
+            //查询可用库存
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock', 'sku');
+            //查询平台
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $platformarr = $platform->where(['sku' => ['in', $skus]])->column('platform_type');
+            foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 if ($v['item_status'] == 1) {
                     $v['item_status'] = '待选品';
-                } elseif($v['item_status'] == 2) {
+                } elseif ($v['item_status'] == 2) {
                     $v['item_status'] = '选品通过';
-                } elseif($v['item_status'] == 3) {
+                } elseif ($v['item_status'] == 3) {
                     $v['item_status'] = '选品拒绝';
-                } elseif($v['item_status'] == 4) {
+                } elseif ($v['item_status'] == 4) {
                     $v['item_status'] = '已取消';
                 }
+                //90天总销量
+                $v['sales_num'] = $productarr[$v['sku']] ?: 0;
+                $v['available_stock'] = $stock[$v['sku']] ?: 0;
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);

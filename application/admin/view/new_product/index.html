@@ -51,14 +51,14 @@
             <div class="caption">
                 <h4><%=item.name?item.name:'无'%></h4>
                 <p class="text-muted"><span style="width:150px;display:inline-block;">商品分类: <%=item.category_name%></span>  <span style="margin-left:80px;">SKU: <%=item.sku%></span></p>
-                <p class="text-muted"><span style="width:150px;display:inline-block;">总销量:<%=item.id%></span>  <span style="margin-left:80px;">可用库存: <%=item.id%></span></p>
+                <p class="text-muted"><span style="width:150px;display:inline-block;">90天总销量:<%=item.sales_num%></span>  <span style="margin-left:80px;">可用库存: <%=item.available_stock%></span></p>
                 <p class="text-muted"><span style="width:150px;display:inline-block;">同步平台: <%=item.id%></span>  <span style="margin-left:80px;">状态: <%=item.item_status%></span></p>
                 <p class="text-muted">创建人: <%=item.create_person%></p>
                 <p class="text-muted">创建时间: <%=item.create_time%></p>   
                 <p>
                     <!--详情的事件需要在JS中手动绑定-->
-                    <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-success btn-passAudit btn-disabled disabled {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
-                    <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused btn-disabled disabled {:$auth->check('new_product/passAudit')?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>
+                    <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
+                    <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused  {:$auth->check('new_product/passAudit')?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>
                         
                     <a href="#" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a> 
 
