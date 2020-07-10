@@ -31,6 +31,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 templateView: true,
                 //分页大小
                 pageSize: 12,
+                search: false,
+                showExport: false,
                 columns: [
                     [
                         { checkbox: true },
@@ -45,13 +47,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'category_name', title: __('分类名称'), operate: false },
-                        { field: 'link', title: __('产品链接'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status
+                            //formatter: Controller.api.formatter.devicess
+                        },
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'sales_num', title: __('90天总销量'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'platform_type', title: __('平台'), operate: false },
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
-                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
-                        { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
+                        // { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
+                        // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
@@ -104,33 +112,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     }
                                 },
 
-                                {
-                                    name: 'auditRefused',
-                                    text: '取消',
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    icon: 'fa fa-remove',
-                                    url: Config.moduleurl + '/new_product/cancel',
-                                    confirm: '确认取消吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.item_status == 1) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                }
+                                // {
+                                //     name: 'auditRefused',
+                                //     text: '取消',
+                                //     title: __('取消'),
+                                //     classname: 'btn btn-xs btn-danger btn-ajax',
+                                //     icon: 'fa fa-remove',
+                                //     url: Config.moduleurl + '/new_product/cancel',
+                                //     confirm: '确认取消吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         if (row.item_status == 1) {
+                                //             return true;
+                                //         } else {
+                                //             return false;
+                                //         }
+                                //     }
+                                // }
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -180,18 +188,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             //商品审核通过
             $(document).on('click', '.btn-passAudit', function () {
                 var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要审核通过吗'),
-                    function (index) {
-                        Backend.api.ajax({
-                            url: "new_product/passAudit",
-                            data: { ids: ids }
-                        }, function (data, ret) {
-                            table.bootstrapTable('refresh');
-                            Layer.close(index);
-                        });
-                    }
-                );
+
+                Backend.api.open('new_product/passAudit/ids/' + $(this).data('id'), __('Detail'), { area: ['50%', '50%'] });
+
+                // Layer.confirm(
+                //     __('确定要审核通过吗'),
+                //     function (index) {
+                //         Backend.api.ajax({
+                //             url: "new_product/passAudit",
+                //             data: { ids: ids }
+                //         }, function (data, ret) {
+                //             table.bootstrapTable('refresh');
+                //             Layer.close(index);
+                //         });
+                //     }
+                // );
             });
             //商品审核拒绝
             $(document).on('click', '.btn-auditRefused', function () {
@@ -201,6 +212,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     function (index) {
                         Backend.api.ajax({
                             url: "new_product/auditRefused",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+
+            //商品审核取消
+            $(document).on('click', '.btn-cancel', function () {
+                var ids = $(this).data('id');
+                Layer.confirm(
+                    __('确定要取消吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "new_product/cancel",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');

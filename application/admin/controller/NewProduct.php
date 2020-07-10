@@ -87,9 +87,21 @@ class NewProduct extends Backend
             $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter', 'true_sku');
             //查询可用库存
             $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock', 'sku');
+
+            $skus = ['SM691318-01', 'NL691318-01'];
             //查询平台
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $platformarr = $platform->where(['sku' => ['in', $skus]])->column('platform_type');
+            $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
+            $platformarr = collection($platformarr)->toArray();
+
+            //查询对应平台
+            $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+            $magentoplatformarr = $magentoplatform->column('name', 'id');
+
+            $arr = [];
+            foreach ($platformarr as $v) {
+                $arr[$v['sku']] .= $magentoplatformarr[$v['platform_type']] . ',';
+            }
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 if ($v['item_status'] == 1) {
@@ -104,6 +116,7 @@ class NewProduct extends Backend
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
+                $v['platform_type'] = trim($arr[$v['sku']], ',');
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -794,9 +807,8 @@ class NewProduct extends Backend
             } else {
                 $this->error('审核失败');
             }
-        } else {
-            $this->error('404 Not found');
-        }
+        } 
+        return $this->fetch('check');
     }
 
     /***

@@ -7,7 +7,7 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         
-                        {:build_toolbar('refresh,delete')}
+                        {:build_toolbar('refresh')}
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('new_product/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
                         <!-- <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('new_product/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->
                         <!-- <a class="btn btn-info btn-disabled disabled btn-selected" href="javascript:;"><i class="fa fa-leaf"></i> 获取选中项</a>
@@ -52,7 +52,7 @@
                 <h4><%=item.name?item.name:'无'%></h4>
                 <p class="text-muted"><span style="width:150px;display:inline-block;">商品分类: <%=item.category_name%></span>  <span style="margin-left:80px;">SKU: <%=item.sku%></span></p>
                 <p class="text-muted"><span style="width:150px;display:inline-block;">90天总销量:<%=item.sales_num%></span>  <span style="margin-left:80px;">可用库存: <%=item.available_stock%></span></p>
-                <p class="text-muted"><span style="width:150px;display:inline-block;">同步平台: <%=item.id%></span>  <span style="margin-left:80px;">状态: <%=item.item_status%></span></p>
+                <p class="text-muted"><span style="width:150px;display:inline-block;">同步平台: <%=item.platform_type%></span>  <span style="margin-left:80px;">状态: <%=item.item_status%></span></p>
                 <p class="text-muted">创建人: <%=item.create_person%></p>
                 <p class="text-muted">创建时间: <%=item.create_time%></p>   
                 <p>
@@ -60,11 +60,11 @@
                     <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
                     <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused  {:$auth->check('new_product/passAudit')?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>
                         
-                    <a href="#" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a> 
+                    <a href="javascript:;" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a> 
 
                     <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
-                    <a href="#" class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> 编辑</a> 
-                    <!-- <a href="#" class="btn btn-danger btn-del" data-id="<%=item.id%>"><i class="fa fa-times"></i> 删除</a> -->
+                    <a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a> 
+                    <a href="javascript:;" title='取消' class="btn btn-danger btn-cancel" data-id="<%=item.id%>"><i class="fa fa-remove"></i></a>
                     
                     <span class="pull-right" style="margin-top:10px;">
                         <!--如果需要多选操作，请确保有下面的checkbox元素存在,可移除-->
