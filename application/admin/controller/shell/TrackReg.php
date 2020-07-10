@@ -48,8 +48,8 @@ class TrackReg extends Backend
             $title = strtolower(str_replace(' ', '-', $v['title']));
             //区分usps运营商
             if (strtolower($title) == 'usps') {
-                $track_num1 = substr($v['track_number'], 0, 10);
-                if ($track_num1 == '9200190255' || $track_num1 == '9205990255') {
+                $track_num1 = substr($v['track_number'], 0, 4);
+                if ($track_num1 == '9200' || $track_num1 == '9205') {
                     //郭伟峰
                     $shipment_data_type = 'USPS_1';
                 } else {
@@ -89,7 +89,7 @@ class TrackReg extends Backend
             $data['shipment_data_type'] = $shipment_data_type;
             $data['track_number'] = $v['track_number'];
             $data['delivery_time'] = $v['created_at'];
-            Db::name('order_node')->where(['order_id', $v['order_id'], 'site' => $site_type])->update($data);
+            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
         }
         if ($list) {
             $this->ordernodedetail->saveAll($list);
@@ -194,5 +194,52 @@ class TrackReg extends Backend
         $stringBody = (string) $body;
         $res = json_decode($stringBody);
         return $res;
+    }
+    /**
+     * zendesk10分钟更新前20分钟的数据
+     * @return [type] [description]
+     */
+    public function zeelool_zendesk()
+    {
+        $this->zendeskUpateData('zeelool',1);
+        echo 'all ok';
+        exit;
+    }
+    public function voogueme_zendesk()
+    {
+        $this->zendeskUpateData('voogueme',2);
+        echo 'all ok';
+        exit;
+    }
+    /**
+     * zendesk10分钟更新前20分钟的数据方法
+     * @return [type] [description]
+     */
+    public function zendeskUpateData($siteType,$type)
+    {
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+
+        $this->model = new \app\admin\model\zendesk\Zendesk;
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
+
+        //求交集的更新
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+        foreach ($intersects as $intersect) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            echo $intersect . 'is ok' . "\n";
+        }
+        //新增
+        foreach ($diffs as $diff) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            echo $diff . 'ok' . "\n";
+        }
+        echo 'all ok';
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        exit;
     }
 }

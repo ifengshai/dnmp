@@ -1,0 +1,394 @@
+<style>
+    .list-div {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        height: 400px;
+        margin-bottom: 10px;
+    }
+
+    .caigou {
+        width: 45%;
+        margin-bottom: 10px;
+        float: left;
+    }
+
+    #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .caigou-table-lens tbody tr td input {
+        text-align: center;
+    }
+</style>
+<div class="panel-heading">
+    {:build_heading()}
+    <ul class="nav nav-tabs" style="margin-bottom: 20px;">
+        <li class="active"><a href="{:url('detail')}?id={$row.id}&ref=addtabs">订单信息</a></li>
+		<!-- <li><a href="{:url('orderDetail')}?order_number={$row.ordersn}&id={$row.id}&label={$label}">订单节点</a></li>  -->
+    </ul>
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div style="width: 100%;" class="list-div">
+        <div class='caigou'>
+            <p style="font-size: 16px;text-align: center;"><b>订单基本信息</b></p>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单编号:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_number" class="form-control" name="row[increment_id]"
+                        value="{$row.ordersn}" type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单状态:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$status}"
+                        type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.createtime}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">手机号:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$address.mobile}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+        </div>
+
+        <div class='caigou'>
+            <p style="font-size: 16px;text-align: center;"><b>收货信息</b></p>
+
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">收件人:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_freight" class="form-control contract_name" readonly name=""
+                        value="{$address.realname}" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">省份:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.province}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">城市:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.city}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">区域:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.area}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">地址:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_freight" class="form-control contract_name" readonly name="" type="text"
+                        value="{$address.address}">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>订单项列表</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</td>
+                    <th>SKU</td>
+                    <th>商品名称</td>
+                    <th>数量</td>
+                    <th>颜色</td>
+                    <th>单价</td>
+                    <th>总价</td>
+                </tr>
+                {foreach $goods as $k => $v}
+                <tr>
+                    <td>{:$k+1}</td>
+                    <td>{$v.sku}</td>
+                    <td>{$v.name}</td>
+                    <td>{$v.total}</td>
+                    <td>{$v.colour}</td>
+                    <td>{$v.unitprice}</td>
+                    <td>{$v.price}</td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+    </div>
+
+    <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>订单支付列表</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>订单号</th>
+                    <th>支付金额</th>
+                    <th>订单金额</th>
+                    <th>运费</th>
+                    <th>支付方式</th>
+                    <th>支付状态</th>
+                
+                </tr>
+                <tr>
+                    <td>{$row.ordersn} </td>
+                    <td>{$pay.fee}</td>
+                    <td>{$row.price|sprintf='%.2f',###} </td>
+                    <td>{$row.discountprice} </td>
+                    <td>{$pay.type} </td>
+                    <td>{$status}</td>
+  
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <hr>
+    <div class="row item_info" style="margin-top:15px;">
+        <p style="font-size: 16px;text-align: center;"><b>处方信息</b></p>
+        <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+            <div id="detailWin" class="easyui-window panel-body panel-body-noborder window-body" title=""
+                data-options="modal:true,closed:true,border:'thin',cls:'c6'"
+                style="padding: 10px; width: 100%; height: 200px;">
+                <style type="text/css">
+                    table.altrowstable {
+                        margin: 0 auto;
+                        width: 95%;
+                        font-family: verdana, arial, sans-serif;
+                        font-size: 11px;
+                        color: #333333;
+                        border-width: 1px;
+                        border-color: #247692;
+                        border-collapse: collapse;
+                        margin-bottom: 20px;
+                    }
+
+                    table.altrowstable th {
+                        border-width: 1px;
+                        padding: 8px;
+                        font-size: 14px;
+                        border-style: solid;
+                        border-color: #a9c6c9;
+                    }
+
+                    table.altrowstable td {
+                        border-width: 1px;
+                        padding: 8px;
+                        text-align: center;
+                        font-size: 14px;
+                        border-style: solid;
+                        border-color: #a9c6c9;
+                    }
+                </style>
+                <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
+                    <tbody>
+                        {foreach $goods as $sku}
+                        <tr>
+                            <td>
+                                <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
+                                    <tbody>
+                                        <tr></tr>
+
+                                        <tr>
+                                            <td>商品名称：</td>
+                                            <td>{$sku.name}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>SKU：</td>
+                                            <td>{$sku.sku}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>数量：</td>
+                                            <td>{$sku.total}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>处方类型：</td>
+                                            <td>{$sku.prescription_type}</td>
+                                        </tr>
+                                        <!-- <tr>
+                                        <td>基片类型：</td>
+                                        <td></td>
+                                    </tr> -->
+                                        <tr>
+                                            <td>镜片类型：</td>
+                                            <td>{$sku.index_type}</td>
+                                        </tr>
+                                        <!-- <tr>
+                                        <td>折射率：</td>
+                                        <td></td>
+                                    </tr> -->
+                                        <tr>
+                                            <td>镀膜类型：</td>
+                                            <td>{$sku.coatiing_name}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
+                                    style="margin:0 auto;margin-top:18px;width:90%;">
+                                    <tbody cellpadding="0">
+                                        <tr class="title">
+                                            <td colspan="10">处方参数</td>
+                                        </tr>
+                                        <tr class="title">
+                                            <td></td>
+                                            <td>SPH</td>
+                                            <td>CYL</td>
+                                            <td>AXI</td>
+                                            <td>ADD</td>
+                                            <td>PD</td>
+                                            <td>Prism Horizontal</td>
+                                            <td>Base Direction</td>
+                                            <td>Prism Vertical</td>
+                                            <td>Base Direction</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Right(OD)</td>
+                                            <td>{:$sku['od_sph'] ?? ''}</td>
+                                            <td>{:$sku['od_cyl'] ?? ''}</td>
+                                            <td>{:$sku['od_axis'] ?? ''}</td>
+                                            {if $sku['total_add']}
+                                            <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
+                                            {else/}
+
+                                            <td>{:$sku['od_add']}</td>
+                                            {/if}
+                                            {if $sku['pdcheck'] == 'on'}
+                                            <td>{:$sku['pd_r'] ?? ''}</td>
+                                            {else/}
+                                            <td rowspan="2">{:$sku['pd'] ?? ''}</td>
+                                            {/if}
+                                            <td>{:$sku['od_pv'] ?? ''}</td>
+                                            <td>{:$sku['od_bd'] ?? ''}</td>
+                                            <td>{:$sku['od_pv_r'] ?? ''}</td>
+                                            <td>{:$sku['od_bd_r'] ?? ''}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Left(OS)</td>
+                                            <td>{:$sku['os_sph'] ?? ''}</td>
+                                            <td>{:$sku['os_cyl'] ?? ''}</td>
+                                            <td>{:$sku['os_axis'] ?? ''}</td>
+                                            {if !$sku['total_add']}
+                                            <td>{:$sku['os_add']}</td>
+                                            {/if}
+                                            {if $sku['pdcheck'] == 'on'}
+                                            <td>{:$sku['pd_l'] ?? ''}</td>
+                                            {/if}
+                                            <td>{:$sku['os_pv'] ?? ''}</td>
+                                            <td>{:$sku['os_bd'] ?? ''}</td>
+                                            <td>{:$sku['os_pv_r'] ?? ''}</td>
+                                            <td>{:$sku['os_bd_r'] ?? ''}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+
+            </div>
+        </form>
+    </div>
+
+
+</form>

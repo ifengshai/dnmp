@@ -1070,6 +1070,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 1;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1081,6 +1082,7 @@ class ItWebDemand extends Backend
                         if ($params['type']==1){
                             $update_date['is_small_probability'] =  $params['is_small_probability'];
                         }
+                        $code = 2;
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -1123,7 +1125,14 @@ class ItWebDemand extends Backend
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
-                            Ding::dingHook(__FUNCTION__, $row);
+                            //前端点击完成 后端点击完成 其他点击完成
+                            if ($code == 1){
+                                Ding::dingHook('web_group_finish', $row);
+                            }elseif ($code == 2){
+                                Ding::dingHook('php_group_finish', $row);
+                            }else{
+                                Ding::dingHook(__FUNCTION__, $row);
+                            }
                             $this->success('成功');
                         } else {
                             $this->error('失败');

@@ -163,7 +163,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 0 || row.purchase_type == 2) {
+                                        var arr = [0, 1, 2, 5];
+                                        if (arr.includes(row.purchase_status) || row.purchase_type == 2) {
                                             return true;
                                         } else {
                                             return false;
@@ -307,7 +308,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
             $(document).on('click', '.btn-del', function () {
-               
+
                 $(this).parent().parent().remove();
                 var total = 0;
                 $('.goods_total').each(function () {
@@ -316,10 +317,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 })
                 //商品总价
                 $('.total').val(total);
-                 //运费
-                 var freight = $('.freight').val();
-                 //总计
-                 $('.purchase_total').val(total + freight * 1);
+                //运费
+                var freight = $('.freight').val();
+                //总计
+                $('.purchase_total').val(total + freight * 1);
             })
 
             $(document).on('click', '.btn-arrival-del', function () {
@@ -762,7 +763,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         logisticsDetail: function () {
             Controller.api.bindevent();
-            
+
         },
         checkdetail: function () {
             Controller.api.bindevent();
@@ -998,13 +999,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?ids=' + ids, '_blank');
+                    window.open(Config.moduleurl + '/purchase/purchase_order/process_export_xls?ids=' + ids, '_blank');
                 } else {
                     var options = table.bootstrapTable('getOptions');
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
-                    window.open(Config.moduleurl + '/warehouse/check/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    window.open(Config.moduleurl + '/purchase/purchase_order/process_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
 
             });
@@ -1219,7 +1220,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //这里可以获取从服务端获取的JSON数据
                 //这里我们手动设置底部的值
                 //console.log(data.total_money);
-                $("#total-money").text(Math.round(data.total_money * 100)/100);
+                $("#total-money").text(Math.round(data.total_money * 100) / 100);
                 $("#return-money").text(Math.round(data.return_money * 100) / 100);
 
             });
@@ -1309,10 +1310,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     //url: "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total="+row.refund_amount,
                                     url: function (row) {
                                         //实际采购金额（元）
-                                        var purchase_virtual_total = row.purchase_virtual_total != undefined ? row.purchase_virtual_total : 0;
+                                        var purchase_virtual_total = 0;
+                                        if (row.purchase_virtual_total) {
+                                            purchase_virtual_total = row.purchase_virtual_total;
+                                        }
+
                                         //退款金额
-                                        var refund_amount = row.refund_amount != undefined ? row.refund_amount : 0;
-                                        var purchase_settle_money = row.purchase_settle_money != undefined ? row.purchase_settle_money : 0;
+                                        var refund_amount = 0;
+                                        if (row.refund_amount) {
+                                            refund_amount = row.refund_amount;
+                                        }
+
+                                        //退款金额
+                                        var purchase_settle_money = 0;
+                                        if (row.purchase_settle_money) {
+                                            purchase_settle_money = row.purchase_settle_money;
+                                        }
+
                                         return "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total=" + purchase_virtual_total + "&refund_amount=" + refund_amount + "&purchase_settle_money=" + purchase_settle_money + "&ids=" + row.id;
                                     },
                                     extend: 'data-area = \'["100%","100%"]\'',
@@ -1365,7 +1379,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         // }
                                         if ((row.refund_amount <= 0) || (!row.refund_amount)) {
                                             return false;
-                                        }                                        
+                                        }
                                         return true;
                                     }
                                 }

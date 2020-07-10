@@ -8,6 +8,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use app\admin\model\StockLog;
 
 /**
  * 入库单管理
@@ -431,20 +432,17 @@ class Instock extends Backend
                 /**
                  * @todo 审核通过增加库存 并添加入库单入库数量
                  */
+                $error_num = [];
                 foreach ($list as $k => $v) {
                     //更新商品表商品总库存
                     //总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
-                        $stock_res = $item->where($item_map)->setInc('stock', $v['in_stock_num']);
-                        //可用库存
-                        $available_stock_res = $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
-
-                        $sample_num_res = $item->where($item_map)->setInc('sample_num', $v['sample_num']);
+                        $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
                     }
 
-                    if ($stock_res === false || $available_stock_res === false || $sample_num_res === false) {
+                    if ($stock_res === false) {
                         $error_num[] = $k;
                     }
 
@@ -482,6 +480,20 @@ class Instock extends Backend
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
                         $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
+
+                    //插入日志表
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'two_type'                  => 3,
+                        'sku'                       => $v['sku'],
+                        'public_id'                 => $v['in_stock_id'],
+                        'stock_change'              => $v['in_stock_num'],
+                        'available_stock_change'    => $v['in_stock_num'],
+                        'sample_num_change'         => $v['sample_num'],
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '入库单增加总库存,可用库存,样品库存'
+                    ]);
                 }
 
                 //有错误 则回滚数据
@@ -489,7 +501,6 @@ class Instock extends Backend
                     throw new Exception("入库失败！！请检查SKU");
                 }
             }
-
 
             $this->model->commit();
             $item->commit();

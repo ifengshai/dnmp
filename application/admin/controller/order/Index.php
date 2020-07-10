@@ -24,7 +24,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 {
-    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls'];
+    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls'];
     protected $model = null;
 
     public function _initialize()
@@ -35,6 +35,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->rufoo = new \app\admin\model\order\order\Rufoo;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
@@ -217,22 +218,18 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         return $this->view->fetch();
     }
 
-
-
     /**
      * 订单信息2
      */
     public function orderDetail($order_number = null)
     {
-
         $order_number = $order_number ?? $this->request->get('order_number');
-        //$order_number = 100077570;
         //查询订单详情		
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
-		
-		$new_ruleList = array_column($ruleList,NULL,'node_type');	
+
+        $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
-		
+
         $entity_id = $this->request->get('id');
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
@@ -291,7 +288,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("row", $row);
         $this->view->assign("label", $label);
         return $this->view->fetch();
-    } 
+    }
 
 
     /**
@@ -311,7 +308,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 return $this->selectpage();
             }
             $rep    = $this->request->get('filter');
-            
+
             $addWhere = '1=1';
             if ($rep != '{}') {
                 // $whereArr = json_decode($rep,true);
@@ -341,7 +338,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             $list = $model
                 ->where($where)
-//                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+                //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -933,15 +930,14 @@ EOF;
         }
 
         $ids = input('ids');
-//        $ids = "345168,259,258,256,255,254,253,252,251,250";
+        //        $ids = "345168,259,258,256,255,254,253,252,251,250";
         if ($ids) {
             $map['entity_id'] = ['in', $ids];
         }
         $rep = $this->request->get('filter');
-//        dump($rep);die;
+        //        dump($rep);die;
         $addWhere = '1=1';
         if ($rep != '{}') {
-
         } else {
             $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
         }
@@ -961,7 +957,7 @@ EOF;
             ->column('entity_id');
         $costInfo = $model->getOrderCostInfoExcel($totalId, $thisPageId);
         $list = collection($list)->toArray();
-//        dump($list);die;
+        //        dump($list);die;
         //遍历以获得导出所需要的数据
         foreach ($list as $k => $v) {
             //订单支付金额
@@ -999,7 +995,7 @@ EOF;
                 }
             }
         }
-//        dump($list);die;
+        //        dump($list);die;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1083,4 +1079,5 @@ EOF;
 
         $writer->save('php://output');
     }
+
 }
