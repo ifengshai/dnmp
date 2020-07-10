@@ -79,8 +79,21 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            //查询商品分类
+            $category = $this->category->where('is_del', 1)->column('name', 'id');
+            foreach($list as &$v) {
+                $v['category_name'] = $category[$v['category_id']];
+                if ($v['item_status'] == 1) {
+                    $v['item_status'] = '待选品';
+                } elseif($v['item_status'] == 2) {
+                    $v['item_status'] = '选品通过';
+                } elseif($v['item_status'] == 3) {
+                    $v['item_status'] = '选品拒绝';
+                } elseif($v['item_status'] == 4) {
+                    $v['item_status'] = '已取消';
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();
@@ -124,7 +137,7 @@ class NewProduct extends Backend
                     if (!$textureEncode) {
                         $this->error(__('The corresponding encoding rule does not exist, please try again'));
                     }
-                   
+
                     //如果是后来添加的
                     if (!empty($params['origin_skus']) && $params['item_count'] >= 1) { //正常情况
                         $count = $params['item_count'];
@@ -169,13 +182,17 @@ class NewProduct extends Backend
                             } else {
                                 $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
                             }
+
                             $lastInsertId = Db::name('new_product')->insertGetId($data);
+
                             if ($lastInsertId !== false) {
                                 $itemAttribute['item_id'] = $lastInsertId;
                                 $itemAttribute['attribute_type'] = 3;
                                 $itemAttribute['accessory_texture'] = $params['frame_texture'];
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['frame_images'] = $params['frame_images'];
+
                                 $res = Db::name('new_product_attribute')->insert($itemAttribute);
                                 if (!$res) {
                                     throw new Exception('添加失败！！');
@@ -289,6 +306,7 @@ class NewProduct extends Backend
                                 $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
                                 $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['frame_images'] = $params['frame_images'];
                                 $res = Db::name('new_product_attribute')->insert($itemAttribute);
                                 if (!$res) {
                                     throw new Exception('添加失败！！');
@@ -330,7 +348,7 @@ class NewProduct extends Backend
         }
         return $this->view->fetch();
     }
-    
+
 
     /**
      * 编辑
@@ -854,7 +872,7 @@ class NewProduct extends Backend
             $list[$k]['id'] = $k + 1;
             $list[$k]['title'] = $result->productInfo->subject;
             if (count($v->attributes) > 1) {
-                $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' .$v->attributes[1]->attributeValue;
+                $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' . $v->attributes[1]->attributeValue;
             } else {
                 $list[$k]['color'] = $v->attributes[0]->attributeValue;
             }

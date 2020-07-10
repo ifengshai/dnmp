@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined, Fast) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
 
     var Controller = {
         index: function () {
@@ -11,7 +11,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     index_url: 'new_product/index' + location.search,
                     add_url: 'new_product/add',
                     edit_url: 'new_product/edit',
-                    // del_url: 'new_product/del',
+                    detail_url: 'new_product/detail',
                     multi_url: 'new_product/multi',
                     table: 'new_product',
                 }
@@ -19,13 +19,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
             var table = $("#table");
 
+            Template.helper("Moment", Moment);
+
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'create_time',
                 sortOrder: 'desc',
-                escape: false,
+                // escape: false,
+                templateView: true,
+                //分页大小
+                pageSize: 12,
                 columns: [
                     [
                         { checkbox: true },
@@ -39,7 +44,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'link', title: __('产品链接'),cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear},
+                        { field: 'category_name', title: __('分类名称'), operate: false },
+                        { field: 'link', title: __('产品链接'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
@@ -51,6 +57,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             formatter: Table.api.formatter.status
                         },
                         { field: 'newproductattribute.frame_remark', title: __('选品备注'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'newproductattribute.frame_images', operate: false },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
 
@@ -161,6 +168,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //点击详情
+            $(document).on("click", ".btn-detail[data-id]", function () {
+                Backend.api.open('new_product/detail/ids/' + $(this).data('id'), __('Detail'), { area: ['100%', '100%'] });
+            });
+
 
             //商品审核通过
             $(document).on('click', '.btn-passAudit', function () {
@@ -430,55 +443,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                             return false;
 
-                            // $('.newAddition').remove();
-                            // if (resultData.procurement_type) {
-                            //     $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            // } else {
-                            //     $("#c-procurement_type").val("");
-                            // }
-                            // if (resultData.procurement_origin) {
-                            //     $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            // } else {
-                            //     $("#c-procurement_origin").val();
-                            // }
-                            // $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
-                            // $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
-                            // $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
-                            // $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
-                            // $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
-                            // $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
-                            // $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
-                            // $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
-                            // $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
-                            // $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
-                            // $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
-                            // $('#c-frame_bridge').val(resultData.frame_bridge);
-                            // $('#c-frame_height').val(resultData.frame_height);
-                            // $('#c-frame_width').val(resultData.frame_width);
-                            // $('#c-frame_length').val(resultData.frame_length);
-                            // $('#c-frame_temple_length').val(resultData.frame_temple_length);
-                            // $('#c-weight').val(resultData.frame_weight);
-                            // $('#c-mirror_width').val(resultData.mirror_width);
-                            // $('#c-problem_desc').html(resultData.frame_remark);
-                            // $('.note-editable').html(resultData.frame_remark);
-                            // $('#item-count').val(resultData.itemCount);
-                            // //$(".editor").textarea
-                            // if (resultData.origin_sku) {
 
-                            //     var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
-                            //     console.log(data);
-                            //     $('#caigou-table tbody').html('');
-                            //     for (var i in data.itemArr) {
-                            //         str += '<tr>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
-                            //         str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
-                            //     }
-                            //     $('#caigou-table tbody').html(str);
-
-                            // }
 
                         }
                         return false;
