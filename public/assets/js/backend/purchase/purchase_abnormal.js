@@ -26,8 +26,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'error_number', title: __('Error_number') },
-                        { field: 'supplier_name', title: __('Supplier_name') },
-                        { field: 'purchase_number', title: __('采购单号') },
+                        { field: 'supplier.supplier_name', title: __('Supplier_name') },
+                        { field: 'purchase.purchase_number', title: __('采购单号') },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'batch_id', title: __('Batch_id') },
                         {

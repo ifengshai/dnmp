@@ -27,9 +27,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('序号'),operate:false},
-                        {field: 'sku', title: __('SKU')},
+                        {field: 'sku', title: __('SKU'),operate:'LIKE'},
                         {field: 'product_name', title: __('商品名称'),operate:false},
-                        {field: 'location', title: __('库位号'),operate:false},
+                        {field: 'location_id', title: __('库位号'),operate:false},
+                        {field: 'location', title: __('库位'),visible:false},
                         {field: 'stock', title: __('留样库存'),operate:false},
                         {field: 'is_lend', title: __('是否借出'),searchList: {"1": __('是'), "0": __('否')}},
                         {field: 'lend_num', title: __('借出数量'),operate:false},
@@ -154,6 +155,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'location_number', title: __('入库单号')},
                         {field: 'status', title: __('状态'),searchList: {"1": __('新建'), "2": __('待审核'), "3": __('已审核'), "4": __('已拒绝'), "5": __('已取消')}},
                         {field: 'create_user', title: __('创建人')},
+                        {field: 'sku', title: __('SKU'),visible:false},
                         {field: 'createtime', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'buttons',
@@ -370,12 +372,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
                         {field: 'id', title: __('借出ID'),operate:false},
                         {field: 'status', title: __('状态'),searchList: {"1": __('待审核'), "2": __('已借出'), "3": __('已拒绝'), "4": __('已归还'), "5": __('已取消')}},
+                        {field: 'sku', title: __('SKU'),visible:false,operate:'LIKE'},
                         {field: 'create_user', title: __('申请人')},
                         {field: 'createtime', title: __('申请时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
@@ -479,8 +482,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_workorder_out_add: function () {
@@ -491,8 +496,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_lendlog_add: function () {
@@ -504,8 +511,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control selectpicker sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_edit: function () {
@@ -523,8 +532,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
                 console.log(sku_arr);
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_workorder_out_edit: function () {
@@ -536,8 +547,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
                 console.log(sku_arr);
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_lendlog_edit: function () {
@@ -549,8 +562,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
                 console.log(sku_arr);
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
+
+                Controller.api.bindevent();
             });
         },
         sample_workorder_detail: function () {
@@ -567,9 +582,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
     };
     return Controller;
 });
-function select_sku(key){
-    
-}
 /**
  * 入库删除
  * @param {key} key 

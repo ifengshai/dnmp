@@ -357,6 +357,8 @@
     <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
     <!--订单支付的支付方式 根据订单号读出来-->
     <input type="hidden" id='work_platform' name="row[work_platform]" value="{$row.work_platform}" />
+
+    <input type="hidden" name="row[is_new_version]" id="is_new_version" value="{$row.is_new_version}">
     <!--站点类型-->
 
     <div class="form-group">
@@ -984,7 +986,7 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('Fast name')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('First name')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-firstname" class="form-control" disabled name="row[address][firstname]" type="text" value="">
                         </div>

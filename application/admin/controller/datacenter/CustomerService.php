@@ -30,11 +30,14 @@ class CustomerService extends Backend
      */
     public function index()
     {
-        //分组数据
+        //分组数据  韩雨薇组成员
         $infoOne = $this->customers_by_group(1);
+
+        //白青青组成员
         $infoTwo = $this->customers_by_group(2);
+
         //总览数据start
-        //1.今天数据
+        //1.今天数据  10 => 默认全部
         $todayData = $this->workload->gettodayData(10);
         //昨天数据
         $yesterdayData = $this->workload->getyesterdayData(10);
@@ -1160,6 +1163,8 @@ class CustomerService extends Backend
         }elseif(2 == $customer_type){
             $type = $this->customers_by_group(2);
         }
+
+        //AB组员工ID
         $type_arr = $category_arr = [];
         if(!empty($type)){
             foreach($type as $k =>$v){
@@ -1172,11 +1177,14 @@ class CustomerService extends Backend
         }elseif(2 == $customer_category){ //非正式员工
             $category = $this->getCustomerFormal(2);
         }
+
         if(!empty($category)){
             foreach($category as $k=>$v){
                 $category_arr[] = $v;
             }
         }
+
+        //AB组员工为真 并且 
         if(count($type_arr)>0 && count($category_arr)==0){
             $where['due_id'] = ['in',$type_arr];
         }elseif(count($type_arr)>0 && count($category_arr)>0){
@@ -1190,6 +1198,7 @@ class CustomerService extends Backend
         //客服处理量
         $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
         $customerReply = collection($customerReply)->toArray();
+     
         //客服分组
         $info = $this->customers();
         $kefumanage = config('workorder.kefumanage');

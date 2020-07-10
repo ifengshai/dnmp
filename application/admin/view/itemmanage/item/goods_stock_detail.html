@@ -218,10 +218,10 @@
                     <td>{:$k+1}</td>
                     <td>{$v.purchase_number}</td>
                     <td>{:config('purchase_status')[$v['purchase_status']]}</td>
-                    <td>{$v['purchase_num'] - $v['arrivals_num']}</td>
+                    <td>{$v['purchase_num']}</td>
                     <td>{$v.createtime}</td>
                     <td>{$v.create_person}</td>
-                    <td>{$v.product_cycle_time}</td>
+                    <td>{$v.arrival_time}</td>
                     <td>{$v.receiving_time}</td>
                 </tr>
                 {/foreach}

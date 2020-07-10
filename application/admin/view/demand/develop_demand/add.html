@@ -7,6 +7,30 @@
             <input id="c-titel" data-rule="required" class="form-control" name="row[title]" type="text" value="">
         </div>
     </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('部门')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[department_group]" class="form-control"  data-rule="required">
+                <option value="">请选择</option>
+                <option value="1">运营部</option>
+                <option value="2">客服部</option>
+                <option value="3">仓管部</option>
+                <option value="4">产品开发部</option>
+                <option value="5">财务部</option>
+                <option value="6">技术部</option>
+                <option value="7">IT产品部</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group phper_class">
+        <label class="control-label col-xs-12 col-sm-2">{:__('负责人')}</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[duty_user_id][]', $userlist, null, ['class'=>'form-control
+            selectpicker', null,'data-live-search' => true, 'multiple' => true,'id'=>'assign_developer_ids'])}
+        </div>
+    </div>
+
     {if $demand_type == 1}
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}:</label>
@@ -23,7 +47,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Desc')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-desc" class="form-control editor" rows="4" name="row[desc]"
+            <textarea id="c-desc" class="form-control editor_simditor" rows="4" name="row[desc]"
                       cols="30"></textarea>
         </div>
     </div>

@@ -315,12 +315,14 @@
         </div>
     </div>
 
+
+
     <input type='hidden' name="row[purchase_status]" class="status" value="{$row.purchase_status}">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            {if $row.purchase_type ==1} 
+            {if $row.purchase_type ==1 && $row.purchase_status == 0}  
             <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
             {/if}
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>

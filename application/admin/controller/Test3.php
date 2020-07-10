@@ -205,139 +205,38 @@ class Test3 extends Backend
      */
     public function proccess_stock()
     {
-        $item = new \app\admin\model\itemmanage\Item();
-        $result = $item->where(['is_open' => 1, 'is_del' => 1, 'on_way_stock' => ['<', 0]])->field('sku,id')->select();
-        $result = collection($result)->toArray();
-        $skus = array_column($result, 'sku');
-        //计算SKU总采购数量
+        // $item = new \app\admin\model\itemmanage\Item();
+        // $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
+        // $result = collection($result)->toArray();
+        // $skus = array_column($result, 'sku');
+
+
+        //查询签收的采购单
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $hasWhere['sku'] = ['in', $skus];
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_map['is_del'] = 1;
-        $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->where($purchase_map)
-            ->group('sku')
-            ->column('sum(purchase_num) as purchase_num', 'sku');
+        $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
 
-        //查询出满足条件的采购单号
-        $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->where($purchase_map)
-            ->group('PurchaseOrder.id')
-            ->column('PurchaseOrder.id');
 
-        //查询留样库存
-        //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-        $check_map['status'] = 2;
-        $check_map['type'] = 1;
-        $check_map['Check.purchase_id'] = ['in', $ids];
-        $check = new \app\admin\model\warehouse\Check;
-        $hasWhere['sku'] = ['in', $skus];
-        $check_list = $check->hasWhere('checkItem', $hasWhere)
-            ->where($check_map)
-            ->group('sku')
-            ->column('sum(arrivals_num) as arrivals_num', 'sku');
-        foreach ($result as &$v) {
-            $on_way_stock = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
-            $v['on_way_stock'] = $on_way_stock > 0 ? $on_way_stock : 0;
-        }
-        unset($v);
-        $res = $item->saveAll($result);
-        echo $res;
+
+        // //计算SKU总采购数量
+        // $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        // $hasWhere['sku'] = ['in', $skus];
+        // $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
+        // $purchase_map['is_del'] = 1;
+        // $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
+        // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+        //     ->where($purchase_map)
+        //     ->group('sku')
+        //     ->column('sum(purchase_num) as purchase_num', 'sku');
+
+        // foreach ($result as &$v) {
+        //     $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
+        //     unset($v['sku']);
+        // }
+        // unset($v);
+        // $res = $item->saveAll($result);
+        echo  $res;
         die;
     }
-
-    /**
-     * 处理质检单状态
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/06/09 10:09:17 
-     * @return void
-     */
-    public function process_status()
-    {
-        $logistics_info = new \app\admin\model\LogisticsInfo();
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        $list = $logistics_info->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $status = $purchase->where(['id' => $v['purchase_id']])->value('check_status');
-            if ($status == 2) {
-                $logistics_info->where(['id' => $v['id']])->update(['status' => 1]);
-            }
-            echo $k . "\n";
-        }
-        echo 'ok';
-    }
-
-    /**
-     * 处理质检单状态
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/06/09 10:09:17 
-     * @return void
-     */
-    public function process_check()
-    {
-        $logistics_info = new \app\admin\model\LogisticsInfo();
-        $check = new \app\admin\model\warehouse\Check();
-        $list = $logistics_info->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $count = $check->where(['purchase_id' => $v['purchase_id'], 'status' => 2])->count();
-            if ($count > 0) {
-                $logistics_info->where(['id' => $v['id']])->update(['is_check_order' => 1]);
-            }
-            echo $k . "\n";
-            usleep(50000);
-        }
-        echo 'ok';
-    }
-
-    public function process_logstatic()
-    {
-        $logistics_info = new \app\admin\model\LogisticsInfo();
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        $list = $logistics_info->where(['type' => 1])->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $purchase_info = $purchase->where(['id' => $v['purchase_id']])->field('logistics_company_no,purchase_type')->find();
-            if ($purchase_info['purchase_type'] == 1) {
-                $data['source'] = 1;
-            } else {
-                $data['source'] = 2;
-            }
-            $data['logistics_company_no'] = $purchase_info['logistics_company_no'];
-            $logistics_info->where(['id' => $v['id']])->update($data);
-            echo $k . "\n";
-        }
-        echo 'ok';
-    }
-
-    /**
-     * 修改支付时间
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/06/08 17:02:59 
-     * @return void
-     */
-    // public function setPayTime()
-    // {
-    //     ini_set('memory_limit', '512M');
-    //     $order_node_detail = new \app\admin\model\OrderNodeDetail();
-    //     $list = $order_node_detail->where(['order_node' => 0, 'node_type' => 0])->field('create_time,order_id,site')->select();
-    //     $list = collection($list)->toArray();
-    //     foreach ($list as $k => $v) {
-    //         $order_node_detail->where(['order_id' => $v['order_id'], 'order_node' => 0, 'node_type' => 1, 'site' => $v['site']])->update(['create_time' => $v['create_time']]);
-
-    //         echo $v['order_id'] . "\n";
-    //         usleep(50000);
-    //     }
-    //     echo 'ok';
-    //     die;
-    // }
-
 }

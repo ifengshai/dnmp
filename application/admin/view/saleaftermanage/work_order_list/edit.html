@@ -370,6 +370,8 @@
     <input type="hidden" id='is_check' name="row[is_check]" value="{$row.is_check}"/>
     <!-- 问题类型id传递 -->
     <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
+
+    <input type="hidden" name="row[is_new_version]" id="is_new_version" value="{$row.is_new_version}">
     <!--站点类型-->
     <div id="input-hidden"></div>
     <div class="form-group">
@@ -871,7 +873,7 @@
                     </div>
                 </div>
                 <div class="step7_function1_child">
-                    <label class="control-label col-xs-12 col-sm-3">{:__('Fast name')}：</label>
+                    <label class="control-label col-xs-12 col-sm-3">{:__('First name')}：</label>
                     <div class="col-xs-12 col-sm-8">
                         <input id="c-firstname" class="form-control" name="row[address][firstname]" type="text"
                                value="">

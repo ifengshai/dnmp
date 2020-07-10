@@ -113,9 +113,12 @@ class WorkOrderList extends Model
      */
     public function getSkuList($order_platform, $increment_id)
     {
+        $is_new_version = 0;
         switch ($order_platform) {
             case 1:
                 $this->model = new \app\admin\model\order\order\Zeelool();
+                $is_new_version = $this->model->where('increment_id', $increment_id)
+                    ->value('is_new_version');
                 break;
             case 2:
                 $this->model = new \app\admin\model\order\order\Voogueme();
@@ -143,6 +146,7 @@ class WorkOrderList extends Model
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
+        $result['is_new_version'] = $is_new_version;
         $result['base_grand_total'] = $orderInfo['base_grand_total'];
         $result['grand_total']    = $orderInfo['grand_total'];
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
@@ -216,20 +220,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1)
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -237,11 +246,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','isNewVersion'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -356,7 +365,7 @@ class WorkOrderList extends Model
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
 
-                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
+                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     $data = [
                         'work_id' => $work_id,
                         'increment_id' => $params['platform_order'],
@@ -509,17 +518,22 @@ class WorkOrderList extends Model
      * @param $prescription_type
      * @return array
      */
-    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type)
+    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type,$isNewVersion)
     {
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 0){
+                $url = 'magic/product/lensData';
+            }elseif($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
         $coatingLists = $data['coating_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
         $lens = $prescription[$prescription_type] ?? [];
@@ -534,12 +548,22 @@ class WorkOrderList extends Model
             }
         } else {
             //colorname
-            foreach ($colorList as $key => $val) {
-                if ($val['id'] == $colorId) {
-                    $colorName = $val['name'];
-                    break;
+            if($isNewVersion == 1){
+                foreach ($lensColorList as $key => $val) {
+                    if ($val['lens_id'] == $colorId) {
+                        $colorName = $val['lens_data_name'];
+                        break;
+                    }
+                }
+            }else{
+                foreach ($colorList as $key => $val) {
+                    if ($val['id'] == $colorId) {
+                        $colorName = $val['name'];
+                        break;
+                    }
                 }
             }
+
             //lensName
             foreach ($lensColorList as $val) {
                 if ($val['lens_id'] == $lens_id) {
@@ -551,11 +575,20 @@ class WorkOrderList extends Model
         }
 
         foreach ($coatingLists as $coatingList) {
-            if ($coatingList['id'] == $coating_id) {
-                $coatingName = $coatingList['name'];
-                break;
+            if($isNewVersion == 1){
+                if ($coatingList['coating_id'] == $coating_id) {
+                    $coatingName = $coatingList['coating_name'];
+                    break;
+                }
+            }else{
+                if ($coatingList['id'] == $coating_id) {
+                    $coatingName = $coatingList['name'];
+                    break;
+                }
             }
+
         }
+
         return ['lensName' => $lensName, 'lensType' => $lensType, 'colorName' => $colorName, 'coatingName' => $coatingName];
     }
 
@@ -567,7 +600,7 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function createOrder($siteType, $work_id)
+    public function createOrder($siteType, $work_id, $isNewVersion = 0)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
@@ -616,7 +649,7 @@ class WorkOrderList extends Model
                 }
 
                 $postData['product'][$key] = [
-                    'sku' => strtoupper($changeSku['original_sku']),
+                    'sku' => $changeSku['original_sku'],
                     'qty' => $changeSku['original_number'],
                     'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
@@ -649,16 +682,24 @@ class WorkOrderList extends Model
                     'color_id' => $prescriptions['color_id'],
                     'color_name' => $prescriptions['color_name'],
                 ];
+                $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', json_encode($postData), FILE_APPEND);
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
+                if($isNewVersion == 0){
+                    $url = 'magic/order/createOrder';
+                }elseif($isNewVersion == 1){
+                    $url = 'magic/order/newCreateOrder';
+                }
+                $res = $this->httpRequest($siteType, $url, $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-                self::where(['id' => $work_id])->setField('replacement_order',$increment_id);
- 
+                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+
+                //补发扣库存
+                $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
                 exception($e->getMessage());
             }
@@ -717,20 +758,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '')
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$is_new_version = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $is_new_version;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($is_new_version == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -738,11 +784,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type','is_new_version'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -758,8 +804,8 @@ class WorkOrderList extends Model
      */
     public function checkWork($work_id, $params = [])
     {
-        $work = self::find($work_id);
 
+        $work = self::find($work_id);
         //判断是否已审核
         if ($work->check_time) return true;
         Db::startTrans();
@@ -827,10 +873,11 @@ class WorkOrderList extends Model
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
+
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (in_array($measure_choose_id, [7,8, 9, 10])) {
+                        if (in_array($measure_choose_id, [7, 8, 9, 10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -864,7 +911,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id);
+                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();

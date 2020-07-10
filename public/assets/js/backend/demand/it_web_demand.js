@@ -1808,7 +1808,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Layer.open({
                             closeBtn: 1,
                             title: row.title,
-                            area:['60%'],
+                            maxWidth:800,
+                            maxHeight:800,
                             shadeClose:true,
                             anim: 0,
                             content: value

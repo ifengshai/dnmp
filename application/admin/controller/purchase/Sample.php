@@ -60,23 +60,33 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['location']) {
+                $smap['location'] = ['like', '%' . $filter['location'] . '%'];
+                $ids = Db::name('purchase_sample_location')->where($smap)->column('id');
+                $map['location_id'] = ['in', $ids];
+                unset($filter['location']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->sample
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->sample
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
-                $list[$key]['location'] = $this->samplelocation->getLocationName($value['location_id']);
+                $list[$key]['location_id'] = $this->samplelocation->getLocationName($value['location_id']);
                 $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
                 $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
             }
@@ -540,6 +550,14 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = Db::name('purchase_sample_workorder_item')->where($smap)->column('parent_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $where_arr['type'] = 1;
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -547,12 +565,14 @@ class Sample extends Backend
             $total = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -603,6 +623,10 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'],'sku');
                 $stock_arr = array_column($params['goods'],'stock');
+                //判断是否有重复项
+                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                    $this->error(__('sku不能重复', ''));
+                }
                 if(in_array('',$sku_arr)){
                     $this->error(__('商品信息不能为空', ''));
                 }
@@ -1154,18 +1178,26 @@ class Sample extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = Db::name('purchase_sample_lendlog_item')->where($smap)->column('log_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $total = $this->samplelendlog
                 ->where($where)
-                ->order($sort, $order)
+                ->where($map)
                 ->count();
-
             $list = $this->samplelendlog
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['status_id'] = $value['status'];
@@ -1436,17 +1468,23 @@ class Sample extends Backend
             $this->error('缺少参数！！');
         }
         $where['id'] = $params['ids'];
-        //归还
-        $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
-        foreach($lendlog_items as $item){
-            $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
-            //判断是否没有借出数量，如果没有修改样品间列表的状态
-            $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
-            if($already_lend_num == 0){
-                $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
+        //判断是否是本人归还，如果是本人，才允许归还
+        $admin_user = $this->samplelendlog->where($where)->value('create_user');
+        if($admin_user == session('admin.nickname')){
+            //归还
+            $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
+            foreach($lendlog_items as $item){
+                $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
+                //判断是否没有借出数量，如果没有修改样品间列表的状态
+                $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
+                if($already_lend_num == 0){
+                    $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
+                }
             }
+            $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
+            $this->success();
+        }else{
+            $this->error('只有本人才能归还');
         }
-        $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
-        $this->success();
     }
 }

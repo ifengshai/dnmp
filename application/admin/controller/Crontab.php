@@ -257,7 +257,7 @@ order by sfoi.item_id asc limit 1000";
 
             $final_params['os_add'] = urldecode($final_params['os_add']);
             $final_params['od_add'] = urldecode($final_params['od_add']);
-    
+
             //判断双ADD还是单ADD
             if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
@@ -481,11 +481,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || stripos($v['index_type'], 'FRAME ONLY') !== false || stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1709,6 +1709,14 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
 
 
+
+            //如果为太阳镜 拼接颜色
+            if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $items[$order_item_key]['index_name'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+                $items[$order_item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+
+
             /**
              * 判断定制现片逻辑
              * 1、渐进镜 Progressive
@@ -1716,7 +1724,7 @@ order by sfoi.item_id asc limit 1000";
              * 3、染色镜 镜片类型包含Lens with Color Tint
              * 4、当cyl<=-4或cyl>=4
              */
-         
+
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             } else {
@@ -1740,7 +1748,6 @@ order by sfoi.item_id asc limit 1000";
             } else {
                 echo '<br>执行失败';
             }
-          
         } else {
             echo '执行完毕！';
         }
@@ -2042,13 +2049,13 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
         $meeloog_model = new \app\admin\model\order\order\Meeloog;
-        $intelligent_purchase_query_sql = "SELECT a.sku, if(counter,counter,0) as counter, 
+        $intelligent_purchase_query_sql = "SELECT a.sku,if(counter,counter,0) as counter, 
         IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
         FROM catalog_product_entity a 
         LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
@@ -2057,31 +2064,40 @@ order by sfoi.item_id asc limit 1000";
 
         //查询产品库sku
         foreach ($zeelool_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
-            $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
+            $zeelool_list[$k]['zeelool_sku'] = $sku;
         }
+
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($voogueme_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
-            $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
+            $voogueme_list[$k]['voogueme_sku'] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($nihao_list as $k => $v) {
-            $true_sku = $sku_list[$v['sku']];
+            //判断库存时去掉-s 等
+            $arr = explode('-', $v['sku']);
+            $sku = $arr[0] . '-' . $arr[1];
+            $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
-            $nihao_list[$k]['nihao_sku'] = $v['sku'];
+            $nihao_list[$k]['nihao_sku'] = $sku;
         }
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
-
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -2113,7 +2129,7 @@ order by sfoi.item_id asc limit 1000";
         $where['a.status'] = 1;
         $where['b.status'] = 1;
         $supplier_list = $supplier->alias('a')->where($where)->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
-        
+
         //查询产品库正常SKU
         $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
 
@@ -3941,7 +3957,7 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 4:
                 $model = Db::connect('database.db_meeloog');
-                break;    
+                break;
             default:
                 $model = false;
                 break;
@@ -4031,20 +4047,15 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        
-        $skus =[
-            'FX0206-02',
-            'OP049594-01'
-        ];
 
-        $stock = [
-            926,
-            276
+        $skus = [
+            'OP049594-01',
+            'OP01860-04',
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = $stock[$k];
+            $data['real_time_qty'] = 0;
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -4065,17 +4076,20 @@ order by sfoi.item_id asc limit 1000";
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus =[
-            'FX0206-02',
-            'OP049594-01'
+        $skus = [
+            'OP049594-01',
+            'OP01860-04',
         ];
         foreach ($skus as $k => $v) {
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
             $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
@@ -4089,9 +4103,15 @@ order by sfoi.item_id asc limit 1000";
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
             $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            $map['custom_is_match_frame'] = 1; //是否配镜架
+            unset($map['custom_is_delivery_new']);
+            unset($map['custom_is_match_frame_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
 
             $p_map['sku'] = $v;
-            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             dump($v);
             dump($data);
             $res = $this->item->where($p_map)->update($data);
@@ -4117,17 +4137,20 @@ order by sfoi.item_id asc limit 1000";
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus =[
-            'FX0206-02',
-            'OP049594-01'
+        $skus = [
+            'OP049594-01',
+            'OP01860-04',
         ];
         foreach ($skus as $k => $v) {
+            $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
             $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
             $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
@@ -4140,9 +4163,12 @@ order by sfoi.item_id asc limit 1000";
             $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $wesee_sku;
             $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            unset($map['custom_is_delivery_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $p_map['sku'] = $v;
-            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             $res = $this->item->where($p_map)->update($data);
         }
         dump($res);
@@ -4159,16 +4185,13 @@ order by sfoi.item_id asc limit 1000";
      */
     public function set_product_sotck()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus =[
-            'FX0206-02',
-            'OP049594-01'
+        $skus = [
+            'OP049594-01',
+            'OP01860-04',
         ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
