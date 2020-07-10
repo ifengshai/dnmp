@@ -349,6 +349,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
             });
         },
+        signvalue:function(){
+            Form.api.bindevent($("form[role=form]"),function(){
+               location.reload();  
+            });
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

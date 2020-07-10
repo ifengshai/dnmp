@@ -217,17 +217,34 @@ class Zendesk extends Backend
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
                         $createData['email_ccs'] = $email_ccs;
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$type)->value('signvalue');
+                    //获取zendesk用户的昵称
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    //替换签名中的昵称
+                    if(strpos($sign,'{{agent.name}}')!==false){
+                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    }             
+                    $sign = $sign ? $sign : '';
+                    //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
+                    if(strpos($params['content'],'<p>')!==false){
+                        $params['content'] = str_replace('<p>','<span style="display:block">',$params['content']);
+                    } 
+                    if(strpos($params['content'],'</p>')!==false){
+                        $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    } 
+                    
                     $priority = config('zendesk.priority')[$params['priority']];
-                    $body = $params['content'];
                     if ($priority) {
                         $createData['priority'] = $priority;
                     }
+                    
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
-                    if (strip_tags($body)) {
+                    if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
 //                        $createData['comment']['body'] = $converter->convert($body);
-                        $createData['comment']['html_body'] = $body;
-
+                        $createData['comment']['html_body'] = $params['content'].$sign;
                     }
                     if ($params['image']) {
                         //附件上传
@@ -409,16 +426,33 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+                    //获取zendesk用户的昵称
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    //替换签名中的昵称
+                    if(strpos($sign,'{{agent.name}}')!==false){
+                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    }             
+                    $sign = $sign ? $sign : '';
+                    //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
+                    if(strpos($params['content'],'<p>')!==false){
+                        $params['content'] = str_replace('<p>','<span style="display:block">',$params['content']);
+                    } 
+                    if(strpos($params['content'],'</p>')!==false){
+                        $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    } 
+
                     $priority = config('zendesk.priority')[$params['priority']];
-                    $body = $params['content'];
                     if ($priority) {
                         $updateData['priority'] = $priority;
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
-                    if (strip_tags($body)) {
+                    if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
 //                        $updateData['comment']['body'] = $converter->convert($body);
-                        $updateData['comment']['html_body'] = $body;
+                        $updateData['comment']['html_body'] = $params['content'].$sign;
                     }
                     if ($params['image']) {
                         //附件上传
@@ -1014,5 +1048,36 @@ DOC;
         }
         echo 'all ok';
         exit;
+    }
+    /**
+     * zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 15:25:29 
+     * @return void
+     */
+    public function signvalue(){
+        $signarr = Db::name('zendesk_signvalue')->select();
+        $this->view->assign('signarr',$signarr);
+        return $this->view->fetch();
+    }
+    /**
+     * 修改zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 16:51:27 
+     * @param [type] $site
+     * @return void
+     */
+    public function signvalue_edit(){
+        $params = $this->request->post("row/a");
+        $result = Db::name('zendesk_signvalue')->where('site',$params['site'])->update(['signvalue'=>$params['signvalue']]);
+        if($result){
+            $this->success('操作成功！！',url('zendesk/signvalue'));
+        }else{
+            $this->error('操作失败！！');
+        }
     }
 }
