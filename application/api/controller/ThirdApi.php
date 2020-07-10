@@ -202,7 +202,7 @@ class ThirdApi extends Api
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
+                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 11;
@@ -402,7 +402,7 @@ class ThirdApi extends Api
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
+                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 11;
@@ -603,7 +603,7 @@ class ThirdApi extends Api
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
+                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 11;
@@ -783,7 +783,7 @@ class ThirdApi extends Api
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
+                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 11;
@@ -968,7 +968,7 @@ class ThirdApi extends Api
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
+                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
                             $update_order_node['order_node'] = 3;
                             $update_order_node['node_type'] = 11;
