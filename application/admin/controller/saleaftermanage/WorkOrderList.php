@@ -2815,14 +2815,8 @@ class WorkOrderList extends Backend
         $this->assignconfig('operate_type', $operateType);
         if (2 <= $row->work_status) {
             $row->assign_user = Admin::where(['id' => $row->assign_user_id])->value('nickname');
-            if ($row->assign_user_id == 0){
-                $row->assign_user = '';
-            }
         } else {
             $row->assign_user  = Admin::where(['id' => $row->operation_user_id])->value('nickname');
-            if($row->operation_user_id == 0){
-                $row->assign_user = '';
-            }
         }
         $this->view->assign("row", $row);
         if ($operateType == 2) { //审核
