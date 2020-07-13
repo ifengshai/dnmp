@@ -1253,6 +1253,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             Controller.api.bindevent();
+            //进入页面展示按钮下的数据
+            $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                var id = $(this).val();
+                if(id == 15){
+                    //vip退款显示
+                    $(".step2").show();
+                }
+                if(id == 13){
+                    //修改地址
+                    changeOrderAddress();
+                }
+            })
+
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 //读取是谁添加的配置console.log(Config.work_type);
