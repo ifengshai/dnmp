@@ -140,7 +140,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                 //return (pageNumber - 1) * pageSize + 1 + index;
                                 return 1 + index;
-                            }, operate: false,visible:false
+                            }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'sku', title: __(' sku'), operate: 'LIKE'},
@@ -154,7 +154,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 if (value.length > 0) {
                                     for (i = 0, len = value.length; i < len; i++) {
                                         // all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><input id="'+ rows +'" type="text" class="form-control" style="display: inline-block;width: 180px;text-align: center;" value="'+ value[i].num +'"></div>';
-                                        all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><b class="recept text-red">'+ value[i].num +'</b></div>';
+                                        all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><b class="recept text-red">' + value[i].num + '</b></div>';
                                     }
                                 }
                                 return all_user_name;
@@ -220,7 +220,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
+                var content1 =
+                    '<tr> <td>' +
+                    '<div class="btn-group bootstrap-select form-control">' +
+                    '<button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" role="button" title="没有选中任何项">' +
+                    '<span class="filter-option pull-left">没有选中任何项</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span>' +
+                    '</button>' +
+                    '<div class="dropdown-menu open" role="combobox">' +
+                    '<div class="bs-searchbox">' +
+                    '<input type="text" class="form-control" autocomplete="off" role="textbox" aria-label="Search">' +
+                    '</div>' +
+                    '<ul class="dropdown-menu inner" role="listbox" aria-expanded="false">' +
+                    '<li data-original-index="0" class="selected">' +
+                    '<a tabindex="0" class="" style="" data-tokens="null" role="option" aria-disabled="false" aria-selected="true">' +
+                    '<span class="text">' +
+                    '</span>' +
+                    '<span class="glyphicon glyphicon-ok check-mark">' +
+                    '</span>' +
+                    '</a>' +
+                    '</li>' +
+                    '</ul>' +
+                    '</div>' +
+                    '<select class="form-control selectpicker" data-live-search="1" name="row[supplier_id]" tabindex="-98">' +
+                    '<option value="0" selected="selected"></option>' +
+                    '</select>' +
+                    '</div>' +
+                    '\n</td> <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td> <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> </tr>';
+                $('.caigou table tbody').append(content1);
 
             })
 
