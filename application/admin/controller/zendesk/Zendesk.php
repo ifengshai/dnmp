@@ -173,6 +173,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($type == 2) {
                         $siteName = 'voogueme';
+                    }elseif($type == 3){
+                        $siteName = 'nihao';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
@@ -407,6 +409,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($ticket->type == 2){
                         $siteName = 'voogueme';
+                    } elseif($ticket->type == 3){
+                        $siteName = 'nihao';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -660,6 +664,8 @@ Please close this window and try again.");
                 $siteName = 'zeelool';
             }elseif($type == 2){
                 $siteName = 'voogueme';
+            }else{
+                $siteName = 'nihao';
             }
 
             $data = [

@@ -7,7 +7,8 @@
 return [
     'platform'=>[
         1=>'zeelool',
-        2=>'voogueme'
+        2=>'voogueme',
+        3=>'nihao'
     ],
     'zeelool' => [
         'subdomain' => "zeelooloptical",
@@ -16,6 +17,11 @@ return [
     ],
     'voogueme' => [
         'subdomain' => "voogue",
+        'username' => "ww591795345@outlook.com",
+        'token' => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go"
+    ],
+    'nihao' => [
+        'subdomain' => "nihao",
         'username' => "ww591795345@outlook.com",
         'token' => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go"
     ],
