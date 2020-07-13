@@ -209,24 +209,7 @@ class SelfApi extends Api
         if (!$track_number) {
             $this->error(__('缺少快递单号参数'), [], 400);
         }
-        switch ($site) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_meeloog';
-                break;
-            default:
-                return false;
-                break;
-        }
-
+  
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -252,6 +235,12 @@ class SelfApi extends Api
         } else {
             $shipment_data_type = $title;
         }
+
+        //如果已发货 则不再更新发货时间
+        if ($row->order_node == 2 && $row->node_type == 7) {
+            $this->error(__('订单节点已存在'), [], 400);
+        }
+
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
