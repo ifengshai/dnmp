@@ -210,7 +210,7 @@ class ZeeloolPrescriptionDetailHelper
 					$items[$item_key]['od_add'] = $lens_params['od_add'];
 				}
 			} else {
-				if ($items[$item_key]['od_add'] && $lens_params['od_add']*1 != 0) {
+				if ($items[$item_key]['od_add'] && (float) $lens_params['od_add']*1 != 0) {
 					$items[$item_key]['total_add'] = $lens_params['od_add'];
 				} else {
 					$items[$item_key]['total_add'] = $lens_params['os_add'];
