@@ -59,7 +59,18 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
  
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
+        
+        <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            
+            <input id="c-origin_skus" data-rule="required" class="form-control" name="row[origin_skus]" type="text"
+                value="">
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('同步平台')}:</label>
         <div class="col-xs-12 col-sm-3">
             <select id="brand_id" data-rule="required" class="form-control selectpicker" data-live-search='true'
                 name="row[brand_id]">
@@ -68,13 +79,6 @@
                 {/foreach}
             </select>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Origin_sku')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            
-            <input id="c-origin_skus" data-rule="required" class="form-control" name="row[origin_skus]" type="text"
-                value="">
-        </div>
-
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer">
