@@ -44,10 +44,17 @@ class Test extends Backend
         $order_shipment = Db::name('z_linshi')->select();
         $order_shipment = collection($order_shipment)->toArray();
 
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
         foreach ($order_shipment as $k => $v){
-            $shipment_reg[0]['number'] =  $v['yundanhao'];
-            $shipment_reg[0]['carrier'] =  '21051';
-            $track = $this->regitster17Track($shipment_reg);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['yundanhao'],
+                'carrier' => '21051'
+            ]]);
+
+            $update['17status'] = $trackInfo['data']['accepted'][0]['track']['e'];
+            Db::name('z_linshi')->where('id', $v['id'])->update($update);
 
             sleep(1);
 
