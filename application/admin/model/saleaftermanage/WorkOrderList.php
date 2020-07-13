@@ -330,22 +330,53 @@ class WorkOrderList extends Model
         if (($work->work_type == 1 && $measure_choose_id == 13) || ($work->work_type == 2 && $measure_choose_id == 13)) {
             Db::startTrans();
             try {
-                $changeAddress = $params['modify_address'];
-                $postData = array(
-                    'increment_id'=>$params['platform_order'],
-                    'type'=>$changeAddress['address_id'],
-                    'first_name'=>$changeAddress['firstname'],
-                    'last_name'=>$changeAddress['lastname'],
-                    'email'=>$changeAddress['email'],
-                    'telephone'=>$changeAddress['telephone'],
-                    'country'=>$changeAddress['country_id'],
-                    'region_id'=>$changeAddress['region_id'],
-                    'region'=>$changeAddress['region'],
-                    'city'=>$changeAddress['city'],
-                    'street'=>$changeAddress['street'],
-                    'postcode'=>$changeAddress['postcode'],
-                );
-                $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
+                if (!$params['modify_address']['country_id']) {
+                    exception('国家不能为空');
+                }
+                //查询是否有该地址
+                $is_exist = WorkOrderChangeSku::where(['work_id' => $work_id])->value('id');
+                if(!$is_exist){
+                    $data = [
+                        'work_id' => $work_id,
+                        'increment_id' => $params['platform_order'],
+                        'platform_type' => $params['work_platform'],
+                        'change_type' => 6,
+                        'measure_id' => $measure_id,
+                        'create_person' => session('admin.nickname'),
+                        'update_time' => date('Y-m-d H:i:s'),
+                        'create_time' => date('Y-m-d H:i:s')
+                    ];
+                    //修改地址
+                    $data['email'] = $params['modify_address']['email'];
+ 
+                    $data['userinfo_option'] = serialize($params['modify_address']);
+                    WorkOrderChangeSku::create($data);
+                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 6]);
+                }else{
+                    //更新
+                    $data['email'] = $params['modify_address']['email'];
+                    $data['userinfo_option'] = serialize($params['modify_address']);
+                    WorkOrderChangeSku::where(['work_id' => $work_id])->update($data);
+                }
+                
+                if($params['work_status'] == 2){
+                    $changeAddress = $params['modify_address'];
+                    $postData = array(
+                        'increment_id'=>$params['platform_order'],
+                        'type'=>$changeAddress['address_id'],
+                        'first_name'=>$changeAddress['firstname'],
+                        'last_name'=>$changeAddress['lastname'],
+                        'email'=>$changeAddress['email'],
+                        'telephone'=>$changeAddress['telephone'],
+                        'country'=>$changeAddress['country_id'],
+                        'region_id'=>$changeAddress['region_id'],
+                        'region'=>$changeAddress['region'],
+                        'city'=>$changeAddress['city'],
+                        'street'=>$changeAddress['street'],
+                        'postcode'=>$changeAddress['postcode'],
+                    );
+                    $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
+                }
                 Db::commit();
             } catch (\Exception $e) {
                 Db::rollback();
