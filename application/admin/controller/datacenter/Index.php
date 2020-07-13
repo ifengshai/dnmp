@@ -658,7 +658,17 @@ class Index extends Backend
                     $i++;
                 }
             }
+            if(array_filter($result)>0){
+                $sortField = array_column($result,'available_stock');
+                //可用库存倒叙排列
+                if(($params['sort'] == 'available_stock') && ($params['order'] == 'desc')){
+                    array_multisort($sortField,SORT_DESC,$result);
+                //可用库存正序排列    
+                }elseif(($params['sort'] == 'available_stock') && ($params['order'] == 'asc')){
+                    array_multisort($sortField,SORT_ASC,$result);
+                }                
 
+            }
             return json(['code' => 1, 'data' => $json, 'rows' => $result]);
         }
         $this->assign('create_time', $create_time);

@@ -1073,7 +1073,16 @@ DOC;
      */
     public function signvalue_edit(){
         $params = $this->request->post("row/a");
-        $result = Db::name('zendesk_signvalue')->where('site',$params['site'])->update(['signvalue'=>$params['signvalue']]);
+        //查询是否存在
+        $is_exist = Db::name('zendesk_signvalue')->where('site',$params['site'])->value('id');
+        if($is_exist){
+            $result = Db::name('zendesk_signvalue')->where('site',$params['site'])->update(['signvalue'=>$params['signvalue']]);
+        }else{
+            $arr['site'] = $params['site'];
+            $arr['signvalue'] = $params['signvalue'];
+            $result = Db::name('zendesk_signvalue')->insert($arr);
+        }
+        
         if($result){
             $this->success('操作成功！！',url('zendesk/signvalue'));
         }else{

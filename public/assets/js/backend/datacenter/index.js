@@ -126,7 +126,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         { field: 'sku', title: __('SKU'), operate: false },
                         { field: 'name', title: __('商品名称'), operate: false },
                         { field: 'type_name', title: __('分类'), operate: false },
-                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), sortable: true,operate: false },
                         { field: 'sales_num', title: __('销量'), operate: false },
                         {
                             field: 'is_up', title: __('平台上下架状态'), operate: false,
