@@ -2682,6 +2682,7 @@ function delOne(str,arr){
 function changeOrderAddress(){
     $("#user_address").show();
     var incrementId = $('#c-platform_order').val();
+    var work_id = $('#work_id').val();
     if (!incrementId) {
         Toastr.error('订单号不能为空');
         return false;
@@ -2694,6 +2695,7 @@ function changeOrderAddress(){
             data: {
                 increment_id: incrementId,
                 site_type: site_type,
+                work_id: work_id,
             }
         }, function (json, ret) {
             if (json.code == 0) {
