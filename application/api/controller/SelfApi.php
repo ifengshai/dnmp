@@ -237,7 +237,7 @@ class SelfApi extends Api
         }
 
         //如果已发货 则不再更新发货时间
-        if ($row->order_node == 2 && $row->node_type == 7) {
+        if ($row->order_node >= 2 && $row->node_type >= 7) {
             $this->error(__('订单节点已存在'), [], 400);
         }
 
