@@ -1,86 +1,31 @@
 <style>
-    .caigou {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        padding: 10px;
-        width: 71%;
-        margin-left: 12%;
-        margin-bottom: 10px;
-    }
-
-    .caigou #caigou-table {
-        width: 100%;
-        height: 130px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
-    }
-
-    .caigou #caigou-table tr {
-
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        line-height: 50px;
-    }
-
-    .caigou #caigou-table tr th {
-
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
-        font-size: 14px;
-    }
-
-    .caigou #caigou-table tr td {
-
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-    }
-
-    .caigou #caigou-table tr td input {
-
-        width: 150px;
-    }
-
-    .caigou #caigou-table tr td  .c-name{
-        width: 220px;
+    .content {
+        min-height: 0px;
     }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
- 
+
     <div class="form-group">
-        
-        <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            
-            <input id="c-origin_skus" data-rule="required" class="form-control" name="row[origin_skus]" type="text"
-                value="">
+
+        <label class="control-label col-xs-2 col-sm-2" style="text-align: right;">{:__('SKU')}:</label>
+        <div class="col-xs-8 col-sm-3">
+            {:input('sku')}
         </div>
 
     </div>
-
+    <input type="hidden" value="{:input('ids')}" name="id" />
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('同步平台')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select id="brand_id" data-rule="required" class="form-control selectpicker" data-live-search='true'
-                name="row[brand_id]">
-                {foreach name="brandList" item="vo"}
+        <label class="control-label col-xs-2 col-sm-2"
+            style="line-height: 30px;text-align: right;">{:__('同步平台')}:</label>
+        <div class="col-xs-6 col-sm-3">
+            <select id="platformarr" data-rule="required" class="form-control selectpicker" name="site">
+                <option value="">请选择</option>
+                {foreach name="platformarr" item="vo"}
                 <option value="{$key}">{$vo}</option>
                 {/foreach}
             </select>
         </div>
     </div>
-    <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
