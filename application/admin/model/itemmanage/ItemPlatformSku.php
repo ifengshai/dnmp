@@ -34,57 +34,46 @@ class ItemPlatformSku extends Model
     //添加商品平台sku
     public function addPlatformSku($row)
     {
-        $res = $this->where('sku', $row['sku'])->field('sku,name')->find();
-        if ($res) {
+        switch ($row['site']) {
+            case 1:
+                $prefix = 'Z';
+                break;
+            case 2:
+                $prefix = 'G';
+                break;
+            case 3:
+                $prefix = 'N';
+                break;
+            case 4:
+                $prefix = 'M';
+                break;
+            case 5:
+                $prefix = 'W';
+                break;
+            default:
+                $prefix = false;
+                break;
+        }
+        //判断前缀是否存在
+        if (false == $prefix) {
             return false;
         }
-        $platform = (new MagentoPlatform())->getOrderPlatformList();
-        if (!empty($platform) && is_array($platform)) {
-            $arr = [];
-            foreach ($platform as $k => $v) {
-                switch ($v) {
-                    case 'zeelool':
-                        $prefix = 'Z';
-                        break;
-                    case 'voogueme':
-                        $prefix = 'G';
-                        break;
-                    case 'nihao':
-                        $prefix = 'N';
-                        break;
-                    case 'meeloog':
-                        $prefix = 'M';
-                        break;
-                    case 'wesee':
-                        $prefix = 'W';
-                        break;
-                    default:
-                        $prefix = false;
-                        break;
-                }
-                //判断前缀是否存在
-                if (false == $prefix) {
-                    continue;
-                }
-                //监测平台sku是否存在
-                $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $k);
-                if (false === $platformSkuExists) {
-                    continue;
-                }
-                $arr[$k]['sku'] = $row['sku'];
-                $arr[$k]['platform_sku'] = $prefix . $row['sku'];
-                $arr[$k]['name'] = $row['name'];
-                $arr[$k]['platform_type'] = $k;
-                $arr[$k]['outer_sku_status'] = 2;
-                $arr[$k]['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
-                $arr[$k]['create_time'] = date("Y-m-d H:i:s", time());
-                $arr[$k]['platform_frame_is_rimless'] = $row['frame_is_rimless'];
-            }
-            $result = $this->allowField(true)->saveAll($arr);
-            return $result ? $result : false;
-        } else {
+        //监测平台sku是否存在
+        $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $row['site']);
+        if ($platformSkuExists) {
             return false;
         }
+        $arr['sku'] = $row['sku'];
+        $arr['platform_sku'] = $prefix . $row['sku'];
+        $arr['name'] = $row['name'];
+        $arr['platform_type'] = $row['site'];
+        $arr['outer_sku_status'] = 2;
+        $arr['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
+        $arr['create_time'] = date("Y-m-d H:i:s", time());
+        $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
+        $arr['category_id'] = $row['category_id'];
+        $result = $this->allowField(true)->save($arr);
+        return $result ? $result : false;
     }
     /***
      * 查找平台SKU
@@ -264,15 +253,15 @@ class ItemPlatformSku extends Model
      * @param  $platform 平台 
      * @return void
      */
-    public function putawayDifferenceSku($id,$platform)
+    public function putawayDifferenceSku($id, $platform)
     {
         $item = new \app\admin\model\itemmanage\Item();
-        if(1 == $id){
+        if (1 == $id) {
             $skus = $item->getFrameSku();
-        }elseif(3 == $id){
+        } elseif (3 == $id) {
             $skus = $item->getOrnamentsSku();
         }
-        
+
         $map['outer_sku_status'] = 1;
         $map['platform_type']    = $platform;
         $map['sku'] = ['in', $skus];
@@ -288,14 +277,14 @@ class ItemPlatformSku extends Model
      * @param [type] $platform 平台
      * @return void
      */
-    public function getDifferencePlatformSku($id,$platform)
+    public function getDifferencePlatformSku($id, $platform)
     {
         $category = new \app\admin\model\itemmanage\ItemCategory;
         $map['attribute_group_id'] = $id;
         $ids = $category->where($map)->column('id');
         $where['m.category_id']  = ['in', $ids];
         $where['p.platform_type'] = $platform;
-        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
+        return $this->alias('p')->join('fa_item m', 'p.sku=m.sku', 'inner')->where($where)->column('p.platform_sku');
     }
     /**
      * 获取不同平台的新品sku
@@ -306,7 +295,7 @@ class ItemPlatformSku extends Model
      * @param [type] $id
      * @return void
      */
-    public function getDifferencePlatformNewSku($id,$platform)
+    public function getDifferencePlatformNewSku($id, $platform)
     {
         $category = new \app\admin\model\itemmanage\ItemCategory;
         $map['attribute_group_id'] = $id;
@@ -314,6 +303,6 @@ class ItemPlatformSku extends Model
         $where['m.category_id']  = ['in', $ids];
         $where['m.is_new']       = 1;
         $where['p.platform_type'] = $platform;
-        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
-    }    
+        return $this->alias('p')->join('fa_item m', 'p.sku=m.sku', 'inner')->where($where)->column('p.platform_sku');
+    }
 }

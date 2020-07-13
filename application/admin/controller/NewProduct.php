@@ -88,7 +88,6 @@ class NewProduct extends Backend
             //查询可用库存
             $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock', 'sku');
 
-            $skus = ['SM691318-01', 'NL691318-01'];
             //查询平台
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
@@ -105,13 +104,13 @@ class NewProduct extends Backend
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 if ($v['item_status'] == 1) {
-                    $v['item_status'] = '待选品';
+                    $v['item_status_text'] = '待选品';
                 } elseif ($v['item_status'] == 2) {
-                    $v['item_status'] = '选品通过';
+                    $v['item_status_text'] = '选品通过';
                 } elseif ($v['item_status'] == 3) {
-                    $v['item_status'] = '选品拒绝';
+                    $v['item_status_text'] = '选品拒绝';
                 } elseif ($v['item_status'] == 4) {
-                    $v['item_status'] = '已取消';
+                    $v['item_status_text'] = '已取消';
                 }
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
@@ -758,56 +757,68 @@ class NewProduct extends Backend
     /***
      * 审核通过
      */
-    public function passAudit($ids = null)
+    public function passAudit()
     {
         if ($this->request->isAjax()) {
+            $ids = input('id');
+            $site = input('site');
             //查询所选择的数据
-            $where['new_product.id'] = ['in', $ids];
-            $row = $this->model->where($where)->with(['newproductattribute'])->select();
-            $row = collection($row)->toArray();
-            foreach ($row as $k => $v) {
-                if ($v['item_status'] != 1) {
-                    $this->error('此状态不能审核！！');
-                }
+            $where['new_product.id'] = $ids;
+            $row = $this->model->where($where)->with(['newproductattribute'])->find();
+            if (!$row) {
+                $this->error('未查询到数据');
             }
 
-            $map['id'] = ['in', $ids];
+            $row = $row->toArray();
+            if ($row['item_status'] != 1 && $row['item_status'] != 2) {
+                $this->error('此状态不能同步');
+            }
+
+            $map['id'] = $ids;
             $map['item_status'] = 1;
             $data['item_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                if ($row) {
-
-                    foreach ($row as $val) {
-                        $params = $val;
-                        $params['create_person'] = session('admin.nickname');
-                        $params['create_time'] = date('Y-m-d H:i:s', time());
-                        $params['item_status'] = 1;
-                        unset($params['id']);
-                        //查询商品表SKU是否存在
-                        $t_where['sku'] = $params['sku'];
-                        $t_where['is_del'] = 1;
-                        $count = $this->item->where($t_where)->count();
-                        //此SKU已存在 跳过
-                        if ($count > 0) {
-                            continue;
-                        }
-
-                        //添加商品主表信息
-                        $this->item->allowField(true)->isUpdate(false)->data($params, true)->save();
-                        $attributeParams = $val['newproductattribute'];
-                        unset($attributeParams['id']);
-                        unset($attributeParams['frame_images']);
-                        $attributeParams['item_id'] = $this->item->id;
-                        //添加商品属性表信息
-                        $this->itemAttribute->allowField(true)->isUpdate(false)->data($attributeParams, true)->save();
-                    }
+                $params = $row;
+                $params['create_person'] = session('admin.nickname');
+                $params['create_time'] = date('Y-m-d H:i:s', time());
+                $params['item_status'] = 1;
+                unset($params['id']);
+                unset($params['newproductattribute']);
+                //查询商品表SKU是否存在
+                $t_where['sku'] = $params['sku'];
+                $t_where['is_del'] = 1;
+                $count = $this->item->where($t_where)->count();
+                //此SKU已存在 跳过
+                if ($count < 1) {
+                    //添加商品主表信息
+                    $this->item->allowField(true)->save($params);
+                    $attributeParams = $row['newproductattribute'];
+                    unset($attributeParams['id']);
+                    unset($attributeParams['frame_images']);
+                    $attributeParams['item_id'] = $this->item->id;
+                    //添加商品属性表信息
+                    $this->itemAttribute->allowField(true)->save($attributeParams);
                 }
+
+                //添加对应平台映射关系
+                $skuParams['site'] = $site;
+                $skuParams['sku'] = $params['sku'];
+                $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
+                $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
+                (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
             }
-        } 
+        }
+
+        //查询对应平台
+        $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $magentoplatformarr = $magentoplatform->column('name', 'id');
+        $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
     }
 
@@ -914,5 +925,69 @@ class NewProduct extends Backend
         } else {
             $this->error('未采集到数据！！', '', $list);
         }
+    }
+
+    /**
+     * 需求提报列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/13 13:56:00 
+     * @return void
+     */
+    public function replenishEscalationList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+            //查询商品分类
+            $category = $this->category->where('is_del', 1)->column('name', 'id');
+            //查询90天总销量
+            $productgrade = new \app\admin\model\ProductGrade();
+            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter,grade', 'true_sku');
+            //查询可用库存
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
+
+            foreach ($list as &$v) {
+                $v['category_name'] = $category[$v['category_id']];
+                //90天总销量
+                $v['sales_num'] = $productarr[$v['sku']]['counter'] ?: 0;
+                $v['grade'] = $productarr[$v['sku']]['grade'];
+                $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
+                $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        // //查询对应平台
+        $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $magentoplatformarr = $magentoplatform->field('name,id')->select();
+
+        $site = input('site', 1);
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
     }
 }

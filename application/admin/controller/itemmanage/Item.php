@@ -1353,7 +1353,11 @@ class Item extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 //添加到商品平台sku
-                (new ItemPlatformSku())->addPlatformSku($row);
+                //审核通过同步到有映射关系的平台
+
+
+
+                // (new ItemPlatformSku())->addPlatformSku($row);
                 $this->success('审核通过成功');
             } else {
                 $this->error('审核通过失败');
