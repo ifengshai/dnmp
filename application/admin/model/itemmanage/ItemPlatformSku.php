@@ -71,6 +71,7 @@ class ItemPlatformSku extends Model
         $arr['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
         $arr['create_time'] = date("Y-m-d H:i:s", time());
         $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
+        $arr['category_id'] = $row['category_id'];
         $result = $this->allowField(true)->save($arr);
         return $result ? $result : false;
     }

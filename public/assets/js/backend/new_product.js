@@ -111,34 +111,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                         }
                                     }
                                 },
-
-                                // {
-                                //     name: 'auditRefused',
-                                //     text: '取消',
-                                //     title: __('取消'),
-                                //     classname: 'btn btn-xs btn-danger btn-ajax',
-                                //     icon: 'fa fa-remove',
-                                //     url: Config.moduleurl + '/new_product/cancel',
-                                //     confirm: '确认取消吗',
-                                //     success: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         $(".btn-refresh").trigger("click");
-                                //         //如果需要阻止成功提示，则必须使用return false;
-                                //         //return false;
-                                //     },
-                                //     error: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         return false;
-                                //     },
-                                //     visible: function (row) {
-                                //         //返回true时按钮显示,返回false隐藏
-                                //         if (row.item_status == 1) {
-                                //             return true;
-                                //         } else {
-                                //             return false;
-                                //         }
-                                //     }
-                                // }
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -335,6 +307,95 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         passaudit: function () {
             Controller.api.bindevent();
         },
+        replenishescalationlist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/replenishescalationlist' + location.search,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'category_name', title: __('商品分类'), operate: 'like' },
+                        { field: 'grade', title: __('销量等级'), operate: 'like', },
+                        { field: 'product_cycle', title: '生产周期', operate: false },
+                        { field: 'available_stock', title: '可用库存', operate: false },
+                        { field: 'on_way_stock', title: '在途库存', operate: false },
+                        { field: 'product_cycle', title: '待入库数量', operate: false },
+                        { field: 'product_cycle', title: '过去15天日均销量', operate: false },
+                        { field: 'product_cycle', title: '过去90天日均销量', operate: false },
+                        { field: 'product_cycle', title: '预估售卖天数', operate: false },
+                        { field: 'product_cycle', title: '建议补货量', operate: false },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+
+                                {
+                                    name: 'edit',
+                                    text: '加入补货清单',
+                                    title: __('加入补货清单'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/new_product/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        //console.log(row.item_status);
+                                        if (row.item_status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                            ], formatter: Table.api.formatter.operate
+                        }
+                       
+                    ]
+                ]
+            });
+            
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    filter[field] = value;
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+
+        },
+
         api: {
 
             formatter: {

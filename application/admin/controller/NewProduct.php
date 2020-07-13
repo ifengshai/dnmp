@@ -806,6 +806,7 @@ class NewProduct extends Backend
                 $skuParams['sku'] = $params['sku'];
                 $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
                 $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
                 (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
 
                 $this->success('审核成功');
@@ -924,5 +925,69 @@ class NewProduct extends Backend
         } else {
             $this->error('未采集到数据！！', '', $list);
         }
+    }
+
+    /**
+     * 需求提报列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/13 13:56:00 
+     * @return void
+     */
+    public function replenishEscalationList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+            //查询商品分类
+            $category = $this->category->where('is_del', 1)->column('name', 'id');
+            //查询90天总销量
+            $productgrade = new \app\admin\model\ProductGrade();
+            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter,grade', 'true_sku');
+            //查询可用库存
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
+
+            foreach ($list as &$v) {
+                $v['category_name'] = $category[$v['category_id']];
+                //90天总销量
+                $v['sales_num'] = $productarr[$v['sku']]['counter'] ?: 0;
+                $v['grade'] = $productarr[$v['sku']]['grade'];
+                $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
+                $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        // //查询对应平台
+        $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $magentoplatformarr = $magentoplatform->field('name,id')->select();
+
+        $site = input('site', 1);
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
     }
 }
