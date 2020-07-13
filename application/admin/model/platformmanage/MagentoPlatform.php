@@ -99,4 +99,16 @@ class MagentoPlatform extends Model
         $id = $this->where($where)->value('id');
         return $id ? $id : false;
     }
+
+    /**
+     * 获取对应平台id
+     */
+    public function getMagentoPrefix($id = '')
+    {
+        $where['status'] = 1;
+        $where['is_del'] = 1;
+        $where['id'] = $id;
+        $name = $this->where($where)->value('prefix');
+        return $name ? $name : false;
+    }
 }

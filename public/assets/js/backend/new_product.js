@@ -314,7 +314,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'new_product/replenishescalationlist' + location.search,
+                    index_url: 'new_product/replenishescalationlist' + location.search + '&label=' +  Config.label,
                 }
             });
 

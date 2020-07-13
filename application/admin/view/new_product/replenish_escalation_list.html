@@ -5,9 +5,9 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs">
-            <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li> -->
             {foreach name="magentoplatformarr" item="vo"}
-            <li><a href="#t-{$key}" data-value="{$vo.id}" data-field="platform_type" data-toggle="tab">{$vo.name}</a></li>
+            <li class="{:$site == $vo['id'] ? 'active' : ''}"><a href="#t-{$key}" data-value="{$vo.id}" data-field="platform_type" data-toggle="tab">{$vo.name}</a>
+            </li>
             {/foreach}
         </ul>
     </div>

@@ -42,6 +42,10 @@ class NewProduct extends Backend
         $num = $this->item->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
+
+        $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
+
     }
 
     /**
@@ -94,8 +98,7 @@ class NewProduct extends Backend
             $platformarr = collection($platformarr)->toArray();
 
             //查询对应平台
-            $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
-            $magentoplatformarr = $magentoplatform->column('name', 'id');
+            $magentoplatformarr = $this->magentoplatformarr;
 
             $arr = [];
             foreach ($platformarr as $v) {
@@ -816,8 +819,7 @@ class NewProduct extends Backend
         }
 
         //查询对应平台
-        $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
-        $magentoplatformarr = $magentoplatform->column('name', 'id');
+        $magentoplatformarr = $this->magentoplatformarr;
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
     }
@@ -946,15 +948,27 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['platform_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['platform_type']) {
+                unset($map['platform_type']);
+            }
             
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -981,13 +995,19 @@ class NewProduct extends Backend
         }
 
         // //查询对应平台
-        $magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
-        $magentoplatformarr = $magentoplatform->field('name,id')->select();
-
-        $site = input('site', 1);
+        $magentoplatformarr = $this->magentoplatform->field('name,id')->cache(86400)->select();
+        foreach($magentoplatformarr as $k => $v) {
+            if(!$this->auth->check('dashboard/' . $v['name'])) {
+                unset($magentoplatformarr[$k]);
+            }
+        }
+        $magentoplatformarr = array_values($magentoplatformarr);
+        $site = input('site', $magentoplatformarr[0]['id']);
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
+
+
 }

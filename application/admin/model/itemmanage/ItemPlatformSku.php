@@ -34,26 +34,9 @@ class ItemPlatformSku extends Model
     //添加商品平台sku
     public function addPlatformSku($row)
     {
-        switch ($row['site']) {
-            case 1:
-                $prefix = 'Z';
-                break;
-            case 2:
-                $prefix = 'G';
-                break;
-            case 3:
-                $prefix = 'N';
-                break;
-            case 4:
-                $prefix = 'M';
-                break;
-            case 5:
-                $prefix = 'W';
-                break;
-            default:
-                $prefix = false;
-                break;
-        }
+        //查询前缀
+        $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+        $prefix = $magento_platform->getMagentoPrefix($row['site']);
         //判断前缀是否存在
         if (false == $prefix) {
             return false;
