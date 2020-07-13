@@ -1,0 +1,108 @@
+<style>
+    .caigou {
+        /* border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px; */
+        padding: 10px;
+        width: 85%;
+        margin-left: 20px;
+        margin-top: 40px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+
+
+    <div class='caigou'>
+        <p style="font-size: 16px;"><b>总需求数量：</b></p>
+        <div>
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table">
+                <tr>
+                    <th>供应商</td>
+                    <th>分配数量</td>
+                    <th>操作</td>
+                </tr>
+                <tr>
+                    <td>
+                        <!--<input class="form-control sku" name="skus[]" type="text" >-->
+                        {:build_select('row[supplier_id]', $supplier ,'', ['class'=>'form-control selectpicker', 'data-live-search' => true])}
+
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<div id="table-content" style="display: none;">
+    <table>
+        <tr>
+            <td>
+                <!--<div class="btn-group bootstrap-select form-control"><button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" role="button" title="没有选中任何项"><span class="filter-option pull-left">没有选中任何项</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span></button><div class="dropdown-menu open" role="combobox"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off" role="textbox" aria-label="Search"></div><ul class="dropdown-menu inner" role="listbox" aria-expanded="false"><li data-original-index="0" class="selected"><a tabindex="0" class="" style="" data-tokens="null" role="option" aria-disabled="false" aria-selected="true"><span class="text"></span><span class="glyphicon glyphicon-ok check-mark"></span></a></li></ul></div><select class="form-control selectpicker" data-live-search="1" name="row[supplier_id]" tabindex="-98"><option value="0" selected="selected"></option></select></div>-->
+                {:build_select('row[supplier_id]', $supplier ,'', ['class'=>'form-control selectpicker', 'data-live-search' => true])}
+            </td>
+            <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
+        </tr>
+    </table>
+</div>
