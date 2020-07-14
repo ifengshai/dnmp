@@ -994,15 +994,18 @@ class NewProduct extends Backend
             return json($result);
         }
 
-        // //查询对应平台
+        //查询对应平台
         $magentoplatformarr = $this->magentoplatform->field('name,id')->cache(86400)->select();
         foreach($magentoplatformarr as $k => $v) {
+            //判断当前用户拥有的站点权限
             if(!$this->auth->check('dashboard/' . $v['name'])) {
                 unset($magentoplatformarr[$k]);
             }
         }
         $magentoplatformarr = array_values($magentoplatformarr);
+        //取第一个key为默认站点
         $site = input('site', $magentoplatformarr[0]['id']);
+
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);

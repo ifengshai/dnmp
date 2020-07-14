@@ -242,4 +242,9 @@ class TrackReg extends Backend
         // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
+
+
+    public function get
+
+
 }
