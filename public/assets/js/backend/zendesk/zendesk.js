@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         },
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
-                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
+                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
