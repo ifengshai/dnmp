@@ -2739,7 +2739,7 @@ class Test extends Backend
                 if ($v['track_number']) {
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
-                    $list[$k + 5]['content']  = '';
+                    $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
                     $list[$k + 5]['create_time'] = $v['create_time'];
                     $list[$k + 5]['site'] = 4;
                     $list[$k + 5]['order_id'] = $v['entity_id'];
@@ -2839,7 +2839,7 @@ class Test extends Backend
                     $list[$k + 7]['track_number'] = $v['track_number'];
                     $list[$k + 7]['handle_user_id'] = 0;
                     $list[$k + 7]['handle_user_name'] = '';
-                    $list[$k + 7]['content'] = '';
+                    $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
@@ -2861,6 +2861,8 @@ class Test extends Backend
         }
         echo 'ok';
     }
+
+    
     public function update_base_grand_total()
     {
         $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
