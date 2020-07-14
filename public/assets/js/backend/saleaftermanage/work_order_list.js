@@ -2710,30 +2710,30 @@ function changeOrderAddress(){
                 var address_id= data.address[i].address_id ? data.address[i].address_id : 0;
                 if(i == address_id){
                     address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                    //补发地址自动填充第一个
+                    $('#c-firstname1').val(data.address[i].firstname);
+                    $('#c-lastname1').val(data.address[i].lastname);
+                    var email = data.address[i].email;
+                    if (email == null) {
+                        email = $('#customer_email1').val();
+                    }
+                    $('#c-email1').val(email);
+                    $('#c-telephone1').val(data.address[i].telephone);
+                    $('#c-country1').val(data.address[i].country_id);
+                    $('#c-country1').change();
+                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                        $('#c-region2').val(0);
+                    }else{
+                        $('#c-region2').val(data.address[i].region_id);
+                    }
+                    $('#c-region12').val(data.address[i].region);
+                    $('#c-city1').val(data.address[i].city);
+                    $('#c-street1').val(data.address[i].street);
+                    $('#c-postcode1').val(data.address[i].postcode);
+                    $('#c-currency_code1').val(order_pay_currency);
                 }else{
                     address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                 }
-                //补发地址自动填充第一个
-                $('#c-firstname1').val(data.address[i].firstname);
-                $('#c-lastname1').val(data.address[i].lastname);
-                var email = data.address[i].email;
-                if (email == null) {
-                    email = $('#customer_email1').val();
-                }
-                $('#c-email1').val(email);
-                $('#c-telephone1').val(data.address[i].telephone);
-                $('#c-country1').val(data.address[i].country_id);
-                $('#c-country1').change();
-                if(data.address[i].region_id == '8888' || !data.address[i].region_id){
-                    $('#c-region2').val(0);
-                }else{
-                    $('#c-region2').val(data.address[i].region_id);
-                }
-                $('#c-region12').val(data.address[i].region);
-                $('#c-city1').val(data.address[i].city);
-                $('#c-street1').val(data.address[i].street);
-                $('#c-postcode1').val(data.address[i].postcode);
-                $('#c-currency_code1').val(order_pay_currency);
             }
             $('#address_select1').html(address1);
             //选择地址切换地址
@@ -2752,7 +2752,6 @@ function changeOrderAddress(){
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
             })
-
             $('.selectpicker ').selectpicker('refresh');
         });
     }
