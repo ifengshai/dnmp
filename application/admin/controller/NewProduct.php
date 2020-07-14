@@ -13,6 +13,7 @@ use app\admin\model\purchase\Supplier;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use think\Loader;
 use fast\Alibaba;
+use app\admin\model\NewProductMappingLog;
 
 /**
  * 商品管理
@@ -1024,14 +1025,16 @@ class NewProduct extends Backend
             $mapping = new \app\admin\model\NewProductMapping();
             //判断如果有此SKU 则累加补货数量 否则添加
             $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->count();
+            $params['create_time'] = date('Y-m-d H:i:s');
+            $params['create_person'] = session('admin.nickname');
             if ($count > 0) {
                 $result = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->setInc('replenish_num', $params['replenish_num']);
             } else {
-                $params['create_time'] = date('Y-m-d H:i:s');
-                $params['create_person'] = session('admin.nickname');
                 $result = $mapping->allowField(true)->save($params);
             }
             if ($result !== false) {
+                //记录日志
+                (new NewProductMappingLog)->addLog($params);
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
@@ -1044,4 +1047,82 @@ class NewProduct extends Backend
         $this->assign('row', $row);
         return $this->fetch();
     }
+
+    /**
+     * 补货需求清单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/13 13:56:00 
+     * @return void
+     */
+    public function productMappingList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\NewProductMapping();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['website_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['website_type']) {
+                unset($map['website_type']);
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $skus = array_column($list, 'sku');
+            //查询商品分类
+            $category = $this->category->where('is_del', 1)->column('name', 'id');
+            //查询90天总销量
+            $productgrade = new \app\admin\model\ProductGrade();
+            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter,grade', 'true_sku');
+            //查询可用库存
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
+
+            foreach ($list as &$v) {
+                $v['category_name'] = $category[$v['category_id']];
+                //90天总销量
+                $v['sales_num'] = $productarr[$v['sku']]['counter'] ?: 0;
+                $v['grade'] = $productarr[$v['sku']]['grade'];
+                $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
+                $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        //取第一个key为默认站点
+        $site = input('site', $magentoplatformarr[0]['id']);
+
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
+    }
+
 }
