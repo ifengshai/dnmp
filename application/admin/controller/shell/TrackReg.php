@@ -252,7 +252,7 @@ class TrackReg extends Backend
     }
 
     /**
-     * 更新物流表状态
+     * 更新物流表状态 handle 改为1
      *
      * @Description
      * @author wpl
