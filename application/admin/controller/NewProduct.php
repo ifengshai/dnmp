@@ -45,7 +45,6 @@ class NewProduct extends Backend
 
         $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
         $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
-
     }
 
     /**
@@ -958,7 +957,7 @@ class NewProduct extends Backend
             if ($filter['platform_type']) {
                 unset($map['platform_type']);
             }
-            
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -994,15 +993,8 @@ class NewProduct extends Backend
             return json($result);
         }
 
-        //查询对应平台
-        $magentoplatformarr = $this->magentoplatform->field('name,id')->cache(86400)->select();
-        foreach($magentoplatformarr as $k => $v) {
-            //判断当前用户拥有的站点权限
-            if(!$this->auth->check('dashboard/' . $v['name'])) {
-                unset($magentoplatformarr[$k]);
-            }
-        }
-        $magentoplatformarr = array_values($magentoplatformarr);
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
         //取第一个key为默认站点
         $site = input('site', $magentoplatformarr[0]['id']);
 
@@ -1012,5 +1004,44 @@ class NewProduct extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 加入补货清单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/14 10:31:27 
+     * @return void
+     */
+    public function addReplenishOrder($ids = null)
+    {
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $row = $platform->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
+            $mapping = new \app\admin\model\NewProductMapping();
+            //判断如果有此SKU 则累加补货数量 否则添加
+            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->count();
+            if ($count > 0) {
+                $result = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->setInc('replenish_num', $params['replenish_num']);
+            } else {
+                $params['create_time'] = date('Y-m-d H:i:s');
+                $params['create_person'] = session('admin.nickname');
+                $result = $mapping->allowField(true)->save($params);
+            }
+            if ($result !== false) {
+                $this->success('审核成功');
+            } else {
+                $this->error('审核失败');
+            }
+        }
 
+        //查询对应平台
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        $this->assign('platformarr', $magentoplatformarr);
+        $this->assign('row', $row);
+        return $this->fetch();
+    }
 }

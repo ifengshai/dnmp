@@ -3,7 +3,7 @@
 namespace app\admin\model\platformManage;
 
 use think\Model;
-
+use app\admin\library\Auth;
 
 class MagentoPlatform extends Model
 {
@@ -65,7 +65,7 @@ class MagentoPlatform extends Model
      */
     public function getNewOrderPlatformList($arr)
     {
-        $result = $this->where('status', '=', 1)->where('id','in',$arr)->field('id,name')->select();
+        $result = $this->where('status', '=', 1)->where('id', 'in', $arr)->field('id,name')->select();
         if (!$result) {
             return [0 => '请先添加平台'];
         }
@@ -110,5 +110,27 @@ class MagentoPlatform extends Model
         $where['id'] = $id;
         $name = $this->where($where)->value('prefix');
         return $name ? $name : false;
+    }
+
+    /**
+     * 获取站点权限
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/14 11:10:53 
+     * @return void
+     */
+    public function getAuthSite()
+    {
+        $this->auth = Auth::instance();
+        //查询对应平台
+        $magentoplatformarr = $this->field('name,id')->cache(86400)->select();
+        foreach ($magentoplatformarr as $k => $v) {
+            //判断当前用户拥有的站点权限
+            if (!$this->auth->check('dashboard/' . $v['name'])) {
+                unset($magentoplatformarr[$k]);
+            }
+        }
+        return array_values($magentoplatformarr);
     }
 }

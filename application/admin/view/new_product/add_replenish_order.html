@@ -1,0 +1,45 @@
+<style>
+    .content {
+        min-height: 0px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+
+        <label class="control-label col-xs-2 col-sm-2" style="text-align: right;">SKU:</label>
+        <div class="col-xs-8 col-sm-3">
+            {$row.sku}
+        </div>
+
+    </div>
+    <input type="hidden" value="{$row.sku}" name="row[sku]" />
+    <div class="form-group">
+        <label class="control-label col-xs-2 col-sm-2"
+            style="line-height: 30px;text-align: right;">{:__('平台')}:</label>
+        <div class="col-xs-8 col-sm-3">
+            <select id="platformarr" data-rule="required" class="form-control selectpicker" name="row[website_type]">
+                <option value="">请选择</option>
+                {foreach name="platformarr" item="vo"}
+                <option value="{$vo.id}">{$vo.name}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+
+        <label class="control-label col-xs-2 col-sm-2" style="text-align: right;">{:__('数量')}:</label>
+        <div class="col-xs-8 col-sm-3">
+            <input id="c-id" data-rule="required" class="form-control"  name="row[replenish_num]" type="number" value="">
+        </div>
+    </div>
+
+   
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

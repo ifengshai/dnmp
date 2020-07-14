@@ -344,24 +344,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
 
                                 {
-                                    name: 'edit',
+                                    name: 'detail',
                                     text: '加入补货清单',
                                     title: __('加入补货清单'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: Config.moduleurl + '/new_product/edit',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder',
+                                    extend: 'data-area = \'["40%","40%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        //console.log(row.item_status);
-                                        if (row.item_status == 1) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
+                                        return true;
                                     }
                                 },
                             ], formatter: Table.api.formatter.operate
@@ -395,7 +390,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             });
 
         },
-
+        addreplenishorder: function () {
+            Controller.api.bindevent();
+        },
         api: {
 
             formatter: {
