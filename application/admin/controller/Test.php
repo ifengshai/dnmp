@@ -37,6 +37,39 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    /**
+     * 临时批量注册--lixiang
+     */
+    public function linshi_reg_track(){
+        $order_shipment = Db::name('z_linshi')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v){
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['yundanhao'],
+                'carrier' => '21051'
+            ]]);
+
+            $update['17status'] = $trackInfo['data']['accepted'][0]['track']['e'];
+            Db::name('z_linshi')->where('id', $v['id'])->update($update);
+
+            sleep(1);
+
+            echo  $k . "ok \n";
+        }
+        echo "all ok \n";
+    }
+
+    protected function regitster17Track($params = [])
+    {
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $track = $trackingConnector->registerMulti($params);
+        return $track;
+    }
+
     public function new_track_test2()
     {
 
