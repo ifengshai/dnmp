@@ -277,7 +277,7 @@ class Test extends Backend
         $order_shipment = collection($order_shipment)->toArray();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
-
+        echo count($order_shipment);
         foreach ($order_shipment as $k => $v) {
             //先把主表状态更新为2-7
             // $update['order_node'] = 2;
