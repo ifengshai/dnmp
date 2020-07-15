@@ -625,11 +625,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
         },
-        ajaxCategoryInfo: function () {
-            Controller.api.bindevent();
-            Form.api.bindevent($("form[role=form]"));
-            Form.events.datetimepicker($("form"));
-        },
+
     };
     return Controller;
 });

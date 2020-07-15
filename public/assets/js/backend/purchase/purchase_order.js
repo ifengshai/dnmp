@@ -502,8 +502,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.caigou table tbody').append(content);
-
-
                 Controller.api.bindevent();
 
             })

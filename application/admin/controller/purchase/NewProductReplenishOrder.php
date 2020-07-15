@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\purchase;
 
+use app\admin\model\NewProduct;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -35,8 +36,13 @@ class NewProductReplenishOrder extends Backend
      */
 
 
-    /***
-     * 多个一起审核通过
+    /**
+     * 审核通过补货需求单
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/15
+     * Time: 9:14
      */
     public function morePassAudit($ids = null)
     {
@@ -66,8 +72,13 @@ class NewProductReplenishOrder extends Backend
         }
     }
 
-    /***
-     * 多个一起审核拒绝
+    /**
+     * 审核拒绝补货需求单
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/15
+     * Time: 11:15
      */
     public function moreAuditRefused($ids = null)
     {
@@ -249,12 +260,12 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->list
-//                ->where($where)
+                ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->list
-//                ->where($where)
+                ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -272,4 +283,188 @@ class NewProductReplenishOrder extends Backend
         return $this->view->fetch('handle');
     }
 
+    /**
+     * 创建采购单
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/15
+     * Time: 8:58
+     */
+    public function purchase_order()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+
+                    $sku = $this->request->post("sku/a");
+                    $num = $this->request->post("purchase_num/a");
+                    //执行过滤空值
+                    array_walk($sku, 'trim_value');
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+                    $params['create_person'] = session('admin.nickname');
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+
+                    $batch_sku = $this->request->post("batch_sku/a");
+                    $arrival_num = $this->request->post("arrival_num/a");
+                    if ($arrival_num) {
+                        //现在分批到货数量必须等于采购数量
+                        $arr = [];
+                        foreach ($arrival_num as $k => $v) {
+                            foreach ($v as $key => $val) {
+                                $arr[$key] += $val;
+                            }
+                        }
+                        foreach ($num as $k => $v) {
+                            if ($arr[$k] != $v) {
+                                $this->error('分批到货数量必须等于采购数量');
+                            }
+                        }
+                    }
+
+                    $result = $this->model->allowField(true)->save($params);
+
+                    //添加采购单商品信息
+                    if ($result !== false) {
+                        $product_name = $this->request->post("product_name/a");
+                        $supplier_sku = $this->request->post("supplier_sku/a");
+
+                        $price = $this->request->post("purchase_price/a");
+                        $total = $this->request->post("purchase_total/a");
+
+                        $data = [];
+                        foreach (array_filter($sku) as $k => $v) {
+                            $data[$k]['sku'] = $v;
+                            $data[$k]['supplier_sku'] = trim($supplier_sku[$k]);
+                            $data[$k]['product_name'] = $product_name[$k];
+                            $data[$k]['purchase_num'] = $num[$k];
+                            $data[$k]['purchase_price'] = $price[$k];
+                            $data[$k]['purchase_total'] = $total[$k];
+                            $data[$k]['purchase_id'] = $this->model->id;
+                            $data[$k]['purchase_order_number'] = $params['purchase_number'];
+                        }
+                        //批量添加
+                        $this->purchase_order_item->saveAll($data);
+
+                        //添加分批数据
+                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batch_sku = $this->request->post("batch_sku/a");
+                        $arrival_num = $this->request->post("arrival_num/a");
+
+                        //判断是否有分批数据
+                        if ($batch_arrival_time && count($batch_arrival_time) > 0) {
+                            $i = 0;
+                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                                $batch_data['purchase_id'] = $this->model->id;
+                                $batch_data['arrival_time'] = $v;
+                                $batch_data['batch'] = $i + 1;
+                                $batch_data['create_person'] = session('admin.nickname');
+                                $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                $batch_id = $this->batch->insertGetId($batch_data);
+                                $i++;
+                                $list = [];
+                                foreach ($batch_sku[$k] as $key => $val) {
+                                    if (!$val || !$arrival_num[$k][$key]) {
+                                        continue;
+                                    }
+                                    $list[$key]['sku'] = $val;
+                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                    $list[$key]['purchase_batch_id'] = $batch_id;
+                                }
+
+                                $this->batch_item->saveAll($list);
+                            }
+                        }
+                    }
+
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success('添加成功！！',  url('PurchaseOrder/index'));
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+//        //查询新品数据
+//        $new_product_ids = $this->request->get('new_product_ids');
+//        if ($new_product_ids) {
+//            //查询所选择的数据
+//            $where['new_product.id'] = ['in', $new_product_ids];
+//            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
+//            $row = collection($row)->toArray();
+//            foreach ($row as $v) {
+//                if ($v['item_status'] != 1) {
+//                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
+//                }
+//            }
+//
+//            //提取供应商id
+//            $supplier = array_unique(array_column($row, 'supplier_id'));
+//            if (count($supplier) > 1) {
+//                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+//            }
+//            $this->assign('row', $row);
+//            $this->assign('is_new_product', 1);
+//        }
+//
+//
+//        //查询供应商
+//        $supplier = new \app\admin\model\purchase\Supplier;
+//        $data = $supplier->getSupplierData();
+//        $this->assign('supplier', $data);
+
+
+        //查询补货需求单处理表
+        $new_product_ids = $this->request->get('ids');
+        $new_product_ids = input('ids');
+        $detail = $this->list->where('id',$new_product_ids)->find();
+
+        //当前信息对应的供应商信息
+        $supplier = $this->supplier->where('id',$detail['supplier_id'])->field('supplier_name,address,id,purchase_person')->find();
+        $this->assign('supplier', $supplier);
+
+        //查询合同
+        $contract = new \app\admin\model\purchase\Contract;
+        $contract_data = $contract->getContractData();
+        $this->assign('contract_data', $contract_data);
+
+        //生成采购编号
+        $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $this->assign('purchase_number', $purchase_number);
+        $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
+        return $this->view->fetch();
+    }
+
+    public function exists_params()
+    {
+        dump(111);die;
+    }
 }
