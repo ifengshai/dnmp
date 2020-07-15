@@ -384,9 +384,11 @@ class ZendeskMailTemplate extends Backend
         if($this->request->isAjax()){
             $zeeloolMacros = (new Notice(request(),['type' => 'zeelool']))->getTemplate();
             $vooguemeMacros = (new Notice(request(),['type' => 'voogueme']))->getTemplate();
+            $nihaoMacros = (new Notice(request(),['type' => 'nihao']))->getTemplate();
             $macrosTypes = [
                 1 => $zeeloolMacros,
-                2 => $vooguemeMacros
+                2 => $vooguemeMacros,
+                3 => $nihaoMacros
             ];
             foreach($macrosTypes as $type =>  $macrosType){
                 foreach($macrosType as $macro) {
