@@ -25,6 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'admin.nickname', title: __('admin.nickname')},
+                        {field: 'nickname', title: __('nickname')},
                         // {field: 'admin.email', title: __('admin.email')},
                         {field: 'agent.account_user', title: __('Name'),operate: false},
                         {field: 'type', title: __('type'), custom: { 1: 'blue', 2: 'yellow' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
