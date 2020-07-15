@@ -338,7 +338,7 @@ class Zendesk extends Backend
         }
         //获取所有的tags
         $tags = ZendeskTags::order('count desc')->column('name', 'id');
-        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        //站点类型，默认zeelool，1：zeelool，2：voogueme, 3:nihao
         $type = input('type',1);
         //获取所有的消息模板
         //获取所有的消息模板
@@ -582,8 +582,10 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
-        }else{
+        }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
         }
 
         $orders = $orderModel
