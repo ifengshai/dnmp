@@ -3,6 +3,7 @@
 namespace app\admin\controller\purchase;
 
 use app\common\controller\Backend;
+use think\Db;
 
 /**
  * 补货需求单
@@ -22,6 +23,7 @@ class NewProductReplenishOrder extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\purchase\NewProductReplenishOrder;
+        $this->list = new \app\admin\model\purchase\NewProductReplenishList;
         $this->supplier = new \app\admin\model\purchase\Supplier;
 
     }
@@ -96,6 +98,8 @@ class NewProductReplenishOrder extends Backend
 
 
     /**
+     * 补货需求单分配
+     *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/13
@@ -111,21 +115,22 @@ class NewProductReplenishOrder extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where(['is_del' => 1,'is_verify'=>1])
+            $total = $this->model->where(['is_del' => 1, 'is_verify' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where(['is_del' => 1,'is_verify'=>1])
+            $list = $this->model->where(['is_del' => 1, 'is_verify' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
+
             foreach ($list as $k => $v) {
-//                $list[$k]['supplier'] = $this->supplier->getSupplierData();
-                $list[$k]['supplier'] = ['0'=>['name'=>'思蒙眼镜','num'=>10],'1'=>['name'=>'兴亮眼镜','num'=>11]];
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $list[$k]['supplier'] = $new_product_replenish_list;
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -135,6 +140,8 @@ class NewProductReplenishOrder extends Backend
     }
 
     /**
+     * 确认分配
+     *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/13
@@ -143,7 +150,8 @@ class NewProductReplenishOrder extends Backend
     public function distribution_confirm()
     {
         $ids = $this->request->post("ids/a");
-        dump($ids);die;
+        dump($ids);
+        die;
         if (!$ids) {
             $this->error('缺少参数！！');
         }
@@ -151,6 +159,8 @@ class NewProductReplenishOrder extends Backend
     }
 
     /**
+     * 补货需求单确认分配弹出框
+     *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/13
@@ -158,13 +168,108 @@ class NewProductReplenishOrder extends Backend
      */
     public function distribute_detail()
     {
+
+        $id = input('ids');
+        $num = $this->model->where('id', $id)->field('id,replenishment_num,sku')->find();
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $params = $this->request->post();
+
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                $whole_num = 0;
+                //判断各个供应商分配数量之和是否等于总需求数量 相等的话 写入处理表
+                foreach ($params['supplier_num'] as $k => $v) {
+                    $whole_num += (int)$v;
+                }
+                if ($num['replenishment_num'] != $whole_num) {
+                    $this->error('供应商分配数量之和需等于总需求数量');
+                }
+                Db::startTrans();
+                try {
+                    foreach ($params['supplier_id'] as $k => $v) {
+                        $supplier = $this->supplier->where('id', $v)->field('id,purchase_person,supplier_name')->find();
+                        //关联补货单id
+                        $data['replenish_id'] = $num['id'];
+                        $data['sku'] = $num['sku'];
+                        $data['supplier_id'] = $supplier['id'];
+                        $data['supplier_name'] = $supplier['supplier_name'];
+                        $data['distribute_num'] = $params['supplier_num'][$k];
+                        $data['purchase_person'] = $supplier['purchase_person'];
+                        //插入补货单处理表 同时更新补货单分配表状态为待处理
+                        $result = Db::name('new_product_replenish_list')->insert($data);
+                        $update = $this->model->where('id',$id)->setField('status',2);
+                    }
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
         $supplier = $this->supplier->getSupplierData();
-        $this->assign('supplier',$supplier);
+        $this->assign('supplier', $supplier);
+        $this->assign('num', $num);
         return $this->view->fetch();
     }
+
+    /**
+     * 补货需求单处理
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/14
+     * Time: 15:38
+     */
     public function handle()
     {
-        dump(11);
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->list
+//                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->list
+//                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            foreach ($list as $k => $v) {
+                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_id'])->value('replenishment_num');
+                $list[$k]['num'] = $new_product_replenish_order;
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch('handle');
     }
 
 }
