@@ -274,7 +274,6 @@ class Test extends Backend
 
     public function new_track_shipment_num()
     {
-
         $order_shipment = Db::name('order_node')->where('node_type', '<', '7')->where('delivery_time is not null')->select();
         $order_shipment = collection($order_shipment)->toArray();
 

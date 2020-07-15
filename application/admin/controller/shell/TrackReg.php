@@ -75,7 +75,7 @@ class TrackReg extends Backend
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
             $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_id'] = $v['order_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
             $list[$k]['shipment_data_type'] = $shipment_data_type;
@@ -164,7 +164,7 @@ class TrackReg extends Backend
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
             $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_id'] = $v['order_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
             $list[$k]['shipment_data_type'] = $shipment_data_type;
