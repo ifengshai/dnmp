@@ -273,11 +273,14 @@ class Test extends Backend
 
     public function new_track_shipment_num()
     {
-        $order_shipment = Db::name('order_node')->where('node_type', '>=', 7)->where('node_type', '<>', 40)->select();
+        $order_shipment = Db::name('order_node')->where('node_type', '<>', 40)->select();
         $order_shipment = collection($order_shipment)->toArray();
-        $trackingConnector = new TrackingConnector($this->apiKey);
         echo count($order_shipment);
+        $trackingConnector = new TrackingConnector($this->apiKey);
         foreach ($order_shipment as $k => $v) {
+            if ($k < 36869) {
+                continue;
+            }
             //先把主表状态更新为2-7
             // $update['order_node'] = 2;
             // $update['node_type'] = 7;
