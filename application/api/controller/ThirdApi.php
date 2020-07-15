@@ -137,47 +137,13 @@ class ThirdApi extends Api
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-                
-
-                //到达目的国
-                if (stripos($v['z'], 'Customs status updated') !== false) {
-                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 11;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 11;
-                        $order_node_detail['content'] = $this->str4;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
 
                 //结果
                 if($all_num - 1 == $k){
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
-                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
-                            $update_order_node['order_node'] = 3;
-                            $update_order_node['node_type'] = 11;
-                            $update_order_node['update_time'] = $time;
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['node_type'] = 11;
-                            $order_node_detail['content'] = $this->str4;
-                            $order_node_detail['create_time'] = $time;
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                            $time = '';
-                            $order_node_date['order_node'] = 3;
-                            $order_node_date['node_type'] = 11;
-                        }
-
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -297,45 +263,13 @@ class ThirdApi extends Api
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-                //到达目的国
-                if (stripos($v['z'], 'Customs status updated') !== false) {
-                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 11;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 11;
-                        $order_node_detail['content'] = $this->str4;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
 
                 //结果
                 if($all_num -1  == $k){
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
-                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
-                            $update_order_node['order_node'] = 3;
-                            $update_order_node['node_type'] = 11;
-                            $update_order_node['update_time'] = $time;
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['node_type'] = 11;
-                            $order_node_detail['content'] = $this->str4;
-                            $order_node_detail['create_time'] = $time;
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                            $time = '';
-                            $order_node_date['order_node'] = 3;
-                            $order_node_date['node_type'] = 11;
-                        }
-
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -456,46 +390,13 @@ class ThirdApi extends Api
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-                
-                //到达目的国
-                if (stripos($v['z'], 'Customs status updated') !== false) {
-                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 11;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 11;
-                        $order_node_detail['content'] = $this->str4;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
 
                 //结果
                 if($all_num - 1 == $k){
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
-                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
-                            $update_order_node['order_node'] = 3;
-                            $update_order_node['node_type'] = 11;
-                            $update_order_node['update_time'] = $time;
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['node_type'] = 11;
-                            $order_node_detail['content'] = $this->str4;
-                            $order_node_detail['create_time'] = $time;
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                            $time = '';
-                            $order_node_date['order_node'] = 3;
-                            $order_node_date['node_type'] = 11;
-                        }
-
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -628,45 +529,12 @@ class ThirdApi extends Api
                     }
                 }
 
-                //到达目的国
-                if (stripos($v['z'], 'Accepted at USPS Origin Facility') !== false) {
-                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 11;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 11;
-                        $order_node_detail['content'] = $this->str4;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
-
                 //结果
                 if($all_num - 1 == $k){
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
-                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
-                            $update_order_node['order_node'] = 3;
-                            $update_order_node['node_type'] = 11;
-                            $update_order_node['update_time'] = $time;
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['node_type'] = 11;
-                            $order_node_detail['content'] = $this->str4;
-                            $order_node_detail['create_time'] = $time;
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                            $time = '';
-                            $order_node_date['order_node'] = 3;
-                            $order_node_date['node_type'] = 11;
-                        }
-
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -792,24 +660,7 @@ class ThirdApi extends Api
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
-                        if (($data['e'] == 40 || $data['e'] == 30) && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
-                            $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
-                            $update_order_node['order_node'] = 3;
-                            $update_order_node['node_type'] = 11;
-                            $update_order_node['update_time'] = $time;
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['node_type'] = 11;
-                            $order_node_detail['content'] = $this->str4;
-                            $order_node_detail['create_time'] = $time;
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                            $time = '';
-                            $order_node_date['order_node'] = 3;
-                            $order_node_date['node_type'] = 11;
-                        }
-
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
