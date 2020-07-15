@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template','editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
 
     var Controller = {
         index: function () {
@@ -398,6 +398,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'new_product/productmappinglist' + location.search + '&label=' +  Config.label,
+                    edit_url: 'new_product/mappingedit',
                 }
             });
 
@@ -413,27 +414,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { checkbox: true },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'replenish_num', title: __('补货需求数量'), operate: false },
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-
-                                {
-                                    name: 'detail',
-                                    text: '加入补货清单',
-                                    title: __('加入补货清单'),
-                                    classname: 'btn btn-xs btn-success btn-dialog',
-                                    icon: 'fa fa-pencil',
-                                    url: Config.moduleurl + '/new_product/addReplenishOrder',
-                                    extend: 'data-area = \'["40%","40%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                },
-                            ], formatter: Table.api.formatter.operate
+                            field: 'replenish_num', title: __('补货需求数量'), operate: false, editable: {
+                                emptytext: "__",
+                            }
                         }
                        
                     ]
@@ -442,6 +426,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            table.bootstrapTable('getOptions').onEditableSave = function (field, row, oldValue, $el) {
+                var data = {};
+                data["row[" + field + "]"] = row[field];
+                Fast.api.ajax({
+                    url: this.extend.edit_url + "/ids/" + row[this.pk],
+                    data: data
+                }, function (data) {
+
+                    table.bootstrapTable('refresh');
+                })
+            }
 
             //选项卡切换
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
