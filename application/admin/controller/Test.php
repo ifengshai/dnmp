@@ -797,4 +797,42 @@ class Test extends Backend
         echo 'ok';
         die;
     }
+
+    /**
+     * 跑错误单数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/15 16:50:21 
+     * @return void
+     */
+    public function  test01()
+    {
+        $this->orderNode = new \app\admin\model\OrderNode;
+        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail();
+        $this->orderNodeCourier = new \app\admin\model\OrderNodeCourier();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $data = $this->orderNode->where(['order_id' => ['<', 15000], 'site' => ['<>', 4]])->select();
+        foreach ($data as $k => $v) {
+            if ($v['site'] == 1) {
+                $res = $this->zeelool->where(['increment_id' => $v['order_number']])->find();
+            } elseif($v['site'] == 2) {
+                $res = $this->voogueme->where(['increment_id' => $v['order_number']])->find();
+            } elseif($v['site'] == 3) {
+                $res = $this->nihao->where(['increment_id' => $v['order_number']])->find();
+            }
+
+            if ($res) {
+                $this->orderNode->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+            } else {
+                $this->orderNode->where(['id' => $v['id']])->delete();
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+            }
+        }
+    }
 }
