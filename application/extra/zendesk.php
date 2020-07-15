@@ -61,7 +61,8 @@ return [
     ],
     'platform_url'=>[
         1   => 'https://www.zeelool.com/index.php/GBExholSDIhOVRMimieBn0LQ/sales_order/view/order_id/',
-        2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/'
+        2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/',
+        3   => 'https://pc.nihaooptical.com/index.php/xiaomoshou/sales_order/view/order_id/'
     ],
     'check_order_info_url'=>
         'http://'.$_SERVER['HTTP_HOST'].'/admin_1biSSnWyfW.php/saleaftermanage/order_return/search?ref=addtabs'
