@@ -193,7 +193,7 @@ class ZendeskAccount extends Backend
                 }
                 $data[$nk]['user_type']      = 2;
                 $data[$nk]['account_id']     = $nv['id'];
-                $data[$nk]['account_type']   = 2;
+                $data[$nk]['account_type']   = 3;
                 $data[$nk]['account_user']   = $nv['name'];
                 $data[$nk]['account_email']  = $nv['email'];
             }
