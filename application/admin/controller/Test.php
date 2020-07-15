@@ -273,9 +273,8 @@ class Test extends Backend
 
     public function new_track_shipment_num()
     {
-        $order_shipment = Db::name('order_node')->where(['node_type' => ['>=', 7], 'node_type' => ['<>', 40]])->select();
+        $order_shipment = Db::name('order_node')->where('node_type', '>=', 7)->where('node_type', '<>', 40)->select();
         $order_shipment = collection($order_shipment)->toArray();
-
         $trackingConnector = new TrackingConnector($this->apiKey);
         echo count($order_shipment);
         foreach ($order_shipment as $k => $v) {
@@ -818,9 +817,9 @@ class Test extends Backend
         foreach ($data as $k => $v) {
             if ($v['site'] == 1) {
                 $res = $this->zeelool->where(['increment_id' => $v['order_number']])->find();
-            } elseif($v['site'] == 2) {
+            } elseif ($v['site'] == 2) {
                 $res = $this->voogueme->where(['increment_id' => $v['order_number']])->find();
-            } elseif($v['site'] == 3) {
+            } elseif ($v['site'] == 3) {
                 $res = $this->nihao->where(['increment_id' => $v['order_number']])->find();
             }
 
