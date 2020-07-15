@@ -28,6 +28,7 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_zeelool', 1);
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
     }
 
     /**
@@ -115,95 +116,6 @@ class TrackReg extends Backend
             usleep(500000);
         }
         echo $site_str . ' is ok' . "\n";
-    }
-
-
-    /**
-     * 批量 注册物流
-     * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
-     */
-    public function reg_shipment_meeloog()
-    {
-        $site_type = 4;
-        $order_shipment = Db::connect('database.db_meeloog')
-            ->table('sales_flat_shipment_track')->alias('a')
-            ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
-            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
-            ->where('a.created_at', '>=', '2020-03-31 00:00:00')
-            ->where('a.handle', '=', '0')
-            ->group('a.order_id')
-            ->select();
-        foreach ($order_shipment as $k => $v) {
-            $title = strtolower(str_replace(' ', '-', $v['title']));
-            //区分usps运营商
-            if (strtolower($title) == 'usps') {
-                $track_num1 = substr($v['track_number'], 0, 4);
-                if ($track_num1 == '9200' || $track_num1 == '9205') {
-                    //郭伟峰
-                    $shipment_data_type = 'USPS_1';
-                } else {
-                    $track_num2 = substr($v['track_number'], 0, 4);
-                    if ($track_num2 == '9400') {
-                        //加诺
-                        $shipment_data_type = 'USPS_2';
-                    } else {
-                        //杜明明
-                        $shipment_data_type = 'USPS_3';
-                    }
-                }
-            } else {
-                $shipment_data_type = $title;
-            }
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[$k]['number'] =  $v['track_number'];
-            $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
-            $shipment_reg[$k]['order_id'] =  $v['order_id'];
-
-
-            $list[$k]['order_node'] = 2;
-            $list[$k]['node_type'] = 7; //出库
-            $list[$k]['create_time'] = $v['created_at'];
-            $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['order_id'];
-            $list[$k]['order_number'] = $v['increment_id'];
-            $list[$k]['shipment_type'] = $v['title'];
-            $list[$k]['shipment_data_type'] = $shipment_data_type;
-            $list[$k]['track_number'] = $v['track_number'];
-            $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
-
-            $data['order_node'] = 2;
-            $data['node_type'] = 7;
-            $data['update_time'] = $v['created_at'];
-            $data['shipment_type'] = $v['title'];
-            $data['shipment_data_type'] = $shipment_data_type;
-            $data['track_number'] = $v['track_number'];
-            $data['delivery_time'] = $v['created_at'];
-            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
-        }
-        if ($list) {
-            $this->ordernodedetail->saveAll($list);
-        }
-
-        $order_group = array_chunk($shipment_reg, 40);
-
-        $trackingConnector = new TrackingConnector($this->apiKey);
-        $order_ids = array();
-        foreach ($order_group as $key => $val) {
-            $aa = $trackingConnector->registerMulti($val);
-
-            //请求接口更改物流表状态
-            $order_ids = implode(',', array_column($val, 'order_id'));
-            $params['ids'] = $order_ids;
-            $params['site'] = $site_type;
-            $res = $this->setLogisticsStatus($params);
-            if ($res->status !== 200) {
-                echo  '更新失败:' . $order_ids . "\n";
-            }
-            $order_ids = array();
-            echo  $key . "\n";
-            usleep(500000);
-        }
-        echo  ' is ok' . "\n";
     }
 
     /**
