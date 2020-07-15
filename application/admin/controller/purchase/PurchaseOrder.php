@@ -1710,7 +1710,7 @@ class PurchaseOrder extends Backend
             ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
-            ->join(['fa_logistics_info' => 'd'], 'd.purchase_id=purchase_order.id','left')
+            ->join(['fa_logistics_info' => 'd'], 'd.purchase_id=purchase_order.id', 'left')
             ->where($where)
             ->where($map)
             ->order('purchase_order.id desc')
@@ -1759,7 +1759,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['logistics_number']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("O" . ($key * 1 + 2), $value['logistics_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         }
 
         //设置宽度
