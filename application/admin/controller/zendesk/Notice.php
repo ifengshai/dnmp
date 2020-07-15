@@ -1017,7 +1017,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-02T23:00:00Z updated_at<=2020-07-03T23:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-08T04:00:00Z updated_at<=2020-07-08T07:00:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1051,7 +1051,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=20minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=5minutes order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
