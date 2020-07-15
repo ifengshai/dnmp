@@ -40,13 +40,14 @@ class Test extends Backend
     /**
      * 临时批量注册--lixiang
      */
-    public function linshi_reg_track(){
+    public function linshi_reg_track()
+    {
         $order_shipment = Db::name('z_linshi')->select();
         $order_shipment = collection($order_shipment)->toArray();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
 
-        foreach ($order_shipment as $k => $v){
+        foreach ($order_shipment as $k => $v) {
 
             $trackInfo = $trackingConnector->getTrackInfoMulti([[
                 'number' => $v['yundanhao'],
@@ -274,7 +275,6 @@ class Test extends Backend
 
     public function new_track_shipment_num()
     {
-
         $order_shipment = Db::name('order_node')->where('node_type', '<', '7')->where('delivery_time is not null')->select();
         $order_shipment = collection($order_shipment)->toArray();
 
@@ -3026,12 +3026,10 @@ class Test extends Backend
     {
         $this->orderNode = new \app\admin\model\OrderNode;
         $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail;
-        $data = $this->orderNode->where('delivery_time>=signing_time')->select();
+        $data = $this->orderNode->where('site', 4)->select();
         $data = collection($data)->toArray();
         foreach ($data as $k => $v) {
-            $res = Db::name('order_node_courier')->field('create_time')->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->order('id desc')->find();
-            $this->orderNode->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->update(['signing_time' => $res['create_time']]);
-            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number'], 'order_node' => 4, 'node_type' => 40])->update(['create_time' => $res['create_time']]);
+            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => 4])->update(['order_id' => $v['order_id']]);
 
             echo $k . "\n";
         }
