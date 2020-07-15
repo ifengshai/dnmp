@@ -419,7 +419,7 @@ class Test extends Backend
                             $order_node_detail['create_time'] = $v['a'];
                             Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         }
-                        if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40) {
+                        if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40 && $order_node_date['node_type'] != $data['e']) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
