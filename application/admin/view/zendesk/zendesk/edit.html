@@ -95,9 +95,9 @@
                                     {if condition="$ticket->status ==1"}
                                     <option value="1">new</option>
                                     {/if}
-                                    <option value="2">open</option>
-                                    <option value="3" selected>pending</option>
-                                    <option value="4">solved</option>
+                                    <option value="2" {if condition="$ticket->status ==2"}selected{/if}>open</option>
+                                    <option value="3" {if condition="$ticket->status ==3"}selected{/if}>pending</option>
+                                    <option value="4" {if condition="$ticket->status ==4"}selected{/if}>solved</option>
                                 </select>
                             </div>
                         </div>
