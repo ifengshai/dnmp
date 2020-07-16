@@ -47,15 +47,17 @@ class Test extends Backend
      */
     public function linshi_retrack()
     {
-        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['<=', '2020-06-01 00:00:00']])->column('track_number');
+        $order_shipment = Db::name('order_node')->field('track_number as number')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['<=', '2020-06-01 00:00:00']])->select();
+        $order_shipment = collection($order_shipment)->toArray();
         $res = array_chunk($order_shipment, 40);
         $trackingConnector = new TrackingConnector($this->apiKey);
         echo count($res);
-        foreach($res as $k => $v) {
-            $params['number'] = $v;
-            $track = $trackingConnector->retrackMulti($params);
+        foreach ($res as $k => $v) {
+           
+            $track = $trackingConnector->retrackMulti($v);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($track) . "\r\n", FILE_APPEND);
             usleep(200000);
-            echo $k ."\n";
+            echo $k . "\n";
         }
         echo 'is ok';
     }
