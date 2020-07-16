@@ -338,7 +338,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend:'data-area = \'["100%", "100%"]\' data-shade = \'[0.3, "#393D49"]\'',
                                     icon: 'fa fa-plus',
                                     classname: 'btn btn-xs btn-info btn-dialog',
-                                    url: 'purchase/new_product_replenish_order/purchase_order',
+                                    url: 'purchase/purchase_order/add/label/replenish',
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 1) {
@@ -376,7 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                         };
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('purchase/new_product_replenish_order/purchase_order?new_product_ids=' + ids.join(','), '创建采购单', options);
+                        Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
 
                     }
                 );
