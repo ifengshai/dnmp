@@ -115,6 +115,9 @@ class Notice extends Controller
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            if($id == 165371){
+                file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$ticket->status.'555'."\r\n",FILE_APPEND);
+            }
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
@@ -232,6 +235,9 @@ class Notice extends Controller
         Db::startTrans();
         try {
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            if($id == 165371){
+                file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$ticket->status."\r\n",FILE_APPEND);
+            }
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -993,7 +999,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-02T23:00:00Z updated_at<=2020-07-03T23:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-10T03:00:00Z updated_at<=2020-07-10T05:00:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1027,7 +1033,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=20minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=5minutes order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
