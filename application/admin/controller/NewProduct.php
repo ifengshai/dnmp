@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\purchase\NewProductReplenishOrder;
 use app\common\controller\Backend;
 use think\Request;
 use think\Db;
@@ -153,7 +154,7 @@ class NewProduct extends Backend
                     }
 
                     //求出对应的sku编码规则
-                    $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
+                    $resultEncode = $this->category->getCategoryTexture($params['category_id']);
                     $textureEncodeInfo = $resultEncode['typeResult'];
                     if (false !== strpos($textureEncodeInfo, '-')) {
                         $textureArr = explode('-', $textureEncodeInfo);
@@ -195,13 +196,13 @@ class NewProduct extends Backend
                             $data['name'] = $v;
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
-                            $data['brand_id']    = $params['brand_id'];
-                            $data['price']       = $price[$k];
-                            $data['supplier_id']    = $params['supplier_id'];
-                            $data['supplier_sku']    = $supplierSku[$k];
+                            $data['brand_id'] = $params['brand_id'];
+                            $data['price'] = $price[$k];
+                            $data['supplier_id'] = $params['supplier_id'];
+                            $data['supplier_sku'] = $supplierSku[$k];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
-                            $data['link']    = $params['link'];
+                            $data['link'] = $params['link'];
                             //后来添加的商品数据
                             if (!empty($params['origin_skus'])) {
                                 $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
@@ -287,12 +288,12 @@ class NewProduct extends Backend
                             $data['name'] = $v;
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
-                            $data['brand_id']    = $params['brand_id'];
-                            $data['supplier_id']    = $params['supplier_id'];
-                            $data['supplier_sku']    = $supplierSku[$k];
-                            $data['link']    = $params['link'];
+                            $data['brand_id'] = $params['brand_id'];
+                            $data['supplier_id'] = $params['supplier_id'];
+                            $data['supplier_sku'] = $supplierSku[$k];
+                            $data['link'] = $params['link'];
                             $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
-                            $data['price']    = $price[$k];
+                            $data['price'] = $price[$k];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
                             //后来添加的商品数据
@@ -448,13 +449,13 @@ class NewProduct extends Backend
             //获取所有适合性别
             $allFrameGender = $this->itemAttribute->getFrameGender();
             //获取所有型号
-            $allFrameSize  = $this->itemAttribute->getFrameSize();
+            $allFrameSize = $this->itemAttribute->getFrameSize();
             //获取所有眼镜类型
             $allGlassesType = $this->itemAttribute->getGlassesType();
             //获取所有采购产地
-            $allOrigin      = $this->itemAttribute->getOrigin();
+            $allOrigin = $this->itemAttribute->getOrigin();
             //获取配镜类型
-            $allFrameType   = $this->itemAttribute->getFrameType();
+            $allFrameType = $this->itemAttribute->getFrameType();
 
             $this->assign('AllFrameType', $allFrameType);
             $this->assign('AllOrigin', $allOrigin);
@@ -504,13 +505,13 @@ class NewProduct extends Backend
             //获取所有适合性别
             $allFrameGender = $this->itemAttribute->getFrameGender();
             //获取所有型号
-            $allFrameSize  = $this->itemAttribute->getFrameSize();
+            $allFrameSize = $this->itemAttribute->getFrameSize();
             //获取所有眼镜类型
             $allGlassesType = $this->itemAttribute->getGlassesType();
             //获取所有采购产地
-            $allOrigin      = $this->itemAttribute->getOrigin();
+            $allOrigin = $this->itemAttribute->getOrigin();
             //获取配镜类型
-            $allFrameType   = $this->itemAttribute->getFrameType();
+            $allFrameType = $this->itemAttribute->getFrameType();
 
             $this->assign('AllFrameType', $allFrameType);
             $this->assign('AllOrigin', $allOrigin);
@@ -541,7 +542,7 @@ class NewProduct extends Backend
             }
             $result = $this->category->getAttrCategoryById($categoryId);
             if (!$result) {
-                return  $this->error('对应分类不存在,请重新尝试');
+                return $this->error('对应分类不存在,请重新尝试');
             } elseif ($result == -1) {
                 return $this->error('对应分类存在下级分类,请重新选择');
             }
@@ -557,13 +558,13 @@ class NewProduct extends Backend
                 //获取所有适合性别
                 $allFrameGender = $this->itemAttribute->getFrameGender();
                 //获取所有型号
-                $allFrameSize  = $this->itemAttribute->getFrameSize();
+                $allFrameSize = $this->itemAttribute->getFrameSize();
                 //获取所有眼镜类型
                 $allGlassesType = $this->itemAttribute->getGlassesType();
                 //获取所有采购产地
-                $allOrigin      = $this->itemAttribute->getOrigin();
+                $allOrigin = $this->itemAttribute->getOrigin();
                 //获取配镜类型
-                $allFrameType   = $this->itemAttribute->getFrameType();
+                $allFrameType = $this->itemAttribute->getFrameType();
                 //获取供应商
                 $allSupplier = (new Supplier())->getSupplierData();
 
@@ -592,11 +593,12 @@ class NewProduct extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
-            return  $this->success('ok', '', $data);
+            return $this->success('ok', '', $data);
         } else {
             return $this->error(__('404 Not Found'));
         }
     }
+
     /***
      * 异步请求线下采购城市
      */
@@ -612,6 +614,7 @@ class NewProduct extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
+
     /***
      * 异步获取原始的sku(origin_sku)
      */
@@ -637,7 +640,7 @@ class NewProduct extends Backend
     {
         if ($this->request->isAjax()) {
             $categoryId = $this->request->post('categoryId');
-            $sku        = $this->request->post('sku');
+            $sku = $this->request->post('sku');
             if (!$categoryId || !$sku) {
                 $this->error('参数错误，请重新尝试');
             }
@@ -662,13 +665,13 @@ class NewProduct extends Backend
                 //获取所有适合性别
                 $allFrameGender = $this->itemAttribute->getFrameGender();
                 //获取所有型号
-                $allFrameSize  = $this->itemAttribute->getFrameSize();
+                $allFrameSize = $this->itemAttribute->getFrameSize();
                 //获取所有眼镜类型
                 $allGlassesType = $this->itemAttribute->getGlassesType();
                 //获取所有采购产地
-                $allOrigin      = $this->itemAttribute->getOrigin();
+                $allOrigin = $this->itemAttribute->getOrigin();
                 //获取配镜类型
-                $allFrameType   = $this->itemAttribute->getFrameType();
+                $allFrameType = $this->itemAttribute->getFrameType();
                 //获取供应商
                 $allSupplier = (new Supplier())->getSupplierData();
 
@@ -685,7 +688,7 @@ class NewProduct extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result >= 3) { //商品是饰品类型
-                $row  = $this->model->getItemInfo($sku, 3);
+                $row = $this->model->getItemInfo($sku, 3);
                 $result = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $result['textureResult'] ?? []);
                 $this->assign('AllFrameColor', $result['colorResult'] ?? []);
@@ -716,6 +719,7 @@ class NewProduct extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 异步获取品牌分类列表
      */
@@ -854,7 +858,6 @@ class NewProduct extends Backend
             $this->error('加载错误！！');
         }
     }
-
 
 
     /***
@@ -1089,12 +1092,14 @@ class NewProduct extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where('is_show', 1)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where('is_show', 1)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -1187,6 +1192,59 @@ class NewProduct extends Backend
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
+        }
+    }
+
+    /**
+     * 计划任务 计划补货 每月7号执行一次 汇总各个平台原始sku相同的品的补货需求数量 加入补货需求单以供采购分配处理 汇总过后更新字段 is_show 的值 列表不显示
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/16
+     * Time: 15:46
+     */
+    public function plan_replenishment()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //统计计划补货数据
+        $list = $this->model
+            ->where(['is_show' => 1, 'type' => 1])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->group('sku')
+            ->column("sku,sum(replenish_num) as sum");
+        $result = false;
+        //插入补货需求单表
+        Db::startTrans();
+        try {
+            $number = 0;
+            foreach ($list as $k => $v) {
+                $arr[$number]['sku'] = $k;
+                $arr[$number]['replenishment_num'] = $v;
+                $arr[$number]['create_person'] = 'Admin';
+                $number += 1;
+            }
+            $result = $this->order->allowField(true)->saveAll($arr);
+            //更新计划补货列表
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 1])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        if ($result !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error(__('No rows were updated'));
         }
     }
 }
