@@ -203,15 +203,17 @@ class Zendesk extends Backend
                         'email' => $params['email']
                     ];
                     //判断当前邮箱是否存在
-                    if(!$this->model->where('email',$params['email'])->find()){
+                    $findEmail = $this->model->where('email',$params['email'])->find();
+                    if(!$findEmail){
                         $emailName = strstr($params['email'],'@',true);
                         $createData['requester']['name'] = $emailName;
 //
 //                        (new Notice(request(), ['type' => $siteName]))->createUser(
 //                            ['user' => ['name' => $params['email'], 'email' => $params['email']]]
 //                        );
+                    }else{
+                        $createData['requester']['name'] = $findEmail->username;
                     }
-
                     //有抄送，添加抄送
                     if ($params['email_cc']) {
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
