@@ -38,6 +38,31 @@ class Test extends Backend
     }
 
     /**
+     * 重启跟踪2-7状态的物流
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/16 09:16:20 
+     * @return void
+     */
+    public function linshi_retrack()
+    {
+        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['<=', '2020-06-01 00:00:00']])->column('track_number');
+        $res = array_chunk($order_shipment, 40);
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        echo count($res);
+        foreach($res as $k => $v) {
+            $params['number'] = $v;
+            $track = $trackingConnector->retrackMulti($params);
+            echo $k ."\n";
+        }
+        echo 'is ok';
+    }
+
+
+
+
+    /**
      * 临时批量注册--lixiang
      */
     public function linshi_reg_track()
