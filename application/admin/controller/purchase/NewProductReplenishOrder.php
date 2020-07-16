@@ -413,27 +413,28 @@ class NewProductReplenishOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
 
-//        //查询新品数据
-//        $new_product_ids = $this->request->get('new_product_ids');
-//        if ($new_product_ids) {
-//            //查询所选择的数据
-//            $where['new_product.id'] = ['in', $new_product_ids];
-//            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
-//            $row = collection($row)->toArray();
-//            foreach ($row as $v) {
-//                if ($v['item_status'] != 1) {
-//                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
-//                }
-//            }
-//
-//            //提取供应商id
-//            $supplier = array_unique(array_column($row, 'supplier_id'));
-//            if (count($supplier) > 1) {
-//                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
-//            }
-//            $this->assign('row', $row);
-//            $this->assign('is_new_product', 1);
-//        }
+        //查询新品数据
+        $new_product_ids = $this->request->get('new_product_ids');
+        if ($new_product_ids) {
+            //查询所选择的数据
+            $where['new_product.id'] = ['in', $new_product_ids];
+            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
+            $row = collection($row)->toArray();
+            dump($row);die;
+            foreach ($row as $v) {
+                if ($v['item_status'] != 1) {
+                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
+                }
+            }
+
+            //提取供应商id
+            $supplier = array_unique(array_column($row, 'supplier_id'));
+            if (count($supplier) > 1) {
+                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+            }
+            $this->assign('row', $row);
+            $this->assign('is_new_product', 1);
+        }
 //
 //
 //        //查询供应商
@@ -442,14 +443,39 @@ class NewProductReplenishOrder extends Backend
 //        $this->assign('supplier', $data);
 
 
-        //查询补货需求单处理表
-        $new_product_ids = $this->request->get('ids');
-        $new_product_ids = input('ids');
-        $detail = $this->list->where('id',$new_product_ids)->find();
 
-        //当前信息对应的供应商信息
-        $supplier = $this->supplier->where('id',$detail['supplier_id'])->field('supplier_name,address,id,purchase_person')->find();
-        $this->assign('supplier', $supplier);
+        //查询新品数据
+        $new_product_ids = $this->request->get('new_product_ids');
+
+        if ($new_product_ids) {
+            //查询所选择的数据 批量生成
+            $where['id'] = ['in', $new_product_ids];
+            $row = $this->list
+                ->where($where)
+                ->select();
+            $row = collection($row)->toArray();
+
+            //提取供应商id
+            $supplier = array_unique(array_column($row, 'supplier_id'));
+            if (count($supplier) > 1) {
+                $this->error(__('必须选择相同的供应商！！'), url('purchase/new_product_replenish_order/handle'));
+            }
+            $supplier_info = $this->supplier->where('id',$supplier[0])->field('supplier_name,address,id,purchase_person')->find();
+//            dump($supplier_info);die;
+
+            $this->assign('row', $row);
+            $this->assign('supplier', $supplier_info);
+            $this->assign('is_new_product', 1);
+        }else{
+            //查询补货需求单处理表 单条生成采购单
+            $new_product_ids = $this->request->get('ids');
+            $new_product_ids = input('ids');
+            $detail = $this->list->where('id',$new_product_ids)->find();
+
+            //当前信息对应的供应商信息
+            $supplier = $this->supplier->where('id',$detail['supplier_id'])->field('supplier_name,address,id,purchase_person')->find();
+            $this->assign('supplier', $supplier);
+        }
 
         //查询合同
         $contract = new \app\admin\model\purchase\Contract;

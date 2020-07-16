@@ -44,6 +44,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'type',
+                            title: __('补货需求单类型'),
+                            custom: { 1: 'green', 2: 'danger'},
+                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'create_person',
+                            title: __('创建人')
+                        },
+                        {
                             field: 'create_time',
                             title: __('Create_time'),
                             operate: 'RANGE',
@@ -57,10 +68,49 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             formatter: function (value, row, index) {
                                 var that = $.extend({}, this);
-                                $(table).data("operate-edit", null); // 列表页面隐藏 .编辑operate-edit  - 删除按钮operate-del
+                                $(table).data("operate-edit", null);
+                                $(table).data("operate-del", null);// 列表页面隐藏 .编辑operate-edit  - 删除按钮operate-del
                                 that.table = table;
                                 return Table.api.formatter.operate.call(that, value, row, index);
-                            }
+                            },
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '查看详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/new_product_replenish_order/distribute_detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'distribution_detail',
+                                    text: __('分配'),
+                                    title: __('分配'),
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'purchase/new_product_replenish_order/distribute_detail',
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                    callback: function (data) {
+                                    }
+                                },
+
+
+                            ],
                             // formatter: Table.api.formatter.operate
                         }
                     ]
@@ -234,7 +284,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         handle: function () {
             // 初始化表格参数配置
             Table.api.init({
-                singleSelect: true,
                 showJumpto: true,
                 searchFormVisible: true,
                 extend: {
@@ -252,7 +301,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        // {checkbox: true},
+                        {checkbox: true},
                         {
 
                             field: '', title: __('序号'), formatter: function (value, row, index) {
@@ -287,8 +336,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     text: __('创建采购单'),
                                     title: __('创建采购单'),
                                     extend:'data-area = \'["100%", "100%"]\' data-shade = \'[0.3, "#393D49"]\'',
-                                    icon: 'fa fa-pencil',
-                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-plus',
+                                    classname: 'btn btn-xs btn-info btn-dialog',
                                     url: 'purchase/new_product_replenish_order/purchase_order',
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
