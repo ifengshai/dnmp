@@ -54,6 +54,7 @@ class Test extends Backend
         foreach($res as $k => $v) {
             $params['number'] = $v;
             $track = $trackingConnector->retrackMulti($params);
+            usleep(200000);
             echo $k ."\n";
         }
         echo 'is ok';
