@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template','editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
 
     var Controller = {
         index: function () {
@@ -50,8 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'category_id', title: __('Category_id'),
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
-                            formatter: Table.api.formatter.status
-                            //formatter: Controller.api.formatter.devicess
+                            formatter: Table.api.formatter.status, visible: false
                         },
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'sales_num', title: __('90天总销量'), operate: false },
@@ -314,7 +313,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'new_product/replenishescalationlist' + location.search + '&label=' +  Config.label,
+                    index_url: 'new_product/replenishescalationlist' + location.search + '&label=' + Config.label,
                 }
             });
 
@@ -330,12 +329,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { checkbox: true },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'category_name', title: __('商品分类'), operate: 'like' },
-                        { field: 'grade', title: __('销量等级'), operate: 'like', },
+                        { field: 'category_name', title: __('商品分类'), operate: false },
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status, visible: false
+                        },
+                        { field: 'grade', title: __('销量等级'), operate: false, },
                         { field: 'product_cycle', title: '生产周期', operate: false },
                         { field: 'available_stock', title: '可用库存', operate: false },
+                        { field: 'available_stock', title: '虚拟仓库存', operate: false },
                         { field: 'on_way_stock', title: '在途库存', operate: false },
-                        { field: 'product_cycle', title: '待入库数量', operate: false },
+                        { field: 'wait_in_num', title: '待入库数量', operate: false },
                         { field: 'product_cycle', title: '过去15天日均销量', operate: false },
                         { field: 'product_cycle', title: '过去90天日均销量', operate: false },
                         { field: 'product_cycle', title: '预估售卖天数', operate: false },
@@ -345,11 +350,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                                 {
                                     name: 'detail',
-                                    text: '加入补货清单',
-                                    title: __('加入补货清单'),
+                                    text: '加入计划补货清单',
+                                    title: __('加入计划补货清单'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: Config.moduleurl + '/new_product/addReplenishOrder',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder/type/1',
                                     extend: 'data-area = \'["40%","40%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -359,13 +364,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                         return true;
                                     }
                                 },
+
+                                {
+                                    name: 'detail',
+                                    text: '加入紧急补货清单',
+                                    title: __('加入紧急补货清单'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder/type/2',
+                                    extend: 'data-area = \'["40%","40%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
                             ], formatter: Table.api.formatter.operate
                         }
-                       
+
                     ]
                 ]
             });
-            
+
             // 为表格绑定事件
             Table.api.bindevent(table);
 
@@ -397,7 +420,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'new_product/productmappinglist' + location.search + '&label=' +  Config.label,
+                    index_url: 'new_product/productmappinglist' + location.search + '&label=' + Config.label,
                     edit_url: 'new_product/mappingedit',
                 }
             });
@@ -412,18 +435,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id'), operate: false },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'category_name', title: __('商品分类'), operate: false },
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status, visible: false
+                        },
+                        {
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            formatter: Table.api.formatter.status
+                        },
+
                         {
                             field: 'replenish_num', title: __('补货需求数量'), operate: false, editable: {
                                 emptytext: "__",
                             }
                         }
-                       
+
                     ]
                 ]
             });
-            
+
             // 为表格绑定事件
             Table.api.bindevent(table);
 

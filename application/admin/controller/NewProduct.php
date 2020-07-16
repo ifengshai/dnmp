@@ -979,9 +979,15 @@ class NewProduct extends Backend
             //查询90天总销量
             $productgrade = new \app\admin\model\ProductGrade();
             $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter,grade', 'true_sku');
+
+            //查询生产周期
+            $suppliersku = new \app\admin\model\purchase\SupplierSku();
+            $product_cycle_arr = $suppliersku->where(['label' => 1, 'status' => 1, 'sku' => ['in', $skus]])->column('product_cycle', 'sku');
             //查询可用库存
             $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
-
+            //查询待入库数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder();
+            $wait_in_arr = $purchase->getWaitInStockNum($skus);
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 //90天总销量
@@ -989,6 +995,8 @@ class NewProduct extends Backend
                 $v['grade'] = $productarr[$v['sku']]['grade'];
                 $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
+                $v['product_cycle'] = $product_cycle_arr[$v['sku']] ?: 7;
+                $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -1035,9 +1043,9 @@ class NewProduct extends Backend
             if ($result !== false) {
                 //记录日志
                 (new NewProductMappingLog)->addLog($params);
-                $this->success('审核成功');
+                $this->success('操作成功');
             } else {
-                $this->error('审核失败');
+                $this->error('操作失败');
             }
         }
 
@@ -1182,4 +1190,5 @@ class NewProduct extends Backend
         }
     }
 
+    
 }

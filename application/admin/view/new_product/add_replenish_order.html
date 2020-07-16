@@ -14,6 +14,8 @@
 
     </div>
     <input type="hidden" value="{$row.sku}" name="row[sku]" />
+    <input type="hidden" value="{:input('type')}" name="row[type]" />
+    <input type="hidden" value="{$row.category_id}" name="row[category_id]" />
     <div class="form-group">
         <label class="control-label col-xs-2 col-sm-2"
             style="line-height: 30px;text-align: right;">{:__('平台')}:</label>
