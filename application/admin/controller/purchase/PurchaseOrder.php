@@ -1528,6 +1528,12 @@ class PurchaseOrder extends Backend
             unset($filter['createtime']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+        //添加供货商名称搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['s.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
 
         //是否存在需要退回产品
         $check_map['unqualified_num'] = ['>', 0];
@@ -1543,6 +1549,7 @@ class PurchaseOrder extends Backend
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_supplier' => 's'], 's.id=d.supplier_id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
             ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
