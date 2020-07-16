@@ -859,12 +859,13 @@ DOC;
                 ->where(['admin_id' => $admin_id])
                 ->find();
 
-        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=''")];
-        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select();
+        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0")];
+        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select(false);
 
         foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
             $this->model->where('id',$ticket->id)->update([
+                'is_hide' => 0,
                 'assign_id' => $admin_id,
                 'assignee_id' => $task->assignee_id,
                 'assign_time' => date('Y-m-d H:i:s', time()),
@@ -874,6 +875,7 @@ DOC;
             $task->apply_count = $task->apply_count + 1;
             $task->save();
         }
+        $this->success("操作成功");
         /* $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
 
@@ -916,6 +918,7 @@ DOC;
                 $this->error("请先完成今天的任务量再进行申请");
             }
         }
+
         $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['status' => ['in',[1,2]]])->order('id desc')->select();
         $key = 1;
