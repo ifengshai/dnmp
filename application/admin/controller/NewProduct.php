@@ -1032,11 +1032,11 @@ class NewProduct extends Backend
             $params = $this->request->post("row/a");
             $mapping = new \app\admin\model\NewProductMapping();
             //判断如果有此SKU 则累加补货数量 否则添加
-            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->count();
+            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type']])->count();
             $params['create_time'] = date('Y-m-d H:i:s');
             $params['create_person'] = session('admin.nickname');
             if ($count > 0) {
-                $result = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku']])->setInc('replenish_num', $params['replenish_num']);
+                $result = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type']])->setInc('replenish_num', $params['replenish_num']);
             } else {
                 $result = $mapping->allowField(true)->save($params);
             }
@@ -1189,6 +1189,4 @@ class NewProduct extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
     }
-
-    
 }
