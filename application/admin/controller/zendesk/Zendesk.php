@@ -241,7 +241,7 @@ class Zendesk extends Backend
                     if ($priority) {
                         $createData['priority'] = $priority;
                     }
-                    
+                    $createData['subject'] = $params['subject'];
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
