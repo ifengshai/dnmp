@@ -65,6 +65,13 @@ class Notice extends Controller
             return true;
         }
     }
+
+    public function test()
+    {
+        $comments = $this->getComments(165000);
+        dump($comments);die;
+    }
+
     /**
      * 获取到新增的通知
      */

@@ -857,7 +857,7 @@ DOC;
         $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['admin_id' => $admin_id])
                 ->find();
-        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0")];
+        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->limit(10)->select();
         foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
