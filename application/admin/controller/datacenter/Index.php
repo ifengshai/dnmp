@@ -646,11 +646,9 @@ class Index extends Backend
                     $list = $this->meeloog->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(4);
-                }elseif ($params['stie'] == 5){
+                }elseif ($params['site'] == 5){
                     //查询对应平台销量
                     $list = $this->wesee->getOrderSalesNum([], $map);
-                    var_dump($list);
-                    exit;
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(5);                    
                 }
