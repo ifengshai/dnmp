@@ -493,7 +493,7 @@ class Notice extends Controller
      * 获取修改的通知
      */
     public function update1()
-    {dump(111);exit;
+    {
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
@@ -522,6 +522,9 @@ class Notice extends Controller
             $tags = join(',', $tags);
 
             $zendesk = Zendesk::where(['ticket_id' => $id, 'type' => $type])->find();
+
+            dump($zendesk->assignee_id);
+            dump($ticket->assignee_id);exit;
             if (!$zendesk) {
                 return 'success';
             }
