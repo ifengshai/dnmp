@@ -1048,12 +1048,12 @@ DOC;
         $intersects = array('82794');
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update1();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create1();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';

@@ -522,6 +522,10 @@ class Notice extends Controller
             $tags = join(',', $tags);
 
             $zendesk = Zendesk::where(['ticket_id' => $id, 'type' => $type])->find();
+
+            dump($id);
+            dump($zendesk->assignee_id);
+            dump($ticket->assignee_id);exit;
             if (!$zendesk) {
                 return 'success';
             }
