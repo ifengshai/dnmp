@@ -1034,7 +1034,7 @@ DOC;
     public function asyncTicketHttps()
     {
         $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
-dump($ticketIds);exit;
+
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
@@ -1042,14 +1042,15 @@ dump($ticketIds);exit;
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
+
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update1();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create1();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
