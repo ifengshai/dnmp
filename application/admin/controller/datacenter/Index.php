@@ -34,6 +34,7 @@ class Index extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
@@ -604,6 +605,8 @@ class Index extends Backend
                     $res = $this->nihao->getOrderSalesNumTop30([], $map);
                 } elseif ($params['site'] == 4) {
                     $res = $this->meeloog->getOrderSalesNumTop30([], $map);
+                }elseif  ($params['site'] == 5){
+                    $res = $this->wesee->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
             }
@@ -643,6 +646,11 @@ class Index extends Backend
                     $list = $this->meeloog->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(4);
+                }elseif ($params['site'] == 5){
+                    //查询对应平台销量
+                    $list = $this->wesee->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(5);                    
                 }
                 $productInfo = $this->item->getSkuInfo();
                 $list = $list ?? [];
