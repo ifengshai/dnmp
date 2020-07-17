@@ -1045,12 +1045,6 @@ DOC;
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
-        $intersects = array('80422','82794','82392','78530','80445','78477','76188','47221');
-        foreach($intersects as $intersect){
-            $ticket = (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->getTicket($intersect);
-            echo $intersect .'--'.$ticket->assignee_id."\n";
-        }
-        exit;
         //更新
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update1();

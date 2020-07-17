@@ -235,16 +235,14 @@ class Notice extends Controller
         Db::startTrans();
         try {
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
-            if($id == 165371){
-                file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$ticket->status."\r\n",FILE_APPEND);
-            }
+
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
                 'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
                 'zendesk_update_time' => $zendesk_update_time
             ];
-            //如果分配人修改，则同步修改分配人
+            /*//如果分配人修改，则同步修改分配人
             if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
 
                 $updateData['assignee_id'] = $ticket->assignee_id;
@@ -254,7 +252,7 @@ class Notice extends Controller
             if (!$ticket->assignee_id) {
                 $updateData['assignee_id'] = '';
                 $updateData['assign_id'] = '';
-            }
+            }*/
             //更新rating,如果存在的话
             if (!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
