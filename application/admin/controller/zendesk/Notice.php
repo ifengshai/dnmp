@@ -548,6 +548,8 @@ class Notice extends Controller
             if($id == 96349){
                 dump($zendesk->assignee_id);
                 dump($ticket->assignee_id);exit;
+            }else{
+                exit;
             }
             if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
 
