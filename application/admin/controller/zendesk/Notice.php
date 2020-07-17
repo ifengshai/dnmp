@@ -545,12 +545,10 @@ class Notice extends Controller
                 'zendesk_update_time' => $zendesk_update_time
             ];
             //如果分配人修改，则同步修改分配人
-            if($id == 96349){
-                dump($zendesk->assignee_id);
-                dump($ticket->assignee_id);exit;
-            }else{
-                exit;
-            }
+
+            dump($zendesk->assignee_id);
+            dump($ticket->assignee_id);exit;
+
             if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
 
                 $updateData['assignee_id'] = $ticket->assignee_id;
