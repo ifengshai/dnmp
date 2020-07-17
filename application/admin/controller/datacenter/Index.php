@@ -649,6 +649,8 @@ class Index extends Backend
                 }elseif ($params['stie'] == 5){
                     //查询对应平台销量
                     $list = $this->wesee->getOrderSalesNum([], $map);
+                    var_dump($list);
+                    exit;
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(5);                    
                 }
