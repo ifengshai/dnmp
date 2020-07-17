@@ -203,15 +203,17 @@ class Zendesk extends Backend
                         'email' => $params['email']
                     ];
                     //判断当前邮箱是否存在
-                    if(!$this->model->where('email',$params['email'])->find()){
+                    $findEmail = $this->model->where('email',$params['email'])->find();
+                    if(!$findEmail){
                         $emailName = strstr($params['email'],'@',true);
                         $createData['requester']['name'] = $emailName;
 //
 //                        (new Notice(request(), ['type' => $siteName]))->createUser(
 //                            ['user' => ['name' => $params['email'], 'email' => $params['email']]]
 //                        );
+                    }else{
+                        $createData['requester']['name'] = $findEmail->username;
                     }
-
                     //有抄送，添加抄送
                     if ($params['email_cc']) {
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
@@ -239,7 +241,7 @@ class Zendesk extends Backend
                     if ($priority) {
                         $createData['priority'] = $priority;
                     }
-                    
+                    $createData['subject'] = $params['subject'];
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
@@ -837,11 +839,10 @@ DOC;
      */
     public function moreTasks()
     {
-
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
         $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
-        if($now){
+        if($now > 0){
             $this->error("请先处理完成已分配的工单");
         }
         //判断今天是否完成工作量
@@ -856,22 +857,28 @@ DOC;
         $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['admin_id' => $admin_id])
                 ->find();
-
-        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=''")];
-        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select();
-
+        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0")];
+        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->limit(10)->select();
         foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
-            $this->model->where('id',$ticket->id)->update([
+            $res = $this->model->where('id',$ticket->id)->update([
+                'is_hide' => 0,
                 'assign_id' => $admin_id,
                 'assignee_id' => $task->assignee_id,
                 'assign_time' => date('Y-m-d H:i:s', time()),
             ]);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', $this->model->getLastSql() . "\r\n", FILE_APPEND);
             //分配数目+1
             $task->complete_apply_count = $task->complete_apply_count + 1;
             $task->apply_count = $task->apply_count + 1;
             $task->save();
         }
+        if (false !== $res) {
+            $this->success("申请成功");
+        } else {
+            $this->error("申请失败");
+        }
+        
         /* $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
 
@@ -914,6 +921,7 @@ DOC;
                 $this->error("请先完成今天的任务量再进行申请");
             }
         }
+
         $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['status' => ['in',[1,2]]])->order('id desc')->select();
         $key = 1;
@@ -1029,6 +1037,7 @@ DOC;
     public function asyncTicketHttps()
     {
         $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
@@ -1036,14 +1045,20 @@ DOC;
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
+        $intersects = array('80422','82794','82392','78530','80445','78477','76188','47221');
+        foreach($intersects as $intersect){
+            $ticket = (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->getTicket($intersect);
+            echo $intersect .'--'.$ticket->assignee_id."\n";
+        }
+        exit;
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update1();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create1();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
