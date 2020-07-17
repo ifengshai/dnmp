@@ -36,13 +36,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: {1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理'},
                             formatter: Table.api.formatter.status
                         },
-                        {
-                            field: 'is_verify',
-                            title: __('审核状态'),
-                            custom: {0: 'blue', 1: 'green', 2: 'danger'},
-                            searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
-                            formatter: Table.api.formatter.status
-                        },
+                        // {
+                        //     field: 'is_verify',
+                        //     title: __('审核状态'),
+                        //     custom: {0: 'blue', 1: 'green', 2: 'danger'},
+                        //     searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
+                        //     formatter: Table.api.formatter.status
+                        // },
                         {
                             field: 'type',
                             title: __('补货需求单类型'),
