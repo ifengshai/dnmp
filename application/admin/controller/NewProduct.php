@@ -1214,7 +1214,6 @@ class NewProduct extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
         $result = false;
-        //插入补货需求单表
         Db::startTrans();
         try {
             $number = 0;
@@ -1222,12 +1221,69 @@ class NewProduct extends Backend
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
+                $arr[$number]['type'] = 1;
                 $number += 1;
             }
+            //插入补货需求单表
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 1])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        if ($result !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error(__('No rows were updated'));
+        }
+    }
+
+    /**
+     * 紧急补货
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/17
+     * Time: 9:22
+     */
+    public function emergency_replenishment()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //统计计划补货数据
+        $list = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->group('sku')
+            ->column("sku,sum(replenish_num) as sum");
+        $result = false;
+        Db::startTrans();
+        try {
+            $number = 0;
+            foreach ($list as $k => $v) {
+                $arr[$number]['sku'] = $k;
+                $arr[$number]['replenishment_num'] = $v;
+                $arr[$number]['create_person'] = session('admin.nickname');
+                $arr[$number]['create_time'] = date('Y-m-d h:i:s');
+                $arr[$number]['type'] = 2;
+                $number += 1;
+            }
+            //插入补货需求单表
+            $result = $this->order->allowField(true)->saveAll($arr);
+            //更新计划补货列表
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 2])
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
             Db::commit();
