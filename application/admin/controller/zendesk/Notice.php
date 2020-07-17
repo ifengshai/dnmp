@@ -493,7 +493,7 @@ class Notice extends Controller
      * 获取修改的通知
      */
     public function update1()
-    {
+    {dump(111);exit;
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
