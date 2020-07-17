@@ -1,0 +1,180 @@
+<style>
+    .caigou {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">调拨单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-transfer_order_number" class="form-control" readonly name="row[transfer_order_number]"
+                value="{$transfer_order_number}" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">调出虚拟仓:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[call_out_site]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">现货</option>
+                <option value="2">大货</option>
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">调入虚拟仓:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[call_in_site]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">现货</option>
+                <option value="2">大货</option>
+            </select>
+        </div>
+    </div>
+ 
+    <div class="form-group">
+     
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-remark" class="form-control " rows="5" name="row[remark]"
+                cols="50"></textarea>
+        </div>
+    </div>
+    <hr>
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
+        <div style="margin-bottom: 20px;">
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table" class="purchase-table">
+                <tr>
+                    <th>SKU</td>
+                    <th>产品名称</td>
+                    <th>供应商sku</td>
+                    <th>采购数量（个）</td>
+                    <th>采购单价（元）</td>
+                    <th>总价（元）</td>
+                    <th>操作</td>
+                </tr>
+                {if $list}
+                {foreach $list as $v}
+                <tr>
+                    <input  class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden" value="{$v.id}">
+                    <td>
+                        <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text"
+                            value="{$v.sku}">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                            type="text" value=""></td>
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
+                            type="text" value=""></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
+                            type="text" value="{$v.distribute_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
+                            type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a></td>
+                </tr>
+                {/foreach}
+                
+                {else/}
+                <tr>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
+                            type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a></td>
+                </tr>
+                {/if}
+            </table>
+        </div>
+
+
+    </div>
+    <input type='hidden' name="row[purchase_status]" class="status" value="0">
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<div id="table-content" style="display: none;">
+    <table>
+        <tr>
+            <td>
+                <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
+            </td>
+            <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                    type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
+                    type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" type="text">
+            </td>
+            <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
+                    type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
+        </tr>
+    </table>
+</div>
