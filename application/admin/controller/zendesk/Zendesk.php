@@ -1044,7 +1044,7 @@ DOC;
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
-
+dump($intersects);exit;
         //更新
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update1();
