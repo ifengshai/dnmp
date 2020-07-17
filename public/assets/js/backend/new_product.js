@@ -500,6 +500,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+            $(document).on('click', '.btn-replenish_add', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要创建紧急补货需求单吗？'),
+                    function (index) {
+                        Layer.closeAll();
+                        var options = {
+                            shadeClose: false,
+                            shade: [0.3, '#393D49'],
+                            area: ['100%', '100%'], //弹出层宽高
+                            callback: function (value) {
+
+                            }
+                        };
+                        // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
+                        Fast.api.open('new_product/emergency_replenishment','创建紧急补货需求单',options);
+
+                    }
+                );
+            });
 
         },
         addreplenishorder: function () {
