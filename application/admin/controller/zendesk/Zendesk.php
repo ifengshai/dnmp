@@ -859,7 +859,6 @@ DOC;
                 ->find();
         $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0")];
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select();
-        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', $this->model->getLastSql() . "\r\n", FILE_APPEND);
         foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
             $res = $this->model->where('id',$ticket->id)->update([
@@ -869,15 +868,17 @@ DOC;
                 'assign_time' => date('Y-m-d H:i:s', time()),
             ]);
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', $this->model->getLastSql() . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', 'admin_id:'. $admin_id . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', 'assignee_id' . $task->assignee_id . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', 'id' . $ticket->id . "\r\n", FILE_APPEND);
             //分配数目+1
             $task->complete_apply_count = $task->complete_apply_count + 1;
             $task->apply_count = $task->apply_count + 1;
             $task->save();
         }
-        $this->success("操作成功");
+        if (false !== $res) {
+            $this->success("申请成功");
+        } else {
+            $this->error("申请失败");
+        }
+        
         /* $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
 
