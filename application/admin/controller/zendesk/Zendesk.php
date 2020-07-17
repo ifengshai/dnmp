@@ -1034,6 +1034,7 @@ DOC;
     public function asyncTicketHttps()
     {
         $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+dump($ticketIds);exit;
         //判断是否存在
         $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
