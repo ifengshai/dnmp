@@ -284,7 +284,7 @@ class Test3 extends Backend
     public function zendesk_test()
     {
         //查询zendesk_comments
-        $zendesk = Db::name('zendesk_comments')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 0)->select();
+        $zendesk = Db::name('zendesk_comments')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 1)->select();
         $assign_arr = Db::name('zendesk_agents')->column('admin_id', 'old_agent_id');
         foreach ($zendesk as $k => $v) {
             //如果是公用账户 查询zendesk表 获取承接人id 更新评论表due_id
