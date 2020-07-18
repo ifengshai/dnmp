@@ -323,8 +323,11 @@ class Notice extends Controller
         if ($ticket == 'success') {
             return 'success';
         }
-        echo 999;
+        dump($id);
+        dump($type);
         dump(Zendesk::where(['ticket_id' => $id, 'type' => $type])->find());
+        echo 999;
+
         //存在已创建的则跳过流程
         if (Zendesk::where(['ticket_id' => $id, 'type' => $type])->find()) {
             return 'success';
