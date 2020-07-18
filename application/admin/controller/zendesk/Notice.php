@@ -65,6 +65,13 @@ class Notice extends Controller
             return true;
         }
     }
+
+    public function test()
+    {
+        $comments = $this->getComments(165000);
+        dump($comments);die;
+    }
+
     /**
      * 获取到新增的通知
      */
@@ -202,30 +209,30 @@ class Notice extends Controller
         } else {
             $type = 2;
         }
-        try {
+        try{
             //$channel = $postData['channel'];
             //最后一条评论
             $comments = $this->getComments($id);
             //有错误的防止执行下一步
-            if ($comments == 'success') {
+            if($comments == 'success'){
                 return 'success';
             }
             $ticket = $this->getTicket($id);
             //有错误的防止执行下一步
-            if ($ticket == 'success') {
+            if($ticket == 'success'){
                 return 'success';
             }
             //开始插入相关数据
             $tags = $ticket->tags;
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
             sort($tags);
-            $tags = join(',', $tags);
+            $tags = join(',',$tags);
 
-            $zendesk = Zendesk::where(['ticket_id' => $id, 'type' => $type])->find();
-            if (!$zendesk) {
+            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
+            if(!$zendesk){
                 return 'success';
             }
-        } catch (Exception $e) {
+        }catch (Exception $e) {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
@@ -234,10 +241,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
-            if($id == 165371){
-                file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$ticket->status."\r\n",FILE_APPEND);
-            }
+            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -245,75 +249,76 @@ class Notice extends Controller
                 'zendesk_update_time' => $zendesk_update_time
             ];
             //如果分配人修改，则同步修改分配人
-            if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
+            if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
 
                 $updateData['assignee_id'] = $ticket->assignee_id;
-                $updateData['assign_id'] = ZendeskAgents::where('agent_id', $ticket->assignee_id)->value('admin_id');
+                $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+
             }
             //如果没有分配人
-            if (!$ticket->assignee_id) {
+            if(!$ticket->assignee_id){
                 $updateData['assignee_id'] = '';
                 $updateData['assign_id'] = '';
             }
             //更新rating,如果存在的话
-            if (!$zendesk->rating && $ticket->satisfaction_rating) {
+            if(!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
                 $ratingComment = $ticket->satisfaction_rating->comment;
                 $ratingReason = $ticket->satisfaction_rating->reason;
                 $updateData['rating'] = $score;
                 $updateData['comment'] = $ratingComment;
                 $updateData['reason'] = $ratingReason;
-                if ($score == 'good') {
+                if($score == 'good') {
                     $updateData['rating_type'] = 1;
-                } elseif ($score == 'bad') {
+                }elseif($score == 'bad') {
                     $updateData['rating_type'] = 2;
                 }
             }
             //如果存在抄送则更新
-            if ($ticket->follower_ids) {
+            if($ticket->follower_ids) {
                 $follweIds = $ticket->follower_ids;
                 $emailCcs = [];
-                foreach ($follweIds as $follweId) {
+                foreach($follweIds as $follweId) {
                     $userInfo = $this->client->crasp()->findUser(['id' => $follweId])->user;
                     $emailCcs[] = $userInfo->email;
                 }
-                if ($emailCcs) {
+                if($emailCcs) {
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
             Zendesk::update($updateData, ['id' => $zendesk->id]);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1（分担逻辑修改，改方法暂时不用）
-            //            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
-            //                //找出今天的task
-            //                $task = ZendeskTasks::whereTime('create_time', 'today')
-            //                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
-            //                    ->find();
-            //                //存在，则更新
-            //                if ($task) {
-            //                    $task->leave_count = $task->leave_count + 1;
-            //                    $task->target_count = $task->target_count - 1;
-            //                    $task->surplus_count = $task->surplus_count - 1;
-            //                    $task->complete_count = $task->complete_count - 1;
-            //                    $task->complete_apply_count = $task->complete_apply_count - 1;
-            //                    $task->save();
-            //                }
-            //            }
+//            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
+//                //找出今天的task
+//                $task = ZendeskTasks::whereTime('create_time', 'today')
+//                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
+//                    ->find();
+//                //存在，则更新
+//                if ($task) {
+//                    $task->leave_count = $task->leave_count + 1;
+//                    $task->target_count = $task->target_count - 1;
+//                    $task->surplus_count = $task->surplus_count - 1;
+//                    $task->complete_count = $task->complete_count - 1;
+//                    $task->complete_apply_count = $task->complete_apply_count - 1;
+//                    $task->save();
+//                }
+//            }
             //从stefen修改为其他用户，用户apply_count+1，complete_apply_count+1
-            //            if($ticket->assignee_id != '382940274852' && $zendesk->assignee_id == '382940274852'){
-            //                //找出今天的task
-            //                $task = ZendeskTasks::whereTime('create_time', 'today')
-            //                    ->where(['assignee_id' => $ticket->assignee_id, 'type' => $zendesk->type])
-            //                    ->find();
-            //                //存在，则更新
-            //                if ($task) {
-            //                    $task->complete_apply_count = $task->complete_apply_count + 1;
-            //                    $task->apply_count = $task->apply_count + 1;
-            //                    $task->save();
-            //                }
-            //            }
+//            if($ticket->assignee_id != '382940274852' && $zendesk->assignee_id == '382940274852'){
+//                //找出今天的task
+//                $task = ZendeskTasks::whereTime('create_time', 'today')
+//                    ->where(['assignee_id' => $ticket->assignee_id, 'type' => $zendesk->type])
+//                    ->find();
+//                //存在，则更新
+//                if ($task) {
+//                    $task->complete_apply_count = $task->complete_apply_count + 1;
+//                    $task->apply_count = $task->apply_count + 1;
+//                    $task->save();
+//                }
+//            }
             //其他用户修改为stefen,今天分配的量-1
-            if ($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852') {
+            if($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852'){
                 //找出今天的task
                 $task = ZendeskTasks::whereTime('create_time', 'today')
                     ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
@@ -329,7 +334,7 @@ class Notice extends Controller
                 }
             }
             //查找comment_id是否存在，不存在则添加
-            foreach ($comments as $comment) {
+            foreach($comments as $comment) {
                 if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
                     //获取所有的附件
                     $attachments = [];
@@ -351,7 +356,7 @@ class Notice extends Controller
                         'attachments' => join(',', $attachments),
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
-                        'platform' => $type,
+                        'platform'=>$type,
                     ]);
                 }
             }
@@ -999,7 +1004,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-14T08:00:00Z updated_at<=2020-07-14T23:00:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-17T12:00:00Z updated_at<=2020-07-17T23:00:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1043,7 +1048,7 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 20 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 5 * 60) . "\r\n", FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 

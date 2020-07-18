@@ -37,6 +37,45 @@ class Test4 extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    public function zendesk_test()
+    {
+        $comments = new \app\admin\model\zendesk\ZendeskComments();
+        $list = $comments->field('id,author_id')->where(['create_time' => ['between', ['2020-07-01 00:00:00', '2020-07-19 00:00:00']], 'is_admin' => 0])->select();
+
+        $account = new \app\admin\model\zendesk\ZendeskAccount();
+        $account_id = $account->column('account_id');
+        foreach ($list as $k => $v) {
+            if (in_array($v['author_id'], $account_id)) {
+                $comments->where('id', $v['id'])->update(['is_admin' => 1]);
+            }
+            echo $v['id'] . "\n";
+        }
+        echo "is ok";
+        die;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function new_track_test()
     {
 

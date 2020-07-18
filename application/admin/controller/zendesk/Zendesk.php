@@ -248,6 +248,7 @@ class Zendesk extends Backend
 //                        $createData['comment']['body'] = $converter->convert($body);
                         $createData['comment']['html_body'] = $params['content'].$sign;
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','add:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
@@ -456,6 +457,8 @@ class Zendesk extends Backend
 //                        $updateData['comment']['body'] = $converter->convert($body);
                         $updateData['comment']['html_body'] = $params['content'].$sign;
                     }
+
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','edit:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
@@ -590,8 +593,14 @@ class Zendesk extends Backend
             ->limit(5)
             ->select();        
         $btn = input('btn',0);
+
+        //查询魔晶账户
+        // $admin = new \app\admin\model\Admin();
+        // $username = $admin->where('status','normal')->column('nickname','id');
+
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
+        // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
@@ -857,7 +866,7 @@ DOC;
         $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['admin_id' => $admin_id])
                 ->find();
-        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0")];
+        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->limit(10)->select();
         foreach($tickets as $ticket){
             //修改zendesk的assign_id,assign_time
@@ -1045,20 +1054,14 @@ DOC;
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
-        $intersects = array('80422','82794','82392','78530','80445','78477','76188','47221');
-        foreach($intersects as $intersect){
-            $ticket = (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->getTicket($intersect);
-            echo $intersect .'--'.$ticket->assignee_id."\n";
-        }
-        exit;
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
