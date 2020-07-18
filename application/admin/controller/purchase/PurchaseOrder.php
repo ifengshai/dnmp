@@ -1843,15 +1843,36 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $whereCondition['purchase_status'] = ['egt', 2];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
             if ($rep != '{}') {
                 $whereTotalId = '1=1';
+                $filter = json_decode($rep, true);
+                //付款人
+                if($filter['pay_person']){
+                    $workIds = Purchase_order_pay::where(['create_person' =>$filter['pay_person']])->column('purchase_id');
+                    $whereCondition['purchase_order.id'] = ['in', $workIds];
+                    unset($filter['pay_person']);
+                }
+                if($filter['pay_time']){
+                    $time = explode(' ', $filter['pay_time']);
+                    $mapTime['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
+                    if (!empty($whereCondition['id'])) {
+                        $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                        $whereCondition['purchase_order.id']  = ['in', $newWorkIds];
+                    } else {
+                        $whereCondition['purchase_order.id']  = ['in', $measuerWorkIds];
+                    }
+                    unset($filter['pay_time']);
+                }
+                $this->request->get(['filter' => json_encode($filter)]);
             } else {
                 $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
