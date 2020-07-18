@@ -248,6 +248,7 @@ class Zendesk extends Backend
 //                        $createData['comment']['body'] = $converter->convert($body);
                         $createData['comment']['html_body'] = $params['content'].$sign;
                     }
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','add:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
@@ -456,6 +457,8 @@ class Zendesk extends Backend
 //                        $updateData['comment']['body'] = $converter->convert($body);
                         $updateData['comment']['html_body'] = $params['content'].$sign;
                     }
+
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','edit:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
