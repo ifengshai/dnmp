@@ -139,6 +139,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
                 'zendesk_update_time' => $zendesk_update_time,
+                'create_time' => date('Y-m-d H:i:s',time()),
+                'update_time' => date('Y-m-d H:i:s',time()),
             ]);
             $zid = $zendesk->id;
             foreach ($comments as $comment) {
@@ -349,23 +351,6 @@ class Notice extends Controller
             }
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
-            $as = [
-                'ticket_id' => $id,
-                'type' => $type,
-                'channel' => $via->channel,
-                'email' => $userInfo->email,
-                'username' => $userInfo->name,
-                'user_id' => $ticket->requester_id,
-                'to_email' => $via->source->to->address,
-                'priority' => $priority,
-                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
-                'tags' => $tags,
-                'subject' => $subject,
-                'raw_subject' => $rawSubject,
-                'assignee_id' => $ticket->assignee_id ?: 0,
-                'assign_id' => $admin_id ?: 0,
-                'zendesk_update_time' => $zendesk_update_time,
-            ];dump($as);
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
@@ -383,8 +368,9 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
+                'create_time' => date('Y-m-d H:i:s',time()),
+                'update_time' => date('Y-m-d H:i:s',time()),
             ]);
-            echo 555;exit;
             $zid = $zendesk->id;
             foreach ($comments as $comment) {
                 //获取所有的附件
@@ -442,7 +428,7 @@ class Notice extends Controller
      * 手动更新zendesk异常信息
      */
     public function update()
-    {echo 4443243;exit;
+    {
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
