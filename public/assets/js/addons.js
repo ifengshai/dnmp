@@ -437,7 +437,11 @@ define([], function () {
                                     }
                                 },
                                 onPaste: function (ne) {
+                                    var bufferText = ((ne.originalEvent || ne).clipboardData || window.clipboardData).getData('Text/plain');
+                                    //    ne.preventDefault();  
                                     ne.preventDefault ? ne.preventDefault() : (ne.returnValue = false);
+                                    // Firefox fix
+                                    document.execCommand("insertText", false, bufferText);
                                 },
                             }
                         });
