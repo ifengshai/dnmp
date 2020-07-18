@@ -343,7 +343,7 @@ class Notice extends Controller
         //开始插入相关数据
         //开启事务
         Db::startTrans();
-        try {
+//        try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
             $userInfo = $user->user;
@@ -422,11 +422,11 @@ class Notice extends Controller
             }
             Db::commit();
             //写入附表
-        } catch (Exception $e) {
-            Db::rollback();
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            //echo $e->getMessage();
-        }
+//        } catch (Exception $e) {
+//            Db::rollback();
+//            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+//            //echo $e->getMessage();
+//        }
         return 'success';
     }
 

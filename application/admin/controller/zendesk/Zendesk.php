@@ -1056,10 +1056,11 @@ DOC;
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
-        foreach($intersects as $intersect){
+        /*foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
-        }
+        }*/
+        $diffs = array('166901');
         //新增
         foreach($diffs as $diff){
             (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
