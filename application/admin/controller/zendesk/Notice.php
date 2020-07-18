@@ -356,7 +356,7 @@ class Notice extends Controller
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
 
             //写入主表
-            $zendesk = Db::name('zendesk')->insert([
+            $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
                 'channel' => $via->channel,
@@ -376,7 +376,7 @@ class Notice extends Controller
                 'update_time' => date('Y-m-d H:i:s',time()),
             ]);
 
-            $zid = $zendesk->id;
+            $zid = $zendesk;
             foreach ($comments as $comment) {
                 //获取所有的附件
                 $attachments = [];
