@@ -281,15 +281,11 @@ class Test3 extends Backend
     public function zendesk_test()
     {
         //查询zendesk_comments
-        $zendesk = Db::name('zendesk_comments')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 1)->select();
+        $zendesk = Db::name('zendesk_comments')->field('a.id,a.author_id,b.assign_id')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 1)->where('a.author_id', 'not in', ['383342686912', '381994479654'])->select();
         $assign_arr = Db::name('zendesk_agents')->column('admin_id', 'old_agent_id');
         foreach ($zendesk as $k => $v) {
             //如果是公用账户 查询zendesk表 获取承接人id 更新评论表due_id
-            if (in_array($v['author_id'], ['383342686912', '381994479654'])) {
-                Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $v['assign_id']]);
-            } else {
-                Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $assign_arr[$v['author_id']]]);
-            }
+            Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $assign_arr[$v['author_id']] ?: 0]);
 
             echo $k . "\n";
         }
