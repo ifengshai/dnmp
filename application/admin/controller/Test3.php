@@ -239,4 +239,35 @@ class Test3 extends Backend
         echo  $res;
         die;
     }
+    public function zendesk_assign_modify(){
+        $list = Db::name('Sheet1')->select();
+        foreach ($list as $item){
+            $zendesk = Db::name('zendesk')->where('assignee_id',$item['id'])->column('id');
+            foreach ($zendesk as $value){
+                if($value){
+                    Db::name('zendesk')->where('id',$value)->update(['assign_id'=>$item['admin_id'],'due_id'=>$item['admin_id'],'recipient'=>$item['admin_id']]);
+                    echo $value.' is ok'."\n";
+                }
+            }
+        }
+    }
+    public function zendesk_id_modify(){
+        $this->zendesk_id1(1);
+        $this->zendesk_id1(2);
+    }
+    public function zendesk_id1($type){
+        if($type == 1){
+            $zendesk_str = '383342686912';
+        }else{
+            $zendesk_str = '381994479654';
+        }
+        $zendesk_arr['type'] = $type;
+        $zendesk_arr['channel'] = ['in', ['email', 'chat']];
+        $zendesk = Db::name('zendesk')->where($zendesk_arr)->column('id');
+        foreach ($zendesk as $item){
+            //更新zendesk_id
+            Db::name('zendesk')->where('id',$item)->update(['assignee_id'=>$zendesk_str]);
+            echo $item.' is ok'."\n";
+        }
+    }
 }
