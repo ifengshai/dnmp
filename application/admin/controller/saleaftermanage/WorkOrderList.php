@@ -2341,6 +2341,7 @@ class WorkOrderList extends Backend
                             $this->model->changeLens($params, $row->id, $v, $res);
                             $this->model->changeFrame($params, $row->id, $v, $res);
                             $this->model->cancelOrder($params, $row->id, $v, $res);
+                            $this->model->changeAddress($params, $row->id, $v, $res);
                         }
                     }
 
@@ -2484,19 +2485,27 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            $isNewVersion = input('is_new_version');
+            $work_id = input('work_id');
 
             try {
-                //获取地址、处方等信息
+                //获取网站数据库地址,获取地址信息
                 $res = $this->model->getAddress($siteType, $incrementId);
-                //请求接口获取lens_type，coating_type，prescription_type等信息
-                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'],1,$isNewVersion);
+                //判断是否是新建状态
+                $work_status = $this->model->where('id',$work_id)->value('work_status');
+                if($work_status == 1){
+                    //获取魔晶数据库中地址
+                    $address = Db::name('work_order_change_sku')->where('work_id',$work_id)->value('userinfo_option');
+                    $address = unserialize($address);
+                    $res['address'][$address['address_id']] = $address;
+                    $address_type = $address['address_id'] == 0 ? 'shipping' : 'billing';
+                    $res['address'][$address['address_id']]['address_type'] = $address_type;
+                }
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
 
             if ($res) {
-                $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
+                $this->success('操作成功！！', '', ['address' => $res]);
             } else {
                 $this->error('未获取到数据！！');
             }

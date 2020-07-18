@@ -1253,6 +1253,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             Controller.api.bindevent();
+            //进入页面展示按钮下的数据
+            $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                var id = $(this).val();
+                if(id == 15){
+                    //vip退款显示
+                    $(".step2").show();
+                }
+                if(id == 13){
+                    //修改地址
+                    changeOrderAddress();
+                }
+            })
+
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 //读取是谁添加的配置console.log(Config.work_type);
@@ -2669,6 +2682,7 @@ function delOne(str,arr){
 function changeOrderAddress(){
     $("#user_address").show();
     var incrementId = $('#c-platform_order').val();
+    var work_id = $('#work_id').val();
     if (!incrementId) {
         Toastr.error('订单号不能为空');
         return false;
@@ -2681,6 +2695,7 @@ function changeOrderAddress(){
             data: {
                 increment_id: incrementId,
                 site_type: site_type,
+                work_id: work_id,
             }
         }, function (json, ret) {
             if (json.code == 0) {
@@ -2692,7 +2707,8 @@ function changeOrderAddress(){
             //修改地址
             var address1 = '';
             for (var i = 0; i < data.address.length; i++) {
-                if (i == 0) {
+                var address_id= data.address[i].address_id ? data.address[i].address_id : 0;
+                if(i == address_id){
                     address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
                     //补发地址自动填充第一个
                     $('#c-firstname1').val(data.address[i].firstname);
@@ -2715,7 +2731,7 @@ function changeOrderAddress(){
                     $('#c-street1').val(data.address[i].street);
                     $('#c-postcode1').val(data.address[i].postcode);
                     $('#c-currency_code1').val(order_pay_currency);
-                } else {
+                }else{
                     address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                 }
             }
@@ -2736,7 +2752,6 @@ function changeOrderAddress(){
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
             })
-
             $('.selectpicker ').selectpicker('refresh');
         });
     }
