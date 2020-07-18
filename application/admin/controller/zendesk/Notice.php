@@ -436,7 +436,7 @@ class Notice extends Controller
      * 手动更新zendesk异常信息
      */
     public function update()
-    {echo 999;exit;
+    {echo 4443243;exit;
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
