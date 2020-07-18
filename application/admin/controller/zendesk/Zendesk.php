@@ -1047,12 +1047,12 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create1();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
