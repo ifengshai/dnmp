@@ -248,6 +248,17 @@ class Test3 extends Backend
             echo $item['id'] . ' is ok' . "\n";
         }
     }
+    public function zendesk_tongyong()
+    {
+        $list = Db::name('zendesk')->where('assignee_id', 'in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $k => $v) {
+            $due_id = Db::name('zendesk_comments')->where('zid', $v['id'])->where('is_admin', 1)->order('id desc')->value('due_id');
+            Db::name('zendesk')->where('id', $v['id'])->update(['assign_id' => $due_id, 'due_id' => $due_id, 'recipient' => $due_id]);
+            echo $k . "\n";
+        }
+        echo 'ok';
+    }
+
     //修改zendesk表中zendesk的id
     public function zendesk_id_modify()
     {
