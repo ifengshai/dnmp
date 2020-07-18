@@ -40,7 +40,7 @@ class Test4 extends Backend
     public function zendesk_test()
     {
         $comments = new \app\admin\model\zendesk\ZendeskComments();
-        $list = $comments->where(['create_time' => ['between', ['2020-07-01 00:00:00', '2020-07-19 00:00:00']], 'is_admin' => 0])->select();
+        $list = $comments->field('id,author_id')->where(['create_time' => ['between', ['2020-07-01 00:00:00', '2020-07-19 00:00:00']], 'is_admin' => 0])->select();
 
         $account = new \app\admin\model\zendesk\ZendeskAccount();
         $account_id = $account->column('account_id');
