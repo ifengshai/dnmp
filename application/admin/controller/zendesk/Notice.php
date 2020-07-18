@@ -342,7 +342,7 @@ class Notice extends Controller
         $tags = join(',', $tags);
         //开始插入相关数据
         //开启事务
-        Db::startTrans();
+        //Db::startTrans();
 //        try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
@@ -378,7 +378,7 @@ class Notice extends Controller
                 'update_time' => date('Y-m-d H:i:s',time()),
             ]);
             //写入主表
-            $zendesk = Zendesk::create([
+            $zendesk = Db::name('zendesk')->insert([
                 'ticket_id' => $id,
                 'type' => $type,
                 'channel' => $via->channel,
@@ -397,6 +397,7 @@ class Notice extends Controller
                 'create_time' => date('Y-m-d H:i:s',time()),
                 'update_time' => date('Y-m-d H:i:s',time()),
             ]);
+            echo Db::name('zendesk')->getLastSql();exit;
             echo 333;
             $zid = $zendesk->id;
             foreach ($comments as $comment) {
@@ -444,7 +445,7 @@ class Notice extends Controller
                     'update_time' => date('Y-m-d H:i:s',time()),
                 ]);
             }
-            Db::commit();
+            //Db::commit();
             //写入附表
 //        } catch (Exception $e) {
 //            Db::rollback();
