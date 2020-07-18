@@ -73,7 +73,232 @@ class Notice extends Controller
     }
 
     /**
-     * 获取到新增的通知
+     * 每天自动创建zendesk信息
+     */
+    public function auto_create()
+    {
+        $postData = $this->postData;
+        $id = $postData['id'];
+        $type = $postData['type'];
+        if ($type == 'zeelool') {
+            $type = 1;
+        } else {
+            $type = 2;
+        }
+        //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
+        //评论s
+        $comments = $this->getComments($id);
+        //有错误的防止执行下一步
+        if ($comments == 'success') {
+            return 'success';
+        }
+        $ticket = $this->getTicket($id);
+        //有错误的防止执行下一步
+        if ($ticket == 'success') {
+            return 'success';
+        }
+        //存在已创建的则跳过流程
+        if (Zendesk::where(['ticket_id' => $id, 'type' => $type])->find()) {
+            return 'success';
+        }
+        $via = $ticket->via;
+        $priority = 0;
+        if ($ticket->priority) {
+            $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
+        }
+        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $ticket->tags)->column('id');
+        sort($tags);
+        $tags = join(',', $tags);
+        //开始插入相关数据
+        //开启事务
+        Db::startTrans();
+        try {
+            //根据用户的id获取用户的信息
+            $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
+            $userInfo = $user->user;
+            $subject = $ticket->subject;
+            $rawSubject = $ticket->raw_subject;
+            if (!$ticket->subject && !$ticket->raw_subject) {
+                $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
+            }
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            //写入主表
+            $zendesk = Zendesk::create([
+                'ticket_id' => $id,
+                'type' => $type,
+                'channel' => $via->channel,
+                'email' => $userInfo->email,
+                'username' => $userInfo->name,
+                'user_id' => $ticket->requester_id,
+                'to_email' => $via->source->to->address,
+                'priority' => $priority,
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                'tags' => $tags,
+                'subject' => $subject,
+                'raw_subject' => $rawSubject,
+                'assignee_id' => $ticket->assignee_id ?: 0,
+                'assign_id' => 0,
+                'zendesk_update_time' => $zendesk_update_time,
+            ]);
+            $zid = $zendesk->id;
+            foreach ($comments as $comment) {
+                //获取所有的附件
+                $attachments = [];
+                if ($comment->attachments) {
+                    foreach ($comment->attachments as $attachment) {
+                        $attachments[] = $attachment->content_url;
+                    }
+                }
+                //如果是chat或者voice并且有了分配人，那么创建的一个public设置为1，is_admin设置为1，due_id设置为admin_id,目的是为了记录chat和voice的工作量
+                $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $comment->author_id)->value('admin_id');
+                //存在分配人，是chat或者voice，并且不是管理员主动创建的
+                if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                    ZendeskComments::create([
+                        'ticket_id' => $id,
+                        'comment_id' => 0,
+                        'zid' => $zid,
+                        'author_id' => $ticket->assignee_id,
+                        'body' => $zendesk->channel . '记录工作量',
+                        'html_body' => $zendesk->channel . '记录工作量',
+                        'is_public' => 1,
+                        'is_admin' => 1,
+                        'attachments' => '',
+                        'is_created' => 1,
+                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id')
+                    ]);
+                }
+                ZendeskComments::create([
+                    'ticket_id' => $id,
+                    'comment_id' => $comment->id,
+                    'zid' => $zid,
+                    'author_id' => $comment->author_id,
+                    'body' => $comment->body,
+                    'html_body' => $comment->html_body,
+                    'is_public' => $comment->public ? 1 : 2,
+                    'is_admin' => 0,
+                    'attachments' => json($attachments),
+                    'is_created' => 1,
+                    'due_id' => 0,
+                    'platform' => $type,
+                    'attachments' => join(',', $attachments)
+                ]);
+            }
+            Db::commit();
+            //写入附表
+        } catch (Exception $e) {
+            Db::rollback();
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            //echo $e->getMessage();
+        }
+        return 'success';
+    }
+
+    /**
+     * 每天自动更新zendesk信息
+     */
+    public function auto_update()
+    {
+        $postData = $this->postData;
+        $id = $postData['id'];
+        $type = $postData['type'];
+        if ($type == 'zeelool') {
+            $type = 1;
+        } else {
+            $type = 2;
+        }
+        try{
+            //$channel = $postData['channel'];
+            //最后一条评论
+            $comments = $this->getComments($id);
+            //有错误的防止执行下一步
+            if($comments == 'success'){
+                return 'success';
+            }
+            $ticket = $this->getTicket($id);
+            //有错误的防止执行下一步
+            if($ticket == 'success'){
+                return 'success';
+            }
+            //开始插入相关数据
+            $tags = $ticket->tags;
+            $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
+            sort($tags);
+            $tags = join(',',$tags);
+
+            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
+            if(!$zendesk){
+                return 'success';
+            }
+        }catch (Exception $e) {
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return 'success';
+            //echo $e->getMessage();
+        }
+        //开启事务
+        Db::startTrans();
+        try {
+            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
+            //更新主表,目前应该只会更新status，其他不会更新
+            $updateData = [
+                'tags' => $tags,
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                'zendesk_update_time' => $zendesk_update_time
+            ];
+            //更新rating,如果存在的话
+            if(!$zendesk->rating && $ticket->satisfaction_rating) {
+                $score = $ticket->satisfaction_rating->score;
+                $ratingComment = $ticket->satisfaction_rating->comment;
+                $ratingReason = $ticket->satisfaction_rating->reason;
+                $updateData['rating'] = $score;
+                $updateData['comment'] = $ratingComment;
+                $updateData['reason'] = $ratingReason;
+                if($score == 'good') {
+                    $updateData['rating_type'] = 1;
+                }elseif($score == 'bad') {
+                    $updateData['rating_type'] = 2;
+                }
+            }
+            Zendesk::update($updateData, ['id' => $zendesk->id]);
+
+            //查找comment_id是否存在，不存在则添加
+            foreach($comments as $comment) {
+                if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
+                    //获取所有的附件
+                    $attachments = [];
+                    if ($comment->attachments) {
+                        foreach ($comment->attachments as $attachment) {
+                            $attachments[] = $attachment->content_url;
+                        }
+                    }
+                    ZendeskComments::create([
+                        'ticket_id' => $id,
+                        'zid' => $zendesk->id,
+                        'comment_id' => $comment->id,
+                        'author_id' => $comment->author_id,
+                        'body' => $comment->body,
+                        'html_body' => $comment->html_body,
+                        'is_public' => $comment->public ? 1 : 2,
+                        'is_admin' => 0,
+                        'attachments' => join(',', $attachments),
+                        'is_created' => 2,
+                        'due_id' => 0,
+                        'platform'=>$type,
+                    ]);
+                }
+            }
+            Db::commit();
+        } catch (Exception $e) {
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            Db::rollback();
+            //return true;
+            //写入日志
+        }
+        return 'success';
+    }
+    /**
+     * 手动创建zendesk异常信息
      */
     public function create()
     {
@@ -122,9 +347,7 @@ class Notice extends Controller
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
-            if($id == 165371){
-                file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$ticket->status.'555'."\r\n",FILE_APPEND);
-            }
+            $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
@@ -140,7 +363,7 @@ class Notice extends Controller
                 'subject' => $subject,
                 'raw_subject' => $rawSubject,
                 'assignee_id' => $ticket->assignee_id ?: 0,
-                'assign_id' => 0,
+                'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
             ]);
             $zid = $zendesk->id;
@@ -153,7 +376,7 @@ class Notice extends Controller
                     }
                 }
                 //如果是chat或者voice并且有了分配人，那么创建的一个public设置为1，is_admin设置为1，due_id设置为admin_id,目的是为了记录chat和voice的工作量
-                $admin_id = $due_id = ZendeskAgents::where('agent_id', $comment->author_id)->value('admin_id');
+                $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $comment->author_id)->value('admin_id');
                 //存在分配人，是chat或者voice，并且不是管理员主动创建的
                 if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice']) && $ticket->assignee_id != $ticket->requester_id) {
                     ZendeskComments::create([
@@ -167,7 +390,7 @@ class Notice extends Controller
                         'is_admin' => 1,
                         'attachments' => '',
                         'is_created' => 1,
-                        'due_id' => ZendeskAgents::where('agent_id', $ticket->assignee_id)->value('admin_id')
+                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id')
                     ]);
                 }
                 ZendeskComments::create([
@@ -197,7 +420,7 @@ class Notice extends Controller
     }
 
     /**
-     * 获取修改的通知
+     * 手动更新zendesk异常信息
      */
     public function update()
     {
@@ -248,7 +471,7 @@ class Notice extends Controller
                 'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
                 'zendesk_update_time' => $zendesk_update_time
             ];
-            //如果分配人修改，则同步修改分配人
+            /*//如果分配人修改，则同步修改分配人
             if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
 
                 $updateData['assignee_id'] = $ticket->assignee_id;
@@ -259,7 +482,7 @@ class Notice extends Controller
             if(!$ticket->assignee_id){
                 $updateData['assignee_id'] = '';
                 $updateData['assign_id'] = '';
-            }
+            }*/
             //更新rating,如果存在的话
             if(!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
@@ -318,7 +541,7 @@ class Notice extends Controller
 //                }
 //            }
             //其他用户修改为stefen,今天分配的量-1
-            if($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852'){
+            /*if($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852'){
                 //找出今天的task
                 $task = ZendeskTasks::whereTime('create_time', 'today')
                     ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
@@ -332,7 +555,7 @@ class Notice extends Controller
                     $zendesk->is_hide = 0;
                     $zendesk->save();
                 }
-            }
+            }*/
             //查找comment_id是否存在，不存在则添加
             foreach($comments as $comment) {
                 if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
@@ -343,7 +566,7 @@ class Notice extends Controller
                             $attachments[] = $attachment->content_url;
                         }
                     }
-                    $admin_id = $due_id = ZendeskAgents::where('agent_id', $comment->author_id)->value('admin_id');
+                    $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $comment->author_id)->value('admin_id');
                     ZendeskComments::create([
                         'ticket_id' => $id,
                         'zid' => $zendesk->id,
@@ -1038,7 +1261,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=5minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=15minutes order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1048,7 +1271,7 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 5 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 15 * 60) . "\r\n", FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 

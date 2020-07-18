@@ -239,35 +239,53 @@ class Test3 extends Backend
         echo  $res;
         die;
     }
-    public function zendesk_assign_modify(){
-        $list = Db::name('Sheet1')->select();
-        foreach ($list as $item){
-            $zendesk = Db::name('zendesk')->where('assignee_id',$item['id'])->column('id');
-            foreach ($zendesk as $value){
-                if($value){
-                    Db::name('zendesk')->where('id',$value)->update(['assign_id'=>$item['admin_id'],'due_id'=>$item['admin_id'],'recipient'=>$item['admin_id']]);
-                    echo $value.' is ok'."\n";
-                }
-            }
+    //修改zendesk表中的承接人id
+    public function zendesk_assign_modify()
+    {
+        $list = Db::name('Sheet1')->where('id', 'not in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $item) {
+            Db::name('zendesk')->where('assignee_id', $item['id'])->update(['assign_id' => $item['admin_id'], 'due_id' => $item['admin_id'], 'recipient' => $item['admin_id']]);
+            echo $item['id'] . ' is ok' . "\n";
         }
     }
-    public function zendesk_id_modify(){
+    //修改zendesk表中zendesk的id
+    public function zendesk_id_modify()
+    {
         $this->zendesk_id1(1);
         $this->zendesk_id1(2);
     }
-    public function zendesk_id1($type){
-        if($type == 1){
+    public function zendesk_id1($type)
+    {
+        if ($type == 1) {
             $zendesk_str = '383342686912';
-        }else{
+        } else {
             $zendesk_str = '381994479654';
         }
         $zendesk_arr['type'] = $type;
-        $zendesk_arr['channel'] = ['in', ['email', 'chat']];
         $zendesk = Db::name('zendesk')->where($zendesk_arr)->column('id');
-        foreach ($zendesk as $item){
+        foreach ($zendesk as $item) {
             //更新zendesk_id
-            Db::name('zendesk')->where('id',$item)->update(['assignee_id'=>$zendesk_str]);
-            echo $item.' is ok'."\n";
+            Db::name('zendesk')->where('id', $item)->update(['assignee_id' => $zendesk_str]);
+            echo $item . ' is ok' . "\n";
         }
+    }
+    //修改comments表中的due_id
+    public function zendesk_test()
+    {
+        //查询zendesk_comments
+        $zendesk = Db::name('zendesk_comments')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 0)->select();
+        $assign_arr = Db::name('zendesk_agents')->column('admin_id', 'old_agent_id');
+        foreach ($zendesk as $k => $v) {
+            //如果是公用账户 查询zendesk表 获取承接人id 更新评论表due_id
+            if (in_array($v['author_id'], ['383342686912', '381994479654'])) {
+                Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $v['assign_id']]);
+            } else {
+                Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $assign_arr[$v['author_id']]]);
+            }
+
+            echo $k . "\n";
+        }
+
+        echo 'is ok';
     }
 }
