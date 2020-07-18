@@ -241,12 +241,12 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->auto_update();
             echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
