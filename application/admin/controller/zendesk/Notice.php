@@ -317,28 +317,21 @@ class Notice extends Controller
         if ($comments == 'success') {
             return 'success';
         }
-        echo 777;
         $ticket = $this->getTicket($id);
         //有错误的防止执行下一步
         if ($ticket == 'success') {
             return 'success';
         }
-        dump($id);
-        dump($type);
-        dump(Zendesk::where(['ticket_id' => $id, 'type' => $type])->find());
-        echo 999;
 
         //存在已创建的则跳过流程
         if (Zendesk::where(['ticket_id' => $id, 'type' => $type])->find()) {
             return 'success';
         }
-        echo 888;
         $via = $ticket->via;
         $priority = 0;
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
         }
-        echo 8575;
         $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $ticket->tags)->column('id');
         sort($tags);
         $tags = join(',', $tags);
@@ -346,20 +339,33 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            echo 111;
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
             $userInfo = $user->user;
             $subject = $ticket->subject;
-            echo 222;
             $rawSubject = $ticket->raw_subject;
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            echo 333;
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
-            echo 444;
+            $as = [
+                'ticket_id' => $id,
+                'type' => $type,
+                'channel' => $via->channel,
+                'email' => $userInfo->email,
+                'username' => $userInfo->name,
+                'user_id' => $ticket->requester_id,
+                'to_email' => $via->source->to->address,
+                'priority' => $priority,
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                'tags' => $tags,
+                'subject' => $subject,
+                'raw_subject' => $rawSubject,
+                'assignee_id' => $ticket->assignee_id ?: 0,
+                'assign_id' => $admin_id ?: 0,
+                'zendesk_update_time' => $zendesk_update_time,
+            ];dump($as);
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
