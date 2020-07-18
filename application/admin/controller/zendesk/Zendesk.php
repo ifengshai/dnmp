@@ -1056,13 +1056,15 @@ DOC;
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
+        $intersects = array('166893');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
+        $diffs = array('166893');
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
