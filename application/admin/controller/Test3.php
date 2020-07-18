@@ -239,6 +239,7 @@ class Test3 extends Backend
         echo  $res;
         die;
     }
+    //修改zendesk表中的承接人id
     public function zendesk_assign_modify(){
         $list = Db::name('Sheet1')->select();
         foreach ($list as $item){
@@ -251,6 +252,7 @@ class Test3 extends Backend
             }
         }
     }
+    //修改zendesk表中zendesk的id
     public function zendesk_id_modify(){
         $this->zendesk_id1(1);
         $this->zendesk_id1(2);
@@ -270,4 +272,6 @@ class Test3 extends Backend
             echo $item.' is ok'."\n";
         }
     }
+    //修改comments表中的due_id
+
 }
