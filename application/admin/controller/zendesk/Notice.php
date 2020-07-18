@@ -358,6 +358,25 @@ class Notice extends Controller
 
             echo 11;
             dump($admin_id);
+            dump([
+                'ticket_id' => $id,
+                'type' => $type,
+                'channel' => $via->channel,
+                'email' => $userInfo->email,
+                'username' => $userInfo->name,
+                'user_id' => $ticket->requester_id,
+                'to_email' => $via->source->to->address,
+                'priority' => $priority,
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                'tags' => $tags,
+                'subject' => $subject,
+                'raw_subject' => $rawSubject,
+                'assignee_id' => $ticket->assignee_id ?: 0,
+                'assign_id' => $admin_id ?: 0,
+                'zendesk_update_time' => $zendesk_update_time,
+                'create_time' => date('Y-m-d H:i:s',time()),
+                'update_time' => date('Y-m-d H:i:s',time()),
+            ]);
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
@@ -378,6 +397,7 @@ class Notice extends Controller
                 'create_time' => date('Y-m-d H:i:s',time()),
                 'update_time' => date('Y-m-d H:i:s',time()),
             ]);
+            echo 333;
             $zid = $zendesk->id;
             foreach ($comments as $comment) {
                 //获取所有的附件
