@@ -427,7 +427,6 @@ define([], function () {
                                 onInit: function () {
                                 },
                                 onImageUpload: function (files) {
-
                                     var that = this;
                                     //依次上传图片
                                     for (var i = 0; i < files.length; i++) {
