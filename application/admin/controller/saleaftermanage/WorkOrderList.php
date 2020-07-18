@@ -2212,10 +2212,20 @@ EOF;
         if ($ids) {
             $addWhere .= " AND id IN ({$ids})";
         }
-
+        //筛选措施
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['measure_choose_id']) {
+            $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+            $map['id']  = ['in', $measuerWorkIds];
+            unset($filter['measure_choose_id']);
+        }else{
+            $map = [];
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
         list($where) = $this->buildparams();
         $list = $this->model
             ->where($where)
+            ->where($map)
             ->where($addWhere)
             ->select();
         $list = collection($list)->toArray();
