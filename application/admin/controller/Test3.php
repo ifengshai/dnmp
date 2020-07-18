@@ -273,12 +273,9 @@ class Test3 extends Backend
             $zendesk_str = '381994479654';
         }
         $zendesk_arr['type'] = $type;
-        $zendesk = Db::name('zendesk')->where($zendesk_arr)->column('id');
-        foreach ($zendesk as $item) {
-            //更新zendesk_id
-            Db::name('zendesk')->where('id', $item)->update(['assignee_id' => $zendesk_str]);
-            echo $item . ' is ok' . "\n";
-        }
+        Db::name('zendesk')->where($zendesk_arr['type'])->update(['assignee_id' => $zendesk_str]);
+
+        echo 'ok';
     }
     //修改comments表中的due_id
     public function zendesk_test()
