@@ -166,7 +166,9 @@ class Notice extends Controller
                         'is_admin' => 1,
                         'attachments' => '',
                         'is_created' => 1,
-                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id')
+                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
+                        'create_time' => date('Y-m-d H:i:s',time()),
+                        'update_time' => date('Y-m-d H:i:s',time()),
                     ]);
                 }
                 ZendeskComments::create([
@@ -178,11 +180,12 @@ class Notice extends Controller
                     'html_body' => $comment->html_body,
                     'is_public' => $comment->public ? 1 : 2,
                     'is_admin' => 0,
-                    'attachments' => json($attachments),
                     'is_created' => 1,
                     'due_id' => 0,
                     'platform' => $type,
-                    'attachments' => join(',', $attachments)
+                    'attachments' => join(',', $attachments),
+                    'create_time' => date('Y-m-d H:i:s',time()),
+                    'update_time' => date('Y-m-d H:i:s',time()),
                 ]);
             }
             Db::commit();
@@ -395,7 +398,9 @@ class Notice extends Controller
                         'is_admin' => 1,
                         'attachments' => '',
                         'is_created' => 1,
-                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id')
+                        'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
+                        'create_time' => date('Y-m-d H:i:s',time()),
+                        'update_time' => date('Y-m-d H:i:s',time()),
                     ]);
                 }
                 ZendeskComments::create([
@@ -407,11 +412,12 @@ class Notice extends Controller
                     'html_body' => $comment->html_body,
                     'is_public' => $comment->public ? 1 : 2,
                     'is_admin' => $admin_id ? 1 : 0,
-                    'attachments' => json($attachments),
                     'is_created' => 1,
                     'due_id' => $due_id ? $due_id : 0,
                     'platform' => $type,
-                    'attachments' => join(',', $attachments)
+                    'attachments' => join(',', $attachments),
+                    'create_time' => date('Y-m-d H:i:s',time()),
+                    'update_time' => date('Y-m-d H:i:s',time()),
                 ]);
             }
             Db::commit();
