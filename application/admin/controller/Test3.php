@@ -273,7 +273,7 @@ class Test3 extends Backend
             $zendesk_str = '381994479654';
         }
         $zendesk_arr['type'] = $type;
-        Db::name('zendesk')->where($zendesk_arr['type'])->update(['assignee_id' => $zendesk_str]);
+        Db::name('zendesk')->where($zendesk_arr)->update(['assignee_id' => $zendesk_str]);
 
         echo 'ok';
     }
