@@ -1267,6 +1267,10 @@ class NewProduct extends Backend
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
+
+        if (empty($list)){
+            $this->error('暂时没有紧急补货单需要处理');
+        }
         $result = false;
         Db::startTrans();
         try {
