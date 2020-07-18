@@ -244,16 +244,12 @@ class Test3 extends Backend
         foreach ($list as $item){
             $zendesk = Db::name('zendesk')->where('assignee_id',$item['id'])->column('id');
             foreach ($zendesk as $value){
-                /*if($value){
+                if($value){
                     Db::name('zendesk')->where('id',$value)->update(['assign_id'=>$item['admin_id'],'due_id'=>$item['admin_id'],'recipient'=>$item['admin_id']]);
                     echo $value.' is ok'."\n";
-                }*/
-                if(!$value){
-                    $arr[] = $value;
                 }
             }
         }
-        dump($arr);
     }
     public function zendesk_id_modify(){
         $this->zendesk_id1(1);
