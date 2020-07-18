@@ -353,7 +353,11 @@ class Notice extends Controller
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            dump($ticket->assignee_id);
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
+
+            echo 11;
+            dump($admin_id);
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
