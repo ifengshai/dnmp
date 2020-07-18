@@ -171,7 +171,7 @@
                                     {/if}
                                     <span class="username">
                                         {if condition="$vo['is_admin']"}
-                                      <a href="#">{:$username[$vo->due_id]}</a>
+                                      <a href="#">{$vo->agent->agent->account_user}</a>
                                         {else/}
                                         <a href="#">{$ticket->username}</a>
                                         {/if}

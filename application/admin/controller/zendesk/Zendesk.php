@@ -595,12 +595,12 @@ class Zendesk extends Backend
         $btn = input('btn',0);
 
         //查询魔晶账户
-        $admin = new \app\admin\model\Admin();
-        $username = $admin->where('status','normal')->column('nickname','id');
+        // $admin = new \app\admin\model\Admin();
+        // $username = $admin->where('status','normal')->column('nickname','id');
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
-        $this->view->assign('username', $username);
+        // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
