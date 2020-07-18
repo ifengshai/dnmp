@@ -69,7 +69,8 @@ class Notice extends Controller
     public function test()
     {
         $comments = $this->getComments(165000);
-        dump($comments);die;
+        dump($comments);
+        die;
     }
 
     /**
@@ -123,7 +124,7 @@ class Notice extends Controller
             }
             $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
             //写入主表
-            $zendesk = Zendesk::create([
+            $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
                 'channel' => $via->channel,
@@ -139,10 +140,10 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s',time()),
-                'update_time' => date('Y-m-d H:i:s',time()),
+                'create_time' => date('Y-m-d H:i:s', time()),
+                'update_time' => date('Y-m-d H:i:s', time()),
             ]);
-            $zid = $zendesk->id;
+            $zid = $zendesk;
             foreach ($comments as $comment) {
                 //获取所有的附件
                 $attachments = [];
@@ -167,8 +168,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s',time()),
-                        'update_time' => date('Y-m-d H:i:s',time()),
+                        'create_time' => date('Y-m-d H:i:s', time()),
+                        'update_time' => date('Y-m-d H:i:s', time()),
                     ]);
                 }
                 ZendeskComments::create([
@@ -184,15 +185,15 @@ class Notice extends Controller
                     'due_id' => 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s',time()),
-                    'update_time' => date('Y-m-d H:i:s',time()),
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                    'update_time' => date('Y-m-d H:i:s', time()),
                 ]);
             }
             Db::commit();
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',"auto_add:" . $id."\r\n",FILE_APPEND);
             //echo $e->getMessage();
         }
         return 'success';
@@ -211,30 +212,30 @@ class Notice extends Controller
         } else {
             $type = 2;
         }
-        try{
+        try {
             //$channel = $postData['channel'];
             //最后一条评论
             $comments = $this->getComments($id);
             //有错误的防止执行下一步
-            if($comments == 'success'){
+            if ($comments == 'success') {
                 return 'success';
             }
             $ticket = $this->getTicket($id);
             //有错误的防止执行下一步
-            if($ticket == 'success'){
+            if ($ticket == 'success') {
                 return 'success';
             }
             //开始插入相关数据
             $tags = $ticket->tags;
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
             sort($tags);
-            $tags = join(',',$tags);
+            $tags = join(',', $tags);
 
-            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
-            if(!$zendesk){
+            $zendesk = Zendesk::where(['ticket_id' => $id, 'type' => $type])->find();
+            if (!$zendesk) {
                 return 'success';
             }
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
@@ -243,7 +244,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -251,23 +252,23 @@ class Notice extends Controller
                 'zendesk_update_time' => $zendesk_update_time
             ];
             //更新rating,如果存在的话
-            if(!$zendesk->rating && $ticket->satisfaction_rating) {
+            if (!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
                 $ratingComment = $ticket->satisfaction_rating->comment;
                 $ratingReason = $ticket->satisfaction_rating->reason;
                 $updateData['rating'] = $score;
                 $updateData['comment'] = $ratingComment;
                 $updateData['reason'] = $ratingReason;
-                if($score == 'good') {
+                if ($score == 'good') {
                     $updateData['rating_type'] = 1;
-                }elseif($score == 'bad') {
+                } elseif ($score == 'bad') {
                     $updateData['rating_type'] = 2;
                 }
             }
             Zendesk::update($updateData, ['id' => $zendesk->id]);
 
             //查找comment_id是否存在，不存在则添加
-            foreach($comments as $comment) {
+            foreach ($comments as $comment) {
                 if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
                     //获取所有的附件
                     $attachments = [];
@@ -288,12 +289,13 @@ class Notice extends Controller
                         'attachments' => join(',', $attachments),
                         'is_created' => 2,
                         'due_id' => 0,
-                        'platform'=>$type,
+                        'platform' => $type,
                     ]);
                 }
             }
             Db::commit();
         } catch (Exception $e) {
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',"auto_update:" . $id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
@@ -302,6 +304,7 @@ class Notice extends Controller
         }
         return 'success';
     }
+
     /**
      * 手动创建zendesk异常信息
      */
@@ -343,7 +346,7 @@ class Notice extends Controller
         //开始插入相关数据
         //开启事务
         //Db::startTrans();
-//        try {
+        try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
             $userInfo = $user->user;
@@ -372,8 +375,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s',time()),
-                'update_time' => date('Y-m-d H:i:s',time()),
+                'create_time' => date('Y-m-d H:i:s', time()),
+                'update_time' => date('Y-m-d H:i:s', time()),
             ]);
 
             $zid = $zendesk;
@@ -401,8 +404,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s',time()),
-                        'update_time' => date('Y-m-d H:i:s',time()),
+                        'create_time' => date('Y-m-d H:i:s', time()),
+                        'update_time' => date('Y-m-d H:i:s', time()),
                     ]);
                 }
                 ZendeskComments::create([
@@ -418,17 +421,17 @@ class Notice extends Controller
                     'due_id' => $due_id ? $due_id : 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s',time()),
-                    'update_time' => date('Y-m-d H:i:s',time()),
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                    'update_time' => date('Y-m-d H:i:s', time()),
                 ]);
             }
             //Db::commit();
             //写入附表
-//        } catch (Exception $e) {
+        } catch (Exception $e) {
 //            Db::rollback();
-//            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-//            //echo $e->getMessage();
-//        }
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', $id . "\r\n", FILE_APPEND);
+            //echo $e->getMessage();
+        }
         return 'success';
     }
 
@@ -445,30 +448,30 @@ class Notice extends Controller
         } else {
             $type = 2;
         }
-        try{
+        try {
             //$channel = $postData['channel'];
             //最后一条评论
             $comments = $this->getComments($id);
             //有错误的防止执行下一步
-            if($comments == 'success'){
+            if ($comments == 'success') {
                 return 'success';
             }
             $ticket = $this->getTicket($id);
             //有错误的防止执行下一步
-            if($ticket == 'success'){
+            if ($ticket == 'success') {
                 return 'success';
             }
             //开始插入相关数据
             $tags = $ticket->tags;
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
             sort($tags);
-            $tags = join(',',$tags);
+            $tags = join(',', $tags);
 
-            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
-            if(!$zendesk){
+            $zendesk = Zendesk::where(['ticket_id' => $id, 'type' => $type])->find();
+            if (!$zendesk) {
                 return 'success';
             }
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
@@ -477,7 +480,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -497,28 +500,28 @@ class Notice extends Controller
                 $updateData['assign_id'] = '';
             }*/
             //更新rating,如果存在的话
-            if(!$zendesk->rating && $ticket->satisfaction_rating) {
+            if (!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
                 $ratingComment = $ticket->satisfaction_rating->comment;
                 $ratingReason = $ticket->satisfaction_rating->reason;
                 $updateData['rating'] = $score;
                 $updateData['comment'] = $ratingComment;
                 $updateData['reason'] = $ratingReason;
-                if($score == 'good') {
+                if ($score == 'good') {
                     $updateData['rating_type'] = 1;
-                }elseif($score == 'bad') {
+                } elseif ($score == 'bad') {
                     $updateData['rating_type'] = 2;
                 }
             }
             //如果存在抄送则更新
-            if($ticket->follower_ids) {
+            if ($ticket->follower_ids) {
                 $follweIds = $ticket->follower_ids;
                 $emailCcs = [];
-                foreach($follweIds as $follweId) {
+                foreach ($follweIds as $follweId) {
                     $userInfo = $this->client->crasp()->findUser(['id' => $follweId])->user;
                     $emailCcs[] = $userInfo->email;
                 }
-                if($emailCcs) {
+                if ($emailCcs) {
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
@@ -570,7 +573,7 @@ class Notice extends Controller
                 }
             }*/
             //查找comment_id是否存在，不存在则添加
-            foreach($comments as $comment) {
+            foreach ($comments as $comment) {
                 if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
                     //获取所有的附件
                     $attachments = [];
@@ -592,13 +595,13 @@ class Notice extends Controller
                         'attachments' => join(',', $attachments),
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
-                        'platform'=>$type,
+                        'platform' => $type,
                     ]);
                 }
             }
             Db::commit();
         } catch (Exception $e) {
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log',"update:" .$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
             //return true;
@@ -686,6 +689,7 @@ class Notice extends Controller
         $commentId = $event[0]->id;
         return $commentId;
     }
+
     public function createTicket($params)
     {
         try {
@@ -755,7 +759,7 @@ class Notice extends Controller
     public function fetchUser($params)
     {
         try {
-            return  $this->client->users()->findAll($params);
+            return $this->client->users()->findAll($params);
         } catch (\Exception $e) {
             return ['code' => 0, 'message' => $e->getMessage()];
         }
@@ -769,7 +773,7 @@ class Notice extends Controller
     public function createUser($params)
     {
         try {
-            return  $this->client->crasp()->createUser($params);
+            return $this->client->crasp()->createUser($params);
         } catch (\Exception $e) {
             return ['code' => 0, 'message' => $e->getMessage()];
         }
@@ -1062,6 +1066,7 @@ class Notice extends Controller
             //            }
         }
     }
+
     /**
      * 格式化筛选条件
      * @param array $array
@@ -1199,6 +1204,7 @@ class Notice extends Controller
             }
         }
     }
+
     /**
      * 脚本执行分配
      * @throws \think\db\exception\DataNotFoundException
@@ -1209,6 +1215,7 @@ class Notice extends Controller
     {
         Zendesk::shellAssignTicket();
     }
+
     /**
      * 脚本执行分配修改版
      * @throws \think\db\exception\DataNotFoundException
