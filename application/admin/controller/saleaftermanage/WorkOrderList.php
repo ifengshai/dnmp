@@ -3567,11 +3567,30 @@ EOF;
         if ($ids) {
             $addWhere .= " AND id IN ({$ids})";
         }
-
+        $filter = json_decode($this->request->get('filter'), true);
+        $map = [];
+        if ($filter['recept_person']) {
+            $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
+            $map['id'] = ['in', $workIds];
+            unset($filter['recept_person']);
+        }
+        //筛选措施
+        if ($filter['measure_choose_id']) {
+            $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+            if (!empty($map['id'])) {
+                $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                $map['id']  = ['in', $newWorkIds];
+            } else {
+                $map['id']  = ['in', $measuerWorkIds];
+            }
+            unset($filter['measure_choose_id']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
         list($where) = $this->buildparams();
         $list = $this->model
             ->where($where)
             ->where($addWhere)
+            ->where($map)
             ->select();
         $list = collection($list)->toArray();
         //查询用户id对应姓名
