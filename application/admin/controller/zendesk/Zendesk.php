@@ -26,7 +26,7 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight = ['edit_recipient'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -854,7 +854,6 @@ DOC;
         if($now > 0){
             $this->error("请先处理完成已分配的工单");
         }
-        $this->error("暂停使用");
         //判断今天是否完成工作量
         /* $tasks = ZendeskTasks::whereTime('create_time', 'today')
             ->where(['admin_id' => 114])
@@ -868,20 +867,73 @@ DOC;
                 ->where(['admin_id' => $admin_id])
                 ->find();
         $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
-        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->limit(10)->select();
+        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
+        $i = 0;
         foreach($tickets as $ticket){
-            //修改zendesk的assign_id,assign_time
-            $res = $this->model->where('id',$ticket->id)->update([
-                'is_hide' => 0,
-                'assign_id' => $admin_id,
-                'assignee_id' => $task->assignee_id,
-                'assign_time' => date('Y-m-d H:i:s', time()),
-            ]);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk_test.log', $this->model->getLastSql() . "\r\n", FILE_APPEND);
-            //分配数目+1
-            $task->complete_apply_count = $task->complete_apply_count + 1;
-            $task->apply_count = $task->apply_count + 1;
-            $task->save();
+            if ($i = 10) {
+                continue;
+            }
+            //open
+            if ($ticket['status'] == 2) {
+                //修改zendesk的assign_id,assign_time
+                $res = $this->model->where('id',$ticket->id)->update([
+                    'is_hide' => 0,
+                    'assign_id' => $admin_id,
+                    'assignee_id' => $task->assignee_id,
+                    'assign_time' => date('Y-m-d H:i:s', time()),
+                ]);
+
+                 //分配数目+1
+                $task->complete_apply_count = $task->complete_apply_count + 1;
+                $task->apply_count = $task->apply_count + 1;
+                $task->save();
+
+                $i++;
+                
+            } elseif($ticket['status'] == 1) {
+
+                //判断是否处理过该用户的邮件
+                $zendesk_id = $this->model->where('email',$ticket->email)->order('id','desc')->column('id');
+                //查询接触过该用户邮件的最后一条评论
+                $commentAuthorId = Db::name('zendesk_comments')
+                    ->alias('c')
+                    ->join('fa_admin a','c.due_id=a.id')
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden']])
+                    ->order('c.id','desc')
+                    ->value('due_id');
+                if($commentAuthorId){
+                    //是自己的老用户
+                    if ($admin_id == $commentAuthorId) {
+                        //修改zendesk的assign_id,assign_time
+                        $res = $this->model->where('id',$ticket->id)->update([
+                            'is_hide' => 0,
+                            'assign_id' => $admin_id,
+                            'assignee_id' => $task->assignee_id,
+                            'assign_time' => date('Y-m-d H:i:s', time()),
+                        ]);
+                        $i++;
+                        //分配数目+1
+                        $task->complete_apply_count = $task->complete_apply_count + 1;
+                        $task->apply_count = $task->apply_count + 1;
+                        $task->save();
+                    }
+                    
+                }else{
+                    $res = $this->model->where('id',$ticket->id)->update([
+                        'is_hide' => 0,
+                        'assign_id' => $admin_id,
+                        'assignee_id' => $task->assignee_id,
+                        'assign_time' => date('Y-m-d H:i:s', time()),
+                    ]);
+                    $i++;
+                    //分配数目+1
+                    $task->complete_apply_count = $task->complete_apply_count + 1;
+                    $task->apply_count = $task->apply_count + 1;
+                    $task->save();
+                }
+
+            }
+
         }
         if (false !== $res) {
             $this->success("申请成功");
@@ -1057,12 +1109,12 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
@@ -1107,38 +1159,5 @@ DOC;
         }else{
             $this->error('操作失败！！');
         }
-    }
-    /**
-     * 修改承接人
-     *
-     * @Author lsw 1461069578@qq.com
-     * @DateTime 2020-07-18 19:10:00
-     * @return void
-     */
-    public function edit_recipient($ids=null)
-    {
-        if($this->request->isAjax()){
-            $params = $this->request->post("row/a");
-            if(!$params['id']){
-                $this->error('承接人不存在，请重新尝试');
-            }
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $result = $this->model->where(['id'=>$ids])->update($data);
-            if($result){
-                $where['due_id'] = 0;
-                $where['is_admin'] = 1;
-                $where['zid'] = $ids;
-                $dataInfo['due_id'] = $params['id'];
-                $resultInfo = ZendeskComments::where($where)->update($dataInfo);
-            }
-            if($result){
-                $this->success('修改成功');
-            }
-        }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
-        $this->assign('issueList',$issueList);
-        return $this->view->fetch();
     }
 }
