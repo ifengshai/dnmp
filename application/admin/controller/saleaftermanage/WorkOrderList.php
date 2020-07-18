@@ -3740,6 +3740,7 @@ EOF;
                 case 2:
                     $value['work_level'] = '中';
                     break;
+                case 3:    
                     $value['work_level'] = '高';
                     break;
             }
