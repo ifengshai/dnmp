@@ -4079,7 +4079,18 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'OA01901-02'
+            'FP0044-06',
+            'FX0206-01',
+            'FA0457-01',
+            'FP0341-01',
+            'FA0457-02',
+            'VHP0189-01',
+            'FX0206-03',
+            'FP0886-02',
+            'FP0886-01',
+            'OA01451-03',
+            'OT652438-02',
+            'OT652438-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4139,7 +4150,18 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'OA01901-02'
+            'FP0044-06',
+            'FX0206-01',
+            'FA0457-01',
+            'FP0341-01',
+            'FA0457-02',
+            'VHP0189-01',
+            'FX0206-03',
+            'FP0886-02',
+            'FP0886-01',
+            'OA01451-03',
+            'OT652438-02',
+            'OT652438-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
