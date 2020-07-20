@@ -2283,6 +2283,8 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
+        dump($list);die;
+
         $map = [];
         $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
         $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-30 day")), date("Y-m-d 00:00:00", time())]];
