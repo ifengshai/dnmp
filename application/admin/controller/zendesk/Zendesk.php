@@ -1160,4 +1160,37 @@ DOC;
             $this->error('操作失败！！');
         }
     }
+    /**
+     * 修改承接人
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-07-18 19:10:00
+     * @return void
+     */
+    public function edit_recipient($ids=null)
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->post("row/a");
+            if(!$params['id']){
+                $this->error('承接人不存在，请重新尝试');
+            }
+            $data['assign_id']  = $params['id'];
+            $data['due_id']     = $params['id'];
+            $data['recipient']  = $params['id'];
+            $result = $this->model->where(['id'=>$ids])->update($data);
+            if($result){
+                $where['due_id'] = 0;
+                $where['is_admin'] = 1;
+                $where['zid'] = $ids;
+                $dataInfo['due_id'] = $params['id'];
+                $resultInfo = ZendeskComments::where($where)->update($dataInfo);
+            }
+            if($result){
+                $this->success('修改成功');
+            }
+        }
+        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $this->assign('issueList',$issueList);
+        return $this->view->fetch();
+    }
 }
