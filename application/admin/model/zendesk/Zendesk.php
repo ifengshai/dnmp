@@ -401,7 +401,7 @@ class Zendesk extends Model
 
             if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
                 //判断是否处理过该用户的邮件
-                $zendesk_id = Zendesk::where('email',$ticket->email)->order('id','desc')->column('id');
+                $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
                 //查询接触过该用户邮件的最后一条评论
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')

@@ -57,6 +57,50 @@ class Test4 extends Backend
 
 
 
+    /**
+     * 处理在途库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/09 10:08:03 
+     * @return void
+     */
+    public function proccess_stock()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1, 'on_way_stock' => ['<', 0]])->field('sku,id')->select();
+        $result = collection($result)->toArray();
+        $skus = array_column($result, 'sku');
+
+
+        //查询签收的采购单
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
+        //计算SKU总采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $hasWhere['sku'] = ['in', $skus];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
+        $purchase_map['is_del'] = 1;
+        $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
+        $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->group('sku')
+            ->column('sum(purchase_num) as purchase_num', 'sku');
+
+        foreach ($result as &$v) {
+            $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
+            unset($v['sku']);
+        }
+        unset($v);
+        $res = $item->saveAll($result);
+        echo  $res;
+        die;
+    }
+
+
+
 
 
 

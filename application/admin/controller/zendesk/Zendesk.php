@@ -26,6 +26,11 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['edit_recipient'];
 
     public function _initialize()
     {
@@ -1098,16 +1103,19 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",2)->column('ticket_id');
 
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
+
+        $intersects = array('80293','82512','83675');
+        $diffs = array('84301','84303');
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
