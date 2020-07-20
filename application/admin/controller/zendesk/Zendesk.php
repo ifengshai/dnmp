@@ -1115,7 +1115,7 @@ DOC;
         //更新
 
         $intersects = array();
-        $diffs = array('166574');
+        $diffs = array('166576');
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
