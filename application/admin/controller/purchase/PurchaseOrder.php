@@ -1117,7 +1117,7 @@ class PurchaseOrder extends Backend
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
-                    if (in_array($res->purchase_status, [7, 8, 9, 10])) {
+                    if (in_array($res->purchase_status, [6, 7, 8, 9, 10])) {
                         continue;
                     }
 
@@ -1186,8 +1186,6 @@ class PurchaseOrder extends Backend
                         $list['purchase_status'] = 5;
                     } elseif (in_array($v['baseInfo']['status'], ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
                         $list['purchase_status'] = 6; //待收货
-                    } else {
-                        $list['purchase_status'] = 7; //已收货
                     }
                     //收货地址
                     $list['delivery_address'] = $v['baseInfo']['receiverInfo']['toArea'];
@@ -1843,7 +1841,7 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            
+
             $whereCondition['purchase_status'] = ['egt', 2];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
@@ -1851,12 +1849,12 @@ class PurchaseOrder extends Backend
                 $whereTotalId = '1=1';
                 $filter = json_decode($rep, true);
                 //付款人
-                if($filter['pay_person']){
-                    $workIds = Purchase_order_pay::where(['create_person' =>$filter['pay_person']])->column('purchase_id');
+                if ($filter['pay_person']) {
+                    $workIds = Purchase_order_pay::where(['create_person' => $filter['pay_person']])->column('purchase_id');
                     $whereCondition['purchase_order.id'] = ['in', $workIds];
                     unset($filter['pay_person']);
                 }
-                if($filter['pay_time']){
+                if ($filter['pay_time']) {
                     $time = explode(' ', $filter['pay_time']);
                     $mapTime['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                     $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
