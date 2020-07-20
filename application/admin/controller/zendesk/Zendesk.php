@@ -1114,8 +1114,8 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        $intersects = array();
-        $diffs = array('166574');
+        $intersects = array('166574','166576','159491','166581','163062','139236','159368','160831','138994','144577','154936','162647','166164','152567','158890','164070','162372');
+        $diffs = array('166577','166578','167189','167191');
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
