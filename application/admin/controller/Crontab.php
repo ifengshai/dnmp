@@ -2141,8 +2141,7 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-        
-
+    
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
         // $where['a.label'] = 1;
@@ -2220,6 +2219,9 @@ order by sfoi.item_id asc limit 1000";
 
         $map = [];
         foreach ($list as $k => $v) {
+            $zeelool_num = 0;
+            $voogueme_num = 0;
+            $nihao_num = 0;
             if ($v['grade'] == 'A+' || $v['grade'] == 'A') {
                 if ($v['zeelool_sku']) {
                     $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
@@ -2241,18 +2243,7 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
-                if ($v['true_sku'] == 'OT02084-01') {
-                    
-                    echo $zeelool_num;
-                    echo "<br>";
-                    echo $voogueme_num;
-                    echo "<br>";
-                    echo $nihao_num;
-                    echo "<br>";
-                    echo $zeelool_model->getLastSql();
-                }
-
-
+              
                 $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2, 2);
             }
 
@@ -2294,9 +2285,6 @@ order by sfoi.item_id asc limit 1000";
                 }
             }
         }
-
-        dump($list);die;
-
         $map = [];
         $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
         $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-30 day")), date("Y-m-d 00:00:00", time())]];
