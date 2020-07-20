@@ -11,7 +11,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'warehouse/transfer_order/index' + location.search,
                     add_url: 'warehouse/transfer_order/add',
                     edit_url: 'warehouse/transfer_order/edit',
-                    del_url: 'warehouse/transfer_order/del',
+                    // del_url: 'warehouse/transfer_order/del',
                     multi_url: 'warehouse/transfer_order/multi',
                     table: 'transfer_order',
                 }
@@ -39,13 +39,73 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'create_person', title: __('Create_person') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/transfer_order/detail',
+                                    extend: 'data-area = \'["80%","80%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'warehouse/transfer_order/edit',
+                                    extend: 'data-area = \'["80%","80%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }
+                                },
+                            ]
+                        }
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/transfer_order/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/transfer_order/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
         },
         add: function () {
             Controller.api.bindevent();
@@ -90,12 +150,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
-                $(this).parent().parent().remove();
+                var _this = $(this);
+                var id = $(this).parent().parent().find('.item_id').val();
+                if (id) {
+                    Layer.confirm(__('确定删除此数据吗?'), function () {
+                        _this.parent().parent().remove();
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/warehouse/transfer_order/deleteItem',
+                            data: { id: id }
+                        }, function () {
+                            Layer.closeAll();
+                        });
+                    });
+                } else {
+                    _this.parent().parent().remove();
+                }
             })
+        },
+        detail: function () {
+            Controller.api.bindevent();
         },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+
+                $(document).on('click', '.btn-status', function () {
+                    $('.status').val(1);
+                })
 
                 //模糊匹配订单
                 $('.sku').autocomplete({

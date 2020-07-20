@@ -26,6 +26,7 @@ class TransferOrder extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\TransferOrder;
+        $this->transferOrderItem = new \app\admin\model\warehouse\TransferOrderItem;
 
         //获取所有站点
         $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
@@ -101,14 +102,16 @@ class TransferOrder extends Backend
                     if (false !== $result) {
                         $sku = $this->request->post("sku/a");
                         $num = $this->request->post("num/a");
+                        $sku_stock = $this->request->post("sku_stock/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = trim($v);
                             $data[$k]['num'] = trim($num[$k]);
+                            $data[$k]['stock'] = trim($sku_stock[$k]);
                             $data[$k]['transfer_order_id'] = $this->model->id;
                         }
                         //批量添加
-                        $this->purchase_order_item->saveAll($data);
+                        $this->transferOrderItem->saveAll($data);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -171,14 +174,21 @@ class TransferOrder extends Backend
                     if (false !== $result) {
                         $sku = $this->request->post("sku/a");
                         $num = $this->request->post("num/a");
+                        $item_id = $this->request->post("item_id/a");
+                        $sku_stock = $this->request->post("sku_stock/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = trim($v);
                             $data[$k]['num'] = trim($num[$k]);
-                            $data[$k]['transfer_order_id'] = $this->model->id;
+                            $data[$k]['stock'] = trim($sku_stock[$k]);
+                            if (@$item_id[$k]) {
+                                $data[$k]['id'] = $item_id[$k];
+                            } else {
+                                $data[$k]['transfer_order_id'] = $ids;
+                            }
                         }
                         //批量添加
-                        $this->purchase_order_item->saveAll($data);
+                        $this->transferOrderItem->allowField(true)->saveAll($data);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -200,6 +210,37 @@ class TransferOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
+
+        //查询产品信息
+        $map['transfer_order_id'] = $ids;
+        $item = $this->transferOrderItem->where($map)->select();
+        $this->assign('item', $item);
+
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $this->view->assign("row", $row);
+
+        //查询产品信息
+        $map['transfer_order_id'] = $ids;
+        $item = $this->transferOrderItem->where($map)->select();
+        $this->assign('item', $item);
+
         return $this->view->fetch();
     }
 
@@ -221,6 +262,80 @@ class TransferOrder extends Backend
             $this->success('', '', $stock);
         } else {
             $this->error(__('No rows were updated'));
+        }
+    }
+
+    /**
+     * 审核
+     */
+    public function setStatus()
+    {
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($v['status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+        $status = input('status');
+        $data['status'] = $status;
+        Db::startTrans();
+        try {
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res === false) {
+                throw new Exception('审核失败！！');
+            } 
+            //审核通过
+            if ($status == 2) {
+                $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                //审核通过冲减各站虚拟仓库存
+                $where['transfer_order_id'] = ['in', $ids];
+                $list = $this->transferOrderItem->alias('a')->field('a.*,b.call_out_site,b.call_in_site')->join(['fa_transfer_order' => 'b'], 'a.transfer_order_id=b.id')->where($where)->select();
+                foreach ($list as $v) {
+                    //查询虚拟仓库存
+                    $stock = $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_out_site']])->value('stock');
+                    //如果调出数量大于虚拟仓现有库存 则调出失败
+                    if ($v['num'] > $stock) {
+                        throw new Exception('id:' . $v['id'] . '|' . $v['sku'] . ':' . '虚拟仓库存不足');
+                    }
+                    //减少虚拟库存
+                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_out_site']])->setDec('stock', $v['num']);
+                    //增加虚拟库存
+                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_in_site']])->setInc('stock', $v['num']);
+                }
+            }
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success();
+    }
+
+
+    /**
+     * 删除合同里商品信息
+     */
+    public function deleteItem()
+    {
+        if ($this->request->isPost()) {
+            $id = input('id');
+            $res = $this->transferOrderItem->destroy($id);
+            if ($res) {
+                $this->success();
+            } else {
+                $this->error();
+            }
         }
     }
 }

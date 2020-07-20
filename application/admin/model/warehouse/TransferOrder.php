@@ -16,7 +16,7 @@ class TransferOrder extends Model
     protected $name = 'transfer_order';
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = 'int';
+    protected $autoWriteTimestamp = false;
 
     // 定义时间戳字段名
     protected $createTime = false;
@@ -28,15 +28,6 @@ class TransferOrder extends Model
 
     ];
     
-
-    
-
-
-
-
-
-
-
     public function transferorderitem()
     {
         return $this->belongsTo('app\admin\model\TransferOrderItem', 'id', 'transfer_order_id', [], 'LEFT')->setEagerlyType(0);
