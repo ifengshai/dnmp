@@ -1,0 +1,142 @@
+<style>
+    #add-form{
+        margin-top: 20px;
+    }
+    .information p{
+        margin-bottom: 4px;
+    }
+    .list-inner .text-muted{
+        margin-right: 20px;
+    }
+    .list-inner p{
+        width: 130px;
+        margin-top: 10px;
+    }
+    .list-inner{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 2px dashed #ccc;
+    }
+    .text-muted-box{
+        display: flex;
+        align-items: center;
+    }
+    .text-muted-box p {
+        display: flex;
+        flex-direction: column;
+    }
+    .text-muted-box > .text-muted{
+        width: 80px;
+    }
+    .text-muted{
+        display: inline-block;
+        width: 100px;
+    }
+    .text-muted input{
+        cursor: pointer;
+    }
+    .text-muted label{
+        cursor: pointer;
+    }
+    .btn-group{
+        width: 50%;
+    }
+</style>
+<div class="information">
+    <p style="text-align: left;margin-left: 4rem;">1、添加问题首先选择是客服工单还是仓库工单</p>
+    <p style="text-align: left;margin-left: 4rem;">2、选择此条问题所对应的大类</p>
+    <p style="text-align: left;margin-left: 4rem;">3、填写此条问题的名称</p>
+    <p style="text-align: left;margin-left: 4rem;">4、选择此问题对应的措施</p>
+    <p style="text-align: left;margin-left: 4rem;">(1)注意：勾选某个措施会生成此条问题下的此措施，勾选是否需要审核（会按照工单审核规则管理的规则进行匹配），勾选是否自动完成。</p>
+    <p style="text-align: left;margin-left: 4rem;">(2)注意：选择承接组请注意需要选择组内有承接人的组。</p>
+</div>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('部门类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select class="form-control selectpicker" id="bumen" name="row[type]">
+                <!--                <option value="0">请选择</option>-->
+                <option value="2">仓库工单</option>
+                <option value="1">客服工单</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" id="kefu" style="display: none">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题大类')}:</label>
+
+        <div class="col-xs-12 col-sm-8">
+            <select class="form-control selectpicker" name="row[problem_belong]">
+                <option value="2">物流仓库</option>
+                <option value="3">产品质量</option>
+                <option value="4">客户问题</option>
+                <option value="6">其他</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" id="cangku">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题大类')}:</label>
+
+        <div class="col-xs-12 col-sm-8">
+            <select class="form-control selectpicker" name="row[problem_belong1]">
+                <option value="5">其他</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-problem_name" data-rule="required" class="form-control" name="row[problem_name]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
+        <div class="col-xs-12 col-sm-8 nav-list">
+            {foreach name="step" item="vo" key='k'}
+            <div class="col-xs-12 col-sm-8 list-inner">
+                <div class="text-muted-box">
+                    <span class="text-muted is_on">
+                        <input type="checkbox" name="row[choose_id][{$vo.id}][is_on]" id="name{$vo.id}" />
+                        <label for="name{$vo.id}">{$vo.step_name}</label>
+                    </span>
+                    <p>
+                        <span class="text-muted is_checked">
+                            <input type="checkbox" name="row[choose_id][{$vo.id}][is_checked]" id="step{$vo.id}" />
+
+                            <label for="step{$vo.id}">是否需要审核</label>
+                        </span>
+                            <span class="text-muted is_auto_complete">
+                            <input type="checkbox" name="row[choose_id][{$vo.id}][is_auto_complete]" id="auto{$vo.id}" />
+
+                            <label for="auto{$vo.id}">是否自动完成</label>
+                        </span>
+                    </p>
+                </div>
+                <p>承接组：</p>
+                <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
+                    {foreach name="groupdata" item="vv" key='kk'}
+                    <option value="{$vv.id}">{$vv.name}</option>
+                    {/foreach}
+                </select>
+            </div>
+
+<!--                {:build_select('row[extend][]', $extend_team, $vo, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
+            {/foreach}
+        </div>
+    </div>
+<!--    <div class="form-group">-->
+<!--        <label class="control-label col-xs-12 col-sm-2">{:__('Is_del')}:</label>-->
+<!--        <div class="col-xs-12 col-sm-8">-->
+<!--            <input id="c-is_del" data-rule="required" class="form-control" name="row[is_del]" type="number" value="1">-->
+<!--        </div>-->
+<!--    </div>-->
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
