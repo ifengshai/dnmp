@@ -2056,6 +2056,7 @@ order by sfoi.item_id asc limit 1000";
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
+        echo $intelligent_purchase_query_sql;
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
@@ -2098,6 +2099,8 @@ order by sfoi.item_id asc limit 1000";
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
+
+        dump($lists);
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -2122,7 +2125,7 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-
+        dump($data);die;
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
         // $where['a.label'] = 1;
