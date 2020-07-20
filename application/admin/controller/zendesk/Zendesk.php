@@ -1103,10 +1103,10 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",2)->column('ticket_id');
 
         //求交集的更新
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
@@ -1114,15 +1114,15 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        $intersects = array('166574','166576','159491','166581','163062','139236','159368','160831','138994','144577','154936','162647','166164','152567','158890','164070','162372');
-        $diffs = array('166577','166578','167189','167191');
+        $intersects = array('80293','82512','83675');
+        $diffs = array('84301','84303');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
