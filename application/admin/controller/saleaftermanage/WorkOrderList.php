@@ -2485,11 +2485,14 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
+            $isNewVersion = input('is_new_version');
             $work_id = input('work_id');
 
             try {
                 //获取网站数据库地址,获取地址信息
                 $res = $this->model->getAddress($siteType, $incrementId);
+                //请求接口获取lens_type，coating_type，prescription_type等信息
+                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'],1,$isNewVersion);
                 //判断是否是新建状态
                 $work_status = $this->model->where('id',$work_id)->value('work_status');
                 if($work_status == 1){
@@ -2505,7 +2508,7 @@ class WorkOrderList extends Backend
             }
 
             if ($res) {
-                $this->success('操作成功！！', '', ['address' => $res]);
+                $this->success('操作成功！！', '', ['address' => $res,'lens' => $lens]);
             } else {
                 $this->error('未获取到数据！！');
             }
