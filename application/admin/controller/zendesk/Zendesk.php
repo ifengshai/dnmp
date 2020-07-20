@@ -26,6 +26,11 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['edit_recipient'];
 
     public function _initialize()
     {
