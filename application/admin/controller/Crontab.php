@@ -2056,51 +2056,68 @@ order by sfoi.item_id asc limit 1000";
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-        echo $intelligent_purchase_query_sql;
-
+       
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
 
         //查询产品库sku
+        $zeelool_sku = [];
         foreach ($zeelool_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $zeelool_sku)) {
+                unset($zeelool_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
             $zeelool_list[$k]['zeelool_sku'] = $sku;
+            $zeelool_sku[] = $sku;
         }
 
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
+        $voogueme_sku = [];
         foreach ($voogueme_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $voogueme_sku)) {
+                unset($voogueme_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
             $voogueme_list[$k]['voogueme_sku'] = $sku;
+            $voogueme_sku[] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
+        $nihao_sku = [];
         foreach ($nihao_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $nihao_sku)) {
+                unset($nihao_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
             $nihao_list[$k]['nihao_sku'] = $sku;
+            $nihao_sku[] = $sku;
         }
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
+        dump($lists);die;
 
-        dump($lists);
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -2125,7 +2142,8 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-        dump($data);die;
+        
+
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
         // $where['a.label'] = 1;
