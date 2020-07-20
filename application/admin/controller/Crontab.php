@@ -2241,6 +2241,18 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
+                if ($v['true_sku'] == 'OT02084-01') {
+                    
+                    echo $zeelool_num;
+                    echo "<br>";
+                    echo $voogueme_num;
+                    echo "<br>";
+                    echo $nihao_num;
+                    echo "<br>";
+                    echo $zeelool_model->getLastSql();
+                }
+
+
                 $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2, 2);
             }
 
