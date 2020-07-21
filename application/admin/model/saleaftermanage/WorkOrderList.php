@@ -358,8 +358,7 @@ class WorkOrderList extends Model
                     $data['userinfo_option'] = serialize($params['modify_address']);
                     WorkOrderChangeSku::where(['work_id' => $work_id])->update($data);
                 }
-                dump($params);exit;
-                if($params['work_status'] == 2){
+                if($params['work_status'] != 1){
                     $changeAddress = $params['modify_address'];
                     $postData = array(
                         'increment_id'=>$params['platform_order'],
