@@ -452,6 +452,7 @@ class Zendesk extends Model
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
                     self::where('id',$ticket->id)->setField('is_hide',0);
+                    echo $ticket->ticket_id."--".$task->admin_id." is ok"."\n";
                 }
             }
 
