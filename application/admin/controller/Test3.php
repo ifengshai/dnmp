@@ -261,8 +261,13 @@ class Test3 extends Backend
                     //查询该评论的最后一条记录
                     $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
                     if($due_id){
-                        Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
-                        echo $item['ticket_id']."\n";
+                        if($i<9){
+                            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
+                            echo $item['ticket_id']."\n";
+                            $i++;
+                        }else{
+                            break;
+                        }
                     }
                 }
             }
