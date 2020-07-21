@@ -262,6 +262,7 @@ class Test3 extends Backend
                 if($admin_type != $item['type']){
                     //查询该评论的最后一条记录
                     $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
+                    Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
                     dump($due_id);exit;
                     if(!$due_id){
 
