@@ -392,7 +392,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'ticket_id'=>'163070'])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -441,6 +441,8 @@ class Zendesk extends Model
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
+                    $str = '';
+                    $str = $ticket->ticket_id."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
@@ -451,7 +453,9 @@ class Zendesk extends Model
                     $task->complete_count = $task->complete_count + 1;
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
+                    $str .= $task->admin_id;
                     self::where('id',$ticket->id)->setField('is_hide',0);
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                     echo $ticket->ticket_id."--".$task->admin_id." is ok"."\n";
                 }
             }
