@@ -153,12 +153,154 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 );
             });
         },
+
         add: function () {
             Controller.api.bindevent();
         },
+
         edit: function () {
             Controller.api.bindevent();
         },
+
+        //补货需求单
+        replenish: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                singleSelect: true,
+                showJumpto: true,
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'purchase/new_product_replenish_order/replenish' + location.search,
+                    table: 'item',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        // {checkbox: true},
+                        {
+
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1 + index;
+                            }, operate: false, visible: false
+                        },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'id', title: __('补货需求单'), operate: false},
+                        {
+                            field: 'type',
+                            title: __('补货需求单类型'),
+                            custom: {1: 'blue', 2: 'danger'},
+                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            formatter: Table.api.formatter.status
+                        },                        {
+                        field: 'status',
+                        title: __('状态'),
+                        custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
+                        searchList: {1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理'},
+                        formatter: Table.api.formatter.status
+                    },
+                        {
+                            field: 'create_person',
+                            title: __('创建人')
+                        },
+                        {
+                            field: 'create_time',
+                            title: __('Create_time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime
+                        },
+                        {
+                            field: 'operate', title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            formatter: function (value, row, index) {
+                                var that = $.extend({}, this);
+                                $(table).data("operate-edit", null);
+                                $(table).data("operate-del", null);// 列表页面隐藏 .编辑operate-edit  - 删除按钮operate-del
+                                that.table = table;
+                                return Table.api.formatter.operate.call(that, value, row, index);
+                            },
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '查看详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/new_product_replenish_order/index',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'distribution',
+                                    text: __('分配'),
+                                    title: __('分配'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'purchase/new_product_replenish_order/distribution',
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                    callback: function (data) {
+                                    }
+                                },
+                                {
+                                    name: 'handle',
+                                    text: '处理',
+                                    title: __('处理'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'purchase/new_product_replenish_order/handle',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
+
+                            ],
+                            // formatter: Table.api.formatter.operate
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+        },
+
+        //分配
         distribution: function () {
             // 初始化表格参数配置
             Table.api.init({
@@ -243,13 +385,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'purchase/new_product_replenish_order/distribute_detail',
                                     visible: function (row) {
-                                            //返回true时按钮显示,返回false隐藏
-                                            if (row.status == 1) {
-                                                return true;
-                                            } else {
-                                                return false;
-                                            }
-                                        },
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
                                     callback: function (data) {
                                     }
                                 },
@@ -281,6 +423,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //     );
             // });
         },
+
+        //处理
         handle: function () {
             // 初始化表格参数配置
             Table.api.init({
@@ -396,6 +540,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(this).parent().parent().remove();
             })
         },
+
         purchase_order: function () {
             Controller.api.bindevent();
             var z = 0;

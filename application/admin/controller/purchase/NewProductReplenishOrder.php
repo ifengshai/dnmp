@@ -26,8 +26,10 @@ class NewProductReplenishOrder extends Backend
         $this->model = new \app\admin\model\purchase\NewProductReplenishOrder;
         $this->list = new \app\admin\model\purchase\NewProductReplenishList;
         $this->supplier = new \app\admin\model\purchase\Supplier;
+        $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
 
     }
+
 
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
@@ -35,6 +37,81 @@ class NewProductReplenishOrder extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
+    /**
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/21
+     * Time: 13:46
+     */
+    public function replenish()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->replenish
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->replenish
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/21
+     * Time: 14:35
+     */
+    public function index($ids = null)
+    {
+
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where('replenish_id',$ids)
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where('replenish_id',$ids)
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
 
     /**
      * 审核通过补货需求单
@@ -116,8 +193,9 @@ class NewProductReplenishOrder extends Backend
      * Date: 2020/7/13
      * Time: 11:22
      */
-    public function distribution()
+    public function distribution($ids = null)
     {
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
