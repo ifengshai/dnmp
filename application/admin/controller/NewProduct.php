@@ -1207,12 +1207,14 @@ class NewProduct extends Backend
     {
         $this->model = new \app\admin\model\NewProductMapping();
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+
         //统计计划补货数据
         $list = $this->model
             ->where(['is_show' => 1, 'type' => 1])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
+        //统计各个站计划某个sku计划补货的总数
         $result = false;
         Db::startTrans();
         try {
