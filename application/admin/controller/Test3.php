@@ -252,6 +252,7 @@ class Test3 extends Backend
     //排查邮件中所有不匹配站点的邮件
     public function zendesk_plat_modify(){
         $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['neq',0],'status'=>['neq'=>5],'id'=>'2838'])->select();
+        dump($zendesk);exit;
         $i = 0;
         foreach ($zendesk as $item){
             //查询该邮件的负责人的站点
