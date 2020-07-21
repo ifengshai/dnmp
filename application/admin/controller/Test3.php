@@ -258,10 +258,13 @@ class Test3 extends Backend
             //查询该邮件的负责人的站点
             $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
             if($admin_type != $item['type']){
-                echo $item['ticket_id']."\n";
-                $i++;
+
                 //查询该评论的最后一条记录
                 $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
+                if(!$due_id){
+                    $i++;
+                    echo $item['ticket_id']."\n";
+                }
 
             }
         }
