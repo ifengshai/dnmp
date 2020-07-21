@@ -263,7 +263,7 @@ class Test3 extends Backend
                 $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
                 if(!$due_id){
                     $i++;
-                    echo $item['ticket_id']."\n";
+                    echo $item['id']."\n";
                 }
 
             }
