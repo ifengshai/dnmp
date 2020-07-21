@@ -54,7 +54,7 @@ return [
         14 => '其他'
     ],
     'platform_url'=>[
-        1   => 'https://www.zeelool.com/index.php/GBExholSDIhOVRMimieBn0LQ/sales_order/view/order_id/',
+        1   => 'https://www.zeelool.com/index.php/GW05pqxvzpEVjIYTALLNumrCf/sales_order/view/order_id/',
         2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/'
     ],
     'check_order_info_url'=>
