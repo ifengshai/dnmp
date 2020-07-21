@@ -1088,7 +1088,17 @@ class Item extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            
+            $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //查询各站SKU虚拟库存
+            foreach ($list as &$v) {
+                $v['zeelool_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
+                $v['voogueme_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
+                $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
+                $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
+            }
             unset($v);
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -2528,5 +2538,4 @@ class Item extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
-
 }

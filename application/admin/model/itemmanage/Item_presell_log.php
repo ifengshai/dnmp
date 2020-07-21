@@ -41,8 +41,23 @@ class Item_presell_log extends Model
 
     }
 
-
-
-
+    /**
+     * 添加预售日志
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/21 15:39:40 
+     * @param array $params
+     * @return void
+     */
+    public function setData($params = [])
+    {
+        if ($params) {
+            $params['create_time'] = date('Y-m-d H:i:s');
+            $params['create_person'] = session('admin.nickname');
+            return $this->allowField(true)->save($params);
+        }
+        return false;
+    }
 
 }

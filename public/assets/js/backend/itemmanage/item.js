@@ -863,15 +863,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'name', title: __('Name') },
+                        // { field: 'name', title: __('Name') },
+
                         { field: 'stock', title: __('总库存'), operate: false },
+                        
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'zeelool_stock', title: __('虚拟仓库存Zeelool'), operate: false },
+                        { field: 'voogueme_stock', title: __('虚拟仓库存Voogueme'), operate: false },
+                        { field: 'nihao_stock', title: __('虚拟仓库存Nihao'), operate: false },
+                        { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
                                 return row.stock - row.distribution_occupy_stock;
                             }
                         },
-                        { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
                         { field: 'sample_num', title: __('留样库存'), operate: false },
 
