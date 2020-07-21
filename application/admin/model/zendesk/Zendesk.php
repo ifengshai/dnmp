@@ -392,7 +392,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'ticket_id'=>'152974'])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -402,6 +402,7 @@ class Zendesk extends Model
             if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
                 //判断是否处理过该用户的邮件
                 $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
+                dump($zendesk_id);
                 //查询接触过该用户邮件的最后一条评论
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
@@ -409,6 +410,7 @@ class Zendesk extends Model
                     ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden']])
                     ->order('c.id','desc')
                     ->value('due_id');
+                dump($commentAuthorId);
                 if($commentAuthorId){
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
@@ -417,6 +419,7 @@ class Zendesk extends Model
                             'target_count' => ['>',0]
                         ])
                         ->find();
+                    dump($task);
                 }else{
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -437,7 +440,7 @@ class Zendesk extends Model
                         ->find();
                 }
             }
-
+exit;
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
