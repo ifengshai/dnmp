@@ -251,7 +251,8 @@ class Test3 extends Backend
     }
     //排查邮件中所有不匹配站点的邮件
     public function zendesk_plat_modify(){
-        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->select();
+        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->find();
+        dump($zendesk);exit;
         $arr = array();
         $i = 0;
         foreach ($zendesk as $item){
