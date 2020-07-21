@@ -256,19 +256,19 @@ class Test3 extends Backend
         $i = 0;
         foreach ($zendesk as $item){
             //查询该邮件的负责人的站点
-            //$admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
-            $admin_type = Db::name('zendesk_agents')->where('admin_id',50)->value('type');
-            dump($admin_type);exit;
-            if($admin_type != $item['type']){
+            $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
+            if($admin_type){
+                if($admin_type != $item['type']){
+                    //查询该评论的最后一条记录
+                    $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
+                    if(!$due_id){
+                        $i++;
+                        echo $item['id']."\n";
+                    }
 
-                //查询该评论的最后一条记录
-                $due_id = Db::name('zendesk_comments')->where(['zid'=>$item['id'],'is_admin'=>1,'due_id'=>['neq',0]])->order('id','desc')->value('due_id');
-                if(!$due_id){
-                    $i++;
-                    echo $item['id']."\n";
                 }
-
             }
+
         }
         dump($i);exit;
     }
