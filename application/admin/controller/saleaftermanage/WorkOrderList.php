@@ -1221,6 +1221,8 @@ class WorkOrderList extends Backend
                                 $integral_auto_complete = $auto_complete; 
                             }elseif( 9 == $v){
                                 $coupon_auto_complete   = $auto_complete;
+                            }elseif(13 == $v){
+                                $changeArr_auto_complete = $auto_complete; 
                             }
                             //循环插入承接人
                             $appointList = [];
@@ -1267,7 +1269,7 @@ class WorkOrderList extends Backend
                             $this->model->changeLens($params, $work_id, $v, $res);
                             $this->model->changeFrame($params, $work_id, $v, $res);
                             $this->model->cancelOrder($params, $work_id, $v, $res);
-                            $this->model->changeAddress($params, $work_id, $v, $res);
+                            
                         }
                     }
                     
@@ -1282,6 +1284,11 @@ class WorkOrderList extends Backend
                         if (in_array(9, array_filter($params['measure_choose_id'])) && (1 == $coupon_auto_complete)) {
                             $this->model->presentCoupon($work_id);
                         }
+                        //修改地址
+                        if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
+                            $this->model->changeAddress($params, $work_id, $v, $res);
+                        }
+
                     }
                     //非草稿状态进入审核阶段
                     if ($this->model->work_status != 1) {
@@ -2298,6 +2305,13 @@ class WorkOrderList extends Backend
                             $appoint_users = $params['order_recept']['appoint_users'][$v];
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
                             $auto_complete = $params['order_recept']['auto_complete'][$v];
+                            if(10 == $v){
+                                $integral_auto_complete = $auto_complete; 
+                            }elseif( 9 == $v){
+                                $coupon_auto_complete   = $auto_complete;
+                            }elseif(13 == $v){
+                                $changeArr_auto_complete = $auto_complete; 
+                            }
                             //循环插入承接人
                             $appointList = [];
                             if(is_array($appoint_ids) && count($appoint_ids)>0){
@@ -2348,13 +2362,25 @@ class WorkOrderList extends Backend
 
                     //不需要审核时直接发送积分，赠送优惠券
                     if (!$params['is_check']  && $params['work_status'] != 1) {
+                        // //赠送积分
+                        // if (in_array(10, array_filter($params['measure_choose_id']))) {
+                        //     $this->model->presentIntegral($row->id);
+                        // }
+                        // //直接发送优惠券
+                        // if (in_array(9, array_filter($params['measure_choose_id']))) {
+                        //     $this->model->presentCoupon($row->id);
+                        // }
                         //赠送积分
-                        if (in_array(10, array_filter($params['measure_choose_id']))) {
+                        if (in_array(10, array_filter($params['measure_choose_id'])) && (1 == $integral_auto_complete)) {
                             $this->model->presentIntegral($row->id);
                         }
                         //直接发送优惠券
-                        if (in_array(9, array_filter($params['measure_choose_id']))) {
+                        if (in_array(9, array_filter($params['measure_choose_id'])) && (1 == $coupon_auto_complete)) {
                             $this->model->presentCoupon($row->id);
+                        }
+                        //修改地址
+                        if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
+                            $this->model->changeAddress($params, $row->id, $v, $res);
                         }
                     }
                     //非草稿状态进入审核阶段
