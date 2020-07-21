@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 searchFormVisible: true,
 
                 extend: {
-                    index_url: 'purchase/new_product_replenish_order/index' + location.search,
+                    index_url: 'purchase/new_product_replenish_order/index' + location.search + '&replenish_id=' + Config.id,
                     add_url: 'purchase/new_product_replenish_order/add',
                     edit_url: 'purchase/new_product_replenish_order/edit',
                     del_url: 'purchase/new_product_replenish_order/del',
@@ -27,8 +27,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
+                        {field: 'replenish_id', title: __('需求单ID')},
+
                         {field: 'sku', title: __(' sku')},
                         {field: 'replenishment_num', title: __('Replenishment_num'), operate: false},
+                        {
+                            field: 'supplier',
+                            title: __('分配数量'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if (value.length > 0) {
+                                    for (i = 0, len = value.length; i < len; i++) {
+                                        // all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><input id="'+ rows +'" type="text" class="form-control" style="display: inline-block;width: 180px;text-align: center;" value="'+ value[i].num +'"></div>';
+                                        all_user_name += '<div class="step_recept"><b class="step">' + value[i].supplier_name + '：</b><b class="recept text-red">' + value[i].distribute_num + '</b></div>';
+                                    }
+                                }
+                                return all_user_name;
+                            },
+                        },
                         {
                             field: 'status',
                             title: __('状态'),
@@ -74,22 +91,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return Table.api.formatter.operate.call(that, value, row, index);
                             },
                             buttons: [
-                                {
-                                    name: 'detail',
-                                    text: '查看详情',
-                                    title: __('查看详情'),
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'purchase/new_product_replenish_order/distribute_detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                },
+
                                 {
                                     name: 'distribution_detail',
                                     text: __('分配'),
@@ -308,7 +310,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showJumpto: true,
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'purchase/new_product_replenish_order/distribution' + location.search,
+                    index_url: 'purchase/new_product_replenish_order/distribution' + location.search + '&replenish_id=' + Config.id,
                     table: 'item',
                 }
             });
@@ -431,7 +433,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showJumpto: true,
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'purchase/new_product_replenish_order/handle' + location.search,
+                    index_url: 'purchase/new_product_replenish_order/handle' + location.search + '&replenish_id=' + Config.id,
                     table: 'item',
                 }
             });

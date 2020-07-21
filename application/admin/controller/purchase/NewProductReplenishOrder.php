@@ -30,7 +30,6 @@ class NewProductReplenishOrder extends Backend
 
     }
 
-
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -82,7 +81,8 @@ class NewProductReplenishOrder extends Backend
      */
     public function index($ids = null)
     {
-
+        $replenish_id = input('replenish_id');
+        $this->assignConfig('id',$ids);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -92,19 +92,23 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where('replenish_id',$ids)
+                ->where('replenish_id',$replenish_id)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where('replenish_id',$ids)
+                ->where('replenish_id',$replenish_id)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
+            foreach ($list as $k => $v) {
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $list[$k]['supplier'] = $new_product_replenish_list;
+            }
 
             $result = array("total" => $total, "rows" => $list);
 
@@ -112,78 +116,6 @@ class NewProductReplenishOrder extends Backend
         }
         return $this->view->fetch();
     }
-
-    /**
-     * 审核通过补货需求单
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/7/15
-     * Time: 9:14
-     */
-    public function morePassAudit($ids = null)
-    {
-        if ($this->request->isAjax()) {
-            $map['id'] = ['in', $ids];
-            $row = $this->model->where($map)->field('id,status,is_verify')->select();
-            foreach ($row as $v) {
-                if ($v['status'] != 1) {
-                    $this->error('只有待分配状态才能操作！！');
-                }
-                if ($v['is_verify'] != 0) {
-                    $this->error('只有待审核状态才能操作！！');
-                }
-            }
-            $data['is_verify'] = 1;
-            $data['check_time'] = date("Y-m-d H:i:s", time());
-
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-
-            if ($res !== false) {
-                $this->success('审核成功');
-            } else {
-                $this->error('审核失败');
-            }
-        } else {
-            $this->error('404 Not found');
-        }
-    }
-
-    /**
-     * 审核拒绝补货需求单
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/7/15
-     * Time: 11:15
-     */
-    public function moreAuditRefused($ids = null)
-    {
-        if ($this->request->isAjax()) {
-            $map['id'] = ['in', $ids];
-            $row = $this->model->where($map)->field('id,status,is_verify')->select();
-            foreach ($row as $v) {
-                if ($v['status'] != 1) {
-                    $this->error('只有待分配状态才能操作！！');
-                }
-                if ($v['is_verify'] != 0) {
-                    $this->error('只有待审核状态才能操作！！');
-                }
-            }
-            $data['is_verify'] = 2;
-            $data['check_time'] = date("Y-m-d H:i:s", time());
-
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res !== false) {
-                $this->success('审核拒绝成功');
-            } else {
-                $this->error('审核拒绝失败');
-            }
-        } else {
-            $this->error('404 Not found');
-        }
-    }
-
 
     /**
      * 补货需求单分配
@@ -195,7 +127,8 @@ class NewProductReplenishOrder extends Backend
      */
     public function distribution($ids = null)
     {
-
+        $replenish_id = input('replenish_id');
+        $this->assignConfig('id',$ids);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -204,12 +137,14 @@ class NewProductReplenishOrder extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where(['is_del' => 1, 'is_verify' => 1])
+            $total = $this->model
+                ->where(['is_del' => 1, 'is_verify' => 1,'replenish_id'=>$replenish_id])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where(['is_del' => 1, 'is_verify' => 1])
+            $list = $this->model
+                ->where(['is_del' => 1, 'is_verify' => 1,'replenish_id'=>$replenish_id])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -226,25 +161,6 @@ class NewProductReplenishOrder extends Backend
             return json($result);
         }
         return $this->view->fetch('distribution');
-    }
-
-    /**
-     * 确认分配
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/7/13
-     * Time: 15:23
-     */
-    public function distribution_confirm()
-    {
-        $ids = $this->request->post("ids/a");
-        dump($ids);
-        die;
-        if (!$ids) {
-            $this->error('缺少参数！！');
-        }
-
     }
 
     /**
@@ -327,8 +243,17 @@ class NewProductReplenishOrder extends Backend
      * Date: 2020/7/14
      * Time: 15:38
      */
-    public function handle()
+    public function handle($ids = null)
     {
+
+        $this->assignConfig('id',$ids);
+        $replenish_id = input('replenish_id');
+        if (!$replenish_id){
+            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+        }else{
+            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+        }
+        $map['replenish_id'] = ['in', $order_ids];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -338,11 +263,13 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->list
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->list
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -567,8 +494,95 @@ class NewProductReplenishOrder extends Backend
         return $this->view->fetch();
     }
 
-    public function exists_params()
+    /**
+     * 审核通过补货需求单
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/15
+     * Time: 9:14
+     */
+    public function morePassAudit($ids = null)
     {
-        dump(111);die;
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,status,is_verify')->select();
+            foreach ($row as $v) {
+                if ($v['status'] != 1) {
+                    $this->error('只有待分配状态才能操作！！');
+                }
+                if ($v['is_verify'] != 0) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
+            $data['is_verify'] = 1;
+            $data['check_time'] = date("Y-m-d H:i:s", time());
+
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+
+            if ($res !== false) {
+                $this->success('审核成功');
+            } else {
+                $this->error('审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
     }
+
+    /**
+     * 审核拒绝补货需求单
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/15
+     * Time: 11:15
+     */
+    public function moreAuditRefused($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,status,is_verify')->select();
+            foreach ($row as $v) {
+                if ($v['status'] != 1) {
+                    $this->error('只有待分配状态才能操作！！');
+                }
+                if ($v['is_verify'] != 0) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
+            $data['is_verify'] = 2;
+            $data['check_time'] = date("Y-m-d H:i:s", time());
+
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('审核拒绝成功');
+            } else {
+                $this->error('审核拒绝失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+
+    /**
+     * 确认分配
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/13
+     * Time: 15:23
+     */
+    public function distribution_confirm()
+    {
+        $ids = $this->request->post("ids/a");
+        dump($ids);
+        die;
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+
+    }
+
+
 }

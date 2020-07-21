@@ -1207,7 +1207,7 @@ class NewProduct extends Backend
     {
         $this->model = new \app\admin\model\NewProductMapping();
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
-
+        $this->replenish = new \app\admin\model\purchase\NewProductReplenish();
         //统计计划补货数据
         $list = $this->model
             ->where(['is_show' => 1, 'type' => 1])
@@ -1218,15 +1218,20 @@ class NewProduct extends Backend
         $result = false;
         Db::startTrans();
         try {
+            //首先插入主表 获取主表id new_product_replenish
+            $data['type'] = 1;
+            $data['create_person'] = 'Admin';
+            $res = $this->replenish->insertGetId($data);
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
                 $arr[$number]['type'] = 1;
+                $arr[$number]['replenish_id'] = $res;
                 $number += 1;
             }
-            //插入补货需求单表
+            //插入补货需求单表 关联主表 new_product_replenish_order
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
@@ -1276,6 +1281,10 @@ class NewProduct extends Backend
         $result = false;
         Db::startTrans();
         try {
+            //首先插入主表 获取主表id new_product_replenish
+            $data['type'] = 2;
+            $data['create_person'] = session('admin.nickname');
+            $res = $this->replenish->insertGetId($data);
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
