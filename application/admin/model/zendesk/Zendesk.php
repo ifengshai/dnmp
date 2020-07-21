@@ -392,7 +392,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'ticket_id'=>'163070'])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -452,9 +452,9 @@ class Zendesk extends Model
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
                     self::where('id',$ticket->id)->setField('is_hide',0);
+                    echo $ticket->ticket_id."--".$task->admin_id." is ok"."\n";
                 }
             }
-
             usleep(1000);
         }
     }
