@@ -412,7 +412,7 @@ class Zendesk extends Model
                 if($commentAuthorId){
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
-                            'assignee_id' => $commentAuthorId,
+                            'admin_id' => $commentAuthorId,
                             'type' => $ticket->getType(),
                             'target_count' => ['>',0]
                         ])
