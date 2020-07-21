@@ -235,11 +235,11 @@ class Zendesk extends Backend
                     }             
                     $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
-                    if(strpos($params['content'],'<p>')!==false){
-                        $params['content'] = str_replace('<p>','<span style="display:block">',$params['content']);
+                    if(strpos($sign,'<p>')!==false){
+                        $sign = str_replace('<p>','<span style="display:block">',$sign);
                     } 
-                    if(strpos($params['content'],'</p>')!==false){
-                        $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    if(strpos($sign,'</p>')!==false){
+                        $sign = str_replace('</p>','</span>',$sign);
                     } 
                     
                     $priority = config('zendesk.priority')[$params['priority']];
