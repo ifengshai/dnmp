@@ -400,14 +400,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     return false;
                 }
                 var status = 0;
+                var i = 0;
                 $("#ticket_id_list .ticket_id_list input").each(function(){
                     var sel_ticket_id=$(this).val();
                     if(add_ticket_id == sel_ticket_id){
                         status = 1;
                     }
+                    i++;
                 });
+                
                 if(status == 1){
                     layer.msg('重复的Ticket Id');
+                    return false;
+                }
+                if(i > 9){
+                    layer.msg('一次同步最多不超过10个');
                     return false;
                 }
                 $('.input_ticket_id').val('');
