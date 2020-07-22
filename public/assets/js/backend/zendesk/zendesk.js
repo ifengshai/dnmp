@@ -157,8 +157,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            $(document).on("click", ".btn-selected", function () {
-                Backend.api.open('zendesk/zendesk/artificial_synchronous' , { area: ['100%', '100%'] });
+            $(document).on("click", ".btn-synchronous", function () {
+                Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
             });
         },
         add: function () {
