@@ -264,7 +264,18 @@ class PurchaseOrder extends Backend
             $ids = $ids ? $ids : input('ids');
             $this->list = new \app\admin\model\purchase\NewProductReplenishList;
             $list = $this->list->where('id', 'in', $ids)->select();
-            if (count(array_unique(array_column($list,'supplier_id'))) > 1)  $this->error(__('必须选择相同的供应商！！'),url('purchase/new_product_replenish_order/handle'));
+            
+            $item = new \app\admin\model\itemmanage\Item;
+            $supplier = new \app\admin\model\purchase\SupplierSku;
+            foreach($list as &$v) {
+                //查询sku 商品名称
+                $data = $item->getGoodsInfo($v['sku']);
+                $v['product_name'] = $data->name;
+                //查询供应商SKU
+                $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
+            }
+            unset($v);
+            if (count(array_unique(array_column($list, 'supplier_id'))) > 1)  $this->error(__('必须选择相同的供应商！！'), url('purchase/new_product_replenish_order/handle'));
             $this->assign('list', $list);
         }
 

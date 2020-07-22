@@ -208,6 +208,7 @@
                 </tr>
                 {if $list}
                 {foreach $list as $v}
+                <input  class="form-control"  name="row[replenish_id]" type="hidden">
                 <tr>
                     <input  class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden" value="{$v.id}">
                     <td>
@@ -215,9 +216,9 @@
                             value="{$v.sku}">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                            type="text" value=""></td>
+                            type="text" value="{$v.product_name}"></td>
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
-                            type="text" value=""></td>
+                            type="text" value="{$v.supplier_sku}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
                             type="text" value="{$v.distribute_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
