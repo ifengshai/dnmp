@@ -382,10 +382,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         artificial_synchronous:function(){
             Controller.api.bindevent();
 
+
+            $('.input_ticket_id').keydown(function(e){
+                if (107 == (e.keyCode || e.which)) {
+                    $('.a_ticket_id').click();
+                }
+                if (13 == (e.keyCode || e.which)) {
+                    e.preventDefault();
+                    $('.a_ticket_id').click();
+                }
+            });
+
             $(document).on('click', '.a_ticket_id', function () {
                 var add_ticket_id = $('.input_ticket_id').val();
                 if(!add_ticket_id){
-                    layer.alert('不能为空');
+                    layer.msg('不能为空');
                     return false;
                 }
                 var status = 0;
@@ -396,7 +407,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     }
                 });
                 if(status == 1){
-                    layer.alert('重复的Ticket Id');
+                    layer.msg('重复的Ticket Id');
                     return false;
                 }
                 $('.input_ticket_id').val('');
