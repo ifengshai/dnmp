@@ -258,12 +258,18 @@ class NewProductReplenishOrder extends Backend
 
         $this->assignConfig('id',$ids);
         $replenish_id = input('replenish_id');
-        if (!$replenish_id){
-            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+        if (!$ids){
+            $id = $replenish_id;
         }else{
-            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+            $id = $ids;
         }
-        $map['replenish_order_id'] = ['in', $order_ids];
+//        if (!$replenish_id){
+//            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+//        }else{
+//            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+//        }
+//        $map['replenish_id'] = ['in', $order_ids];
+        $map['replenish_id'] = ['=',$id];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
