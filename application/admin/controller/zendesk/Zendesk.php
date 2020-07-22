@@ -873,7 +873,6 @@ DOC;
                 ->find();
         $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
-dump($tickets);exit;
         $i = 0;
         foreach($tickets as $ticket){
             $task = array();
@@ -881,7 +880,7 @@ dump($tickets);exit;
                 continue;
             }
             //open
-            if ($ticket['status'] == 2) {
+            if ($ticket->status == 2) {
                 //修改zendesk的assign_id,assign_time
                 $res = $this->model->where('id',$ticket->id)->update([
                     'is_hide' => 0,
@@ -897,7 +896,7 @@ dump($tickets);exit;
 
                 $i++;
                 
-            } elseif($ticket['status'] == 1) {
+            } elseif($ticket->status == 1) {
 
                 //判断是否处理过该用户的邮件
                 $zendesk_id = $this->model->where('email',$ticket->email)->order('id','desc')->column('id');
