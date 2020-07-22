@@ -875,7 +875,7 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
-            if ($i = 10) {
+            if ($i == 10) {
                 continue;
             }
             //open
@@ -914,11 +914,11 @@ DOC;
                             'assignee_id' => $task->assignee_id,
                             'assign_time' => date('Y-m-d H:i:s', time()),
                         ]);
-                        $i++;
                         //分配数目+1
                         $task->complete_apply_count = $task->complete_apply_count + 1;
                         $task->apply_count = $task->apply_count + 1;
                         $task->save();
+                        $i++;
                     }
                     
                 }else{
@@ -928,11 +928,11 @@ DOC;
                         'assignee_id' => $task->assignee_id,
                         'assign_time' => date('Y-m-d H:i:s', time()),
                     ]);
-                    $i++;
                     //分配数目+1
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->apply_count = $task->apply_count + 1;
                     $task->save();
+                    $i++;
                 }
 
             }
