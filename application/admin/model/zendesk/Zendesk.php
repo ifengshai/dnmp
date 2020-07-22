@@ -391,8 +391,12 @@ class Zendesk extends Model
                 ]);
             }
         }
+
+
+
+
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'ticket_id'=>59587])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'id'=>['in','97511,98118,98640,98645,99203,99724,99744,100336,101026,101038,101225,101632,101930,102014,102387,102421,102443,102970,103543,103782,104112']])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -438,7 +442,6 @@ class Zendesk extends Model
                 }
             }
             if ($task) {
-                echo 555;
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
                     $str = '';
@@ -459,7 +462,6 @@ class Zendesk extends Model
                     echo $str." is ok"."\n";
                 }
             }
-            exit;
             usleep(1000);
         }
     }
