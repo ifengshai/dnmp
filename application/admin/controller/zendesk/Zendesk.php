@@ -875,11 +875,11 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
-            if ($i = 10) {
+            if ($i == 10) {
                 continue;
             }
             //open
-            if ($ticket['status'] == 2) {
+            if ($ticket->status == 2) {
                 //修改zendesk的assign_id,assign_time
                 $res = $this->model->where('id',$ticket->id)->update([
                     'is_hide' => 0,
@@ -892,13 +892,11 @@ DOC;
                 $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->apply_count = $task->apply_count + 1;
                 $task->save();
-
                 $i++;
                 
-            } elseif($ticket['status'] == 1) {
-
+            } elseif($ticket->status == 1) {
                 //判断是否处理过该用户的邮件
-                $zendesk_id = $this->model->where('email',$ticket->email)->order('id','desc')->column('id');
+                $zendesk_id = $this->model->where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
                 //查询接触过该用户邮件的最后一条评论
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
@@ -916,11 +914,11 @@ DOC;
                             'assignee_id' => $task->assignee_id,
                             'assign_time' => date('Y-m-d H:i:s', time()),
                         ]);
-                        $i++;
                         //分配数目+1
                         $task->complete_apply_count = $task->complete_apply_count + 1;
                         $task->apply_count = $task->apply_count + 1;
                         $task->save();
+                        $i++;
                     }
                     
                 }else{
@@ -930,11 +928,11 @@ DOC;
                         'assignee_id' => $task->assignee_id,
                         'assign_time' => date('Y-m-d H:i:s', time()),
                     ]);
-                    $i++;
                     //分配数目+1
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->apply_count = $task->apply_count + 1;
                     $task->save();
+                    $i++;
                 }
 
             }
@@ -1097,32 +1095,46 @@ DOC;
         }
     }
 
+    /*
+     * 手动同步数据方法
+     * 主管，经理有权限
+     * */
+    public function artificial_synchronous()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            dump($params);exit;
+
+        }
+        return $this->view->fetch();
+    }
     /**
      * https断掉的数据更新
      * @return [type] [description]
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",2)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
         //求交集的更新
+
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        $intersects = array('80293','82512','83675');
-        $diffs = array('84301','84303');
+        //$intersects = array('80293','82512','83675');
+        //$diffs = array('84301','84303');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
