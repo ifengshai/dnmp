@@ -258,6 +258,7 @@ class Test3 extends Backend
             $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
             if($admin_type){
                 if($admin_type != $item['type']){
+                    echo $item['id']."\n";
                     $i++;
                     /*//查询该评论的最后一条记录
                     $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
