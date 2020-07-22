@@ -873,9 +873,9 @@ DOC;
                 ->find();
         $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select(false);
-        echo $tickets;exit;
         $i = 0;
         foreach($tickets as $ticket){
+            dump($ticket);
             dump($ticket->status);exit;
             if ($i = 10) {
                 continue;
