@@ -872,7 +872,7 @@ DOC;
                 ->where(['admin_id' => $admin_id])
                 ->find();
         $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=0 or assign_id is null")];
-        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select(false);
+        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
             dump($ticket);
