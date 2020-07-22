@@ -445,7 +445,7 @@ class Zendesk extends Model
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
                     $str = '';
-                    $str = $ticket->ticket_id."--".$ticket->assign_id.'--';
+                    $str = $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
