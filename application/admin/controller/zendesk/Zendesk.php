@@ -1097,6 +1097,19 @@ DOC;
         }
     }
 
+    /*
+     * 手动同步数据方法
+     * 主管，经理有权限
+     * */
+    public function artificial_synchronous()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            dump($params);exit;
+
+        }
+        return $this->view->fetch();
+    }
     /**
      * https断掉的数据更新
      * @return [type] [description]
@@ -1109,13 +1122,14 @@ DOC;
         $nowTicketsIds = $this->model->where("type",2)->column('ticket_id');
 
         //求交集的更新
+
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        $intersects = array('80293','82512','83675');
-        $diffs = array('84301','84303');
+        //$intersects = array('80293','82512','83675');
+        //$diffs = array('84301','84303');
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
