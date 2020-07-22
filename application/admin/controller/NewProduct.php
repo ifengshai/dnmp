@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\admin\model\purchase\NewProductReplenishOrder;
 use app\common\controller\Backend;
+use function fast\array_except;
 use think\Request;
 use think\Db;
 use think\Exception;
@@ -1214,19 +1215,22 @@ class NewProduct extends Backend
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
-        //统计各个站计划某个sku计划补货的总数
+        //统计各个站计划某个sku计划补货的总数 以及比例 回写平台sku映射表中
+        
         $result = false;
         Db::startTrans();
         try {
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 1;
             $data['create_person'] = 'Admin';
+            $data['create_time'] = date('Y-m-d h:i:s');
             $res = $this->replenish->insertGetId($data);
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
+                $arr[$number]['create_time'] = date('Y-m-d h:i:s');
                 $arr[$number]['type'] = 1;
                 $arr[$number]['replenish_id'] = $res;
                 $number += 1;
@@ -1284,7 +1288,8 @@ class NewProduct extends Backend
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 2;
             $data['create_person'] = session('admin.nickname');
-            $res = $this->replenish->insertGetId($data);
+            $data['create_time'] = date('Y-m-d h:i:s');
+            $res = Db::name('new_product_replenish')->insertGetId($data);
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
@@ -1292,6 +1297,7 @@ class NewProduct extends Backend
                 $arr[$number]['create_person'] = session('admin.nickname');
                 $arr[$number]['create_time'] = date('Y-m-d h:i:s');
                 $arr[$number]['type'] = 2;
+                $arr[$number]['replenish_id'] = $res;
                 $number += 1;
             }
             //插入补货需求单表

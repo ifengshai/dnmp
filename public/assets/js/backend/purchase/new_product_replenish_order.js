@@ -290,7 +290,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
 
                             ],
-                            // formatter: Table.api.formatter.operate
+                            formatter: Table.api.formatter.operate
                         }
 
                     ]
@@ -299,7 +299,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-
+            $(".btn-dialog").data("end", function(){
+                //关闭后的事件
+                $(".btn-refresh").trigger("click");//刷新当前页面的数据
+            });
         },
 
         //分配

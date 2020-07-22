@@ -37,6 +37,8 @@ class NewProductReplenishOrder extends Backend
      */
 
     /**
+     * 补货需求单
+     *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/21
@@ -106,7 +108,7 @@ class NewProductReplenishOrder extends Backend
 
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
-                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id',$v['id'])->field('supplier_name,distribute_num')->select();
                 $list[$k]['supplier'] = $new_product_replenish_list;
             }
 
@@ -153,7 +155,7 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
-                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id',$v['id'])->field('supplier_name,distribute_num')->select();
                 $list[$k]['supplier'] = $new_product_replenish_list;
             }
             $result = array("total" => $total, "rows" => $list);
@@ -175,7 +177,7 @@ class NewProductReplenishOrder extends Backend
     {
 
         $id = input('ids');
-        $num = $this->model->where('id', $id)->field('id,replenishment_num,sku')->find();
+        $num = $this->model->where('id', $id)->field('id,replenishment_num,sku,replenish_id,type')->find();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $params = $this->request->post();
@@ -197,10 +199,13 @@ class NewProductReplenishOrder extends Backend
                 }
                 Db::startTrans();
                 try {
+                    //根据这条补货需求单的某一个sku进行分配 分配根据选择的供应商以及供应商对应的数量插入处理表 进入创建采购单步骤
                     foreach ($params['supplier_id'] as $k => $v) {
                         $supplier = $this->supplier->where('id', $v)->field('id,purchase_person,supplier_name')->find();
                         //关联补货单id
-                        $data['replenish_id'] = $num['id'];
+                        $data['replenish_id'] = $num['replenish_id'];
+                        $data['replenish_order_id'] = $num['id'];
+                        $data['type'] = $num['type'];
                         $data['sku'] = $num['sku'];
                         $data['supplier_id'] = $supplier['id'];
                         $data['supplier_name'] = $supplier['supplier_name'];
@@ -209,6 +214,11 @@ class NewProductReplenishOrder extends Backend
                         //插入补货单处理表 同时更新补货单分配表状态为待处理
                         $result = Db::name('new_product_replenish_list')->insert($data);
                         $update = $this->model->where('id',$id)->setField('status',2);
+                    }
+                    //每次对补货需求单进行分配的时候 查询这个补货需求单是否还有未分配的sku 如果没有就更新补货需求单状态为待处理
+                    $replenish_order = $this->model->where(['replenish_id'=>$num['replenish_id'],'status'=>1])->find();
+                    if (empty($replenish_order)){
+                        $res = $this->replenish->where('id',$num['replenish_id'])->setField('status',2);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -253,7 +263,7 @@ class NewProductReplenishOrder extends Backend
         }else{
             $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
         }
-        $map['replenish_id'] = ['in', $order_ids];
+        $map['replenish_order_id'] = ['in', $order_ids];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -278,7 +288,7 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
-                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_id'])->value('replenishment_num');
+                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_order_id'])->value('replenishment_num');
                 $list[$k]['num'] = $new_product_replenish_order;
             }
             $result = array("total" => $total, "rows" => $list);
