@@ -251,17 +251,20 @@ class Test3 extends Backend
     }
     //排查邮件中所有不匹配站点的邮件
     public function zendesk_plat_modify(){
-        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['in','75,105'],'status'=>['neq',5]])->select();
+        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['in','75,105,155,95,117'],'status'=>['neq',5]])->select();
         $i = 0;
         foreach ($zendesk as $item){
-            /*$other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105']])->column('admin_id');
-            if($item['type'] == 1){
-                $rand = rand(0,14);
-            }else{
-                $rand = rand(0,7);
+            if($i<9){
+                $other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105,155,95,117']])->column('admin_id');
+                if($item['type'] == 1){
+                    $rand = rand(0,11);
+                }else{
+                    $rand = rand(0,5);
+                }
+                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id[$rand]]);
+                $i++;
             }
-            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id[$rand]]);*/
-            $i++;
+
 
             /*//查询该邮件的负责人的站点
             $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
