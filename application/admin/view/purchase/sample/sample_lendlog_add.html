@@ -53,6 +53,19 @@
             <th style="width: 150px;">删除</th>
         </thead>
         <tbody id="product_data">
+            {if isset($info)}
+            {foreach name="info" item="vo" key="k"}
+            <tr role="row" class="odd del_{$k}">
+            <!-- <td><input type="text" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td> -->
+            <td><select name="row[goods][{$k}][sku]" id="sku" class="form-control selectpicker sku_arr" data-live-search="true">
+                <option data-id="{$vo.location_id}" value="{$vo.sku}">{$vo.sku}</option>
+            </select></td>
+            <td><input type="text" class="form-control" name="row[goods][{$k}][lend_num]" id="sku_{$k}" value="1" ></td>
+            <td class="location">{$vo.location_id}</td>
+            <td id="del"><a href="javascript:;" style="color:white !important;" onclick="del_add_tr('{$k}')">删除</a></td>
+            </tr>    
+            {/foreach}        
+            {/if}
         </tbody>
     </table>
     <div class="form-group layer-footer">

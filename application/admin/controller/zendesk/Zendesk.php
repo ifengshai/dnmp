@@ -875,8 +875,7 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
-            $task = array();
-            if ($i = 10) {
+            if ($i == 10) {
                 continue;
             }
             //open
@@ -893,13 +892,11 @@ DOC;
                 $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->apply_count = $task->apply_count + 1;
                 $task->save();
-
                 $i++;
                 
             } elseif($ticket->status == 1) {
-
                 //判断是否处理过该用户的邮件
-                $zendesk_id = $this->model->where('email',$ticket->email)->order('id','desc')->column('id');
+                $zendesk_id = $this->model->where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
                 //查询接触过该用户邮件的最后一条评论
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
@@ -917,11 +914,11 @@ DOC;
                             'assignee_id' => $task->assignee_id,
                             'assign_time' => date('Y-m-d H:i:s', time()),
                         ]);
-                        $i++;
                         //分配数目+1
                         $task->complete_apply_count = $task->complete_apply_count + 1;
                         $task->apply_count = $task->apply_count + 1;
                         $task->save();
+                        $i++;
                     }
                     
                 }else{
@@ -931,11 +928,11 @@ DOC;
                         'assignee_id' => $task->assignee_id,
                         'assign_time' => date('Y-m-d H:i:s', time()),
                     ]);
-                    $i++;
                     //分配数目+1
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->apply_count = $task->apply_count + 1;
                     $task->save();
+                    $i++;
                 }
 
             }
