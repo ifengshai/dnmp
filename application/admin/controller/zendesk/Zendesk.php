@@ -51,6 +51,10 @@ class Zendesk extends Backend
         $this->request->filter(['strip_tags']);
         $tags = ZendeskTags::column('name','id');
         $this->view->assign('tags',$tags);
+        //是否有同步权限
+        $artificial_synchronous = $this->auth->check('zendesk/zendesk/artificial_synchronous');
+        $this->view->assign('artificial_synchronous',$artificial_synchronous);
+
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
@@ -1120,21 +1124,31 @@ DOC;
             if($site_str == ''){
                 $this->error("站点匹配错误，请联系技术");
             }
+            $intersects = array();
+            $diffs = array();
             foreach ($params['ticket_id'] as $val){
                 $tickets = $this->model->where('ticket_id',$val)->find();
                 if($tickets->id){
                     //存在，更新
-
-
+                    $intersects[] = $tickets->ticket_id;
                 }else{
                     //不存在，新增
-
+                    $diffs[] = $tickets->ticket_id;
                 }
-                dump($tickets->id);exit;
             }
 
+            //更新
+            foreach($intersects as $intersect){
+                (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+            }
+            //新增
+            foreach($diffs as $diff){
+                (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
+            }
 
+            $this->success("同步完成");
         }
+
         return $this->view->fetch();
     }
     /**

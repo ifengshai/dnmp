@@ -156,6 +156,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            $(document).on("click", ".btn-selected", function () {
+                Backend.api.open('zendesk/zendesk/artificial_synchronous' , { area: ['100%', '100%'] });
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -375,6 +379,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         edit_recipient:function(){
             Form.api.bindevent($("form[role=form]"));
         },
+        artificial_synchronous:function(){
+            Controller.api.bindevent();
+
+            $(document).on('click', '.a_ticket_id', function () {
+                var add_ticket_id = $('.input_ticket_id').val();
+                if(!add_ticket_id){
+                    layer.alert('不能为空');
+                    return false;
+                }
+                var status = 0;
+                $("#ticket_id_list .ticket_id_list input").each(function(){
+                    var sel_ticket_id=$(this).val();
+                    if(add_ticket_id == sel_ticket_id){
+                        status = 1;
+                    }
+                });
+                if(status == 1){
+                    layer.alert('重复的Ticket Id');
+                    return false;
+                }
+                $('.input_ticket_id').val('');
+                var add_str = '<div class="ticket_id_list" id="ticket_id_'+add_ticket_id+'"><span>'+add_ticket_id+'</span><a href="javascript:;" onclick=del_ticket_id("'+add_ticket_id+'")> Ｘ </a><input type="hidden" name="row[ticket_id][]" value="'+add_ticket_id+'"></div>'
+                $('#ticket_id_list').append(add_str);
+            });
+
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -442,3 +472,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
     };
     return Controller;
 });
+
+function del_ticket_id(user_id){
+    $("#ticket_id_"+user_id).remove();
+}

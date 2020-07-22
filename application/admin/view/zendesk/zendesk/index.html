@@ -17,6 +17,10 @@
                         <a href="{:url('zendesk/zendesk/add',['type' => 1])}" class="btn btn-info  {:$auth->check('zendesk/zendesk/add')?'':'hide'}"  data-area = '["100%","100%"]' title="zeelool发送"   target="_blank"><i class="fa fa-plus"></i> zeelool发送</a>
                         <a href="{:url('zendesk/zendesk/add',['type' => 2])}" class="btn btn-warning  {:$auth->check('zendesk/zendesk/add')?'':'hide'}" data-area = '["100%","100%"]' title="voogueme发送" target="_blank" ><i class="fa fa-plus"></i> voogueme发送</a>
                         <a class="btn btn-success btn-change btn-start"  data-url="{:url('zendesk/zendesk/moreTasks')}" href="javascript:;"><i class="fa fa-play"></i> 申请工单</a>
+
+                        {if $artificial_synchronous != false}
+                            <a class="btn btn-info btn-selected" href="javascript:;"><i class="fa fa-leaf"></i> 同步数据</a>
+                        {/if}
                     </div>
                         <table id="table" class="table table-striped table-bordered table
                         -hover table-nowrap"
