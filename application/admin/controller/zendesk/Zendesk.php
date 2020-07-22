@@ -875,11 +875,12 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
+            $task = array();
             if ($i = 10) {
                 continue;
             }
             //open
-            if ($ticket['status'] == 2) {
+            if ($ticket->status == 2) {
                 //修改zendesk的assign_id,assign_time
                 $res = $this->model->where('id',$ticket->id)->update([
                     'is_hide' => 0,
@@ -895,7 +896,7 @@ DOC;
 
                 $i++;
                 
-            } elseif($ticket['status'] == 1) {
+            } elseif($ticket->status == 1) {
 
                 //判断是否处理过该用户的邮件
                 $zendesk_id = $this->model->where('email',$ticket->email)->order('id','desc')->column('id');

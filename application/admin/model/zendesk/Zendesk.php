@@ -391,17 +391,14 @@ class Zendesk extends Model
                 ]);
             }
         }
-
-
-
-
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'id'=>['in','97511,98118,98640,98645,99203,99724,99744,100336,101026,101038,101225,101632,101930,102014,102387,102421,102443,102970,103543,103782,104112']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
+            $task = array();
             //电话不分配
-            if($ticket->channel == 'voice') continue;
+            if($ticket->channel == 'voice') {continue;}
 
             if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
                 //判断是否处理过该用户的邮件
@@ -429,7 +426,6 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }
-
             }else{
                 //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
                 if(in_array($ticket->assign_id,$targetAccount)){
@@ -444,8 +440,9 @@ class Zendesk extends Model
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
+                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                     $str = '';
-                    $str = $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
+                    $str .= $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
@@ -456,8 +453,8 @@ class Zendesk extends Model
                     $task->complete_count = $task->complete_count + 1;
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
+
                     $str .= $task->admin_id;
-                    self::where('id',$ticket->id)->setField('is_hide',0);
                     file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                     echo $str." is ok"."\n";
                 }
