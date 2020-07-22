@@ -88,6 +88,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $(document).on('click', '.btn-sample-lendlog-add', function () {
+                var ids = Table.api.selectedids(table);
+                var url = 'purchase/sample/sample_lendlog_add?ids=' + ids;
+                Fast.api.open(url, __('申请'), { area: ['900px', '500px'] });
+
+                return false;
+            })
         },
         sample_location_index: function () {
             // 初始化表格参数配置
