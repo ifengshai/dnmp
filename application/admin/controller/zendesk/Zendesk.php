@@ -1126,6 +1126,9 @@ DOC;
             }
             $intersects = array();
             $diffs = array();
+            if(!$params['ticket_id']){
+                $this->error("请点击add");
+            }
             foreach ($params['ticket_id'] as $val){
                 $tickets = $this->model->where('ticket_id',$val)->find();
                 if($tickets->id){
@@ -1136,15 +1139,20 @@ DOC;
                     $diffs[] = $tickets->ticket_id;
                 }
             }
+            if($intersects){
+                //更新
+                foreach($intersects as $intersect){
+                    (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+                }
+            }
 
-            //更新
-            foreach($intersects as $intersect){
-                (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+            if($diffs){
+                //新增
+                foreach($diffs as $diff){
+                    (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
+                }
             }
-            //新增
-            foreach($diffs as $diff){
-                (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
-            }
+
 
             $this->success("同步完成");
         }
