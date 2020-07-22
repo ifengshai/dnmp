@@ -259,7 +259,7 @@ order by sfoi.item_id asc limit 1000";
             $final_params['od_add'] = urldecode($final_params['od_add']);
 
             //判断双ADD还是单ADD
-            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
+            if ((float) $final_params['os_add'] && (float) $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
