@@ -261,20 +261,19 @@ class Test3 extends Backend
                     //查询该评论的最后一条记录
                     $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
                     if($due_id){
-//                        if($i<9){
+                        if($i<9){
                             if($due_id == 75 || $due_id == 105){
-                                $i++;
-//                                $other_due_id = Db::name('zendesk_agents')->where('type',$item['type'])->value('admin_id');
-//                                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id]);
-//                            }else{
-//                                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
+                                $other_due_id = Db::name('zendesk_agents')->where('type',$item['type'])->value('admin_id');
+                                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id]);
+                            }else{
+                                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
                             }
 
-//                            echo $item['id']."\n";
-//                            $i++;
-//                        }else{
-//                            break;
-//                        }
+                            echo $item['id']."\n";
+                            $i++;
+                        }else{
+                            break;
+                        }
                     }
                 }
             }
