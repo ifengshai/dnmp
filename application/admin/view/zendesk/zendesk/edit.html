@@ -168,7 +168,7 @@
                         <div class="active tab-pane" id="activity">
                             <!-- Post -->
                             {foreach name="comments" item="vo"}
-                            <div class="post">
+                            <div class="post" {if condition="$vo['comment_id'] eq 0"}style="background-color: #f7f7bf!important"{/if}>
                                 <div class="user-block">
                                     {if condition="$vo['is_admin']"}
                                     <img class="img-circle img-bordered-sm" src="{:session('admin.avatar')}" alt="user image">
