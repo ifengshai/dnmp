@@ -452,8 +452,8 @@ class Zendesk extends Model
                     $task->complete_count = $task->complete_count + 1;
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
+                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                     $str .= $task->admin_id;
-                    self::where('id',$ticket->id)->setField('is_hide',0);
                     file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                     echo $str." is ok"."\n";
                 }
