@@ -1358,39 +1358,64 @@ class Item extends Backend
             if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核通过');
             }
-            $map['id'] = $id;
-            $data['item_status'] = 3;
-            $data['check_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 
+            Db::startTrans();
+            try {
+                $map['id'] = $id;
+                $data['item_status'] = 3;
+                $data['check_time']  = date("Y-m-d H:i:s", time());
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                if ($res === false) {
+                    throw new Exception('审核失败！！');
+                }
 
-            if ($res) {
-                
-                //添加到商品平台sku
-                //审核通过把SKU同步到有映射关系的平台
-                $uploadItemArr['categories']            = array(2);
-                $uploadItemArr['websites']              = array(1);
-                $uploadItemArr['name']                  = $row['name'];
-                $uploadItemArr['description']           = 'Product description';
-                $uploadItemArr['short_description']     = 'Product short description';
-                $uploadItemArr['url_key']               = $row['platform_sku'];
-                $uploadItemArr['url_path']              = $row['sku'];
-                $uploadItemArr['true_sku']              = $row['sku'];
-                $uploadItemArr['status']                = '0';
-                $uploadItemArr['visibility']            = '4';
-                $uploadItemArr['meta_title']            = 'Product meta title';
-                $uploadItemArr['meta_keyword']          = 'Product meta keyword';
-                $uploadItemArr['meta_description']      = 'Product meta description';
-                Soap::createProduct();
-
-
-                // (new ItemPlatformSku())->addPlatformSku($row);
-                $this->success('审核通过成功');
-            } else {
-                $this->error('审核通过失败');
+                //查询同步的平台
+                $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+                $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
+                $error_num = [];
+                $uploadItemArr = [];
+                foreach ($platformArr as $k => $v) {
+                    $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                    //审核通过把SKU同步到有映射关系的平台
+                    $uploadItemArr['categories']            = array(2);
+                    $uploadItemArr['websites']              = array(1);
+                    $uploadItemArr['name']                  = 'product name';
+                    $uploadItemArr['description']           = 'Product description';
+                    $uploadItemArr['short_description']     = 'Product short description';
+                    $uploadItemArr['url_key']               = $row['sku'];
+                    $uploadItemArr['url_path']              = $v['platform_sku'];
+                    $uploadItemArr['true_sku']              = $row['sku'];
+                    $uploadItemArr['status']                = 2;
+                    $uploadItemArr['visibility']            = 4;
+                    $uploadItemArr['meta_title']            = 'Product meta title';
+                    $uploadItemArr['meta_keyword']          = 'Product meta keyword';
+                    $uploadItemArr['meta_description']      = 'Product meta description';
+                    $uploadItemArr['sku']                   = $v['platform_sku'];
+                    $soap_res = Soap::createProduct($magentoArr, $uploadItemArr);
+                    if (!$soap_res) {
+                        $error_num[] = $v['platform_type'];
+                    } else {
+                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                    }
+                }
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
             }
-        } else {
-            $this->error('404 Not found');
+
+            if ($error_num) {
+                $this->error('站点同步失败:' . implode(',', $error_num));
+            }
+
+            $this->success('审核成功！！');
         }
     }
     /***
@@ -1494,7 +1519,7 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $row = $this->model->where($map)->field('id,item_status')->select();
+            $row = $this->model->where($map)->field('id,item_status,sku')->select();
             foreach ($row as $v) {
                 if ($v['item_status'] != 2) {
                     $this->error('只有待审核状态才能操作！！');
@@ -1503,11 +1528,34 @@ class Item extends Backend
             $data['item_status'] = 3;
             $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res != false) {
-                $row = $this->model->where('id', 'in', $ids)->field('sku,name,frame_is_rimless')->select();
-                if ($row) {
-                    foreach ($row as $val) {
-                        (new ItemPlatformSku())->addPlatformSku($val);
+            if ($res !== false) {
+                foreach ($row as $val) {
+                    //查询同步的平台
+                    $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+                    $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
+                    $uploadItemArr = [];
+                    foreach ($platformArr as $k => $v) {
+                        $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                        //审核通过把SKU同步到有映射关系的平台
+                        $uploadItemArr['categories']            = array(2);
+                        $uploadItemArr['websites']              = array(1);
+                        $uploadItemArr['name']                  = 'product name';
+                        $uploadItemArr['description']           = 'Product description';
+                        $uploadItemArr['short_description']     = 'Product short description';
+                        $uploadItemArr['url_key']               = $val['sku'];
+                        $uploadItemArr['url_path']              = $v['platform_sku'];
+                        $uploadItemArr['true_sku']              = $val['sku'];
+                        $uploadItemArr['status']                = 2;
+                        $uploadItemArr['visibility']            = 4;
+                        $uploadItemArr['meta_title']            = 'Product meta title';
+                        $uploadItemArr['meta_keyword']          = 'Product meta keyword';
+                        $uploadItemArr['meta_description']      = 'Product meta description';
+                        $uploadItemArr['sku']                   = $v['platform_sku'];
+                        $soap_res = Soap::createProduct($magentoArr, $uploadItemArr);
+                        if ($soap_res) {
+                            $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                        }
                     }
                 }
                 $this->success('审核成功');

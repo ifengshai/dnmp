@@ -804,6 +804,7 @@ class NewProduct extends Backend
                     $attributeParams = $row['newproductattribute'];
                     unset($attributeParams['id']);
                     unset($attributeParams['frame_images']);
+                    unset($attributeParams['frame_color']);
                     $attributeParams['item_id'] = $this->item->id;
                     //添加商品属性表信息
                     $this->itemAttribute->allowField(true)->save($attributeParams);

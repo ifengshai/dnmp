@@ -16,35 +16,27 @@ class Soap
      * @param [type] $params
      * @return void
      */
-    public static function createProduct($magentoUrl = '', $magento_account, $magento_key, $params)
+    public static function createProduct($config = [], $params)
     {
-        $client = new \SoapClient($magentoUrl . '/api/soap/?wsdl');
-
-        // If some stuff requires api authentification,
-        // then get a session token
-        $session = $client->login($magento_account, $magento_key);
-
-        // get attribute set
+        if (!$config) {
+            return false;
+        }
+        $client = new \SoapClient($config['magento_url'] . '/api/soap/?wsdl');
+        $session = $client->login($config['magento_account'], $config['magento_key']);
+        //获取magento产品属性设置
         $attributeSets = $client->call($session, 'product_attribute_set.list');
-        $attributeSet = current($attributeSets);
-
-        $newProductData = array(
-            'name'              => 'Test product',
-            'websites'          => array(1),
-            'short_description' => 'This is the short desc',
-            'description'       => 'This is the long desc',
-            'price'             => 150.00,
-            'status'            => 1,
-            'tax_class_id'      => 0,
-            'visibility'        => 4
-        );
-
+        foreach ($attributeSets as $v) {
+            //选择默认值
+            if ($v['name'] == $config['item_attr_name']) {
+                $attributeSet['set_id'] = $v['set_id'];
+            }
+        }
         try {
             // product creation
-            $client->call($session, 'product.create', array('simple', $attributeSet['set_id'], $params['sku'], $newProductData));
+            $client->call($session, 'catalog_product.create', array($config['item_type'], $attributeSet['set_id'], $params['sku'], $params));
         } catch (\SoapFault $e) {
-            $msg = "Error in inserting product with sku $ItemNmbr : " . $e->getMessage();
-            echo $msg;
+            return false;
         }
+        return true;
     }
 }
