@@ -392,14 +392,18 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'ticket_id'=>59587])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
+        dump($targetAccount);
         foreach ($waitTickets as $ticket) {
+            dump($ticket);
             //电话不分配
             if($ticket->channel == 'voice') continue;
 
             if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
+                dump(111);
+                dump($ticket->assign_id);
                 //判断是否处理过该用户的邮件
                 $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
                 //查询接触过该用户邮件的最后一条评论
@@ -410,6 +414,7 @@ class Zendesk extends Model
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
+                    dump(222);
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
                             'admin_id' => $commentAuthorId,
@@ -418,6 +423,7 @@ class Zendesk extends Model
                         ])
                         ->find();
                 }else{
+                    dump(333);
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
@@ -427,6 +433,7 @@ class Zendesk extends Model
                 }
 
             }else{
+                dump(444);
                 //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
                 if(in_array($ticket->assign_id,$targetAccount)){
                     //离职，则分配给最少单的用户
@@ -437,7 +444,7 @@ class Zendesk extends Model
                         ->find();
                 }
             }
-
+dump($task);exit;
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
@@ -456,7 +463,7 @@ class Zendesk extends Model
                     $str .= $task->admin_id;
                     self::where('id',$ticket->id)->setField('is_hide',0);
                     file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
-                    echo $ticket->ticket_id."--".$task->admin_id." is ok"."\n";
+                    echo $str." is ok"."\n";
                 }
             }
             usleep(1000);
