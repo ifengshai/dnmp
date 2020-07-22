@@ -1206,8 +1206,11 @@ class NewProduct extends Backend
      */
     public function plan_replenishment()
     {
+        //补货需求清单表
         $this->model = new \app\admin\model\NewProductMapping();
+        //补货需求单子表
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //补货需求单主表
         $this->replenish = new \app\admin\model\purchase\NewProductReplenish();
         //统计计划补货数据
         $list = $this->model
@@ -1215,27 +1218,51 @@ class NewProduct extends Backend
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
-        //统计各个站计划某个sku计划补货的总数 以及比例 回写平台sku映射表中
-        
+        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+        $sku_list = $this->model
+                ->where(['is_show' => 1, 'type' => 1])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->field('id,sku,website_type,replenish_num')
+                ->select();
+        //根据sku对数组进行重新分配
+        $sku_list = $this->array_group_by($sku_list, 'sku');
+
         $result = false;
         Db::startTrans();
         try {
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 1;
             $data['create_person'] = 'Admin';
-            $data['create_time'] = date('Y-m-d h:i:s');
+            $data['create_time'] = date('Y-m-d H:i:s');
             $res = $this->replenish->insertGetId($data);
+
+            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+            $int = 0;
+            foreach ($sku_list as $k => $v) {
+                //求出此sku在此补货单中的总数量
+                $sku_whole_num = array_sum(array_map(function ($val) {return $val['replenish_num'];}, $v));
+                //求出比例赋予新数组
+                foreach ($v as $ko => $vo) {
+                    $date[$int]['id'] = $vo['id'];
+                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                    $date[$int]['replenish_id'] = $res;
+                    $int += 1;
+                }
+            }
+            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+            $res1 = $this->model->allowField(true)->saveAll($date);
+
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
-                $arr[$number]['create_time'] = date('Y-m-d h:i:s');
+                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
                 $arr[$number]['type'] = 1;
                 $arr[$number]['replenish_id'] = $res;
                 $number += 1;
             }
-            //插入补货需求单表 关联主表 new_product_replenish_order
+            //插入补货需求单子表 关联主表 new_product_replenish_order 关联字段replenish_id
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
@@ -1261,6 +1288,32 @@ class NewProduct extends Backend
     }
 
     /**
+     * *@param  [type] $arr [二维数组]
+     * @param  [type] $key [键名]
+     * @return [type]      [新的二维数组]
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/22
+     * Time: 11:37
+     */
+    function array_group_by($arr, $key)
+    {
+        $grouped = array();
+        foreach ($arr as $value) {
+            $grouped[$value[$key]][] = $value;
+        }
+        if (func_num_args() > 2) {
+            $args = func_get_args();
+            foreach ($grouped as $key => $value) {
+                $parms = array_merge($value, array_slice($args, 2, func_num_args()));
+                $grouped[$key] = call_user_func_array('array_group_by', $parms);
+            }
+        }
+        return $grouped;
+    }
+
+
+    /**
      * 紧急补货
      *
      * Created by Phpstorm.
@@ -1279,23 +1332,50 @@ class NewProduct extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
 
-        if (empty($list)){
+        if (empty($list)) {
             $this->error('暂时没有紧急补货单需要处理');
         }
+
+        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+        $sku_list = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->field('id,sku,website_type,replenish_num')
+            ->select();
+        //根据sku对数组进行重新分配
+        $sku_list = $this->array_group_by($sku_list, 'sku');
+
         $result = false;
         Db::startTrans();
         try {
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 2;
             $data['create_person'] = session('admin.nickname');
-            $data['create_time'] = date('Y-m-d h:i:s');
+            $data['create_time'] = date('Y-m-d H:i:s');
             $res = Db::name('new_product_replenish')->insertGetId($data);
+
+            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+            $int = 0;
+            foreach ($sku_list as $k => $v) {
+                //求出此sku在此补货单中的总数量
+                $sku_whole_num = array_sum(array_map(function ($val) {return $val['replenish_num'];}, $v));
+                //求出比例赋予新数组
+                foreach ($v as $ko => $vo) {
+                    $date[$int]['id'] = $vo['id'];
+                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                    $date[$int]['replenish_id'] = $res;
+                    $int += 1;
+                }
+            }
+            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+            $res1 = $this->model->allowField(true)->saveAll($date);
+
             $number = 0;
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = session('admin.nickname');
-                $arr[$number]['create_time'] = date('Y-m-d h:i:s');
+                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
                 $arr[$number]['type'] = 2;
                 $arr[$number]['replenish_id'] = $res;
                 $number += 1;
