@@ -1140,31 +1140,37 @@ DOC;
                     $site_str = '';
                     break;
             }
+
             if($site_str == ''){
                 $this->error("站点匹配错误，请联系技术");
             }
             $intersects = array();
             $diffs = array();
+            if(!$params['ticket_id']){
+                $this->error("请点击add");
+            }
             foreach ($params['ticket_id'] as $val){
                 $tickets = $this->model->where('ticket_id',$val)->find();
                 if($tickets->id){
                     //存在，更新
-                    $intersects[] = $tickets->ticket_id;
+                    $intersects[] = $val;
                 }else{
                     //不存在，新增
-                    $diffs[] = $tickets->ticket_id;
+                    $diffs[] = $val;
                 }
             }
-
-            //更新
-            foreach($intersects as $intersect){
-                (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+            if($intersects){
+                //更新
+                foreach($intersects as $intersect){
+                    (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+                }
             }
-            //新增
-            foreach($diffs as $diff){
-                (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
+            if($diffs){
+                //新增
+                foreach($diffs as $diff){
+                    (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
+                }
             }
-
             $this->success("同步完成");
         }
 
