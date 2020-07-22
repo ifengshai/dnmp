@@ -875,8 +875,6 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
-            dump($ticket);
-            dump($ticket->status);exit;
             if ($i = 10) {
                 continue;
             }
@@ -894,13 +892,9 @@ DOC;
                 $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->apply_count = $task->apply_count + 1;
                 $task->save();
-                dump(111);
-                dump($ticket->id);
                 $i++;
                 
             } elseif($ticket->status == 1) {
-                dump(222);
-                dump($ticket->id);
                 //判断是否处理过该用户的邮件
                 $zendesk_id = $this->model->where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
                 //查询接触过该用户邮件的最后一条评论
@@ -911,8 +905,6 @@ DOC;
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
-                    dump(333);
-                    dump($ticket->id);
                     //是自己的老用户
                     if ($admin_id == $commentAuthorId) {
                         //修改zendesk的assign_id,assign_time
@@ -930,8 +922,6 @@ DOC;
                     }
                     
                 }else{
-                    dump(444);
-                    dump($ticket->id);
                     $res = $this->model->where('id',$ticket->id)->update([
                         'is_hide' => 0,
                         'assign_id' => $admin_id,
