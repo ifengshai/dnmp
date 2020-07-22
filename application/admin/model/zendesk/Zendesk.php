@@ -438,6 +438,7 @@ class Zendesk extends Model
                 }
             }
             if ($task) {
+                echo 555;
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
                     $str = '';
