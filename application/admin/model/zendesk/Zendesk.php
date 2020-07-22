@@ -396,6 +396,7 @@ class Zendesk extends Model
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
+            $task = array();
             //电话不分配
             if($ticket->channel == 'voice') {continue;}
 
@@ -410,8 +411,6 @@ class Zendesk extends Model
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
-                    $str = '';
-                    $str .= $commentAuthorId.'--111'.'--';
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
                             'admin_id' => $commentAuthorId,
@@ -420,8 +419,6 @@ class Zendesk extends Model
                         ])
                         ->find();
                 }else{
-                    $str = '';
-                    $str .= '222--';
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
@@ -429,12 +426,9 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }
-
             }else{
                 //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
                 if(in_array($ticket->assign_id,$targetAccount)){
-                    $str = '';
-                    $str .= '333--';
                     //离职，则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
@@ -446,6 +440,7 @@ class Zendesk extends Model
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
+                    $str = '';
                     $str .= $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
