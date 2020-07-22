@@ -1227,7 +1227,7 @@ class Sample extends Backend
      * @since 2020/05/25 17:02:44 
      * @return void
      */
-    public function sample_lendlog_add()
+    public function sample_lendlog_add($ids=null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -1253,6 +1253,15 @@ class Sample extends Backend
                 if(in_array('',$lend_num_arr)){
                     $this->error(__('借出数量不能为空', ''));
                 }
+                // dump($params);
+                // exit;
+                //判断库存是否足够
+                $info = $this->check_stock_enough($params['goods'],$sku_arr);
+                if($info && (1!=$info)){
+                    $this->error("sku{$info}借出库存不足,请重新尝试");
+                }elseif(1 == $info){
+                    $this->error("无法找到相关库存不足,请重新尝试");
+                }
                 //生成入库主表数据
                 $lendlog['status'] = 1;
                 $lendlog['create_user'] = session('admin.nickname');
@@ -1269,6 +1278,18 @@ class Sample extends Backend
                
             }
             $this->error(__('Parameter %s can not be empty', ''));
+        }else{
+            if(!empty($ids)){
+                $idArr = explode(',',$ids);
+                $list = $this->sample->where('id','in',$idArr)->select();
+                $list = collection($list)->toArray();
+                foreach ($list as $key=>$value){
+                    $list[$key]['location_id'] = $this->samplelocation->getLocationName($value['location_id']);
+                    $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
+                    $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
+                }
+                $this->assign('info',$list);
+            }
         }
 
         //获取样品间商品列表
@@ -1488,5 +1509,37 @@ class Sample extends Backend
             //     $this->error('只有本人才能归还');
             // }
         }
+    }
+    /**
+     * 判断库存是否足够
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-07-22 14:08:00
+     * @return void
+     */
+    public function check_stock_enough($goods,$sku_arr)
+    {
+        //求出所有的sku的留样库存和借出的数量
+        $info = $this->sample->where('sku','in',$sku_arr)->field('sku,stock-lend_num as new_stock')->select();
+        if(!$info){
+            return 1;
+        }
+        $info = collection($info)->toArray();
+        //return $info;
+        //组装传入的sku信息
+        $arr = [];
+        foreach($goods as $v){
+             $arr[$v['sku']] = $v['lend_num'];
+        }
+        $not_enough = 0;
+        foreach($info as $vv){
+            if(array_key_exists($vv['sku'],$arr)){
+                if($arr[$vv['sku']]>$vv['new_stock']){
+                    $not_enough = 1;
+                    return $vv['sku'];
+                }
+            }
+        }
+        return $not_enough ? true : false;
     }
 }
