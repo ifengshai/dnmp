@@ -262,6 +262,7 @@ class Test3 extends Backend
                     $rand = rand(0,5);
                 }
                 Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id[$rand]]);
+                echo $item['id']."\n".' is ok';
                 $i++;
             }
 
