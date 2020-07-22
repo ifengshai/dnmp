@@ -440,6 +440,7 @@ class Zendesk extends Model
             if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
                 if ($task->target_count > $task->complete_count) {
+                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                     $str = '';
                     $str .= $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
@@ -452,7 +453,7 @@ class Zendesk extends Model
                     $task->complete_count = $task->complete_count + 1;
                     $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
-                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
+
                     $str .= $task->admin_id;
                     file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                     echo $str." is ok"."\n";
