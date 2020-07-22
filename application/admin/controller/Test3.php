@@ -251,19 +251,15 @@ class Test3 extends Backend
     }
     //排查邮件中所有不匹配站点的邮件
     public function zendesk_plat_modify(){
-        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['neq',0],'status'=>['neq',5],'id'=>'35745'])->select();
-        dump($zendesk);
+        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['neq',0],'status'=>['neq',5]])->select();
         $i = 0;
         foreach ($zendesk as $item){
-            $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
-            dump($due_id);exit;
             //查询该邮件的负责人的站点
             $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
             if($admin_type){
                 if($admin_type != $item['type']){
                     //查询该评论的最后一条记录
                     $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
-                    dump($due_id);exit;
                     if($due_id){
                         if($i<9){
                             if($due_id == 75 || $due_id == 105){
@@ -272,7 +268,6 @@ class Test3 extends Backend
                             }else{
                                 Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
                             }
-
                             echo $item['id']."\n";
                             $i++;
                         }else{
@@ -281,7 +276,6 @@ class Test3 extends Backend
                     }
                 }
             }
-
         }
         dump($i);exit;
     }
