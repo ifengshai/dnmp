@@ -258,6 +258,9 @@ order by sfoi.item_id asc limit 1000";
             $final_params['os_add'] = urldecode($final_params['os_add']);
             $final_params['od_add'] = urldecode($final_params['od_add']);
 
+            echo $final_params['os_add'];
+            echo $final_params['od_add'];
+            dump($order_item_value);
             //判断双ADD还是单ADD
             if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
