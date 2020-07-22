@@ -1121,6 +1121,7 @@ DOC;
                     $site_str = '';
                     break;
             }
+
             if($site_str == ''){
                 $this->error("站点匹配错误，请联系技术");
             }
@@ -1133,10 +1134,10 @@ DOC;
                 $tickets = $this->model->where('ticket_id',$val)->find();
                 if($tickets->id){
                     //存在，更新
-                    $intersects[] = $tickets->ticket_id;
+                    $intersects[] = $val;
                 }else{
                     //不存在，新增
-                    $diffs[] = $tickets->ticket_id;
+                    $diffs[] = $val;
                 }
             }
             if($intersects){
@@ -1145,15 +1146,12 @@ DOC;
                     (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
                 }
             }
-
             if($diffs){
                 //新增
                 foreach($diffs as $diff){
                     (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
                 }
             }
-
-
             $this->success("同步完成");
         }
 
