@@ -875,8 +875,7 @@ DOC;
         $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time desc')->select();
         $i = 0;
         foreach($tickets as $ticket){
-            dump($ticket->status);
-            $task = array();
+            dump($ticket->status);exit;
             if ($i = 10) {
                 continue;
             }
