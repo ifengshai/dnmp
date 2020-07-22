@@ -1103,7 +1103,36 @@ DOC;
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            dump($params);exit;
+            switch ($params['site']) {
+                case 1:
+                    $site_str = 'zeelool';
+                    break;
+                case 2:
+                    $site_str = 'voogueme';
+                    break;
+                case 3:
+                    $site_str = 'nihaooptical';
+                    break;
+                default:
+                    $site_str = '';
+                    break;
+            }
+            if($site_str == ''){
+                $this->error("站点匹配错误，请联系技术");
+            }
+            foreach ($params['ticket_id'] as $val){
+                $tickets = $this->model->where('ticket_id',$val)->find();
+                if($tickets->id){
+                    //存在，更新
+
+
+                }else{
+                    //不存在，新增
+
+                }
+                dump($tickets->id);exit;
+            }
+
 
         }
         return $this->view->fetch();
