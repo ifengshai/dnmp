@@ -254,17 +254,16 @@ class Test3 extends Backend
         $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['in','75,105,155,95,117'],'status'=>['neq',5]])->select();
         $i = 0;
         foreach ($zendesk as $item){
-            if($i<9){
-                $other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105,155,95,117']])->column('admin_id');
-                if($item['type'] == 1){
-                    $rand = rand(0,11);
-                }else{
-                    $rand = rand(0,5);
-                }
-                Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id[$rand]]);
-                echo $item['id']."\n".' is ok';
-                $i++;
+            $other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105,155,95,117']])->column('admin_id');
+            if($item['type'] == 1){
+                $rand = rand(0,11);
+            }else{
+                $rand = rand(0,5);
             }
+            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id[$rand]]);
+            echo $item['id'].' is ok'."\n";
+            $i++;
+
 
 
             /*//查询该邮件的负责人的站点
