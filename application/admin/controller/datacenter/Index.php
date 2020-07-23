@@ -1206,7 +1206,7 @@ class Index extends Backend
         //$voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
         $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
         $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-        $weese = $this->weese->getOrderSalesNum($w_sku,$map);
+        //$weese = $this->weese->getOrderSalesNum($w_sku,$map);
         //重组数组
         foreach ($list as &$v) {
 
@@ -1217,7 +1217,7 @@ class Index extends Backend
             $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
 
            $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
-           $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
+           //$v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
            // $v['all_num'] = $v['z_num'] + $v['v_num'];
         }
         unset($v);
@@ -1230,9 +1230,9 @@ class Index extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
             ->setCellValue("B1", "N站销量")
             ->setCellValue("C1", "M站销量")
-            ->setCellValue("D1", "W站销量");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "可用库存")
-             ->setCellValue("F1", "在途库存");
+            ->setCellValue("D1", "可用库存");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "在途库存");
+             //->setCellValue("F1", "在途库存");
         //  $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
         //      ->setCellValue("G1", "可用库存");
         // $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
@@ -1243,11 +1243,11 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['n_num']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['m_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['w_num']);
+            //$spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['w_num']);
             // $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
             // $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), 0);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['on_way_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['on_way_stock']);
         }    
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -1255,7 +1255,7 @@ class Index extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        //$spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         // $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
         // $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
         //设置边框
