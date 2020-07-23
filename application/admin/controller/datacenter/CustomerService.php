@@ -21,6 +21,19 @@ class CustomerService extends Backend
         $this->workload = new \app\admin\model\WorkloadStatistics;
     }
     /**
+     * 客服数据大屏
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/23 16:55:02 
+     * @return void
+     */
+    public function customer_data_screen(){
+        $platform = input('platform') ? input('platform') : 1;
+
+        return $this->view->fetch();
+    }
+    /**
      * 客服数据(首页)
      *
      * @Description

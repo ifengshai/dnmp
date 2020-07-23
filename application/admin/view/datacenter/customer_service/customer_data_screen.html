@@ -1,0 +1,629 @@
+<style>
+   .plat_form{
+       margin-right: 10px;
+   }
+    .echart-style td{
+        width:60px;
+    }
+</style>
+
+<style type="text/css">
+table.altrowstable {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
+table.altrowstable tr:nth-child(odd){
+    background:#E9F1F4;
+    background: #F5F5F5;
+}
+table.altrowstable tr:nth-child(even){
+    background: #fff;
+    background: #eee;
+}
+
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+
+    .tab-content > .active {
+       display: block;
+       clear: both;
+    }  
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                    <!-- <form id = "form1" action="#" class="form-commonsearch form-horizontal" role="form1" method="post"> -->
+                        <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div>
+                                    <div class="form-group">
+                                        <div style="font-size: 16px;"><b>工单概况</b></div><br>
+                                        <div style="margin-left: 57px;font-size: 14px;">
+                                            站点：
+                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 1])}"   title="Zeelool"   target="_blank"> Zeelool</a></span>
+                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 2])}"   title="Voogueme"   target="_blank"> Voogueme</a></span>
+                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 3])}"   title="Nihao"   target="_blank"> Nihao</a></span>
+                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 4])}"  title="Wesee"   target="_blank"> Wesee</a></span>
+                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 0])}"  title="全部"   target="_blank"> 全部</a></span>
+
+                                        </div>
+                                    </div>                                                                 
+                            </div>
+                        </div>
+                    <!-- </form> -->
+                <table id="workload-info" class="altrowstable"
+                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                width="100%">
+             <thead>                    
+             <tr>
+                 <th style="text-align: center; vertical-align: middle;">日期</th>
+                 <th style="text-align: center; vertical-align: middle;">工单创建数量</th>
+                 <th style="text-align: center; vertical-align: middle;">工单完成数量</th>
+                 <th style="text-align: center; vertical-align: middle;">补发订单比（%）</th>
+                 <th style="text-align: center; vertical-align: middle;">退款订单比（%）</th>
+                 <th style="text-align: center; vertical-align: middle;">退款金额比（%）</th>
+             </tr>
+             </thead>
+                  <tr>
+                      <td style="text-align: center; vertical-align: middle;">今天</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$todayData.wait_num}</td>
+                      <td id='today_increment_num' style="text-align: center; vertical-align: middle;">{$todayData.increment_num}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$todayData.reply_num}</td>
+                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$todayData.waiting_num}</td>
+                      <td id='today_pending_num' style="text-align: center; vertical-align: middle;">{$todayData.pending_num}</td>
+                  </tr>
+                  <tr>
+                    <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">昨天</td>
+                    <td id='yesterday_wait_num'    style="text-align: center; vertical-align: middle;">{$yesterdayData.wait_num}</td>
+                    <td id='yesterday_increment_num'       style="text-align: center; vertical-align: middle;">{$yesterdayData.increment_num}</td>
+                    <td id='yesterday_reply_num'          style="text-align: center; vertical-align: middle;">{$yesterdayData.reply_num}</td>
+                    <td id='yesterday_waiting_num'  style="text-align: center; vertical-align: middle;">{$yesterdayData.waiting_num}</td>
+                    <td id='yesterday_pending_num' style="text-align: center; vertical-align: middle;">{$yesterdayData.pending_num}</td>
+                </tr>
+                <tr>
+                    <td id='serven_sales_money'         style="text-align: center; vertical-align: middle;">过去7天</td>
+                    <td id='serven_wait_num'   style="text-align: center; vertical-align: middle;">{$servenData.wait_num}</td>
+                    <td id='serven_increment_num' style="text-align: center; vertical-align: middle;">{$servenData.increment_num}</td>
+                    <td id='serven_reply_num'   style="text-align: center; vertical-align: middle;">{$servenData.reply_num}</td>
+                    <td id='serven_waiting_num'  style="text-align: center; vertical-align: middle;">{$servenData.waiting_num}</td>
+                    <td id='serven_pending_num' style="text-align: center; vertical-align: middle;">{$servenData.pending_num}</td>
+                </tr>
+                <tr>
+                    <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">过去30天</td>
+                    <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                    <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                    <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                    <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                    <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                </tr>
+                    <tr>
+                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">当月</td>
+                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                    </tr>
+                    <tr>
+                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">上月</td>
+                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                    </tr>
+                    <tr>
+                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">今年</td>
+                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                    </tr>
+                    <tr>
+                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">总计</td>
+                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                    </tr>
+                </table>                
+            </div>
+            <div class="tab-panes fade active in">
+                <p><span>工作量概况</span></p>
+                <div class="widget-body no-padding" style="width: 48%;float:left;">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">A组</th>
+                            <th style="text-align: center; vertical-align: middle;">工作组别</th>
+                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
+                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
+                        </tr>
+                        </thead>
+                        {if !empty($infoOne)}
+                        {foreach name="infoOne" item="vo" key='k'}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $customerType[$k];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
+                        </tr>
+                         {/foreach}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">合计</td>
+                            <td style="text-align: center; vertical-align: middle;"></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['no_qualified_day'];?></td>
+                        </tr>                         
+                         {/if}                                                                                                                                                   							 
+                    </table>
+                </div>
+                <div class="widget-body no-padding" style="width: 48%;float:right">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">B组</th>
+                            <th style="text-align: center; vertical-align: middle;">工作组别</th>
+                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
+                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
+                        </tr>
+                        </thead>
+                        {if !empty($infoTwo)}
+                        {foreach name="infoTwo" item="vo" key='k'}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $customerType[$k];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
+                        </tr>
+                         {/foreach}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">合计</td>
+                            <td style="text-align: center; vertical-align: middle;"></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['no_qualified_day'];?></td>
+                        </tr>
+                         {/if}                                                                                                                                                   							 
+                    </table>
+                </div>                
+            </div>
+            <div class="tab-pane fade active in">
+                <p><span>工单统计</span></p>
+                <div class="widget-body no-padding" style="width: 100%; ">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">A组</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
+                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
+                        </tr>
+                        </thead>
+                        {if !empty($infoOne)}
+                        {foreach name="infoOne" item="vo" key='k'}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
+                            <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
+                            <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['replacement_num'],2);?></td>
+                            {if $workArr[$k]['counter'] gt 0 } 
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['replacement_num']/$workArr[$k]['counter']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['refund_num'],2);?></td>
+                            {if $workArr[$k]['counter'] gt 0}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['refund_num']/$workArr[$k]['counter']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money'],2);?></td>
+                            {if $workArr[$k]['base_grand_total'] gt 0}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money']/$workArr[$k]['base_grand_total']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                         </tr>
+                         {/foreach}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">合计</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['create_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['counter'];?></td>
+                            <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['base_grand_total'],2);?></td>
+                            <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['coupon'],2);?></td>
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['replacement_num'],2);?></td>
+                            {if $workArr['one']['counter'] gt 0 } 
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['replacement_num']/$workArr['one']['counter']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['refund_num'],2);?></td>
+                            {if $workArr['one']['counter'] gt 0}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr['one']['refund_num']/$workArr['one']['counter']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['total_refund_money'],2);?></td>
+                            {if $workArr['one']['base_grand_total'] gt 0}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['total_refund_money']/$workArr['one']['base_grand_total']*100,2);?></td>
+                            {else/}
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                            {/if}
+                         </tr>                        
+                         {/if}                                                                                                                                                     							 
+                    </table>
+                </div>
+                <div class="widget-body no-padding" style="width: 100%; ">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">B组</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
+                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
+                        </tr>
+                        </thead>
+                            {if !empty($infoTwo)}
+                            {foreach name="infoTwo" item="vo" key='k'}
+                             <tr>
+                                <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
+                                <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
+                                <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['replacement_num'],2);?></td>
+                                {if $workArr[$k]['counter'] gt 0 } 
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['replacement_num']/$workArr[$k]['counter']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['refund_num'],2);?></td>
+                                {if $workArr[$k]['counter'] gt 0}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['refund_num']/$workArr[$k]['counter']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money'],2);?></td>
+                                {if $workArr[$k]['base_grand_total'] gt 0}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money']/$workArr[$k]['base_grand_total']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                             </tr>
+                             {/foreach}
+                             <tr>
+                                <td style="text-align: center; vertical-align: middle;">合计</td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['create_num'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['counter'];?></td>
+                                <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['base_grand_total'],2);?></td>
+                                <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['coupon'],2);?></td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['replacement_num'],2);?></td>
+                                {if $workArr['two']['counter'] gt 0 } 
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['replacement_num']/$workArr['two']['counter']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['refund_num'],2);?></td>
+                                {if $workArr['two']['counter'] gt 0}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr['two']['refund_num']/$workArr['two']['counter']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['total_refund_money'],2);?></td>
+                                {if $workArr['two']['base_grand_total'] gt 0}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['total_refund_money']/$workArr['two']['base_grand_total']*100,2);?></td>
+                                {else/}
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
+                                {/if}
+                             </tr>                            
+                             {/if}                                                                                                                                                    							 
+                    </table>
+                </div>
+                <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
+                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">
+                    <div class="col-xs-12 col-md-9">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="control-label col-xs-2">工单平台</label>
+                            <div class="col-xs-4">
+                                <select  id="order_platform_one" data-rule="required" class="form-control" name="order_platform">
+                                    {foreach name="orderPlatformList" item="vo"}
+                                    {if $key == $platform}
+                                    <option value="{$key}" selected="selected">{$vo}</option>
+                                    {else}
+                                    <option value="{$key}">{$vo}</option>
+                                    {/if}
+                                    {/foreach}
+                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                </select>
+                            </div>
+                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
+                            <div class="col-xs-4">
+                                <input type="hidden" class="form-control operate" name="create_time_one-operate" data-name="create_time_one" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_one"  placeholder="创建时间" id="create_time_one" value="" data-index="14">
+                            </div>
+                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
+                                <input type="button" class="btn btn-success echart1-btn" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_one reset" value="重置"></div>                                                        
+                        </div>                                                                 
+                    </div>
+                  </form>                    
+                    <div class="col-lg-12">
+                        <div style="float: left;width:60%;">
+                            <label for="create_time" class="control-label col-xs-1"
+                                style="font-weight: bold;width: 150px;margin-top: 20px;">工单问题类型统计</label>
+                            <div id="echart1" style="float: left;height:400px;width:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">
+                 <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">
+                    <div class="col-xs-12 col-md-9">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="control-label col-xs-2">工单平台</label>
+                            <div class="col-xs-4">
+                                <select  id="order_platform_two" data-rule="required" class="form-control" name="order_platform">
+                                    {foreach name="orderPlatformList" item="vo"}
+                                    {if $key == $platform}
+                                    <option value="{$key}" selected="selected">{$vo}</option>
+                                    {else}
+                                    <option value="{$key}">{$vo}</option>
+                                    {/if}
+                                    {/foreach}
+                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                </select>
+                            </div>
+                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
+                            <div class="col-xs-4">
+                                <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
+                            </div>
+                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
+                                <input type="button" class="btn btn-success echart3-btn" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_two reset" value="重置"></div>                                                        
+                        </div>                                                                 
+                    </div>
+                  </form>                    
+                    <div class="col-lg-12">
+                        <div class="col-lg-12" style="float: left;">
+                            <label for="create_time" class="control-label col-xs-1"
+                                style="font-weight: bold;width: 150px;margin-top:20px;">工单处理措施统计</label>
+                                <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
+                        </div>
+                    </div>
+                </div>                                                
+            </div>
+            <div class="tab-panes fade active in">
+                <div class="widget-body no-padding" style="width: 48%; float:left;margin-top: 20px;">
+                    <p><span>工单处理概况</span></p>
+                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">                    
+                        <div class="col-xs-12 col-md-9">
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="col-xs-4">
+                                    <input type="hidden" class="form-control operate" name="create_time_workorder-operate" data-name="create_time_two" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_workorder"  placeholder="创建时间" id="create_time_workorder" value="" data-index="14">
+                                </div>
+                                <div class="col-sm-4" style="margin-bottom: 20px;">
+                                    <input type="button" class="btn btn-success workorder-btn" value="提交">
+                                    <input type="reset" class="btn btn-default btn-create_time_workorder reset" value="重置">
+                                </div>                                                        
+                            </div>                                                                 
+                        </div>
+                    </form> 
+                    <table id="workorder-left" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">措施</th>
+                            {if isset($examineArr)}
+                            {foreach name="examineArr" item="vo" key="k"}
+                            <th style="text-align: center; vertical-align: middle;">{$vo}</th>
+                            {/foreach}
+                            {/if}
+                        </tr>
+                        </thead>
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">未超时未审批</td>
+                                 {if isset($examineArr)}
+                                 {foreach name="examineArr" item="vo" key="k"}
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></td>
+                                 {/foreach}
+                                 {/if}
+                             </tr>
+                             <tr>
+                                <td style="text-align: center; vertical-align: middle;">未超时已审批</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></td>
+                                {/foreach}
+                                {/if}
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; vertical-align: middle;">超时未审批</td>  
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></td>
+                                {/foreach}
+                                {/if}
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; vertical-align: middle;">超时已审批</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_checked'];?></th>
+                                {/foreach}
+                                {/if}
+                            </tr>                                                                                                                                                                                                                                        							 
+                    </table>
+                    <table id="workorder-right" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">措施</th>
+                            <th style="text-align: center; vertical-align: middle;">未超时未处理</th>
+                            <th style="text-align: center; vertical-align: middle;">未超时已处理</th>
+                            <th style="text-align: center; vertical-align: middle;">超时未处理</th>
+                            <th style="text-align: center; vertical-align: middle;">超时已处理</th>
+                        </tr>
+                        </thead>
+                            {if isset($step)}
+                            {foreach name="step" item="vo" key="k"}
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handle'];?></td>
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handled'];?></td>
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handle'];?></td>
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handled'];?></td>
+                             </tr>
+                             {/foreach}
+                             {/if}                                                                                                                                                                                                                                        							 
+                    </table>                                       
+                </div>
+                <div class="widget-body no-padding" style="width: 48%; float:right;margin-top: 20px;">
+                    <p><span>跟单概况</span></p>
+                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">                    
+                        <div class="col-xs-12 col-md-9">
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="col-xs-4">
+                                    <input type="hidden" class="form-control operate" name="create_time_warehouse-operate" data-name="create_time_warehouse" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_warehouse"  placeholder="创建时间" id="create_time_warehouse" value="" data-index="14">
+                                </div>
+                                <div class="col-sm-4" style="margin-bottom: 20px;">
+                                    <input type="button" class="btn btn-success warehouse-btn" value="提交">
+                                    <input type="reset" class="btn btn-default btn-create_time_warehouse reset" value="重置">
+                                </div>                                                        
+                            </div>                                                                 
+                        </div>
+                    </form>                     
+                    <table id="warehouse" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">跟单概况</th>
+                            <th style="text-align: center; vertical-align: middle;">未超时未处理</th>
+                            <th style="text-align: center; vertical-align: middle;">未超时已处理</th>
+                            <th style="text-align: center; vertical-align: middle;">超时未处理</th>
+                            <th style="text-align: center; vertical-align: middle;">超时已处理</th>
+                        </tr>
+                        </thead>
+                            {if isset($warehouse_problem_type)}
+                             {foreach name="warehouse_problem_type" item="vo" key="k"}
+                             <tr>
+                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handle'];?></td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handled'];?></td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handle'];?></td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handled'];?></td>
+                             </tr>
+                             {/foreach}
+                             {/if}                                                                                                                                                   							 
+                    </table>
+                </div>                
+            </div>                                                                       
+        </div>     		
+	</div>
+</div>
