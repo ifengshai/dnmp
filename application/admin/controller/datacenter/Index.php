@@ -1172,10 +1172,10 @@ class Index extends Backend
         }
         list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-        $total = $this->item
-            ->where($where)
-            ->order($sort, $order)
-            ->count();
+        // $total = $this->item
+        //     ->where($where)
+        //     ->order($sort, $order)
+        //     ->count();
 
         $list = $this->item
             ->where($where)
@@ -1223,6 +1223,8 @@ class Index extends Backend
         unset($v);
 
         $list = collection($list)->toArray();
+        dump($list);
+        exit;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1248,6 +1250,7 @@ class Index extends Backend
             // $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), 0);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['available_stock']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['on_way_stock']);
+        }    
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
@@ -1300,6 +1303,6 @@ class Index extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-     }
+     
     }
 }
