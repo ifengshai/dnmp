@@ -3627,6 +3627,7 @@ EOF;
         list($where) = $this->buildparams();
         $list = $this->model
             ->where($where)
+            ->where($map)
             ->where($addWhere)
             ->where($map)
             ->select();

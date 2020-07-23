@@ -259,12 +259,12 @@ order by sfoi.item_id asc limit 1000";
             $final_params['od_add'] = urldecode($final_params['od_add']);
 
             //判断双ADD还是单ADD
-            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
+            if ((float) $final_params['os_add'] && (float) $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                if ($items[$order_item_key]['od_add'] && $final_params['od_add'] * 1 != 0) {
+                if ($items[$order_item_key]['od_add'] && (float) $final_params['od_add'] * 1 != 0) {
                     $items[$order_item_key]['total_add'] = $final_params['od_add'];
                 } else {
                     $items[$order_item_key]['total_add'] = $final_params['os_add'];
@@ -2056,48 +2056,67 @@ order by sfoi.item_id asc limit 1000";
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-
+       
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
 
         //查询产品库sku
+        $zeelool_sku = [];
         foreach ($zeelool_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $zeelool_sku)) {
+                unset($zeelool_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $zeelool_list[$k]['true_sku'] = $true_sku;
             $zeelool_list[$k]['zeelool_sku'] = $sku;
+            $zeelool_sku[] = $sku;
         }
 
 
         $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
+        $voogueme_sku = [];
         foreach ($voogueme_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $voogueme_sku)) {
+                unset($voogueme_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $voogueme_list[$k]['true_sku'] = $true_sku;
             $voogueme_list[$k]['voogueme_sku'] = $sku;
+            $voogueme_sku[] = $sku;
         }
 
         // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
+        $nihao_sku = [];
         foreach ($nihao_list as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v['sku']);
             $sku = $arr[0] . '-' . $arr[1];
+            if (in_array($sku, $nihao_sku)) {
+                unset($nihao_list[$k]);
+                continue;
+            }
             $true_sku = $sku_list[$sku];
             $nihao_list[$k]['true_sku'] = $true_sku;
             $nihao_list[$k]['nihao_sku'] = $sku;
+            $nihao_sku[] = $sku;
         }
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
+      
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -2122,7 +2141,7 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-
+    
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
         // $where['a.label'] = 1;
@@ -2200,6 +2219,9 @@ order by sfoi.item_id asc limit 1000";
 
         $map = [];
         foreach ($list as $k => $v) {
+            $zeelool_num = 0;
+            $voogueme_num = 0;
+            $nihao_num = 0;
             if ($v['grade'] == 'A+' || $v['grade'] == 'A') {
                 if ($v['zeelool_sku']) {
                     $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
@@ -2221,6 +2243,7 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
+              
                 $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2, 2);
             }
 
@@ -2262,7 +2285,6 @@ order by sfoi.item_id asc limit 1000";
                 }
             }
         }
-
         $map = [];
         $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
         $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-30 day")), date("Y-m-d 00:00:00", time())]];
@@ -4049,13 +4071,12 @@ order by sfoi.item_id asc limit 1000";
     {
 
         $skus = [
-            'OP049594-01',
-            'OP01860-04',
+            'OA01901-02'
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = 0;
+            $data['real_time_qty'] = 157;
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -4080,8 +4101,18 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'OP049594-01',
-            'OP01860-04',
+            'FP0044-06',
+            'FX0206-01',
+            'FA0457-01',
+            'FP0341-01',
+            'FA0457-02',
+            'VHP0189-01',
+            'FX0206-03',
+            'FP0886-02',
+            'FP0886-01',
+            'OA01451-03',
+            'OT652438-02',
+            'OT652438-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4141,8 +4172,18 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'OP049594-01',
-            'OP01860-04',
+            'FP0044-06',
+            'FX0206-01',
+            'FA0457-01',
+            'FP0341-01',
+            'FA0457-02',
+            'VHP0189-01',
+            'FX0206-03',
+            'FP0886-02',
+            'FP0886-01',
+            'OA01451-03',
+            'OT652438-02',
+            'OT652438-04',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4190,8 +4231,7 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'OP049594-01',
-            'OP01860-04',
+            'OA01901-02'
         ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {

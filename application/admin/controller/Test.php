@@ -37,33 +37,81 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    /**
+     * 重启跟踪2-7状态的物流
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/16 09:16:20 
+     * @return void
+     */
+    public function linshi_retrack()
+    {
+        $order_shipment = Db::name('order_node')->field('track_number as number')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['<=', '2020-06-01 00:00:00']])->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        $res = array_chunk($order_shipment, 40);
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        echo count($res);
+        foreach ($res as $k => $v) {
+           
+            $track = $trackingConnector->retrackMulti($v);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($track) . "\r\n", FILE_APPEND);
+            usleep(200000);
+            echo $k . "\n";
+        }
+        echo 'is ok';
+    }
+
+
 
 
     /**
-     * 批量 获取物流明细
-     * 莫删除
+     * 临时批量注册--lixiang
      */
-    public function track_ship_date()
+    public function linshi_reg_track()
     {
-        $this->new_track_shipment_num(1);
-        exit;
-        $this->track_shipment_num(2);
-        $this->track_shipment_num(3);
+        $order_shipment = Db::name('z_linshi')->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['yundanhao'],
+                'carrier' => '21051'
+            ]]);
+
+            $update['17status'] = $trackInfo['data']['accepted'][0]['track']['e'];
+            Db::name('z_linshi')->where('id', $v['id'])->update($update);
+
+            sleep(1);
+
+            echo  $k . "ok \n";
+        }
+        echo "all ok \n";
     }
 
-    public function new_track_shipment_num()
+    protected function regitster17Track($params = [])
+    {
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $track = $trackingConnector->registerMulti($params);
+        return $track;
+    }
+
+    public function new_track_test2()
     {
 
-        $order_shipment = Db::name('order_node')->where('node_type', '<', '7')->where('delivery_time is not null')->select();
+        $order_shipment = Db::name('order_node')->where(['node_type' => 10, 'order_node' => 3, 'shipment_type' => 'USPS'])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
         $trackingConnector = new TrackingConnector($this->apiKey);
 
         foreach ($order_shipment as $k => $v) {
             //先把主表状态更新为2-7
-            $update['order_node'] = 2;
-            $update['node_type'] = 7;
-            Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+            // $update['order_node'] = 2;
+            // $update['node_type'] = 7;
+            // Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
 
             $title = strtolower(str_replace(' ', '-', $v['title']));
 
@@ -117,14 +165,80 @@ class Test extends Backend
         echo 'ok';
     }
 
-    //fedex
-    public function new_fedex_data($data, $add)
-    {
-        $sel_num = 1; //抓取第二条
-        $trackdetail = array_reverse($data['z1']);
-        $all_num = count($trackdetail);
 
-        $order_node_detail['order_node'] = 3;
+    public function new_track_test()
+    {
+
+        $order_shipment = Db::name('order_node')->where(['node_type' => ['<>', 40], 'order_node' => 3, 'shipment_type' => 'USPS'])->select();
+        $order_shipment = collection($order_shipment)->toArray();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach ($order_shipment as $k => $v) {
+            //先把主表状态更新为2-7
+            // $update['order_node'] = 2;
+            // $update['node_type'] = 7;
+            // Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+                /* 'number' => '92001902551559000101352584', //usps郭伟峰
+                'carrier' => '21051' */
+            ]]);
+
+            $add['site'] = $v['site'];
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $v['order_number'];
+            $add['shipment_type'] = $v['shipment_type'];
+            $add['shipment_data_type'] = $v['shipment_data_type'];
+            $add['track_number'] = $v['track_number'];
+
+            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+
+
+                $this->tongyong($trackdata, $add);
+
+                // if (stripos($v['shipment_type'], 'USPS') !== false) {
+                //     if ($v['shipment_data_type'] == 'USPS_1') {
+                //         //郭伟峰
+                //         $this->usps_1_data($trackdata, $add);
+                //     }
+                //     if ($v['shipment_data_type'] == 'USPS_2') {
+                //         //加诺
+                //         $this->usps_2_data($trackdata, $add);
+                //     }
+                // }
+
+                // if (stripos($v['shipment_type'], 'DHL') !== false) {
+                //     $this->new_dhl_data($trackdata, $add);
+                // }
+
+                // if (stripos($v['shipment_type'], 'fede') !== false) {
+                //     $this->new_fedex_data($trackdata, $add);
+                // }
+            }
+            echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
+            usleep(200000);
+        }
+        echo 'ok';
+    }
+
+
+    //usps_1  郭伟峰
+    public function tongyong($data, $add)
+    {
         $order_node_detail['handle_user_id'] = 0;
         $order_node_detail['handle_user_name'] = 'system';
         $order_node_detail['site'] = $add['site'];
@@ -134,161 +248,146 @@ class Test extends Backend
         $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
         $order_node_detail['track_number'] = $add['track_number'];
 
-        if ($data['e'] != 0) {
-            foreach ($trackdetail as $k => $v) {
-                $add['create_time'] = $v['a'];
-                $add['content'] = $v['z'];
-                $add['courier_status'] = $data['e'];
-                $count = Db::name('order_node_courier')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'content' => $add['content']])->count();
-                if ($count < 1) {
-                    Db::name('order_node_courier')->insert($add); //插入物流日志表
-                }
+        if ($data['e'] == 40) {
 
-                //上网
-                if ($k == $sel_num) {
-                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 8;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 8;
-                        $order_node_detail['content'] = $this->str1;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
-                //运输中
-                if ($k == $sel_num + 1) {
-                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 10;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 10;
-                        $order_node_detail['content'] = $this->str3;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
-
-                //到达目的国
-                if (stripos($v['z'], 'International shipment release - Import') !== false) {
-                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                    if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) {
-                        $update_order_node['order_node'] = 3;
-                        $update_order_node['node_type'] = 11;
-                        $update_order_node['update_time'] = $v['a'];
-                        Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                        $order_node_detail['node_type'] = 11;
-                        $order_node_detail['content'] = $this->str4;
-                        $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                    }
-                }
-
-                //结果
-                if ($all_num - 1 == $k) {
-                    if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
-                        $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
-                        if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
-                            $update_order_node['order_node'] = 4;
-                            $update_order_node['node_type'] = $data['e'];
-                            $update_order_node['update_time'] = $v['a'];
-                            if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间 
-                            }
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['order_node'] = 4;
-                            $order_node_detail['node_type'] = $data['e'];
-                            switch ($data['e']) {
-                                case 30:
-                                    $order_node_detail['content'] = $this->str30;
-                                    break;
-                                case 35:
-                                    $order_node_detail['content'] = $this->str35;
-                                    break;
-                                case 40:
-                                    $order_node_detail['content'] = $this->str40;
-                                    break;
-                                case 50:
-                                    $order_node_detail['content'] = $this->str50;
-                                    break;
-                            }
-
-                            $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                        }
-                        if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40) {
-                            $update_order_node['order_node'] = 4;
-                            $update_order_node['node_type'] = $data['e'];
-                            $update_order_node['update_time'] = $v['a'];
-                            if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
-                            }
-                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-
-                            $order_node_detail['order_node'] = 4;
-                            $order_node_detail['node_type'] = $data['e'];
-                            switch ($data['e']) {
-                                case 30:
-                                    $order_node_detail['content'] = $this->str30;
-                                    break;
-                                case 35:
-                                    $order_node_detail['content'] = $this->str35;
-                                    break;
-                                case 40:
-                                    $order_node_detail['content'] = $this->str40;
-                                    break;
-                                case 50:
-                                    $order_node_detail['content'] = $this->str50;
-                                    break;
-                            }
-
-                            $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-                        }
-                    }
-                }
+            $add['create_time'] = $data['z0']['a'];
+            $add['content'] = $data['z0']['z'];
+            $add['courier_status'] = $data['e'];
+            $count = Db::name('order_node_courier')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'content' => $add['content']])->count();
+            if ($count < 1) {
+                Db::name('order_node_courier')->insert($add); //插入物流日志表
             }
+
+            $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+            $update_order_node['order_node'] = 4;
+            $update_order_node['node_type'] = $data['e'];
+            $update_order_node['update_time'] = $data['z0']['a'];
+            $update_order_node['signing_time'] = $data['z0']['a']; //更新签收时间
+            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+
+            $order_node_detail['order_node'] = 4;
+            $order_node_detail['node_type'] = $data['e'];
+            switch ($data['e']) {
+                case 30:
+                    $order_node_detail['content'] = $this->str30;
+                    break;
+                case 35:
+                    $order_node_detail['content'] = $this->str35;
+                    break;
+                case 40:
+                    $order_node_detail['content'] = $this->str40;
+                    break;
+                case 50:
+                    $order_node_detail['content'] = $this->str50;
+                    break;
+            }
+
+            $order_node_detail['create_time'] = $data['z0']['a'];
+            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
         }
     }
 
-    //DHL
-    public function new_dhl_data($data, $add)
+
+    /**
+     * 批量 获取物流明细
+     * 莫删除
+     */
+    public function track_ship_date()
     {
-        $sel_num = 1; //抓取第二条
+        $this->new_track_shipment_num(1);
+        exit;
+    }
+
+    public function new_track_shipment_num()
+    {
+        $order_shipment = Db::name('order_node')->where('node_type', '<>', 40)->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        echo count($order_shipment);
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        foreach ($order_shipment as $k => $v) {
+            if ($k < 36869) {
+                continue;
+            }
+            //先把主表状态更新为2-7
+            // $update['order_node'] = 2;
+            // $update['node_type'] = 7;
+            // Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
+
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                'number' => $v['track_number'],
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+                /* 'number' => '92001902551559000101352584', //usps郭伟峰
+                'carrier' => '21051' */
+            ]]);
+
+            $add['site'] = $v['site'];
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $v['order_number'];
+            $add['shipment_type'] = $v['shipment_type'];
+            $add['shipment_data_type'] = $v['shipment_data_type'];
+            $add['track_number'] = $v['track_number'];
+
+            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+
+                $this->tongyong_data($trackdata, $add);
+            }
+            echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
+            usleep(200000);
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 通用物流处理逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/15 10:29:31 
+     * @param [type] $data
+     * @param [type] $add
+     * @return void
+     */
+    public function tongyong_data($data, $add = [])
+    {
         $trackdetail = array_reverse($data['z1']);
+        $time = '';
         $all_num = count($trackdetail);
 
-        $order_node_detail['order_node'] = 3;
-        $order_node_detail['handle_user_id'] = 0;
-        $order_node_detail['handle_user_name'] = 'system';
-        $order_node_detail['site'] = $add['site'];
-        $order_node_detail['order_id'] = $add['order_id'];
-        $order_node_detail['order_number'] = $add['order_number'];
-        $order_node_detail['shipment_type'] = $add['shipment_type'];
-        $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
-        $order_node_detail['track_number'] = $add['track_number'];
+        if (!empty($trackdetail)) {
+            $order_node_detail['order_node'] = 3;
+            $order_node_detail['handle_user_id'] = 0;
+            $order_node_detail['handle_user_name'] = 'system';
+            $order_node_detail['site'] = $add['site'];
+            $order_node_detail['order_id'] = $add['order_id'];
+            $order_node_detail['order_number'] = $add['order_number'];
+            $order_node_detail['shipment_type'] = $add['shipment_type'];
+            $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
+            $order_node_detail['track_number'] = $add['track_number'];
 
-        if ($data['e'] != 0) {
+            //获取物流明细表中的描述
+            $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
             foreach ($trackdetail as $k => $v) {
-                $add['create_time'] = $v['a'];
-                $add['content'] = $v['z'];
-                $add['courier_status'] = $data['e'];
-                $count = Db::name('order_node_courier')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'content' => $add['content']])->count();
-                if ($count < 1) {
+                if (!in_array($v['z'], $contents)) {
+                    $add['create_time'] = $v['a'];
+                    $add['content'] = $v['z'];
+                    $add['courier_status'] = $data['e'];
                     Db::name('order_node_courier')->insert($add); //插入物流日志表
                 }
-
-                //上网
-                if ($k == $sel_num) {
-                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                if ($k == 1) {
+                    //更新上网
+                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
                     if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
@@ -301,14 +400,16 @@ class Test extends Backend
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                     }
                 }
-                //运输中
-                if ($k == $sel_num + 1) {
-                    $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                if ($k == 2) {
+                    //更新运输
+                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
+
                     if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 10;
                         $update_order_node['update_time'] = $v['a'];
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
+
 
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
@@ -2333,63 +2434,165 @@ class Test extends Backend
                     $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person_new'];
                     $list[$k + 5]['shipment_type'] = '';
                     $list[$k + 5]['track_number'] = '';
+=======
+>>>>>>> origin/master
 
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 5;
-                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
+                        $order_node_detail['node_type'] = 10;
+                        $order_node_detail['content'] = $this->str3;
+                        $order_node_detail['create_time'] = $v['a'];
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
                 }
+                //结果
+                if ($all_num - 1 == $k) {
+                    if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
+                        $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) || ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
+                            $update_order_node['order_node'] = 4;
+                            $update_order_node['node_type'] = $data['e'];
+                            $update_order_node['update_time'] = $v['a'];
+                            if ($data['e'] == 40) {
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
+                            }
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
-                if ($v['custom_is_delivery_new'] == 1) {
-                    $list[$k + 6]['order_node'] = 2;
-                    $list[$k + 6]['node_type'] = 6; //质检
-                    $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
-                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at_new'];
-                    $list[$k + 6]['site'] = 2;
-                    $list[$k + 6]['order_id'] = $v['entity_id'];
-                    $list[$k + 6]['order_number'] = $v['increment_id'];
-                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
-                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person_new'];
-                    $list[$k + 6]['shipment_type'] = '';
-                    $list[$k + 6]['track_number'] = '';
+                            $order_node_detail['order_node'] = 4;
+                            $order_node_detail['node_type'] = $data['e'];
+                            switch ($data['e']) {
+                                case 30:
+                                    $order_node_detail['content'] = $this->str30;
+                                    break;
+                                case 35:
+                                    $order_node_detail['content'] = $this->str35;
+                                    break;
+                                case 40:
+                                    $order_node_detail['content'] = $this->str40;
+                                    break;
+                                case 50:
+                                    $order_node_detail['content'] = $this->str50;
+                                    break;
+                            }
 
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 6;
-                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
-                }
+                            $order_node_detail['create_time'] = $v['a'];
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
+                        if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40 && $order_node_date['node_type'] != $data['e']) {
+                            $update_order_node['order_node'] = 4;
+                            $update_order_node['node_type'] = $data['e'];
+                            $update_order_node['update_time'] = $v['a'];
+                            if ($data['e'] == 40) {
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
+                            }
+                            Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
-                if ($v['track_number']) {
-                    $list[$k + 7]['order_node'] = 2;
-                    $list[$k + 7]['node_type'] = 7; //出库
-                    $list[$k + 7]['create_time'] = $v['create_time'];
-                    $list[$k + 7]['site'] = 2;
-                    $list[$k + 7]['order_id'] = $v['entity_id'];
-                    $list[$k + 7]['order_number'] = $v['increment_id'];
-                    $list[$k + 7]['shipment_type'] = $v['title'];
-                    $list[$k + 7]['track_number'] = $v['track_number'];
-                    $list[$k + 7]['handle_user_id'] = 0;
-                    $list[$k + 7]['handle_user_name'] = '';
-                    $list[$k + 7]['content'] = '';
+                            $order_node_detail['order_node'] = 4;
+                            $order_node_detail['node_type'] = $data['e'];
+                            switch ($data['e']) {
+                                case 30:
+                                    $order_node_detail['content'] = $this->str30;
+                                    break;
+                                case 35:
+                                    $order_node_detail['content'] = $this->str35;
+                                    break;
+                                case 40:
+                                    $order_node_detail['content'] = $this->str40;
+                                    break;
+                                case 50:
+                                    $order_node_detail['content'] = $this->str50;
+                                    break;
+                            }
 
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 7;
-                    $data['update_time'] = $v['create_time'];
+                            $order_node_detail['create_time'] = $v['a'];
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
+                    }
                 }
             }
-            $data['shipment_type'] = $v['title'];
-            $data['track_number'] = $v['track_number'];
-
-
-            if ($count > 0) {
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
-            } else {
-                Db::name('order_node')->insert($data);
-            }
-            $this->ordernodedetail->saveAll($list);
-            echo $key . "\n";
         }
-        echo 'ok';
     }
+
+    /**
+     * 获取快递号
+     * @param $title
+     * @return mixed|string
+     */
+    public function getCarrier($title)
+    {
+        $carrierId = '';
+        if (stripos($title, 'post') !== false) {
+            $carrierId = 'chinapost';
+            $title = 'China Post';
+        } elseif (stripos($title, 'ems') !== false) {
+            $carrierId = 'chinaems';
+            $title = 'China Ems';
+        } elseif (stripos($title, 'dhl') !== false) {
+            $carrierId = 'dhl';
+            $title = 'DHL';
+        } elseif (stripos($title, 'fede') !== false) {
+            $carrierId = 'fedex';
+            $title = 'Fedex';
+        } elseif (stripos($title, 'usps') !== false) {
+            $carrierId = 'usps';
+            $title = 'Usps';
+        } elseif (stripos($title, 'yanwen') !== false) {
+            $carrierId = 'yanwen';
+            $title = 'YANWEN';
+        } elseif (stripos($title, 'cpc') !== false) {
+            $carrierId = 'cpc';
+            $title = 'Canada Post';
+        }
+        $carrier = [
+            'dhl' => '100001',
+            'chinapost' => '03011',
+            'chinaems' => '03013',
+            'cpc' =>  '03041',
+            'fedex' => '100003',
+            'usps' => '21051',
+            'yanwen' => '190012'
+        ];
+        if ($carrierId) {
+            return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
+        }
+        return ['title' => $title, 'carrierId' => $carrierId];
+    }
+
+    /**
+     * 更新物流表状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/05/18 18:16:48 
+     * @return void
+     */
+    protected function setLogisticsStatus($params)
+    {
+        switch ($params['site']) {
+            case 1:
+                $url = config('url.zeelool_url');
+                break;
+            case 2:
+                $url = config('url.voogueme_url');
+                break;
+            case 3:
+                $url = config('url.nihao_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+        unset($params['site']);
+        $url = $url . 'magic/order/logistics';
+        $client = new Client(['verify' => false]);
+        //请求URL
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        return $res;
+    }
+
+
     /**
      * 获取订单节点数据
      *
@@ -2455,66 +2658,66 @@ class Test extends Backend
             $data['order_number'] = $v['increment_id'];
             $data['update_time'] = $v['created_at'];
             //打标签
-            if ($v['custom_print_label_new'] == 1) {
+            if ($v['custom_print_label'] == 1) {
                 $list[$k + 2]['order_node'] = 1;
                 $list[$k + 2]['node_type'] = 2;
                 $list[$k + 2]['content'] = 'Order is under processing';
-                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at_new'];
+                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at'];
                 $list[$k + 2]['site'] = 4;
                 $list[$k + 2]['order_id'] = $v['entity_id'];
                 $list[$k + 2]['order_number'] = $v['increment_id'];
-                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person_new']];
-                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person_new'];
+                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person']];
+                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person'];
                 $list[$k + 2]['shipment_type'] = '';
                 $list[$k + 2]['track_number'] = '';
 
                 $data['order_node'] = 1;
                 $data['node_type'] = 2;
-                $data['update_time'] = $v['custom_print_label_created_at_new'];
+                $data['update_time'] = $v['custom_print_label_created_at'];
             }
 
             //判断订单是否为仅镜架
             if ($v['custom_order_prescription_type'] == 1) {
-                if ($v['custom_is_match_frame_new'] == 1) {
+                if ($v['custom_is_match_frame'] == 1) {
                     $list[$k + 3]['order_node'] = 2;
                     $list[$k + 3]['node_type'] = 3;
                     $list[$k + 3]['content'] = 'The product(s) is/are ready, waiting for Quality Inspection';
-                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at'];
                     $list[$k + 3]['site'] = 4;
                     $list[$k + 3]['order_id'] = $v['entity_id'];
                     $list[$k + 3]['order_number'] = $v['increment_id'];
-                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
-                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person'];
                     $list[$k + 3]['shipment_type'] = '';
                     $list[$k + 3]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at'];
                 }
 
-                if ($v['custom_is_delivery_new'] == 1) {
+                if ($v['custom_is_delivery'] == 1) {
                     $list[$k + 4]['order_node'] = 2;
                     $list[$k + 4]['node_type'] = 6;
                     $list[$k + 4]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
-                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at'];
                     $list[$k + 4]['site'] = 4;
                     $list[$k + 4]['order_id'] = $v['entity_id'];
                     $list[$k + 4]['order_number'] = $v['increment_id'];
-                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
-                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person'];
                     $list[$k + 4]['shipment_type'] = '';
                     $list[$k + 4]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at'];
                 }
 
                 if ($v['track_number']) {
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
-                    $list[$k + 5]['content']  = '';
+                    $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
                     $list[$k + 5]['create_time'] = $v['create_time'];
                     $list[$k + 5]['site'] = 4;
                     $list[$k + 5]['order_id'] = $v['entity_id'];
@@ -2530,77 +2733,77 @@ class Test extends Backend
                 }
             } else {
 
-                if ($v['custom_is_match_frame_new'] == 1) {
+                if ($v['custom_is_match_frame'] == 1) {
                     $list[$k + 3]['order_node'] = 2;
                     $list[$k + 3]['node_type'] = 3; //配镜架
                     $list[$k + 3]['content'] = 'Frame(s) is/are ready, waiting for lenses';
-                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at'];
                     $list[$k + 3]['site'] = 4;
                     $list[$k + 3]['order_id'] = $v['entity_id'];
                     $list[$k + 3]['order_number'] = $v['increment_id'];
-                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
-                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person'];
                     $list[$k + 3]['shipment_type'] = '';
                     $list[$k + 3]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at'];
                 }
 
-                if ($v['custom_is_match_lens_new'] == 1) {
+                if ($v['custom_is_match_lens'] == 1) {
                     $list[$k + 4]['order_node'] = 2;
                     $list[$k + 4]['node_type'] = 4; //配镜片
                     $list[$k + 4]['content'] = 'Lenses production completed, waiting for customizing';
-                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at'];
                     $list[$k + 4]['site'] = 4;
                     $list[$k + 4]['order_id'] = $v['entity_id'];
                     $list[$k + 4]['order_number'] = $v['increment_id'];
-                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person_new']];
-                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person_new'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person'];
                     $list[$k + 4]['shipment_type'] = '';
                     $list[$k + 4]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 4;
-                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
+                    $data['update_time'] = $v['custom_match_lens_created_at'];
                 }
 
-                if ($v['custom_is_send_factory_new'] == 1) {
+                if ($v['custom_is_send_factory'] == 1) {
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 5; //加工
                     $list[$k + 5]['content'] = 'Customizing completed, waiting for Quality Inspection';
-                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at'];
                     $list[$k + 5]['site'] = 4;
                     $list[$k + 5]['order_id'] = $v['entity_id'];
                     $list[$k + 5]['order_number'] = $v['increment_id'];
-                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person_new']];
-                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person_new'];
+                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person']];
+                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person'];
                     $list[$k + 5]['shipment_type'] = '';
                     $list[$k + 5]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 5;
-                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
+                    $data['update_time'] = $v['custom_match_factory_created_at'];
                 }
 
 
-                if ($v['custom_is_delivery_new'] == 1) {
+                if ($v['custom_is_delivery'] == 1) {
                     $list[$k + 6]['order_node'] = 2;
                     $list[$k + 6]['node_type'] = 6; //质检
                     $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
-                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at'];
                     $list[$k + 6]['site'] = 4;
                     $list[$k + 6]['order_id'] = $v['entity_id'];
                     $list[$k + 6]['order_number'] = $v['increment_id'];
-                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
-                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person']];
+                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person'];
                     $list[$k + 6]['shipment_type'] = '';
                     $list[$k + 6]['track_number'] = '';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at'];
                 }
 
                 if ($v['track_number']) {
@@ -2614,7 +2817,7 @@ class Test extends Backend
                     $list[$k + 7]['track_number'] = $v['track_number'];
                     $list[$k + 7]['handle_user_id'] = 0;
                     $list[$k + 7]['handle_user_name'] = '';
-                    $list[$k + 7]['content'] = '';
+                    $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
@@ -2636,179 +2839,58 @@ class Test extends Backend
         }
         echo 'ok';
     }
-    public function update_base_grand_total()
-    {
-        $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
-        $platform = $this->request->get('platform');
-        switch ($platform) {
-            case 1:
-                $model = Db::connect('database.db_zeelool');
-                break;
-            case 2:
-                $model = Db::connect('database.db_voogueme');
-                break;
-            case 3:
-                $model = Db::connect('database.db_nihao');
-                break;
-            case 4:
-                $model = Db::connect('database.db_meeloog');
-                break;
-            default:
-                $model = false;
-                break;
-        }
-        $where['work_platform'] = $platform;
-        $where['base_grand_total'] = 0;
-        //求出所有没有订单金额的工单
-        $result = $this->worklist->where($where)->column('platform_order');
-
-        if (!$result) {
-            echo 1;
-            exit;
-        }
-        $info = $model->name('sales_flat_order')->where('increment_id', 'in', $result)->field('increment_id,base_grand_total')->select();
-        if (!$info) {
-            echo 2;
-            exit;
-        }
-        foreach ($info as $v) {
-            $this->worklist->where(['platform_order' => $v['increment_id']])->update(['base_grand_total' => $v['base_grand_total']]);
-        }
-    }
-
-
-    public function tempprocess()
-    {
-        $data = $this->ordernode->where('shipment_type', 2)->select();
-        foreach ($data as $k => $v) {
-            $shipment_type = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where('order_id', $v['order_id'])->value('title');
-            $this->ordernode->where('id', $v['id'])->update(['shipment_type' => $shipment_type]);
-            echo $k . '\n';
-        }
-    }
-
-    public function demo()
-    {
-
-        $str1 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3410";s:8:"form_key";s:16:"1xAFB996YzQgwr4k";s:3:"qty";i:1;s:7:"options";a:1:{i:3342;s:4:"4038";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:29:{s:19:"frame_regural_price";d:26.949999999999999;s:11:"frame_price";d:26.949999999999999;s:12:"prescription";s:261:"prescription_type=SingleVision&od_sph=-1.25&od_cyl=0.75&od_axis=90&os_sph=-1.25&os_cyl=1.50&os_axis=90&pdcheck=on&pd_r=30.00&pd_l=31.50&pd=&os_add=0.00&od_add=0.00&prismcheck=&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=";s:11:"lenstype_id";s:10:"lenstype_4";s:13:"lenstype_name";s:19:"Blue Light Blocking";s:18:"lenstype_data_name";s:19:"Blue Light Blocking";s:21:"lenstype_regual_price";i:20;s:14:"lenstype_price";d:20;s:19:"lenstype_base_price";d:20;s:7:"lens_id";s:13:"refractive_11";s:9:"lens_name";s:9:"Recommend";s:14:"lens_data_name";s:24:"1.61 Blue Light Blocking";s:10:"lens_index";s:4:"1.61";s:17:"lens_regual_price";i:10;s:10:"lens_price";d:10;s:15:"lens_base_price";d:10;s:8:"color_id";s:0:"";s:10:"color_name";N;s:15:"color_data_name";N;s:18:"color_regual_price";N;s:11:"color_price";i:0;s:16:"color_base_price";N;s:10:"coating_id";s:0:"";s:12:"coating_name";N;s:13:"coating_price";i:0;s:18:"coating_base_price";N;s:3:"rid";N;s:4:"lens";d:30;s:5:"total";d:56.950000000000003;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3342";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"4038";s:11:"custom_view";b:0;}}}';
-        $arr = serialize($str);
-        echo $arr;
-        die;
-    }
-    public function ceshi()
-    {
-        $stime = date("Y-m-d 00:00:00");
-        $etime = date("Y-m-d 23:59:59");
-        $time  = 123;
-    }
-    /**
-     * 批量更改zendesk的is_used字段
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/06/01 10:18:25 
-     * @return void
-     */
-    public function modify_zendesk_used()
-    {
-        $account = Db('zendesk_account')->select();
-        foreach ($account as $key => $value) {
-            $is_exist = Db('zendesk_agents')->where('agent_id', $value['account_id'])->value('id');
-            $is_used = $is_exist ? 2 : 1;
-            Db('zendesk_account')->where('account_id', $value['account_id'])->update(['is_used' => $is_used]);
-            echo $value['id'] . "\n";
-        }
-    }
-    /**
-     * order_node表批量增加魔晶内部使用的物流商
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/06/11 10:42:13 
-     * @return void
-     */
-    public function add_shipment_data_type1()
-    {
-        //查询order_node表中有运营商的数据信息
-        $node_track_list = Db::name('order_node')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
-        $node_track_list = collection($node_track_list)->toArray();
-        foreach ($node_track_list as $item) {
-            $track_num1 = substr($item['track_number'], 0, 4);
-            if ($track_num1 == '9200' || $track_num1 == '9205') {
-                //郭伟峰
-                Db::name('order_node')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
-                echo $item['id'] . "\n";
-                usleep(20000);
-            }
-        }
-        echo "ok";
-        exit;
-    }
-    /**
-     * order_node_courier表批量增加魔晶内部使用的物流商
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/06/11 10:42:13 
-     * @return void
-     */
-    public function add_shipment_data_type2()
-    {
-        ini_set('memory_limit', '512M');
-        //查询order_node_courier表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_courier')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
-        $node_track_list = collection($node_track_list)->toArray();
-        foreach ($node_track_list as $item) {
-            $track_num1 = substr($item['track_number'], 0, 4);
-            if ($track_num1 == '9200' || $track_num1 == '9205') {
-                Db::name('order_node_courier')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
-                echo $item['id'] . "\n";
-                usleep(20000);
-            }
-        }
-        echo "ok";
-        exit;
-    }
-    /**
-     * order_node_detail表批量增加魔晶内部使用的物流商
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/06/11 10:42:13 
-     * @return void
-     */
-    public function add_shipment_data_type3()
-    {
-        ini_set('memory_limit', '512M');
-        //查询order_node_detail表中有运营商的数据信息
-        $node_track_list = Db::name('order_node_detail')->where('shipment_data_type', 'USPS_3')->field('id,track_number')->order('id asc')->select();
-        $node_track_list = collection($node_track_list)->toArray();
-        foreach ($node_track_list as $item) {
-            $track_num1 = substr($item['track_number'], 0, 4);
-            if ($track_num1 == '9200' || $track_num1 == '9205') {
-                Db::name('order_node_detail')->where('id', $item['id'])->update(['shipment_data_type' => 'USPS_1']);
-                echo $item['id'] . "\n";
-                usleep(20000);
-            }
-        }
-        echo "ok";
-        exit;
-    }
 
     public function test1()
     {
         $this->orderNode = new \app\admin\model\OrderNode;
         $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail;
-        $data = $this->orderNode->where('delivery_time>=signing_time')->select();
+        $data = $this->orderNode->where('site', 4)->select();
         $data = collection($data)->toArray();
         foreach ($data as $k => $v) {
-            $res = Db::name('order_node_courier')->field('create_time')->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->order('id asc')->find();
-            $this->orderNode->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->update(['delivery_time' => $res['create_time']]);
-            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number'], 'order_node' => 2, 'node_type' => 7])->update(['create_time' => $res['create_time']]);
+            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => 4])->update(['order_id' => $v['order_id']]);
 
             echo $k . "\n";
         }
 
-        echo 'ok';die;
+        echo 'ok';
+        die;
+    }
+
+    /**
+     * 跑错误单数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/15 16:50:21 
+     * @return void
+     */
+    public function  test01()
+    {
+        $this->orderNode = new \app\admin\model\OrderNode;
+        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail();
+        $this->orderNodeCourier = new \app\admin\model\OrderNodeCourier();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $data = $this->orderNode->where(['order_id' => ['<', 15000], 'site' => ['<>', 4]])->select();
+        foreach ($data as $k => $v) {
+            if ($v['site'] == 1) {
+                $res = $this->zeelool->where(['increment_id' => $v['order_number']])->find();
+            } elseif ($v['site'] == 2) {
+                $res = $this->voogueme->where(['increment_id' => $v['order_number']])->find();
+            } elseif ($v['site'] == 3) {
+                $res = $this->nihao->where(['increment_id' => $v['order_number']])->find();
+            }
+
+            if ($res) {
+                $this->orderNode->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+            } else {
+                $this->orderNode->where(['id' => $v['id']])->delete();
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+            }
+        }
     }
 }

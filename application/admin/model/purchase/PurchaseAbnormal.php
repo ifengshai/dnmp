@@ -25,8 +25,17 @@ class PurchaseAbnormal extends Model
     ];
     
 
+    //关联模型
+    public function supplier()
+    {
+        return $this->belongsTo('Supplier', 'supplier_id', '', [], 'left')->setEagerlyType(0);;
+    }
     
-
+    //关联模型
+    public function purchase()
+    {
+        return $this->belongsTo('PurchaseOrder', 'purchase_id', '', [], 'left')->setEagerlyType(0);;
+    }
 
 
 

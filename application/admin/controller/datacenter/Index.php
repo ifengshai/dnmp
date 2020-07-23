@@ -34,6 +34,7 @@ class Index extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
@@ -604,6 +605,8 @@ class Index extends Backend
                     $res = $this->nihao->getOrderSalesNumTop30([], $map);
                 } elseif ($params['site'] == 4) {
                     $res = $this->meeloog->getOrderSalesNumTop30([], $map);
+                }elseif  ($params['site'] == 5){
+                    $res = $this->wesee->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
             }
@@ -643,6 +646,11 @@ class Index extends Backend
                     $list = $this->meeloog->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(4);
+                }elseif ($params['site'] == 5){
+                    //查询对应平台销量
+                    $list = $this->wesee->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(5);                    
                 }
                 $productInfo = $this->item->getSkuInfo();
                 $list = $list ?? [];
@@ -658,7 +666,17 @@ class Index extends Backend
                     $i++;
                 }
             }
+            if(array_filter($result)>0){
+                $sortField = array_column($result,'available_stock');
+                //可用库存倒叙排列
+                if(($params['sort'] == 'available_stock') && ($params['order'] == 'desc')){
+                    array_multisort($sortField,SORT_DESC,$result);
+                //可用库存正序排列    
+                }elseif(($params['sort'] == 'available_stock') && ($params['order'] == 'asc')){
+                    array_multisort($sortField,SORT_ASC,$result);
+                }                
 
+            }
             return json(['code' => 1, 'data' => $json, 'rows' => $result]);
         }
         $this->assign('create_time', $create_time);
@@ -1124,5 +1142,163 @@ class Index extends Backend
         $track = $track->getStatusNumberCount($starttime, $endtime);
         dump($track);
         die;
+    }
+    /**
+     * 导出销量统计
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-07-23 14:06:24
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere.= " AND id IN ({$ids})";
+        }
+        //统计三个站销量
+        //自定义时间搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['created_at']) {
+            $createat = explode(' ', $filter['created_at']);
+            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            unset($filter['created_at']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        } else {
+            $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00"), date("Y-m-d H:i:s", time())]];
+        }
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+        $total = $this->item
+            ->where($where)
+            ->order($sort, $order)
+            ->count();
+
+        $list = $this->item
+            ->where($where)
+            ->order($sort, $order)
+            ->limit($offset, $limit)
+            ->select();
+
+        foreach ($list as &$v) {
+            //sku转换
+            $v['z_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 1);
+
+            $v['v_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 2);
+
+            $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
+
+            $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+            $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
+        }
+        unset($v);
+
+        $z_sku = array_column($list, 'z_sku');
+        $v_sku = array_column($list, 'v_sku');
+        $n_sku = array_column($list, 'n_sku');
+        $m_sku = array_column($list, 'm_sku');
+        $w_sku = array_column($list, 'w_sku');
+        //获取三个站销量数据
+        $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
+        $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
+        $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
+        $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
+        $weese = $this->weese->getOrderSalesNum($w_sku,$map);
+        //重组数组
+        foreach ($list as &$v) {
+
+            $v['z_num'] = round($zeelool[$v['z_sku']]) ?? 0;
+
+            $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
+
+            $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
+
+            $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
+            $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
+            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
+        }
+        unset($v);
+
+        $list = collection($list)->toArray();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
+            ->setCellValue("B1", "z站销量")
+            ->setCellValue("C1", "v站销量");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "nihao站销量")
+            ->setCellValue("E1", "M站销量");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
+            ->setCellValue("G1", "可用库存");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['z_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['v_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['w_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+       
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '销量数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+     }
     }
 }
