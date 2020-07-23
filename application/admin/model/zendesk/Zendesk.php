@@ -407,7 +407,7 @@ class Zendesk extends Model
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
                     ->join('fa_admin a','c.due_id=a.id')
-                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden']])
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
