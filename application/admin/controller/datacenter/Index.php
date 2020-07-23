@@ -1230,11 +1230,11 @@ class Index extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
             ->setCellValue("B1", "z站销量")
             ->setCellValue("C1", "v站销量");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "nihao站销量")
-             ->setCellValue("E1", "M站销量");
-         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
-             ->setCellValue("G1", "可用库存");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "可用库存")
+             ->setCellValue("E1", "在途库存");
+        //  $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
+        //      ->setCellValue("G1", "可用库存");
+        // $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
 
         foreach ($list as $key => $value) {
