@@ -408,7 +408,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     }
                     i++;
                 });
-                
+
                 if(status == 1){
                     layer.msg('重复的Ticket Id');
                     return false;

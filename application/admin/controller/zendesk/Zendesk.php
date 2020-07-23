@@ -1150,7 +1150,9 @@ DOC;
                 $this->error("请点击add");
             }
             foreach ($params['ticket_id'] as $val){
-                $tickets = $this->model->where('ticket_id',$val)->find();
+                $where['ticket_id'] = $val;
+                $where['type'] = $params['site'];
+                $tickets = $this->model->where($where)->find();
                 if($tickets->id){
                     //存在，更新
                     $intersects[] = $val;
