@@ -1273,19 +1273,15 @@ class NewProduct extends Backend
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
-            $this->error($e->getMessage());
+            echo $e->getMessage();
         } catch (PDOException $e) {
             Db::rollback();
-            $this->error($e->getMessage());
+            echo $e->getMessage();
         } catch (Exception $e) {
             Db::rollback();
-            $this->error($e->getMessage());
+            echo $e->getMessage();
         }
-        if ($result !== false) {
-            $this->success('操作成功！！');
-        } else {
-            $this->error(__('No rows were updated'));
-        }
+    
     }
 
     /**

@@ -208,7 +208,7 @@
                 </tr>
                 {if $list}
                 {foreach $list as $v}
-                <input  class="form-control"  name="row[replenish_id]" type="hidden">
+                <input  class="form-control"  name="row[replenish_id]" type="hidden" value="{$v.replenish_id}">
                 <tr>
                     <input  class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden" value="{$v.id}">
                     <td>
