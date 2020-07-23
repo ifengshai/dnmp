@@ -896,22 +896,30 @@ DOC;
                     //new的邮件分配，去查找曾经负责该用户的处理人，如果是当前用户就能申请，如果不是不能申请
                     //判断是否处理过该用户的邮件
                     $zendesk_id = Zendesk::where(['email'=>$item['email'],'type'=>$item['type']])->order('id','desc')->column('id');
-                    //查询接触过该用户邮件的最后一条评论
-                    $commentAuthorId = Db::name('zendesk_comments')
-                        ->alias('c')
-                        ->join('fa_admin a','c.due_id=a.id')
-                        ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
-                        ->order('c.id','desc')
-                        ->select(false);
+                    if($zendesk_id){
+                        //查询接触过该用户邮件的最后一条评论
+                        $commentAuthorId = Db::name('zendesk_comments')
+                            ->alias('c')
+                            ->join('fa_admin a','c.due_id=a.id')
+                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                            ->order('c.id','desc')
+                            ->select(false);
                         //->value('due_id');
 
-                    echo($commentAuthorId);exit;
-                    if($commentAuthorId == $admin_id || !$commentAuthorId){
-                        //可以申请
+                        echo($commentAuthorId);exit;
+                        if($commentAuthorId == $admin_id || !$commentAuthorId){
+                            //可以申请
+                            if(count($tickets) < 10){
+                                $tickets[] = $item;
+                            }
+                        }
+                    }else{
+                        echo 222;exit;
                         if(count($tickets) < 10){
                             $tickets[] = $item;
                         }
                     }
+
                 }else{
                     if(count($tickets) < 10){
                         $tickets[] = $item;
