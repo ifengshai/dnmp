@@ -426,6 +426,10 @@ class Instock extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase->startTrans();
         $this->purchase->startTrans();
+//        $item_platform_sku = $platform->where('sku','OO005935-01')->field('platform_type,stock')->select();
+//        $whole_num = $platform->where('sku','OO005935-01')->sum('stock');
+//        dump($list);dump($whole_num);
+//dump(collection($item_platform_sku)->toArray());die;
         try {
             $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -498,6 +502,22 @@ class Instock extends Backend
                                 $num = round($stock_num * $val['rate']);
                                 $stock_num -= $num;
                                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                            }
+                        }
+                    }else{
+                        //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
+                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        $stock_num = $v['in_stock_num'];
+                        foreach ($item_platform_sku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                            } else {
+                                $num = round($stock_num * $val['stock']/$whole_num);
+                                $stock_num -= $num;
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                             }
                         }
                     }
