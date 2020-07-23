@@ -103,6 +103,7 @@ class Notice extends Controller
             return 'success';
         }
         $via = $ticket->via;
+        $channel = $via->channel == 'api' ? 'email' : $via->channel;
         $priority = 0;
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
@@ -127,7 +128,7 @@ class Notice extends Controller
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
-                'channel' => $via->channel,
+                'channel' => $channel,
                 'email' => $userInfo->email,
                 'username' => $userInfo->name,
                 'user_id' => $ticket->requester_id,
@@ -140,8 +141,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', time()),
-                'update_time' => date('Y-m-d H:i:s', time()),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
             ]);
             $zid = $zendesk;
             foreach ($comments as $comment) {
@@ -168,8 +169,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', time()),
-                        'update_time' => date('Y-m-d H:i:s', time()),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
                     ]);
                 }
                 ZendeskComments::create([
@@ -185,8 +186,8 @@ class Notice extends Controller
                     'due_id' => 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                    'update_time' => date('Y-m-d H:i:s', time()),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
                 ]);
             }
             Db::commit();
@@ -336,6 +337,7 @@ class Notice extends Controller
             return 'success';
         }
         $via = $ticket->via;
+        $channel = $via->channel == 'api' ? 'email' : $via->channel;
         $priority = 0;
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
@@ -362,7 +364,7 @@ class Notice extends Controller
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
-                'channel' => $via->channel,
+                'channel' => $channel,
                 'email' => $userInfo->email,
                 'username' => $userInfo->name,
                 'user_id' => $ticket->requester_id,
@@ -375,8 +377,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', time()),
-                'update_time' => date('Y-m-d H:i:s', time()),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
             ]);
 
             $zid = $zendesk;
@@ -404,8 +406,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', time()),
-                        'update_time' => date('Y-m-d H:i:s', time()),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
                     ]);
                 }
                 ZendeskComments::create([
@@ -421,8 +423,8 @@ class Notice extends Controller
                     'due_id' => $due_id ? $due_id : 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                    'update_time' => date('Y-m-d H:i:s', time()),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
                 ]);
             }
             //Db::commit();
@@ -958,6 +960,7 @@ class Notice extends Controller
         foreach ($tickets as $ticket) {
             ++$key;
             $via = $ticket->via;
+            $channel = $via->channel == 'api' ? 'email' : $via->channel;
             $priority = 0;
             if ($ticket->priority) {
                 $priority = array_search($ticket->priority, config('zendesk.priority'));
@@ -985,7 +988,7 @@ class Notice extends Controller
                 $zendesk = Zendesk::create([
                     'ticket_id' => $ticket->id,
                     'type' => $type,
-                    'channel' => $via->channel,
+                    'channel' => $channel,
                     'email' => $userInfo->email,
                     'username' => $userInfo->name,
                     'user_id' => $ticket->requester_id,
