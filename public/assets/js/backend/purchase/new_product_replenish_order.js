@@ -349,13 +349,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __(' sku'), operate: 'LIKE' },
-                        {
-                            field: 'status',
-                            title: __('状态'),
-                            custom: { 1: 'blue', 2: 'danger', 3: 'orange', 4: 'red' },
-                            searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
-                            formatter: Table.api.formatter.status
-                        },
+                        // {
+                        //     field: 'status',
+                        //     title: __('状态'),
+                        //     custom: { 1: 'blue', 2: 'danger', 3: 'orange', 4: 'red' },
+                        //     searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
+                        //     formatter: Table.api.formatter.status
+                        // },
                         { field: 'replenishment_num', title: __('Replenishment_num'), operate: false },
                         {
                             field: 'supplier',
@@ -368,6 +368,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         // all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><input id="'+ rows +'" type="text" class="form-control" style="display: inline-block;width: 180px;text-align: center;" value="'+ value[i].num +'"></div>';
                                         all_user_name += '<div class="step_recept"><b class="step">' + value[i].supplier_name + '：</b><b class="recept text-red">' + value[i].distribute_num + '</b></div>';
                                     }
+                                }else{
+                                    all_user_name = '-';
                                 }
                                 return all_user_name;
                             },
@@ -484,7 +486,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'supplier_name', title: __('供应商'), operate: false },
                         { field: 'distribute_num', title: __('分配数量'), operate: false },
                         { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
-                        { field: 'purchase_person', title: __('采购负责人'), operate: false },
+                        { field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE' },
                         {
                             field: 'status',
                             title: __('状态'),
