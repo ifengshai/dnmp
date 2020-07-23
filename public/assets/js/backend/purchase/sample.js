@@ -597,6 +597,13 @@ function del_add_tr(key){
     $(".del_"+key).remove();
 }
 /**
+ * 编辑删除 lsw
+ * @param {key} key 
+ */
+function del_lend_tr(key){
+    $(".del_"+key).remove();
+}
+/**
  * 库位添加保存草稿
  */
 function save(){

@@ -1843,6 +1843,7 @@ class PurchaseOrder extends Backend
             }
 
             $whereCondition['purchase_status'] = ['egt', 2];
+            $whereConditionOr = [];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
             if ($rep != '{}') {
@@ -1864,6 +1865,7 @@ class PurchaseOrder extends Backend
                     } else {
                         $whereCondition['purchase_order.id']  = ['in', $measuerWorkIds];
                     }
+                    $whereConditionOr['purchase_order.payment_time'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                     unset($filter['pay_time']);
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -1875,6 +1877,7 @@ class PurchaseOrder extends Backend
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->count();
 
@@ -1882,6 +1885,7 @@ class PurchaseOrder extends Backend
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1891,12 +1895,14 @@ class PurchaseOrder extends Backend
                 ->where($whereCondition)
                 ->where($whereTotalId)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('purchase_order.id');
