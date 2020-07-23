@@ -407,7 +407,7 @@ class Zendesk extends Model
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
                     ->join('fa_admin a','c.due_id=a.id')
-                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden']])
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
@@ -442,7 +442,7 @@ class Zendesk extends Model
                 if ($task->target_count > $task->complete_count) {
                     Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                     $str = '';
-                    $str .= $ticket->ticket_id."--".$ticket->getType()."--".$ticket->assign_id.'--';
+                    $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
