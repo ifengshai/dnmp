@@ -1450,6 +1450,9 @@ class Inventory extends Backend
                                 $original_sku_log['distribution_change_num'] = -$original_number;
                                 $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
 
+                                //追加对应站点虚拟库存
+                                $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setInc('stock', $original_number);
+
                                 //插入日志表
                                 (new StockLog())->setData([
                                     'type'                      => 2,
@@ -1469,6 +1472,9 @@ class Inventory extends Backend
                             if ($warehouse_change_sku && $change_number) {
                                 $change_sku_log['distribution_change_num'] = $change_number;
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+
+                                //扣减对应站点虚拟库存
+                                $platformSku->where(['sku' => $warehouse_change_sku, 'platform_type' => $order_platform])->setDec('stock', $change_number);
 
                                 //插入日志表
                                 (new StockLog())->setData([
@@ -1490,6 +1496,9 @@ class Inventory extends Backend
                             if ($warehouse_original_sku && $original_number) {
                                 $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
 
+                                //追加对应站点虚拟库存
+                                $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setInc('stock', $original_number);
+
                                 //插入日志表
                                 (new StockLog())->setData([
                                     'type'                      => 2,
@@ -1507,6 +1516,9 @@ class Inventory extends Backend
                             //更新之后的sku减少可用库存,增加占用库存
                             if ($warehouse_change_sku && $change_number) {
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+
+                                //扣减对应站点虚拟库存
+                                $platformSku->where(['sku' => $warehouse_change_sku, 'platform_type' => $order_platform])->setDec('stock', $change_number);
 
                                 //插入日志表
                                 (new StockLog())->setData([
@@ -1586,6 +1598,9 @@ class Inventory extends Backend
                         $original_sku_log['distribution_change_num'] = -$original_number;
                         $res = $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
 
+                        //追加对应站点虚拟库存
+                        $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setInc('stock', $original_number);
+
                         if (false !== $res) {
                             //插入日志表
                             (new StockLog())->setData([
@@ -1604,6 +1619,9 @@ class Inventory extends Backend
                         }
                     } else {
                         $res = $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+
+                        //追加对应站点虚拟库存
+                        $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setInc('stock', $original_number);
 
                         if (false !== $res) {
                             //插入日志表
@@ -1663,13 +1681,17 @@ class Inventory extends Backend
             Db::startTrans();
             try {
                 $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+
+                //扣减对应站点虚拟库存
+                $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setDec('stock', $original_number);
+
                 if (false !== $res) {
                     if ($type == 3) {
                         $two_type = 9;
                     } elseif ($type == 4) {
                         $two_type = 8;
                     }
-                   
+
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
