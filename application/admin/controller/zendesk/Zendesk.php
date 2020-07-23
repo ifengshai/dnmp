@@ -402,6 +402,8 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+        //获取签名
+        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -443,8 +445,6 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
-                    //获取签名
-                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
@@ -558,24 +558,17 @@ class Zendesk extends Backend
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
 
-        //获取签名
-        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
-        //获取zendesk用户的昵称
-        $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
-        $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-        //替换签名中的昵称
-        if(strpos($sign,'{{agent.name}}')!==false){
-            $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+        foreach ($comments as &$comment){
+            //获取当前评论的用户的昵称
+            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+            $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+            //替换签名中的昵称
+            if(strpos($sign,'{{agent.name}}')!==false){
+                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+            }
+            $comment['sign'] = $sign ? $sign : '';
         }
-        $sign = $sign ? $sign : '';
-        //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
-        if(strpos($sign,'<p>')!==false){
-            $sign = str_replace('<p>','<span style="display:block">',$sign);
-        }
-        if(strpos($sign,'</p>')!==false){
-            $sign = str_replace('</p>','</span>',$sign);
-        }
-        
+
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
@@ -633,7 +626,7 @@ class Zendesk extends Backend
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
 
-        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn','sign'));
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);

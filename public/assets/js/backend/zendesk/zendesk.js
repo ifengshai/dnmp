@@ -92,7 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        if(Config.admin_id == 75){
+                                        if(Config.admin_id == 75 || Config.admin_id == 117 || Config.admin_id == 95){
                                             return true;
                                         }
                                     }
