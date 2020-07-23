@@ -119,68 +119,68 @@ table.altrowstable tr:nth-child(even){
              </thead>
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">今天</td>
-                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$todayData.wait_num}</td>
-                      <td id='today_increment_num' style="text-align: center; vertical-align: middle;">{$todayData.increment_num}</td>
-                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$todayData.reply_num}</td>
-                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$todayData.waiting_num}</td>
-                      <td id='today_pending_num' style="text-align: center; vertical-align: middle;">{$todayData.pending_num}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_percent}</td>
+                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_money_percent}</td>
                   </tr>
                   <tr>
-                    <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">昨天</td>
-                    <td id='yesterday_wait_num'    style="text-align: center; vertical-align: middle;">{$yesterdayData.wait_num}</td>
-                    <td id='yesterday_increment_num'       style="text-align: center; vertical-align: middle;">{$yesterdayData.increment_num}</td>
-                    <td id='yesterday_reply_num'          style="text-align: center; vertical-align: middle;">{$yesterdayData.reply_num}</td>
-                    <td id='yesterday_waiting_num'  style="text-align: center; vertical-align: middle;">{$yesterdayData.waiting_num}</td>
-                    <td id='yesterday_pending_num' style="text-align: center; vertical-align: middle;">{$yesterdayData.pending_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">昨天</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
-                    <td id='serven_sales_money'         style="text-align: center; vertical-align: middle;">过去7天</td>
-                    <td id='serven_wait_num'   style="text-align: center; vertical-align: middle;">{$servenData.wait_num}</td>
-                    <td id='serven_increment_num' style="text-align: center; vertical-align: middle;">{$servenData.increment_num}</td>
-                    <td id='serven_reply_num'   style="text-align: center; vertical-align: middle;">{$servenData.reply_num}</td>
-                    <td id='serven_waiting_num'  style="text-align: center; vertical-align: middle;">{$servenData.waiting_num}</td>
-                    <td id='serven_pending_num' style="text-align: center; vertical-align: middle;">{$servenData.pending_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">过去7天</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
-                    <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">过去30天</td>
-                    <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                    <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                    <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                    <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                    <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">过去30天</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_money_percent}</td>
                 </tr>
-                    <tr>
-                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">当月</td>
-                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
-                    </tr>
-                    <tr>
-                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">上月</td>
-                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
-                    </tr>
-                    <tr>
-                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">今年</td>
-                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
-                    </tr>
-                    <tr>
-                        <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">总计</td>
-                        <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
-                        <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
-                        <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
-                        <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
-                        <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
-                    </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">当月</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">上月</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">今年</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">总计</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_complete_num}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_bufa_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_percent}</td>
+                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_money_percent}</td>
+                </tr>
                 </table>                
             </div>
             <div class="tab-panes fade active in">
