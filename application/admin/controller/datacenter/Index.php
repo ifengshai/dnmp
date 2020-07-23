@@ -1192,7 +1192,7 @@ class Index extends Backend
             $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
 
             $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
-            $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
+            //$v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
         }
         unset($v);
 
@@ -1206,7 +1206,7 @@ class Index extends Backend
         $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
         $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
         $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-        $weese = $this->weese->getOrderSalesNum($w_sku,$map);
+        //$weese = $this->weese->getOrderSalesNum($w_sku,$map);
         //重组数组
         foreach ($list as &$v) {
 
@@ -1217,7 +1217,7 @@ class Index extends Backend
             $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
 
             $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
-            $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
+           // $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
             $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
         }
         unset($v);
@@ -1244,7 +1244,7 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['v_num']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['w_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), 0);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
         //设置宽度
