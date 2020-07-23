@@ -890,7 +890,7 @@ DOC;
         $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['assign_id'=>$admin_id,'is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
         if(count($tickets) < 10){
             //当前用户负责的邮件不够10条，按照更新时间查询不是该用户负责的未分配的open和new的邮件
-            $other_tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1,'due_id'=>['eq',0],'assign_id'=>['neq',$admin_id]])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->select();
+            $other_tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1,'assign_id'=>['neq',$admin_id]])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->select();
             foreach($other_tickets as $item){
                 if($item['status'] == 1){
                     //new的邮件分配，去查找曾经负责该用户的处理人，如果是当前用户就能申请，如果不是不能申请
