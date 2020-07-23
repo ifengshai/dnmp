@@ -38,6 +38,34 @@ class Test extends Backend
     }
 
     /**
+     * 重启跟踪2-7状态的物流
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/16 09:16:20 
+     * @return void
+     */
+    public function linshi_retrack()
+    {
+        $order_shipment = Db::name('order_node')->field('track_number as number')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['<=', '2020-06-01 00:00:00']])->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        $res = array_chunk($order_shipment, 40);
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        echo count($res);
+        foreach ($res as $k => $v) {
+           
+            $track = $trackingConnector->retrackMulti($v);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($track) . "\r\n", FILE_APPEND);
+            usleep(200000);
+            echo $k . "\n";
+        }
+        echo 'is ok';
+    }
+
+
+
+
+    /**
      * 临时批量注册--lixiang
      */
     public function linshi_reg_track()
@@ -273,12 +301,14 @@ class Test extends Backend
 
     public function new_track_shipment_num()
     {
-        $order_shipment = Db::name('order_node')->where(['node_type' => ['>=', 7], 'node_type' => ['<>', 40]])->select();
+        $order_shipment = Db::name('order_node')->where('node_type', '<>', 40)->select();
         $order_shipment = collection($order_shipment)->toArray();
-
+        echo count($order_shipment);
         $trackingConnector = new TrackingConnector($this->apiKey);
-
         foreach ($order_shipment as $k => $v) {
+            if ($k < 36869) {
+                continue;
+            }
             //先把主表状态更新为2-7
             // $update['order_node'] = 2;
             // $update['node_type'] = 7;
@@ -796,5 +826,43 @@ class Test extends Backend
 
         echo 'ok';
         die;
+    }
+
+    /**
+     * 跑错误单数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/15 16:50:21 
+     * @return void
+     */
+    public function  test01()
+    {
+        $this->orderNode = new \app\admin\model\OrderNode;
+        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail();
+        $this->orderNodeCourier = new \app\admin\model\OrderNodeCourier();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $data = $this->orderNode->where(['order_id' => ['<', 15000], 'site' => ['<>', 4]])->select();
+        foreach ($data as $k => $v) {
+            if ($v['site'] == 1) {
+                $res = $this->zeelool->where(['increment_id' => $v['order_number']])->find();
+            } elseif ($v['site'] == 2) {
+                $res = $this->voogueme->where(['increment_id' => $v['order_number']])->find();
+            } elseif ($v['site'] == 3) {
+                $res = $this->nihao->where(['increment_id' => $v['order_number']])->find();
+            }
+
+            if ($res) {
+                $this->orderNode->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
+            } else {
+                $this->orderNode->where(['id' => $v['id']])->delete();
+                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
+            }
+        }
     }
 }

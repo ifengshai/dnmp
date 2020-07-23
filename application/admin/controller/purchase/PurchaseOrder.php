@@ -1117,7 +1117,7 @@ class PurchaseOrder extends Backend
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
-                    if (in_array($res->purchase_status, [7, 8, 9, 10])) {
+                    if (in_array($res->purchase_status, [6, 7, 8, 9, 10])) {
                         continue;
                     }
 
@@ -1186,8 +1186,6 @@ class PurchaseOrder extends Backend
                         $list['purchase_status'] = 5;
                     } elseif (in_array($v['baseInfo']['status'], ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
                         $list['purchase_status'] = 6; //待收货
-                    } else {
-                        $list['purchase_status'] = 7; //已收货
                     }
                     //收货地址
                     $list['delivery_address'] = $v['baseInfo']['receiverInfo']['toArea'];
@@ -1528,6 +1526,12 @@ class PurchaseOrder extends Backend
             unset($filter['createtime']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+        //添加供货商名称搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['s.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
 
         //是否存在需要退回产品
         $check_map['unqualified_num'] = ['>', 0];
@@ -1543,6 +1547,7 @@ class PurchaseOrder extends Backend
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_supplier' => 's'], 's.id=d.supplier_id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
             ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
@@ -1836,19 +1841,43 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $whereCondition['purchase_status'] = ['egt', 2];
+            $whereConditionOr = [];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
             if ($rep != '{}') {
                 $whereTotalId = '1=1';
+                $filter = json_decode($rep, true);
+                //付款人
+                if ($filter['pay_person']) {
+                    $workIds = Purchase_order_pay::where(['create_person' => $filter['pay_person']])->column('purchase_id');
+                    $whereCondition['purchase_order.id'] = ['in', $workIds];
+                    unset($filter['pay_person']);
+                }
+                if ($filter['pay_time']) {
+                    $time = explode(' ', $filter['pay_time']);
+                    $mapTime['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
+                    if (!empty($whereCondition['id'])) {
+                        $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                        $whereCondition['purchase_order.id']  = ['in', $newWorkIds];
+                    } else {
+                        $whereCondition['purchase_order.id']  = ['in', $measuerWorkIds];
+                    }
+                    $whereConditionOr['purchase_order.payment_time'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    unset($filter['pay_time']);
+                }
+                $this->request->get(['filter' => json_encode($filter)]);
             } else {
                 $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->count();
 
@@ -1856,6 +1885,7 @@ class PurchaseOrder extends Backend
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1865,12 +1895,14 @@ class PurchaseOrder extends Backend
                 ->where($whereCondition)
                 ->where($whereTotalId)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('purchase_order.id');

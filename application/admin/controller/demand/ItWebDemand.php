@@ -145,7 +145,7 @@ class ItWebDemand extends Backend
                 $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
                 unset($filter['test_user_id_arr']);
             }
-            
+
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -501,13 +501,13 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
 
                 //判断当前登录人是否显示应该操作的按钮
-               /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
-                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
-                        $list[$k]['is_test_record_hidden'] = 1;
-                        $list[$k]['is_test_finish_hidden'] = 1;
-                    }
-                }
-                */
+                /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                         $list[$k]['is_test_record_hidden'] = 1;
+                         $list[$k]['is_test_finish_hidden'] = 1;
+                     }
+                 }
+                 */
 
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
@@ -705,11 +705,11 @@ class ItWebDemand extends Backend
      */
     public function add()
     {
-       /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
-        $user_id[] =  '0550643549844645';//李想
-        $user_id[] =  '0333543233781107';//张晓
-        $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-        dump($res);exit;*/
+        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+         $user_id[] =  '0550643549844645';//李想
+         $user_id[] =  '0333543233781107';//张晓
+         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+         dump($res);exit;*/
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -1309,16 +1309,16 @@ class ItWebDemand extends Backend
                     }
 
                 }else{
-                $params['create_time'] =  date('Y-m-d H:i',time());
-                $params['create_user_id'] =  $this->auth->id;
-                $res_status = $this->testRecordModel->allowField(true)->save($params);
+                    $params['create_time'] =  date('Y-m-d H:i',time());
+                    $params['create_user_id'] =  $this->auth->id;
+                    $res_status = $this->testRecordModel->allowField(true)->save($params);
 
-                if ($res_status) {
-                    Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
+                    if ($res_status) {
+                        Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -1526,7 +1526,7 @@ class ItWebDemand extends Backend
 
 
     /**
-    *  bug列表页面
+     *  bug列表页面
      * 是否扣除测试绩效
      */
 
@@ -1598,7 +1598,7 @@ class ItWebDemand extends Backend
 
 
     /**
-    *  bug列表页面
+     *  bug列表页面
      * 是否工作时间处理问题
      */
 

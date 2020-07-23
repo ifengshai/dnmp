@@ -236,11 +236,11 @@ class Zendesk extends Model
 
     /**
      * 修改后的分单脚本
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * 一、判断当天是否分配任务，若没有分配任务就在分配任务量表中插入用户的任务量分配信息
+     * 二、分配任务：
+     *          1.如果有老用户（未离职）处理过邮件，就把任务分配给该老用户
      */
-    public static function shellAssignTicketChange()
+    public static function shellAssignTicketChange1()
     {
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
@@ -254,6 +254,7 @@ class Zendesk extends Model
             $userlist_arr = array_filter(array_column($agents,'userid'));
             $userlist_str = implode(',',$userlist_arr);
             $time = strtotime(date('Y-m-d 0:0:0',time()));
+            //通过接口获取休息人员名单
             $ding = new \app\api\controller\Ding;
             $restuser_arr=$ding->getRestList($userlist_str,$time);
             foreach ($agents as $agent) {
@@ -359,6 +360,103 @@ class Zendesk extends Model
                         $task->save();
                         self::where('id',$ticket->id)->setField('is_hide',0);
                     }
+                }
+            }
+            usleep(1000);
+        }
+    }
+    public static function shellAssignTicketChange()
+    {
+        //1，判断今天有无task，无，创建
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+        //设置所有的隐藏
+        self::where('id','>=',1)->setField('is_hide',1);
+        if (!$tasks) {
+            //创建所有的tasks
+            //获取所有的agents
+            $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->where('a.status','<>','hidden')->where('z.count','<>',0)->select();
+            foreach ($agents as $agent) {
+                //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
+                ZendeskTasks::create([
+                    'type' => $agent['type'],
+                    'admin_id' => $agent['admin_id'],
+                    'assignee_id' => $agent['agent_id'],
+                    'leave_count' => 0,
+                    'target_count' => $agent['count'],
+                    'surplus_count' => $agent['count'],
+                    'complete_count' => 0,
+                    'check_count' => $agent['count'],
+                    'apply_count' => 0,
+                    'complete_apply_count' => 0
+                ]);
+            }
+        }
+        //获取所有的open和new的邮件
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        //找出所有离职用户id
+        $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
+        foreach ($waitTickets as $ticket) {
+            $task = array();
+            //电话不分配
+            if($ticket->channel == 'voice') {continue;}
+
+            if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
+                //判断是否处理过该用户的邮件
+                $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
+                //查询接触过该用户邮件的最后一条评论
+                $commentAuthorId = Db::name('zendesk_comments')
+                    ->alias('c')
+                    ->join('fa_admin a','c.due_id=a.id')
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                    ->order('c.id','desc')
+                    ->value('due_id');
+                if($commentAuthorId){
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where([
+                            'admin_id' => $commentAuthorId,
+                            'type' => $ticket->getType(),
+                            'target_count' => ['>',0]
+                        ])
+                        ->find();
+                }else{
+                    //则分配给最少单的用户
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['type' => $ticket->getType()])
+                        ->order('surplus_count', 'desc')
+                        ->limit(1)
+                        ->find();
+                }
+            }else{
+                //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
+                if(in_array($ticket->assign_id,$targetAccount)){
+                    //离职，则分配给最少单的用户
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['type' => $ticket->getType()])
+                        ->order('surplus_count', 'desc')
+                        ->limit(1)
+                        ->find();
+                }
+            }
+            if ($task) {
+                //判断该用户是否已经分配满了，满的话则不分配
+                if ($task->target_count > $task->complete_count) {
+                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
+                    $str = '';
+                    $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
+                    //修改zendesk的assign_id,assign_time
+                    $ticket->assign_id = $task->admin_id;
+                    $ticket->assignee_id = $task->assignee_id;
+                    $ticket->assign_time = date('Y-m-d H:i:s', time());
+                    $ticket->save();
+                    //修改task的字段
+                    $task->surplus_count = $task->surplus_count - 1;
+                    $task->complete_count = $task->complete_count + 1;
+                    $task->complete_apply_count = $task->complete_apply_count + 1;
+                    $task->save();
+
+                    $str .= $task->admin_id;
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
+                    echo $str." is ok"."\n";
                 }
             }
             usleep(1000);

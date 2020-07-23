@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom:{1:'blue',2:'yellow',3:'green',4:'red'},
                             formatter:Table.api.formatter.status,
                         },
-                        {field: 'template_name', title: __('Template_name')},
+                        {field: 'template_name', title: __('Template_name'),operate:'LIKE %...%'},
                         {field: 'template_description', title: __('Template_description')},
                         {
                             field: 'template_permission', 

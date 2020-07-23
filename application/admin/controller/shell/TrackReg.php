@@ -28,7 +28,7 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_zeelool', 1);
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
-        //$this->reg_shipment('database.db_meeloog', 4);
+        $this->reg_shipment('database.db_meeloog', 4);
     }
 
     /**
@@ -231,6 +231,7 @@ class TrackReg extends Backend
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
+
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
@@ -240,12 +241,12 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->auto_update();
             echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';

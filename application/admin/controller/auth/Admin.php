@@ -11,9 +11,9 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use think\Cache;
 use think\Validate;
 use think\Db;
-
 use think\Exception;
 
 
@@ -367,12 +367,15 @@ class Admin extends Backend
 
                 // 过滤不允许的组别,避免越权
                 $group = array_intersect($this->childrenGroupIds, $group);
-
+                //添加客服分组start
+                $this->addCostomerGroup($row->id,$group);
+                //添加客服分组end
                 $dataset = [];
                 foreach ($group as $value) {
                     $dataset[] = ['uid' => $row->id, 'group_id' => $value];
                 }
                 model('AuthGroupAccess')->saveAll($dataset);
+                Cache::rm('Workorderconfig_getConfigInfo');
                 $this->success();
             }
             $this->error();
@@ -442,5 +445,51 @@ class Admin extends Backend
         // $this->dataLimit = 'auth';
         // $this->dataLimitField = 'id';
         return parent::selectpage();
+    }
+    /**
+     * 添加客服组别
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-30 14:11:46
+     * @return void
+     */
+    public function addCostomerGroup($id,$group){
+        $where['name'] = ['in',['A组客服主管','B组客服主管']];
+        $result = Db::name('auth_group')->where($where)->field('id,pid,name')->select();
+        if(!$result){
+            return false;
+        }
+        $group_id = 0;
+        foreach($result as $v){
+            if($v['name'] == 'A组客服主管'){
+                $infoOne = ( new AuthGroup)->getAllNextGroup($v['id']);
+                if($infoOne){
+                    array_push($infoOne,$v['id']);
+                }else{
+                    $infoOne = [$v['id']];
+                }
+                //求交集
+                $rsOne = array_intersect($group,$infoOne);                
+                if($rsOne){
+                    $group_id = 1;
+                }
+                
+            }elseif($v['name'] == 'B组客服主管'){
+                $infoTwo = ( new AuthGroup)->getAllNextGroup($v['id']);
+                if($infoTwo){
+                    array_push($infoTwo,$v['id']);
+                }else{
+                    $infoTwo = [$v['id']];
+                }
+                //求交集
+                $rsTwo = array_intersect($group,$infoTwo);                              
+                if($rsTwo){
+                    $group_id = 2;
+                }
+                
+            }
+                
+        }
+        Db::name('admin')->where(['id'=>$id])->update(['group_id'=>$group_id]);
     }
 }
