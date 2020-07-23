@@ -1241,7 +1241,7 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['w_num']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['on_way_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
         }    
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
