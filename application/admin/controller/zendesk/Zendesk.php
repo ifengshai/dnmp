@@ -69,7 +69,8 @@ class Zendesk extends Backend
                 $map['zendesk.assign_id'] = session('admin.id');
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
-                $map['zendesk.assign_id'] = session('admin.id');
+                $now_admin_id = session('admin.id');
+                $map[] = ['exp', Db::raw("zendesk.assign_id=$now_admin_id or zendesk.due_id=$now_admin_id")];
                 $map['zendesk.status'] = ['in', [1, 2]];
                 $map['zendesk.is_hide'] = 0;
                 $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
