@@ -1174,6 +1174,7 @@ class Index extends Backend
 
         $list = $this->item
             ->where($where)
+            ->where($addWhere)
             ->order($sort, $order)
             ->limit($offset, $limit)
             ->select();
