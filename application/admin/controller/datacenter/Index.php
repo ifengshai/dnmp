@@ -1213,7 +1213,7 @@ class Index extends Backend
 
            $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
            $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
-           // $v['all_num'] = $v['z_num'] + $v['v_num'];
+           $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
         }
         unset($v);
 
@@ -1228,8 +1228,9 @@ class Index extends Backend
             ->setCellValue("D1", "N站销量");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "M站销量");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
-             ->setCellValue("G1", "可用库存");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
+             ->setCellValue("G1", "总的销量")
+             ->setCellValue("H1", "可用库存");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "在途库存");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
 
         foreach ($list as $key => $value) {
@@ -1240,8 +1241,9 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['w_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['all_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['on_way_stock']);
         }    
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -1252,6 +1254,7 @@ class Index extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(40);
         //设置边框
         $border = [
             'borders' => [
