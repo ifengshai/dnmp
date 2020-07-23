@@ -1201,14 +1201,12 @@ class Index extends Backend
         //$n_sku = array_column($list, 'n_sku');
         //$m_sku = array_column($list, 'm_sku');
         $w_sku = array_column($list, 'w_sku');
-        dump($w_sku);
-        exit;
         //获取三个站销量数据
         //$zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
         //$voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
         //$nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
         //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-        $weese = $this->weese->getOrderSalesNum($w_sku,$map);
+        $weese = $this->wesee->getOrderSalesNum($w_sku,$map);
         //重组数组
         foreach ($list as &$v) {
 
@@ -1244,7 +1242,7 @@ class Index extends Backend
         foreach ($list as $key => $value) {
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['n_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['w_num']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['available_stock']);
             //$spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['w_num']);
             // $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
