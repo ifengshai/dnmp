@@ -1153,7 +1153,7 @@ class Index extends Backend
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
@@ -1189,23 +1189,23 @@ class Index extends Backend
 
             $v['v_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 2);
 
-            $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            //$v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
 
-            $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+            //$v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
             //$v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
         }
         unset($v);
 
         $z_sku = array_column($list, 'z_sku');
         $v_sku = array_column($list, 'v_sku');
-        $n_sku = array_column($list, 'n_sku');
-        $m_sku = array_column($list, 'm_sku');
+        //$n_sku = array_column($list, 'n_sku');
+        //$m_sku = array_column($list, 'm_sku');
         //$w_sku = array_column($list, 'w_sku');
         //获取三个站销量数据
         $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
         $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
-        $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
-        $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
+        //$nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
+        //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
        // $weese = $this->weese->getOrderSalesNum($w_sku,$map);
         //重组数组
         foreach ($list as &$v) {
@@ -1214,11 +1214,11 @@ class Index extends Backend
 
            $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
 
-            $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
+           // $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
 
-           $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
+           //$v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
           // $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
-            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'];
+            $v['all_num'] = $v['z_num'] + $v['v_num'];
         }
         unset($v);
 
@@ -1242,11 +1242,11 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['z_num']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['v_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), 0);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
+            // $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
+            // $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
+            // $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), 0);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['on_way_stock']);
         }    
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -1254,9 +1254,9 @@ class Index extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        // $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        // $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        // $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
         //设置边框
         $border = [
             'borders' => [
