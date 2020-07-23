@@ -24,7 +24,7 @@ return [
     'Check_time'           => '工单审核时间',
     'Complete_time'        => '工单完成时间',
     'problem_type'        => '问题类型',
-    'step'        => '实时措施',
+    'step'        => '实施措施',
     'replenish_money'        => '补差价金额',
     'replenish_increment_id'        => '补差价订单号',
     'check_coupon'        => '不需要审核的优惠券',

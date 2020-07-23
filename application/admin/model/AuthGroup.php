@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use think\Model;
+use think\Cache;
 
 class AuthGroup extends Model
 {
@@ -32,4 +33,49 @@ class AuthGroup extends Model
         }
         return $result ? $resultArr : false;
     }
+    /**
+     * 获取一个分组的所有下级分组
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-06-29 10:24:34
+     * @return void
+     */
+    public function getAllNextGroup_yuan($group_id) 
+    {
+        $rs = $this->where('pid','in',$group_id)->field('id')->select();
+        if(!$rs){
+            return false;
+        }
+        static $arr = [];
+        foreach ($rs as $v){
+            $arr[] = $v['id'];
+            $this->getAllNextGroup($v['id']);
+        }
+        return $arr;
+    }
+    public function getAllNextGroup($group_id) 
+    {   //$arr = Cache::get('AuthGroup_getAllNextGroup_'.$group_id);
+        // if($arr){
+        //     return $arr;
+        // }
+        $rs = $this->field('id,pid')->select();
+        if(!$rs){
+            return false;
+        }
+        $info = $this->get_all_child($rs,$group_id);
+        //Cache::set('AuthGroup_getAllNextGroup_'.$group_id,$info);
+        return $info;
+    }
+
+    function get_all_child($array,$id){
+        $arr = array();
+        foreach($array as $v){
+            if($v['pid'] == $id){
+                $arr[] = $v['id'];
+                $arr = array_merge($arr,$this->get_all_child($array,$v['id']));
+            };
+        };
+        return $arr;
+    }
+
 }

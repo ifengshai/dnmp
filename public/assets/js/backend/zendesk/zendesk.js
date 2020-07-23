@@ -73,10 +73,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         if( Config.admin_id == 1 || Config.admin_id == 75){
                                             return true;
                                         }
-                                        if(row.assign_id != Config.admin_id){
-                                            return false;
-                                        }
+                                        // if(row.assign_id != Config.admin_id){
+                                        //     return false;
+                                        // }
                                         return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text:__('修改承接人'),
+                                    title:__('修改承接人'),
+                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'zendesk/zendesk/edit_recipient',
+                                    icon: '',
+                                    //extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function(row){
+                                        if(Config.admin_id == 75){
+                                            return true;
+                                        }
                                     }
                                 }
 
@@ -348,6 +366,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 };
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
             });
+        },
+        signvalue:function(){
+            Form.api.bindevent($("form[role=form]"),function(){
+               location.reload();  
+            });
+        },
+        edit_recipient:function(){
+            Form.api.bindevent($("form[role=form]"));
         },
         api: {
             bindevent: function () {

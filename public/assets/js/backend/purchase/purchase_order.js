@@ -1270,6 +1270,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         },
                         { field: 'create_person', title: __('Create_person'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {field:'pay_person',title:__('付款人'),visible:false},
+                        {field:'pay_time',title:__('付款时间'),operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {

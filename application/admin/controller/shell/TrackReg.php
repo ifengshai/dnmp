@@ -28,6 +28,7 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_zeelool', 1);
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
     }
 
     /**
@@ -75,7 +76,7 @@ class TrackReg extends Backend
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
             $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_id'] = $v['order_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
             $list[$k]['shipment_data_type'] = $shipment_data_type;
@@ -116,6 +117,7 @@ class TrackReg extends Backend
         }
         echo $site_str . ' is ok' . "\n";
     }
+
     /**
      * 获取快递号
      * @param $title
@@ -162,7 +164,7 @@ class TrackReg extends Backend
     }
 
     /**
-     * 更新物流表状态
+     * 更新物流表状态 handle 改为1
      *
      * @Description
      * @author wpl
@@ -181,12 +183,20 @@ class TrackReg extends Backend
             case 3:
                 $url = config('url.nihao_url');
                 break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
             default:
                 return false;
                 break;
         }
+        
+        if ($params['site'] == 4) {
+            $url = $url . 'rest/mj/update_order_handle';
+        } else {
+            $url = $url . 'magic/order/logistics';
+        }
         unset($params['site']);
-        $url = $url . 'magic/order/logistics';
         $client = new Client(['verify' => false]);
         //请求URL
         $response = $client->request('POST', $url, array('form_params' => $params));
@@ -221,6 +231,7 @@ class TrackReg extends Backend
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
+
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
@@ -230,12 +241,12 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->auto_update();
             echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';

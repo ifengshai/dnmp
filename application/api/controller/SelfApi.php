@@ -209,24 +209,7 @@ class SelfApi extends Api
         if (!$track_number) {
             $this->error(__('缺少快递单号参数'), [], 400);
         }
-        switch ($site) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_meeloog';
-                break;
-            default:
-                return false;
-                break;
-        }
-
+  
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -252,6 +235,12 @@ class SelfApi extends Api
         } else {
             $shipment_data_type = $title;
         }
+
+        //如果已发货 则不再更新发货时间
+        if ($row->order_node >= 2 && $row->node_type >= 7) {
+            $this->error(__('订单节点已存在'), [], 400);
+        }
+
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
@@ -578,7 +567,15 @@ class SelfApi extends Api
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3, 'work_platform' => $site])->field('create_user_id,id')->find();
         if ($list) {
-            Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+            //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+            //判断查询的工单中有没有其他措施
+            $measure_choose_id = Db::name('work_order_measure')->where('work_id',$list['id'])->column('measure_choose_id');
+            if(count($measure_choose_id) == 1 && in_array(8,$measure_choose_id)){
+                //如果只有一个补差价，就更改主表的状态
+                $workorder->where('id',$list['id'])->update(['work_status'=>6]);
+            }
+            Db::name('work_order_measure')->where('work_id',$list['id'])->update(['operation_type'=>1]);
+            Db::name('work_order_recept')->where('work_id',$list['id'])->update(['recept_status'=>1]);
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }
