@@ -904,24 +904,27 @@ DOC;
                             ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
                             ->order('c.id','desc')
                             ->value('due_id');
-
-                        echo($commentAuthorId);exit;
                         if($commentAuthorId == $admin_id || !$commentAuthorId){
                             //可以申请
                             if(count($tickets) < 10){
                                 $tickets[] = $item;
+                            }else{
+                                break;
                             }
                         }
                     }else{
-                        echo 222;exit;
                         if(count($tickets) < 10){
                             $tickets[] = $item;
+                        }else{
+                            break;
                         }
                     }
 
                 }else{
                     if(count($tickets) < 10){
                         $tickets[] = $item;
+                    }else{
+                        break;
                     }
                 }
             }
