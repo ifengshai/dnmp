@@ -895,8 +895,7 @@ DOC;
                 if($item['status'] == 1){
                     //new的邮件分配，去查找曾经负责该用户的处理人，如果是当前用户就能申请，如果不是不能申请
                     //判断是否处理过该用户的邮件
-                    dump($item);exit;
-                    $zendesk_id = Zendesk::where(['email'=>$item['email'],'type'=>$item['type']])->order('id','desc')->column('id');
+                    $zendesk_id = Db::name('zendesk')->where(['email'=>$item['email'],'type'=>$item['type']])->order('id','desc')->column('id');
                     dump($zendesk_id);exit;
                     if($zendesk_id){
                         //查询接触过该用户邮件的最后一条评论
