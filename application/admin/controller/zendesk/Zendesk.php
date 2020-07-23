@@ -888,6 +888,7 @@ DOC;
                 ->find();
         //查询当前用户负责的邮件
         $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['assign_id'=>$admin_id,'is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
+        dump($tickets);exit;
         if(count($tickets) < 10){
             //当前用户负责的邮件不够10条，按照更新时间查询不是该用户负责的未分配的open和new的邮件
             $other_tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1,'due_id'=>['eq',0],'assign_id'=>['neq',0]])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->select();
@@ -907,15 +908,11 @@ DOC;
                         //可以申请
                         if(count($tickets) < 10){
                             $tickets[] = $item;
-                            //修改该邮件的处理人
-                            Db::name('zendesk')->where('id',$item['id'])->update(['due_id'=>$admin_id]);
                         }
                     }
                 }else{
                     if(count($tickets) < 10){
                         $tickets[] = $item;
-                        //修改该邮件的处理人
-                        Db::name('zendesk')->where('id',$item['id'])->update(['due_id'=>$admin_id]);
                     }
                 }
             }
