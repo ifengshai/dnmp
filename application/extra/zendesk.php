@@ -8,7 +8,7 @@ return [
     'platform'=>[
         1=>'zeelool',
         2=>'voogueme',
-        3=>'nihao'
+        3=>'nihaooptical'
     ],
     'zeelool' => [
         'subdomain' => "zeelooloptical",
