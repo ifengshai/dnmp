@@ -847,6 +847,7 @@ class PurchaseOrder extends Backend
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         $item = new \app\admin\model\itemmanage\Item();
         $this->list = new \app\admin\model\purchase\NewProductReplenishList;
+        $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
         if ($res !== false) {
 
             //在途库存新逻辑
@@ -858,6 +859,16 @@ class PurchaseOrder extends Backend
                     //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态
                     if ($v['replenish_list_id']) {
                         $this->list->where('id', $v['replenish_list_id'])->update(['real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
+                        $replenish_id = $this->list->where('id',$v['replenish_list_id'])->field('replenish_id,status')->find();
+                        $replenish_order = $this->list->where(['replenish_id'=>$replenish_id['replenish_id'],'status'=>1])->find();
+                        //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
+                        if ($replenish_id['status'] == 2){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',3);
+                        }
+                        if (empty($replenish_order)){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',4);
+                        }
                     }
                 }
             }

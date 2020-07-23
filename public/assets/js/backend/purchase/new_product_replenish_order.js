@@ -209,7 +209,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         }, {
                             field: 'status',
                             title: __('状态'),
-                            custom: { 1: 'blue', 2: 'danger', 3: 'orange', 4: 'red' },
+                            custom: { 1: 'green', 2: 'orange', 3: 'red', 4: 'blue' },
                             searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
                             formatter: Table.api.formatter.status
                         },
@@ -243,13 +243,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'purchase/new_product_replenish_order/index',
+                                    url: 'purchase/new_product_replenish_order/handle_detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status != 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -276,7 +280,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     text: '处理',
                                     title: __('处理'),
                                     extend: 'data-area = \'["100%","100%"]\'',
-                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    classname: 'btn btn-xs btn-danger btn-dialog',
                                     icon: 'fa fa-pencil',
                                     url: 'purchase/new_product_replenish_order/handle',
                                     callback: function (data) {
@@ -284,7 +288,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 2 || row.status == 3) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
 
@@ -538,6 +546,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 );
             });
+        },
+
+        //查看详情
+        handle_detail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'purchase/new_product_replenish_order/handle_detail' + location.search + '&replenish_id=' + Config.id,
+                    table: 'item',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1 + index;
+                            }, operate: false, visible: false
+                        },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'sku', title: __(' sku'), operate: 'LIKE' },
+                        { field: 'num', title: __('总需求数量'), operate: false },
+                        { field: 'supplier_name', title: __('供应商'), operate: false },
+                        { field: 'distribute_num', title: __('分配数量'), operate: false },
+                        { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
+                        { field: 'purchase_person', title: __('采购负责人'), operate: false },
+                        {
+                            field: 'status',
+                            title: __('状态'),
+                            custom: { 1: 'green', 2: 'danger' },
+                            searchList: { 1: '未采购', 2: '已采购' },
+                            formatter: Table.api.formatter.status
+                        },
+                        ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
         },
 
         distribute_detail: function () {

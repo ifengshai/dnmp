@@ -305,6 +305,65 @@ class NewProductReplenishOrder extends Backend
     }
 
     /**
+     * 补货需求单处理
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/14
+     * Time: 15:38
+     */
+    public function handle_detail($ids = null)
+    {
+
+        $this->assignConfig('id',$ids);
+        $replenish_id = input('replenish_id');
+        if (!$ids){
+            $id = $replenish_id;
+        }else{
+            $id = $ids;
+        }
+//        if (!$replenish_id){
+//            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+//        }else{
+//            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+//        }
+//        $map['replenish_id'] = ['in', $order_ids];
+        $map['replenish_id'] = ['=',$id];
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->list
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->list
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            foreach ($list as $k => $v) {
+                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_order_id'])->value('replenishment_num');
+                $list[$k]['num'] = $new_product_replenish_order;
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch('handle_detail');
+    }
+
+    /**
      * 创建采购单
      *
      * Created by Phpstorm.
