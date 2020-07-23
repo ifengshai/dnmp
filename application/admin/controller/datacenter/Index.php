@@ -1201,6 +1201,8 @@ class Index extends Backend
         //$n_sku = array_column($list, 'n_sku');
         //$m_sku = array_column($list, 'm_sku');
         $w_sku = array_column($list, 'w_sku');
+        dump($w_sku);
+        exit;
         //获取三个站销量数据
         //$zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
         //$voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
