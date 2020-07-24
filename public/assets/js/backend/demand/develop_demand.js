@@ -43,13 +43,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'department_group',
                             title: __('所属部门'),
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black' },
-                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部',4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
+                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部', 4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'duty_nickname', title: __('责任人'), operate: 'like'},
+                        { field: 'duty_nickname', title: __('责任人'), operate: 'like' },
 
 
-                        { field: 'nickname', title: __('负责人'), operate: 'like', visible:false },
+                        { field: 'nickname', title: __('负责人'), operate: 'like', visible: false },
                         /*{
                             field: 'priority',
                             title: __('Priority'),
@@ -323,7 +323,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 ) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1) {
                                                 return true;
                                             } else {
                                                 return false;
@@ -554,14 +554,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
-                    var op     = params.op ? JSON.parse(params.op) : {};
-                    if(field == 'me_task'){
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == 'me_task') {
                         filter[field] = value;
-                    }else{
+                    } else {
                         delete filter.me_task;
                     }
                     params.filter = JSON.stringify(filter);
-                    params.op     = JSON.stringify(op);
+                    params.op = JSON.stringify(op);
                     return params;
                 };
                 table.bootstrapTable('refresh', {});
@@ -684,12 +684,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'department_group',
                             title: __('所属部门'),
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black' },
-                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部',4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
+                            searchList: { 1: '运营部', 2: '客服部', 3: '仓管部', 4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'duty_nickname', title: __('责任人'), operate: 'like'},
+                        { field: 'duty_nickname', title: __('责任人'), operate: 'like' },
 
-                        { field: 'nickname', title: __('开发负责人'), operate: 'like', visible:false },
+                        { field: 'nickname', title: __('开发负责人'), operate: 'like', visible: false },
                         /*{
                             field: 'priority',
                             title: __('Priority'),
@@ -888,7 +888,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_test_record_hidden ==1 && row.is_finish == 1) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_test_record_hidden == 1 && row.is_finish == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -981,7 +981,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden ==1) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -1052,14 +1052,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
-                    var op     = params.op ? JSON.parse(params.op) : {};
-                    if(field == 'me_task'){
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == 'me_task') {
                         filter[field] = value;
-                    }else{
+                    } else {
                         delete filter.me_task;
                     }
                     params.filter = JSON.stringify(filter);
-                    params.op     = JSON.stringify(op);
+                    params.op = JSON.stringify(op);
                     return params;
                 };
                 table.bootstrapTable('refresh', {});
@@ -1212,7 +1212,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             closeBtn: 1,
                             title: "详情",
                             content: str,
-                            area:['80%','80%'],
+                            area: ['80%', '80%'],
                             anim: 0
                         });
                     }
