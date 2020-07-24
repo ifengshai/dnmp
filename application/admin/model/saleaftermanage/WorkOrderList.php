@@ -1386,38 +1386,45 @@ class WorkOrderList extends Model
     /**
      * 统计工单创建数量
      */
-    public function wo_sum($start,$end,$platform,$type = 0){
+    public function wo_sum($start,$end,$platform = 0,$type = 0){
         if($type == 1){
             $map['create_time'] = array('between',[$start,$end]);
         }
         $map['work_status'] = array('not in','0,4');
-        $map['work_platform'] = $platform;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+
         $count = $this->where($map)->count();
         return $count ? $count : 0;
     }
     /**
      * 统计工单完成数量
      */
-    public function wo_complete_num($start,$end,$platform,$type = 0){
+    public function wo_complete_num($start,$end,$platform = 0,$type = 0){
         if($type == 1){
             $map['complete_time'] = array('between',[$start,$end]);
         }
         $map['work_status'] = 6;
-        $map['work_platform'] = $platform;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
         $count = $this->where($map)->count();
         return $count ? $count : 0;
     }
     /**
      * 统计补发订单比
      */
-    public function wo_bufa_percent($start,$end,$platform,$type = 0){
+    public function wo_bufa_percent($start,$end,$platform = 0,$type = 0){
         $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
         if($type == 1){
             $map['complete_time'] = array('between',[$start,$end]);
         }
         $map['order_type'] = 4;
         $map['work_status'] = 6;
-        $map['work_platform'] = $platform;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
         $count = $this->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
         return $sum ? $sum.'%' : 0;
@@ -1425,14 +1432,16 @@ class WorkOrderList extends Model
     /**
      * 统计退款订单比
      */
-    public function wo_refund_percent($start,$end,$platform,$type = 0){
+    public function wo_refund_percent($start,$end,$platform = 0,$type = 0){
         $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
         if($type == 1){
             $map['complete_time'] = array('between',[$start,$end]);
         }
         $map['is_refund'] = 1;
         $map['work_status'] = 6;
-        $map['work_platform'] = $platform;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
         $count = $this->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
         return $sum ? $sum.'%' : 0;
@@ -1440,17 +1449,18 @@ class WorkOrderList extends Model
     /**
      * 统计退款金额比
      */
-    public function wo_refund_money_percent($start,$end,$platform,$type = 0){
+    public function wo_refund_money_percent($start,$end,$platform = 0,$type = 0){
         if($type == 1){
             $map['complete_time'] = array('between',[$start,$end]);
         }
         $map['is_refund'] = 1;
         $map['work_status'] = 6;
-        $map['work_platform'] = $platform;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
         $complete_money = $this->where($map)->sum('base_grand_total');
         $money = $this->where($map)->sum('refund_money');
         $sum = $complete_money == 0 ? 0 : round($money/$complete_money*100,2);
         return $sum ? $sum.'%' : 0;
     }
-
 }

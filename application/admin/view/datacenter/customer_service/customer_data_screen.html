@@ -1,12 +1,3 @@
-<style>
-   .plat_form{
-       margin-right: 10px;
-   }
-    .echart-style td{
-        width:60px;
-    }
-</style>
-
 <style type="text/css">
 table.altrowstable {
     margin: 0 auto;
@@ -76,7 +67,40 @@ table.altrowstable tr:nth-child(even){
     .tab-content > .active {
        display: block;
        clear: both;
-    }  
+    }
+    .work_title{
+        display: flex;
+
+    }
+    .work_title li{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        list-style: none;
+    }
+    .work_title li span{
+        display: inline-block;
+        font-size: 14px;
+    }
+    .work_title li b{
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 28px;
+    }
+    .work_title li.active span,.work_title li.active b{
+        color:#396FFF;
+    }
+    .plat_form,.plat_form1{
+        margin-right: 10px;
+    }
+    .plat_form.active,.plat_form1.active{
+        color:#396FFF;
+    }
+    .echart-style td{
+        width:60px;
+    }
+
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -84,7 +108,6 @@ table.altrowstable tr:nth-child(even){
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-                    <!-- <form id = "form1" action="#" class="form-commonsearch form-horizontal" role="form1" method="post"> -->
                         <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div>
@@ -92,17 +115,15 @@ table.altrowstable tr:nth-child(even){
                                         <div style="font-size: 16px;"><b>工单概况</b></div><br>
                                         <div style="margin-left: 57px;font-size: 14px;">
                                             站点：
-                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 1])}"   title="Zeelool"   target="_blank"> Zeelool</a></span>
-                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 2])}"   title="Voogueme"   target="_blank"> Voogueme</a></span>
-                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 3])}"   title="Nihao"   target="_blank"> Nihao</a></span>
-                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 4])}"  title="Wesee"   target="_blank"> Wesee</a></span>
-                                            <span class="plat_form"><a href="{:url('datacenter/customer_service/customer_data_screen',['platform' => 0])}"  title="全部"   target="_blank"> 全部</a></span>
-
+                                            <span class="plat_form active" data-id="plat_form" data-value="1"> Zeelool</span>
+                                            <span class="plat_form" data-id="plat_form" data-value="2">Voogueme</span>
+                                            <span class="plat_form" data-id="plat_form" data-value="3">Nihao</span>
+                                            <span class="plat_form" data-id="plat_form" data-value="4">Wesee</span>
+                                            <span class="plat_form" data-id="plat_form" data-value="5">全部</span>
                                         </div>
                                     </div>                                                                 
                             </div>
                         </div>
-                    <!-- </form> -->
                 <table id="workload-info" class="altrowstable"
                 data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                 data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -119,303 +140,125 @@ table.altrowstable tr:nth-child(even){
              </thead>
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">今天</td>
-                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
-                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_percent}</td>
-                      <td style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_money_percent}</td>
+                      <td id="today_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
+                      <td id="today_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
+                      <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                      <td id="today_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_percent}</td>
+                      <td id="today_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_money_percent}</td>
                   </tr>
                   <tr>
                     <td style="text-align: center; vertical-align: middle;">昨天</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_money_percent}</td>
+                    <td id="yesterday_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
+                    <td id="yesterday_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
+                    <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
+                    <td id="yesterday_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_percent}</td>
+                    <td id="yesterday_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">过去7天</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_money_percent}</td>
+                    <td id="seven_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
+                    <td id="seven_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
+                    <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
+                    <td id="seven_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_percent}</td>
+                    <td id="seven_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">过去30天</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_money_percent}</td>
+                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
+                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
+                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
+                    <td id="thirty_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_percent}</td>
+                    <td id="thirty_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">当月</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_money_percent}</td>
+                    <td id="nowmonth_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_num}</td>
+                    <td id="nowmonth_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_complete_num}</td>
+                    <td id="nowmonth_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_bufa_percent}</td>
+                    <td id="nowmonth_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_percent}</td>
+                    <td id="nowmonth_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">上月</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_money_percent}</td>
+                    <td id="premonth_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_num}</td>
+                    <td id="premonth_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_complete_num}</td>
+                    <td id="premonth_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_bufa_percent}</td>
+                    <td id="premonth_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_percent}</td>
+                    <td id="premonth_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">今年</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_money_percent}</td>
+                    <td id="year_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_num}</td>
+                    <td id="year_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_complete_num}</td>
+                    <td id="year_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_bufa_percent}</td>
+                    <td id="year_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_percent}</td>
+                    <td id="year_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_money_percent}</td>
                 </tr>
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">总计</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_complete_num}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_bufa_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_percent}</td>
-                    <td style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_money_percent}</td>
+                    <td id="total_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_num}</td>
+                    <td id="total_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_complete_num}</td>
+                    <td id="total_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_bufa_percent}</td>
+                    <td id="total_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_percent}</td>
+                    <td id="total_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_money_percent}</td>
                 </tr>
                 </table>                
             </div>
             <div class="tab-panes fade active in">
-                <p><span>工作量概况</span></p>
-                <div class="widget-body no-padding" style="width: 48%;float:left;">
-                    <table id="order-info-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">A组</th>
-                            <th style="text-align: center; vertical-align: middle;">工作组别</th>
-                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
-                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
-                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
-                        </tr>
-                        </thead>
-                        {if !empty($infoOne)}
-                        {foreach name="infoOne" item="vo" key='k'}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $customerType[$k];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
-                        </tr>
-                         {/foreach}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">合计</td>
-                            <td style="text-align: center; vertical-align: middle;"></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['yester_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['counter'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['one']['no_qualified_day'];?></td>
-                        </tr>                         
-                         {/if}                                                                                                                                                   							 
-                    </table>
+                <div id="form2" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <div style="font-size: 16px;"><b>工作量概况</b></div><br>
+                    <div style="margin-left: 57px;font-size: 14px;">
+                        站点：
+                        <span class="plat_form1 active" data-id="plat_form1" data-value="1"> Zeelool</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="2">Voogueme</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="3">Nihao</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="4">Wesee</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="5">全部</span>
+                        <input type="hidden" id="web_platform" value="1">
+                    </div>
+                    <div style="margin-left: 57px;font-size: 14px;margin-top: 20px;">
+                        时间：
+                        <span>
+                            <input type="hidden" class="form-control operate" name="workload_time-operate" data-name="one_time" value="RANGE" readonly="">
+                            <input type="text" autocomplete="off" class="datetimerange" name="workload_time"  placeholder="输入时间" id="workload_time" value="" data-index="14" style="width: 300px;">
+                        </span>
+                    </div>
+
+                    <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                    <input type="hidden" id="title_type" value="2">
+                    <ul class="work_title">
+                        <li>
+                            <span>待处理</span>
+                            <b id="wait_deal_num">{$worknum_situation.wait_deal_num}</b>
+                        </li>
+                        <li data-value="1" class="title active">
+                            <span>新增</span>
+                            <b id="new_create_num">{$worknum_situation.new_create_num}</b>
+                        </li>
+                        <li data-value="2" class="title">
+                            <span>已回复</span>
+                            <b id="already_reply_num">{$worknum_situation.already_reply_num}</b>
+                        </li>
+                        <li data-value="4" class="title">
+                            <span>待分配</span>
+                            <b id="wait_allot_num">{$worknum_situation.wait_allot_num}</b>
+                        </li>
+                        <li data-value="5" class="title">
+                            <span>转正人效</span>
+                            <b id="positive_effect_num">{$worknum_situation.positive_effect_num}</b>
+                        </li>
+                        <li data-value="7" class="title">
+                            <span>回复失效（h）</span>
+                            <b id="reply_failure_num">{$worknum_situation.reply_failure_num}</b>
+                        </li>
+                    </ul>
+                    <div id="echart" style="height:200px;width:100%;"></div>
                 </div>
-                <div class="widget-body no-padding" style="width: 48%;float:right">
-                    <table id="order-info-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">B组</th>
-                            <th style="text-align: center; vertical-align: middle;">工作组别</th>
-                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
-                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
-                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
-                        </tr>
-                        </thead>
-                        {if !empty($infoTwo)}
-                        {foreach name="infoTwo" item="vo" key='k'}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $customerType[$k];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
-                        </tr>
-                         {/foreach}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">合计</td>
-                            <td style="text-align: center; vertical-align: middle;"></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['yester_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['counter'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr['two']['no_qualified_day'];?></td>
-                        </tr>
-                         {/if}                                                                                                                                                   							 
-                    </table>
-                </div>                
             </div>
             <div class="tab-pane fade active in">
-                <p><span>工单统计</span></p>
-                <div class="widget-body no-padding" style="width: 100%; ">
-                    <table id="order-info-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">A组</th>
-                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
-                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
-                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
-                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
-                        </tr>
-                        </thead>
-                        {if !empty($infoOne)}
-                        {foreach name="infoOne" item="vo" key='k'}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
-                            <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
-                            <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['replacement_num'],2);?></td>
-                            {if $workArr[$k]['counter'] gt 0 } 
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['replacement_num']/$workArr[$k]['counter']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['refund_num'],2);?></td>
-                            {if $workArr[$k]['counter'] gt 0}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['refund_num']/$workArr[$k]['counter']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money'],2);?></td>
-                            {if $workArr[$k]['base_grand_total'] gt 0}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money']/$workArr[$k]['base_grand_total']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                         </tr>
-                         {/foreach}
-                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">合计</td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['create_num'];?></td>
-                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['one']['counter'];?></td>
-                            <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['base_grand_total'],2);?></td>
-                            <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['coupon'],2);?></td>
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['replacement_num'],2);?></td>
-                            {if $workArr['one']['counter'] gt 0 } 
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['replacement_num']/$workArr['one']['counter']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['refund_num'],2);?></td>
-                            {if $workArr['one']['counter'] gt 0}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr['one']['refund_num']/$workArr['one']['counter']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['total_refund_money'],2);?></td>
-                            {if $workArr['one']['base_grand_total'] gt 0}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['one']['total_refund_money']/$workArr['one']['base_grand_total']*100,2);?></td>
-                            {else/}
-                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                            {/if}
-                         </tr>                        
-                         {/if}                                                                                                                                                     							 
-                    </table>
-                </div>
-                <div class="widget-body no-padding" style="width: 100%; ">
-                    <table id="order-info-list" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">B组</th>
-                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
-                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
-                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
-                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
-                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
-                        </tr>
-                        </thead>
-                            {if !empty($infoTwo)}
-                            {foreach name="infoTwo" item="vo" key='k'}
-                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
-                                <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
-                                <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['replacement_num'],2);?></td>
-                                {if $workArr[$k]['counter'] gt 0 } 
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['replacement_num']/$workArr[$k]['counter']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['refund_num'],2);?></td>
-                                {if $workArr[$k]['counter'] gt 0}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['refund_num']/$workArr[$k]['counter']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money'],2);?></td>
-                                {if $workArr[$k]['base_grand_total'] gt 0}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['total_refund_money']/$workArr[$k]['base_grand_total']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                             </tr>
-                             {/foreach}
-                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">合计</td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['create_num'];?></td>
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr['two']['counter'];?></td>
-                                <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['base_grand_total'],2);?></td>
-                                <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['coupon'],2);?></td>
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['replacement_num'],2);?></td>
-                                {if $workArr['two']['counter'] gt 0 } 
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['replacement_num']/$workArr['two']['counter']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['refund_num'],2);?></td>
-                                {if $workArr['two']['counter'] gt 0}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo @round($workArr['two']['refund_num']/$workArr['two']['counter']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['total_refund_money'],2);?></td>
-                                {if $workArr['two']['base_grand_total'] gt 0}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo round($workArr['two']['total_refund_money']/$workArr['two']['base_grand_total']*100,2);?></td>
-                                {else/}
-                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">0</td>
-                                {/if}
-                             </tr>                            
-                             {/if}                                                                                                                                                    							 
-                    </table>
-                </div>
+
                 <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
-                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    <form id="form3" class="form-commonsearch form-horizontal" action="#" role="form1"
                     method="post">
                     <div class="col-xs-12 col-md-9">
                         <div class="form-group" style="margin-top: 20px;">

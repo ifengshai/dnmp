@@ -7,6 +7,7 @@ use think\Cache;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskAgents;
+use think\Db;
 
 class CustomerService extends Backend
 {
@@ -19,6 +20,7 @@ class CustomerService extends Backend
         $this->model   = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step    = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->workload = new \app\admin\model\WorkloadStatistics;
+        $this->zendesk = new \app\admin\model\zendesk\Zendesk;
     }
     /**
      * 客服数据大屏
@@ -29,11 +31,48 @@ class CustomerService extends Backend
      * @return void
      */
     public function customer_data_screen(){
-        $platform = input('platform') ? input('platform') : 1;
+        $platform = input('platform') ? input('platform') : 0;
 
         $workorder_situation = $this->model->workorder_situation($platform);
-        $this->view->assign(compact('workorder_situation'));
+
+        $worknum_situation = $this->zendesk->worknum_situation($platform);
+        $this->view->assign(compact('workorder_situation','worknum_situation'));
         return $this->view->fetch();
+    }
+    /**
+     * ajax获取工单概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 10:15:10 
+     * @return void
+     */
+    public function workorder_situation(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform = $params['platform'] ? $params['platform'] : 0;
+            $workorder_situation = $this->model->workorder_situation($platform);
+            $this->success('', '', $workorder_situation);
+        }
+    }
+    /**
+     * ajax获取工作量概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function worknum_situation(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform = $params['web_platform'] ? $params['web_platform'] : 0;
+            $workload_time = $params['workload_time'] ? $params['workload_time'] : '';
+            $title_type = $params['title_type'] ? $params['title_type'] : 1;
+
+            $workorder_situation = $this->zendesk->worknum_situation($platform,$workload_time);
+            $this->success('', '', $workorder_situation);
+        }
     }
     /**
      * 客服数据(首页)
