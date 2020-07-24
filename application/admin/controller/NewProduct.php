@@ -46,7 +46,7 @@ class NewProduct extends Backend
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
 
-        $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
     }
 

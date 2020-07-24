@@ -29,7 +29,7 @@ class TransferOrder extends Backend
         $this->transferOrderItem = new \app\admin\model\warehouse\TransferOrderItem;
 
         //获取所有站点
-        $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
         $this->assign('magentoplatformarr', $this->magentoplatformarr);
     }

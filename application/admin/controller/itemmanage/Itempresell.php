@@ -29,7 +29,7 @@ class Itempresell extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $this->magentoplatform = new \app\admin\model\platformManage\MagentoPlatform();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->item = new \app\admin\model\itemmanage\Item();
     }
 
