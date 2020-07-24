@@ -1574,8 +1574,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
-
-            $(document).on('click', "#add_entry_user", function () {
+            Controller.api.bindevent();
+           /* $(document).on('click', "#add_entry_user", function () {
                 var user_id = $('#Copy_to_user_id').val();
                 if(isNaN(parseInt(user_id))){
                     layer.alert('无效的选择');
@@ -1595,7 +1595,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
                 var add_str = '<div class="user_list" id="userid_'+user_id+'"><span>'+user_name+'</span><a href="javascript:;" onclick="del_Entry_user('+user_id+')"> Ｘ </a><input type="hidden" name="row[copy_to_user_id][]" value="'+user_id+'"></div>'
                 $('#user_list').append(add_str);
-            });
+            });*/
         },
         edit: function () {
             Controller.api.bindevent();

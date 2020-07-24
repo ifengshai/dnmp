@@ -773,6 +773,8 @@ class ItWebDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+
         $this->view->assign('demand_type',input('demand_type'));
         /*$user_id = $this->auth->id;
         $user_name = $this->auth->username;

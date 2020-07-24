@@ -2,13 +2,22 @@
 return [
     //站点
     'siteType' => [
-        '' => '请选择',
         '1' => 'Zeelool',
         '2' => 'Voogueme',
         '3' => 'Nihao',
         '4' => 'Wesee',
         '5' => 'Other',
         '6' => '如弗小程序',
+    ],
+    'site' => [
+        '1' => 'Zeelool',
+        '2' => 'Voogueme',
+        '3' => 'Nihao',
+        '4' => 'Meeloog',
+        '5' => 'Wesee',
+        '6' => 'Rufoo',
+        '7' => 'Toloog',
+        '8' => 'Other',
     ],
     //抄送人
     'copyToUserId' => [
