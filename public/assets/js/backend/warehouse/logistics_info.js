@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'is_new_product', title: __('是否为选品采购单'), custom: { 1: 'success', 0: 'danger' },
+                            field: 'is_new_product', title: __('是否为新品采购单'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },

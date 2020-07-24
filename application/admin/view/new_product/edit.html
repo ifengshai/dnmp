@@ -284,6 +284,21 @@
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50">{$row['newproductattribute']['frame_remark']}</textarea>
         </div>
     </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" name="row[frame_images]" type="text" value="{$row['newproductattribute']['frame_images']}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="false" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    
     
     <input type='hidden' name="row[item_status]" id="status" value="{$row['item_status']}">
     <div class="form-group layer-footer">
@@ -320,8 +335,6 @@
             <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}">
         </div>
     </div>
-
-   
 
 
     <div class='caigou ajax-add'>
@@ -377,6 +390,22 @@
             <textarea id="c-problem_desc" class="form-control" rows="5" name="row[frame_remark]" cols="50">{$row['newproductattribute']['frame_remark']}</textarea>
         </div>
     </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" name="row[frame_images]" type="text" value="{$row['newproductattribute']['frame_images']}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="false" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+
+    
     <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer" style="display:none;">
         <label class="control-label col-xs-12 col-sm-2"></label>

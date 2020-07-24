@@ -84,7 +84,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'is_new_product', title: __('Is_new_product'),
+                            field: 'is_sample', title: __('是否为留样采购单'),
                             custom: { 0: 'danger', 1: 'success' },
                             searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
@@ -502,8 +502,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.caigou table tbody').append(content);
-
-
                 Controller.api.bindevent();
 
             })

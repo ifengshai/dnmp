@@ -253,4 +253,66 @@ class TrackReg extends Backend
         // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
+
+    /**
+     * 获取每日SKU各站销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/14 09:41:49 
+     * @return void
+     */
+    public function getSkuSalesNum()
+    {
+        set_time_limit(0);
+        $item = new \app\admin\model\itemmanage\Item();
+        $zeelool = new \app\admin\model\order\order\Zeelool();
+        $voogueme = new \app\admin\model\order\order\Voogueme();
+        $nihao = new \app\admin\model\order\order\Nihao();
+        $meeloog = new \app\admin\model\order\order\Meeloog();
+        $wesee = new \app\admin\model\order\order\Weseeoptical();
+        $map['is_open'] = 1;
+        $map['is_del'] = 1;
+        $map['item_status'] = 3;
+        $list = $item->where($map)->limit(300)->select();
+        $skus = [];
+        foreach ($list as $k => $v) {
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
+            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
+            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
+            $meeloog_sku = $itemPlatformSku->getWebSku($v['sku'], 4);
+            $wesee_sku = $itemPlatformSku->getWebSku($v['sku'], 5);
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $stime = date("Y-m-d 00:00:00");
+            $etime = date("Y-m-d 23:59:59");
+            $where['a.created_at'] = ['between', [$stime, $etime]];
+            //Zeelool
+            $where['sku'] = $zeelool_sku;
+            $zeelool_num = $zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Voogueme
+            $where['sku'] = $voogueme_sku;
+            $voogueme_num = $voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Nihao
+            $where['sku'] = $nihao_sku;
+            $nihao_num = $nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            //meeloog
+            $where['sku'] = $meeloog_sku;
+            $meeloog_num = $meeloog->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            //wesee
+            $where['sku'] = $wesee_sku;
+            $wesee_num = $wesee->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
+                $skus[] = $v['sku'];
+            }
+        }
+        $data['is_change'] = 1;
+        $data['is_open'] = 3;
+        $res = $item->save($data, ['sku' => ['in', $skus]]);
+        dump($res);
+        die;
+    }
 }

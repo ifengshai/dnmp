@@ -113,7 +113,7 @@ class PurchaseOrder extends Backend
     /**
      * 添加
      */
-    public function add()
+    public function add($ids = null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -169,6 +169,7 @@ class PurchaseOrder extends Backend
 
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
+                        $replenish_list_id = $this->request->post("replenish_list_id/a");
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -179,6 +180,7 @@ class PurchaseOrder extends Backend
                             $data[$k]['purchase_price'] = $price[$k];
                             $data[$k]['purchase_total'] = $total[$k];
                             $data[$k]['purchase_id'] = $this->model->id;
+                            $data[$k]['replenish_list_id'] = $replenish_list_id[$k];
                             $data[$k]['purchase_order_number'] = $params['purchase_number'];
                         }
                         //批量添加
@@ -235,28 +237,47 @@ class PurchaseOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
 
-        //查询新品数据
-        $new_product_ids = $this->request->get('new_product_ids');
-        if ($new_product_ids) {
-            //查询所选择的数据
-            $where['new_product.id'] = ['in', $new_product_ids];
-            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
-            $row = collection($row)->toArray();
-            foreach ($row as $v) {
-                if ($v['item_status'] != 1) {
-                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
-                }
-            }
+        // //查询新品数据
+        // $new_product_ids = $this->request->get('new_product_ids');
+        // if ($new_product_ids) {
+        //     //查询所选择的数据
+        //     $where['new_product.id'] = ['in', $new_product_ids];
+        //     $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
+        //     $row = collection($row)->toArray();
+        //     foreach ($row as $v) {
+        //         if ($v['item_status'] != 1) {
+        //             $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
+        //         }
+        //     }
 
-            //提取供应商id
-            $supplier = array_unique(array_column($row, 'supplier_id'));
-            if (count($supplier) > 1) {
-                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+        //     //提取供应商id
+        //     $supplier = array_unique(array_column($row, 'supplier_id'));
+        //     if (count($supplier) > 1) {
+        //         $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+        //     }
+        //     $this->assign('row', $row);
+        //     $this->assign('is_new_product', 1);
+        // }
+
+        $label = input('label');
+        if ($label == 'replenish') {
+            $ids = $ids ? $ids : input('ids');
+            $this->list = new \app\admin\model\purchase\NewProductReplenishList;
+            $list = $this->list->where('id', 'in', $ids)->select();
+            
+            $item = new \app\admin\model\itemmanage\Item;
+            $supplier = new \app\admin\model\purchase\SupplierSku;
+            foreach($list as &$v) {
+                //查询sku 商品名称
+                $data = $item->getGoodsInfo($v['sku']);
+                $v['product_name'] = $data->name;
+                //查询供应商SKU
+                $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
-            $this->assign('row', $row);
-            $this->assign('is_new_product', 1);
+            unset($v);
+            if (count(array_unique(array_column($list, 'supplier_id'))) > 1)  $this->error(__('必须选择相同的供应商！！'), url('purchase/new_product_replenish_order/handle'));
+            $this->assign('list', $list);
         }
-
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
@@ -825,6 +846,8 @@ class PurchaseOrder extends Backend
         $data['purchase_status'] = $status;
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         $item = new \app\admin\model\itemmanage\Item();
+        $this->list = new \app\admin\model\purchase\NewProductReplenishList;
+        $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
         if ($res !== false) {
 
             //在途库存新逻辑
@@ -833,6 +856,20 @@ class PurchaseOrder extends Backend
                 $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
                 foreach ($list as $v) {
                     $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态
+                    if ($v['replenish_list_id']) {
+                        $this->list->where('id', $v['replenish_list_id'])->update(['real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
+                        $replenish_id = $this->list->where('id',$v['replenish_list_id'])->field('replenish_id,status')->find();
+                        $replenish_order = $this->list->where(['replenish_id'=>$replenish_id['replenish_id'],'status'=>1])->find();
+                        //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
+                        if ($replenish_id['status'] == 2){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',3);
+                        }
+                        if (empty($replenish_order)){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',4);
+                        }
+                    }
                 }
             }
 

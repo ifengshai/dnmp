@@ -140,7 +140,7 @@ class PurchaseOrder extends Model
         //退销单的退销金额
         $returnResult = Db::name('purchase_return')->where($map)->field('purchase_id,round(sum(return_money),2) return_money')->group('purchase_id')->select();
         //收货异常的退销金额 start
-        $abnormalResult = Db::name('purchase_abnormal_item')->where($map)->where(['error_type'=>2])->field('purchase_id,round(sum((should_arrival_num-arrival_num)*purchase_price)) return_price')->group('purchase_id')->select();
+        $abnormalResult = Db::name('purchase_abnormal_item')->where($map)->where(['error_type' => 2])->field('purchase_id,round(sum((should_arrival_num-arrival_num)*purchase_price)) return_price')->group('purchase_id')->select();
         $arr = [];
         $arr['return_money'] = 0;
         if (!$returnResult && !$abnormalResult) {
@@ -155,10 +155,10 @@ class PurchaseOrder extends Model
             }
         }
 
-        if($abnormalResult){
-            foreach($abnormalResult as $av){
+        if ($abnormalResult) {
+            foreach ($abnormalResult as $av) {
                 $arr['return_money'] += $av['return_price'];
-                if(in_array($av['purchase_id'],$thisPageIdArr)){
+                if (in_array($av['purchase_id'], $thisPageIdArr)) {
                     $arr['thisPageArr'][$av['purchase_id']] += $av['return_price'];
                 }
             }
@@ -417,5 +417,27 @@ class PurchaseOrder extends Model
         }
         unset($v);
         return $list ?? [];
+    }
+
+    /**
+     * 查询待入库数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/16 11:07:07 
+     * @return void
+     */
+    public function getWaitInStockNum($skus = [])
+    {
+        $where['is_del'] = 1;
+        $where['purchase_status'] = 7;
+        $where['stock_status'] = 0;
+        $where['sku'] = ['in', $skus];
+        $list = $this->alias('a')
+            ->where($where)
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->group('sku')
+            ->column('sum(purchase_num) as purchase_num', 'sku');
+        return $list;
     }
 }
