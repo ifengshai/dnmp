@@ -220,7 +220,7 @@ class TransferOrder extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
