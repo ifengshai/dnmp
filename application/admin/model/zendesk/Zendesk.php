@@ -465,12 +465,17 @@ class Zendesk extends Model
     /*
      * 统计工作量概况
      * */
-    public function worknum_situation($platform,$workload_time = ''){
-        $map['type'] = $platform;
+    public function worknum_situation($platform = 0,$workload_time = ''){
+        if($platform){
+            $map['type'] = $platform;
+        }
         //待处理
         $wait_deal_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
+
         //新增
-        $where['platform'] = $platform;
+        if($platform){
+            $where['platform'] = $platform;
+        }
         if($workload_time){
             $createat = explode(' ', $workload_time);
             $where['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
@@ -491,7 +496,9 @@ class Zendesk extends Model
         $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
         $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
         //人效
-        $task_where['type'] = $platform;
+        if($platform){
+            $task_where['type'] = $platform;
+        }
         $admin_ids = Db::name('zendesk_agents')->where(['type'=>$platform,'admin_id'=>['neq','75,117,95,105']])->column('admin_id');
         $all_already_num = Db::name('zendesk_comments')->where($where)->where(['due_id'=>['in',$admin_ids]])->count();
         $people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$admin_ids]])->count();

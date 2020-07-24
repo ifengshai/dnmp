@@ -348,7 +348,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             //工作概况中的站点选择
             $(document).on('click','.plat_form',function(){
                 var platform = $(this).data('value');
-
+                $(".plat_form").removeClass('active');
+                $(this).addClass('active');
                 Backend.api.ajax({
                     url:'datacenter/customer_service/workorder_situation',
                     data:{platform:platform}
@@ -425,407 +426,40 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             //获取工作量概况数据
             $(document).on('click','.plat_form1',function(){
                 $("#web_platform").val($(this).data('value'));
+                $(".plat_form1").removeClass('active');
+                $(this).addClass('active');
                 worknum_situation();
             });
             $(document).on('click','.title',function(){
-                $("#title_type").val($(this).data('value'));
+                if($(this).data('value')){
+                    $("#title_type").val($(this).data('value'));
+                }
+                $(".title").removeClass('active');
+                $(this).addClass('active');
                 worknum_situation();
             });
             
+            //工单量概况折线图
+            var chartOptions = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'line'
+            };
             
-            // 基于准备好的dom，初始化echarts实例
-            //销售额
-            var myChart  = Echarts.init(document.getElementById('echart'), 'walden');
-            // 指定图表的配置项和数据
-            var option = {
-                title: {
-                    text: '',
-                    subtext: ''
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: [__('Z站销量额')]
-                },
-                toolbox: {
-                    show: false,
-                    feature: {
-                        magicType: { show: true, type: ['stack', 'tiled'] },
-                        saveAsImage: { show: true }
-                    }
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: Orderdata.column
-                },
-                yAxis: [{
-                }],
-                grid: [{
-                    left: '10%',
-                    top: '10',
-                    right: '10'
-                }],
-                series: [{
-                    name: __('Z站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeeloolSalesMoneyList
-                },         
-                ]
-            };
-            myChart.setOption(option);
-            $(window).resize(function () {
-                myChart.resize();
-            });
-
-            //Form.api.bindevent($("div[role=form8]"));
-            //Form.api.bindevent($("form[role=form]"));
-            //显示中间个饼图
-            var chartOptions1 = {
-                targetId: 'echart1',
-                downLoadTitle: '图表',
-                type: 'pie',
-                pie: {
-                    tooltip: { //提示框组件。
-                        trigger: 'item',
-                        formatter: function (param) {
-                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
-                        }
-                    },
-                }
-            };
-            var chartOptions3 = {
-                targetId: 'echart3',
-                downLoadTitle: '图表',
-                type: 'pie',
-                pie: {
-                    tooltip: { //提示框组件。
-                        trigger: 'item',
-                        formatter: function (param) {
-                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
-                        }
-                    },
-                }               
-            };
-            var time_one = $('#create_time_one').val() ? $('#create_time_one').val() :'';
-            //console.log(time_one);
-            var time_two = $('#create_time_two').val() ? $('#create_time_two').val() :'';
-            //console.log(time_two);
-            var platform = 1;
-            var options1 = {
+            var options = {
                 type: 'post',
-                url: 'datacenter/customer_service/detail',
+                url: 'datacenter/customer_service/worknum_line',
                 data: {
-                    'time': time_one,
-                    'platform': platform,
-                    'key':'echart1' 
-                }
-            }             
-            var options3 = {
-                type: 'post',
-                url: 'datacenter/customer_service/detail',
-                data: {
-                    'time': time_two,
-                    'platform': platform,
-                    'key':'echart3' 
+                    platform:$("#web_platform").val(),
+                    workload_time:$("#workload_time").val(),
+                    title_type:$("#title_type").val()
                 }
             }
-            EchartObj.api.ajax(options1, chartOptions1);
-            EchartObj.api.ajax(options3, chartOptions3);
-                        //点击重置按钮
-            $(document).on('click', '.btn-workload-time', function () {
-                $('#workload_time').val('');
-                // $('#customer_email').attr({ "value": "" });
-                // $('#customer_name').attr({ "value": "" });
-                // $('#customer_phone').attr({ "value": "" });
-                // $('#track_number').attr({ "value": "" });
-            });
-            $(document).on('click','.btn-create_time_one',function(){
-                $('#create_time_one').val('');
-            });
-            $(document).on('click','.btn-create_time_two',function(){
-                $("#create_time_two").val('');
-            });
-            $(document).on('click','.btn-create_time_workorder',function(){
-                $("#create_time_workorder").val('');
-            });
-            $(document).on('click','.btn-create_time_warehouse',function(){
-                $("#create_time_warehouse").val('');
-            });
-            //首页概况统计
-            $(document).on('click','#workload-btn',function(){
-                var create_time = $('#workload_time').val();
-                var platform    = $('#order_platform_workload').val();
-                if (!create_time) {
-                    Toastr.error('请先选择时间范围');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url:'datacenter/customer_service/workload_general',
-                    data:{time:create_time,platform:platform}
-                }, function(data, ret){
-                    var today = ret.data.todayData;
-                    var yesterday  = ret.data.yesterdayData;
-                    var serven     = ret.data.servenData;
-                    var third      = ret.data.thirdData;
-                    var starttime  = ret.data.start;
-                    var endtime    = ret.data.end;
-                    var info       = ret.data.info;
-                    $('#today_wait_num').text(today.wait_num);
-                    $('#today_increment_num').text(today.increment_num);
-                    $('#today_reply_num').text(today.reply_num);
-                    $('#today_waiting_num').text(today.waiting_num);
-                    $('#today_pending_num').text(today.pending_num);
+            EchartObj.api.ajax(options, chartOptions)
 
-                    $('#yesterday_wait_num').text(yesterday.wait_num);
-                    $('#yesterday_increment_num').text(yesterday.increment_num);
-                    $('#yesterday_reply_num').text(yesterday.reply_num);
-                    $('#yesterday_waiting_num').text(yesterday.waiting_num);
-                    $('#yesterday_pending_num').text(yesterday.pending_num);
-
-                    $('#serven_wait_num').text(serven.wait_num);
-                    $('#serven_increment_num').text(serven.increment_num);
-                    $('#serven_reply_num').text(serven.reply_num);
-                    $('#serven_waiting_num').text(serven.waiting_num);
-                    $('#serven_pending_num').text(serven.pending_num);
-
-                    $('#third_wait_num').text(third.wait_num);
-                    $('#third_increment_num').text(third.increment_num);
-                    $('#third_reply_num').text(third.reply_num);
-                    $('#third_waiting_num').text(third.waiting_num);
-                    $('#third_pending_num').text(third.pending_num);
-                    var tr = '<tr id="new_tr">';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+starttime+':'+endtime+'</td>';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+info.wait_num+'</td>';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+info.increment_num+'</td>';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+info.reply_num+'</td>';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+info.waiting_num+'</td>';
-                        tr += '<td style="text-align: center; vertical-align: middle;">'+info.pending_num+'</td>';
-                        tr+='</tr>';      
-                    $("#workload-info").append(tr);                       
-                    return false;
-                }, function(data, ret){
-                    Layer.alert(ret.msg);
-                    return false;
-                });                 
-
-            });
-            //首页工单问题类型统计
-            $(document).on('click', '.echart1-btn', function () {
-                var create_time = $('#create_time_one').val();
-                console.log(create_time);
-                if (!create_time) {
-                    Toastr.error('请先选择时间范围');
-                    return false;
-                }
-                var chartOptions3 = {
-                    targetId: 'echart1',
-                    downLoadTitle: '图表',
-                    type: 'pie',
-                    pie: {
-                        tooltip: { //提示框组件。
-                            trigger: 'item',
-                            formatter: function (param) {
-                                return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
-                            }
-                        },
-                    }               
-                };
-                var platform = $('#order_platform_one').val();                
-                var options3 = {
-                    type: 'post',
-                    url: 'datacenter/customer_service/detail',
-                    data: {
-                        'time': create_time,
-                        'platform': platform,
-                        'key':'echart1' 
-                    }
-                }                
-                EchartObj.api.ajax(options3, chartOptions3);
-            });
-            //首页工单处理措施统计
-            $(document).on('click', '.echart3-btn', function () {
-                var create_time = $('#create_time_two').val();
-                if (!create_time) {
-                    Toastr.error('请先选择时间范围');
-                    return false;
-                }
-                var chartOptions3 = {
-                    targetId: 'echart3',
-                    downLoadTitle: '图表',
-                    type: 'pie',               
-                };
-                var platform = $('#order_platform_two').val();               
-                var options3 = {
-                    type: 'post',
-                    url: 'datacenter/customer_service/detail',
-                    data: {
-                        'time': create_time,
-                        'platform': platform,
-                        'key':'echart3' 
-                    }
-                }                
-                EchartObj.api.ajax(options3, chartOptions3);
-            });
-            //首页工单处理概况
-            $(document).on('click', '.workorder-btn', function () {
-                var create_time = $('#create_time_workorder').val();
-                if (!create_time) {
-                    Toastr.error('请先选择时间范围');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url:'datacenter/customer_service/workorder_general',
-                    data:{time:create_time}
-                }, function(data, ret){
-                    $("#workorder-left tr").remove();
-                    $("#workorder-right tr").remove();
-                    var examineArr = ret.data.examineArr;
-                    var step       = ret.data.step;
-                    var workorder_handle_left_data = ret.data.workorder_handle_left_data;
-                    var workorder_handle_right_data = ret.data.workorder_handle_right_data;
-                    //工单处理概况左边数据 start
-                    var left_tr = '<tr>';
-                        left_tr+='<th style="text-align: center; vertical-align: middle;">措施</th>';
-                    for(let key  in examineArr){
-                        left_tr+='<th style="text-align: center; vertical-align: middle;">'+examineArr[key]+'</th>';
-                    }
-                        left_tr+='</tr>';
-                        left_tr+='<tr>';
-                        left_tr+='<td style="text-align: center; vertical-align: middle;">未超时未审批</td>';
-                    for(let key in examineArr){
-                        if(workorder_handle_left_data != false){
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">'+workorder_handle_left_data[key].no_time_out_check+'</td>';
-                        }else{
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">0</td>';
-                        }     
-                    }
-                        left_tr+='</tr>';
-                        left_tr+='<tr>';
-                        left_tr+='<td style="text-align: center; vertical-align: middle;">未超时已审批</td>';
-                    for(let key in examineArr){
-                        if(workorder_handle_left_data != false){
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">'+workorder_handle_left_data[key].no_time_out_checked+'</td>';
-                        }else{
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">0</td>';
-                        }     
-                    }
-                        left_tr+='</tr>';
-                        left_tr+='<tr>';
-                        left_tr+='<td style="text-align: center; vertical-align: middle;">超时未审批</td>';
-                    for(let key in examineArr){
-                        if(workorder_handle_left_data != false){
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">'+workorder_handle_left_data[key].time_out_check+'</td>';
-                        }else{
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">0</td>';
-                        }     
-                    }
-                        left_tr+='</tr>';
-                        left_tr+='<tr>';
-                        left_tr+='<td style="text-align: center; vertical-align: middle;">超时已审批</td>';
-                    for(let key in examineArr){
-                        if(workorder_handle_left_data != false){
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">'+workorder_handle_left_data[key].time_out_checked+'</td>';
-                        }else{
-                            left_tr+='<td style="text-align: center; vertical-align: middle;">0</td>';
-                        }     
-                    }
-                        left_tr+='</tr>';
-                    $("#workorder-left").append(left_tr);     
-                    //工单处理概况左边数据 end
-                    //工单处理概况右边数据 start
-                        var right_tr ='<tr>';
-                            right_tr+='<th style="text-align: center; vertical-align: middle;">措施</th>';
-                            right_tr+='<th style="text-align: center; vertical-align: middle;">未超时未处理</th>';
-                            right_tr+='<th style="text-align: center; vertical-align: middle;">未超时已处理</th>';
-                            right_tr+='<th style="text-align: center; vertical-align: middle;">超时未处理</th>';
-                            right_tr+='<th style="text-align: center; vertical-align: middle;">超时已处理</th>';
-                            right_tr+='</tr>';
-                    for(let key in step){
-                        if(workorder_handle_right_data != false){
-                            right_tr+='<tr>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+step[key]+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+workorder_handle_right_data[key].no_time_out_handle+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+workorder_handle_right_data[key].no_time_out_handled+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+workorder_handle_right_data[key].time_out_handle+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+workorder_handle_right_data[key].time_out_handled+'</td>'+
-                            '</tr>';
-                        }else{
-                            right_tr+='<tr>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+step[key]+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '</tr>';
-                        }
-                    }      
-                    //工单处理概况右边数据 end     
-                    $("#workorder-right").append(right_tr);    
-                    return false;
-                }, function(data, ret){
-                    Layer.alert(ret.msg);
-                    return false;
-                });
-            });
-            //首页跟单处理概况
-            $(document).on('click', '.warehouse-btn', function () {
-                var create_time = $('#create_time_warehouse').val();
-                if (!create_time) {
-                    Toastr.error('请先选择时间范围');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url:'datacenter/customer_service/warehouse_general',
-                    data:{time:create_time}
-                }, function(data, ret){
-                    var warehouse_data = ret.data.warehouse_data;
-                    var warehouse_problem_type = ret.data.warehouse_problem_type;
-                    $("#warehouse tr").remove();
-                    var tr ='<tr>';
-                        tr+='<th style="text-align: center; vertical-align: middle;">跟单概况</th>';
-                        tr+='<th style="text-align: center; vertical-align: middle;">未超时未处理</th>';
-                        tr+='<th style="text-align: center; vertical-align: middle;">未超时已处理</th>';
-                        tr+='<th style="text-align: center; vertical-align: middle;">超时未处理</th>';
-                        tr+='<th style="text-align: center; vertical-align: middle;">超时已处理</th>';
-                        tr+='</tr>';
-                    for(let key in warehouse_problem_type){
-                        if(warehouse_data != false){
-                            tr+='<tr>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_problem_type[key]+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_data[key].no_time_out_handle+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_data[key].no_time_out_handled+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_data[key].time_out_handle+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_data[key].time_out_handled+'</td>'+
-                            '</tr>';
-                        }else{
-                            tr+='<tr>'+
-                            '<td style="text-align: center; vertical-align: middle;">'+warehouse_problem_type[key]+'</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '<td style="text-align: center; vertical-align: middle;">0</td>'+
-                            '</tr>';
-                        }
-                    }      
-                    //工单处理概况右边数据 end     
-                    $("#warehouse").append(tr);                       
-                    return false;
-                }, function(data, ret){
-                    Layer.alert(ret.msg);
-                    return false;
-                });                
-            });                                                 
+            // 基于准备好的dom，初始化echarts实例
+            //销售额
+                                                           
         },
         api: {
             formatter: {
@@ -1184,7 +818,7 @@ function worknum_situation(){
         url:'datacenter/customer_service/worknum_situation',
         data:{platform:platform,workload_time:workload_time,title_type:title_type}
     }, function(data, ret){
-        var wait_deal_num = ret.data.$wait_deal_num;
+        var wait_deal_num = ret.data.wait_deal_num;
         var new_create_num  = ret.data.new_create_num;
         var already_reply_num  = ret.data.already_reply_num;
         var wait_allot_num  = ret.data.wait_allot_num;

@@ -64,14 +64,51 @@ class CustomerService extends Backend
      * @return void
      */
     public function worknum_situation(){
+
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $platform = $params['web_platform'] ? $params['web_platform'] : 0;
+            $platform = $params['platform'] ? $params['platform'] : 0;
             $workload_time = $params['workload_time'] ? $params['workload_time'] : '';
             $title_type = $params['title_type'] ? $params['title_type'] : 1;
 
             $workorder_situation = $this->zendesk->worknum_situation($platform,$workload_time);
             $this->success('', '', $workorder_situation);
+        }
+    }
+    /**
+     * ajax获取工作量中的折线图数据
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function worknum_line(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $params['platform'];
+            $params['workload_time'];
+            $params['title_type'];
+
+
+            $json['xcolumnData'] = array_keys($all_sales_num);
+            $json['column'] = ['每天订单量', '每天处理订单量'];
+            $json['columnData'] = [
+                [
+                    'name' => '每天订单量',
+                    'type' => 'line',
+                    'smooth' => true,
+                    'data' =>  array_values($all_sales_num)
+                ],
+                [
+                    'name' => '每天处理订单量',
+                    'type' => 'line',
+                    'smooth' => true,
+                    'data' => array_values($order_process_num)
+                ],
+
+            ];
+            return json(['code' => 1, 'data' => $json]);
         }
     }
     /**
