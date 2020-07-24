@@ -639,6 +639,7 @@ class Inventory extends Backend
         $outstock = new \app\admin\model\warehouse\Outstock;
         $outstockItem = new \app\admin\model\warehouse\OutStockItem;
 
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         //回滚
         Db::startTrans();
         try {
@@ -662,6 +663,27 @@ class Inventory extends Backend
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
                         $stock = $item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
+
+
+                        //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
+                        //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
+                        $stock_num = $v['error_qty'];
+                        foreach ($item_platform_sku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
+                            } else {
+                                $num = round($stock_num * $val['stock']/$whole_num);
+                                $stock_num -= $num;
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                            }
+                        }
+
+
                     }
 
                     //修改库存结果为真
