@@ -1219,6 +1219,9 @@ class NewProduct extends Backend
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
+        if (empty($list)) {
+            echo ('暂时没有紧急补货单需要处理');die;
+        }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
                 ->where(['is_show' => 1, 'type' => 1])

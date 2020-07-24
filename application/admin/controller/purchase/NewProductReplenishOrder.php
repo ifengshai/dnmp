@@ -184,7 +184,6 @@ class NewProductReplenishOrder extends Backend
 
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -192,10 +191,17 @@ class NewProductReplenishOrder extends Backend
                 $whole_num = 0;
                 //判断各个供应商分配数量之和是否等于总需求数量 相等的话 写入处理表
                 foreach ($params['supplier_num'] as $k => $v) {
-                    $whole_num += (int)$v;
+                    if(preg_match("/^[1-9][0-9]*$/" ,(int)$v)){
+                        $whole_num += (int)$v;
+                    }else{
+                        $this->error('供应商分配数量必须大于0');
+                    }
                 }
                 if ($num['replenishment_num'] != $whole_num) {
                     $this->error('供应商分配数量之和需等于总需求数量');
+                }
+                if ($params['supplier_id'] != array_unique($params['supplier_id'])){
+                    $this->error('请不要选择两个相同的供应商');
                 }
                 Db::startTrans();
                 try {
