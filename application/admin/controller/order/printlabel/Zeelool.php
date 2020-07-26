@@ -1368,6 +1368,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             '500006786',
             '400295439',
             '400295735',
+            '400295535',
         ];
 
         $map['sfo.increment_id'] = ['in', $str];
