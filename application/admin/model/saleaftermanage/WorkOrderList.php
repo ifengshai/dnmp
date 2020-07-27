@@ -1510,7 +1510,9 @@ class WorkOrderList extends Model
         $problem_ids = Db::name('work_order_problem_type')->where($kehu_where)->column('id');
         $where['work_status'] = 6;
         $where['problem_type_id'] = array('in',$problem_ids);
-        $where['work_platform'] = $platform;
+        if($platform){
+            $where['work_platform'] = $platform;
+        }
         $count = $this->where($where)->where($time_where)->count();
         return $count;
     }
@@ -1524,7 +1526,10 @@ class WorkOrderList extends Model
             $arr[$key]['name'] = $value['step_name'];
             $where['m.operation_type'] = 1;
             $where['m.measure_choose_id'] = $value['id'];
-            $arr[$key]['value'] = Db::name('work_order_measure')->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->where('w.work_platform',$platform)->count();
+            if($platform){
+                $where['w.work_platform'] = $platform;
+            }
+            $arr[$key]['value'] = Db::name('work_order_measure')->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
         }
         return $arr;
     }

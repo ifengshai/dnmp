@@ -168,7 +168,6 @@ class CustomerService extends Backend
      */
     public function workorder_question_type()
     {
-
         //异步调用图标数据
         if ($this->request->isAjax()) {
             $params = $this->request->param();
@@ -189,7 +188,6 @@ class CustomerService extends Backend
                     $column[] = $v['name'];
                 }
             } elseif ($params['key'] == 'echart3') {
-
                 //问题类型统计
                 $columnData = $this->model->workorder_measures($platform, $map1);
                 foreach ($columnData as $k => $v) {
