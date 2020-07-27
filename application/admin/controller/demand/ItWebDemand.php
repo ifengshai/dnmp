@@ -50,11 +50,258 @@ class ItWebDemand extends Backend
         $user_name = implode(',',$user_name_arr);
         return $user_name;
     }
+    public function site_data(){
+        if ($this->request->isAjax()) {
+            return json(config('demand.site'));
+        }
+    }
 
     /**
      * 技术部网站需求列表
      */
     public function index()
+    {
+        //dump(input());exit;
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            $smap = array();
+            if ($filter['Allgroup_sel'] == 1) {
+                $smap['web_designer_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 2) {
+                $smap['phper_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 3) {
+                $smap['app_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 4) {
+                $smap['test_group'] = 1;
+            }
+
+            if ($filter['entry_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                if (!empty($id)){
+                    $smap['entry_user_id'] = $id;
+                }else{
+                    $smap['entry_user_id'] =  trim($filter['entry_user_name']);
+                }
+                unset($filter['entry_user_name']);
+                unset($smap['nickname']);
+            }
+            $meWhere = '';
+            //我的
+            if(isset($filter['me_task'])){
+
+                $adminId = session('admin.id');
+                //是否是主管
+                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+                //判断是否是测试
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(status = 1 or test_group = 1)";
+                }
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(test_group = 1 and FIND_IN_SET({$adminId},test_user_id))";
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                //拼接我创建的所有和负责人是我的,抄送人是我的
+                if($meWhere){
+                    $meWhere .= "  or entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }else{
+                    $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }
+                unset($filter['me_task']);
+            } elseif(isset($filter['none_complete'])){//未完成
+                $meWhere="status !=7";
+                unset($filter['none_complete']);
+            }
+
+            $user_map='';
+            if ($filter['all_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $admin_user['nickname'] = ['like', '%' . trim($filter['all_user_name']) . '%'];
+                $id = $admin->where($admin_user)->value('id');
+                if (!empty($id)){
+                    $user_map = "FIND_IN_SET({$id},web_designer_user_id) or FIND_IN_SET({$id},phper_user_id) or FIND_IN_SET({$id},app_user_id) ";
+                }else{
+                    $user_map="web_designer_user_id =  '".trim($filter['all_user_name'])."'";
+                }
+                unset($filter['all_user_name']);
+                unset($admin_user['nickname']);
+            }
+
+            //测试负责人筛选
+            $testuser = array();
+            if ($filter['test_user_id_arr']) {
+                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
+                unset($filter['test_user_id_arr']);
+            }
+
+            if(isset($filter['Allgroup_sel'])){
+                unset($filter['Allgroup_sel']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where($smap)
+                ->where($meWhere)
+                ->where($user_map)
+                ->where($testuser)
+                ->order($sort, $order)
+                ->count();
+            $list = $this->model
+                ->where($where)
+                ->where($smap)
+                ->where($meWhere)
+                ->where($user_map)
+                ->where($testuser)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            //检查有没有权限
+            $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
+            $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
+            $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
+            $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
+            $permissions['demand_test_distribution'] = $this->auth->check('demand/it_web_demand/test_distribution');//测试分配
+            $permissions['demand_finish'] = $this->auth->check('demand/it_web_demand/group_finish');//开发完成
+            $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
+            $permissions['demand_test_record_bug'] = $this->auth->check('demand/it_web_demand/test_record_bug');//测试完成
+            $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
+            $permissions['demand_opt_test_duty'] = $this->auth->check('demand/it_web_demand/opt_test_duty');//是否扣测试绩效
+            $permissions['demand_opt_work_time'] = $this->auth->check('demand/it_web_demand/opt_work_time');//是否扣非加班处理问题
+
+            foreach ($list as $k => $v){
+                $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
+                $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
+
+                $list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
+                $list[$k]['hope_time'] = $v['hope_time']?$v['hope_time'].'Day':'-';//预计时间
+
+                /*分配*/
+                $list[$k]['Allgroup'] = array();
+                if($v['web_designer_group'] == 1){
+                    $list[$k]['Allgroup'][] = '前端';
+                    $list[$k]['web_designer_user_name'] = $this->extract_username($v['web_designer_user_id'],'web_designer_user');
+                    $list[$k]['web_designer_expect_time'] = date('m-d H:i',strtotime($v['web_designer_expect_time']));
+                    if($v['web_designer_is_finish'] == 1){
+                        $list[$k]['web_designer_finish_time'] = date('m-d H:i',strtotime($v['web_designer_finish_time']));
+                    }
+                }
+                if($v['phper_group'] == 1){
+                    $list[$k]['Allgroup'][] = '后端';
+                    $list[$k]['phper_user_name'] = $this->extract_username($v['phper_user_id'],'phper_user');
+                    $list[$k]['phper_expect_time'] = date('m-d H:i',strtotime($v['phper_expect_time']));
+                    if($v['phper_is_finish'] == 1){
+                        $list[$k]['phper_finish_time'] = date('m-d H:i',strtotime($v['phper_finish_time']));
+                    }
+                }
+                if($v['app_group'] == 1){
+                    $list[$k]['Allgroup'][] = 'APP';
+                    $list[$k]['app_user_name'] = $this->extract_username($v['app_user_id'],'app_user');
+                    $list[$k]['app_expect_time'] = date('m-d H:i',strtotime($v['app_expect_time']));
+                    if($v['app_is_finish'] == 1){
+                        $list[$k]['app_finish_time'] = date('m-d H:i',strtotime($v['app_finish_time']));
+                    }
+                }
+                if($v['test_group'] == 1){
+                    foreach (explode(',',$v['test_user_id']) as $t){
+                        $list[$k]['test_user_id_arr'][] = config('demand.test_user')[$t];
+                    }
+                }
+                /*分配*/
+
+                /*当前状态*/
+                if($v['status'] == 1){
+                    $list[$k]['status_str'] = 'New';
+                }elseif ($v['status'] == 2){
+                    $list[$k]['status_str'] = '待通过';
+                }elseif ($v['status'] == 3){
+                    if($v['web_designer_group'] == 0 && $v['phper_group'] == 0 && $v['app_group'] == 0){
+                        $list[$k]['status_str'] = '待分配';
+                    }else{
+                        $list[$k]['status_str'] = '开发ing';
+                    }
+                }elseif ($v['status'] == 4){
+                    if($v['test_group'] == 1){
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待测试,待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待测试,已确认';
+                        }
+                    }else{
+                        $list[$k]['status_str'] = '待上线';
+                    }
+
+                }elseif ($v['status'] == 5){
+                    if($v['test_group'] == 1){
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待上线';
+                        }
+                    }else{
+                        $list[$k]['status_str'] = '待上线';
+                    }
+                }elseif ($v['status'] == 6){
+
+                    $list[$k]['status_str'] = '待回归测试';
+                }elseif ($v['status'] == 7){
+
+                    $list[$k]['status_str'] = '已完成';
+                }
+
+                /*当前状态*/
+                //$this->user_id = $this->auth->id;
+                //权限赋值
+                $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_supper_edit'] = $permissions['demand_supper_edit'];
+                $list[$k]['demand_del'] = $permissions['demand_del'];
+                $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
+                $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
+                $list[$k]['demand_test_distribution'] = $permissions['demand_test_distribution'];
+                $list[$k]['demand_finish'] = $permissions['demand_finish'];
+                $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
+                $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
+                $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
+                $list[$k]['demand_opt_test_duty'] = $permissions['demand_opt_test_duty'];
+                $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
+
+                //判断当前登录人是否显示应该操作的按钮
+                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                        $list[$k]['is_test_record_hidden'] = 1;//显示
+                        $list[$k]['is_test_finish_hidden'] = 1;//显示
+                        $list[$k]['is_test_detail_log'] = 0;//不显示
+                    }
+                }
+                if($this->auth->id == $v['entry_user_id']){
+                    $list[$k]['is_entry_user_hidden'] = 1;
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    public function index1()
     {
         //dump(input());exit;
         //设置过滤方法
@@ -704,6 +951,51 @@ class ItWebDemand extends Backend
      * 添加
      */
     public function add()
+    {
+        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+         $user_id[] =  '0550643549844645';//李想
+         $user_id[] =  '0333543233781107';//张晓
+         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+         dump($res);exit;*/
+
+        if ($this->request->isPost()) {
+            $params = input();
+            if($params){
+                $data = $params['row'];
+
+                $add['type'] = $data['type'];
+                $add['site'] = $data['site'];
+                $add['site_type'] = implode(',',$data['site_type']);
+                $add['entry_user_id'] = $this->auth->id;
+                $add['copy_to_user_id'] = implode(',',$data['copy_to_user_id']);
+                $add['title'] = $data['title'];
+                $add['content'] = $data['content'];
+                $add['accessory'] = $data['accessory'];
+                $add['is_emergency'] = $data['is_emergency'];
+                //以下默认状态
+                $add['status'] = 1;
+                $add['create_time'] = date('Y-m-d H:i',time());
+                $add['pm_audit_status'] = 1;
+                $result = $this->model->allowField(true)->save($add);
+
+                if($result){
+                    //Ding::dingHook(__FUNCTION__,$this->model);
+                    $this->success('添加成功');
+                }else{
+                    $this->error('新增失败，请联系技术，并说明操作过程');
+                }
+            }
+        }
+
+
+        $this->view->assign('demand_type',input('demand_type'));
+        /*$user_id = $this->auth->id;
+        $user_name = $this->auth->username;
+        $this->view->assign('user_id',$this->auth->id);
+        $this->view->assign('user_name', $this->auth->username);*/
+        return $this->view->fetch();
+    }
+    public function add1()
     {
         /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
          $user_id[] =  '0550643549844645';//李想
