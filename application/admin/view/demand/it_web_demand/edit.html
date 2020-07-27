@@ -79,6 +79,11 @@
         resize: none;
     }
     /*右边div -- end*/
+    /*下面按钮 -- start*/
+    .btn-del{
+        background-color: red;width: 60px;color: white;font-size: 14px;margin-left: 10px;
+    }
+    /*下面按钮 -- end*/
 </style>
 
 <form role="form" method="POST" data-toggle="validator" id="demand_edit" action="">
@@ -140,10 +145,10 @@
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-12 col-sm-8" style="width: 99.9%!important;">
             {if $type == 'view'}
-            <button type="submit" value="del" class="btn btn-del">{:__('删除')}</button>
-            <button type="submit" value="edit" class="btn btn-edit">{:__('修改')}</button>
+            <button type="submit" value="del" class="btn btn-del" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+            <button type="submit" value="edit" class="btn btn-edit" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
             {/if}
         </div>
     </div>
