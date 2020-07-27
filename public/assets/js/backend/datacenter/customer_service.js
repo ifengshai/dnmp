@@ -437,6 +437,23 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 $(".title").removeClass('active');
                 $(this).addClass('active');
                 worknum_situation();
+                //工单量概况折线图
+                var chartOptions = {
+                    targetId: 'echart2',
+                    downLoadTitle: '图表',
+                    type: 'line'
+                };
+                
+                var options = {
+                    type: 'post',
+                    url: 'datacenter/customer_service/worknum_line',
+                    data: {
+                        platform:$("#web_platform").val(),
+                        workload_time:$("#workload_time").val(),
+                        title_type:$("#title_type").val()
+                    }
+                }
+                EchartObj.api.ajax(options, chartOptions)
             });
             
             //工单量概况折线图

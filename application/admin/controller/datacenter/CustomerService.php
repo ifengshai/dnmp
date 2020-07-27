@@ -86,10 +86,54 @@ class CustomerService extends Backend
     public function worknum_line(){
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $params['platform'];
-            $params['workload_time'];
-            $params['title_type'];
+            $platform = $params['platform'];
+            $workload_time = $params['workload_time'];
+            $workload_time = '2020-07-08 00:00:00 - 2020-07-15 23:59:59';
+            $title_type = $params['title_type'] ? $params['title_type'] : 1;
+            if($platform){
+                $where['platform'] = $platform;
+            }
+            if($workload_time){
+                $createat = explode(' ', $workload_time);
 
+
+                $date_arr = array($createat[0]);
+                if($createat[0] != $createat[3]){
+                    for ($i = 0;$i<=100;$i++){
+                        $m = $i+1;
+                        $deal_date = date_create($createat[0]);
+                        date_add($deal_date,date_interval_create_from_date_string("$m days"));
+                        $next_day = date_format($deal_date,"Y-m-d");
+                        $where['update_time'] = ['between', [$next_day, $createat[3]  . ' ' . $createat[4]]];
+                        if($next_day != $createat[3]){
+                            $date_arr[] = $next_day;
+                        }else{
+                            $date_arr[] = $next_day;
+                            break;
+                        }
+                    }
+
+                }
+            }else{
+                //默认显示一周的数据
+                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+                $seven_enddate = date("Y-m-d 23:59:59");
+                $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+
+                $date_arr = array(
+                    date("Y-m-d", strtotime("-6 day")),
+                    date("Y-m-d", strtotime("-5 day")),
+                    date("Y-m-d", strtotime("-4 day")),
+                    date("Y-m-d", strtotime("-3 day")),
+                    date("Y-m-d", strtotime("-2 day")),
+                    date("Y-m-d", strtotime("-1 day")),
+                    date("Y-m-d"),
+                );
+            }
+
+            dump($date_arr);exit;
+            $new_create_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>0])->count();
+            $already_reply_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>1])->count();
 
             $json['xcolumnData'] = array_keys($all_sales_num);
             $json['column'] = ['每天订单量', '每天处理订单量'];
