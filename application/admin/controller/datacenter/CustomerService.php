@@ -160,6 +160,49 @@ class CustomerService extends Backend
         }
     }
     /**
+     * ajax获取工单处理概况中的饼图数据
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function workorder_question_type()
+    {
+
+        //异步调用图标数据
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform    = $params['platform'] ? $params['platform'] : 1;
+            if ($params['time']) {
+                $time = explode(' ', $params['create_time']);
+                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map1['operation_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+                $map1['operation_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            }
+
+            if ($params['key'] == 'echart1') {
+                //工单问题类型统计
+                $columnData = $this->model->workorder_question_type($platform, $map);
+                foreach ($columnData as $k =>$v) {
+                    $column[] = $v['name'];
+                }
+            } elseif ($params['key'] == 'echart3') {
+
+                //问题类型统计
+                $columnData = $this->model->workorder_measures($platform, $map1);
+                foreach ($columnData as $k => $v) {
+                    $column[] = $v['name'];
+                }
+            }
+            $json['column'] = $column;
+            $json['columnData'] = $columnData;
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    /**
      * 客服数据(首页)
      *
      * @Description

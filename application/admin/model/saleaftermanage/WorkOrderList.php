@@ -1463,4 +1463,69 @@ class WorkOrderList extends Model
         $sum = $complete_money == 0 ? 0 : round($money/$complete_money*100,2);
         return $sum ? $sum.'%' : 0;
     }
+    /*
+     * 问题类型统计
+     * */
+    public function workorder_question_type($platform,$time_where){
+        //客户问题
+        $kefu_arr = $this->get_question_type(4,$platform,$time_where);
+        //物流仓储
+        $wuliu_arr = $this->get_question_type(2,$platform,$time_where);
+        //产品问题
+        $product_arr = $this->get_question_type(3,$platform,$time_where);
+        //其他
+        $other_arr = $this->get_question_type(6,$platform,$time_where);
+        //仓库跟单
+        $warehouse_arr = $this->get_question_type(5,$platform,$time_where);
+        $arr = array(
+            array(
+                'name'=>'客户问题',
+                'value'=>$kefu_arr
+            ),
+            array(
+                'name'=>'物流仓储',
+                'value'=>$wuliu_arr
+            ),
+            array(
+                'name'=>'产品问题',
+                'value'=>$product_arr
+            ),
+            array(
+                'name'=>'其他',
+                'value'=>$other_arr
+            ),
+            array(
+                'name'=>'仓库跟单',
+                'value'=>$warehouse_arr
+            ),
+        );
+        return $arr;
+    }
+    /*
+     * 问题类型通用方法
+     * */
+    public function get_question_type($type,$platform,$time_where){
+        $kehu_where['problem_belong'] = $type;
+        $kehu_where['is_del'] = 1;
+        $problem_ids = Db::name('work_order_problem_type')->where($kehu_where)->column('id');
+        $where['work_status'] = 6;
+        $where['problem_type_id'] = array('in',$problem_ids);
+        $where['work_platform'] = $platform;
+        $count = $this->where($where)->where($time_where)->count();
+        return $count;
+    }
+    /*
+     * 措施统计
+     * */
+    public function workorder_measures($platform,$time_where){
+        $measures = Db::name('work_order_step_type')->where('is_del',1)->field('id,step_name')->select();
+        $arr = array();
+        foreach ($measures as $key=>$value){
+            $arr[$key]['name'] = $value['step_name'];
+            $where['m.operation_type'] = 1;
+            $where['m.measure_choose_id'] = $value['id'];
+            $arr[$key]['value'] = Db::name('work_order_measure')->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->where('w.work_platform',$platform)->count();
+        }
+        return $arr;
+    }
 }

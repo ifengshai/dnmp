@@ -108,22 +108,20 @@ table.altrowstable tr:nth-child(even){
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-                        <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
-                            <div class="row">
-                                <div>
-                                    <div class="form-group">
-                                        <div style="font-size: 16px;"><b>工单概况</b></div><br>
-                                        <div style="margin-left: 57px;font-size: 14px;">
-                                            站点：
-                                            <span class="plat_form active" data-id="plat_form" data-value="1"> Zeelool</span>
-                                            <span class="plat_form" data-id="plat_form" data-value="2">Voogueme</span>
-                                            <span class="plat_form" data-id="plat_form" data-value="3">Nihao</span>
-                                            <span class="plat_form" data-id="plat_form" data-value="4">Wesee</span>
-                                            <span class="plat_form" data-id="plat_form" data-value="0">全部</span>
-                                        </div>
-                                    </div>                                                                 
+                <div class="row">
+                    <div>
+                        <div class="form-group">
+                            <div style="font-size: 16px;"><b>工单概况</b></div><br>
+                            <div style="margin-left: 57px;font-size: 14px;">
+                                站点：
+                                <span class="plat_form active" data-id="plat_form" data-value="1"> Zeelool</span>
+                                <span class="plat_form" data-id="plat_form" data-value="2">Voogueme</span>
+                                <span class="plat_form" data-id="plat_form" data-value="3">Nihao</span>
+                                <span class="plat_form" data-id="plat_form" data-value="4">Wesee</span>
+                                <span class="plat_form" data-id="plat_form" data-value="0">全部</span>
                             </div>
-                        </div>
+                        </div>                                                                 
+                </div>  
                 <table id="workload-info" class="altrowstable"
                 data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                 data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -258,21 +256,18 @@ table.altrowstable tr:nth-child(even){
             <div class="tab-pane fade active in">
 
                 <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
-                    <form id="form3" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    <div id="form3" class="form-commonsearch form-horizontal" action="#" role="form1"
                     method="post">
                     <div class="col-xs-12 col-md-9">
                         <div class="form-group" style="margin-top: 20px;">
                             <label class="control-label col-xs-2">工单平台</label>
                             <div class="col-xs-4">
-                                <select  id="order_platform_one" data-rule="required" class="form-control" name="order_platform">
-                                    {foreach name="orderPlatformList" item="vo"}
-                                    {if $key == $platform}
-                                    <option value="{$key}" selected="selected">{$vo}</option>
-                                    {else}
-                                    <option value="{$key}">{$vo}</option>
-                                    {/if}
-                                    {/foreach}
-                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                <select  id="plat_form2" data-rule="required" class="form-control" name="plat_form2">
+                                    <option value="1" selected>Zeelool</option>
+                                    <option value="2">Voogueme</option>
+                                    <option value="3">Nihao</option>
+                                    <option value="4">Wesee</option>
+                                    <option value="0">全部</option>
                                 </select>
                             </div>
                             <label class="control-label col-xs-1 col-sm-2">时间:</label>
@@ -281,35 +276,30 @@ table.altrowstable tr:nth-child(even){
                                 <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_one"  placeholder="创建时间" id="create_time_one" value="" data-index="14">
                             </div>
                             <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
-                                <input type="button" class="btn btn-success echart1-btn" value="提交">
-                                <input type="reset" class="btn btn-default btn-create_time_one reset" value="重置"></div>                                                        
+                                <input type="button" class="btn btn-success echart1-btn" id="question_type_submit" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_one reset" id="question_type_reset" value="重置"></div>                                                        
                         </div>                                                                 
                     </div>
-                  </form>                    
+                  </div>                    
                     <div class="col-lg-12">
                         <div style="float: left;width:60%;">
-                            <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top: 20px;">工单问题类型统计</label>
+                            <div style="font-size: 16px;"><b>工单问题类型统计</b></div><br>
                             <div id="echart1" style="float: left;height:400px;width:100%;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">
-                 <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
-                    method="post">
+                 <div id="form5" class="form-commonsearch form-horizontal" action="#" role="form6" method="post">
                     <div class="col-xs-12 col-md-9">
                         <div class="form-group" style="margin-top: 20px;">
                             <label class="control-label col-xs-2">工单平台</label>
                             <div class="col-xs-4">
-                                <select  id="order_platform_two" data-rule="required" class="form-control" name="order_platform">
-                                    {foreach name="orderPlatformList" item="vo"}
-                                    {if $key == $platform}
-                                    <option value="{$key}" selected="selected">{$vo}</option>
-                                    {else}
-                                    <option value="{$key}">{$vo}</option>
-                                    {/if}
-                                    {/foreach}
-                                    <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                <select  id="plat_form3" data-rule="required" class="form-control" name="plat_form3">
+                                    <option value="1" selected>Zeelool</option>
+                                    <option value="2">Voogueme</option>
+                                    <option value="3">Nihao</option>
+                                    <option value="4">Wesee</option>
+                                    <option value="0">全部</option>
                                 </select>
                             </div>
                             <label class="control-label col-xs-1 col-sm-2">时间:</label>
@@ -318,155 +308,19 @@ table.altrowstable tr:nth-child(even){
                                 <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
                             </div>
                             <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
-                                <input type="button" class="btn btn-success echart3-btn" value="提交">
-                                <input type="reset" class="btn btn-default btn-create_time_two reset" value="重置"></div>                                                        
+                                <input type="button" class="btn btn-success echart3-btn" id="question_type_submit1" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_two reset" id="question_type_reset1" value="重置"></div>                                                        
                         </div>                                                                 
                     </div>
-                  </form>                    
+                  </div>                    
                     <div class="col-lg-12">
                         <div class="col-lg-12" style="float: left;">
-                            <label for="create_time" class="control-label col-xs-1"
-                                style="font-weight: bold;width: 150px;margin-top:20px;">工单处理措施统计</label>
-                                <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
+                            <div style="font-size: 16px;"><b>工单处理措施统计</b></div><br>
+                            <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
                         </div>
                     </div>
                 </div>                                                
-            </div>
-            <div class="tab-panes fade active in">
-                <div class="widget-body no-padding" style="width: 48%; float:left;margin-top: 20px;">
-                    <p><span>工单处理概况</span></p>
-                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
-                    method="post">                    
-                        <div class="col-xs-12 col-md-9">
-                            <div class="form-group" style="margin-top: 20px;">
-                                <div class="col-xs-4">
-                                    <input type="hidden" class="form-control operate" name="create_time_workorder-operate" data-name="create_time_two" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_workorder"  placeholder="创建时间" id="create_time_workorder" value="" data-index="14">
-                                </div>
-                                <div class="col-sm-4" style="margin-bottom: 20px;">
-                                    <input type="button" class="btn btn-success workorder-btn" value="提交">
-                                    <input type="reset" class="btn btn-default btn-create_time_workorder reset" value="重置">
-                                </div>                                                        
-                            </div>                                                                 
-                        </div>
-                    </form> 
-                    <table id="workorder-left" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">措施</th>
-                            {if isset($examineArr)}
-                            {foreach name="examineArr" item="vo" key="k"}
-                            <th style="text-align: center; vertical-align: middle;">{$vo}</th>
-                            {/foreach}
-                            {/if}
-                        </tr>
-                        </thead>
-                             <tr>
-                                 <td style="text-align: center; vertical-align: middle;">未超时未审批</td>
-                                 {if isset($examineArr)}
-                                 {foreach name="examineArr" item="vo" key="k"}
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></td>
-                                 {/foreach}
-                                 {/if}
-                             </tr>
-                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">未超时已审批</td>
-                                {if isset($examineArr)}
-                                {foreach name="examineArr" item="vo" key="k"}
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></td>
-                                {/foreach}
-                                {/if}
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">超时未审批</td>  
-                                {if isset($examineArr)}
-                                {foreach name="examineArr" item="vo" key="k"}
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></td>
-                                {/foreach}
-                                {/if}
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">超时已审批</td>
-                                {if isset($examineArr)}
-                                {foreach name="examineArr" item="vo" key="k"}
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_checked'];?></th>
-                                {/foreach}
-                                {/if}
-                            </tr>                                                                                                                                                                                                                                        							 
-                    </table>
-                    <table id="workorder-right" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">措施</th>
-                            <th style="text-align: center; vertical-align: middle;">未超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">未超时已处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时已处理</th>
-                        </tr>
-                        </thead>
-                            {if isset($step)}
-                            {foreach name="step" item="vo" key="k"}
-                             <tr>
-                                 <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handle'];?></td>
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handled'];?></td>
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handle'];?></td>
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handled'];?></td>
-                             </tr>
-                             {/foreach}
-                             {/if}                                                                                                                                                                                                                                        							 
-                    </table>                                       
-                </div>
-                <div class="widget-body no-padding" style="width: 48%; float:right;margin-top: 20px;">
-                    <p><span>跟单概况</span></p>
-                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
-                    method="post">                    
-                        <div class="col-xs-12 col-md-9">
-                            <div class="form-group" style="margin-top: 20px;">
-                                <div class="col-xs-4">
-                                    <input type="hidden" class="form-control operate" name="create_time_warehouse-operate" data-name="create_time_warehouse" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_warehouse"  placeholder="创建时间" id="create_time_warehouse" value="" data-index="14">
-                                </div>
-                                <div class="col-sm-4" style="margin-bottom: 20px;">
-                                    <input type="button" class="btn btn-success warehouse-btn" value="提交">
-                                    <input type="reset" class="btn btn-default btn-create_time_warehouse reset" value="重置">
-                                </div>                                                        
-                            </div>                                                                 
-                        </div>
-                    </form>                     
-                    <table id="warehouse" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                        <thead>                    
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">跟单概况</th>
-                            <th style="text-align: center; vertical-align: middle;">未超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">未超时已处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时已处理</th>
-                        </tr>
-                        </thead>
-                            {if isset($warehouse_problem_type)}
-                             {foreach name="warehouse_problem_type" item="vo" key="k"}
-                             <tr>
-                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handle'];?></td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handled'];?></td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handle'];?></td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handled'];?></td>
-                             </tr>
-                             {/foreach}
-                             {/if}                                                                                                                                                   							 
-                    </table>
-                </div>                
-            </div>                                                                       
+            </div>                                                                    
         </div>     		
 	</div>
 </div>

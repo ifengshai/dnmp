@@ -521,5 +521,4 @@ class Zendesk extends Model
         );
         return $zendesk;
     }
-
 }

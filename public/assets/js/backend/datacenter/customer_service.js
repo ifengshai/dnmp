@@ -423,13 +423,19 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             // 指定图表的配置项和数据
             Controller.api.formatter.daterangepicker($("form[role=form2]"));
             Controller.api.formatter.daterangepicker($("div[role=form8]"));
+           
             //获取工作量概况数据
             $(document).on('click','.plat_form1',function(){
                 $("#web_platform").val($(this).data('value'));
                 $(".plat_form1").removeClass('active');
                 $(this).addClass('active');
                 worknum_situation();
+                Controller.api.formatter.line_chart();
             });
+            $("#workload_time").on("apply.daterangepicker",function(){
+                worknum_situation();
+                Controller.api.formatter.line_chart();
+            })
             $(document).on('click','.title',function(){
                 if($(this).data('value')){
                     $("#title_type").val($(this).data('value'));
@@ -438,45 +444,34 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 $(this).addClass('active');
                 worknum_situation();
                 //工单量概况折线图
-                var chartOptions = {
-                    targetId: 'echart2',
-                    downLoadTitle: '图表',
-                    type: 'line'
-                };
-                
-                var options = {
-                    type: 'post',
-                    url: 'datacenter/customer_service/worknum_line',
-                    data: {
-                        platform:$("#web_platform").val(),
-                        workload_time:$("#workload_time").val(),
-                        title_type:$("#title_type").val()
-                    }
-                }
-                EchartObj.api.ajax(options, chartOptions)
+                Controller.api.formatter.line_chart();
             });
             
             //工单量概况折线图
-            var chartOptions = {
-                targetId: 'echart2',
-                downLoadTitle: '图表',
-                type: 'line'
-            };
-            
-            var options = {
-                type: 'post',
-                url: 'datacenter/customer_service/worknum_line',
-                data: {
-                    platform:$("#web_platform").val(),
-                    workload_time:$("#workload_time").val(),
-                    title_type:$("#title_type").val()
-                }
-            }
-            EchartObj.api.ajax(options, chartOptions)
-
+            Controller.api.formatter.line_chart();
             // 基于准备好的dom，初始化echarts实例
-            //销售额
-                                                           
+            //工单问题类型统计
+            Controller.api.formatter.daterangepicker($("form[role=form3]"));
+            Controller.api.formatter.daterangepicker($("div[role=form1]"));
+            $(document).on('click','#question_type_submit',function(){
+                Controller.api.formatter.pie_chart('echart1',$("#plat_form2").val(),$("#create_time_one").val());
+            });
+            $(document).on('click','#question_type_reset',function(){
+                $("#plat_form2").val(1)
+                $("#create_time_one").val('')
+            });
+            Controller.api.formatter.pie_chart('echart1',$("#plat_form2").val(),$("#create_time_one").val());
+            //工单处理措施统计
+            Controller.api.formatter.daterangepicker($("form[role=form5]"));
+            Controller.api.formatter.daterangepicker($("div[role=form6]"));
+            $(document).on('click','#question_type_submit1',function(){
+                Controller.api.formatter.pie_chart('echart3',$("#plat_form3").val(),$("#create_time_two").val());
+            });
+            $(document).on('click','#question_type_reset1',function(){
+                $("#plat_form3").val(1)
+                $("#create_time_two").val('')
+            });
+            Controller.api.formatter.pie_chart('echart3',$("#plat_form3").val(),$("#create_time_two").val());
         },
         api: {
             formatter: {
@@ -524,6 +519,51 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         });
                     }
                 },
+                pie_chart: function(type,platform,create_time){
+                    //工单饼图展示方法
+                    var chartOptions1 = {
+                        targetId: type,
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
+                    };
+                    var options1 = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/workorder_question_type',
+                        data: {
+                            'create_time': create_time,
+                            'platform': platform,
+                            'key':type 
+                        }
+                    }             
+                    EchartObj.api.ajax(options1, chartOptions1);
+                },
+                line_chart: function(){
+                    //工单量概况折线图
+                    var chartOptions = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+                    
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/worknum_line',
+                        data: {
+                            platform:$("#web_platform").val(),
+                            workload_time:$("#workload_time").val(),
+                            title_type:$("#title_type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                }
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -811,6 +851,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
               }
             });            
         },
+
     };
     return Controller;
 });
