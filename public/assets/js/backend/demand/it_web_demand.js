@@ -31,7 +31,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             custom:{1: 'black', 2: 'black', 3: 'black' , 4: 'black', 5: 'black', 6:'black',7:'black',8:'black'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'entry_user_id', title: __('提出人'),operate:false},
+                        {field: 'entry_user_id', title: __('提出人'),visible:false},
+                        {field: 'entry_user_name', title: __('提出人')},
                         {
                             field: 'type',
                             title: __('类型'),
@@ -49,7 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Controller.api.formatter.gettitle,
                         },
 
-                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE'},
 
                         {
                             field: 'pm_audit_status',
@@ -64,11 +65,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             custom:{1: 'black', 2: 'black', 3: 'black' , 4: 'black', 5: 'black'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'hope_time', title: __('任务周期'),operate:false},
+                        {field: 'node_time', title: __('任务周期'),operate:false},
                         {
                             field: 'status',
                             title: __('任务状态'),
-                            searchList: { 1: '未激活', 2: '测试已确认', 3: '开发ing' , 4: '开发已完成', 5: '待上线', 6: '待回归测试',7: '已完成'}, 
+                            searchList: { 1: '未激活', 2: '激活', 3: '已响应' , 4: '完成', 5: '超时完成'},
+                            custom:{1: 'gray', 2: 'blue', 3: 'green' , 4: 'gray', 5: 'yellow'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -2308,12 +2310,102 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
         },
         edit: function () {
             Controller.api.bindevent();
+            $(".editor_nkeditor", $("form[role=form]")).each(function () {
+                var that = this;
+                Nkeditor.create(that, {
+                    width: '100%',
+                    height: '50%',
+                    filterMode: false,
+                    wellFormatMode: false,
+                    allowMediaUpload: true, //是否允许媒体上传
+                    allowFileManager: true,
+                    allowImageUpload: true,
+                    wordImageServer: typeof Config.nkeditor != 'undefined' && Config.nkeditor.wordimageserver ? "127.0.0.1:10101" : "", //word图片替换服务器的IP和端口
+                    urlType: Config.upload.cdnurl ? 'domain' : '',//给图片加前缀
+                    cssPath: Fast.api.cdnurl('/assets/addons/nkeditor/plugins/code/prism.css'),
+                    cssData: "body {font-size: 13px}",
+                    fillDescAfterUploadImage: false, //是否在上传后继续添加描述信息
+                    themeType: typeof Config.nkeditor != 'undefined' ? Config.nkeditor.theme : 'black', //编辑器皮肤,这个值从后台获取
+                    fileManagerJson: Fast.api.fixurl("/addons/nkeditor/index/attachment/module/" + Config.modulename),
+                    items: [
+                        'source'
+                    ],
+                    afterCreate: function () {
+                        var self = this;
+                        //Ctrl+回车提交
+                        Nkeditor.ctrl(document, 13, function () {
+                            self.sync();
+                            $(that).closest("form").submit();
+                        });
+                        Nkeditor.ctrl(self.edit.doc, 13, function () {
+                            self.sync();
+                            $(that).closest("form").submit();
+                        });
+                        //粘贴上传
+                        $("body", self.edit.doc).bind('paste', function (event) {
+                            var image, pasteEvent;
+                            pasteEvent = event.originalEvent;
+                            if (pasteEvent.clipboardData && pasteEvent.clipboardData.items) {
+                                image = getImageFromClipboard(pasteEvent);
+                                if (image) {
+                                    event.preventDefault();
+                                    Upload.api.send(image, function (data) {
+                                        self.exec("insertimage", Fast.api.cdnurl(data.url));
+                                    });
+                                }
+                            }
+                        });
+                        //挺拽上传
+                        $("body", self.edit.doc).bind('drop', function (event) {
+                            var image, pasteEvent;
+                            pasteEvent = event.originalEvent;
+                            if (pasteEvent.dataTransfer && pasteEvent.dataTransfer.files) {
+                                images = getImageFromDrop(pasteEvent);
+                                if (images.length > 0) {
+                                    event.preventDefault();
+                                    $.each(images, function (i, image) {
+                                        Upload.api.send(image, function (data) {
+                                            self.exec("insertimage", Fast.api.cdnurl(data.url));
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                    },
+                    //FastAdmin自定义处理
+                    beforeUpload: function (callback, file) {
+                        var file = file ? file : $("input.ke-upload-file", this.form).prop('files')[0];
+                        Upload.api.send(file, function (data) {
+                            var data = {code: '000', data: {url: Fast.api.cdnurl(data.url)}, title: '', width: '', height: '', border: '', align: ''};
+                            callback(data);
+                        });
 
-            $(document).on('click', ".btn", function () {
+                    },
+                    //错误处理 handler
+                    errorMsgHandler: function (message, type) {
+                        try {
+                            console.log(message, type);
+                        } catch (Error) {
+                            alert(message);
+                        }
+                    }
+                });
+            });
+            $(document).on('click', ".btn-sub", function () {
                 var type = $(this).val();
                 if(type == 'del'){
                     $("#demand_edit").attr('action','demand/it_web_demand/del');
-
+                }
+                if(type == 'edit'){
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
+                }
+                if(type == 'pending'){
+                    $('#pm_audit_status').val(2);
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
+                }
+                if(type == 'sub'){
+                    $('#pm_audit_status').val(3);
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
                 }
                 $("#demand_edit").submit();
             });
@@ -2500,12 +2592,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
             formatter: {
                 //点击标题，弹出窗口
                 gettitle: function (value) {
-                    return '<a class="btn-gettitle">' + value + '</a>';
+                    return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
                 },
                 //点击评审，弹出窗口
                 ge_pm_status: function (value, row, index) {
-                    //这里我们直接使用row的数据
-                    return '<div style="float: left;width: 100%;"><span class="check_pm_status" data = "' + value + '" style="">查 看</span></div>';
+                    if(row.pm_audit_status == 1){
+                        return '<div><span class="check_pm_status status1_color">待审</span></div>';
+                    }
+                    if(row.pm_audit_status == 2){
+                        return '<div><span class="check_pm_status status2_color">Pending</span></div>';
+                    }
+                    if(row.pm_audit_status == 3){
+                        return '<div><span class="check_pm_status status3_color">通过</span></div>';
+                    }
+
                 },
 
                 getClear: function (value) {
@@ -2530,7 +2630,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 gettitle: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-gettitle': function (e, value, row, index) {
-                        //var str = '标题：'+row.title+'<br><hr>内容：'+value;
                         Backend.api.open('demand/it_web_demand/edit/type/view/ids/' +row.id, __('任务查看'), { area: ['70%', '70%'] });
                     }
                 },
@@ -2538,8 +2637,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 ge_pm_status: {
                     //格式为：方法名+空格+DOM元素
                     'click .check_pm_status': function (e, value, row, index) {
-                        //var str = '标题：'+row.title+'<br><hr>内容：'+value;
-                        Backend.api.open('demand/it_web_demand/add/' +row.id, __('Detail'), { area: ['70%', '70%'] });
+                        Backend.api.open('demand/it_web_demand/edit/type/pm_audit/ids/' +row.id, __('任务评审'), { area: ['70%', '70%'] });
                     }
                 },
 

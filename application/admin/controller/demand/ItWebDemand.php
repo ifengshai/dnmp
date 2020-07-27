@@ -192,8 +192,16 @@ class ItWebDemand extends Backend
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
 
+                $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
+                $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
+
+
+
+
+
+
                 $list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
-                $list[$k]['hope_time'] = $v['hope_time']?$v['hope_time'].'Day':'-';//预计时间
+
 
                 /*分配*/
                 $list[$k]['Allgroup'] = array();
@@ -228,48 +236,6 @@ class ItWebDemand extends Backend
                 }
                 /*分配*/
 
-                /*当前状态*/
-                if($v['status'] == 1){
-                    $list[$k]['status_str'] = 'New';
-                }elseif ($v['status'] == 2){
-                    $list[$k]['status_str'] = '待通过';
-                }elseif ($v['status'] == 3){
-                    if($v['web_designer_group'] == 0 && $v['phper_group'] == 0 && $v['app_group'] == 0){
-                        $list[$k]['status_str'] = '待分配';
-                    }else{
-                        $list[$k]['status_str'] = '开发ing';
-                    }
-                }elseif ($v['status'] == 4){
-                    if($v['test_group'] == 1){
-                        if($v['entry_user_confirm'] == 0){
-                            $list[$k]['status_str'] = '待测试,待确认';
-                        }else{
-                            $list[$k]['status_str'] = '待测试,已确认';
-                        }
-                    }else{
-                        $list[$k]['status_str'] = '待上线';
-                    }
-
-                }elseif ($v['status'] == 5){
-                    if($v['test_group'] == 1){
-                        if($v['entry_user_confirm'] == 0){
-                            $list[$k]['status_str'] = '待确认';
-                        }else{
-                            $list[$k]['status_str'] = '待上线';
-                        }
-                    }else{
-                        $list[$k]['status_str'] = '待上线';
-                    }
-                }elseif ($v['status'] == 6){
-
-                    $list[$k]['status_str'] = '待回归测试';
-                }elseif ($v['status'] == 7){
-
-                    $list[$k]['status_str'] = '已完成';
-                }
-
-                /*当前状态*/
-                //$this->user_id = $this->auth->id;
                 //权限赋值
                 $list[$k]['demand_add'] = $permissions['demand_add'];
                 $list[$k]['demand_supper_edit'] = $permissions['demand_supper_edit'];
@@ -971,7 +937,7 @@ class ItWebDemand extends Backend
                 $add['title'] = $data['title'];
                 $add['content'] = $data['content'];
                 $add['accessory'] = $data['accessory'];
-                $add['is_emergency'] = $data['is_emergency'];
+                $add['is_emergency'] = $data['is_emergency']?$params['is_emergency']:0;
                 //以下默认状态
                 $add['status'] = 1;
                 $add['create_time'] = date('Y-m-d H:i',time());
@@ -1075,23 +1041,74 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /*
+     *  根据优先级和任务周期，返回任务开始时间和结束时间
+     *  $priority  优先级
+     *  $node_time  任务周期
+     * */
+    public function start_time($priority,$node_time){
+        $day_17 = mktime(17,0,0,date('m'),date('d'),date('Y'));//当天5点
+        $week_17 = strtotime ("+17 hour", strtotime("next friday"));//本周5，下午5点
+
+        $data = array();
+        switch ($priority){
+            case 1:
+                $data['start_time'] = date('Y-m-d H:i',time());
+                $data['end_time'] = date('Y-m-d H:i',strtotime('+'.$node_time.'day'));
+                break;
+            case 2:
+                $data['start_time'] = date('Y-m-d H:i',$day_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $day_17));
+                break;
+            case 3:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            case 4:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            case 5:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            default:
+                $data['start_time'] = '';
+                $data['end_time'] = '';
+        }
+        return $data;
+    }
+
     /**
      * 编辑
      */
     public function edit($ids = null)
     {
         if ($this->request->isPost()) {
-            $this->success('成功1111');
-            $params = input();
-            dump($params);exit;
             $params = $this->request->post("row/a");
+
             if ($params) {
-                if ($params['copy_to_user_id']) {
-                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                if($params['pm_audit_status']){
+                    $add['priority'] = $params['priority'];
+                    $add['node_time'] = $params['node_time'];
+                    $time_data = $this->start_time($params['priority'],$params['node_time']);
+                    $add['start_time'] = $time_data['start_time'];
+                    $add['end_time'] = $time_data['end_time'];
+                    $add['pm_audit_status'] = $params['pm_audit_status'];
+                    $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
                 }
-                $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
+                $add['type'] = $params['type'];
+                $add['site'] = $params['site'];
+                $add['site_type'] = implode(',',$params['site_type']);
+                $add['entry_user_id'] = $this->auth->id;
+                $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
+                $add['title'] = $params['title'];
+                $add['content'] = $params['content'];
+                $add['accessory'] = $params['accessory'];
+                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
-                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -1099,29 +1116,18 @@ class ItWebDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-        dump(input());
         $row = $this->model->get($ids);
         $row = $row->toArray();
         $row['site_type_arr'] = explode(',',$row['site_type']);
         $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);
-        dump($row);
-        /*//如果已分配app人员
-        $copy_to_user_id_arr = array();
-        if($row['copy_to_user_id']){
-            $copy_userids = explode(',',$row['copy_to_user_id']);
-            foreach ($copy_userids as $k => $v){
-                $copy_to_user_id_arr[$k]['user_id'] = $v;
-                $copy_to_user_id_arr[$k]['user_name'] = config('demand.copyToUserId')[$v];
-            }
-        }
 
-        $this->view->assign('demand_type',input('demand_type'));
-        $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );*/
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row );
         return $this->view->fetch();
     }
+
+
+
     public function edit1($ids = null)
     {
         if ($this->request->isPost()) {
@@ -1176,12 +1182,11 @@ class ItWebDemand extends Backend
      * */
     public function del($ids = "")
     {
-        $this->success('成功');
-        dump(111);exit;
-        if ($this->request->isAjax()) {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
 
-            $data['is_del'] =  2;
-            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            $data['is_del'] =  0;
+            $res = $this->model->allowField(true)->save($data,['id'=> $params['id']]);
             if ($res) {
                 $this->success('成功');
             } else {

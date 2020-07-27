@@ -1,23 +1,61 @@
 <style>
+    .btn-gettitle{
+        cursor: pointer;
+    }
+    /*评审颜色控制--start*/
+    .status1_color{
+        border: 1px solid #03A7EF;
+        background-color: #03A7EF;
+    }
+    .status1_color:hover{
+        background-color: #216CAA;
+        border: 1px solid #216CAA;
+    }
+    .status2_color{
+        border: 1px solid #F39A24;
+        background-color: #F39A24;
+    }
+    .status2_color:hover{
+        background-color: #CF6C15;
+        border: 1px solid #CF6C15;
+    }
+    .status3_color{
+        border: 1px solid #7F7F7F;
+        background-color: #7F7F7F;
+    }
+    .status3_color:hover{
+        background-color: #5F5F5F;
+        border: 1px solid #5F5F5F;
+    }
+    /*评审颜色控制--end*/
+    .pm_audit_status{
+        float: left;
+        width: 100%;
+    }
     .check_pm_status{
+        height: 26px;
+        line-height: 26px;
         margin: auto;
         display: block;
-        border: 1px solid #3498db;
-        width: 50px;
+        width: 68px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 12px;
         color: #fff;
-        background-color: #3498db;
         content: "\e003";
-    }
-    .check_pm_status:hover{
-        background-color: #217dbb;
     }
     .all_user_name{
         text-align: left;
         width: 100%;
         float: left;
+    }
+
+    .table td{
+        font-weight: 700;
+    }
+
+    .text-black i,.text-gray i,.text-blue i,.text-red i,.text-green i,.text-yellow i{
+        display: none!important;
     }
 </style>
 <div class="panel panel-default panel-intro">
