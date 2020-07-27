@@ -509,8 +509,13 @@ class Zendesk extends Model
         }
         //回复失效
         $reply_time = Db::name('zendesk_comments')->where(['platform'=>$platform,'is_admin'=>0])->order('id','asc')->value('update_time');
-        $reply_time = strtotime($reply_time)+8*3600;
-        $reply_failure_num=ceil((time()-$reply_time)/3600);
+        if($reply_time){
+            $reply_time = strtotime($reply_time)+8*3600;
+            $reply_failure_num=ceil((time()-$reply_time)/3600);
+        }else{
+            $reply_failure_num = 0;
+        }
+
         $zendesk = array(
             'wait_deal_num' => $wait_deal_num,
             'new_create_num' => $new_create_num,

@@ -69,7 +69,6 @@ class CustomerService extends Backend
             $params = $this->request->param();
             $platform = $params['platform'] ? $params['platform'] : 0;
             $workload_time = $params['workload_time'] ? $params['workload_time'] : '';
-            $title_type = $params['title_type'] ? $params['title_type'] : 1;
 
             $workorder_situation = $this->zendesk->worknum_situation($platform,$workload_time);
             $this->success('', '', $workorder_situation);
