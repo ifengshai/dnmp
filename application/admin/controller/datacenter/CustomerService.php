@@ -7,6 +7,7 @@ use think\Cache;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskAgents;
+use think\Db;
 
 class CustomerService extends Backend
 {
@@ -19,6 +20,187 @@ class CustomerService extends Backend
         $this->model   = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step    = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->workload = new \app\admin\model\WorkloadStatistics;
+        $this->zendesk = new \app\admin\model\zendesk\Zendesk;
+    }
+    /**
+     * 客服数据大屏
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/23 16:55:02 
+     * @return void
+     */
+    public function customer_data_screen(){
+        $platform = input('platform') ? input('platform') : 1;
+
+        $workorder_situation = $this->model->workorder_situation($platform);
+
+        $worknum_situation = $this->zendesk->worknum_situation($platform);
+        $this->view->assign(compact('workorder_situation','worknum_situation'));
+        return $this->view->fetch();
+    }
+    /**
+     * ajax获取工单概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 10:15:10 
+     * @return void
+     */
+    public function workorder_situation(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform = $params['platform'] ? $params['platform'] : 0;
+            $workorder_situation = $this->model->workorder_situation($platform);
+            $this->success('', '', $workorder_situation);
+        }
+    }
+    /**
+     * ajax获取工作量概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function worknum_situation(){
+
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform = $params['platform'] ? $params['platform'] : 0;
+            $workload_time = $params['workload_time'] ? $params['workload_time'] : '';
+            $title_type = $params['title_type'] ? $params['title_type'] : 1;
+
+            $workorder_situation = $this->zendesk->worknum_situation($platform,$workload_time);
+            $this->success('', '', $workorder_situation);
+        }
+    }
+    /**
+     * ajax获取工作量中的折线图数据
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function worknum_line(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform = $params['platform'];
+            $workload_time = $params['workload_time'];
+            $title_type = $params['title_type'] ? $params['title_type'] : 1;
+            if($platform){
+                $where['platform'] = $platform;
+            }
+            if($workload_time){
+                $createat = explode(' ', $workload_time);
+                $where['update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                if($title_type == 1){
+                    $where['is_admin'] = 0;
+                }else{
+                    $where['is_admin'] = 1;
+                }
+                $date_arr = array(
+                    $createat[0] => Db::name('zendesk_comments')->where($where)->count()
+                );
+
+                if($createat[0] != $createat[3]){
+                    for ($i = 0;$i<=100;$i++){
+                        $m = $i+1;
+                        $deal_date = date_create($createat[0]);
+                        date_add($deal_date,date_interval_create_from_date_string("$m days"));
+                        $next_day = date_format($deal_date,"Y-m-d");
+                        $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        if($title_type == 1){
+                            $where['is_admin'] = 0;
+                        }else{
+                            $where['is_admin'] = 1;
+                        }
+                        $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                        if($next_day == $createat[3]){
+                            break;
+                        }
+                    }
+
+                }
+            }else{
+                //默认显示一周的数据
+                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+                $seven_enddate = date("Y-m-d 23:59:59");
+                $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+                for ($i = 6;$i>=0;$i--){
+                    $next_day = date("Y-m-d", strtotime("-$i day"));
+                    $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                    if($title_type == 1){
+                        $where['is_admin'] = 0;
+                    }else{
+                        $where['is_admin'] = 1;
+                    }
+                    $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                }
+            }
+
+            if($title_type == 1){
+                $name = '新增工单量';
+            }else{
+                $name = '已回复工单量';
+            }
+            $json['xcolumnData'] = array_keys($date_arr);
+            $json['column'] = [$name];
+            $json['columnData'] = [
+                [
+                    'name' => $name,
+                    'type' => 'line',
+                    'smooth' => true,
+                    'data' => array_values($date_arr)
+                ],
+
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    /**
+     * ajax获取工单处理概况中的饼图数据
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function workorder_question_type()
+    {
+
+        //异步调用图标数据
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform    = $params['platform'] ? $params['platform'] : 1;
+            if ($params['time']) {
+                $time = explode(' ', $params['create_time']);
+                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map1['operation_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+                $map1['operation_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            }
+
+            if ($params['key'] == 'echart1') {
+                //工单问题类型统计
+                $columnData = $this->model->workorder_question_type($platform, $map);
+                foreach ($columnData as $k =>$v) {
+                    $column[] = $v['name'];
+                }
+            } elseif ($params['key'] == 'echart3') {
+
+                //问题类型统计
+                $columnData = $this->model->workorder_measures($platform, $map1);
+                foreach ($columnData as $k => $v) {
+                    $column[] = $v['name'];
+                }
+            }
+            $json['column'] = $column;
+            $json['columnData'] = $columnData;
+            return json(['code' => 1, 'data' => $json]);
+        }
     }
     /**
      * 客服数据(首页)
