@@ -1170,10 +1170,10 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'nihaooptical']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",3)->column('ticket_id');
 
         //求交集的更新
 
@@ -1185,12 +1185,12 @@ DOC;
         //$intersects = array('80293','82512','83675');
         //$diffs = array('84301','84303');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
