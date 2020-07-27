@@ -510,9 +510,18 @@ class Zendesk extends Model
             $positive_effect_num = round($all_already_num/$people_day,2);
         }
         //回复失效
-        $reply_time = Db::name('zendesk_comments')->where(['platform'=>$platform,'is_admin'=>0])->order('id','asc')->value('update_time');
-        $reply_time = strtotime($reply_time)+8*3600;
-        $reply_failure_num=ceil((time()-$reply_time)/3600);
+        if($platform){
+            $reply_where['platform'] = $platform;
+        }
+        $reply_where['is_admin'] = 0;
+        $reply_time = Db::name('zendesk_comments')->where($reply_where)->order('id','asc')->value('update_time');
+        if($reply_time){
+            $reply_time = strtotime($reply_time)+8*3600;
+            $reply_failure_num=ceil((time()-$reply_time)/3600);
+        }else{
+            $reply_failure_num = 0;
+        }
+
         $zendesk = array(
             'wait_deal_num' => $wait_deal_num,
             'new_create_num' => $new_create_num,

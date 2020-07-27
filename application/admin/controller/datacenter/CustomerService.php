@@ -31,7 +31,7 @@ class CustomerService extends Backend
      * @return void
      */
     public function customer_data_screen(){
-        $platform = input('platform') ? input('platform') : 0;
+        $platform = input('platform') ? input('platform') : 1;
 
         $workorder_situation = $this->model->workorder_situation($platform);
 
@@ -69,7 +69,6 @@ class CustomerService extends Backend
             $params = $this->request->param();
             $platform = $params['platform'] ? $params['platform'] : 0;
             $workload_time = $params['workload_time'] ? $params['workload_time'] : '';
-            $title_type = $params['title_type'] ? $params['title_type'] : 1;
 
             $workorder_situation = $this->zendesk->worknum_situation($platform,$workload_time);
             $this->success('', '', $workorder_situation);
@@ -169,12 +168,11 @@ class CustomerService extends Backend
      */
     public function workorder_question_type()
     {
-
         //异步调用图标数据
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $platform    = $params['platform'] ? $params['platform'] : 1;
-            if ($params['time']) {
+            if ($params['create_time']) {
                 $time = explode(' ', $params['create_time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                 $map1['operation_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
@@ -190,7 +188,6 @@ class CustomerService extends Backend
                     $column[] = $v['name'];
                 }
             } elseif ($params['key'] == 'echart3') {
-
                 //问题类型统计
                 $columnData = $this->model->workorder_measures($platform, $map1);
                 foreach ($columnData as $k => $v) {
