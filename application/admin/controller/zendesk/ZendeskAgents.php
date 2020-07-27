@@ -28,6 +28,7 @@ class ZendeskAgents extends Backend
         $type = [
             1 => 'zeelool',
             2 => 'voogueme',
+            3 => 'nihao',
         ];
         $agent_type = [
             1 => '邮件组',

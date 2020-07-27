@@ -30,7 +30,7 @@ class Zendesk extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['edit_recipient'];
+    //protected $noNeedRight = ['edit_recipient'];
 
     public function _initialize()
     {
@@ -183,6 +183,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($type == 2) {
                         $siteName = 'voogueme';
+                    }elseif($type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
@@ -349,7 +351,7 @@ class Zendesk extends Backend
         }
         //获取所有的tags
         $tags = ZendeskTags::order('count desc')->column('name', 'id');
-        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        //站点类型，默认zeelool，1：zeelool，2：voogueme, 3:nihao
         $type = input('type',1);
         //获取所有的消息模板
         //获取所有的消息模板
@@ -400,6 +402,8 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+        //获取签名
+        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -420,6 +424,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($ticket->type == 2){
                         $siteName = 'voogueme';
+                    } elseif($ticket->type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -439,8 +445,6 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
-                    //获取签名
-                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
@@ -554,24 +558,17 @@ class Zendesk extends Backend
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
 
-        //获取签名
-        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
-        //获取zendesk用户的昵称
-        $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
-        $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-        //替换签名中的昵称
-        if(strpos($sign,'{{agent.name}}')!==false){
-            $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+        foreach ($comments as &$comment){
+            //获取当前评论的用户的昵称
+            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+            $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+            //替换签名中的昵称
+            if(strpos($sign,'{{agent.name}}')!==false){
+                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+            }
+            $comment['sign'] = $sign ? $sign : '';
         }
-        $sign = $sign ? $sign : '';
-        //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
-        if(strpos($sign,'<p>')!==false){
-            $sign = str_replace('<p>','<span style="display:block">',$sign);
-        }
-        if(strpos($sign,'</p>')!==false){
-            $sign = str_replace('</p>','</span>',$sign);
-        }
-        
+
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
@@ -612,8 +609,10 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
-        }else{
+        }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
         }
 
         $orders = $orderModel
@@ -627,7 +626,7 @@ class Zendesk extends Backend
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
 
-        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn','sign'));
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
@@ -700,6 +699,8 @@ Please close this window and try again.");
                 $siteName = 'zeelool';
             }elseif($type == 2){
                 $siteName = 'voogueme';
+            }else{
+                $siteName = 'nihaooptical';
             }
 
             $data = [
@@ -1169,10 +1170,10 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'nihaooptical']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",3)->column('ticket_id');
 
         //求交集的更新
 
@@ -1184,12 +1185,12 @@ DOC;
         //$intersects = array('80293','82512','83675');
         //$diffs = array('84301','84303');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';

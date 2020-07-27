@@ -58,6 +58,8 @@ class ZendeskAccount extends Backend
                         $list[$k]['account_type'] = 'zeelool';
                     }elseif(2 == $v['account_type']){
                         $list[$k]['account_type'] = 'voogueme';
+                    }else{
+                        $list[$k]['account_type'] = 'nihao';
                     }
                 }
             }
@@ -101,13 +103,16 @@ class ZendeskAccount extends Backend
             //求出所有的account_id
             $zee_accountIdArr = $this->model->where('account_type',1)->column('account_id');
             $voo_accountIdArr = $this->model->where('account_type',2)->column('account_id');
+            $nihao_accountIdArr = $this->model->where('account_type',3)->column('account_id');
 
             $zeelool_res = (new Notice(request(),['type' => 'zeelool']))->fetchUser(['role'=>'agent']);
             $voogueme_res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'agent']);
+            $nihao_res = (new Notice(request(),['type' => 'nihao']))->fetchUser(['role'=>'agent']);
             $zeelool_info = $this->object_array($zeelool_res);
             $voogueme_info = $this->object_array($voogueme_res);
+            $nihao_info = $this->object_array($nihao_res);
 
-            if(!$zeelool_info && !$voogueme_info){
+            if(!$zeelool_info && !$voogueme_info && !$nihao_info){
                 return $this->error('账户配置错误，请联系开发人员');
             }
             $data = array();
@@ -167,7 +172,34 @@ class ZendeskAccount extends Backend
             }
             if(!empty($data)){
                 Db::name('zendesk_account')->insertAll($data);
-            }        
+            }
+            foreach($nihao_info['users'] as $nk=> $nv){
+                //已经存在的进行更新
+                if(in_array($nv['id'],$nihao_accountIdArr)){
+                    $updateData = [
+                        'user_type' => 2,
+                        'account_user' => $nv['name'],
+                        'account_email' => $nv['email'],
+                    ];
+                    //判断是否已绑定
+                    $agent = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$nv['id'])->find();
+                    if(!$agent){
+                        $updateData['is_used'] = 1;
+                    }else{
+                        $updateData['is_used'] = 2;
+                    }
+                    $this->model->where('account_id',$nv['id'])->update($updateData);
+                    continue;
+                }
+                $data[$nk]['user_type']      = 2;
+                $data[$nk]['account_id']     = $nv['id'];
+                $data[$nk]['account_type']   = 3;
+                $data[$nk]['account_user']   = $nv['name'];
+                $data[$nk]['account_email']  = $nv['email'];
+            }
+            if(!empty($data)){
+                Db::name('zendesk_account')->insertAll($data);
+            }
             return $this->success('账户刷新完毕');
         }else{
             return $this->error('404 Not found');

@@ -464,5 +464,63 @@ class Zendesk extends Model
             usleep(1000);
         }
     }
+    /*
+     * 统计工作量概况
+     * */
+    public function worknum_situation($platform = 0,$workload_time = ''){
+        if($platform){
+            $map['type'] = $platform;
+        }
+        //待处理
+        $wait_deal_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
 
+        //新增
+        if($platform){
+            $where['platform'] = $platform;
+        }
+        if($workload_time){
+            $createat = explode(' ', $workload_time);
+            $where['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        }else{
+            //默认显示一周的数据
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d 23:59:59");
+            $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+        }
+        $new_create_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>0])->count();
+        //已回复
+        $already_reply_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>1])->count();
+        //待分配
+        $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
+        $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
+        //人效
+        if($platform){
+            $task_where['type'] = $platform;
+        }
+        $admin_ids = Db::name('zendesk_agents')->where(['type'=>$platform,'admin_id'=>['neq','75,117,95,105']])->column('admin_id');
+        $all_already_num = Db::name('zendesk_comments')->where($where)->where(['due_id'=>['in',$admin_ids]])->count();
+        $people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$admin_ids]])->count();
+        if($people_day == 0){
+            $positive_effect_num = 0;
+        }else{
+            $positive_effect_num = round($all_already_num/$people_day,2);
+        }
+        //回复失效
+        $reply_time = Db::name('zendesk_comments')->where(['platform'=>$platform,'is_admin'=>0])->order('id','asc')->value('update_time');
+        $reply_time = strtotime($reply_time)+8*3600;
+        $reply_failure_num=ceil((time()-$reply_time)/3600);
+        $zendesk = array(
+            'wait_deal_num' => $wait_deal_num,
+            'new_create_num' => $new_create_num,
+            'already_reply_num' => $already_reply_num,
+            'wait_allot_num' => $wait_allot_num,
+            'positive_effect_num' => $positive_effect_num,
+            'reply_failure_num' => $reply_failure_num,
+        );
+        return $zendesk;
+    }
 }

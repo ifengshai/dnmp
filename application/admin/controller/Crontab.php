@@ -29,7 +29,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
 
 
     /**
@@ -3992,7 +3992,7 @@ order by sfoi.item_id asc limit 1000";
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['m.created_at'] =  ['between', [$stime, $etime]];
-        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
         //求出眼镜所有sku
         $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1, $platform);
         //求出饰品的所有sku
