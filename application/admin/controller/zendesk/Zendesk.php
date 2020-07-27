@@ -30,7 +30,7 @@ class Zendesk extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['edit_recipient'];
+    //protected $noNeedRight = ['edit_recipient'];
 
     public function _initialize()
     {
@@ -183,6 +183,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($type == 2) {
                         $siteName = 'voogueme';
+                    }elseif($type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
@@ -349,7 +351,7 @@ class Zendesk extends Backend
         }
         //获取所有的tags
         $tags = ZendeskTags::order('count desc')->column('name', 'id');
-        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        //站点类型，默认zeelool，1：zeelool，2：voogueme, 3:nihao
         $type = input('type',1);
         //获取所有的消息模板
         //获取所有的消息模板
@@ -422,6 +424,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($ticket->type == 2){
                         $siteName = 'voogueme';
+                    } elseif($ticket->type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -605,8 +609,10 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
-        }else{
+        }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
         }
 
         $orders = $orderModel
@@ -693,6 +699,8 @@ Please close this window and try again.");
                 $siteName = 'zeelool';
             }elseif($type == 2){
                 $siteName = 'voogueme';
+            }else{
+                $siteName = 'nihaooptical';
             }
 
             $data = [

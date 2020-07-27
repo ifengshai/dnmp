@@ -53,12 +53,19 @@ class Notice extends Controller
                 }
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
                 $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.voogueme')['token']]);
-            } else {
+            } elseif($this->postData['type'] == 'zeelool') {
                 if (!$username) {
                     $username = config('zendesk.zeelool')['username'];
                 }
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
                 $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.zeelool')['token']]);
+            }
+            else {
+                if (!$username) {
+                    $username = config('zendesk.nihao')['username'];
+                }
+                $this->client = new ZendeskAPI(config('zendesk.nihao')['subdomain']);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.nihao')['token']]);
             }
         } catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
@@ -83,8 +90,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -210,8 +219,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
@@ -316,8 +327,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -447,8 +460,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
@@ -793,7 +808,13 @@ class Notice extends Controller
     {
         $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);
         $page_count = $res->page_count;
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        if($this->postData['type'] == 'zeelool'){
+            $type = 1;
+        }elseif($this->postData['type'] == 'voogueme'){
+            $type = 2;
+        }else{
+            $type = 3;
+        }
         for ($i = 1; $i <= $page_count; $i++) {
             $res = $this->client->helpCenter->articles()->findAll(['page' => $i, 'per_page' => 100]);
             $articles = $res->articles;
@@ -824,7 +845,6 @@ class Notice extends Controller
     {
         $res = $this->client->crasp()->findTags();
         $page_count = intval(ceil($res->count / 100));
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
         for ($i = 1; $i <= $page_count; $i++) {
             $res = $this->client->crasp()->findTags(['page' => $i, 'per_page' => 100]);
             $tags = $res->tags;
@@ -850,7 +870,13 @@ class Notice extends Controller
 
         $res = $this->client->macros()->findAllActive();
         $macros = $res->macros;
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        if($this->postData['type'] == 'zeelool'){
+            $type = 1;
+        }elseif($this->postData['type'] == 'voogueme'){
+            $type = 2;
+        }else{
+            $type = 3;
+        }
         foreach ($macros as $macro) {
             $data = [];
             $title = $macro->title;
@@ -1105,8 +1131,10 @@ class Notice extends Controller
         $type = $this->postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         $a = 1;
         $ticket_ids = Zendesk::where('ticket_id', 'in', '105010,104326,105024,104644,104913,105119')->where('type', $type)->column('ticket_id');
