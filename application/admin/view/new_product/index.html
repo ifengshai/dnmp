@@ -57,15 +57,19 @@
                 <p class="text-muted">创建时间: <%=item.create_time%></p>   
                 <p>
                     <!--详情的事件需要在JS中手动绑定-->
+                    <% if(item.item_status == 3) {  %>
+                    <a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a>
+                    <%}%>
+                    <% if(item.item_status == 2) {  %>
                     <a href="javascript:;" data-id="<%=item.id%>" data-sku="<%=item.sku%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
-                    
-                        
+                    <%}%>
                     <a href="javascript:;" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a> 
 
                     <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
                     <% if(item.item_status == 1) {  %>
+                    <a href="javascript:;" data-id="<%=item.id%>" data-sku="<%=item.sku%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
                     <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused  {:$auth->check('new_product/passAudit')?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>
-                    <a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a>
+                    <!--<a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a>-->
                     <a href="javascript:;" title='取消' class="btn btn-danger btn-cancel" data-id="<%=item.id%>"><i class="fa fa-remove"></i></a>
                     <%}%>
                     
