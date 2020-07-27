@@ -88,27 +88,36 @@ class CustomerService extends Backend
             $params = $this->request->param();
             $platform = $params['platform'];
             $workload_time = $params['workload_time'];
-            $workload_time = '2020-07-08 00:00:00 - 2020-07-15 23:59:59';
             $title_type = $params['title_type'] ? $params['title_type'] : 1;
             if($platform){
                 $where['platform'] = $platform;
             }
             if($workload_time){
                 $createat = explode(' ', $workload_time);
+                $where['update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                if($title_type == 1){
+                    $where['is_admin'] = 0;
+                }else{
+                    $where['is_admin'] = 1;
+                }
+                $date_arr = array(
+                    $createat[0] => Db::name('zendesk_comments')->where($where)->count()
+                );
 
-
-                $date_arr = array($createat[0]);
                 if($createat[0] != $createat[3]){
                     for ($i = 0;$i<=100;$i++){
                         $m = $i+1;
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date,date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date,"Y-m-d");
-                        $where['update_time'] = ['between', [$next_day, $createat[3]  . ' ' . $createat[4]]];
-                        if($next_day != $createat[3]){
-                            $date_arr[] = $next_day;
+                        $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        if($title_type == 1){
+                            $where['is_admin'] = 0;
                         }else{
-                            $date_arr[] = $next_day;
+                            $where['is_admin'] = 1;
+                        }
+                        $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                        if($next_day == $createat[3]){
                             break;
                         }
                     }
@@ -119,36 +128,31 @@ class CustomerService extends Backend
                 $seven_startdate = date("Y-m-d", strtotime("-6 day"));
                 $seven_enddate = date("Y-m-d 23:59:59");
                 $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
-
-                $date_arr = array(
-                    date("Y-m-d", strtotime("-6 day")),
-                    date("Y-m-d", strtotime("-5 day")),
-                    date("Y-m-d", strtotime("-4 day")),
-                    date("Y-m-d", strtotime("-3 day")),
-                    date("Y-m-d", strtotime("-2 day")),
-                    date("Y-m-d", strtotime("-1 day")),
-                    date("Y-m-d"),
-                );
+                for ($i = 6;$i>=0;$i--){
+                    $next_day = date("Y-m-d", strtotime("-$i day"));
+                    $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                    if($title_type == 1){
+                        $where['is_admin'] = 0;
+                    }else{
+                        $where['is_admin'] = 1;
+                    }
+                    $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                }
             }
 
-            dump($date_arr);exit;
-            $new_create_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>0])->count();
-            $already_reply_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>1])->count();
-
-            $json['xcolumnData'] = array_keys($all_sales_num);
-            $json['column'] = ['每天订单量', '每天处理订单量'];
+            if($title_type == 1){
+                $name = '新增工单量';
+            }else{
+                $name = '已回复工单量';
+            }
+            $json['xcolumnData'] = array_keys($date_arr);
+            $json['column'] = [$name];
             $json['columnData'] = [
                 [
-                    'name' => '每天订单量',
+                    'name' => $name,
                     'type' => 'line',
                     'smooth' => true,
-                    'data' =>  array_values($all_sales_num)
-                ],
-                [
-                    'name' => '每天处理订单量',
-                    'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_values($order_process_num)
+                    'data' => array_values($date_arr)
                 ],
 
             ];
