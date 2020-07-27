@@ -439,9 +439,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $(document).on('click','.title',function(){
                 if($(this).data('value')){
                     $("#title_type").val($(this).data('value'));
+                    $(".title").removeClass('active');
+                    $(this).addClass('active');
                 }
-                $(".title").removeClass('active');
-                $(this).addClass('active');
                 worknum_situation();
                 //工单量概况折线图
                 Controller.api.formatter.line_chart();
