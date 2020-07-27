@@ -65,22 +65,106 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Table.api.formatter.status
                         },
                         {field: 'hope_time', title: __('任务周期'),operate:false},
-
-
-
-
-
-
                         {
                             field: 'status',
-                            title: __('Status'),
-                            visible:false,
-                            searchList: { 1: 'NEW', 2: '测试已确认', 3: '开发ing' , 4: '开发已完成', 5: '待上线', 6: '待回归测试',7: '已完成'}, 
+                            title: __('任务状态'),
+                            searchList: { 1: '未激活', 2: '测试已确认', 3: '开发ing' , 4: '开发已完成', 5: '待上线', 6: '待回归测试',7: '已完成'}, 
                             formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'pm_audit_status',
+                            title: __('开发进度'),
+                            events: Controller.api.events.ge_pm_status,
+                            formatter: Controller.api.formatter.ge_pm_status,
+                        },
+                        {
+                            field: 'pm_audit_status',
+                            title: __('测试进度'),
+                            events: Controller.api.events.ge_pm_status,
+                            formatter: Controller.api.formatter.ge_pm_status,
+                        },
+                        /*{field: 'develop_finish_time', title: __('开发完成时间'), formatter: Table.api.formatter.datetime},
+                        {field: 'test_finish_time', title: __('测试完成时间'), formatter: Table.api.formatter.datetime},*/
+                        {
+                            field: 'all_finish_time',
+                            title: __('时间节点'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.develop_finish_time){
+                                    all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
+                                }
+
+                                if(rows.test_group == 1){
+                                    if(rows.test_is_finish == 1){
+                                        all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    }
+                                }
+                                if(rows.all_finish_time){
+                                    all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
+                                }
+                                if(all_user_name == ''){
+                                    all_user_name = '-';
+                                }
+
+                                return all_user_name;
+                            },
+                        },
+
+                        {
+                            field: 'buttons',
+                            width: "120px",
+                            operate:false,
+                            title: __('完成确认'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'through_demand',
+                                    text: __('确认'),
+                                    title: __('确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/through_demand',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                        if(row.status == 2){
+                                            if(row.demand_through_demand){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
+
+                        {field: 'web_designer_user_id', title: __('前端'),operate:false},
+                        {field: 'phper_user_id', title: __('后端'),operate:false},
+                        {field: 'app_user_id', title: __('APP'),operate:false},
+                        {field: 'test_user_id', title: __('测试'),operate:false},
+
+                        {
+                            field: 'pm_audit_status',
+                            title: __('详情记录'),
+                            events: Controller.api.events.ge_pm_status,
+                            formatter: Controller.api.formatter.ge_pm_status,
                         },
 
 
-                        {field: 'entry_user_name', title: __('Entry_user_id')},
+
+
+                        /*{field: 'entry_user_name', title: __('Entry_user_id')},
                         {field: 'all_user_name', title: __('all_user_id'), visible:false},
 
 
@@ -147,7 +231,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             },
                         },
                         { field: 'test_group', title: __('Test_group'), custom: { 2: 'danger', 1: 'success',0: 'black' }, searchList: { 1: '是', 2: '否', 0:'未确认' }, formatter: Table.api.formatter.status },
-                        /*{field: 'testgroup', title: __('Test_group'),operate:false},*/
+                        /!*{field: 'testgroup', title: __('Test_group'),operate:false},*!/
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
@@ -168,7 +252,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             },
                         },
                         {field: 'create_time', title: __('create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
-                        /*{field: 'all_finish_time', title: __('时间节点'), operate:'RANGE', addclass:'datetimerange',operate:false},*/
+                        /!*{field: 'all_finish_time', title: __('时间节点'), operate:'RANGE', addclass:'datetimerange',operate:false},*!/
 
                         {
                             field: 'all_finish_time',
@@ -487,13 +571,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                             }
                                         }
 
-                                        /* if(row.status == 1 || row.status == 2){
+                                        /!* if(row.status == 1 || row.status == 2){
                                             if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
                                                 return true;
                                             }
                                         }else{
                                             return false;
-                                        } */
+                                        } *!/
                                     }
                                 },
                                 {
@@ -517,7 +601,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                 },
                             ],
                             formatter: Table.api.formatter.buttons
-                        },
+                        },*/
                     ]
                 ]
             });
@@ -2225,6 +2309,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
         edit: function () {
             Controller.api.bindevent();
 
+            $(document).on('click', ".btn", function () {
+                var type = $(this).val();
+                if(type == 'del'){
+                    $("#demand_edit").attr('action','demand/it_web_demand/del');
+
+                }
+                $("#demand_edit").submit();
+            });
+
+        },
+        edit1: function () {
+            Controller.api.bindevent();
+
             $(document).on('click', "#add_entry_user", function () {
                 var user_id = $('#Copy_to_user_id').val();
                 if(isNaN(parseInt(user_id))){
@@ -2434,7 +2531,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     //格式为：方法名+空格+DOM元素
                     'click .btn-gettitle': function (e, value, row, index) {
                         //var str = '标题：'+row.title+'<br><hr>内容：'+value;
-                        Backend.api.open('demand/it_web_demand/add/' +row.id, __('Detail'), { area: ['70%', '70%'] });
+                        Backend.api.open('demand/it_web_demand/edit/type/view/ids/' +row.id, __('任务查看'), { area: ['70%', '70%'] });
                     }
                 },
                 //点击评审，弹出窗口

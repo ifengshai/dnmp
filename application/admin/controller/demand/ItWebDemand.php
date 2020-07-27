@@ -1081,6 +1081,50 @@ class ItWebDemand extends Backend
     public function edit($ids = null)
     {
         if ($this->request->isPost()) {
+            $this->success('成功1111');
+            $params = input();
+            dump($params);exit;
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['copy_to_user_id']) {
+                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                }
+                $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
+                if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        dump(input());
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        $row['site_type_arr'] = explode(',',$row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);
+        dump($row);
+        /*//如果已分配app人员
+        $copy_to_user_id_arr = array();
+        if($row['copy_to_user_id']){
+            $copy_userids = explode(',',$row['copy_to_user_id']);
+            foreach ($copy_userids as $k => $v){
+                $copy_to_user_id_arr[$k]['user_id'] = $v;
+                $copy_to_user_id_arr[$k]['user_name'] = config('demand.copyToUserId')[$v];
+            }
+        }
+
+        $this->view->assign('demand_type',input('demand_type'));
+        $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );*/
+        $this->view->assign("type", input('type'));
+        $this->view->assign("row", $row );
+        return $this->view->fetch();
+    }
+    public function edit1($ids = null)
+    {
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 if ($params['copy_to_user_id']) {
@@ -1132,7 +1176,10 @@ class ItWebDemand extends Backend
      * */
     public function del($ids = "")
     {
+        $this->success('成功');
+        dump(111);exit;
         if ($this->request->isAjax()) {
+
             $data['is_del'] =  2;
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
