@@ -2307,6 +2307,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     }
                 });
             });
+            $('.ke-edit-iframe').css('height', '240px');
         },
         edit: function () {
             Controller.api.bindevent();
@@ -2391,6 +2392,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     }
                 });
             });
+            $('.ke-edit-iframe').css('height', '240px');
             $(document).on('click', ".btn-sub", function () {
                 var type = $(this).val();
                 if(type == 'del'){
