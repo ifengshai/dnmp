@@ -93,7 +93,7 @@ class Notice extends Controller
         } elseif($type == 'voogueme') {
             $type = 2;
         } else{
-            $type == 3;
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -219,8 +219,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
@@ -325,8 +327,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -459,7 +463,7 @@ class Notice extends Controller
         } elseif($type == 'voogueme') {
             $type = 2;
         } else{
-            $type == 3;
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
