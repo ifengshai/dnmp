@@ -31,7 +31,7 @@ class CustomerService extends Backend
      * @return void
      */
     public function customer_data_screen(){
-        $platform = input('platform') ? input('platform') : 0;
+        $platform = input('platform') ? input('platform') : 1;
 
         $workorder_situation = $this->model->workorder_situation($platform);
 
