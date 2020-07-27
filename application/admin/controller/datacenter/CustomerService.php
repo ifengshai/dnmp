@@ -171,7 +171,7 @@ class CustomerService extends Backend
         //异步调用图标数据
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $platform    = $params['platform'] ? $params['platform'] : 1;
+            $platform    = $params['platform'] ? $params['platform'] : 0;
             if ($params['create_time']) {
                 $time = explode(' ', $params['create_time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];

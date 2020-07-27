@@ -1531,6 +1531,7 @@ class WorkOrderList extends Model
             }
             $arr[$key]['value'] = Db::name('work_order_measure')->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
         }
+
         return $arr;
     }
 }
