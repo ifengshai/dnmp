@@ -438,6 +438,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     Controller.api.formatter.line_chart();
                 },0)
             })
+            $("#workload_time").on("cancel.daterangepicker",function(){
+                setTimeout(()=>{
+                    worknum_situation();
+                    Controller.api.formatter.line_chart();
+                },0)
+            })
             $(document).on('click','.title',function(){
                 if($(this).data('value')){
                     $("#title_type").val($(this).data('value'));

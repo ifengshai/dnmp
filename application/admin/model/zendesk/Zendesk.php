@@ -456,6 +456,7 @@ class Zendesk extends Model
                     $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
+                    $ticket->due_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
                     $ticket->assign_time = date('Y-m-d H:i:s', time());
                     $ticket->save();
