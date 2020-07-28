@@ -62,10 +62,10 @@ class Notice extends Controller
             }
             else {
                 if (!$username) {
-                    $username = config('zendesk.nihao')['username'];
+                    $username = config('zendesk.nihaooptical')['username'];
                 }
-                $this->client = new ZendeskAPI(config('zendesk.nihao')['subdomain']);
-                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.nihao')['token']]);
+                $this->client = new ZendeskAPI(config('zendesk.nihaooptical')['subdomain']);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.nihaooptical')['token']]);
             }
         } catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
