@@ -431,7 +431,7 @@ class Zendesk extends Model
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
-                        ->order('surplus_count', 'desc')
+                        ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
                 }
@@ -441,7 +441,7 @@ class Zendesk extends Model
                     //离职，则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
-                        ->order('surplus_count', 'desc')
+                        ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
                 }
@@ -508,6 +508,7 @@ class Zendesk extends Model
         if($platform){
             $task_where['type'] = $platform;
         }
+        $where['is_admin'] = 1;
         $admin_ids = Db::name('zendesk_agents')->where(['type'=>$platform,'admin_id'=>['neq','75,117,95,105']])->column('admin_id');
         $all_already_num = Db::name('zendesk_comments')->where($where)->where(['due_id'=>['in',$admin_ids]])->count();
         $people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$admin_ids]])->count();
