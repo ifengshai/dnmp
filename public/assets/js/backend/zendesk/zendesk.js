@@ -73,9 +73,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         if( Config.admin_id == 1 || Config.admin_id == 75){
                                             return true;
                                         }
-                                        // if(row.assign_id != Config.admin_id){
-                                        //     return false;
-                                        // }
+                                        if(row.assign_id != Config.admin_id){
+                                            return false;
+                                        }
                                         return true;
                                     }
                                 },
