@@ -20,7 +20,7 @@ return [
         'username' => "ww591795345@outlook.com",
         'token' => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go"
     ],
-    'nihao' => [
+    'nihaooptical' => [
         'subdomain' => "nihao",
         'username' => "wangwei@nextmar.com",
         'token' => "1T6P4ewBZsuGLbHcx9WGpEprConFoEd8H5bPZlER"
