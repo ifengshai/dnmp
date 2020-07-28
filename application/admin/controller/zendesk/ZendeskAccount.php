@@ -111,6 +111,7 @@ class ZendeskAccount extends Backend
             $zeelool_info = $this->object_array($zeelool_res);
             $voogueme_info = $this->object_array($voogueme_res);
             $nihao_info = $this->object_array($nihao_res);
+            dump($nihao_info);exit;
 
             if(!$zeelool_info && !$voogueme_info && !$nihao_info){
                 return $this->error('账户配置错误，请联系开发人员');
