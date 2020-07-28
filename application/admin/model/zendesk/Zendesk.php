@@ -521,6 +521,7 @@ class Zendesk extends Model
             $zendesk_where['type'] = $platform;
         }
         $zendesk_where['status'] = array('in','1,2');
+        $zendesk_where['channel'] = array('neq','voice');
         $id = $this->where($zendesk_where)->order('update_time','asc')->value('id');
         $reply_where['is_admin'] = 0;
         $reply_where['zid'] = $id;
