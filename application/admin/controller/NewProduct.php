@@ -1037,7 +1037,7 @@ class NewProduct extends Backend
             $params = $this->request->post("row/a");
             $mapping = new \app\admin\model\NewProductMapping();
             //判断如果有此SKU 则累加补货数量 否则添加
-            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type']])->count();
+            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type'],'is_show'=>1])->count();
             $params['create_time'] = date('Y-m-d H:i:s');
             $params['create_person'] = session('admin.nickname');
             if ($count > 0) {
