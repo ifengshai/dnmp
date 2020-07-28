@@ -107,7 +107,7 @@ class ZendeskAccount extends Backend
 
             $zeelool_res = (new Notice(request(),['type' => 'zeelool']))->fetchUser(['role'=>'agent']);
             $voogueme_res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'agent']);
-            $nihao_res = (new Notice(request(),['type' => 'nihaooptical']))->fetchUser(['role'=>'agent']);
+            $nihao_res = (new Notice(request(),['type' => 'nihaooptical']))->fetchUser(['role'=>'admin']);
             $zeelool_info = $this->object_array($zeelool_res);
             $voogueme_info = $this->object_array($voogueme_res);
             $nihao_info = $this->object_array($nihao_res);
