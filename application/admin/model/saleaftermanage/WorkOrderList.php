@@ -1418,14 +1418,14 @@ class WorkOrderList extends Model
     public function wo_bufa_percent($start,$end,$platform = 0,$type = 0){
         $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
         if($type == 1){
-            $map['complete_time'] = array('between',[$start,$end]);
+            $map['z.complete_time'] = array('between',[$start,$end]);
         }
-        $map['order_type'] = 4;
-        $map['work_status'] = 6;
+        $map['z.work_status'] = 6;
         if($platform != 0){
-            $map['work_platform'] = $platform;
+            $map['z.work_platform'] = $platform;
         }
-        $count = $this->where($map)->count();
+        $map['m.measure_choose_id'] = 7;
+        $count = $this->alias('z')->join('fa_work_order_measure m','z.id=m.work_id')->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
         return $sum ? $sum.'%' : 0;
     }
