@@ -516,7 +516,7 @@ class Zendesk extends Model
         }else{
             $positive_effect_num = round($all_already_num/$people_day,2);
         }
-        //回复失效
+        //回复时效
         if($platform){
             $reply_where['platform'] = $platform;
         }
