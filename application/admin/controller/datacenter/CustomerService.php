@@ -121,7 +121,6 @@ class CustomerService extends Backend
                 for ($i = 6;$i>=0;$i--){
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $where['c.update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    dump($where);
                     $date_arr[$next_day] = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                 }
             }
