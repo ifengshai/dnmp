@@ -433,8 +433,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 Controller.api.formatter.line_chart();
             });
             $("#workload_time").on("apply.daterangepicker",function(){
-                worknum_situation();
-                Controller.api.formatter.line_chart();
+                setTimeout(()=>{
+                    worknum_situation();
+                    Controller.api.formatter.line_chart();
+                },0)
             })
             $(document).on('click','.title',function(){
                 if($(this).data('value')){
@@ -867,7 +869,7 @@ function formatDecimal(num, decimal) {
     return parseFloat(num).toFixed(decimal)
 }
 //工作量概况
-function worknum_situation(){
+function worknum_situation(workload_time){
     var platform = $("#web_platform").val();
     var workload_time = $("#workload_time").val();
     var title_type = $("#title_type").val();
