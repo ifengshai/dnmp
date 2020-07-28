@@ -1,0 +1,225 @@
+<style>
+    .form-group{
+        float: left;
+        width: 100%;
+    }
+    #add_web_designer_user,#add_phper_user,#add_app_group,#add_test_user{
+        float: left;
+        width: 6%;
+        height: 31px;
+        line-height: 31px;
+        border:1px solid #000;
+        text-align: center;
+        border-radius: 30px;
+        cursor: pointer;
+    }
+    .user_list{
+        margin-right: 8px;
+        margin-top: 6px;
+        float: left;
+        height: 20px;
+        line-height: 20px;
+        border:1px solid #000;
+        text-align: center;
+        border-radius: 30px;
+        padding-left: 6px;
+        padding-right: 4px;
+    }
+    .user_list span{
+        float: left;
+    }
+    .user_list a{
+        width: 20px;
+        text-align: center;
+        margin-left: 6px;
+        float: left;
+        height: 19px;
+        border-left: 1px solid #000;
+
+    }
+</style>
+{if $row['status'] == 1}
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('test_distribution')}">
+    {else}
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('distribution')}">
+{/if}
+
+    <input type="hidden" name="row[id]" value="{$row.id}" id="demand_id" />
+    <input type="hidden" name="row[status]" value="{$row.status}" id="status" />
+        {if $demand_type == 2}
+    <input type="hidden" name="row[demand_type]" value="{$demand_type}" id="demand_type" />
+        {/if}
+    {if $row['status'] == 1}
+        <!--测试确认、分配 start-->
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Test_group')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control" data-live-search="1" id="test_group" name="row[test_group]" onchange="update_responsibility_detail(this,'test_class')">
+                    <option value="1" {if $row['test_group'] == 1} selected {/if}>需要</option>
+                    <option value="2" {if $row['test_group'] == 2} selected {/if}>不需要</option>
+                </select>
+            </div>
+        </div>
+        {if $demand_type == 2}
+            <div class="form-group test_class" style="display: none">
+                <label class="control-label col-xs-12 col-sm-2">{:__('Test_complexity')}</label>
+                <div class="col-xs-12 col-sm-8">
+                    {:Form::select('row[test_complexity]', config('demand.allComplexity'), $row.test_complexity, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'Test_complexity'])}
+                </div>
+            </div>
+        {/if}
+
+        <div class="form-group test_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('', config('demand.test_user'), null, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'test_user'])}
+                <div id="test_user_list">
+                    {volist name="test_userid_arr" id="tu"  }
+                    <div class="user_list" id="userid_{$tu.user_id}"><span>{$tu.user_name}</span><a href="javascript:;" onclick="del_Entry_user('{$tu.user_id}')"> Ｘ </a><input type="hidden" name="row[test_user_id][]" value="{$tu.user_id}"></div>
+                    {/volist}
+                </div>
+            </div>
+            <div id="add_test_user"><span>add</span></div>
+        </div>
+        <!--测试确认、分配 end-->
+    {/if}
+
+    {if $row['status'] == 3}
+        <!--前端分配 start-->
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_group')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control" data-live-search="1" id="Web_designer_group" name="row[web_designer_group]" onchange="update_responsibility_detail(this,'Web_designer_class')">
+                    <option value="1" {if $row['web_designer_group'] == 1} selected {/if}>需要</option>
+                    <option value="0" {if $row['web_designer_group'] == 0} selected {/if}>不需要</option>
+                </select>
+            </div>
+        </div>
+        {if $demand_type == 2}
+        <div class="form-group Web_designer_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_complexity')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('row[web_designer_complexity]', config('demand.allComplexity'), $row['web_designer_complexity'], ['class'=>'form-control', null,'data-live-search' => true,'id'=>'Web_designer_complexity'])}
+            </div>
+        </div>
+
+        <div class="form-group Web_designer_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Expect_time')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-web_designer_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{$row[web_designer_expect_time]}">
+            </div>
+        </div>
+        {/if}
+
+        <div class="form-group Web_designer_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('', config('demand.web_designer_user'), null, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'web_designer_user'])}
+                <div id="web_designer_user_list">
+                    {volist name="web_userid_arr" id="wu"  }
+                    <div class="user_list" id="userid_{$wu.user_id}"><span>{$wu.user_name}</span><a href="javascript:;" onclick="del_Entry_user('{$wu.user_id}')"> Ｘ </a><input type="hidden" name="row[web_designer_user_id][]" value="{$wu.user_id}"></div>
+                    {/volist}
+                </div>
+            </div>
+            <div id="add_web_designer_user"><span>add</span></div>
+        </div>
+        <!--前端分配 end-->
+
+        <hr style="float: left;border-top: 1px solid #333!important;width: 100%;">
+
+        <!--后端分配 start-->
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Phper_group')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control" data-live-search="1" id="phper_group" name="row[phper_group]" onchange="update_responsibility_detail(this,'phper_class')">
+                    <option value="1" {if $row['phper_group'] == 1} selected {/if}>需要</option>
+                    <option value="0" {if $row['phper_group'] == 0} selected {/if}>不需要</option>
+                </select>
+            </div>
+        </div>
+        {if $demand_type == 2}
+        <div class="form-group phper_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Phper_complexity')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('row[phper_complexity]', config('demand.allComplexity'), $row['phper_complexity'], ['class'=>'form-control', null,'data-live-search' => true,'id'=>'phper_complexity'])}
+            </div>
+        </div>
+
+        <div class="form-group phper_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Expect_time')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-phper_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[phper_expect_time]" type="text" value="{$row[phper_expect_time]}">
+            </div>
+        </div>
+        {/if}
+        <div class="form-group phper_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('', config('demand.phper_user'), null, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'phper_user'])}
+                <div id="phper_user_list">
+                    {volist name="phper_userid_arr" id="pu"  }
+                    <div class="user_list" id="userid_{$pu.user_id}"><span>{$pu.user_name}</span><a href="javascript:;" onclick="del_Entry_user('{$pu.user_id}')"> Ｘ </a><input type="hidden" name="row[phper_user_id][]" value="{$pu.user_id}"></div>
+                    {/volist}
+                </div>
+            </div>
+            <div id="add_phper_user"><span>add</span></div>
+        </div>
+        <!--后端分配 end-->
+
+        <hr style="float: left;border-top: 1px solid #333!important;width: 100%;">
+
+        <!--app分配 start-->
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('App_group')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control" data-live-search="1" id="app_group" name="row[app_group]" onchange="update_responsibility_detail(this,'app_class')">
+                    <option value="1" {if $row['app_group'] == 1} selected {/if}>需要</option>
+                    <option value="0" {if $row['app_group'] == 0} selected {/if}>不需要</option>
+                </select>
+            </div>
+        </div>
+        {if $demand_type == 2}
+        <div class="form-group app_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('App_complexity')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('row[app_complexity]', config('demand.allComplexity'), $row['app_complexity'], ['class'=>'form-control', null,'data-live-search' => true,'id'=>'app_complexity'])}
+            </div>
+        </div>
+
+        <div class="form-group app_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Expect_time')}</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-app_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[app_expect_time]" type="text" value="{$row[app_expect_time]}">
+            </div>
+        </div>
+        {/if}
+        <div class="form-group app_class" style="display: none">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
+            <div class="col-xs-12 col-sm-8">
+                {:Form::select('', config('demand.app_user'), null, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'app_user'])}
+                <div id="app_user_list">
+                    {volist name="$app_userid_arr" id="au"}
+                    <div class="user_list" id="userid_{$au.user_id}"><span>{$au.user_name}</span><a href="javascript:;" onclick="del_Entry_user('{$au.user_id}')"> Ｘ </a><input type="hidden" name="row[app_user_id][]" value="{$au.user_id}"></div>
+                    {/volist}
+                </div>
+            </div>
+            <div id="add_app_group"><span>add</span></div>
+        </div>
+        <!--app分配 end-->
+
+
+    {/if}
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+        </div>
+    </div>
+</form>
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close" onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>

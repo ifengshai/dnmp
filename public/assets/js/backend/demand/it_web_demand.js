@@ -74,10 +74,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'pm_audit_status',
+                            field: 'develop_finish_status',
                             title: __('开发进度'),
-                            events: Controller.api.events.ge_pm_status,
-                            formatter: Controller.api.formatter.ge_pm_status,
+                            events: Controller.api.events.get_develop_status,
+                            formatter: Controller.api.formatter.get_develop_status,
                         },
                         {
                             field: 'pm_audit_status',
@@ -2441,6 +2441,64 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
         distribution: function () {
             Controller.api.bindevent();
 
+            $(document).on('change', ".web_group_status", function () {
+                var status_val = $(this).val();
+                if(status_val){
+                    if(status_val == 2){
+                        $('.web_html').css('display','none');
+                    }
+                    if(status_val == 1){
+                        $('.web_html').css('display','block');
+                    }
+                }
+            });
+            $(document).on('change', ".php_group_status", function () {
+                var status_val = $(this).val();
+                if(status_val){
+                    if(status_val == 2){
+                        $('.php_html').css('display','none');
+                    }
+                    if(status_val == 1){
+                        $('.php_html').css('display','block');
+                    }
+                }
+            });
+            $(document).on('change', ".app_group_status", function () {
+                var status_val = $(this).val();
+                if(status_val){
+                    if(status_val == 2){
+                        $('.app_html').css('display','none');
+                    }
+                    if(status_val == 1){
+                        $('.app_html').css('display','block');
+                    }
+                }
+            });
+
+            /*$(document).on('click', ".btn-sub", function () {
+                var type = $(this).val();
+                if(type == 'del'){
+                    $("#demand_edit").attr('action','demand/it_web_demand/del');
+                }
+                if(type == 'edit'){
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
+                }
+                if(type == 'pending'){
+                    $('#pm_audit_status').val(2);
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
+                }
+                if(type == 'sub'){
+                    $('#pm_audit_status').val(3);
+                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
+                }
+                $("#demand_edit").submit();
+            });*/
+
+
+        },
+        distribution1: function () {
+            Controller.api.bindevent();
+
             $(function(){
                 var status = $('#status').val();
                 if(status == 3){
@@ -2609,6 +2667,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     }
 
                 },
+                //开发进度点击弹窗
+                get_develop_status: function (value, row, index) {
+                    if(row.status >= 2){
+                        if(row.develop_finish_status == 1){
+                            return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                        }else if (row.develop_finish_status == 2){
+                            return '<div><span class="check_develop_status status1_color">开发中</span></div>';
+                        }else{
+                            return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
+                        }
+                    }else{
+                        return '-';
+                    }
+                },
 
                 getClear: function (value) {
 
@@ -2640,6 +2712,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     //格式为：方法名+空格+DOM元素
                     'click .check_pm_status': function (e, value, row, index) {
                         Backend.api.open('demand/it_web_demand/edit/type/pm_audit/ids/' +row.id, __('任务评审'), { area: ['70%', '70%'] });
+                    }
+                },
+                get_develop_status:{
+                    'click .check_develop_status': function (e, value, row, index) {
+                        Backend.api.open('demand/it_web_demand/distribution/ids/' +row.id, __('开发进度'), { area: ['80%', '55%'] });
                     }
                 },
 

@@ -25,6 +25,7 @@ return [
         '1' => 'PC',
         '2' => 'M',
         '3' => 'APP',
+        '4' => 'Other',
     ],
     //抄送人
     'copyToUserId' => [

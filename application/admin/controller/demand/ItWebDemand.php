@@ -37,6 +37,44 @@ class ItWebDemand extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
     /*
+     *  根据优先级和任务周期，返回任务开始时间和结束时间
+     *  $priority  优先级
+     *  $node_time  任务周期
+     * */
+    public function start_time($priority,$node_time){
+        $day_17 = mktime(17,0,0,date('m'),date('d'),date('Y'));//当天5点
+        $week_17 = strtotime ("+17 hour", strtotime("next friday"));//本周5，下午5点
+
+        $data = array();
+        switch ($priority){
+            case 1:
+                $data['start_time'] = date('Y-m-d H:i',time());
+                $data['end_time'] = date('Y-m-d H:i',strtotime('+'.$node_time.'day'));
+                break;
+            case 2:
+                $data['start_time'] = date('Y-m-d H:i',$day_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $day_17));
+                break;
+            case 3:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            case 4:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            case 5:
+                $data['start_time'] = date('Y-m-d H:i',$week_17);
+                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
+                break;
+            default:
+                $data['start_time'] = '';
+                $data['end_time'] = '';
+        }
+        return $data;
+    }
+
+    /*
      * 取出配置文件的数据，
      * $user_id string 数据格式以逗号分隔
      * $config_name string 配置名称
@@ -49,11 +87,6 @@ class ItWebDemand extends Backend
         }
         $user_name = implode(',',$user_name_arr);
         return $user_name;
-    }
-    public function site_data(){
-        if ($this->request->isAjax()) {
-            return json(config('demand.site'));
-        }
     }
 
     /**
@@ -194,7 +227,6 @@ class ItWebDemand extends Backend
 
                 $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
-
 
 
 
@@ -1041,43 +1073,7 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
-    /*
-     *  根据优先级和任务周期，返回任务开始时间和结束时间
-     *  $priority  优先级
-     *  $node_time  任务周期
-     * */
-    public function start_time($priority,$node_time){
-        $day_17 = mktime(17,0,0,date('m'),date('d'),date('Y'));//当天5点
-        $week_17 = strtotime ("+17 hour", strtotime("next friday"));//本周5，下午5点
 
-        $data = array();
-        switch ($priority){
-            case 1:
-                $data['start_time'] = date('Y-m-d H:i',time());
-                $data['end_time'] = date('Y-m-d H:i',strtotime('+'.$node_time.'day'));
-                break;
-            case 2:
-                $data['start_time'] = date('Y-m-d H:i',$day_17);
-                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $day_17));
-                break;
-            case 3:
-                $data['start_time'] = date('Y-m-d H:i',$week_17);
-                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
-                break;
-            case 4:
-                $data['start_time'] = date('Y-m-d H:i',$week_17);
-                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
-                break;
-            case 5:
-                $data['start_time'] = date('Y-m-d H:i',$week_17);
-                $data['end_time'] = date('Y-m-d H:i',strtotime ("+".$node_time." day", $week_17));
-                break;
-            default:
-                $data['start_time'] = '';
-                $data['end_time'] = '';
-        }
-        return $data;
-    }
 
     /**
      * 编辑
@@ -1108,6 +1104,10 @@ class ItWebDemand extends Backend
                 $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
                 $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
+
+                    /*$row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();*/
+
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
@@ -1287,6 +1287,158 @@ class ItWebDemand extends Backend
      * 开发组权限
      */
     public function distribution($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+
+            if ($params) {
+                $update = array();
+                if($params['web_status'] == 1){
+                    if(!$params['web_designer_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['web_designer_group'] = $params['web_designer_group'];
+                    if($params['web_designer_group'] == 1){
+                        if(!$params['web_designer_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['web_designer_expect_time'] = $params['web_designer_expect_time'].' 18:00:00';
+                        if(!$params['web_designer_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['web_designer_complexity'] = $params['web_designer_complexity'];
+                    }else{
+                        $update['web_designer_expect_time'] = null;
+                        $update['web_designer_complexity'] = null;
+                    }
+                }
+
+                if($params['php_status'] == 1){
+                    if(!$params['phper_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['phper_group'] = $params['phper_group'];
+                    if($params['phper_group'] == 1){
+                        if(!$params['phper_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['phper_expect_time'] = $params['phper_expect_time'].' 18:00:00';
+                        if(!$params['phper_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['phper_complexity'] = $params['phper_complexity'];
+                    }else{
+                        $update['phper_expect_time'] = null;
+                        $update['phper_complexity'] = null;
+                    }
+                }
+
+                if($params['app_status'] == 1){
+                    if(!$params['app_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['app_group'] = $params['app_group'];
+                    if($params['app_group'] == 1){
+                        if(!$params['app_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['app_expect_time'] = $params['app_expect_time'].' 18:00:00';
+                        if(!$params['app_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['app_complexity'] = $params['app_complexity'];
+                    }else{
+                        $update['app_expect_time'] = null;
+                        $update['app_complexity'] = null;
+                    }
+                }
+
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                if ($res) {
+                    //判断是否达到下一个阶段的状态
+                    $develop_finish_status = array();
+                    $row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();
+                    if($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 2){
+                        if(strpos($row_arr['site_type'],'3') !== false){
+                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0 && $row_arr['app_group'] != 0){
+                                //可以进入下一个状态
+                                $develop_finish_status['develop_finish_status'] = 2;
+                                $develop_finish_status['status'] = 3;
+                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
+                            }
+                        }else{
+                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0){
+                                //可以进入下一个状态
+                                $develop_finish_status['develop_finish_status'] = 2;
+                                $develop_finish_status['status'] = 3;
+                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
+                            }
+                        }
+                    }
+
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $ids = $ids ?? input('ids');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
+        $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
+
+        //如果已分配前端人员
+        /*$web_userid_arr = array();
+        if($row_arr['web_designer_user_id']){
+            $web_userids = explode(',',$row_arr['web_designer_user_id']);
+            foreach ($web_userids as $k1 => $v1){
+                $web_userid_arr[$k1]['user_id'] = $v1;
+                $web_userid_arr[$k1]['user_name'] = config('demand.web_designer_user')[$v1];
+            }
+        }
+
+        //如果已分配后端人员
+        $phper_userid_arr = array();
+        if($row_arr['phper_user_id']){
+            $phper_userids = explode(',',$row_arr['phper_user_id']);
+            foreach ($phper_userids as $k2 => $v2){
+                $phper_userid_arr[$k2]['user_id'] = $v2;
+                $phper_userid_arr[$k2]['user_name'] = config('demand.phper_user')[$v2];
+            }
+        }
+
+        //如果已分配app人员
+        $app_userid_arr = array();
+        if($row_arr['app_user_id']){
+            $app_userids = explode(',',$row_arr['app_user_id']);
+            foreach ($app_userids as $k3 => $v3){
+                $app_userid_arr[$k3]['user_id'] = $v3;
+                $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
+            }
+        }
+        if($row_arr['type'] == 2){
+            $demand_type = 2;
+        }
+        $this->view->assign('demand_type',$demand_type);
+        $this->view->assign("web_userid_arr", $web_userid_arr);
+        $this->view->assign("phper_userid_arr", $phper_userid_arr);
+        $this->view->assign("app_userid_arr", $app_userid_arr);*/
+
+        $status = array(
+            1 => '确认',
+            2 => '不涉及',
+        );
+        $this->view->assign("status", $status);
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+    public function distribution1($ids = null)
     {
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
