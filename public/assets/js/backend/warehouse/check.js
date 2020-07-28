@@ -543,12 +543,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //采购单
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
+                    console.log(id);
                     if (id) {
                         var url = Config.moduleurl + '/warehouse/check/getPurchaseData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }
                         }, function (data, ret) {
+                            console.log(1111);
+                            console.log(data);
                             if ($('.supplier.selectpicker option').length > 1) {
                                 $(".supplier").selectpicker('val', data.supplier_id);//默认选中
                             }
