@@ -278,8 +278,7 @@ class Test3 extends Backend
         dump($i);exit;
     }
     public function zendesk_data(){
-        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->column('id');
-        dump($zendesk);exit;
+        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
         foreach ($zendesk as $item){
             $where['zid'] = $item;
             $where['is_admin'] = 1;
