@@ -1161,6 +1161,10 @@ class WorkOrderList extends Backend
                         //     }
                         // }
                         //如果不是客服人员则指定审核人为客服经理 end
+                        if($params['order_type'] == 100){
+                            $params['base_grand_total'] = $params['refund_money'];
+                            $params['grand_total'] = $params['refund_money'];
+                        }
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
