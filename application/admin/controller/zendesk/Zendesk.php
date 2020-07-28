@@ -309,7 +309,7 @@ class Zendesk extends Backend
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
-                        'assign_id' => $agent_id,
+                        'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
                         'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
                     ]);
@@ -746,7 +746,7 @@ Please close this window and try again.");
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                     'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
                 ]);
@@ -764,7 +764,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
