@@ -518,10 +518,11 @@ class Zendesk extends Model
         }
         //回复时效
         if($platform){
-            $reply_where['platform'] = $platform;
+            $reply_where['c.platform'] = $platform;
         }
-        $reply_where['is_admin'] = 0;
-        $reply_time = Db::name('zendesk_comments')->where($reply_where)->order('id','asc')->value('update_time');
+        $reply_where['c.is_admin'] = 0;
+        $reply_where['z.status'] = array('in','1,2');
+        $reply_time = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($reply_where)->order('c.id','asc')->value('c.update_time');
         if($reply_time){
             $reply_time = strtotime($reply_time)+8*3600;
             $reply_failure_num=ceil((time()-$reply_time)/3600);
