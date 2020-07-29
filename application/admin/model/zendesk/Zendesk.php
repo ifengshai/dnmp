@@ -515,6 +515,7 @@ class Zendesk extends Model
         $where['c.is_admin'] = 1;
         $admin_ids = Db::name('zendesk_agents')->where(['type'=>$platform,'admin_id'=>['neq','75,117,95,105']])->column('admin_id');
         $all_already_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.due_id'=>['in',$admin_ids]])->count();
+        dump($all_already_num);exit;
         $people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$admin_ids]])->count();
         if($people_day == 0){
             $positive_effect_num = 0;
