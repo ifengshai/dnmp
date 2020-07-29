@@ -932,6 +932,7 @@ DOC;
                 }
             }
         }
+        dump($tickets);exit;
         $i = 0;
         foreach($tickets as $ticket){
             if ($i == 10) {
