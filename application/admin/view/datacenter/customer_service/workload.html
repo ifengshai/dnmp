@@ -83,21 +83,28 @@ table.altrowstable tr:nth-child(even){
         border-color: #a9c6c9;
         border-radius: 6px;
     }
-    .btn-div {
-        font-size: 14px;
-        line-height: 50px;
-        background: inherit;
-        background-color: rgba(255, 255, 255, 1);
-        border: none;
-        border-radius: 4px;
-        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
-        border-width: 0px;
-        font-family: 'Arial Negreta', 'Arial';
-        font-weight: 700;
-        font-style: normal;
-        margin-right: 20px;
-        width: 180px;
-    }   
+    .work_title{
+        display: flex;
+    }
+    .work_title li{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        list-style: none;
+    }
+    .work_title li span{
+        display: inline-block;
+        font-size: 16px;
+    }
+    .work_title li b{
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 28px;
+    }
+    .work_title li.active span,.work_title li.active b{
+        color:#396FFF;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -111,17 +118,13 @@ table.altrowstable tr:nth-child(even){
                             <div class="row">
                                 <div class="col-xs-12 col-md-3">
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4">zeedesk平台</label>
+                                        <label class="control-label col-xs-4">站点</label>
                                         <div class="col-xs-8">
-                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
-												{foreach name="orderPlatformList" item="vo"}
-                                                {if $key == $platform}
-                                                <option value="{$key}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$key}">{$vo}</option>
-                                                {/if}
-                                                {/foreach}
-                                                <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                            <select data-rule="required" class="form-control" name="order_platform">
+                                                <option value="0">全部</option>
+                                                <option value="1" selected="selected">Zeelool</option>
+                                                <option value="2">Voogueme</option>
+                                                <option value="3">Nihao</option>
                                             </select>
                                         </div>
                                     </div>                                                                 
@@ -139,30 +142,14 @@ table.altrowstable tr:nth-child(even){
                                 </div>
                             </div>
                             <div class="form-group" style="margin-left:1px;">
-                                <label class="control-label col-xs-1 col-sm-1">员工分组:</label>
+                                <label class="control-label col-xs-1 col-sm-1">分组:</label>
                                 <div class="col-xs-2">
-                                    <select  id="c-order_platform" class="form-control" name="customer_type">
-                                        {foreach name="customer_type" item="vo" key=}
-                                        <option value="{$key}"{if $customerType == $key}selected="selected"{/if}>{$vo}</option>
-                                        {/foreach}
+                                    <select   class="form-control" name="customer_type">
+                                        <option value="0" selected="selected">全部</option>
+                                        <option value="1">A组</option>
+                                        <option value="2">B组</option>
                                     </select>
                                 </div>
-                                <label class="control-label col-xs-1 col-sm-1">员工分类:</label>
-                                <div class="col-xs-2">
-                                    <select  id="c-order_platform" class="form-control" name="customer_category">
-                                        {foreach name="customer_category" item="vo"}
-                                        <option value="{$key}" {if $customerCategory == $key}selected="selected"{/if}>{$vo}</option>
-                                        {/foreach}
-                                    </select>
-                                </div>
-                                <label class="control-label col-xs-1 col-sm-1">工作组别:</label>
-                                <div class="col-xs-2">
-                                    <select  id="c-order_platform" class="form-control" name="customer_workload">
-                                        {foreach name="customer_workload" item="vo"}
-                                        <option value="{$key}" {if $customerWorkload == $key}selected="selected"{/if}>{$vo}</option>
-                                        {/foreach}
-                                    </select>
-                                </div>                                
                             </div>                            
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
@@ -170,24 +157,31 @@ table.altrowstable tr:nth-child(even){
                                     <input type="reset" class="btn btn-default reset" value="重置" ></div>
                             </div>                                                            
                             </div>
-                            <div class="btn btn-div">
-                                <span class="extend">
-                                    处理量：<span style="color: red;" id="totalPayInfo">{$handleNum}</span>
-                                </span>
-                            </div>
-                            <div class="btn btn-div">
-                                <span class="extend">
-                                    未达标天数：<span style="color: red;" id="totalPayInfo">{$noQualifiyDay}</span>
-                                </span>
-                            </div>
-                            <!-- <div class="btn btn-div">
-                                <span class="extend">
-                                    差评数量：<span style="color: red;" id="totalPayInfo">0</span>
-                                </span>
-                            </div>                                                                                                                                            -->
                         </div>
                     </form>
                 </div>
+                <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                <input type="hidden" id="title_type" value="1">
+                <ul class="work_title">
+                    <li>
+                        <span>处理量</span>
+                        <b id="deal_num">{$deal_num}</b>
+                    </li>
+                    <li data-value="1" class="title active">
+                        <span>未达标天数</span>
+                        <b id="no_up_to_day">{$no_up_to_day}</b>
+                    </li>
+                    <li class="title">
+                        <span>人效</span>
+                        <b id="all_positive_num">{$positive_effect_num.all_positive_num}</b>
+                    </li>
+                    <li class="title">
+                        <span style="font-size: 12px">正式员工人效 <span id="work_positive_num">{$positive_effect_num.work_positive_num}</span></span>
+                        <span style="font-size: 12px">非正式员工人效 <span id="nowork_positive_num">{$positive_effect_num.nowork_positive_num}</span></span>
+                    </li>
+                </ul>
+                </div>
+                <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                 <table id="order-info-list" class="altrowstable"
                 data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                 data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -196,10 +190,10 @@ table.altrowstable tr:nth-child(even){
              <tr>
                  <th style="text-align: center; vertical-align: middle;">姓名</th>
                  <th style="text-align: center; vertical-align: middle;">分组</th>
-                 <th style="text-align: center; vertical-align: middle;">工作组别</th>
                  <th style="text-align: center; vertical-align: middle;">日期</th>
                  <th style="text-align: center; vertical-align: middle;">处理量</th>
                  <th style="text-align: center; vertical-align: middle;">未达标天数</th>
+                 <th style="text-align: center; vertical-align: middle;">操作</th>
                  <!-- <th style="text-align: center; vertical-align: middle;">差评数量</th>
                  <th style="text-align: center; vertical-align: middle;">差评占比</th> -->
              </tr>
@@ -209,12 +203,10 @@ table.altrowstable tr:nth-child(even){
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
                       <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
-                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.workload_group}</td>
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start}:{$end}</td>
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$vo.no_qualified_day}</td>
-                      <!-- <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
-                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td> -->
+                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$vo.no_qualified_day}</td>
                   </tr>
                   {/foreach}
                   {elseif isset($worklistOne) && $type==3 /}
@@ -234,7 +226,8 @@ table.altrowstable tr:nth-child(even){
                 </tr>                  
                   {/foreach}                  
                   {/if}				 
-                </table>                
+                </table>
+                </div>
             </div>                                   
         </div>     		
 	</div>
