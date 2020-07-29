@@ -401,7 +401,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where('id',109641)->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -419,6 +419,7 @@ class Zendesk extends Model
                     ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
                     ->order('c.id','desc')
                     ->value('due_id');
+                dump($commentAuthorId);exit;
                 if($commentAuthorId){
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
