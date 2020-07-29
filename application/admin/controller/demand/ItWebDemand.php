@@ -547,6 +547,734 @@ class ItWebDemand extends Backend
     }
 
     /**
+     * 添加
+     */
+    public function add()
+    {
+        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+         $user_id[] =  '0550643549844645';//李想
+         $user_id[] =  '0333543233781107';//张晓
+         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+         dump($res);exit;*/
+
+        if ($this->request->isPost()) {
+            $params = input();
+
+            if($params){
+                if($params['is_user_confirm'] == 1){
+                    //提出人确认
+
+                    //如果当前登录人有产品确认权限，并且提出人==当前登录的人，则一个确认，就可以直接当成提出人确认&产品确认。
+
+                    $data['entry_user_confirm'] =  1;
+                    $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
+                    dump($params);exit;
+                    $res = $this->model->allowField(true)->save($data,['id'=> $params['ids']]);
+                    if ($res) {
+                        //$res = $this ->model ->get(input('ids'));
+                        //Ding::dingHook('test_group_finish', $res);
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+
+
+                }else{
+                    $data = $params['row'];
+
+                    $add['type'] = $data['type'];
+                    $add['site'] = $data['site'];
+                    $add['site_type'] = implode(',',$data['site_type']);
+                    $add['entry_user_id'] = $this->auth->id;
+                    $add['copy_to_user_id'] = implode(',',$data['copy_to_user_id']);
+                    $add['title'] = $data['title'];
+                    $add['content'] = $data['content'];
+                    $add['accessory'] = $data['accessory'];
+                    $add['is_emergency'] = $data['is_emergency']?$params['is_emergency']:0;
+                    //以下默认状态
+                    $add['status'] = 1;
+                    $add['create_time'] = date('Y-m-d H:i',time());
+                    $add['pm_audit_status'] = 1;
+                    $result = $this->model->allowField(true)->save($add);
+
+                    if($result){
+                        //Ding::dingHook(__FUNCTION__,$this->model);
+                        $this->success('添加成功');
+                    }else{
+                        $this->error('新增失败，请联系技术，并说明操作过程');
+                    }
+                }
+            }
+        }
+
+
+        $this->view->assign('demand_type',input('demand_type'));
+        /*$user_id = $this->auth->id;
+        $user_name = $this->auth->username;
+        $this->view->assign('user_id',$this->auth->id);
+        $this->view->assign('user_name', $this->auth->username);*/
+        return $this->view->fetch();
+    }
+    public function add1()
+    {
+        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+         $user_id[] =  '0550643549844645';//李想
+         $user_id[] =  '0333543233781107';//张晓
+         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+         dump($res);exit;*/
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $params = input();
+
+            if ($params) {
+                if($params['is_user_confirm'] == 1){
+                    //提出人确认
+                    $data['entry_user_confirm'] =  1;
+                    $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
+                    $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+                    if ($res) {
+                        $res = $this ->model ->get(input('ids'));
+                        Ding::dingHook('test_group_finish', $res);
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+                }else{
+                    //新增
+                    $params = $params['row'];
+                    if ($params['copy_to_user_id']) {
+                        $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                    }
+                    $params['entry_user_id'] = $this->auth->id;
+
+                    $params = $this->preExcludeFields($params);
+
+                    if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                        $params[$this->dataLimitField] = $this->auth->id;
+                    }
+
+                    $result = false;
+                    Db::startTrans();
+                    try {
+                        //是否采用模型验证
+                        if ($this->modelValidate) {
+                            $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                            $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                            $this->model->validateFailException(true)->validate($validate);
+                        }
+                        $result = $this->model->allowField(true)->save($params);
+                        Db::commit();
+                    } catch (ValidateException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (PDOException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (Exception $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    }
+                    if ($result !== false) {
+                        Ding::dingHook(__FUNCTION__, $this ->model);
+                        $this->success();
+                    } else {
+                        $this->error(__('No rows were inserted'));
+                    }
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+
+        $this->view->assign('demand_type',input('demand_type'));
+        /*$user_id = $this->auth->id;
+        $user_name = $this->auth->username;
+        $this->view->assign('user_id',$this->auth->id);
+        $this->view->assign('user_name', $this->auth->username);*/
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+
+            if ($params) {
+                if($params['pm_audit_status']){
+                    $add['priority'] = $params['priority'];
+                    $add['node_time'] = $params['node_time'];
+                    $time_data = $this->start_time($params['priority'],$params['node_time']);
+                    $add['start_time'] = $time_data['start_time'];
+                    $add['end_time'] = $time_data['end_time'];
+                    $add['pm_audit_status'] = $params['pm_audit_status'];
+                    $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
+                }
+                $add['type'] = $params['type'];
+                $add['site'] = $params['site'];
+                $add['site_type'] = implode(',',$params['site_type']);
+                $add['entry_user_id'] = $this->auth->id;
+                $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
+                $add['title'] = $params['title'];
+                $add['content'] = $params['content'];
+                $add['accessory'] = $params['accessory'];
+                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
+                if ($res) {
+
+                    /*$row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();*/
+
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        $row['site_type_arr'] = explode(',',$row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);
+
+        $this->view->assign("type", input('type'));
+        $this->view->assign("row", $row );
+        return $this->view->fetch();
+    }
+    public function edit1($ids = null)
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['copy_to_user_id']) {
+                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                }
+                $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
+                if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        //如果已分配app人员
+        $copy_to_user_id_arr = array();
+        if($row['copy_to_user_id']){
+            $copy_userids = explode(',',$row['copy_to_user_id']);
+            foreach ($copy_userids as $k => $v){
+                $copy_to_user_id_arr[$k]['user_id'] = $v;
+                $copy_to_user_id_arr[$k]['user_name'] = config('demand.copyToUserId')[$v];
+            }
+        }
+
+        $this->view->assign('demand_type',input('demand_type'));
+        $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );
+        $this->view->assign("row", $row );
+        return $this->view->fetch();
+    }
+
+    /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+
+            $data['is_del'] =  0;
+            $res = $this->model->allowField(true)->save($data,['id'=> $params['id']]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+
+    /**
+     * 开发响应
+     * 开发完成
+     */
+    public function distribution($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            //$params['type']的值，1：响应编辑，2：完成
+            if($params['type'] == 2){
+                $update = array();
+                if($params['web_status'] == 1){
+                    $update['web_designer_is_finish'] = 1;
+                    $update['web_designer_finish_time'] =  date('Y-m-d H:i',time());
+                }
+
+                if($params['php_status'] == 1){
+                    $update['phper_is_finish'] = 1;
+                    $update['phper_finish_time'] =  date('Y-m-d H:i',time());
+                }
+
+                if($params['app_status'] == 1){
+                    $update['app_is_finish'] = 1;
+                    $update['app_finish_time'] =  date('Y-m-d H:i',time());
+                }
+
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                if($res){
+                    $flag = 0;//需要几个组进行处理本需求
+                    $num = 0;//已经几个组完成了本需求
+                    //判断状态
+                    $row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();
+
+                    if($row_arr['web_designer_group'] == 1){
+                        $flag += 1;
+                        if($row_arr['web_designer_is_finish'] == 1){
+                            $num += 1;
+                        }
+                    }
+                    if($row_arr['phper_group'] == 1){
+                        $flag += 1;
+                        if($row_arr['phper_is_finish'] == 1){
+                            $num += 1;
+                        }
+                    }
+                    if($row_arr['app_group'] == 1){
+                        $flag += 1;
+                        if($row_arr['app_is_finish'] == 1){
+                            $num += 1;
+                        }
+                    }
+
+                    if($flag == $num){
+                        //如果全部完成，则更新本条目状态
+                        $update = array();
+                        $update['develop_finish_status'] = 3;
+                        $update['develop_finish_time'] = date('Y-m-d H:i',time());
+                        $update['test_status'] = 3;
+                        $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                    }
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+
+            if ($params['type'] == 1) {
+                $update = array();
+                if($params['web_status'] == 1){
+                    if(!$params['web_designer_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['web_designer_group'] = $params['web_designer_group'];
+                    if($params['web_designer_group'] == 1){
+                        if(!$params['web_designer_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['web_designer_expect_time'] = $params['web_designer_expect_time'].' 18:00:00';
+                        if(!$params['web_designer_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['web_designer_complexity'] = $params['web_designer_complexity'];
+                    }else{
+                        $update['web_designer_expect_time'] = null;
+                        $update['web_designer_complexity'] = null;
+                    }
+                }
+
+                if($params['php_status'] == 1){
+                    if(!$params['phper_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['phper_group'] = $params['phper_group'];
+                    if($params['phper_group'] == 1){
+                        if(!$params['phper_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['phper_expect_time'] = $params['phper_expect_time'].' 18:00:00';
+                        if(!$params['phper_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['phper_complexity'] = $params['phper_complexity'];
+                    }else{
+                        $update['phper_expect_time'] = null;
+                        $update['phper_complexity'] = null;
+                    }
+                }
+
+                if($params['app_status'] == 1){
+                    if(!$params['app_group']){
+                        $this->error('需求响应必选');
+                    }
+                    $update['app_group'] = $params['app_group'];
+                    if($params['app_group'] == 1){
+                        if(!$params['app_expect_time']){
+                            $this->error('计划完成时间必选');
+                        }
+                        $update['app_expect_time'] = $params['app_expect_time'].' 18:00:00';
+                        if(!$params['app_complexity']){
+                            $this->error('预期难度必选');
+                        }
+                        $update['app_complexity'] = $params['app_complexity'];
+                    }else{
+                        $update['app_expect_time'] = null;
+                        $update['app_complexity'] = null;
+                    }
+                }
+
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                if ($res) {
+                    //判断是否达到下一个阶段的状态
+                    $develop_finish_status = array();
+                    $row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();
+                    if($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 2){
+                        if(strpos($row_arr['site_type'],'3') !== false){
+                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0 && $row_arr['app_group'] != 0){
+                                //可以进入下一个状态
+                                $develop_finish_status['develop_finish_status'] = 2;
+                                $develop_finish_status['status'] = 3;
+                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
+                            }
+                        }else{
+                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0){
+                                //可以进入下一个状态
+                                $develop_finish_status['develop_finish_status'] = 2;
+                                $develop_finish_status['status'] = 3;
+                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
+                            }
+                        }
+                    }
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+        }
+
+        $ids = $ids ?? input('ids');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
+        $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
+
+        $status = array(
+            1 => '确认',
+            2 => '不涉及',
+        );
+        $this->view->assign("status", $status);
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+    public function distribution1($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $update_date = array();
+                if($params['status'] == 3){
+                    if($params['web_designer_group'] == 1){
+                        if(!$params['web_designer_user_id']){
+                            $this->error('未分配前端责任人');
+                        }
+                        $update_date['web_designer_group'] = $params['web_designer_group'];
+                        $update_date['web_designer_complexity'] = $params['web_designer_complexity'];
+                        $update_date['web_designer_expect_time'] = $params['web_designer_expect_time'];
+                        $update_date['web_designer_user_id'] = implode(',',$params['web_designer_user_id']);
+                    }else{
+                        $update_date['web_designer_group'] = $params['web_designer_group'];
+                        $update_date['web_designer_complexity'] = '';
+                        $update_date['web_designer_expect_time'] = null;
+                        $update_date['web_designer_user_id'] = '';
+                    }
+                    if($params['phper_group'] == 1){
+                        if(!$params['phper_user_id']){
+                            $this->error('未分配后端责任人');
+                        }
+                        $update_date['phper_group'] = $params['phper_group'];
+                        $update_date['phper_complexity'] = $params['phper_complexity'];
+                        $update_date['phper_expect_time'] = $params['phper_expect_time'];
+                        $update_date['phper_user_id'] = implode(',',$params['phper_user_id']);
+                    }else{
+                        $update_date['phper_group'] = $params['phper_group'];
+                        $update_date['phper_complexity'] = '';
+                        $update_date['phper_expect_time'] = null;
+                        $update_date['phper_user_id'] = '';
+                    }
+                    if($params['app_group'] == 1){
+                        if(!$params['app_user_id']){
+                            $this->error('未分配app责任人');
+                        }
+                        $update_date['app_group'] = $params['app_group'];
+                        $update_date['app_complexity'] = $params['app_complexity'];
+                        $update_date['app_expect_time'] = $params['app_expect_time'];
+                        $update_date['app_user_id'] = implode(',',$params['app_user_id']);
+                    }else{
+                        $update_date['app_group'] = $params['app_group'];
+                        $update_date['app_complexity'] = '';
+                        $update_date['app_expect_time'] = null;
+                        $update_date['app_user_id'] = '';
+                    }
+
+                }
+
+                $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
+                if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $ids = $ids ?? input('id');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        //如果已分配前端人员
+        $web_userid_arr = array();
+        if($row_arr['web_designer_user_id']){
+            $web_userids = explode(',',$row_arr['web_designer_user_id']);
+            foreach ($web_userids as $k1 => $v1){
+                $web_userid_arr[$k1]['user_id'] = $v1;
+                $web_userid_arr[$k1]['user_name'] = config('demand.web_designer_user')[$v1];
+            }
+        }
+
+        //如果已分配后端人员
+        $phper_userid_arr = array();
+        if($row_arr['phper_user_id']){
+            $phper_userids = explode(',',$row_arr['phper_user_id']);
+            foreach ($phper_userids as $k2 => $v2){
+                $phper_userid_arr[$k2]['user_id'] = $v2;
+                $phper_userid_arr[$k2]['user_name'] = config('demand.phper_user')[$v2];
+            }
+        }
+
+        //如果已分配app人员
+        $app_userid_arr = array();
+        if($row_arr['app_user_id']){
+            $app_userids = explode(',',$row_arr['app_user_id']);
+            foreach ($app_userids as $k3 => $v3){
+                $app_userid_arr[$k3]['user_id'] = $v3;
+                $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
+            }
+        }
+        if($row_arr['type'] == 2){
+            $demand_type = 2;
+        }
+        $this->view->assign('demand_type',$demand_type);
+        $this->view->assign("web_userid_arr", $web_userid_arr);
+        $this->view->assign("phper_userid_arr", $phper_userid_arr);
+        $this->view->assign("app_userid_arr", $app_userid_arr);
+
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 测试确认--通过--上线
+     * 测试权限
+     */
+    public function test_handle($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+
+            if ($params) {
+                $update = array();
+                if($params['type'] == 'queren'){
+                    $update['test_group'] = $params['test_group'];
+                    $update['test_status'] = 2;
+                    $update['test_confirm_time'] = date('Y-m-d H:i',time());
+                }
+
+                if($params['type'] == 'tongguo'){
+                    $row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();
+
+                    if($params['status'] == 1){
+                        //通过
+                        if($params['test_group'] == 1){
+                            $update['test_is_finish'] = 1;
+                            $update['test_finish_time'] = date('Y-m-d H:i',time());
+                        }
+                        $update['test_status'] = 4;
+                    }else{
+                        //未通过
+                        if($row_arr['web_designer_group'] == 1){
+                            $update['web_designer_is_finish'] = 0;
+                            $update['web_designer_finish_time'] = null;
+                        }
+                        if($row_arr['phper_group'] == 1){
+                            $update['phper_is_finish'] = 0;
+                            $update['phper_finish_time'] = null;
+                        }
+                        if($row_arr['app_group'] == 1){
+                            $update['app_is_finish'] = 0;
+                            $update['app_finish_time'] = null;
+                        }
+                        $update['develop_finish_status'] = 2;
+                        $update['develop_finish_time'] = null;
+                    }
+                }
+
+                if($params['type'] == 'shangxian'){
+                    $row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();
+
+                    $time = date('Y-m-d H:i',time());
+                    $update['test_status'] = 5;
+                    $update['all_finish_time'] = $time;
+                    if($update['all_finish_time'] > $row_arr['end_time']){
+                        $update['status'] = 5;
+                    }else{
+                        $update['status'] = 4;
+                    }
+                }
+
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                if ($res) {
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $ids = $ids ?? input('ids');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
+        $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
+
+        $status = array(
+            1 => '确认任务',
+            2 => '不需测试',
+        );
+        $this->view->assign("status", $status);
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
+/*-----------------------------------------------------------------------------------*/
+
+
+
+    /**
+     * 测试分配
+     * 测试组权限
+     */
+    public function test_distribution($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $update_date = array();
+                if($params['status'] == 1){
+                    if($params['test_group'] == 1){
+                        if(!$params['test_user_id']){
+                            $this->error('未分配测试责任人');
+                        }
+                        $update_date['test_group'] = $params['test_group'];
+                        $update_date['test_complexity'] = $params['test_complexity'];
+                        $update_date['test_user_id'] = implode(',',$params['test_user_id']);
+                    }else{
+                        $update_date['test_group'] = $params['test_group'];
+                        $update_date['test_complexity'] = 0;
+                        $update_date['test_user_id'] = '';
+                    }
+                    if($params['demand_type'] == 2){
+                        $update_date['status'] = 2;
+                    }else{
+                        $update_date['status'] = 3;
+                        $update_date['test_complexity'] = 0;
+                    }
+
+                }
+                $update_date['test_confirm_time'] = date('Y-m-d H:i',time());
+                $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
+                if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $ids = $ids ?? input('id');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        //如果已测试人员
+        if($row_arr['test_group'] == 1){
+            if($row_arr['test_user_id']){
+                $test_userids = explode(',',$row_arr['test_user_id']);
+                foreach ($test_userids as $k4 => $v4){
+                    $test_userid_arr[$k4]['user_id'] = $v4;
+                    $test_userid_arr[$k4]['user_name'] = config('demand.test_user')[$v4];
+                }
+            }
+        }
+
+        $this->view->assign("test_userid_arr", $test_userid_arr);
+        $this->view->assign('demand_type',input('demand_type'));
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch('distribution');
+    }
+
+    /**
+     * 通过需求&标记为小概率
+     * 开发组权限
+     * */
+    public function through_demand($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $params = input();
+            if($params['small_probability'] == 1){
+                $data['is_small_probability'] =  $params['val'];
+            }else{
+                $data['status'] =  3;
+            }
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+    /**
+     * 超级编辑权限
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/06/19 16:26:07 
+     * @param [type] $ids
+     * @return void
+     */
+    public function supper_edit($ids = null)
+    {
+
+    }
+    /**
      * 技术部网站bug列表
      * */
     public function bug_list(){
@@ -943,610 +1671,6 @@ class ItWebDemand extends Backend
         }
         return $this->view->fetch();
     }
-
-
-    /**
-     * 添加
-     */
-    public function add()
-    {
-        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
-         $user_id[] =  '0550643549844645';//李想
-         $user_id[] =  '0333543233781107';//张晓
-         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-         dump($res);exit;*/
-
-        if ($this->request->isPost()) {
-            $params = input();
-            if($params){
-                $data = $params['row'];
-
-                $add['type'] = $data['type'];
-                $add['site'] = $data['site'];
-                $add['site_type'] = implode(',',$data['site_type']);
-                $add['entry_user_id'] = $this->auth->id;
-                $add['copy_to_user_id'] = implode(',',$data['copy_to_user_id']);
-                $add['title'] = $data['title'];
-                $add['content'] = $data['content'];
-                $add['accessory'] = $data['accessory'];
-                $add['is_emergency'] = $data['is_emergency']?$params['is_emergency']:0;
-                //以下默认状态
-                $add['status'] = 1;
-                $add['create_time'] = date('Y-m-d H:i',time());
-                $add['pm_audit_status'] = 1;
-                $result = $this->model->allowField(true)->save($add);
-
-                if($result){
-                    //Ding::dingHook(__FUNCTION__,$this->model);
-                    $this->success('添加成功');
-                }else{
-                    $this->error('新增失败，请联系技术，并说明操作过程');
-                }
-            }
-        }
-
-
-        $this->view->assign('demand_type',input('demand_type'));
-        /*$user_id = $this->auth->id;
-        $user_name = $this->auth->username;
-        $this->view->assign('user_id',$this->auth->id);
-        $this->view->assign('user_name', $this->auth->username);*/
-        return $this->view->fetch();
-    }
-    public function add1()
-    {
-        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
-         $user_id[] =  '0550643549844645';//李想
-         $user_id[] =  '0333543233781107';//张晓
-         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-         dump($res);exit;*/
-
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            $params = input();
-
-            if ($params) {
-                if($params['is_user_confirm'] == 1){
-                    //提出人确认
-                    $data['entry_user_confirm'] =  1;
-                    $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
-                    $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
-                    if ($res) {
-                        $res = $this ->model ->get(input('ids'));
-                        Ding::dingHook('test_group_finish', $res);
-                        $this->success('成功');
-                    } else {
-                        $this->error('失败');
-                    }
-                }else{
-                    //新增
-                    $params = $params['row'];
-                    if ($params['copy_to_user_id']) {
-                        $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
-                    }
-                    $params['entry_user_id'] = $this->auth->id;
-
-                    $params = $this->preExcludeFields($params);
-
-                    if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-                        $params[$this->dataLimitField] = $this->auth->id;
-                    }
-
-                    $result = false;
-                    Db::startTrans();
-                    try {
-                        //是否采用模型验证
-                        if ($this->modelValidate) {
-                            $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                            $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
-                            $this->model->validateFailException(true)->validate($validate);
-                        }
-                        $result = $this->model->allowField(true)->save($params);
-                        Db::commit();
-                    } catch (ValidateException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (PDOException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (Exception $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    }
-                    if ($result !== false) {
-                        Ding::dingHook(__FUNCTION__, $this ->model);
-                        $this->success();
-                    } else {
-                        $this->error(__('No rows were inserted'));
-                    }
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-
-
-        $this->view->assign('demand_type',input('demand_type'));
-        /*$user_id = $this->auth->id;
-        $user_name = $this->auth->username;
-        $this->view->assign('user_id',$this->auth->id);
-        $this->view->assign('user_name', $this->auth->username);*/
-        return $this->view->fetch();
-    }
-
-
-
-    /**
-     * 编辑
-     */
-    public function edit($ids = null)
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-
-            if ($params) {
-                if($params['pm_audit_status']){
-                    $add['priority'] = $params['priority'];
-                    $add['node_time'] = $params['node_time'];
-                    $time_data = $this->start_time($params['priority'],$params['node_time']);
-                    $add['start_time'] = $time_data['start_time'];
-                    $add['end_time'] = $time_data['end_time'];
-                    $add['pm_audit_status'] = $params['pm_audit_status'];
-                    $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
-                }
-                $add['type'] = $params['type'];
-                $add['site'] = $params['site'];
-                $add['site_type'] = implode(',',$params['site_type']);
-                $add['entry_user_id'] = $this->auth->id;
-                $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
-                $add['title'] = $params['title'];
-                $add['content'] = $params['content'];
-                $add['accessory'] = $params['accessory'];
-                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
-                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
-                if ($res) {
-
-                    /*$row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();*/
-
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-        $row = $this->model->get($ids);
-        $row = $row->toArray();
-        $row['site_type_arr'] = explode(',',$row['site_type']);
-        $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);
-
-        $this->view->assign("type", input('type'));
-        $this->view->assign("row", $row );
-        return $this->view->fetch();
-    }
-
-
-
-    public function edit1($ids = null)
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                if ($params['copy_to_user_id']) {
-                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
-                }
-                $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
-                if ($res) {
-                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-        $row = $this->model->get($ids);
-        $row = $row->toArray();
-        //如果已分配app人员
-        $copy_to_user_id_arr = array();
-        if($row['copy_to_user_id']){
-            $copy_userids = explode(',',$row['copy_to_user_id']);
-            foreach ($copy_userids as $k => $v){
-                $copy_to_user_id_arr[$k]['user_id'] = $v;
-                $copy_to_user_id_arr[$k]['user_name'] = config('demand.copyToUserId')[$v];
-            }
-        }
-
-        $this->view->assign('demand_type',input('demand_type'));
-        $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );
-        $this->view->assign("row", $row );
-        return $this->view->fetch();
-    }
-
-    /**
-     * 超级编辑权限
-     *
-     * @Description
-     * @author Lx
-     * @since 2020/06/19 16:26:07 
-     * @param [type] $ids
-     * @return void
-     */
-    public function supper_edit($ids = null)
-    {
-
-    }
-    /**
-     * 逻辑删除
-     * */
-    public function del($ids = "")
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-
-            $data['is_del'] =  0;
-            $res = $this->model->allowField(true)->save($data,['id'=> $params['id']]);
-            if ($res) {
-                $this->success('成功');
-            } else {
-                $this->error('失败');
-            }
-        }
-    }
-
-    /**
-     * 测试分配
-     * 测试组权限
-     */
-    public function test_distribution($ids = null)
-    {
-        if($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $update_date = array();
-                if($params['status'] == 1){
-                    if($params['test_group'] == 1){
-                        if(!$params['test_user_id']){
-                            $this->error('未分配测试责任人');
-                        }
-                        $update_date['test_group'] = $params['test_group'];
-                        $update_date['test_complexity'] = $params['test_complexity'];
-                        $update_date['test_user_id'] = implode(',',$params['test_user_id']);
-                    }else{
-                        $update_date['test_group'] = $params['test_group'];
-                        $update_date['test_complexity'] = 0;
-                        $update_date['test_user_id'] = '';
-                    }
-                    if($params['demand_type'] == 2){
-                        $update_date['status'] = 2;
-                    }else{
-                        $update_date['status'] = 3;
-                        $update_date['test_complexity'] = 0;
-                    }
-
-                }
-                $update_date['test_confirm_time'] =  date('Y-m-d H:i',time());
-                $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
-                if ($res) {
-                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-
-        $ids = $ids ?? input('id');
-        $row = $this->model->get(['id' => $ids]);
-        $row_arr = $row->toArray();
-
-        //如果已测试人员
-        if($row_arr['test_group'] == 1){
-            if($row_arr['test_user_id']){
-                $test_userids = explode(',',$row_arr['test_user_id']);
-                foreach ($test_userids as $k4 => $v4){
-                    $test_userid_arr[$k4]['user_id'] = $v4;
-                    $test_userid_arr[$k4]['user_name'] = config('demand.test_user')[$v4];
-                }
-            }
-        }
-
-        $this->view->assign("test_userid_arr", $test_userid_arr);
-        $this->view->assign('demand_type',input('demand_type'));
-        $this->view->assign("row", $row_arr);
-        return $this->view->fetch('distribution');
-    }
-
-    /**
-     * 通过需求&标记为小概率
-     * 开发组权限
-     * */
-    public function through_demand($ids = null)
-    {
-        if ($this->request->isAjax()) {
-            $params = input();
-            if($params['small_probability'] == 1){
-                $data['is_small_probability'] =  $params['val'];
-            }else{
-                $data['status'] =  3;
-            }
-            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
-            if ($res) {
-                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
-                $this->success('成功');
-            } else {
-                $this->error('失败');
-            }
-        }
-    }
-
-    /**
-     * 开发分配
-     * 开发组权限
-     */
-    public function distribution($ids = null)
-    {
-        if($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-
-            if ($params) {
-                $update = array();
-                if($params['web_status'] == 1){
-                    if(!$params['web_designer_group']){
-                        $this->error('需求响应必选');
-                    }
-                    $update['web_designer_group'] = $params['web_designer_group'];
-                    if($params['web_designer_group'] == 1){
-                        if(!$params['web_designer_expect_time']){
-                            $this->error('计划完成时间必选');
-                        }
-                        $update['web_designer_expect_time'] = $params['web_designer_expect_time'].' 18:00:00';
-                        if(!$params['web_designer_complexity']){
-                            $this->error('预期难度必选');
-                        }
-                        $update['web_designer_complexity'] = $params['web_designer_complexity'];
-                    }else{
-                        $update['web_designer_expect_time'] = null;
-                        $update['web_designer_complexity'] = null;
-                    }
-                }
-
-                if($params['php_status'] == 1){
-                    if(!$params['phper_group']){
-                        $this->error('需求响应必选');
-                    }
-                    $update['phper_group'] = $params['phper_group'];
-                    if($params['phper_group'] == 1){
-                        if(!$params['phper_expect_time']){
-                            $this->error('计划完成时间必选');
-                        }
-                        $update['phper_expect_time'] = $params['phper_expect_time'].' 18:00:00';
-                        if(!$params['phper_complexity']){
-                            $this->error('预期难度必选');
-                        }
-                        $update['phper_complexity'] = $params['phper_complexity'];
-                    }else{
-                        $update['phper_expect_time'] = null;
-                        $update['phper_complexity'] = null;
-                    }
-                }
-
-                if($params['app_status'] == 1){
-                    if(!$params['app_group']){
-                        $this->error('需求响应必选');
-                    }
-                    $update['app_group'] = $params['app_group'];
-                    if($params['app_group'] == 1){
-                        if(!$params['app_expect_time']){
-                            $this->error('计划完成时间必选');
-                        }
-                        $update['app_expect_time'] = $params['app_expect_time'].' 18:00:00';
-                        if(!$params['app_complexity']){
-                            $this->error('预期难度必选');
-                        }
-                        $update['app_complexity'] = $params['app_complexity'];
-                    }else{
-                        $update['app_expect_time'] = null;
-                        $update['app_complexity'] = null;
-                    }
-                }
-
-                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
-                if ($res) {
-                    //判断是否达到下一个阶段的状态
-                    $develop_finish_status = array();
-                    $row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();
-                    if($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 2){
-                        if(strpos($row_arr['site_type'],'3') !== false){
-                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0 && $row_arr['app_group'] != 0){
-                                //可以进入下一个状态
-                                $develop_finish_status['develop_finish_status'] = 2;
-                                $develop_finish_status['status'] = 3;
-                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
-                            }
-                        }else{
-                            if($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0){
-                                //可以进入下一个状态
-                                $develop_finish_status['develop_finish_status'] = 2;
-                                $develop_finish_status['status'] = 3;
-                                $this->model->allowField(true)->save($develop_finish_status,['id'=> $params['id']]);
-                            }
-                        }
-                    }
-
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-
-        $ids = $ids ?? input('ids');
-        $row = $this->model->get(['id' => $ids]);
-        $row_arr = $row->toArray();
-
-        $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
-        $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
-
-        //如果已分配前端人员
-        /*$web_userid_arr = array();
-        if($row_arr['web_designer_user_id']){
-            $web_userids = explode(',',$row_arr['web_designer_user_id']);
-            foreach ($web_userids as $k1 => $v1){
-                $web_userid_arr[$k1]['user_id'] = $v1;
-                $web_userid_arr[$k1]['user_name'] = config('demand.web_designer_user')[$v1];
-            }
-        }
-
-        //如果已分配后端人员
-        $phper_userid_arr = array();
-        if($row_arr['phper_user_id']){
-            $phper_userids = explode(',',$row_arr['phper_user_id']);
-            foreach ($phper_userids as $k2 => $v2){
-                $phper_userid_arr[$k2]['user_id'] = $v2;
-                $phper_userid_arr[$k2]['user_name'] = config('demand.phper_user')[$v2];
-            }
-        }
-
-        //如果已分配app人员
-        $app_userid_arr = array();
-        if($row_arr['app_user_id']){
-            $app_userids = explode(',',$row_arr['app_user_id']);
-            foreach ($app_userids as $k3 => $v3){
-                $app_userid_arr[$k3]['user_id'] = $v3;
-                $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
-            }
-        }
-        if($row_arr['type'] == 2){
-            $demand_type = 2;
-        }
-        $this->view->assign('demand_type',$demand_type);
-        $this->view->assign("web_userid_arr", $web_userid_arr);
-        $this->view->assign("phper_userid_arr", $phper_userid_arr);
-        $this->view->assign("app_userid_arr", $app_userid_arr);*/
-
-        $status = array(
-            1 => '确认',
-            2 => '不涉及',
-        );
-        $this->view->assign("status", $status);
-        $this->view->assign("row", $row_arr);
-        return $this->view->fetch();
-    }
-    public function distribution1($ids = null)
-    {
-        if($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $update_date = array();
-                if($params['status'] == 3){
-                    if($params['web_designer_group'] == 1){
-                        if(!$params['web_designer_user_id']){
-                            $this->error('未分配前端责任人');
-                        }
-                        $update_date['web_designer_group'] = $params['web_designer_group'];
-                        $update_date['web_designer_complexity'] = $params['web_designer_complexity'];
-                        $update_date['web_designer_expect_time'] = $params['web_designer_expect_time'];
-                        $update_date['web_designer_user_id'] = implode(',',$params['web_designer_user_id']);
-                    }else{
-                        $update_date['web_designer_group'] = $params['web_designer_group'];
-                        $update_date['web_designer_complexity'] = '';
-                        $update_date['web_designer_expect_time'] = null;
-                        $update_date['web_designer_user_id'] = '';
-                    }
-                    if($params['phper_group'] == 1){
-                        if(!$params['phper_user_id']){
-                            $this->error('未分配后端责任人');
-                        }
-                        $update_date['phper_group'] = $params['phper_group'];
-                        $update_date['phper_complexity'] = $params['phper_complexity'];
-                        $update_date['phper_expect_time'] = $params['phper_expect_time'];
-                        $update_date['phper_user_id'] = implode(',',$params['phper_user_id']);
-                    }else{
-                        $update_date['phper_group'] = $params['phper_group'];
-                        $update_date['phper_complexity'] = '';
-                        $update_date['phper_expect_time'] = null;
-                        $update_date['phper_user_id'] = '';
-                    }
-                    if($params['app_group'] == 1){
-                        if(!$params['app_user_id']){
-                            $this->error('未分配app责任人');
-                        }
-                        $update_date['app_group'] = $params['app_group'];
-                        $update_date['app_complexity'] = $params['app_complexity'];
-                        $update_date['app_expect_time'] = $params['app_expect_time'];
-                        $update_date['app_user_id'] = implode(',',$params['app_user_id']);
-                    }else{
-                        $update_date['app_group'] = $params['app_group'];
-                        $update_date['app_complexity'] = '';
-                        $update_date['app_expect_time'] = null;
-                        $update_date['app_user_id'] = '';
-                    }
-
-                }
-
-                $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
-                if ($res) {
-                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-
-        $ids = $ids ?? input('id');
-        $row = $this->model->get(['id' => $ids]);
-        $row_arr = $row->toArray();
-
-        //如果已分配前端人员
-        $web_userid_arr = array();
-        if($row_arr['web_designer_user_id']){
-            $web_userids = explode(',',$row_arr['web_designer_user_id']);
-            foreach ($web_userids as $k1 => $v1){
-                $web_userid_arr[$k1]['user_id'] = $v1;
-                $web_userid_arr[$k1]['user_name'] = config('demand.web_designer_user')[$v1];
-            }
-        }
-
-        //如果已分配后端人员
-        $phper_userid_arr = array();
-        if($row_arr['phper_user_id']){
-            $phper_userids = explode(',',$row_arr['phper_user_id']);
-            foreach ($phper_userids as $k2 => $v2){
-                $phper_userid_arr[$k2]['user_id'] = $v2;
-                $phper_userid_arr[$k2]['user_name'] = config('demand.phper_user')[$v2];
-            }
-        }
-
-        //如果已分配app人员
-        $app_userid_arr = array();
-        if($row_arr['app_user_id']){
-            $app_userids = explode(',',$row_arr['app_user_id']);
-            foreach ($app_userids as $k3 => $v3){
-                $app_userid_arr[$k3]['user_id'] = $v3;
-                $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
-            }
-        }
-        if($row_arr['type'] == 2){
-            $demand_type = 2;
-        }
-        $this->view->assign('demand_type',$demand_type);
-        $this->view->assign("web_userid_arr", $web_userid_arr);
-        $this->view->assign("phper_userid_arr", $phper_userid_arr);
-        $this->view->assign("app_userid_arr", $app_userid_arr);
-
-        $this->view->assign("row", $row_arr);
-        return $this->view->fetch();
-    }
-
-
 
     /**
      * 开发完成方法

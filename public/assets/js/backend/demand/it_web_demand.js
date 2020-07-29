@@ -80,10 +80,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Controller.api.formatter.get_develop_status,
                         },
                         {
-                            field: 'pm_audit_status',
+                            field: 'test_status',
                             title: __('测试进度'),
-                            events: Controller.api.events.ge_pm_status,
-                            formatter: Controller.api.formatter.ge_pm_status,
+                            events: Controller.api.events.get_test_status,
+                            formatter: Controller.api.formatter.get_test_status,
                         },
                         /*{field: 'develop_finish_time', title: __('开发完成时间'), formatter: Table.api.formatter.datetime},
                         {field: 'test_finish_time', title: __('测试完成时间'), formatter: Table.api.formatter.datetime},*/
@@ -122,11 +122,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             events: Table.api.events.operate,
                             buttons: [
                                 {
+                                    name: 'add',
+                                    text: __('确认'),
+                                    title: __('提出人确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax user_confirm',
+                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
+                                    confirm: '确认本需求？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4 || row.status == 5){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+
+                                        /*if(row.status == 4 || row.status == 5){
+                                            if(row.demand_add && row.is_entry_user_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }*/
+                                    }
+                                },
+                                {
                                     name: 'through_demand',
                                     text: __('确认'),
-                                    title: __('确认'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
+                                    title: __('产品确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax user_confirm',
                                     url: 'demand/it_web_demand/through_demand',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
@@ -137,16 +171,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                         return false;
                                     },
                                     visible: function(row){
-                                        return true;
-                                        if(row.status == 2){
+                                        if(row.status == 4 || row.status == 5){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+
+
+                                       /* if(row.status == 2){
                                             if(row.demand_through_demand){//操作权限
                                                 return true;
                                             }
                                         }else{
                                             return false;
-                                        }
+                                        }*/
                                     }
                                 },
+
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -2475,26 +2516,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 }
             });
 
-            /*$(document).on('click', ".btn-sub", function () {
+            $(document).on('click', ".btn-sub", function () {
                 var type = $(this).val();
-                if(type == 'del'){
-                    $("#demand_edit").attr('action','demand/it_web_demand/del');
-                }
-                if(type == 'edit'){
-                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
-                }
-                if(type == 'pending'){
-                    $('#pm_audit_status').val(2);
-                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
-                }
-                if(type == 'sub'){
-                    $('#pm_audit_status').val(3);
-                    $("#demand_edit").attr('action','demand/it_web_demand/edit');
-                }
-                $("#demand_edit").submit();
-            });*/
-
-
+                $('#input_'+type).val('2');
+                $("#form_"+type).submit();
+            });
         },
         distribution1: function () {
             Controller.api.bindevent();
@@ -2594,6 +2620,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
             });
             /*app分配 end*/
         },
+        test_handle: function () {
+            Controller.api.bindevent();
+
+            $(document).on('click', ".btn-sub", function () {
+                var type = $(this).val();
+                if(type == 'tongguo_yes'){
+                    $('#tongguo_status').val('1');
+                    $("#tongguo_form").submit();
+                }
+                if(type == 'tongguo_no'){
+                    $('#tongguo_status').val('2');
+                    $("#tongguo_form").submit();
+                }
+            });
+        },
         test_distribution: function () {
             Controller.api.bindevent();
 
@@ -2681,6 +2722,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         return '-';
                     }
                 },
+                //测试进度点击弹窗
+                get_test_status: function (value, row, index) {
+                    if(row.status >= 2){
+                        if(row.test_status == 1){
+                            return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                        }else if (row.test_status == 2){
+                            if(row.test_group == 1){
+                                return '<div><span class="check_test_status status3_color">待测试</span></div>';
+                            }else{
+                                return '<div><span class="check_test_status status3_color">无需测试</span></div>';
+                            }
+
+                        }else if (row.test_status == 3){
+                            return '<div><span class="check_test_status status1_color">待通过</span></div>';
+                        }else if (row.test_status == 4){
+                            return '<div><span class="check_test_status status1_color">待上线</span></div>';
+                        }else if (row.test_status == 5){
+                            return '<div><span class="check_test_status status3_color">已上线</span></div>';
+                        }
+                    }else{
+                        return '-';
+                    }
+                },
 
                 getClear: function (value) {
 
@@ -2709,16 +2773,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 },
                 //点击评审，弹出窗口
                 ge_pm_status: {
-                    //格式为：方法名+空格+DOM元素
                     'click .check_pm_status': function (e, value, row, index) {
                         Backend.api.open('demand/it_web_demand/edit/type/pm_audit/ids/' +row.id, __('任务评审'), { area: ['70%', '70%'] });
                     }
                 },
+                //开发进度，弹出窗口
                 get_develop_status:{
                     'click .check_develop_status': function (e, value, row, index) {
                         Backend.api.open('demand/it_web_demand/distribution/ids/' +row.id, __('开发进度'), { area: ['80%', '55%'] });
                     }
                 },
+                get_test_status: {
+                    'click .check_test_status': function (e, value, row, index) {
+                        Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '45%'] });
+                    }
+                },
+
 
             }            
         }

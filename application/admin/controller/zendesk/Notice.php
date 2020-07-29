@@ -1263,6 +1263,7 @@ class Notice extends Controller
 
         $page = ceil($tickets->count / 100);
         if ($page >= 1) {
+
             //获取后续的
             for ($i = 1; $i <= $page; $i++) {
                 $search = $this->client->search()->find($params, ['page' => $i]);
