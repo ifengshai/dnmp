@@ -903,7 +903,8 @@ DOC;
                         $commentAuthorId = Db::name('zendesk_comments')
                             ->alias('c')
                             ->join('fa_admin a','c.due_id=a.id')
-                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                            ->join('fa_zendesk_agents z','c.due_id=z.admin_id')
+                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$item['type']])
                             ->order('c.id','desc')
                             ->value('due_id');
                         if($commentAuthorId == $admin_id || !$commentAuthorId){
