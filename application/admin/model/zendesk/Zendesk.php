@@ -401,7 +401,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where('id',109641)->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -420,7 +420,6 @@ class Zendesk extends Model
                     ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$ticket->getType()])
                     ->order('c.id','desc')
                     ->value('due_id');
-                dump($commentAuthorId);exit;
                 if($commentAuthorId){
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
@@ -429,7 +428,6 @@ class Zendesk extends Model
                             'target_count' => ['>',0]
                         ])
                         ->find();
-
                 }else{
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -448,13 +446,11 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }else{
-                    $is_exist = ZendeskTasks::whereTime('create_time', 'today')
+                    //如果承接人没有离职
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['admin_id' => $ticket->assign_id])
                         ->limit(1)
                         ->find();
-                    if($is_exist->id){
-                        $task = $is_exist;
-                    }
                 }
             }
             if ($task) {
