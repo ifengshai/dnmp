@@ -105,6 +105,31 @@ table.altrowstable tr:nth-child(even){
     .work_title li.active span,.work_title li.active b{
         color:#396FFF;
     }
+    .work_title .personNum{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    .work_title .personNum div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 50px;
+    }
+    .work_title .personNum div:nth-child(2){
+        align-items: flex-end;
+        position: relative;
+    }
+    .work_title .personNum div:nth-child(2)::after{
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -22px;
+        width: 1px;
+        height: 54px;
+        background-color: #333;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -113,14 +138,14 @@ table.altrowstable tr:nth-child(even){
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
-                    <form id = "form1" action="{:url('/admin/datacenter/customer_service/workload')}" class="form-commonsearch form-horizontal" role="form1" method="post">
+                    <div id = "form1" class="form-commonsearch form-horizontal" role="form1" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div class="col-xs-12 col-md-3">
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">站点</label>
                                         <div class="col-xs-8">
-                                            <select data-rule="required" class="form-control" name="order_platform">
+                                            <select data-rule="required" class="form-control" name="order_platform" id="order_platform">
                                                 <option value="0">全部</option>
                                                 <option value="1" selected="selected">Zeelool</option>
                                                 <option value="2">Voogueme</option>
@@ -144,7 +169,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="form-group" style="margin-left:1px;">
                                 <label class="control-label col-xs-1 col-sm-1">分组:</label>
                                 <div class="col-xs-2">
-                                    <select   class="form-control" name="customer_type">
+                                    <select  class="form-control" name="customer_type" id="customer_type">
                                         <option value="0" selected="selected">全部</option>
                                         <option value="1">A组</option>
                                         <option value="2">B组</option>
@@ -153,12 +178,12 @@ table.altrowstable tr:nth-child(even){
                             </div>                            
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
-                                    <input type="submit" class="btn btn-success" value="提交"> 
-                                    <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                                    <input type="submit" class="btn btn-success" id="worknum_submit" value="提交">
+                                    <input type="reset" class="btn btn-default reset" id="worknum_reset" value="重置" ></div>
                             </div>                                                            
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                 <input type="hidden" id="title_type" value="1">
@@ -171,15 +196,21 @@ table.altrowstable tr:nth-child(even){
                         <span>未达标天数</span>
                         <b id="no_up_to_day">{$no_up_to_day}</b>
                     </li>
-                    <li class="title">
-                        <span>人效</span>
-                        <b id="all_positive_num">{$positive_effect_num.all_positive_num}</b>
+                    <li class="title personNum">
+                        <div>
+                            <span>人效</span>
+                            <b id="all_positive_num">{$positive_effect_num.all_positive_num}</b>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px">正式员工人效 <span id="work_positive_num">{$positive_effect_num.work_positive_num}</span></span>
+                            <span style="font-size: 12px">非正式员工人效 <span id="nowork_positive_num">{$positive_effect_num.nowork_positive_num}</span></span>
+                        </div>
                     </li>
-                    <li class="title">
-                        <span style="font-size: 12px">正式员工人效 <span id="work_positive_num">{$positive_effect_num.work_positive_num}</span></span>
-                        <span style="font-size: 12px">非正式员工人效 <span id="nowork_positive_num">{$positive_effect_num.nowork_positive_num}</span></span>
-                    </li>
+<!--                    <li class="title">-->
+
+<!--                    </li>-->
                 </ul>
+                <div id="worknum_echart" style="height:200px;width:100%;"></div>
                 </div>
                 <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                 <table id="order-info-list" class="altrowstable"

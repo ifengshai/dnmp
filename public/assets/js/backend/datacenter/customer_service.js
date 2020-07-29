@@ -563,6 +563,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
+                },
+                workload_line_chart: function(){
+                    //工作量概况折线图
+                    var chartOptions = {
+                        targetId: 'worknum_echart',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+                    
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/dealnum_line',
+                        data: {
+                            platform:$("#order_platform").val(),
+                            time_str:$("#one_time").val(),
+                            group_id:$("#customer_type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
                 }
             },
             bindevent: function () {
@@ -572,8 +591,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
         //工作量统计
         workload:function()
         {
-            Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Form.api.bindevent($("form[role=form]"));
+            Controller.api.formatter.daterangepicker($("div[role=form1]"));
+            Form.api.bindevent($("div[role=form]"));
             //点击对比时间段显示第二个时间输入框
             $("#contrast").change(function() { 
                 if($("#contrast").is(':checked')){
@@ -582,6 +601,44 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     $("#two-time-node").hide();
                 }
             }); 
+            $("#worknum_submit").click(function(){
+                var platform = $("#order_platform").val();
+                var time_str = $("#one_time").val();
+                var group_id = $("#customer_type").val();
+
+                Backend.api.ajax({
+                    url:'datacenter/customer_service/workload_worknum',
+                    data:{platform:platform,time_str:time_str,group_id:group_id}
+                }, function(data, ret){
+                    $("#order_platform").val(platform)
+                    $("#one_time").val(time_str)
+                    $("#customer_type").val(group_id)
+                    var deal_num = ret.data.deal_num;
+                    var no_up_to_day  = ret.data.no_up_to_day;
+                    var all_positive_num  = ret.data.positive_effect_num.all_positive_num;
+                    var work_positive_num  = ret.data.positive_effect_num.work_positive_num;
+                    var nowork_positive_num  = ret.data.positive_effect_num.nowork_positive_num;
+                    
+                    $('#deal_num').text(deal_num);
+                    $('#no_up_to_day').text(no_up_to_day);
+                    $('#all_positive_num').text(all_positive_num);
+                    $('#work_positive_num').text(work_positive_num);
+                    $('#nowork_positive_num').text(nowork_positive_num);
+                    return true;
+                }, function(data, ret){
+                    Layer.alert(ret.msg);
+                    return false;
+                });   
+                //折线图
+                Controller.api.formatter.workload_line_chart();
+            })
+            $("#worknum_reset").click(function(){
+                 $("#order_platform").val(1);
+                $("#one_time").val('');
+                $("#customer_type").val(0);
+            })
+            //折线图
+            Controller.api.formatter.workload_line_chart();
         },        
         //工单统计
         workstatistics:function()
