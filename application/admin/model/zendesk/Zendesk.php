@@ -444,6 +444,8 @@ class Zendesk extends Model
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
+                }else{
+                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                 }
             }
             if ($task) {
