@@ -885,6 +885,7 @@ class CustomerService extends Backend
             if (!empty($mapTwo)) {
                 $worklistTwo = $this->works_info($where, $mapTwo,$customer_type,$customer_category);
             }
+            // dump($worklistOne);dump($worklistTwo);
             //只有一个没有第二个
             if ($worklistOne && !$mapTwo) {
                 //取出总数
@@ -960,11 +961,26 @@ class CustomerService extends Backend
             $where['work_status'] = 6;
             $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
             sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+
+            //计算工单创建总量 2020.07.28 18:45 jhh 取所有状态下的工单包括新建取消待审核审核成功审核拒绝部分处理已处理取消的
+        $where1 = $where;
+         $where1['work_status'] = ['in',[0,1,2,3,4,5,6,7]];
+         $map1['create_time'] = $map['complete_time'];
+         $workListAllcounter = $this->model->where($where1)->where($map1)->field('count(*) as create_counter,create_user_id')->group('create_user_id')->select();
+         
+         $workListAllcounter = array_column(collection($workListAllcounter)->toArray(),NULL,'create_user_id');
+        //  dump(collection($workList)->toArray());
+        //  dump($workListAllcounter);
             //$where['replacement_order'] = ['neq',''];
             //补发单数和优惠券发放量
             $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null),create_user_id')->group('create_user_id')->select();
             $workList = collection($workList)->toArray();
             $replacementOrder = collection($replacementOrder)->toArray();
+
+            foreach($workList as $kk => $vv){
+                $workList[$kk]['create_counter'] = $workListAllcounter[$vv['create_user_id']]['create_counter'];
+            }
+            // dump($workList);
             if (!empty($replacementOrder)) {
                 $replacementArr = $couponArr = [];
                 foreach ($replacementOrder as $rk => $rv) {
@@ -1002,7 +1018,8 @@ class CustomerService extends Backend
 				if(!empty($workList)){
 					foreach($workList as $wk =>$wv){
 						if($v['id'] == $wv['create_user_id']){
-							$allCustomers[$k]['counter'] = $wv['counter'];
+                            $allCustomers[$k]['counter'] = $wv['counter'];
+                            $allCustomers[$k]['create_counter'] = $wv['create_counter'];
 							$allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
 							$allCustomers[$k]['refund_num'] = $wv['refund_num'];
 							//累计工单完成量
@@ -1479,13 +1496,30 @@ class CustomerService extends Backend
 			}			
 		}else{
 			$allCustomers = $arrCustomers;
-		}
+        }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+    //    dump(collection($workList)->toArray());
         //$where['replacement_order'] = ['neq',''];
         $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
+
+         //计算工单创建总量 2020.07.28 18:45 jhh 取所有状态下的工单包括新建取消待审核审核成功审核拒绝部分处理已处理取消的
+         $where['work_status'] = ['in',[0,1,2,3,4,5,6,7]];
+         $map1['create_time'] = $map['complete_time'];
+         $workListAllcounter = $this->model->where($where)->where($map1)->field('count(*) as create_counter,create_user_id,create_user_name')->group('create_user_id')->select();
+        //  dump(collection($workListAllcounter)->toArray());
+         
         $workList = collection($workList)->toArray();
+
+        $workListAllcounter = array_column(collection($workListAllcounter)->toArray(),NULL,'create_user_id');
+        // $workList = array_merge_recursive(array_column($workList,NULL,'create_user_id'),$workListAllcounter);
+        //  dump($workList);
+
         $replacementOrder = collection($replacementOrder)->toArray();
+        foreach($workList as $kk => $vv){
+            $workList[$kk]['create_counter'] = $workListAllcounter[$vv['create_user_id']]['create_counter'];
+        }
+        // dump($workList);
         if (!empty($replacementOrder)) {
             $replacementArr = [];
             foreach ($replacementOrder as $rk => $rv) {
@@ -1520,7 +1554,8 @@ class CustomerService extends Backend
 				if(!empty($workList)){
 					foreach($workList as $wk =>$wv){
 						if($v['id'] == $wv['create_user_id']){
-							$allCustomers[$k]['counter'] = $wv['counter'];
+                            $allCustomers[$k]['counter'] = $wv['counter'];
+                            $allCustomers[$k]['create_counter'] = $wv['create_counter'];
 							$allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
 							$allCustomers[$k]['refund_num'] = $wv['refund_num'];
 							//累计工单完成量
