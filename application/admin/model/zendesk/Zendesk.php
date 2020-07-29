@@ -445,7 +445,13 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }else{
-                    //Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
+                    $is_exist = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['admin_id' => $ticket->assign_id])
+                        ->limit(1)
+                        ->find();
+                    if($is_exist->id){
+                        $task = $is_exist;
+                    }
                 }
             }
             if ($task) {
