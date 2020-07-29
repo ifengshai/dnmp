@@ -416,7 +416,8 @@ class Zendesk extends Model
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
                     ->join('fa_admin a','c.due_id=a.id')
-                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                    ->join('fa_zendesk_agents z','c.due_id = z.admin_id')
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$ticket->getType()])
                     ->order('c.id','desc')
                     ->value('due_id');
                 dump($commentAuthorId);exit;
@@ -428,6 +429,7 @@ class Zendesk extends Model
                             'target_count' => ['>',0]
                         ])
                         ->find();
+
                 }else{
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
