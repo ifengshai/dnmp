@@ -445,7 +445,7 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }else{
-                    Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
+                    //Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                 }
             }
             if ($task) {
