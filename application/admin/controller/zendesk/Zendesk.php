@@ -953,7 +953,7 @@ DOC;
             } elseif($ticket['status'] == 1) {
                 //new
                 //修改zendesk的assign_id,assign_time
-                $res = $this->model->where('id',$ticket->id)->update([
+                $res = $this->model->where('id',$ticket['id'])->update([
                     'is_hide' => 0,
                     'due_id' => $admin_id,
                     'assign_id' => $admin_id,
