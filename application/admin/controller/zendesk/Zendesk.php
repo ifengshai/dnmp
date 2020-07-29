@@ -934,7 +934,7 @@ DOC;
         $i = 0;
         foreach($tickets as $ticket){
             if ($i == 10) {
-                continue;
+                break;
             }
             if ($ticket['status'] == 2) {
                 //open
