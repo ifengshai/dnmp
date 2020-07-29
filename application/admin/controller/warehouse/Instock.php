@@ -491,6 +491,7 @@ class Instock extends Backend
                     if ($v['replenish_id']) {
                         //查询各站补货需求量占比
                         $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                        // dump(collection($rate_arr)->toArray());die;
                         //根据入库数量插入各站虚拟仓库存
                         $all_num = count($rate_arr);
                         $stock_num = $v['in_stock_num'];
@@ -499,7 +500,7 @@ class Instock extends Backend
                             if (($all_num - $key) == 1) {
                                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                             } else {
-                                $num = round($stock_num * $val['rate']);
+                                $num = round($v['in_stock_num'] * $val['rate']);
                                 $stock_num -= $num;
                                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                             }
@@ -515,7 +516,7 @@ class Instock extends Backend
                             if (($all_num - $key) == 1) {
                                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                             } else {
-                                $num = round($stock_num * $val['stock']/$whole_num);
+                                $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
                                 $stock_num -= $num;
                                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                             }
