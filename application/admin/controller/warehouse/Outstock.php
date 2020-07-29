@@ -354,7 +354,7 @@ class Outstock extends Backend
                         if (($all_num - $key) == 1) {
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stock_num)->update();
                         } else {
-                            $num = round($stock_num * $val['stock']/$whole_num);
+                            $num = round($v['out_stock_num'] * $val['stock']/$whole_num);
                             $stock_num -= $num;
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
                         }
