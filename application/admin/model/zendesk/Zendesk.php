@@ -483,6 +483,8 @@ class Zendesk extends Model
      * 统计工作量概况
      * */
     public function worknum_situation($platform = 0,$workload_time = ''){
+        $this->zendeskComments = new \app\admin\model\zendesk\Zendesk;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
         if($platform){
             $map['type'] = $platform;
         }
@@ -507,9 +509,9 @@ class Zendesk extends Model
             $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
         $where['z.channel'] = array('neq','voice');
-        $new_create_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
+        $new_create_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
         //已回复
-        $already_reply_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1])->count();
+        $already_reply_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1])->count();
         //待分配
         $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
         $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
@@ -518,8 +520,8 @@ class Zendesk extends Model
             $task_where['type'] = $platform;
         }
         $where['c.is_admin'] = 1;
-        $all_already_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
-        $people_day = Db::name('zendesk_tasks')->where($task_where)->count();
+        $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+        $people_day = $this->zendeskTasks->where($task_where)->count();
         if($people_day == 0){
             $positive_effect_num = 0;
         }else{
@@ -534,7 +536,7 @@ class Zendesk extends Model
         $id = $this->where($zendesk_where)->order('update_time','asc')->value('id');
         $reply_where['is_admin'] = 0;
         $reply_where['zid'] = $id;
-        $reply_time = Db::name('zendesk_comments')->where($reply_where)->order('id','desc')->value('update_time');
+        $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
         if($reply_time){
             $reply_time = strtotime($reply_time)+8*3600;
             $reply_failure_num=ceil((time()-$reply_time)/3600);
