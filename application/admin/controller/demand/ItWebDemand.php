@@ -88,6 +88,13 @@ class ItWebDemand extends Backend
         $user_name = implode(',',$user_name_arr);
         return $user_name;
     }
+    /**
+     * 产品权限
+     */
+    public function pm_status($ids = null)
+    {
+
+    }
 
     /**
      * 技术部网站需求列表
@@ -563,12 +570,29 @@ class ItWebDemand extends Backend
             if($params){
                 if($params['is_user_confirm'] == 1){
                     //提出人确认
+                    $row = $this->model->get(['id' => $params['ids']]);
+                    $row_arr = $row->toArray();
+
+                    $pm_status = $this->auth->check('demand/it_web_demand/pm_status');//新增权限
+                    $user_id = $this->auth->id;
+                    $data = array();
+                    if($pm_status){
+                        //有产品的权限，说明当前登录者是产品
+                        if($user_id == $row_arr['entry_user_id']){
+                            //如果当前用户有产品权限，又和提出人是一个人，则一次确定，全部确定
+                            $data['entry_user_confirm'] =  1;
+                            $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
+                        }
+                        $data['pm_confirm'] =  1;
+                        $data['pm_confirm_time'] =  date('Y-m-d H:i',time());
+                    }else{
+                        //没有产品的权限，还能进来这个方法，说明是运营，也就是提出人
+                        $data['entry_user_confirm'] =  1;
+                        $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
+                    }
 
                     //如果当前登录人有产品确认权限，并且提出人==当前登录的人，则一个确认，就可以直接当成提出人确认&产品确认。
 
-                    $data['entry_user_confirm'] =  1;
-                    $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
-                    dump($params);exit;
                     $res = $this->model->allowField(true)->save($data,['id'=> $params['ids']]);
                     if ($res) {
                         //$res = $this ->model ->get(input('ids'));
@@ -577,7 +601,6 @@ class ItWebDemand extends Backend
                     } else {
                         $this->error('失败');
                     }
-
 
                 }else{
                     $data = $params['row'];
@@ -1162,8 +1185,24 @@ class ItWebDemand extends Backend
         $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
 
+        $time_arr = array();
         if($row_arr['web_designer_group'] == 1){
+            $time_arr[] = strtotime($row_arr['web_designer_expect_time']);
+        }
+        if($row_arr['phper_group'] == 1){
+            $time_arr[] = strtotime($row_arr['phper_expect_time']);
+        }
+        if($row_arr['app_group'] == 1){
+            $time_arr[] = strtotime($row_arr['app_expect_time']);
+        }
+        rsort($time_arr);
 
+        $day_num = strtotime($row_arr['end_time']) - $time_arr[0];
+
+        if($day_num<0){
+            $day = 0;
+        }else{
+            $day = ceil($day_num/(3600*24));
         }
 
         $status = array(
@@ -1171,6 +1210,7 @@ class ItWebDemand extends Backend
             2 => '不需测试',
         );
         $this->view->assign("status", $status);
+        $this->view->assign("day", $day);
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
     }

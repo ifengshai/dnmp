@@ -2756,6 +2756,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         return '-';
                     }
                 },
+                //完成确认
+                get_user_confirm: function (value, row, index) {
+                    if(row.test_status == 5){
+                        return '<div><span class="check_user_confirm status1_color">确认</span></div>';
+                    }else{
+                        return '-'
+                    }
+                },
 
                 getClear: function (value) {
 
@@ -2794,9 +2802,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         Backend.api.open('demand/it_web_demand/distribution/ids/' +row.id, __('开发进度'), { area: ['80%', '55%'] });
                     }
                 },
+                //测试进度
                 get_test_status: {
                     'click .check_test_status': function (e, value, row, index) {
                         Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '50%'] });
+                    }
+                },
+                //完成确认
+                get_user_confirm: {
+                    'click .check_user_confirm': function (e, value, row, index) {
+
+                        layer.confirm('确认本需求？', {
+                            btn: ['确认','取消'] //按钮
+                        }, function(){
+
+                            Backend.api.ajax({
+                                url:'demand/it_web_demand/add/is_user_confirm/1/ids/' +row.id,
+                            }, function(data, ret){
+                                $("#table").bootstrapTable('refresh');
+                                Layer.closeAll();
+
+                            }, function(data, ret){
+                                //失败的回调
+                                Toastr.error(22222);
+                                return false;
+                            });
+
+                        }, function(){
+                            Layer.closeAll();
+                        });
+
+
+
+                        //Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '50%'] });
                     }
                 },
 
