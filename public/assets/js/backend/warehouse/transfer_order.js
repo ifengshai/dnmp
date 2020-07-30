@@ -37,6 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
+                        { field: 'sku', title: ('SKU'),visible: false},
+
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'create_person', title: __('Create_person') },
                         {

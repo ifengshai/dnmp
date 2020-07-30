@@ -1098,7 +1098,10 @@ class Item extends Backend
                 $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
                 $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
                 $v['wesee_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
+<<<<<<< HEAD
 
+=======
+>>>>>>> supplychain
             }
             unset($v);
 

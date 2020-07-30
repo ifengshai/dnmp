@@ -670,7 +670,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     if (!supplier_sku) {
                                         supplier_sku = '';
                                     }
-
+                                    shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden" value="' + item[i].replenish_id + '">'
                                     shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + item[i].purchase_id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'

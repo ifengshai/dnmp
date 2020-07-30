@@ -196,10 +196,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                 //return (pageNumber - 1) * pageSize + 1 + index;
                                 return 1 + index;
-                            }, operate: false, visible: false
+                            }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'id', title: __('补货需求单'), operate: false },
+                        { field: 'id', title: __('Id'), operate: false ,visible: false},
+                        { field: 'id', title: __('补货需求单')},
+                        { field: 'sku', title: ('SKU'),visible: false},
+
                         {
                             field: 'type',
                             title: __('补货需求单类型'),
