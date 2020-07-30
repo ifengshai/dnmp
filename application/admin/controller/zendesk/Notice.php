@@ -619,7 +619,7 @@ class Notice extends Controller
                         'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
                         'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
                     ]);
-                    ZendeskComments::create([
+                    Db::name('zendesk_comments')->insert([
                         'ticket_id' => $id,
                         'zid' => $zendesk->id,
                         'comment_id' => $comment->id,
