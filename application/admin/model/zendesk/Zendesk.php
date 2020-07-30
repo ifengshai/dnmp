@@ -13,7 +13,7 @@ class Zendesk extends Model
     protected $name = 'zendesk';
 
     // 定义时间戳字段名
-    protected $autoWriteTimestamp = 'datetime';
+    protected $autoWriteTimestamp = 'timestamp';
     protected $dateFormat = 'Y-m-d H:i:s';
 
     // 追加属性
@@ -538,7 +538,7 @@ class Zendesk extends Model
         $reply_where['zid'] = $id;
         $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
         if($reply_time){
-            $reply_time = strtotime($reply_time)+8*3600;
+            $reply_time = strtotime($reply_time);
             $reply_failure_num=ceil((time()-$reply_time)/3600);
         }else{
             $reply_failure_num = 0;
