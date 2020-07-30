@@ -444,7 +444,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     Controller.api.formatter.line_chart();
                 },0)
             })
-            $(document).on('click','.title',function(){
+            $(document).on('click','.title_click',function(){
                 if($(this).data('value')){
                     $("#title_type").val($(this).data('value'));
                     $(".title").removeClass('active');
