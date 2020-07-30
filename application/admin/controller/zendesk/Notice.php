@@ -29,7 +29,7 @@ class Notice extends Controller
 {
     public $postData = [];
 
-    /**
+    /**time();
      * 方法初始化
      * @throws \Exception
      */
