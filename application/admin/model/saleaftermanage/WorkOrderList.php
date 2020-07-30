@@ -1390,7 +1390,7 @@ class WorkOrderList extends Model
         if($type == 1){
             $map['create_time'] = array('between',[$start,$end]);
         }
-        $map['work_status'] = array('not in','0,4');
+        $map['work_status'] = array('not in','0,4,7');
         if($platform != 0){
             $map['work_platform'] = $platform;
         }
