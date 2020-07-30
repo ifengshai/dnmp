@@ -432,14 +432,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 worknum_situation();
                 Controller.api.formatter.line_chart();
             });
-<<<<<<< HEAD
-            $("#workload_time").on("apply.daterangepicker", function () {
-                worknum_situation();
-                Controller.api.formatter.line_chart();
-            })
-            $(document).on('click', '.title', function () {
-                if ($(this).data('value')) {
-=======
             $("#workload_time").on("apply.daterangepicker",function(){
                 setTimeout(()=>{
                     worknum_situation();
@@ -454,7 +446,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             })
             $(document).on('click','.title_click',function(){
                 if($(this).data('value')){
->>>>>>> fdbd89882ac153eb9ec159758f6c912deba30a79
                     $("#title_type").val($(this).data('value'));
                     $(".title").removeClass('active');
                     $(this).addClass('active');
@@ -733,6 +724,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //第一个饼图点击切换
             $(".statistics").on('click', function () {
                 var value = $(this).data("value");
+                var type_problem_id = $('.problem-counter>.active>a').data('value');
                 if (value > 0) {
                     $(".problem-counter li").siblings('li').removeClass('active');
                     $(this).parent().addClass('active');
@@ -764,7 +756,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     EchartObj.api.ajax(options, chartOptions);
                     //异步获取第二个饼图右边显示的数据
                     Backend.api.ajax({
-                        url: 'datacenter/customer_service/get_two_pie_data',
+                        url: 'datacenter/customer_service/detail',
                         data: {
                             value: value,
                             time: time,
@@ -892,6 +884,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //站点点击切换
             $(".siteType").on('click', function () {
                 var platform = $(this).data("value");
+                alert(platform);
                 //问题类型统计 问题ID
                 var type_problem_id = $('.problem-counter>.active>a').data('value');
                 //问题措施比统计 问题ID
@@ -1028,11 +1021,7 @@ function formatDecimal(num, decimal) {
     return parseFloat(num).toFixed(decimal)
 }
 //工作量概况
-<<<<<<< HEAD
-function worknum_situation() {
-=======
 function worknum_situation(workload_time){
->>>>>>> fdbd89882ac153eb9ec159758f6c912deba30a79
     var platform = $("#web_platform").val();
     var workload_time = $("#workload_time").val();
     var title_type = $("#title_type").val();

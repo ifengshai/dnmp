@@ -109,10 +109,10 @@
                                                 <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
                                                 {foreach name="orderPlatformList" item="vo" key="k"}
                                                 {if $k == $platform}
-                                                <li class="active"><a href="javascript:void(0);" data-value="{$k+1}"
+                                                <li class="active"><a href="javascript:void(0);" data-value="{$k}"
                                                         class="siteType">{$vo}</a></li>
                                                 {else/}
-                                                <li><a href="javascript:void(0);" data-value="{$k+1}"
+                                                <li><a href="javascript:void(0);" data-value="{$k}"
                                                         class="siteType">{$vo}</a></li>
                                                 {/if}
                                                 {/foreach}
@@ -149,13 +149,15 @@
                         <label for="create_time" class="control-label col-xs-1"  style="font-weight: bold;width: 150px;margin-top:20px;text-align: left;margin-bottom:10px;margin-left: -10px;">问题类型统计</label>
                         <ul class="nav nav-tabs problem-counter" style="float:left;clear:both;">
                             <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
+                            {php}$i = 1;{/php}
                             {foreach $problem_type  as $k => $vo}
-                            {if $k eq 1}
+                            {if $i == 1}
                             <li class="active"><a href="javascript:void(0);" data-value="{$k}"
                                     class="statistics">{$vo}</a></li>
                             {else/}
                             <li><a href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
                             {/if}
+                            {php}$i++;{/php}
                             {/foreach}
                         </ul>
 
@@ -189,23 +191,27 @@
                         style="font-weight: bold;width: 150px;margin-top:20px;text-align: left;margin-bottom:10px;margin-left: -10px;">问题措施比统计</label>
                         <input type="hidden" id="warehouse" name="warehouse" value="0" />
                         <ul class="nav nav-tabs step-type" style="float:left;clear:both;">
+                            {php}$i = 1;{/php}
                             {foreach $problem_type  as $k => $vo}
-                            {if $k eq 1}
+                            {if $i == 1}
                             <li class="active"><a href="javascript:void(0);" data-value="{$k}"
                                     class="statisticsTwo">{$vo}</a></li>
                             {else/}
                             <li><a href="javascript:void(0);" data-value="{$k}" class="statisticsTwo">{$vo}</a></li>
                             {/if}
+                            {php}$i++;{/php}
                             {/foreach}
                         </ul>
                         <ul id="second-level" class="nav nav-tabs" style="margin-left:30px;float:left;clear:both;margin-top: 20px; ">
                             <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
+                            {php}$i = 1;{/php}
                             {foreach $problem as $k => $vo}
-                            {if $k eq 1}
+                            {if $i == 1}
                             <li class="active"><a href="javascript:void(0);" data-value="{$k}" class="statisticsThree">{$vo}</a></li>
                             {else/}
                             <li><a href="javascript:void(0);" data-value="{$k}" class="statisticsThree">{$vo}</a></li>
                             {/if}
+                            {php}$i++;{/php}
                             {/foreach}
                         </ul>
 

@@ -1750,7 +1750,7 @@ class CustomerService extends Backend
             
             //查询默认下各措施占比
             $problem_data = $this->problem_step->getProblemData($step_problem_id, $site, $map);
-
+            
             //问题措施比统计
             if ('echart1' == $key) {
                 //循环数组根据id获取客服问题类型
@@ -1799,7 +1799,7 @@ class CustomerService extends Backend
         $problem_data = $this->problem_step->getProblemData(5, 1, $map);
 
         //求出问题大分类的总数,措施的总数
-        $problem_type_total = array_sum($problem_type_data);
+        $problem_type_total = array_sum(array_column($problem_type_data, 'num'));
         $problem_step_total = array_sum($problem_data);
 
 
