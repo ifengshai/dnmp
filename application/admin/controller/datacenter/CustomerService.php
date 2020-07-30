@@ -204,8 +204,8 @@ class CustomerService extends Backend
         //人效
         $positive_effect_num = $this->zendeskComments->positive_effect_num(1);
         //获取表格内容
-        $table_data = $this->get_worknum_table(1);
-        $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num','table_data'));
+        $customer_data = $this->get_worknum_table(1);
+        $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num','customer_data'));
         return $this->view->fetch();
     }
     /*
@@ -215,16 +215,18 @@ class CustomerService extends Backend
         $data = array();
         $i = 0;
         //查询所有客服人员
-        $all_service = Db::name('zendesk_agents')->where(['admin_id'=>['not in','75,117,95,105']])->column('admin_id');
+        $all_service = Db::name('zendesk_agents')->column('admin_id');
         foreach ($all_service as $item=>$value){
-            $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->select();
+            $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
             //用户姓名
             $data[$i]['name'] = $admin['nickname'];
             //分组名称
             if($admin['group_id'] == 1){
                 $data[$i]['group_name'] = 'A组';
-            }else{
+            }elseif($admin['group_id'] == 2){
                 $data[$i]['group_name'] = 'B组';
+            }else{
+                $data[$i]['group_name'] = '';
             }
             if($time_str1){
                 $createat1 = explode(' ', $time_str1);
@@ -234,23 +236,22 @@ class CustomerService extends Backend
                 $seven_enddate = date("Y-m-d");
                 $one_time = $seven_startdate.' - '.$seven_enddate;
             }
+            //时间
+            $data[$i]['one']['time'] = $one_time;
+            //处理量
+            $data[$i]['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform,$time_str1,$admin['group_id'],$value);
+            //未达标天数
+            $data[$i]['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform,$time_str1,$admin['group_id'],$value);
             if($time_str2){
                 $createat2 = explode(' ', $time_str2);
                 $two_time = $createat2[0].' - '.$createat2[3];
-            }else{
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d");
-                $two_time = $seven_startdate.' - '.$seven_enddate;
+                //对比时间
+                $data[$i]['two']['time'] = $two_time;
+                //对比处理量
+                $data[$i]['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform,$time_str2,$admin['group_id'],$value);
+                //对比未达标天数
+                $data[$i]['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform,$time_str2,$admin['group_id'],$value);
             }
-            //时间
-            $data[$i]['data']['one']['time'] = $one_time;
-            $data[$i]['data']['two']['time'] = $two_time;
-            //处理量
-            $data[$i]['data']['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform,$time_str1,$admin['group_id'],$value);
-            $data[$i]['data']['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform,$time_str2,$admin['group_id'],$value);
-            //未达标天数
-            $data[$i]['data']['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform,$time_str1,$admin['group_id'],$value);
-            $data[$i]['data']['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform,$time_str2,$admin['group_id'],$value);
             $i++;
         }
         return $data;
@@ -299,7 +300,7 @@ class CustomerService extends Backend
                 $createat = explode(' ', $time_str);
                 $where['update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => Db::name('zendesk_comments')->where($where)->count()
+                    $createat[0] => $this->zendeskComments->where($where)->count()
                 );
 
                 if($createat[0] != $createat[3]){
@@ -309,7 +310,7 @@ class CustomerService extends Backend
                         date_add($deal_date,date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date,"Y-m-d");
                         $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                        $date_arr[$next_day] = $this->zendeskComments->where($where)->count();
                         if($next_day == $createat[3]){
                             break;
                         }
@@ -323,7 +324,7 @@ class CustomerService extends Backend
                 for ($i = 6;$i>=0;$i--){
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                    $date_arr[$next_day] = $this->zendeskComments->where($where)->count();
                 }
             }
             $name = '处理量';

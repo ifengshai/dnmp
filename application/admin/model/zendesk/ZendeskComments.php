@@ -58,8 +58,9 @@ class ZendeskComments extends Model
      * 人效统计
      * */
     public function positive_effect_num($platform = 0,$time_str = '',$group_id = 0){
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
         //查询所有客服人员
-        $all_service = Db::name('zendesk_agents')->where(['admin_id'=>['not in','75,117,95,105']])->column('admin_id');
+        $all_service = Db::name('zendesk_agents')->column('admin_id');
         $group_one = array();
         $group_two = array();
         $work_arr = array();
@@ -67,9 +68,9 @@ class ZendeskComments extends Model
         foreach ($all_service as $item=>$value){
             //查询用户的入职时间
             $admin_info = Db::name('admin')->where(['id'=>$value,'status'=>'normal'])->field('group_id,createtime')->select();
-            if($admin_info == 1){
+            if($admin_info['group_id'] == 1){
                 $group_one[] = $value;
-            }elseif($admin_info == 2){
+            }elseif($admin_info['group_id'] == 2){
                 $group_two[] = $value;
             }
             $create_date = date('Y-m-d',$admin_info['createtime']);
@@ -81,10 +82,8 @@ class ZendeskComments extends Model
                 $nowork_arr[] = $value;
             }
         }
-
         $where['c.is_admin'] = 1;
         $where['z.channel'] = array('neq','voice');
-        $where['c.due_id'] = array('not in','75,117,95,105');
         if($platform){
             $where['platform'] = $platform;
             $task_where['type'] = $platform;
@@ -111,24 +110,24 @@ class ZendeskComments extends Model
             $task_where['admin_id'] = array('in',$group_admin_id);
         }
         //全部转正人员统计
-        $all_already_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
-        $people_day = Db::name('zendesk_tasks')->where($task_where)->count();
+        $all_already_num = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+        $people_day = $this->zendeskTasks->where($task_where)->count();
         if($people_day == 0){
             $all_positive_num = 0;
         }else{
             $all_positive_num = round($all_already_num/$people_day,2);
         }
         //转正人员统计
-        $work_already_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.due_id'=>['in',$work_arr]])->count();
-        $work_people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$work_arr]])->count();
+        $work_already_num = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.due_id'=>['in',$work_arr]])->count();
+        $work_people_day = $this->zendeskTasks->where($task_where)->where(['admin_id'=>['in',$work_arr]])->count();
         if($work_people_day == 0){
             $work_positive_num = 0;
         }else{
             $work_positive_num = round($work_already_num/$work_people_day,2);
         }
         //非转正人员统计
-        $nowork_already_num = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.due_id'=>['in',$nowork_arr]])->count();
-        $nowork_people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$nowork_arr]])->count();
+        $nowork_already_num = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.due_id'=>['in',$nowork_arr]])->count();
+        $nowork_people_day = $this->zendeskTasks->where($task_where)->where(['admin_id'=>['in',$nowork_arr]])->count();
         if($nowork_people_day == 0){
             $nowork_positive_num = 0;
         }else{
