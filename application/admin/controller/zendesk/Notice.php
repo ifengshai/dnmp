@@ -457,6 +457,9 @@ class Notice extends Controller
      */
     public function update()
     {
+        $sql = "INSERT INTO `fa_zendesk_comments` (`ticket_id` , `zid` , `comment_id` , `author_id` , `body` , `html_body` , `is_public` , `is_admin` , `attachments` , `is_created` , `due_id` , `platform` , `create_time` , `update_time`) VALUES (173977 , 114437 , '1144068438012' , '383350192332' , '688' ,'', 1 , 0 , '' , 2 , 0 , 1 , '2020-07-30 08:35:06' , '2020-07-30 08:35:06')";
+        db()->query($sql);
+        exit;
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
