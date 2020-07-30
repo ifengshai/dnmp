@@ -112,6 +112,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                 return all_user_name;
                             },
                         },
+                        {
+                            field: 'entry_user_confirm',
+                            title: __('完成确认'),
+                            events: Controller.api.events.get_user_confirm,
+                            formatter: Controller.api.formatter.get_user_confirm,
+                        },
 
                         {
                             field: 'buttons',
@@ -2716,7 +2722,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         }else if (row.develop_finish_status == 2){
                             return '<div><span class="check_develop_status status1_color">开发中</span></div>';
                         }else{
-                            return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
+                            if(row.status == 4){
+                                return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
+                            }else{
+                                return '<div><span class="check_develop_status status4_color">开发完成</span></div>';
+                            }
+
                         }
                     }else{
                         return '-';
@@ -2785,7 +2796,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 },
                 get_test_status: {
                     'click .check_test_status': function (e, value, row, index) {
-                        Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '45%'] });
+                        Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '50%'] });
                     }
                 },
 

@@ -1162,6 +1162,10 @@ class ItWebDemand extends Backend
         $row_arr['start_time'] = date('Y-m-d',strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d',strtotime($row_arr['end_time']));
 
+        if($row_arr['web_designer_group'] == 1){
+
+        }
+
         $status = array(
             1 => '确认任务',
             2 => '不需测试',
