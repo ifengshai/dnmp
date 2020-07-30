@@ -620,7 +620,6 @@ class Notice extends Controller
                 }
             }
             Db::commit();
-            exit;
         } catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log',"update:" .$id."\r\n",FILE_APPEND);
             // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
