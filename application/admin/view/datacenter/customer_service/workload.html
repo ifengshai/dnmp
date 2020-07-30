@@ -130,6 +130,13 @@ table.altrowstable tr:nth-child(even){
         height: 54px;
         background-color: #333;
     }
+    .customer_table li{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        list-style: none;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -234,12 +241,33 @@ table.altrowstable tr:nth-child(even){
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.name}</td>
                       <td id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group_name}</td>
-                      {if condition="$taskChangeSku[0]['change_type'] eq 1"/}
-                      <td id='today_order_num' style="text-align: center; vertical-align: middle;">{$vo.one.time}{$vo.two.time}</td>
+                      {if isset($vo['two'])}
+                      <td id='today_order_num' style="text-align: center; vertical-align: middle;">
+                        <ul class="customer_table">
+                            <li>{$vo.one.time}</li>
+                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                            <li>{$vo.two.time}</li>
+                        </ul>
+                      </td>
+                      <td id='today_order_success' style="text-align: center; vertical-align: middle;">
+                        <ul class="customer_table">
+                            <li>{$vo.one.deal_num}</li>
+                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                            <li>{$vo.two.deal_num}</li>
+                        </ul>
+                    </td>
+                      <td id='today_unit_price' style="text-align: center; vertical-align: middle;">
+                        <ul class="customer_table">
+                            <li>{$vo.one.no_up_to_day}</li>
+                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                            <li>{$vo.two.no_up_to_day}</li>
+                        </ul>
+                    </td>
                       {else/}
+                      <td id='today_order_num' style="text-align: center; vertical-align: middle;">{$vo.one.time}</td>
+                      <td id='today_order_success' style="text-align: center; vertical-align: middle;">{$vo.one.deal_num}</td>
+                      <td id='today_unit_price' style="text-align: center; vertical-align: middle;">{$vo.one.no_up_to_day}</td>
                       {/if}
-                      <td id='today_order_success' style="text-align: center; vertical-align: middle;">{$vo.one.deal_num}{$vo.two.deal_num}</td>
-                      <td id='today_unit_price' style="text-align: center; vertical-align: middle;">{$vo.one.no_up_to_day}{$vo.two.no_up_to_day}</td>
                       <td>点击查看</td>
                   </tr>
                   {/foreach}
