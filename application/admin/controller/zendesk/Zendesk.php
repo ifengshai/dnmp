@@ -70,7 +70,7 @@ class Zendesk extends Backend
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $now_admin_id = session('admin.id');
-                $map[] = ['exp', Db::raw("zendesk.assign_id=$now_admin_id or zendesk.due_id=$now_admin_id")];
+                $map[] = ['exp', Db::raw("(zendesk.assign_id=$now_admin_id and zendesk.due_id = 0) or zendesk.due_id=$now_admin_id")];
                 $map['zendesk.status'] = ['in', [1, 2]];
                 $map['zendesk.is_hide'] = 0;
                 $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
@@ -309,9 +309,9 @@ class Zendesk extends Backend
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
-                        'assign_id' => $agent_id,
+                        'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
@@ -513,7 +513,7 @@ class Zendesk extends Backend
                         'due_id' => 0,
                         'email_cc' => $params['email_cc'],
                         'is_hide' => 1,
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if (strip_tags($params['content'])) {
@@ -746,9 +746,9 @@ Please close this window and try again.");
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
-                    'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                    'zendesk_update_time' => date('Y-m-d H:i:s',time())
                 ]);
 
                 ZendeskComments::create([
@@ -764,7 +764,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
@@ -903,7 +903,8 @@ DOC;
                         $commentAuthorId = Db::name('zendesk_comments')
                             ->alias('c')
                             ->join('fa_admin a','c.due_id=a.id')
-                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                            ->join('fa_zendesk_agents z','c.due_id=z.admin_id')
+                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$item['type']])
                             ->order('c.id','desc')
                             ->value('due_id');
                         if($commentAuthorId == $admin_id || !$commentAuthorId){
@@ -934,7 +935,7 @@ DOC;
         $i = 0;
         foreach($tickets as $ticket){
             if ($i == 10) {
-                continue;
+                break;
             }
             if ($ticket['status'] == 2) {
                 //open
@@ -952,7 +953,7 @@ DOC;
             } elseif($ticket['status'] == 1) {
                 //new
                 //修改zendesk的assign_id,assign_time
-                $res = $this->model->where('id',$ticket->id)->update([
+                $res = $this->model->where('id',$ticket['id'])->update([
                     'is_hide' => 0,
                     'due_id' => $admin_id,
                     'assign_id' => $admin_id,

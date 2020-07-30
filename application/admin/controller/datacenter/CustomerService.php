@@ -21,6 +21,7 @@ class CustomerService extends Backend
         $this->step    = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->workload = new \app\admin\model\WorkloadStatistics;
         $this->zendesk = new \app\admin\model\zendesk\Zendesk;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
     }
     /**
      * 客服数据大屏
@@ -89,56 +90,41 @@ class CustomerService extends Backend
             $workload_time = $params['workload_time'];
             $title_type = $params['title_type'] ? $params['title_type'] : 1;
             if($platform){
-                $where['platform'] = $platform;
+                $where['c.platform'] = $platform;
             }
+            if($title_type == 1){
+                $where['c.is_admin'] = 0;
+            }else{
+                $where['c.is_admin'] = 1;
+            }
+            $where['z.channel'] = array('neq','voice');
             if($workload_time){
                 $createat = explode(' ', $workload_time);
-                $where['update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
-                if($title_type == 1){
-                    $where['is_admin'] = 0;
-                }else{
-                    $where['is_admin'] = 1;
-                }
+                $where['c.update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => Db::name('zendesk_comments')->where($where)->count()
+                    $createat[0] => $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
                 );
-
                 if($createat[0] != $createat[3]){
                     for ($i = 0;$i<=100;$i++){
                         $m = $i+1;
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date,date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date,"Y-m-d");
-                        $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        if($title_type == 1){
-                            $where['is_admin'] = 0;
-                        }else{
-                            $where['is_admin'] = 1;
-                        }
-                        $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                        $where['c.update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                         if($next_day == $createat[3]){
                             break;
                         }
                     }
-
                 }
             }else{
                 //默认显示一周的数据
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d 23:59:59");
-                $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
                 for ($i = 6;$i>=0;$i--){
                     $next_day = date("Y-m-d", strtotime("-$i day"));
-                    $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    if($title_type == 1){
-                        $where['is_admin'] = 0;
-                    }else{
-                        $where['is_admin'] = 1;
-                    }
-                    $date_arr[$next_day] = Db::name('zendesk_comments')->where($where)->count();
+                    $where['c.update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                    $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                 }
             }
-
             if($title_type == 1){
                 $name = '新增工单量';
             }else{
