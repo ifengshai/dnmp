@@ -55,14 +55,28 @@ class TransferOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+
+            //如果筛选条件有sku的话 查询这个调拨单子表中有这个sku的单子 进而查到主表数据
+            if ($filter['sku']) {
+                $ids = $this->transferOrderItem->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->field('id')->column('transfer_order_id');
+//                dump(collection($ids)->toArray());die;
+                $map['id'] = ['in',$ids];
+                unset($filter['sku']);
+            }else{
+                $map = array();
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

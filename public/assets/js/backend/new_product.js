@@ -69,6 +69,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'newproductattribute.frame_images', operate: false },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'available_stock', title: __('可用库存'), sortable: true, operate: 'between', formatter: Controller.api.formatter.int_format },
+
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -335,6 +337,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
                             formatter: Table.api.formatter.status, visible: false
                         },
+                        { field: 'available_stock', title: __('可用库存'), sortable: true, operate: 'between', formatter: Controller.api.formatter.int_format },
                         { field: 'grade', title: __('销量等级'), operate: false, },
                         { field: 'product_cycle', title: '生产周期', operate: false },
                         { field: 'available_stock', title: '可用库存', operate: false },
@@ -540,6 +543,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     } else {
                         return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
                     }
+                },
+                int_format: function (value, row, index) {
+                    return parseInt(value);
                 },
 
             },

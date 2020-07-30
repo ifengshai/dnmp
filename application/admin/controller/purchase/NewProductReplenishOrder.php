@@ -53,14 +53,29 @@ class NewProductReplenishOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+
+            //如果筛选条件有sku的话 查询这个补货需求单中有这个sku的单子
+            if ($filter['sku']) {
+                $ids = $this->model->where('sku','like','%'.$filter['sku'].'%')->group('replenish_id')->field('id')->column('replenish_id');
+//                dump(collection($ids)->toArray());die;
+                $map['id'] = ['in',$ids];
+                unset($filter['sku']);
+            }else{
+                $map = array();
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->replenish
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->replenish
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -197,8 +212,10 @@ class NewProductReplenishOrder extends Backend
                         $this->error('供应商分配数量必须大于0');
                     }
                 }
-                if ($num['replenishment_num'] != $whole_num) {
-                    $this->error('供应商分配数量之和需等于总需求数量');
+                if ($num['replenishment_num'] > $whole_num) {
+                    $this->error('已分配数量小于总需求量，请核对已分配数量');
+                }elseif ($num['replenishment_num'] < $whole_num){
+                    $this->error('已分配数量大于总需求量，请核对已分配数量');
                 }
                 if ($params['supplier_id'] != array_unique($params['supplier_id'])){
                     $this->error('请不要选择两个相同的供应商');

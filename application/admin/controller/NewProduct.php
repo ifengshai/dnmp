@@ -73,15 +73,21 @@ class NewProduct extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->alias('a')
+                ->field('a.*,b.sku,b.available_stock')
+                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
-                ->order($sort, $order)
+                ->order('a.id', $order)
                 ->count();
 
             $list = $this->model
+                ->alias('a')
+                ->field('a.*,b.sku,b.available_stock')
+                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
-                ->order($sort, $order)
+                ->order('a.id', $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
@@ -960,21 +966,43 @@ class NewProduct extends Backend
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
+
             if ($filter['platform_type']) {
                 unset($map['platform_type']);
             }
 
+//            if ($filter['stock']) {
+//                $arr = explode(',',$filter['stock']);
+//                $maps['available_stock']  = ['between',[$arr[0],$arr[1]]];
+//                if (empty($arr[0]) || empty($arr[1])){
+//                    $this->error('请输入可用库存的起始值');die;
+//                }
+//                unset($filter['stock']);
+//            }else{
+//                $maps = array();
+//            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+//            dump($sort);dump($order);
             $total = $this->model
+                ->alias('a')
+                ->field('a.*,b.sku,b.available_stock')
+                ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
+//                ->where($maps)
+                ->order('a.id', $order)
                 ->count();
 
             $list = $this->model
+                ->alias('a')
+                ->field('a.*,b.sku,b.available_stock')
+                ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
+//                ->where($maps)
+                ->order('a.id', $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
@@ -1003,6 +1031,7 @@ class NewProduct extends Backend
                 $v['product_cycle'] = $product_cycle_arr[$v['sku']] ?: 7;
                 $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
             }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
