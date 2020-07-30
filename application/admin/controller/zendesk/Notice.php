@@ -635,7 +635,7 @@ class Notice extends Controller
                         'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                         'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
-
+                    echo Db::name('zendesk_comments')->getLastSql();exit;
                 }
             }
             Db::commit();
