@@ -1295,7 +1295,7 @@ class WorkOrderList extends Model
     public function workorder_situation($platform){
         //今天的工单数据统计
         $today_startdate = date('Y-m-d');
-        $today_enddate = date('Y-m-d 23:59:59');
+        $today_enddate = date('Y-m-d', strtotime("+1 day"));
         $today = array(
             'wo_num' => $this->wo_sum($today_startdate,$today_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($today_startdate,$today_enddate,$platform,1),
@@ -1305,7 +1305,7 @@ class WorkOrderList extends Model
         );
         //昨天的工单数据统计
         $yesterday_startdate = date("Y-m-d", strtotime("-1 day"));
-        $yesterday_enddate = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $yesterday_enddate = date("Y-m-d");
         $yesterday = array(
             'wo_num' => $this->wo_sum($yesterday_startdate,$yesterday_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($yesterday_startdate,$yesterday_enddate,$platform,1),
@@ -1315,7 +1315,7 @@ class WorkOrderList extends Model
         );
         //过去7天的工单数据统计
         $seven_startdate = date("Y-m-d", strtotime("-7 day"));
-        $seven_enddate = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $seven_enddate = date("Y-m-d");
         $seven = array(
             'wo_num' => $this->wo_sum($seven_startdate,$seven_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($seven_startdate,$seven_enddate,$platform,1),
@@ -1325,7 +1325,7 @@ class WorkOrderList extends Model
         );
         //过去30天的工单数据统计
         $thirty_startdate = date("Y-m-d", strtotime("-30 day"));
-        $thirty_enddate = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $thirty_enddate = date("Y-m-d");
         $thirty = array(
             'wo_num' => $this->wo_sum($thirty_startdate,$thirty_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($thirty_startdate,$thirty_enddate,$platform,1),
@@ -1335,7 +1335,7 @@ class WorkOrderList extends Model
         );
         //当月
         $nowmonth_startdate = date('Y-m-01', strtotime($today_startdate));
-        $nowmonth_enddate = date("Y-m-d 23:59:59", strtotime("$nowmonth_startdate +1 month -1 day"));
+        $nowmonth_enddate = date("Y-m-d", strtotime("$nowmonth_startdate +1 month"));
         $nowmonth = array(
             'wo_num' => $this->wo_sum($nowmonth_startdate,$nowmonth_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($nowmonth_startdate,$nowmonth_enddate,$platform,1),
@@ -1345,7 +1345,7 @@ class WorkOrderList extends Model
         );
         //上月
         $premonth_startdate = date('Y-m-01', strtotime("$today_startdate -1 month"));
-        $premonth_enddate = date('Y-m-d 23:59:59', strtotime("$premonth_startdate +1 month -1 day"));
+        $premonth_enddate = date('Y-m-d', strtotime("$premonth_startdate +1 month"));
         $premonth = array(
             'wo_num' => $this->wo_sum($premonth_startdate,$premonth_enddate,$platform,1),
             'wo_complete_num' => $this->wo_complete_num($premonth_startdate,$premonth_enddate,$platform,1),
