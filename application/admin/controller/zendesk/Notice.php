@@ -632,10 +632,10 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
                         'platform' => $type,
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                        'create_time' => '2020-09-01 16:0:0',
                         'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
-                    echo Db::name('zendesk_comments')->getLastSql();exit;
+                    echo Db::name('zendesk_comments')->getLastSql();
                 }
             }
             Db::commit();
