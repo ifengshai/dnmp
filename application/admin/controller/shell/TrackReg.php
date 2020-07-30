@@ -221,6 +221,12 @@ class TrackReg extends Backend
         echo 'all ok';
         exit;
     }
+    public function nihao_zendesk()
+    {
+        $this->zendeskUpateData('nihaooptical', 3);
+        echo 'all ok';
+        exit;
+    }
     /**
      * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]

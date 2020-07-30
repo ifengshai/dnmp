@@ -309,7 +309,7 @@ class Zendesk extends Backend
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
-                        'assign_id' => $agent_id,
+                        'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
                         'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
                     ]);
@@ -746,7 +746,7 @@ Please close this window and try again.");
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                     'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
                 ]);
@@ -764,7 +764,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
@@ -903,7 +903,8 @@ DOC;
                         $commentAuthorId = Db::name('zendesk_comments')
                             ->alias('c')
                             ->join('fa_admin a','c.due_id=a.id')
-                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                            ->join('fa_zendesk_agents z','c.due_id=z.admin_id')
+                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$item['type']])
                             ->order('c.id','desc')
                             ->value('due_id');
                         if($commentAuthorId == $admin_id || !$commentAuthorId){
@@ -934,7 +935,7 @@ DOC;
         $i = 0;
         foreach($tickets as $ticket){
             if ($i == 10) {
-                continue;
+                break;
             }
             if ($ticket['status'] == 2) {
                 //open
@@ -952,7 +953,7 @@ DOC;
             } elseif($ticket['status'] == 1) {
                 //new
                 //修改zendesk的assign_id,assign_time
-                $res = $this->model->where('id',$ticket->id)->update([
+                $res = $this->model->where('id',$ticket['id'])->update([
                     'is_hide' => 0,
                     'due_id' => $admin_id,
                     'assign_id' => $admin_id,
