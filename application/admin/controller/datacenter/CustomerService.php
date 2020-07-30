@@ -21,6 +21,7 @@ class CustomerService extends Backend
         $this->step    = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->workload = new \app\admin\model\WorkloadStatistics;
         $this->zendesk = new \app\admin\model\zendesk\Zendesk;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
     }
     /**
      * 客服数据大屏
@@ -101,7 +102,7 @@ class CustomerService extends Backend
                 $createat = explode(' ', $workload_time);
                 $where['c.update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
+                    $createat[0] => $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
                 );
                 if($createat[0] != $createat[3]){
                     for ($i = 0;$i<=100;$i++){
@@ -110,7 +111,7 @@ class CustomerService extends Backend
                         date_add($deal_date,date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date,"Y-m-d");
                         $where['c.update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        $date_arr[$next_day] = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+                        $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                         if($next_day == $createat[3]){
                             break;
                         }
@@ -121,7 +122,7 @@ class CustomerService extends Backend
                 for ($i = 6;$i>=0;$i--){
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $where['c.update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    $date_arr[$next_day] = Db::name('zendesk_comments')->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+                    $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                 }
             }
             if($title_type == 1){

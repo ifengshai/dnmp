@@ -483,7 +483,7 @@ class Zendesk extends Model
      * 统计工作量概况
      * */
     public function worknum_situation($platform = 0,$workload_time = ''){
-        $this->zendeskComments = new \app\admin\model\zendesk\Zendesk;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
         $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
         if($platform){
             $map['type'] = $platform;
