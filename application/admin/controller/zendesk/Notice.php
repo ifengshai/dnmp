@@ -616,9 +616,9 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
                         'platform' => $type,
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
-                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
-                    ]);exit;
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
+                    ]);
                     ZendeskComments::create([
                         'ticket_id' => $id,
                         'zid' => $zendesk->id,
@@ -635,6 +635,7 @@ class Notice extends Controller
                         'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                         'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
+                    exit;
                 }
             }
             Db::commit();
