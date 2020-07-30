@@ -277,4 +277,17 @@ class Test3 extends Backend
         }
         dump($i);exit;
     }
+    public function zendesk_data(){
+        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
+        foreach ($zendesk as $item){
+            $where['zid'] = $item;
+            $where['is_admin'] = 1;
+            $where['due_id'] = array('neq',0);
+            $assign = Db::name('zendesk_comments')->where($where)->order('id','desc')->value('due_id');
+            $params['assign_id'] = $assign;
+            Db::name('zendesk')->where('id',$item)->update($params);
+            echo $item.'--'.$assign.' is ok'."\n";
+        }
+
+    }
 }

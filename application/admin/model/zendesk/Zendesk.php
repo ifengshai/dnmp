@@ -416,7 +416,8 @@ class Zendesk extends Model
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
                     ->join('fa_admin a','c.due_id=a.id')
-                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117']])
+                    ->join('fa_zendesk_agents z','c.due_id = z.admin_id')
+                    ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$ticket->getType()])
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
@@ -431,7 +432,7 @@ class Zendesk extends Model
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
-                        ->order('surplus_count', 'desc')
+                        ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
                 }
@@ -441,7 +442,13 @@ class Zendesk extends Model
                     //离职，则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
-                        ->order('surplus_count', 'desc')
+                        ->order('complete_count', 'asc')
+                        ->limit(1)
+                        ->find();
+                }else{
+                    //如果承接人没有离职
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['admin_id' => $ticket->assign_id])
                         ->limit(1)
                         ->find();
                 }
@@ -454,6 +461,7 @@ class Zendesk extends Model
                     $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
+                    $ticket->due_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
                     $ticket->assign_time = date('Y-m-d H:i:s', time());
                     $ticket->save();
@@ -475,6 +483,8 @@ class Zendesk extends Model
      * 统计工作量概况
      * */
     public function worknum_situation($platform = 0,$workload_time = ''){
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
         if($platform){
             $map['type'] = $platform;
         }
@@ -483,24 +493,25 @@ class Zendesk extends Model
 
         //新增
         if($platform){
-            $where['platform'] = $platform;
+            $where['c.platform'] = $platform;
         }
         if($workload_time){
             $createat = explode(' ', $workload_time);
-            $where['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $where['c.update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
             $map['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
             $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             //默认显示一周的数据
             $seven_startdate = date("Y-m-d", strtotime("-6 day"));
             $seven_enddate = date("Y-m-d 23:59:59");
-            $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $where['c.update_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $map['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
-        $new_create_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>0])->count();
+        $where['z.channel'] = array('neq','voice');
+        $new_create_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
         //已回复
-        $already_reply_num = Db::name('zendesk_comments')->where($where)->where(['is_admin'=>1])->count();
+        $already_reply_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1])->count();
         //待分配
         $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
         $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
@@ -508,9 +519,9 @@ class Zendesk extends Model
         if($platform){
             $task_where['type'] = $platform;
         }
-        $admin_ids = Db::name('zendesk_agents')->where(['type'=>$platform,'admin_id'=>['neq','75,117,95,105']])->column('admin_id');
-        $all_already_num = Db::name('zendesk_comments')->where($where)->where(['due_id'=>['in',$admin_ids]])->count();
-        $people_day = Db::name('zendesk_tasks')->where($task_where)->where(['admin_id'=>['in',$admin_ids]])->count();
+        $where['c.is_admin'] = 1;
+        $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+        $people_day = $this->zendeskTasks->where($task_where)->count();
         if($people_day == 0){
             $positive_effect_num = 0;
         }else{
@@ -521,10 +532,11 @@ class Zendesk extends Model
             $zendesk_where['type'] = $platform;
         }
         $zendesk_where['status'] = array('in','1,2');
+        $zendesk_where['channel'] = array('neq','voice');
         $id = $this->where($zendesk_where)->order('update_time','asc')->value('id');
         $reply_where['is_admin'] = 0;
         $reply_where['zid'] = $id;
-        $reply_time = Db::name('zendesk_comments')->where($reply_where)->order('id','desc')->value('update_time');
+        $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
         if($reply_time){
             $reply_time = strtotime($reply_time)+8*3600;
             $reply_failure_num=ceil((time()-$reply_time)/3600);
