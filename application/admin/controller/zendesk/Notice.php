@@ -35,9 +35,6 @@ class Notice extends Controller
      */
     public function __construct($request = null, $postData = [])
     {
-        // 设置系统时区
-        date_default_timezone_set('UTC');
-        set_time_limit(0);
         parent::__construct();
         if (!$postData) {
             $postData = json_decode(file_get_contents("php://input"), true);
@@ -621,6 +618,9 @@ class Notice extends Controller
                         'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
                         'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
                     ]);
+                    // 设置系统时区
+                    date_default_timezone_set('UTC');
+                    set_time_limit(0);
                     Db::name('zendesk_comments')->insert([
                         'ticket_id' => $id,
                         'zid' => $zendesk->id,
