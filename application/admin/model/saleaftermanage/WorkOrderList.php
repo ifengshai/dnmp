@@ -1520,6 +1520,7 @@ class WorkOrderList extends Model
      * 措施统计
      * */
     public function workorder_measures($platform,$time_where){
+        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $measures = Db::name('work_order_step_type')->where('is_del',1)->field('id,step_name')->select();
         $arr = array();
         foreach ($measures as $key=>$value){
@@ -1529,7 +1530,7 @@ class WorkOrderList extends Model
             if($platform){
                 $where['w.work_platform'] = $platform;
             }
-            $arr[$key]['value'] = Db::name('work_order_measure')->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
+            $arr[$key]['value'] = $this->step->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
         }
 
         return $arr;

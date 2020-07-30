@@ -1278,7 +1278,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-19T00:10:00Z updated_at<=2020-07-19T00:20:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-06-30T23:00:00Z updated_at<=2020-07-10T23:59:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1312,7 +1312,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=15minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=6minutes order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1322,7 +1322,7 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 15 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 
