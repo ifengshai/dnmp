@@ -264,6 +264,7 @@ class CustomerService extends Backend
             $params = $this->request->param();
             $platform = $params['platform'];
             $time_str = $params['time_str'];
+            $contrast_time_str = $params['contrast_time_str'];
             $group_id = $params['group_id'];
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
@@ -273,6 +274,24 @@ class CustomerService extends Backend
             $arr['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform,$time_str,$group_id);
             //人效
             $arr['positive_effect_num'] = $this->zendeskComments->positive_effect_num($platform,$time_str,$group_id);
+            //获取表格中的时间
+            $customer_data = $this->get_worknum_table($platform,$time_str,$contrast_time_str,$group_id);
+            if($customer_data){
+                $str = '';
+                foreach ($customer_data as $item=>$value){
+                    $str .= '<td style="text-align: center; vertical-align: middle;">'.$value['name'].'</td><td id="today_sales_money" style="text-align: center; vertical-align: middle;">'.$value['group_name'].'</td>';
+                    if($value['two']){
+                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['time'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['time'].'</li></ul></td><td id="today_order_success" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['deal_num'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['deal_num'].'</li></ul></td><td id="today_unit_price" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['no_up_to_day'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['no_up_to_day'].'</li></ul></td>';
+                    }else{
+                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;">'.$value['one']['time'].'</td><td id="today_order_success" style="text-align: center; vertical-align: middle;">'.$value['one']['deal_num'].'</td><td id="today_unit_price" style="text-align: center; vertical-align: middle;">'.$value['one']['no_up_to_day'].'</td>';
+                    }
+                    $str .= '<td>点击查看</td>';
+                }
+                $arr['customer_data'] = $str;
+            }else{
+                $arr['customer_data'] = '';
+            }
+
             return json(['code' => 1, 'data' => $arr]);
         }
     }

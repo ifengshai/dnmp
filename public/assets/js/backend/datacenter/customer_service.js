@@ -612,11 +612,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             $("#worknum_submit").click(function(){
                 var platform = $("#order_platform").val();
                 var time_str = $("#one_time").val();
+                var contrast_time_str = $("#two_time").val();
                 var group_id = $("#customer_type").val();
 
                 Backend.api.ajax({
                     url:'datacenter/customer_service/workload_worknum',
-                    data:{platform:platform,time_str:time_str,group_id:group_id}
+                    data:{platform:platform,time_str:time_str,group_id:group_id,contrast_time_str:contrast_time_str}
                 }, function(data, ret){
                     $("#order_platform").val(platform)
                     $("#one_time").val(time_str)
@@ -626,12 +627,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     var all_positive_num  = ret.data.positive_effect_num.all_positive_num;
                     var work_positive_num  = ret.data.positive_effect_num.work_positive_num;
                     var nowork_positive_num  = ret.data.positive_effect_num.nowork_positive_num;
+                    var customer_data  = ret.data.customer_data;
                     
                     $('#deal_num').text(deal_num);
                     $('#no_up_to_day').text(no_up_to_day);
                     $('#all_positive_num').text(all_positive_num);
                     $('#work_positive_num').text(work_positive_num);
                     $('#nowork_positive_num').text(nowork_positive_num);
+                    $(".customer_info").html(customer_data);
                     return true;
                 }, function(data, ret){
                     Layer.alert(ret.msg);

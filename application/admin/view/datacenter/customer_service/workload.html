@@ -238,7 +238,7 @@ table.altrowstable tr:nth-child(even){
              </thead>
                     {if isset($customer_data)}
                     {foreach name="customer_data" item="vo" key="k"}
-                  <tr>
+                  <tr class="customer_info">
                       <td style="text-align: center; vertical-align: middle;">{$vo.name}</td>
                       <td id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group_name}</td>
                       {if isset($vo['two'])}
