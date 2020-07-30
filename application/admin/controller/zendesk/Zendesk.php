@@ -1148,14 +1148,12 @@ DOC;
                     $diffs[] = $val;
                 }
             }
-            $intersects = array('173977');
             if($intersects){
                 //更新
                 foreach($intersects as $intersect){
                     (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
                 }
             }
-            $diffs = array();
             if($diffs){
                 //新增
                 foreach($diffs as $diff){
