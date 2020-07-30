@@ -13,7 +13,7 @@ class Zendesk extends Model
     protected $name = 'zendesk';
 
     // 定义时间戳字段名
-    protected $autoWriteTimestamp = 'datetime';
+    protected $autoWriteTimestamp = 'timestamp';
     protected $dateFormat = 'Y-m-d H:i:s';
 
     // 追加属性

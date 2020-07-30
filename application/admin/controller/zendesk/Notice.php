@@ -132,7 +132,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)));
             //写入主表
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
@@ -150,8 +150,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
             ]);
             $zid = $zendesk;
             foreach ($comments as $comment) {
@@ -178,8 +178,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
                 }
                 ZendeskComments::create([
@@ -195,8 +195,8 @@ class Notice extends Controller
                     'due_id' => 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                 ]);
             }
             Db::commit();
@@ -256,7 +256,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -302,6 +302,8 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => 0,
                         'platform' => $type,
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
                 }
             }
@@ -370,7 +372,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)));
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
 
             //写入主表
@@ -390,8 +392,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
             ]);
 
             $zid = $zendesk;
@@ -419,8 +421,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
                 }
                 ZendeskComments::create([
@@ -436,8 +438,8 @@ class Notice extends Controller
                     'due_id' => $due_id ? $due_id : 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                 ]);
             }
             //Db::commit();
@@ -497,7 +499,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -615,6 +617,8 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
                         'platform' => $type,
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     ]);
                 }
             }
@@ -1040,9 +1044,9 @@ class Notice extends Controller
                     'rating_type' => $ticket->satisfaction_rating->score == 'bad' ? 2 : 1,
                     'comment' => $ticket->satisfaction_rating->comment,
                     'reason' => $ticket->satisfaction_rating->reason,
-                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600)),
-                    'assign_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)))),
+                    'assign_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)))),
                     'shell' => 1
                 ]);
                 $zid = $zendesk->id;
@@ -1086,8 +1090,8 @@ class Notice extends Controller
                         'is_admin' => $is_admin ? 1 : 0,
                         'attachments' => json($attachments),
                         'is_created' => 1,
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)) + 8 * 3600)),
-                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)) + 8 * 3600)),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)))),
                     ]);
                 }
                 echo $zendesk->ticket_id . "\r\n";
@@ -1172,7 +1176,7 @@ class Notice extends Controller
                 $updateData = [
                     'tags' => $tags,
                     'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)))),
                 ];
                 //如果分配人修改，则同步修改分配人
                 if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
