@@ -1756,7 +1756,7 @@ class CustomerService extends Backend
             }
             $site = input('platform', 1); //默认zeelool
             $key = input('key');
-            $problem_id = input('problem_id', 2); //默认问题类型为订单修改
+            $problem_id = input('problem_id', 2); //默认问题类型为物流仓库
             $step_problem_id = input('step_problem_id', 5); //默认类型为物流仓库->关税
             //查询各分类占比 默认订单修改 zeelool 
             $problem_type_data = $this->problem_type->getProblemTypeData($problem_id, $site, $map);
@@ -1805,10 +1805,10 @@ class CustomerService extends Backend
         //问题大分类统计、措施统计
         $problem_type = $this->problem_type->getProblemBelongType();
 
-        //查询各分类占比 默认订单修改 zeelool 
+        //查询各分类占比 默认物流仓库 zeelool 
         $problem_type_data = $this->problem_type->getProblemTypeData(2, 1, $map);
 
-        //查询默认分类
+        //查询默认分类 物流仓库
         $problem =  $this->problem_type->getProblemType(2);
 
         //查询默认下各措施占比 默认关税
