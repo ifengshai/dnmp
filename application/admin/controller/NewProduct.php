@@ -73,18 +73,18 @@ class NewProduct extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->alias('a')
-                ->field('a.*,b.sku,b.available_stock')
-                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
+//                ->alias('a')
+//                ->field('a.*,b.sku,b.available_stock')
+//                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->order('a.id', $order)
                 ->count();
 
             $list = $this->model
-                ->alias('a')
-                ->field('a.*,b.sku,b.available_stock')
-                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
+//                ->alias('a')
+//                ->field('a.*,b.sku,b.available_stock')
+//                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->order('a.id', $order)
