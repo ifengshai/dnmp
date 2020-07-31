@@ -10,7 +10,7 @@ class WorkOrderProblemStep extends Model
 
     // 表名
     protected $name = 'work_order_problem_step';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -20,9 +20,7 @@ class WorkOrderProblemStep extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
     protected $resultSetType = 'collection';
 
 
@@ -40,8 +38,7 @@ class WorkOrderProblemStep extends Model
     public function getProblemData($problemType = 5, $site = 1, $map = [])
     {
         //措施id 
-        $step_ids = $this->where(['problem_id' => $problemType, 'is_del' => 1])->column('id');
-        dump($step_ids);die;
+        $step_ids = $this->where(['problem_id' => $problemType, 'is_del' => 1])->column('step_id');
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         //措施id
         if ($step_ids) {
@@ -52,20 +49,15 @@ class WorkOrderProblemStep extends Model
             $map['a.create_time'] = $map['create_time'];
             unset($map['create_time']);
         }
+
         if ($site < 10) {
             $map['work_platform'] = $site;
+        } else {
+            unset($map['a.create_time']);
         }
         $map['problem_type_id'] = $problemType;
-        $work_data = $work->alias('a')->where($map)->join(['fa_work_order_measure' =>'b'],'a.id=b.work_id')->field('measure_content,count(*) as num')->group('b.measure_choose_id')->select();
+        $work_data = $work->alias('a')->where($map)->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')->field('measure_content as name,count(*) as value')->group('b.measure_choose_id')->select();
         $work_data = collection($work_data)->toArray();
         return $work_data;
     }
-
-
-
-
-
-
-
-
 }

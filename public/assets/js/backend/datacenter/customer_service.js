@@ -796,7 +796,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     $("#second-level li").siblings('li').removeClass('active');
                     $(this).parent().addClass('active');
                     var time = $('#create_time').val();
-                    var platform = $('.site-ul>.active>a').val();
+                    var platform = $('.site-ul>.active>a').data("value");
                     var chartOptions = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
@@ -833,14 +833,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }, function (data, ret) {
                         $("#caigou-table4 tr").remove();
                         var problem_data = ret.list_data.problem_data;
+                        var problem_step_total = ret.list_data.problem_step_total;
                         var addtr = '';
                         for (var i = 0; i < problem_data.length; i++) {
                             addtr += '<tr>' +
-                                '<td>' + problem_data[i].measure_content + '</td>' +
-                                '<td>' + problem_data[i].num + '</td>' +
+                                '<td>' + problem_data[i].name + '</td>' +
+                                '<td>' + problem_data[i].value + '</td>' +
                                 '<td>占比</td>';
                             if (problem_step_total > 0) {
-                                addtr += '<td>' + formatDecimal(problem_data[i].num / problem_step_total * 100, 2) + '%</td>';
+                                addtr += '<td>' + formatDecimal(problem_data[i].value / problem_step_total * 100, 2) + '%</td>';
                             } else {
                                 addtr += '<td>0</td>';
                             }
@@ -980,11 +981,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         var addtr = '';
                         for (var i = 0; i < problem_data.length; i++) {
                             addtr += '<tr>' +
-                                '<td>' + problem_data[i].measure_content + '</td>' +
-                                '<td>' + problem_data[i].num + '</td>' +
+                                '<td>' + problem_data[i].name + '</td>' +
+                                '<td>' + problem_data[i].value + '</td>' +
                                 '<td>占比</td>';
                             if (problem_step_total > 0) {
-                                addtr += '<td>' + formatDecimal(problem_data[i].num / problem_step_total * 100, 2) + '%</td>';
+                                addtr += '<td>' + formatDecimal(problem_data[i].value / problem_step_total * 100, 2) + '%</td>';
                             } else {
                                 addtr += '<td>0</td>';
                             }
@@ -998,8 +999,119 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 }
             });
 
+            //提交按钮
             $('.tijiao').click(function(){
-                $('.siteType').click();
+                var platform = $('.site-ul>.active>a').data("value");
+                //问题类型统计 问题ID
+                var type_problem_id = $('.problem-counter>.active>a').data('value');
+                //问题措施比统计 问题ID
+                // var step_problem_id = $('.step-type>.active>a').data('value');
+                var step_problem_id = $('#second-level>.active>a').data('value');
+                var time = $('#create_time').val();
+                if (platform > 0) {
+                    var chartOptions = {
+                        targetId: 'echart1',
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
+                    };
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/detail',
+                        data: {
+                            'key' : 'echart1',
+                            'time': time,
+                            'platform': platform,
+                            'problem_id': type_problem_id
+                        }
+                    };
+                    EchartObj.api.ajax(options, chartOptions);
+
+
+                    var chartOptions2 = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
+                    };
+                    var options2 = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/detail',
+                        data: {
+                            'key' : 'echart2',
+                            'time': time,
+                            'platform': platform,
+                            'step_problem_id': step_problem_id
+                        }
+                    };
+                    EchartObj.api.ajax(options2, chartOptions2);
+
+                    //异步获取第二个饼图右边显示的数据
+                    Backend.api.ajax({
+                        url: 'datacenter/customer_service/detail',
+                        data: {
+                            'step_problem_id': step_problem_id,
+                            'time': time,
+                            'platform': platform,
+                            'problem_id': type_problem_id
+                        }
+                    }, function (data, ret) {
+                        $("#caigou-table2 tr").remove();
+                        var problem_type_data = ret.list_data.problem_type_data;
+                        var problem_data = ret.list_data.problem_data;
+                        var problem = ret.list_data.problem;
+                        var problem_type_total = ret.list_data.problem_type_total;
+                        var problem_step_total = ret.list_data.problem_step_total;
+                        var addtr = '';
+                        for (var i = 0; i < problem_type_data.length; i++) {
+                            addtr += '<tr>' +
+                                '<td>' + problem[problem_type_data[i].problem_type_id] + '</td>' +
+                                '<td>' + problem_type_data[i].num + '</td>' +
+                                '<td>占比</td>';
+                            if (problem_type_total > 0) {
+                                addtr += '<td>' + formatDecimal(problem_type_data[i].num / problem_type_total * 100, 2) + '%</td>';
+                            } else {
+                                addtr += '<td>0</td>';
+                            }
+                            addtr += '</tr>';
+                        }
+                        $("#caigou-table2").append(addtr);
+
+
+                        $("#caigou-table4 tr").remove();
+                        var addtr = '';
+                        for (var i = 0; i < problem_data.length; i++) {
+                            addtr += '<tr>' +
+                                '<td>' + problem_data[i].name + '</td>' +
+                                '<td>' + problem_data[i].value + '</td>' +
+                                '<td>占比</td>';
+                            if (problem_step_total > 0) {
+                                addtr += '<td>' + formatDecimal(problem_data[i].value / problem_step_total * 100, 2) + '%</td>';
+                            } else {
+                                addtr += '<td>0</td>';
+                            }
+                            addtr += '</tr>';
+                        }
+                        $("#caigou-table4").append(addtr);
+                    }, function (data, ret) {
+                        Layer.alert(ret.msg);
+                        return false;
+                    });
+                }
             })
 
 

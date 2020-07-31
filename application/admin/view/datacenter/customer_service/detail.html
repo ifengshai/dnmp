@@ -224,11 +224,11 @@
                             style="border-width:0px;width: 100%;margin-top: 10px;margin-right: 20px;margin-bottom: 10px;">
                             {foreach $problem_data as $k => $v}
                             <tr>
-                                <td>{$v.measure_content}</td>
-                                <td>{$v.num}</td>
+                                <td>{$v.name}</td>
+                                <td>{$v.value}</td>
                                 <td>占比</td>
                                 {if $problem_step_total gt 0 }
-                                <td>{:round($v['num']/$problem_step_total*100,2)}%</td>
+                                <td>{:round($v['value']/$problem_step_total*100,2)}%</td>
                                 {else/}
                                 <td>0</td>
                                 {/if}
