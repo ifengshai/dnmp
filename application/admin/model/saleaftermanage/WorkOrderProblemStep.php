@@ -41,6 +41,7 @@ class WorkOrderProblemStep extends Model
     {
         //措施id 
         $step_ids = $this->where(['problem_id' => $problemType, 'is_del' => 1])->column('id');
+        dump($step_ids);die;
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         //措施id
         if ($step_ids) {

@@ -731,12 +731,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //第一个饼图点击切换
             $(".statistics").on('click', function () {
                 var value = $(this).data("value");
-                var type_problem_id = $('.problem-counter>.active>a').data('value');
                 if (value > 0) {
                     $(".problem-counter li").siblings('li').removeClass('active');
                     $(this).parent().addClass('active');
                     var time = $('#create_time').val();
-                    var platform = $('.site-ul>.active>a').val();
+                    var platform = $('.site-ul>.active>.siteType').data('value');
                     var chartOptions = {
                         targetId: 'echart1',
                         downLoadTitle: '图表',
@@ -757,7 +756,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             'key' : 'echart1',
                             'time': time,
                             'platform': platform,
-                            'problem_id': type_problem_id
+                            'problem_id': value
                         }
                     };
                     EchartObj.api.ajax(options, chartOptions);
@@ -765,7 +764,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Backend.api.ajax({
                         url: 'datacenter/customer_service/detail',
                         data: {
-                            value: value,
+                            problem_id: value,
                             time: time,
                             platform: platform
                         }
@@ -776,11 +775,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         var problem_type_total = ret.list_data.problem_type_total;
                         var addtr = '';
                         for (var i = 0; i < problem_type_data.length; i++) {
+                            var p_id = problem_type_data[i].problem_type_id;
                             addtr += '<tr>' +
-                                '<td>' + problem[problem_type_data[i].problem_type_id] + '</td>' +
+                                '<td>' + problem[p_id] + '</td>' +
                                 '<td>' + problem_type_data[i].num + '</td>' +
                                 '<td>占比</td>';
-                            if (table.problem_form_total > 0) {
+                            if (problem_type_total > 0) {
                                 addtr += '<td>' + formatDecimal(problem_type_data[i].num / problem_type_total * 100, 2) + '%</td>';
                             } else {
                                 addtr += '<td>0</td>';
@@ -891,7 +891,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //站点点击切换
             $(".siteType").on('click', function () {
                 var platform = $(this).data("value");
-                alert(platform);
                 //问题类型统计 问题ID
                 var type_problem_id = $('.problem-counter>.active>a').data('value');
                 //问题措施比统计 问题ID
@@ -974,7 +973,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 '<td>' + problem[problem_type_data[i].problem_type_id] + '</td>' +
                                 '<td>' + problem_type_data[i].num + '</td>' +
                                 '<td>占比</td>';
-                            if (table.problem_form_total > 0) {
+                            if (problem_type_total > 0) {
                                 addtr += '<td>' + formatDecimal(problem_type_data[i].num / problem_type_total * 100, 2) + '%</td>';
                             } else {
                                 addtr += '<td>0</td>';
