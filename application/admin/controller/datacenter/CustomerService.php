@@ -1741,7 +1741,7 @@ class CustomerService extends Backend
             $site = input('platform', 1); //默认zeelool
             $key = input('key');
             $problem_id = input('problem_id', 2); //默认问题类型为订单修改
-            $step_problem_id = input('step_problem_id', 1); //默认类型为订单修改->更改镜框
+            $step_problem_id = input('step_problem_id', 5); //默认类型为物流仓库->关税
             //查询各分类占比 默认订单修改 zeelool 
             $problem_type_data = $this->problem_type->getProblemTypeData($problem_id, $site, $map);
 
