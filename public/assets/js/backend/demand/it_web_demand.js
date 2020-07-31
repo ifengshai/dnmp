@@ -119,84 +119,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Controller.api.formatter.get_user_confirm,
                         },
 
-                        {
-                            field: 'buttons',
-                            width: "120px",
-                            operate:false,
-                            title: __('完成确认'),
-                            table: table,
-                            events: Table.api.events.operate,
-                            buttons: [
-                                {
-                                    name: 'add',
-                                    text: __('确认'),
-                                    title: __('提出人确认'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax user_confirm',
-                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
-                                    confirm: '确认本需求？',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function(row){
-                                        if(row.status == 4 || row.status == 5){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-
-                                        /*if(row.status == 4 || row.status == 5){
-                                            if(row.demand_add && row.is_entry_user_hidden == 1){//操作权限及显示权限
-                                                if(row.test_group == 1){
-                                                    if(row.entry_user_confirm == 0){
-                                                        return true;
-                                                    }
-                                                }
-                                            }
-                                        }else{
-                                            return false;
-                                        }*/
-                                    }
-                                },
-                                {
-                                    name: 'through_demand',
-                                    text: __('确认'),
-                                    title: __('产品确认'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax user_confirm',
-                                    url: 'demand/it_web_demand/through_demand',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function(row){
-                                        if(row.status == 4 || row.status == 5){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-
-
-                                       /* if(row.status == 2){
-                                            if(row.demand_through_demand){//操作权限
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }*/
-                                    }
-                                },
-
-                            ],
-                            formatter: Table.api.formatter.buttons
-                        },
 
                         {field: 'web_designer_user_id', title: __('前端'),operate:false},
                         {field: 'phper_user_id', title: __('后端'),operate:false},
@@ -2759,7 +2681,54 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 //完成确认
                 get_user_confirm: function (value, row, index) {
                     if(row.test_status == 5){
-                        return '<div><span class="check_user_confirm status1_color">确认</span></div>';
+                        //状态=5才可以点击通过
+                        if(row.demand_pm_status && row.entry_user_id == Config.admin_id){
+                            //当前登录人有产品确认权限，并且当前登录人就是录入人，则一个按钮
+                            if(row.entry_user_confirm == 1 && row.pm_confirm == 1){
+                                return '已确认';
+                            }else{
+                                return '<div><span class="check_user_confirm status1_color">确认</span></div>';
+                            }
+                        }else{
+                            //如果是产品
+                            if(row.demand_pm_status){
+                                if(row.pm_confirm == 1){
+                                    //产品已经确认
+                                    if(row.entry_user_confirm == 1){
+                                        return '已确认';
+                                    }else{
+                                        return '产品已确认';
+                                    }
+                                }else{
+                                    return '<div><span class="check_user_confirm status1_color">确认</span></div>';
+                                }
+                            }
+                            //如果是提出人
+                            if(row.entry_user_id == Config.admin_id){
+                                if(row.entry_user_confirm == 1){
+                                    //提出人已经确认
+                                    if(row.pm_confirm == 1){
+                                        return '已确认';
+                                    }else{
+                                        return '提出人已确认';
+                                    }
+                                }else{
+                                    return '<div><span class="check_user_confirm status1_color">确认</span></div>';
+                                }
+                            }
+                            //如果是其他人
+                            if(row.entry_user_confirm == 1 && row.pm_confirm == 1){
+                                return '已确认';
+                            }else{
+                                if(row.entry_user_confirm == 1){
+                                    return '提出人已确认';
+                                }
+                                if(row.pm_confirm == 1){
+                                    return '产品已确认';
+                                }
+                                return '未确认';
+                            }
+                        }
                     }else{
                         return '-'
                     }
@@ -2824,7 +2793,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
 
                             }, function(data, ret){
                                 //失败的回调
-                                Toastr.error(22222);
+                                Layer.closeAll();
                                 return false;
                             });
 

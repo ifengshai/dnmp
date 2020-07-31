@@ -50,6 +50,7 @@
 
 <div class="all_div">
     {if $row['web_designer_group'] == 2 && $row['test_status'] >= 2}
+        <!--如果测试已经确认，并且不需要前端的话，不显示前端的操作-->
     {else}
     <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -93,13 +94,25 @@
             <div class="item_button">
                 {if $row['test_status'] == 1}
                     {if $row['web_designer_group'] == 0}
-                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {/if}
                     {else}
-                    <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {/if}
                     {/if}
                 {else}
                     {if $row['web_designer_is_finish'] == 0}
-                    <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {if $distribution_status}
+                            <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {else}
+                            <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {/if}
                     {else}
                     <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
                     {/if}
@@ -111,6 +124,7 @@
     {/if}
 
     {if $row['phper_group'] == 2 && $row['test_status'] >= 2}
+        <!--如果测试已经确认，并且不需要后端的话，不显示后端的操作-->
     {else}
     <form role="form" method="POST" id="form_php_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -154,13 +168,25 @@
             <div class="item_button">
                 {if $row['test_status'] == 1}
                     {if $row['phper_group'] == 0}
-                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                        {/if}
                     {else}
-                    <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {/if}
                     {/if}
                 {else}
                     {if $row['phper_is_finish'] == 0}
-                    <button type="submit" value="php_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端完成')}</button>
+                        {if $distribution_status}
+                            <button type="submit" value="php_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端完成')}</button>
+                        {else}
+                            <button type="submit" value="php_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端完成')}</button>
+                        {/if}
                     {else}
                     <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端已完成')}</button>
                     {/if}
@@ -171,6 +197,7 @@
     {/if}
 
     {if $row['app_group'] == 2 && $row['test_status'] >= 2}
+    <!--如果测试已经确认，并且不需要APP的话，不显示APP的操作-->
     {else}
         {if strpos($row['site_type'],'3') !== false}
         <form role="form" method="POST" id="form_app_group" data-toggle="validator" action="">
@@ -215,13 +242,25 @@
                 <div class="item_button">
                     {if $row['test_status'] == 1}
                         {if $row['app_group'] == 0}
-                        <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                            {/if}
                         {else}
-                        <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {/if}
                         {/if}
                     {else}
                         {if $row['app_is_finish'] == 0}
-                        <button type="submit" value="app_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP完成')}</button>
+                            {if $distribution_status}
+                                <button type="submit" value="app_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP完成')}</button>
+                            {else}
+                                <button type="submit" value="app_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP完成')}</button>
+                            {/if}
                         {else}
                         <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP已完成')}</button>
                         {/if}
@@ -231,8 +270,6 @@
         </form>
         {/if}
     {/if}
-
-
 </div>
 
 

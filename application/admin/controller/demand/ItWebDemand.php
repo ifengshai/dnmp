@@ -21,7 +21,7 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -215,11 +215,9 @@ class ItWebDemand extends Backend
                 ->select();
             $list = collection($list)->toArray();
             //检查有没有权限
-            $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
-            $permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
-            $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
-            $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
-            $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
+            //$permissions['demand_supper_edit'] = $this->auth->check('demand/it_web_demand/supper_edit');//超级编辑权限
+            //$permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
+
             $permissions['demand_test_distribution'] = $this->auth->check('demand/it_web_demand/test_distribution');//测试分配
             $permissions['demand_finish'] = $this->auth->check('demand/it_web_demand/group_finish');//开发完成
             $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
@@ -234,12 +232,17 @@ class ItWebDemand extends Backend
 
                 $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
+                //检查权限
+                $list[$k]['demand_pm_status'] = $this->auth->check('demand/it_web_demand/pm_status');//产品确认权限
+                $list[$k]['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+                $list[$k]['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
+                $list[$k]['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发响应
+                $list[$k]['demand_test_handle'] = $this->auth->check('demand/it_web_demand/test_handle');//测试响应
 
 
 
 
-
-                $list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
+                //$list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
 
 
                 /*分配*/
@@ -573,7 +576,7 @@ class ItWebDemand extends Backend
                     $row = $this->model->get(['id' => $params['ids']]);
                     $row_arr = $row->toArray();
 
-                    $pm_status = $this->auth->check('demand/it_web_demand/pm_status');//新增权限
+                    $pm_status = $this->auth->check('demand/it_web_demand/pm_status');//产品确认权限
                     $user_id = $this->auth->id;
                     $data = array();
                     if($pm_status){
@@ -766,6 +769,10 @@ class ItWebDemand extends Backend
 
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row );
+
+        //确认权限
+        $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
+        $this->view->assign('admin_id', session('admin.id'));
         return $this->view->fetch();
     }
     public function edit1($ids = null)
@@ -994,6 +1001,8 @@ class ItWebDemand extends Backend
             1 => '确认',
             2 => '不涉及',
         );
+
+        $this->view->assign("distribution_status", $this->auth->check('demand/it_web_demand/distribution'));
         $this->view->assign("status", $status);
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
