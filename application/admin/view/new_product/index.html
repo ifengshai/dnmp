@@ -72,7 +72,6 @@
                     <% if(item.item_status == 1) {  %>
                     <a href="javascript:;" data-id="<%=item.id%>" data-sku="<%=item.sku%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
                     <a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused  {:$auth->check('new_product/auditRefused')?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>
-                    <!--<a href="javascript:;" data-id="<%=item.id%>" class="btn btn-danger btn-auditRefused  {:$auth->check('new_product/passAudit',)?'':'hide'}" title="{:__('选品拒绝')}" ><i class="fa fa-ban"></i> {:__('选品拒绝')}</a>-->
                     <input type='hidden' name="row[id]" id="idd<%=item.id%>" value="<%=item.id%>">
 
                     <!--<a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a>-->
