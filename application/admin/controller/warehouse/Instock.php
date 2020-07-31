@@ -205,7 +205,7 @@ class Instock extends Backend
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem')
             ->where($check_map)
-            ->field('Check.purchase_id,sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
+            ->field('Check.purchase_id,Check.replenish_id,sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
             ->group('CheckItem.id')
             ->select();
         $list = collection($list)->toArray();
@@ -418,12 +418,18 @@ class Instock extends Backend
             }
         }
 
+        $new_product_mapp = new \app\admin\model\NewProductMapping();
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase->startTrans();
         $this->purchase->startTrans();
+//        $item_platform_sku = $platform->where('sku','OO005935-01')->field('platform_type,stock')->select();
+//        $whole_num = $platform->where('sku','OO005935-01')->sum('stock');
+//        dump($list);dump($whole_num);
+//dump(collection($item_platform_sku)->toArray());die;
         try {
             $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -479,6 +485,42 @@ class Instock extends Backend
                     if ($check_res['order_return_id']) {
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
                         $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
+                    }
+
+                    //审核通过时按照补货需求比例 划分各站虚拟库存 如果未关联补货需求单则按照当前各站虚拟库存数量实时计算各站比例
+                    if ($v['replenish_id']) {
+                        //查询各站补货需求量占比
+                        $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                        // dump(collection($rate_arr)->toArray());die;
+                        //根据入库数量插入各站虚拟仓库存
+                        $all_num = count($rate_arr);
+                        $stock_num = $v['in_stock_num'];
+                        foreach ($rate_arr as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
+                            } else {
+                                $num = round($v['in_stock_num'] * $val['rate']);
+                                $stock_num -= $num;
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                            }
+                        }
+                    }else{
+                        //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
+                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        $stock_num = $v['in_stock_num'];
+                        foreach ($item_platform_sku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                            } else {
+                                $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
+                                $stock_num -= $num;
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                            }
+                        }
                     }
 
                     //插入日志表
@@ -743,7 +785,7 @@ class Instock extends Backend
             ->setCellValue("C1", "入库数量");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人")
             ->setCellValue("E1", "创建时间");
-      
+
 
         foreach ($list as $key => $value) {
 
@@ -760,7 +802,7 @@ class Instock extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-       
+
 
         //设置边框
         $border = [

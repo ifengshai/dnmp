@@ -28,6 +28,7 @@ class ZendeskAgents extends Backend
         $type = [
             1 => 'zeelool',
             2 => 'voogueme',
+            3 => 'nihao',
         ];
         $agent_type = [
             1 => '邮件组',
@@ -184,7 +185,7 @@ class ZendeskAgents extends Backend
     {
         if($this->request->isPost()) {
             $type = input('type');
-            $agents = ZendeskAccount::where(['account_type' => $type, 'is_used' => 1])->field('account_id,account_user')->select();
+            $agents = ZendeskAccount::where(['account_type' => $type])->field('account_id,account_user')->select();
             $html = '<option value="">请选择</option>';
             foreach($agents as $agent){
                 $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";

@@ -344,6 +344,143 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 });                
             });                                                 
         },
+        customer_data_screen: function () {
+            //工作概况中的站点选择
+            $(document).on('click','.plat_form',function(){
+                var platform = $(this).data('value');
+                $(".plat_form").removeClass('active');
+                $(this).addClass('active');
+                Backend.api.ajax({
+                    url:'datacenter/customer_service/workorder_situation',
+                    data:{platform:platform}
+                }, function(data, ret){
+                    var today = ret.data.today;
+                    var yesterday  = ret.data.yesterday;
+                    var seven     = ret.data.seven;
+                    var thirty      = ret.data.thirty;
+                    var nowmonth  = ret.data.nowmonth;
+                    var premonth    = ret.data.premonth;
+                    var year       = ret.data.year;
+                    var total       = ret.data.total;
+                    $('#today_wo_num').text(today.wo_num);
+                    $('#today_wo_complete_num').text(today.wo_complete_num);
+                    $('#today_wo_bufa_percent').text(today.wo_bufa_percent);
+                    $('#today_wo_refund_percent').text(today.wo_refund_percent);
+                    $('#today_wo_refund_money_percent').text(today.wo_refund_money_percent);
+
+                    $('#yesterday_wo_num').text(yesterday.wo_num);
+                    $('#yesterday_wo_complete_num').text(yesterday.wo_complete_num);
+                    $('#yesterday_wo_bufa_percent').text(yesterday.wo_bufa_percent);
+                    $('#yesterday_wo_refund_percent').text(yesterday.wo_refund_percent);
+                    $('#yesterday_wo_refund_money_percent').text(yesterday.wo_refund_money_percent);
+
+                    $('#seven_wo_num').text(seven.wo_num);
+                    $('#seven_wo_complete_num').text(seven.wo_complete_num);
+                    $('#seven_wo_bufa_percent').text(seven.wo_bufa_percent);
+                    $('#seven_wo_refund_percent').text(seven.wo_refund_percent);
+                    $('#seven_wo_refund_money_percent').text(seven.wo_refund_money_percent);
+
+                    $('#thirty_wo_num').text(thirty.wo_num);
+                    $('#thirty_wo_complete_num').text(thirty.wo_complete_num);
+                    $('#thirty_wo_bufa_percent').text(thirty.wo_bufa_percent);
+                    $('#thirty_wo_refund_percent').text(thirty.wo_refund_percent);
+                    $('#thirty_wo_refund_money_percent').text(thirty.wo_refund_money_percent);
+
+                    $('#nowmonth_wo_num').text(nowmonth.wo_num);
+                    $('#nowmonth_wo_complete_num').text(nowmonth.wo_complete_num);
+                    $('#nowmonth_wo_bufa_percent').text(nowmonth.wo_bufa_percent);
+                    $('#nowmonth_wo_refund_percent').text(nowmonth.wo_refund_percent);
+                    $('#nowmonth_wo_refund_money_percent').text(nowmonth.wo_refund_money_percent);
+
+
+                    $('#premonth_wo_num').text(premonth.wo_num);
+                    $('#premonth_wo_complete_num').text(premonth.wo_complete_num);
+                    $('#premonth_wo_bufa_percent').text(premonth.wo_bufa_percent);
+                    $('#premonth_wo_refund_percent').text(premonth.wo_refund_percent);
+                    $('#premonth_wo_refund_money_percent').text(premonth.wo_refund_money_percent);
+
+
+                    $('#year_wo_num').text(year.wo_num);
+                    $('#year_wo_complete_num').text(year.wo_complete_num);
+                    $('#year_wo_bufa_percent').text(year.wo_bufa_percent);
+                    $('#year_wo_refund_percent').text(year.wo_refund_percent);
+                    $('#year_wo_refund_money_percent').text(year.wo_refund_money_percent);
+
+
+                    $('#total_wo_num').text(total.wo_num);
+                    $('#total_wo_complete_num').text(total.wo_complete_num);
+                    $('#total_wo_bufa_percent').text(total.wo_bufa_percent);
+                    $('#total_wo_refund_percent').text(total.wo_refund_percent);
+                    $('#total_wo_refund_money_percent').text(total.wo_refund_money_percent);
+                                        
+                    return true;
+                }, function(data, ret){
+                    Layer.alert(ret.msg);
+                    return false;
+                });   
+            });
+
+            // 指定图表的配置项和数据
+            Controller.api.formatter.daterangepicker($("form[role=form2]"));
+            Controller.api.formatter.daterangepicker($("div[role=form8]"));
+           
+            //获取工作量概况数据
+            $(document).on('click','.plat_form1',function(){
+                $("#web_platform").val($(this).data('value'));
+                $(".plat_form1").removeClass('active');
+                $(this).addClass('active');
+                worknum_situation();
+                Controller.api.formatter.line_chart();
+            });
+            $("#workload_time").on("apply.daterangepicker",function(){
+                setTimeout(()=>{
+                    worknum_situation();
+                    Controller.api.formatter.line_chart();
+                },0)
+            })
+            $("#workload_time").on("cancel.daterangepicker",function(){
+                setTimeout(()=>{
+                    worknum_situation();
+                    Controller.api.formatter.line_chart();
+                },0)
+            })
+            $(document).on('click','.title_click',function(){
+                if($(this).data('value')){
+                    $("#title_type").val($(this).data('value'));
+                    $(".title").removeClass('active');
+                    $(this).addClass('active');
+                }
+                worknum_situation();
+                //工单量概况折线图
+                Controller.api.formatter.line_chart();
+            });
+            
+            //工单量概况折线图
+            Controller.api.formatter.line_chart();
+            // 基于准备好的dom，初始化echarts实例
+            //工单问题类型统计
+            Controller.api.formatter.daterangepicker($("form[role=form3]"));
+            Controller.api.formatter.daterangepicker($("div[role=form1]"));
+            $(document).on('click','#question_type_submit',function(){
+                Controller.api.formatter.pie_chart('echart1',$("#plat_form2").val(),$("#create_time_one").val());
+            });
+            $(document).on('click','#question_type_reset',function(){
+                $("#plat_form2").val(1)
+                $("#create_time_one").val('')
+            });
+            Controller.api.formatter.pie_chart('echart1',$("#plat_form2").val(),$("#create_time_one").val());
+            //工单处理措施统计
+            Controller.api.formatter.daterangepicker($("form[role=form5]"));
+            Controller.api.formatter.daterangepicker($("div[role=form6]"));
+            $(document).on('click','#question_type_submit1',function(){
+                Controller.api.formatter.pie_chart('echart3',$("#plat_form3").val(),$("#create_time_two").val());
+            });
+            $(document).on('click','#question_type_reset1',function(){
+                $("#plat_form3").val(1)
+                $("#create_time_two").val('')
+            });
+            Controller.api.formatter.pie_chart('echart3',$("#plat_form3").val(),$("#create_time_two").val());
+        },
         api: {
             formatter: {
                 daterangepicker: function (form) {
@@ -390,6 +527,51 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         });
                     }
                 },
+                pie_chart: function(type,platform,create_time){
+                    //工单饼图展示方法
+                    var chartOptions1 = {
+                        targetId: type,
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                        }
+                    };
+                    var options1 = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/workorder_question_type',
+                        data: {
+                            'create_time': create_time,
+                            'platform': platform,
+                            'key':type 
+                        }
+                    }             
+                    EchartObj.api.ajax(options1, chartOptions1);
+                },
+                line_chart: function(){
+                    //工单量概况折线图
+                    var chartOptions = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+                    
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/worknum_line',
+                        data: {
+                            platform:$("#web_platform").val(),
+                            workload_time:$("#workload_time").val(),
+                            title_type:$("#title_type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                }
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -677,6 +859,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
               }
             });            
         },
+
     };
     return Controller;
 });
@@ -690,4 +873,33 @@ function formatDecimal(num, decimal) {
       num = num.substring(0)
     }
     return parseFloat(num).toFixed(decimal)
-  }
+}
+//工作量概况
+function worknum_situation(workload_time){
+    var platform = $("#web_platform").val();
+    var workload_time = $("#workload_time").val();
+    var title_type = $("#title_type").val();
+
+    Backend.api.ajax({
+        url:'datacenter/customer_service/worknum_situation',
+        data:{platform:platform,workload_time:workload_time,title_type:title_type}
+    }, function(data, ret){
+        var wait_deal_num = ret.data.wait_deal_num;
+        var new_create_num  = ret.data.new_create_num;
+        var already_reply_num  = ret.data.already_reply_num;
+        var wait_allot_num  = ret.data.wait_allot_num;
+        var positive_effect_num  = ret.data.positive_effect_num;
+        var reply_failure_num  = ret.data.reply_failure_num;
+        
+        $('#wait_deal_num').text(wait_deal_num);
+        $('#new_create_num').text(new_create_num);
+        $('#already_reply_num').text(already_reply_num);
+        $('#wait_allot_num').text(wait_allot_num);
+        $('#positive_effect_num').text(positive_effect_num);
+        $('#reply_failure_num').text(reply_failure_num);
+        return true;
+    }, function(data, ret){
+        Layer.alert(ret.msg);
+        return false;
+    });   
+}

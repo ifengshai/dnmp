@@ -7,7 +7,8 @@
 return [
     'platform'=>[
         1=>'zeelool',
-        2=>'voogueme'
+        2=>'voogueme',
+        3=>'nihaooptical'
     ],
     'zeelool' => [
         'subdomain' => "zeelooloptical",
@@ -18,6 +19,11 @@ return [
         'subdomain' => "voogue",
         'username' => "ww591795345@outlook.com",
         'token' => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go"
+    ],
+    'nihaooptical' => [
+        'subdomain' => "nihao",
+        'username' => "wangwei@nextmar.com",
+        'token' => "1T6P4ewBZsuGLbHcx9WGpEprConFoEd8H5bPZlER"
     ],
     'priority' => [
         0 => '',
@@ -54,8 +60,9 @@ return [
         14 => '其他'
     ],
     'platform_url'=>[
-        1   => 'https://www.zeelool.com/index.php/GBExholSDIhOVRMimieBn0LQ/sales_order/view/order_id/',
-        2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/'
+        1   => 'https://www.zeelool.com/index.php/GW05pqxvzpEVjIYTALLNumrCf/sales_order/view/order_id/',
+        2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/',
+        3   => 'https://pc.nihaooptical.com/index.php/xiaomoshou/sales_order/view/order_id/'
     ],
     'check_order_info_url'=>
         'http://'.$_SERVER['HTTP_HOST'].'/admin_1biSSnWyfW.php/saleaftermanage/order_return/search?ref=addtabs'

@@ -140,7 +140,7 @@ class Nihao extends Model
         // }
         //求出总付款金额
         $totalMap['entity_id'] = ['in', $totalId];
-        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
         if ($payInfo) {
             foreach ($payInfo as $v) {
@@ -232,7 +232,7 @@ class Nihao extends Model
         //去掉重复的补差价订单号
         //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
-        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $fullPostMap['increment_id'] = ['in', $fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($fullPostResult) {
@@ -246,7 +246,7 @@ class Nihao extends Model
             }
         }
         //求出补差价订单(信息协同补差价订单)
-        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $synergyFullPostMap['increment_id'] = ['in', $fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($synergyPostResult) {
@@ -307,7 +307,7 @@ class Nihao extends Model
         }
         //求出总付款金额
         $totalMap['entity_id'] = ['in', $totalId];
-        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
         if ($payInfo) {
             foreach ($payInfo as $v) {
@@ -399,7 +399,7 @@ class Nihao extends Model
         //去掉重复的补差价订单号
         //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
-        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $fullPostMap['increment_id'] = ['in', $fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($fullPostResult) {
@@ -413,7 +413,7 @@ class Nihao extends Model
             }
         }
         //求出补差价订单(信息协同补差价订单)
-        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $synergyFullPostMap['increment_id'] = ['in', $fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($synergyPostResult) {

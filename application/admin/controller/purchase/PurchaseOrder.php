@@ -113,7 +113,7 @@ class PurchaseOrder extends Backend
     /**
      * 添加
      */
-    public function add()
+    public function add($ids = null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -169,6 +169,7 @@ class PurchaseOrder extends Backend
 
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
+                        $replenish_list_id = $this->request->post("replenish_list_id/a");
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -179,6 +180,7 @@ class PurchaseOrder extends Backend
                             $data[$k]['purchase_price'] = $price[$k];
                             $data[$k]['purchase_total'] = $total[$k];
                             $data[$k]['purchase_id'] = $this->model->id;
+                            $data[$k]['replenish_list_id'] = $replenish_list_id[$k];
                             $data[$k]['purchase_order_number'] = $params['purchase_number'];
                         }
                         //批量添加
@@ -235,28 +237,47 @@ class PurchaseOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
 
-        //查询新品数据
-        $new_product_ids = $this->request->get('new_product_ids');
-        if ($new_product_ids) {
-            //查询所选择的数据
-            $where['new_product.id'] = ['in', $new_product_ids];
-            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
-            $row = collection($row)->toArray();
-            foreach ($row as $v) {
-                if ($v['item_status'] != 1) {
-                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
-                }
-            }
+        // //查询新品数据
+        // $new_product_ids = $this->request->get('new_product_ids');
+        // if ($new_product_ids) {
+        //     //查询所选择的数据
+        //     $where['new_product.id'] = ['in', $new_product_ids];
+        //     $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
+        //     $row = collection($row)->toArray();
+        //     foreach ($row as $v) {
+        //         if ($v['item_status'] != 1) {
+        //             $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
+        //         }
+        //     }
 
-            //提取供应商id
-            $supplier = array_unique(array_column($row, 'supplier_id'));
-            if (count($supplier) > 1) {
-                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+        //     //提取供应商id
+        //     $supplier = array_unique(array_column($row, 'supplier_id'));
+        //     if (count($supplier) > 1) {
+        //         $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+        //     }
+        //     $this->assign('row', $row);
+        //     $this->assign('is_new_product', 1);
+        // }
+
+        $label = input('label');
+        if ($label == 'replenish') {
+            $ids = $ids ? $ids : input('ids');
+            $this->list = new \app\admin\model\purchase\NewProductReplenishList;
+            $list = $this->list->where('id', 'in', $ids)->select();
+            
+            $item = new \app\admin\model\itemmanage\Item;
+            $supplier = new \app\admin\model\purchase\SupplierSku;
+            foreach($list as &$v) {
+                //查询sku 商品名称
+                $data = $item->getGoodsInfo($v['sku']);
+                $v['product_name'] = $data->name;
+                //查询供应商SKU
+                $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
-            $this->assign('row', $row);
-            $this->assign('is_new_product', 1);
+            unset($v);
+            if (count(array_unique(array_column($list, 'supplier_id'))) > 1)  $this->error(__('必须选择相同的供应商！！'), url('purchase/new_product_replenish_order/handle'));
+            $this->assign('list', $list);
         }
-
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
@@ -825,6 +846,8 @@ class PurchaseOrder extends Backend
         $data['purchase_status'] = $status;
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         $item = new \app\admin\model\itemmanage\Item();
+        $this->list = new \app\admin\model\purchase\NewProductReplenishList;
+        $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
         if ($res !== false) {
 
             //在途库存新逻辑
@@ -833,6 +856,20 @@ class PurchaseOrder extends Backend
                 $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
                 foreach ($list as $v) {
                     $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态
+                    if ($v['replenish_list_id']) {
+                        $this->list->where('id', $v['replenish_list_id'])->update(['real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
+                        $replenish_id = $this->list->where('id',$v['replenish_list_id'])->field('replenish_id,status')->find();
+                        $replenish_order = $this->list->where(['replenish_id'=>$replenish_id['replenish_id'],'status'=>1])->find();
+                        //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
+                        if ($replenish_id['status'] == 2){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',3);
+                        }
+                        if (empty($replenish_order)){
+                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',4);
+                        }
+                    }
                 }
             }
 
@@ -1090,7 +1127,7 @@ class PurchaseOrder extends Backend
          * @todo 后面添加采集时间段
          */
         $params = [
-            'createStartTime' => date('YmdHis', strtotime("-60 day")) . '000+0800',
+            'createStartTime' => date('YmdHis', strtotime("-10 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
 
@@ -1117,7 +1154,7 @@ class PurchaseOrder extends Backend
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
-                    if (in_array($res['purchase_status'], [7, 8, 9, 10])) {
+                    if (in_array($res->purchase_status, [6, 7, 8, 9, 10])) {
                         continue;
                     }
 
@@ -1186,8 +1223,6 @@ class PurchaseOrder extends Backend
                         $list['purchase_status'] = 5;
                     } elseif (in_array($v['baseInfo']['status'], ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
                         $list['purchase_status'] = 6; //待收货
-                    } else {
-                        $list['purchase_status'] = 7; //已收货
                     }
                     //收货地址
                     $list['delivery_address'] = $v['baseInfo']['receiverInfo']['toArea'];
@@ -1528,6 +1563,12 @@ class PurchaseOrder extends Backend
             unset($filter['createtime']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+        //添加供货商名称搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['s.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
 
         //是否存在需要退回产品
         $check_map['unqualified_num'] = ['>', 0];
@@ -1543,6 +1584,7 @@ class PurchaseOrder extends Backend
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_supplier' => 's'], 's.id=d.supplier_id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
             ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
@@ -1707,16 +1749,16 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
+            ->join(['fa_logistics_info' => 'd'], 'd.purchase_id=purchase_order.id', 'left')
             ->where($where)
             ->where($map)
             ->order('purchase_order.id desc')
             ->select();
 
         $list = collection($list)->toArray();
-
         //查询生产周期
         $supplier = new \app\admin\model\purchase\SupplierSku();
         $info = $supplier->where([
@@ -1742,6 +1784,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "物流单号");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -1758,6 +1801,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("O" . ($key * 1 + 2), $value['logistics_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         }
 
         //设置宽度
@@ -1777,6 +1821,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
 
         //设置边框
         $border = [
@@ -1794,7 +1839,7 @@ class PurchaseOrder extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:O' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
@@ -1833,19 +1878,43 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $whereCondition['purchase_status'] = ['egt', 2];
+            $whereConditionOr = [];
             $rep    = $this->request->get('filter');
             //如果没有搜索条件
             if ($rep != '{}') {
                 $whereTotalId = '1=1';
+                $filter = json_decode($rep, true);
+                //付款人
+                if ($filter['pay_person']) {
+                    $workIds = Purchase_order_pay::where(['create_person' => $filter['pay_person']])->column('purchase_id');
+                    $whereCondition['purchase_order.id'] = ['in', $workIds];
+                    unset($filter['pay_person']);
+                }
+                if ($filter['pay_time']) {
+                    $time = explode(' ', $filter['pay_time']);
+                    $mapTime['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
+                    if (!empty($whereCondition['id'])) {
+                        $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                        $whereCondition['purchase_order.id']  = ['in', $newWorkIds];
+                    } else {
+                        $whereCondition['purchase_order.id']  = ['in', $measuerWorkIds];
+                    }
+                    $whereConditionOr['purchase_order.payment_time'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    unset($filter['pay_time']);
+                }
+                $this->request->get(['filter' => json_encode($filter)]);
             } else {
                 $whereTotalId['purchase_order.createtime'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->count();
 
@@ -1853,6 +1922,7 @@ class PurchaseOrder extends Backend
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1862,12 +1932,14 @@ class PurchaseOrder extends Backend
                 ->where($whereCondition)
                 ->where($whereTotalId)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
                 ->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
+                ->whereor($whereConditionOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('purchase_order.id');

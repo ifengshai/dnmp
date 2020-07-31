@@ -84,7 +84,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'is_new_product', title: __('Is_new_product'),
+                            field: 'is_sample', title: __('是否为留样采购单'),
                             custom: { 0: 'danger', 1: 'success' },
                             searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
@@ -502,8 +502,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.caigou table tbody').append(content);
-
-
                 Controller.api.bindevent();
 
             })
@@ -1272,6 +1270,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         },
                         { field: 'create_person', title: __('Create_person'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {field:'pay_person',title:__('付款人'),visible:false},
+                        {field:'pay_time',title:__('付款时间'),operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {

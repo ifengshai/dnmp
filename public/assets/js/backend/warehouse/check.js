@@ -440,7 +440,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 $(document).on('blur', '.arrivals_num', function () {
                     var batch_id = $('.batch_id').val();
                     var arrivals_num = $(this).val();
-                    if (arrivals_num*1 < 0) {
+                    if (arrivals_num * 1 < 0) {
                         Toastr.error('到货数量不能小于0');
                         $(this).val(0);
                         return false;
@@ -471,7 +471,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     if (not_quantity_num < 0) {
                         not_quantity_num = 0;
                     }
-                    
+
                     $(this).parent().next().next().next().find('input').val(not_quantity_num);
                     if (arrivals_num * 1 > 0) {
                         $(this).parent().next().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
@@ -482,7 +482,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
                     var quantity_num = $(this).val();
-                    if (quantity_num*1 < 0) {
+                    if (quantity_num * 1 < 0) {
                         Toastr.error('合格数量不能小于0');
                         $(this).val(0);
                         return false;
@@ -496,8 +496,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     } else {
                         var true_num = $(this).parent().parent().find('.purchase_num').val();
                     }
-                    
-                    if (quantity_num*1 > arrivals_num*1) {
+
+                    if (quantity_num * 1 > arrivals_num * 1) {
                         $(this).val(0);
                         Toastr.error('合格数量不能大于到货数量');
                         return false;
@@ -524,13 +524,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //计算不合格数量及合格率
                 $(document).on('blur', '.sample_num', function () {
                     var sample_num = $(this).val();
-                    if (sample_num*1 < 0) {
+                    if (sample_num * 1 < 0) {
                         Toastr.error('留样数量不能小于0');
                         $(this).val(0);
                         return false;
                     }
                     var quantity_num = $(this).parent().parent().find('.quantity_num').val();
-                    if (sample_num*1 > quantity_num*1) {
+                    if (sample_num * 1 > quantity_num * 1) {
                         $(this).val(0);
                         Toastr.error('样品数量不能大于合格数量');
                         return false;
@@ -539,7 +539,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
 
 
-            
+
                 //采购单
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
@@ -581,7 +581,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                         supplier_sku = '';
                                     }
 
-                                    shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+                                    shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden" value="' + data.replenish_id + '"><tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
@@ -670,7 +670,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     if (!supplier_sku) {
                                         supplier_sku = '';
                                     }
-
+                                    shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden" value="' + item[i].replenish_id + '">'
                                     shtml += ' <tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + item[i].purchase_id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'

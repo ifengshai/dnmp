@@ -1,0 +1,122 @@
+<style>
+    .table_list {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .table_list #table_list-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .table_list #table_list-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .table_list #table_list-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .table_list #table_list-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .table_list #table_list-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">调拨单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-transfer_order_number" class="form-control" readonly name="row[transfer_order_number]"
+                value="{$row.transfer_order_number}" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">调出虚拟仓:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select id="platformarr" data-rule="required" class="form-control selectpicker call_out_site"
+                name="row[call_out_site]" data-rule="required">
+                <option value="">请选择</option>
+                {foreach name="magentoplatformarr" item="vo"}
+                <option value="{$key}" {:$row['call_out_site'] == $key ? 'selected' : ''}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">调入虚拟仓:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select id="platformarr" data-rule="required" class="form-control selectpicker call_in_site"
+                name="row[call_in_site]">
+                <option value="">请选择</option>
+                {foreach name="magentoplatformarr" item="vo"}
+                <option value="{$key}" {:$row['call_in_site'] == $key ? 'selected' : ''}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-remark" class="form-control " rows="5" name="row[remark]" readonly cols="50">{$row.remark}</textarea>
+        </div>
+    </div>
+    <hr>
+    <div class='table_list' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
+        <div style="margin-bottom: 20px;">
+            <!-- <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div> -->
+            <table id="table_list-table" class="purchase-table">
+                <tr>
+                    <th>SKU</td>
+                    <th>虚拟仓库存</td>
+                    <th>调出数量</td>
+                </tr>
+                {foreach $item as $k => $v}
+                <tr>
+                    <input  class="form-control" name="item_id[]"  value="{$v.id}" type="hidden">
+                    <td>
+                        <input id="c-purchase_remark" class="form-control sku" readonly name="sku[]" value="{$v.sku}" type="text">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control sku_stock" readonly name="sku_stock[]"  value="{$v.stock}"
+                            type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control num" readonly name="num[]" type="text" value="{$v.num}"></td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+
+
+    </div>
+    
+</form>
+

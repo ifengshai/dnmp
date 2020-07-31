@@ -71,6 +71,9 @@ class LogisticsInfo extends Backend
                     $res = $purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product')->find();
                     $list[$k]['purchase_name'] = $res->purchase_name;
                     $list[$k]['is_new_product'] = $res->is_new_product;
+                } else {
+                    $list[$k]['purchase_name'] = '';
+                    $list[$k]['is_new_product'] = 0;
                 }
             }
             $result = array("total" => $total, "rows" => $list);
@@ -101,7 +104,10 @@ class LogisticsInfo extends Backend
         }
 
         if ($this->request->isAjax()) {
-            $res = $this->model->save(['status' => 1], ['id' => $ids]);
+            $params['sign_person'] = session('admin.nickname');
+            $params['sign_time'] = date('Y-m-d H:i:s');
+            $params['status'] = 1;
+            $res = $this->model->save($params, ['id' => $ids]);
             if (false !== $res) {
                 //签收成功时更改采购单签收状态
                 $count = $this->model->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
@@ -153,11 +159,15 @@ class LogisticsInfo extends Backend
             $this->error('缺少参数！！');
         }
         if ($this->request->isAjax()) {
-            $res = $this->model->save(['status' => 1], ['id' => ['in', $ids]]);
+            $params['sign_person'] = session('admin.nickname');
+            $params['sign_time'] = date('Y-m-d H:i:s');
+            $params['status'] = 1;
+            $res = $this->model->save($params, ['id' => ['in', $ids]]);
             if (false !== $res) {
 
                 $row = $this->model->where(['id' => ['in', $ids]])->select();
                 foreach ($row as $k => $v) {
+                    $data = [];
                     //签收成功时更改采购单签收状态
                     $count = $this->model->where(['purchase_id' => $v['purchase_id'], 'status' => 0])->count();
                     if ($count > 0) {
@@ -165,8 +175,8 @@ class LogisticsInfo extends Backend
                     } else {
                         $data['purchase_status'] = 7;
                     }
-                    $data['arrival_time'] = date('Y-m-d H:i:s');
-                    $this->purchase->save($data, ['id' => $v['purchase_id']]);
+                    $data['receiving_time'] = date('Y-m-d H:i:s');
+                    $this->purchase->where(['id' => $v['purchase_id']])->update($data);
 
                     //签收扣减在途库存
                     $batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
@@ -185,9 +195,6 @@ class LogisticsInfo extends Backend
                         }
                     }
                 }
-
-
-
                 $this->success('签收成功');
             } else {
                 $this->error('签收失败');

@@ -50,7 +50,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/datacenter/index/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/datacenter/index/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+                
+            });
         },
         supply_chain_data: function () {
             Controller.api.bindevent();
@@ -126,7 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         { field: 'sku', title: __('SKU'), operate: false },
                         { field: 'name', title: __('商品名称'), operate: false },
                         { field: 'type_name', title: __('分类'), operate: false },
-                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), sortable: true,operate: false },
                         { field: 'sales_num', title: __('销量'), operate: false },
                         {
                             field: 'is_up', title: __('平台上下架状态'), operate: false,

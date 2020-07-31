@@ -18,6 +18,8 @@ class PurchaseAbnormal extends Backend
      */
     protected $model = null;
 
+    protected $relationSearch = true;
+    
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -51,28 +53,30 @@ class PurchaseAbnormal extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->with(['supplier', 'purchase'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
+                ->with(['supplier', 'purchase'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            //查询供应商
-            $supplier = new \app\admin\model\purchase\Supplier();
-            $supplier_list = $supplier->where(['id' => ['in', array_column($list, 'supplier_id')]])->column('supplier_name', 'id');
+            // //查询供应商
+            // $supplier = new \app\admin\model\purchase\Supplier();
+            // $supplier_list = $supplier->where(['id' => ['in', array_column($list, 'supplier_id')]])->column('supplier_name', 'id');
 
-            //查询采购单
-            $purchase = new \app\admin\model\purchase\PurchaseOrder();
-            $purchase_list = $purchase->where(['id' => ['in', array_column($list, 'purchase_id')]])->column('purchase_number', 'id');
+            // //查询采购单
+            // $purchase = new \app\admin\model\purchase\PurchaseOrder();
+            // $purchase_list = $purchase->where(['id' => ['in', array_column($list, 'purchase_id')]])->column('purchase_number', 'id');
 
-            foreach ($list as $k => $v) {
-                $list[$k]['supplier_name'] = $supplier_list[$v['supplier_id']];
-                $list[$k]['purchase_number'] = $purchase_list[$v['purchase_id']];
-            }
+            // foreach ($list as $k => $v) {
+            //     $list[$k]['supplier_name'] = $supplier_list[$v['supplier_id']];
+            //     $list[$k]['purchase_number'] = $purchase_list[$v['purchase_id']];
+            // }
 
             $result = array("total" => $total, "rows" => $list);
 

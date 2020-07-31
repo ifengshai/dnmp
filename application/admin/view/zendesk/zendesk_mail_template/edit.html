@@ -53,11 +53,11 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Mail_level')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[mail_level]', $mailLevel, $row.mail_level, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])} 
+            {:build_select('row[mail_level]', $mailLevel, $row.mail_level, ['class'=>'form-control selectpicker','data-live-search' => true])} 
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Mail_tag')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[mail_tag][]', $tagsList, $row.mail_tag, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple'])} 
+            {:build_select('row[mail_tag][]', $tagsList, $row.mail_tag, ['class'=>'form-control selectpicker','data-live-search' => true,'multiple'=>'multiple'])} 
         </div>
     </div>    
     <div class="form-group layer-footer">

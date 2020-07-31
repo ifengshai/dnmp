@@ -26,6 +26,11 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    //protected $noNeedRight = ['edit_recipient'];
 
     public function _initialize()
     {
@@ -46,6 +51,10 @@ class Zendesk extends Backend
         $this->request->filter(['strip_tags']);
         $tags = ZendeskTags::column('name','id');
         $this->view->assign('tags',$tags);
+        //是否有同步权限
+        $artificial_synchronous = $this->auth->check('zendesk/zendesk/artificial_synchronous');
+        $this->view->assign('artificial_synchronous',$artificial_synchronous);
+
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
@@ -60,7 +69,8 @@ class Zendesk extends Backend
                 $map['zendesk.assign_id'] = session('admin.id');
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
-                $map['zendesk.assign_id'] = session('admin.id');
+                $now_admin_id = session('admin.id');
+                $map[] = ['exp', Db::raw("(zendesk.assign_id=$now_admin_id and zendesk.due_id = 0) or zendesk.due_id=$now_admin_id")];
                 $map['zendesk.status'] = ['in', [1, 2]];
                 $map['zendesk.is_hide'] = 0;
                 $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
@@ -173,6 +183,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($type == 2) {
                         $siteName = 'voogueme';
+                    }elseif($type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
@@ -203,32 +215,52 @@ class Zendesk extends Backend
                         'email' => $params['email']
                     ];
                     //判断当前邮箱是否存在
-                    if(!$this->model->where('email',$params['email'])->find()){
+                    $findEmail = $this->model->where('email',$params['email'])->find();
+                    if(!$findEmail){
                         $emailName = strstr($params['email'],'@',true);
                         $createData['requester']['name'] = $emailName;
 //
 //                        (new Notice(request(), ['type' => $siteName]))->createUser(
 //                            ['user' => ['name' => $params['email'], 'email' => $params['email']]]
 //                        );
+                    }else{
+                        $createData['requester']['name'] = $findEmail->username;
                     }
-
                     //有抄送，添加抄送
                     if ($params['email_cc']) {
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
                         $createData['email_ccs'] = $email_ccs;
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$type)->value('signvalue');
+                    //获取zendesk用户的昵称
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    //替换签名中的昵称
+                    if(strpos($sign,'{{agent.name}}')!==false){
+                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    }             
+                    $sign = $sign ? $sign : '';
+                    //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
+                    if(strpos($sign,'<p>')!==false){
+                        $sign = str_replace('<p>','<span style="display:block">',$sign);
+                    } 
+                    if(strpos($sign,'</p>')!==false){
+                        $sign = str_replace('</p>','</span>',$sign);
+                    } 
+                    
                     $priority = config('zendesk.priority')[$params['priority']];
-                    $body = $params['content'];
                     if ($priority) {
                         $createData['priority'] = $priority;
                     }
+                    $createData['subject'] = $params['subject'];
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
-                    if (strip_tags($body)) {
+                    if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
 //                        $createData['comment']['body'] = $converter->convert($body);
-                        $createData['comment']['html_body'] = $body;
-
+                        $createData['comment']['html_body'] = $params['content'].$sign;
                     }
+                    //file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','add:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
@@ -277,9 +309,9 @@ class Zendesk extends Backend
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
-                        'assign_id' => $agent_id,
+                        'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
@@ -319,7 +351,7 @@ class Zendesk extends Backend
         }
         //获取所有的tags
         $tags = ZendeskTags::order('count desc')->column('name', 'id');
-        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        //站点类型，默认zeelool，1：zeelool，2：voogueme, 3:nihao
         $type = input('type',1);
         //获取所有的消息模板
         //获取所有的消息模板
@@ -370,6 +402,8 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+        //获取签名
+        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -390,6 +424,8 @@ class Zendesk extends Backend
                     $siteName = 'zeelool';
                     if($ticket->type == 2){
                         $siteName = 'voogueme';
+                    } elseif($ticket->type == 3){
+                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -409,17 +445,34 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
+                    //获取zendesk用户的昵称
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    //替换签名中的昵称
+                    if(strpos($sign,'{{agent.name}}')!==false){
+                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    }             
+                    $sign = $sign ? $sign : '';
+                    //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
+                    if(strpos($params['content'],'<p>')!==false){
+                        $params['content'] = str_replace('<p>','<span style="display:block">',$params['content']);
+                    } 
+                    if(strpos($params['content'],'</p>')!==false){
+                        $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    } 
+
                     $priority = config('zendesk.priority')[$params['priority']];
-                    $body = $params['content'];
                     if ($priority) {
                         $updateData['priority'] = $priority;
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
-                    if (strip_tags($body)) {
+                    if (strip_tags($params['content'])) {
 //                        $converter = new HtmlConverter();
 //                        $updateData['comment']['body'] = $converter->convert($body);
-                        $updateData['comment']['html_body'] = $body;
+                        $updateData['comment']['html_body'] = $params['content'].$sign;
                     }
+
+                    //file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt','edit:' . $params['content'].$sign."\r\n",FILE_APPEND);
                     if ($params['image']) {
                         //附件上传
                         $attachments = explode(',', $params['image']);
@@ -457,10 +510,10 @@ class Zendesk extends Backend
                         'status' => $params['status'],
                         'tags' => join(',', $zendeskTags),
                         'assignee_id' => $agent_id,
-                        'due_id' => session('admin.id'),
+                        'due_id' => 0,
                         'email_cc' => $params['email_cc'],
                         'is_hide' => 1,
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if (strip_tags($params['content'])) {
@@ -504,6 +557,18 @@ class Zendesk extends Backend
         $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
+
+        foreach ($comments as &$comment){
+            //获取当前评论的用户的昵称
+            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+            $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+            //替换签名中的昵称
+            if(strpos($sign,'{{agent.name}}')!==false){
+                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+            }
+            $comment['sign'] = $sign ? $sign : '';
+        }
+
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
@@ -544,8 +609,10 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
-        }else{
+        }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
         }
 
         $orders = $orderModel
@@ -554,8 +621,14 @@ class Zendesk extends Backend
             ->limit(5)
             ->select();        
         $btn = input('btn',0);
+
+        //查询魔晶账户
+        // $admin = new \app\admin\model\Admin();
+        // $username = $admin->where('status','normal')->column('nickname','id');
+
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
+        // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
@@ -626,6 +699,8 @@ Please close this window and try again.");
                 $siteName = 'zeelool';
             }elseif($type == 2){
                 $siteName = 'voogueme';
+            }else{
+                $siteName = 'nihaooptical';
             }
 
             $data = [
@@ -671,9 +746,9 @@ Please close this window and try again.");
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
-                    'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                    'zendesk_update_time' => date('Y-m-d H:i:s',time())
                 ]);
 
                 ZendeskComments::create([
@@ -689,7 +764,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
-                    'assign_id' => $agent_id,
+                    'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
@@ -803,59 +878,100 @@ DOC;
      */
     public function moreTasks()
     {
-
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
         $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
-        if($now){
+        if($now > 0){
             $this->error("请先处理完成已分配的工单");
         }
-        //判断今天是否完成工作量
-        /* $tasks = ZendeskTasks::whereTime('create_time', 'today')
-            ->where(['admin_id' => 114])
-            ->find();
-        $tasks = $tasks->toArray();
-        if($task['surplus_count'] > 0){
-            $this->error("请先完成今天的任务量再进行申请");
-        } */
         //获取用户assignee_id 以及对应站点
         $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['admin_id' => $admin_id])
                 ->find();
+        //查询当前用户负责的邮件
+        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['assign_id'=>$admin_id,'is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
+        if(count($tickets) < 10){
+            //当前用户负责的邮件不够10条，按照更新时间查询不是该用户负责的未分配的open和new的邮件
+            $other_tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1,'assign_id'=>['neq',$admin_id]])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->select();
+            foreach($other_tickets as $item){
+                if($item['status'] == 1){
+                    //new的邮件分配，去查找曾经负责该用户的处理人，如果是当前用户就能申请，如果不是不能申请
+                    //判断是否处理过该用户的邮件
+                    $zendesk_id = Db::name('zendesk')->where(['email'=>$item['email'],'type'=>$item['type']])->order('id','desc')->column('id');
+                    if($zendesk_id){
+                        //查询接触过该用户邮件的最后一条评论
+                        $commentAuthorId = Db::name('zendesk_comments')
+                            ->alias('c')
+                            ->join('fa_admin a','c.due_id=a.id')
+                            ->join('fa_zendesk_agents z','c.due_id=z.admin_id')
+                            ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$item['type']])
+                            ->order('c.id','desc')
+                            ->value('due_id');
+                        if($commentAuthorId == $admin_id || !$commentAuthorId){
+                            //可以申请
+                            if(count($tickets) < 10){
+                                $tickets[] = $item;
+                            }else{
+                                break;
+                            }
+                        }
+                    }else{
+                        if(count($tickets) < 10){
+                            $tickets[] = $item;
+                        }else{
+                            break;
+                        }
+                    }
 
-        $map[] = ['exp', Db::raw("assign_id=$admin_id or assign_id=''")];
-        $tickets = $this->model->where('status', 'in', '1,2')->where($map)->where('is_hide',1)->where('type',$task->type)->order('update_time desc')->limit(10)->select();
-
-        foreach($tickets as $ticket){
-            //修改zendesk的assign_id,assign_time
-            $this->model->where('id',$ticket->id)->update([
-                'assign_id' => $admin_id,
-                'assignee_id' => $task->assignee_id,
-                'assign_time' => date('Y-m-d H:i:s', time()),
-            ]);
-            //分配数目+1
-            $task->complete_apply_count = $task->complete_apply_count + 1;
-            $task->apply_count = $task->apply_count + 1;
-            $task->save();
+                }else{
+                    if(count($tickets) < 10){
+                        $tickets[] = $item;
+                    }else{
+                        break;
+                    }
+                }
+            }
         }
-        /* $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
-        $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
-
+        $i = 0;
         foreach($tickets as $ticket){
-            $task = ZendeskTasks::whereTime('create_time', 'today')
-                ->where(['admin_id' => $admin_id,'type' => $ticket->type])
-                ->find();
-            //修改zendesk的assign_id,assign_time
-            $this->model->where('id',$ticket->id)->update([
-                'assign_id' => $admin_id,
-                'assignee_id' => $task->assignee_id,
-                'assign_time' => date('Y-m-d H:i:s', time()),
-            ]);
-            //分配数目+1
-            $task->complete_apply_count = $task->complete_apply_count + 1;
-            $task->apply_count = $task->apply_count + 1;
-            $task->save();
-        } */
+            if ($i == 10) {
+                break;
+            }
+            if ($ticket['status'] == 2) {
+                //open
+                //修改zendesk的assign_id,assign_time
+                $res = $this->model->where('id',$ticket['id'])->update([
+                    'is_hide' => 0,
+                    'due_id' => $admin_id,
+                    'assign_time' => date('Y-m-d H:i:s', time()),
+                ]);
+                 //分配数目+1
+                $task->complete_apply_count = $task->complete_apply_count + 1;
+                $task->apply_count = $task->apply_count + 1;
+                $task->save();
+                $i++;
+            } elseif($ticket['status'] == 1) {
+                //new
+                //修改zendesk的assign_id,assign_time
+                $res = $this->model->where('id',$ticket['id'])->update([
+                    'is_hide' => 0,
+                    'due_id' => $admin_id,
+                    'assign_id' => $admin_id,
+                    'assignee_id' => $task->assignee_id,
+                    'assign_time' => date('Y-m-d H:i:s', time()),
+                ]);
+                //分配数目+1
+                $task->complete_apply_count = $task->complete_apply_count + 1;
+                $task->apply_count = $task->apply_count + 1;
+                $task->save();
+                $i++;
+            }
+        }
+        if (false !== $res) {
+            $this->success("申请成功");
+        } else {
+            $this->error("申请失败");
+        }
     }
     /**
      * 申请分配修改
@@ -880,6 +996,7 @@ DOC;
                 $this->error("请先完成今天的任务量再进行申请");
             }
         }
+
         $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
         $tickets = $this->model->where(['status' => ['in',[1,2]]])->order('id desc')->select();
         $key = 1;
@@ -988,31 +1105,169 @@ DOC;
         }
     }
 
+    /*
+     * 手动同步数据方法
+     * 主管，经理有权限
+     * */
+    public function artificial_synchronous()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            switch ($params['site']) {
+                case 1:
+                    $site_str = 'zeelool';
+                    break;
+                case 2:
+                    $site_str = 'voogueme';
+                    break;
+                case 3:
+                    $site_str = 'nihaooptical';
+                    break;
+                default:
+                    $site_str = '';
+                    break;
+            }
+
+            if($site_str == ''){
+                $this->error("站点匹配错误，请联系技术");
+            }
+            $intersects = array();
+            $diffs = array();
+            if(!$params['ticket_id']){
+                $this->error("请点击add");
+            }
+            foreach ($params['ticket_id'] as $val){
+                $where['ticket_id'] = $val;
+                $where['type'] = $params['site'];
+                $tickets = $this->model->where($where)->find();
+                if($tickets->id){
+                    //存在，更新
+                    $intersects[] = $val;
+                }else{
+                    //不存在，新增
+                    $diffs[] = $val;
+                }
+            }
+            if($intersects){
+                //更新
+                foreach($intersects as $intersect){
+                    (new Notice(request(), ['type' => $site_str,'id' => $intersect]))->update();
+                }
+            }
+            if($diffs){
+                //新增
+                foreach($diffs as $diff){
+                    (new Notice(request(), ['type' => $site_str,'id' => $diff]))->create();
+                }
+            }
+            $this->success("同步完成");
+        }
+
+        return $this->view->fetch();
+    }
     /**
      * https断掉的数据更新
      * @return [type] [description]
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'nihaooptical']))->asyncUpdate();
+
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",3)->column('ticket_id');
 
         //求交集的更新
+
         $intersects = array_intersect($ticketIds, $nowTicketsIds);
         //求差集新增
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
+
+        //$intersects = array('80293','82512','83675');
+        //$diffs = array('84301','84303');
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'nihaooptical','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
         exit;
+    }
+    /**
+     * zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 15:25:29 
+     * @return void
+     */
+    public function signvalue(){
+        $signarr = Db::name('zendesk_signvalue')->select();
+        $this->view->assign('signarr',$signarr);
+        return $this->view->fetch();
+    }
+    /**
+     * 修改zendesk签名
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/06/18 16:51:27 
+     * @param [type] $site
+     * @return void
+     */
+    public function signvalue_edit(){
+        $params = $this->request->post("row/a");
+        //查询是否存在
+        $is_exist = Db::name('zendesk_signvalue')->where('site',$params['site'])->value('id');
+        if($is_exist){
+            $result = Db::name('zendesk_signvalue')->where('site',$params['site'])->update(['signvalue'=>$params['signvalue']]);
+        }else{
+            $arr['site'] = $params['site'];
+            $arr['signvalue'] = $params['signvalue'];
+            $result = Db::name('zendesk_signvalue')->insert($arr);
+        }
+        
+        if($result){
+            $this->success('操作成功！！',url('zendesk/signvalue'));
+        }else{
+            $this->error('操作失败！！');
+        }
+    }
+    /**
+     * 修改承接人
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-07-18 19:10:00
+     * @return void
+     */
+    public function edit_recipient($ids=null)
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->post("row/a");
+            if(!$params['id']){
+                $this->error('承接人不存在，请重新尝试');
+            }
+            $data['assign_id']  = $params['id'];
+            $data['due_id']     = $params['id'];
+            $data['recipient']  = $params['id'];
+            $result = $this->model->where(['id'=>$ids])->update($data);
+            if($result){
+                $where['due_id'] = 0;
+                $where['is_admin'] = 1;
+                $where['zid'] = $ids;
+                $dataInfo['due_id'] = $params['id'];
+                $resultInfo = ZendeskComments::where($where)->update($dataInfo);
+            }
+            if($result){
+                $this->success('修改成功');
+            }
+        }
+        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $this->assign('issueList',$issueList);
+        return $this->view->fetch();
     }
 }

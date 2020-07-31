@@ -28,6 +28,7 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_zeelool', 1);
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
     }
 
     /**
@@ -75,7 +76,7 @@ class TrackReg extends Backend
             $list[$k]['node_type'] = 7; //出库
             $list[$k]['create_time'] = $v['created_at'];
             $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_id'] = $v['order_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
             $list[$k]['shipment_data_type'] = $shipment_data_type;
@@ -116,6 +117,7 @@ class TrackReg extends Backend
         }
         echo $site_str . ' is ok' . "\n";
     }
+
     /**
      * 获取快递号
      * @param $title
@@ -162,7 +164,7 @@ class TrackReg extends Backend
     }
 
     /**
-     * 更新物流表状态
+     * 更新物流表状态 handle 改为1
      *
      * @Description
      * @author wpl
@@ -181,12 +183,20 @@ class TrackReg extends Backend
             case 3:
                 $url = config('url.nihao_url');
                 break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
             default:
                 return false;
                 break;
         }
+        
+        if ($params['site'] == 4) {
+            $url = $url . 'rest/mj/update_order_handle';
+        } else {
+            $url = $url . 'magic/order/logistics';
+        }
         unset($params['site']);
-        $url = $url . 'magic/order/logistics';
         $client = new Client(['verify' => false]);
         //请求URL
         $response = $client->request('POST', $url, array('form_params' => $params));
@@ -201,13 +211,19 @@ class TrackReg extends Backend
      */
     public function zeelool_zendesk()
     {
-        $this->zendeskUpateData('zeelool',1);
+        $this->zendeskUpateData('zeelool', 1);
         echo 'all ok';
         exit;
     }
     public function voogueme_zendesk()
     {
-        $this->zendeskUpateData('voogueme',2);
+        $this->zendeskUpateData('voogueme', 2);
+        echo 'all ok';
+        exit;
+    }
+    public function nihao_zendesk()
+    {
+        $this->zendeskUpateData('nihaooptical', 3);
         echo 'all ok';
         exit;
     }
@@ -215,12 +231,13 @@ class TrackReg extends Backend
      * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]
      */
-    public function zendeskUpateData($siteType,$type)
+    public function zendeskUpateData($siteType, $type)
     {
         // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
+
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
@@ -230,16 +247,78 @@ class TrackReg extends Backend
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
         foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->update();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->auto_update();
             echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->create();
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
             echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
         // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
+    }
+
+    /**
+     * 获取每日SKU各站销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/14 09:41:49 
+     * @return void
+     */
+    public function getSkuSalesNum()
+    {
+        set_time_limit(0);
+        $item = new \app\admin\model\itemmanage\Item();
+        $zeelool = new \app\admin\model\order\order\Zeelool();
+        $voogueme = new \app\admin\model\order\order\Voogueme();
+        $nihao = new \app\admin\model\order\order\Nihao();
+        $meeloog = new \app\admin\model\order\order\Meeloog();
+        $wesee = new \app\admin\model\order\order\Weseeoptical();
+        $map['is_open'] = 1;
+        $map['is_del'] = 1;
+        $map['item_status'] = 3;
+        $list = $item->where($map)->limit(300)->select();
+        $skus = [];
+        foreach ($list as $k => $v) {
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
+            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
+            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
+            $meeloog_sku = $itemPlatformSku->getWebSku($v['sku'], 4);
+            $wesee_sku = $itemPlatformSku->getWebSku($v['sku'], 5);
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $stime = date("Y-m-d 00:00:00");
+            $etime = date("Y-m-d 23:59:59");
+            $where['a.created_at'] = ['between', [$stime, $etime]];
+            //Zeelool
+            $where['sku'] = $zeelool_sku;
+            $zeelool_num = $zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Voogueme
+            $where['sku'] = $voogueme_sku;
+            $voogueme_num = $voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Nihao
+            $where['sku'] = $nihao_sku;
+            $nihao_num = $nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            //meeloog
+            $where['sku'] = $meeloog_sku;
+            $meeloog_num = $meeloog->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            //wesee
+            $where['sku'] = $wesee_sku;
+            $wesee_num = $wesee->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
+                $skus[] = $v['sku'];
+            }
+        }
+        $data['is_change'] = 1;
+        $data['is_open'] = 3;
+        $res = $item->save($data, ['sku' => ['in', $skus]]);
+        dump($res);
+        die;
     }
 }

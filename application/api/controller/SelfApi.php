@@ -209,24 +209,7 @@ class SelfApi extends Api
         if (!$track_number) {
             $this->error(__('缺少快递单号参数'), [], 400);
         }
-        switch ($site) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_meeloog';
-                break;
-            default:
-                return false;
-                break;
-        }
-
+  
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -252,6 +235,12 @@ class SelfApi extends Api
         } else {
             $shipment_data_type = $title;
         }
+
+        //如果已发货 则不再更新发货时间
+        if ($row->order_node >= 2 && $row->node_type >= 7) {
+            $this->error(__('订单节点已存在'), [], 400);
+        }
+
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
@@ -360,35 +349,36 @@ class SelfApi extends Api
      * @since 2020/06/29 16:16:43 
      * @return void
      */
-    public function query_order_node_track_processing(){
+    public function query_order_node_track_processing()
+    {
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
-        
+
         $order_node1 = Db::name('order_node_detail')
-                    ->where('order_number',$order_number)
-                    ->where('site',$site)
-                    ->where('node_type','<=',7)
-                    ->select();
+            ->where('order_number', $order_number)
+            ->where('site', $site)
+            ->where('node_type', '<=', 7)
+            ->select();
         $order_node2 = Db::name('order_node_courier')
-                   ->where('order_number',$order_number)
-                   ->where('site',$site)
-                   ->select();
-        $order_data['order_data'] = array_merge($order_node1,$order_node2);
+            ->where('order_number', $order_number)
+            ->where('site', $site)
+            ->select();
+        $order_data['order_data'] = array_merge($order_node1, $order_node2);
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
 
                 $other_order_node1 = Db::name('order_node_detail')
-                                    ->where('order_number',$val)
-                                    ->where('site',$site)
-                                    ->where('node_type','<=',7)
-                                    ->select();
+                    ->where('order_number', $val)
+                    ->where('site', $site)
+                    ->where('node_type', '<=', 7)
+                    ->select();
                 $other_order_node2 = Db::name('order_node_courier')
-                                    ->where('order_number',$val)
-                                    ->where('site',$site)
-                                    ->select();
-                $order_data['other_order_data'][$val] = array_merge($other_order_node1,$other_order_node2);
+                    ->where('order_number', $val)
+                    ->where('site', $site)
+                    ->select();
+                $order_data['other_order_data'][$val] = array_merge($other_order_node1, $other_order_node2);
             }
         }
         $this->success('成功', $order_data, 200);
@@ -401,21 +391,22 @@ class SelfApi extends Api
      * @since 2020/06/29 16:16:43 
      * @return void
      */
-    public function query_order_node_track(){
+    public function query_order_node_track()
+    {
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
 
         $order_data['order_data'] = Db::name('order_node_courier')
-            ->where('order_number',$order_number)
-            ->where('site',$site)
+            ->where('order_number', $order_number)
+            ->where('site', $site)
             ->select();
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
                 $order_data['other_order_data'][$val] = Db::name('order_node_courier')
-                    ->where('order_number',$val)
-                    ->where('site',$site)
+                    ->where('order_number', $val)
+                    ->where('site', $site)
                     ->select();
             }
         }
@@ -429,24 +420,25 @@ class SelfApi extends Api
      * @since 2020/06/29 16:16:43 
      * @return void
      */
-    public function query_order_node_processing(){
+    public function query_order_node_processing()
+    {
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
 
         $order_data['order_data'] = Db::name('order_node_detail')
-            ->where('order_number',$order_number)
-            ->where('site',$site)
-            ->where('node_type','<=',7)
+            ->where('order_number', $order_number)
+            ->where('site', $site)
+            ->where('node_type', '<=', 7)
             ->select();
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
 
                 $order_data['other_order_data'][$val] = Db::name('order_node_detail')
-                    ->where('order_number',$val)
-                    ->where('site',$site)
-                    ->where('node_type','<=',7)
+                    ->where('order_number', $val)
+                    ->where('site', $site)
+                    ->where('node_type', '<=', 7)
                     ->select();
             }
         }
@@ -573,7 +565,7 @@ class SelfApi extends Api
 
         //根据订单号查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3,'work_platform'=>$site])->field('create_user_id,id')->find();
+        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3, 'work_platform' => $site])->field('create_user_id,id')->find();
         if ($list) {
             //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
             //判断查询的工单中有没有其他措施
@@ -588,5 +580,40 @@ class SelfApi extends Api
             $this->error(__('未查询到数据'), [], 400);
         }
         $this->success('成功', [], 200);
+    }
+
+    /**
+     * 同步商品上下架状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/23 09:26:56 
+     * @return void
+     */
+    public function set_product_status()
+    {
+        if ($this->request->isPost()) {
+            $site = $this->request->request('site'); //站点
+            $sku = $this->request->request('sku'); //true_sku
+            $status = $this->request->request('status'); //status 1上架 2下架
+            if (!$sku) {
+                $this->error(__('缺少SKU参数'), [], 400);
+            }
+
+            if (!$site) {
+                $this->error(__('缺少站点参数'), [], 400);
+            }
+
+            if (!$status) {
+                $this->error(__('缺少状态参数'), [], 400);
+            }
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'sku' => $sku])->save(['outer_sku_status' => $status]);
+            if (false !== $res) {
+                $this->success('同步成功', [], 200);
+            } else {
+                $this->error('同步失败', [], 400);
+            }
+        }
     }
 }

@@ -46,7 +46,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         },
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
-                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
+                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
@@ -74,10 +74,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         if( Config.admin_id == 1 || Config.admin_id == 75){
                                             return true;
                                         }
-                                        if(row.assign_id != Config.admin_id){
+                                        if(row.due_id != Config.admin_id){
                                             return false;
                                         }
                                         return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit_recipient',
+                                    text:__('修改承接人'),
+                                    title:__('修改承接人'),
+                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'zendesk/zendesk/edit_recipient',
+                                    icon: '',
+                                    //extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function(row){
+                                            return true;
                                     }
                                 }
 
@@ -139,6 +155,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            $(document).on("click", ".btn-synchronous", function () {
+                Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -350,6 +370,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
             });
         },
+        signvalue:function(){
+            Form.api.bindevent($("form[role=form]"),function(){
+               location.reload();  
+            });
+        },
+        edit_recipient:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
+        artificial_synchronous:function(){
+            Controller.api.bindevent();
+
+
+            $('.input_ticket_id').keydown(function(e){
+                if (107 == (e.keyCode || e.which)) {
+                    $('.a_ticket_id').click();
+                }
+                if (13 == (e.keyCode || e.which)) {
+                    e.preventDefault();
+                    $('.a_ticket_id').click();
+                }
+            });
+
+            $(document).on('click', '.a_ticket_id', function () {
+                var add_ticket_id = $('.input_ticket_id').val();
+                if(!add_ticket_id){
+                    layer.msg('不能为空');
+                    return false;
+                }
+                var status = 0;
+                var i = 0;
+                $("#ticket_id_list .ticket_id_list input").each(function(){
+                    var sel_ticket_id=$(this).val();
+                    if(add_ticket_id == sel_ticket_id){
+                        status = 1;
+                    }
+                    i++;
+                });
+
+                if(status == 1){
+                    layer.msg('重复的Ticket Id');
+                    return false;
+                }
+                if(i > 9){
+                    layer.msg('一次同步最多不超过10个');
+                    return false;
+                }
+                $('.input_ticket_id').val('');
+                var add_str = '<div class="ticket_id_list" id="ticket_id_'+add_ticket_id+'"><span>'+add_ticket_id+'</span><a href="javascript:;" onclick=del_ticket_id("'+add_ticket_id+'")> Ｘ </a><input type="hidden" name="row[ticket_id][]" value="'+add_ticket_id+'"></div>'
+                $('#ticket_id_list').append(add_str);
+            });
+
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -417,3 +489,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
     };
     return Controller;
 });
+
+function del_ticket_id(user_id){
+    $("#ticket_id_"+user_id).remove();
+}

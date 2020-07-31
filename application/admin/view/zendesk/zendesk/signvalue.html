@@ -1,0 +1,38 @@
+<style>
+    .save{
+        display: block;
+        margin:auto;
+        margin-top: 10px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        {:build_heading()}
+    </div>
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('/zendesk/zendesk/signvalue_edit')}">
+                        <p style="font-size: 16px;text-align: left;"><b>zeelool</b></p>
+                        <input type="hidden" name="row[site]" id="site" value="1">
+                        <textarea id="c-signvalue" data-rule="required" class="form-control editor" name="row[signvalue]" type="text">{$signarr[0]['signvalue']}</textarea>
+                        <button type="submit" class="btn btn-success btn-embossed save">保存</button>
+                    </form>
+                    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('/zendesk/zendesk/signvalue_edit')}">
+                        <p style="font-size: 16px;text-align: left;"><b>voogueme</b></p>
+                        <input type="hidden" name="row[site]" id="site" value="2">
+                        <textarea id="c-signvalue" data-rule="required" class="form-control editor" name="row[signvalue]" type="text">{$signarr[1]['signvalue']}</textarea>
+                        <button type="submit" class="btn btn-success btn-embossed save">保存</button>
+                    </form>
+                    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('/zendesk/zendesk/signvalue_edit')}">
+                        <p style="font-size: 16px;text-align: left;"><b>nihao</b></p>
+                        <input type="hidden" name="row[site]" id="site" value="3">
+                        <textarea id="c-signvalue" data-rule="required" class="form-control editor" name="row[signvalue]" type="text">{$signarr[2]['signvalue']}</textarea>
+                        <button type="submit" class="btn btn-success btn-embossed save">保存</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

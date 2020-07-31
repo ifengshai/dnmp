@@ -242,7 +242,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             $('.caigou table tbody').html('');
                             $('#toolbar').hide();
                             for (var i in data) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + data[i].sku + '"></td>'
+                                shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden" value="' + data[i].replenish_id + '"><tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + data[i].sku + '"></td>'
                                 shtml += ' <td class="supplier_sku">' + data[i].supplier_sku + '</td>'
                                 shtml += ' <td>' + data[i].purchase_num + '</td>'
                                 shtml += ' <td>' + data[i].arrivals_num + '</td>'

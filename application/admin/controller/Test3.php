@@ -195,48 +195,99 @@ class Test3 extends Backend
     }
 
 
-    /**
-     * 处理在途库存
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/06/09 10:08:03 
-     * @return void
-     */
-    public function proccess_stock()
+    
+    //修改zendesk表中的承接人id
+    public function zendesk_assign_modify()
     {
-        // $item = new \app\admin\model\itemmanage\Item();
-        // $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
-        // $result = collection($result)->toArray();
-        // $skus = array_column($result, 'sku');
+        $list = Db::name('Sheet1')->where('id', 'not in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $item) {
+            Db::name('zendesk')->where('assignee_id', $item['id'])->update(['assign_id' => $item['admin_id'], 'due_id' => $item['admin_id'], 'recipient' => $item['admin_id']]);
+            echo $item['id'] . ' is ok' . "\n";
+        }
+    }
+    public function zendesk_tongyong()
+    {
+        $list = Db::name('zendesk')->where('assignee_id', 'in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $k => $v) {
+            $due_id = Db::name('zendesk_comments')->where('zid', $v['id'])->where('is_admin', 1)->order('id desc')->value('due_id');
+            Db::name('zendesk')->where('id', $v['id'])->update(['assign_id' => $due_id, 'due_id' => $due_id, 'recipient' => $due_id]);
+            echo $k . "\n";
+        }
+        echo 'ok';
+    }
 
+    //修改zendesk表中zendesk的id
+    public function zendesk_id_modify()
+    {
+        $this->zendesk_id1(1);
+        $this->zendesk_id1(2);
+    }
+    public function zendesk_id1($type)
+    {
+        if ($type == 1) {
+            $zendesk_str = '383342686912';
+        } else {
+            $zendesk_str = '381994479654';
+        }
+        $zendesk_arr['type'] = $type;
+        Db::name('zendesk')->where($zendesk_arr)->update(['assignee_id' => $zendesk_str]);
 
-        //查询签收的采购单
-        $logistics = new \app\admin\model\LogisticsInfo();
-        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
+        echo 'ok';
+    }
+    //修改comments表中的due_id
+    public function zendesk_test()
+    {
+        //查询zendesk_comments
+        $zendesk = Db::name('zendesk_comments')->field('a.id,a.author_id,b.assign_id')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 1)->where('a.author_id', 'not in', ['383342686912', '381994479654'])->select();
+        $assign_arr = Db::name('zendesk_agents')->column('admin_id', 'old_agent_id');
+        foreach ($zendesk as $k => $v) {
+            //如果是公用账户 查询zendesk表 获取承接人id 更新评论表due_id
+            Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $assign_arr[$v['author_id']] ?: 0]);
 
+            echo $k . "\n";
+        }
 
+        echo 'is ok';
+    }
+    //排查邮件中所有不匹配站点的邮件
+    public function zendesk_plat_modify(){
+        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['neq','0'],'status'=>['neq',5]])->select();
+        $i = 0;
+        foreach ($zendesk as $item){
+            //查询该邮件的负责人的站点
+            $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
+            if($admin_type){
+                if($admin_type != $item['type']){
+                    echo $item['id']."\n";
+                    $i++;
+                    /*//查询该评论的最后一条记录
+                    $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
+                    if($due_id){
+                        if($due_id == 75 || $due_id == 105){
+                            $other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105']])->value('admin_id');
+                            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id]);
+                        }else{
+                            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
+                        }
+                        echo $item['id']."\n";
+                        $i++;
+                    }*/
+                }
+            }
+        }
+        dump($i);exit;
+    }
+    public function zendesk_data(){
+        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
+        foreach ($zendesk as $item){
+            $where['zid'] = $item;
+            $where['is_admin'] = 1;
+            $where['due_id'] = array('neq',0);
+            $assign = Db::name('zendesk_comments')->where($where)->order('id','desc')->value('due_id');
+            $params['assign_id'] = $assign;
+            Db::name('zendesk')->where('id',$item)->update($params);
+            echo $item.'--'.$assign.' is ok'."\n";
+        }
 
-        // //计算SKU总采购数量
-        // $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        // $hasWhere['sku'] = ['in', $skus];
-        // $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
-        // $purchase_map['is_del'] = 1;
-        // $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
-        // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-        //     ->where($purchase_map)
-        //     ->group('sku')
-        //     ->column('sum(purchase_num) as purchase_num', 'sku');
-
-        // foreach ($result as &$v) {
-        //     $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
-        //     unset($v['sku']);
-        // }
-        // unset($v);
-        // $res = $item->saveAll($result);
-        echo  $res;
-        die;
     }
 }
