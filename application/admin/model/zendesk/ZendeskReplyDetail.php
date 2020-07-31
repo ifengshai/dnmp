@@ -12,7 +12,7 @@ class ZendeskReplyDetail extends Model
     protected $name = 'zendesk_reply_detail';
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = 'datetime';
+    protected $autoWriteTimestamp = 'timestamp';
     protected $dateFormat = 'Y-m-d H:i:s';
 
 
