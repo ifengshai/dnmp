@@ -311,7 +311,7 @@ class Zendesk extends Backend
                         'assignee_id' => $assignee_id,
                         'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
@@ -513,7 +513,7 @@ class Zendesk extends Backend
                         'due_id' => 0,
                         'email_cc' => $params['email_cc'],
                         'is_hide' => 1,
-                        'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time())
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if (strip_tags($params['content'])) {
@@ -748,7 +748,7 @@ Please close this window and try again.");
                     'assignee_id' => $agent_id,
                     'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
-                    'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
+                    'zendesk_update_time' => date('Y-m-d H:i:s',time())
                 ]);
 
                 ZendeskComments::create([
