@@ -40,6 +40,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
+                        { field: 'create_user_name', title: __('create_user_name'), operate: 'like', visible: false },
+
                         /*{
                             field: 'order_sku',
                             title: __('Order_sku'),
@@ -2200,23 +2202,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 }
                                 
                             }
+                            // if(count == 1){
+                            //     appoint_users.push(Config.userid);
+                            // }else{
+                            //      if(appoint_users[Config.userid]){
+                            //         delOne(Config.userid,appoint_users);
+                            //     }                         
+                            // }
+                            // if(checkID.length>0 && appoint_users.length === 0){
+                            //     if(!appoint_users[Config.userid]){
+                            //         appoint_users.push(Config.userid);
+                            //     }
+                            // }else if(checkID.length === 0){
+                            //     if(appoint_users[Config.userid]){
+                            //         delOne(Config.userid,appoint_users);
+                            //     } 
+                            // }
                             if(count == 1){
-                                appoint_users.push(Config.userid);
+                                appoint_users.push(Config.create_user_id);
                             }else{
-                                 if(appoint_users[Config.userid]){
-                                    delOne(Config.userid,appoint_users);
+                                 if(appoint_users[Config.create_user_id]){
+                                    delOne(Config.create_user_id,appoint_users);
                                 }                         
                             }
                             if(checkID.length>0 && appoint_users.length === 0){
-                                if(!appoint_users[Config.userid]){
-                                    appoint_users.push(Config.userid);
+                                if(!appoint_users[Config.create_user_id]){
+                                    appoint_users.push(Config.create_user_id);
                                 }
                             }else if(checkID.length === 0){
-                                if(appoint_users[Config.userid]){
-                                    delOne(Config.userid,appoint_users);
+                                if(appoint_users[Config.create_user_id]){
+                                    delOne(Config.create_user_id,appoint_users);
                                 } 
                             }
-
                             //循环根据承接人id获取对应人名称
                             var appoint_users = array_filter(appoint_users);
                             console.log(appoint_users);

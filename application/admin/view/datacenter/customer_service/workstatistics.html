@@ -224,7 +224,8 @@ table.altrowstable tr:nth-child(even){
              <tr>
                  <th style="text-align: center; vertical-align: middle;">姓名</th>
                  <th style="text-align: center; vertical-align: middle;">分组</th>
-                 <th style="text-align: center; vertical-align: middle;">日期</th>               
+                 <th style="text-align: center; vertical-align: middle;">日期</th>        
+                 <th style="text-align: center; vertical-align: middle;">工单创建量</th>       
                  <th style="text-align: center; vertical-align: middle;">工单完成量</th>
                  <th style="text-align: center; vertical-align: middle;">订单总金额($)</th>
                  <th style="text-align: center; vertical-align: middle;">补发单数</th>
@@ -244,6 +245,7 @@ table.altrowstable tr:nth-child(even){
                       {if !empty($start) && !empty($end)}
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
                       {/if}  
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.create_counter}</td>
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
                       <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
@@ -273,6 +275,8 @@ table.altrowstable tr:nth-child(even){
                       <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>   
                       <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group}</td>  
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.create_counter}</td>
+
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>   
                       <td style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
                       <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
@@ -296,8 +300,11 @@ table.altrowstable tr:nth-child(even){
                       {/if}
                   </tr>
                   <tr> 
-                    <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td>  
+                    <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td> 
+                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistTwo[$k]['create_counter'];?></td>    
                     <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $worklistTwo[$k]['counter'];?></td>   
+                    
+
                     <td style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['base_grand_total'],2);?></td>
                     <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"><?php echo round($worklistTwo[$k]['replacement_num'],2);?></td>
                     {if $worklistTwo[$k]['counter'] gt 0 }   

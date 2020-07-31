@@ -2893,6 +2893,7 @@ class WorkOrderList extends Backend
         $this->view->assign('url', $url);
         $this->view->assign('remarkList', $remarkList);
         $this->assignconfig('work_status',$row->work_status);
+        $this->assignconfig('create_user_id',$row->create_user_id);
         return $this->view->fetch();
     }
 
