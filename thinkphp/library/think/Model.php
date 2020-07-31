@@ -181,7 +181,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $this->initialize();
 
         //修改时区
-        // $this->query("set time_zone='+8:00'");
+        $this->query("set time_zone='+8:00'");
     }
 
     /**
