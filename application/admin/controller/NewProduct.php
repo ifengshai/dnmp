@@ -78,7 +78,7 @@ class NewProduct extends Backend
 //                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
-                ->order('a.id', $order)
+                ->order($sort, $order)
                 ->count();
 
             $list = $this->model
@@ -87,7 +87,7 @@ class NewProduct extends Backend
 //                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
-                ->order('a.id', $order)
+                ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
