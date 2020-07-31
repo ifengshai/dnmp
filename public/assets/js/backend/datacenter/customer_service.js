@@ -634,7 +634,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     $('#all_positive_num').text(all_positive_num);
                     $('#work_positive_num').text(work_positive_num);
                     $('#nowork_positive_num').text(nowork_positive_num);
-                    $(".customer_info").html(customer_data);
+                    $(".altrowstable").html(customer_data);
                     return true;
                 }, function(data, ret){
                     Layer.alert(ret.msg);
@@ -648,6 +648,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 $("#one_time").val('');
                 $("#customer_type").val(0);
             })
+            //点击查看
+            $(document).on('click', '.click_look', function () {
+                var admin_id = $(this).data('id');
+                var time_str = $(this).data('value');
+                Backend.api.open('datacenter/customer_service/dealnum_alert_line?admin_id='+admin_id+'&time_str='+time_str,'处理量',{area:["50%", "50%"]});
+            });
+        
             //折线图
             Controller.api.formatter.workload_line_chart();
         },        
@@ -1005,6 +1012,27 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
 
         },
+        //工作量统计处理量折线图弹窗
+        dealnum_alert_line: function(){
+            //工作量概况折线图
+            var chartOptions = {
+                targetId: 'worknum_echart',
+                downLoadTitle: '图表',
+                type: 'line'
+            };
+            
+            var options = {
+                type: 'post',
+                url: 'datacenter/customer_service/dealnum_line',
+                data: {
+                    admin_id:$("#admin_id").val(),
+                    time_str:$("#time_str").val(),
+                }
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+            Controller.api.bindevent();
+        }
 
     };
     return Controller;

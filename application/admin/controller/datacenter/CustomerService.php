@@ -225,6 +225,7 @@ class CustomerService extends Backend
         $all_service = Db::name('zendesk_agents')->column('admin_id');
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
+            $data[$i]['admin_id'] = $value;
             //用户姓名
             $data[$i]['name'] = $admin['nickname'];
             //分组名称
@@ -238,10 +239,12 @@ class CustomerService extends Backend
             if($time_str1){
                 $createat1 = explode(' ', $time_str1);
                 $one_time = $createat1[0].' - '.$createat1[3];
+                $data[$i]['time'] = $time_str1;
             }else{
                 $seven_startdate = date("Y-m-d", strtotime("-6 day"));
                 $seven_enddate = date("Y-m-d");
                 $one_time = $seven_startdate.' - '.$seven_enddate;
+                $data[$i]['time'] = '';
             }
             //时间
             $data[$i]['one']['time'] = $one_time;
@@ -284,15 +287,15 @@ class CustomerService extends Backend
             //获取表格中的时间
             $customer_data = $this->get_worknum_table($platform,$time_str,$contrast_time_str,$group_id);
             if($customer_data){
-                $str = '';
+                $str = '<thead><tr><th style="text-align: center; vertical-align: middle;">姓名</th><th style="text-align: center; vertical-align: middle;">分组</th><th style="text-align: center; vertical-align: middle;">日期</th><th style="text-align: center; vertical-align: middle;">处理量</th><th style="text-align: center; vertical-align: middle;">未达标天数</th><th style="text-align: center; vertical-align: middle;">操作</th></tr></thead>';
                 foreach ($customer_data as $item=>$value){
-                    $str .= '<td style="text-align: center; vertical-align: middle;">'.$value['name'].'</td><td id="today_sales_money" style="text-align: center; vertical-align: middle;">'.$value['group_name'].'</td>';
+                    $str .= '<tr><td style="text-align: center; vertical-align: middle;">'.$value['name'].'</td><td id="today_sales_money" style="text-align: center; vertical-align: middle;">'.$value['group_name'].'</td>';
                     if($value['two']){
                         $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['time'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['time'].'</li></ul></td><td id="today_order_success" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['deal_num'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['deal_num'].'</li></ul></td><td id="today_unit_price" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['no_up_to_day'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['no_up_to_day'].'</li></ul></td>';
                     }else{
                         $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;">'.$value['one']['time'].'</td><td id="today_order_success" style="text-align: center; vertical-align: middle;">'.$value['one']['deal_num'].'</td><td id="today_unit_price" style="text-align: center; vertical-align: middle;">'.$value['one']['no_up_to_day'].'</td>';
                     }
-                    $str .= '<td>点击查看</td>';
+                    $str .= '<td class="click_look" data-id="'.$value['admin_id'].'" data-value="'.$value['time'].'">点击查看</td></tr>';
                 }
                 $arr['customer_data'] = $str;
             }else{
@@ -311,16 +314,18 @@ class CustomerService extends Backend
             $platform = $params['platform'];
             $time_str = $params['time_str'];
             $group_id = $params['group_id'];
-
+            $admin_id = $params['admin_id'];
             if($platform){
                 $where['platform'] = $platform;
             }
             $where['is_admin'] = 1;
-            $where['due_id'] = array('not in','75,117,95,105');
             if($group_id){
                 //查询客服类型
                 $group_admin_id = Db::name('admin')->where(['group_id'=>$group_id,'status'=>'normal'])->column('id');
                 $where['due_id'] = array('in',$group_admin_id);
+            }
+            if($admin_id){
+                $where['due_id'] = $admin_id;
             }
             if($time_str){
                 $createat = explode(' ', $time_str);
@@ -367,7 +372,16 @@ class CustomerService extends Backend
             ];
             return json(['code' => 1, 'data' => $json]);
         }
-
+    }
+    /*
+     * 处理量折线图弹窗
+     * */
+    public function dealnum_alert_line(){
+        $params = $this->request->param();
+        $admin_id = $params['admin_id'];
+        $time_str = $params['time_str'];
+        $this->view->assign(compact('admin_id', 'time_str'));
+        return $this->view->fetch();
     }
     /**
      * 客服数据(首页)

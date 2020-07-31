@@ -232,46 +232,44 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">处理量</th>
                  <th style="text-align: center; vertical-align: middle;">未达标天数</th>
                  <th style="text-align: center; vertical-align: middle;">操作</th>
-                 <!-- <th style="text-align: center; vertical-align: middle;">差评数量</th>
-                 <th style="text-align: center; vertical-align: middle;">差评占比</th> -->
              </tr>
              </thead>
-                    {if isset($customer_data)}
-                    {foreach name="customer_data" item="vo" key="k"}
-                  <tr class="customer_info">
-                      <td style="text-align: center; vertical-align: middle;">{$vo.name}</td>
-                      <td id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group_name}</td>
-                      {if isset($vo['two'])}
-                      <td id='today_order_num' style="text-align: center; vertical-align: middle;">
-                        <ul class="customer_table">
-                            <li>{$vo.one.time}</li>
-                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
-                            <li>{$vo.two.time}</li>
-                        </ul>
-                      </td>
-                      <td id='today_order_success' style="text-align: center; vertical-align: middle;">
-                        <ul class="customer_table">
-                            <li>{$vo.one.deal_num}</li>
-                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
-                            <li>{$vo.two.deal_num}</li>
-                        </ul>
-                    </td>
-                      <td id='today_unit_price' style="text-align: center; vertical-align: middle;">
-                        <ul class="customer_table">
-                            <li>{$vo.one.no_up_to_day}</li>
-                            <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
-                            <li>{$vo.two.no_up_to_day}</li>
-                        </ul>
-                    </td>
-                      {else/}
-                      <td id='today_order_num' style="text-align: center; vertical-align: middle;">{$vo.one.time}</td>
-                      <td id='today_order_success' style="text-align: center; vertical-align: middle;">{$vo.one.deal_num}</td>
-                      <td id='today_unit_price' style="text-align: center; vertical-align: middle;">{$vo.one.no_up_to_day}</td>
-                      {/if}
-                      <td>点击查看</td>
-                  </tr>
-                  {/foreach}
-                  {/if}				 
+                {if isset($customer_data)}
+                {foreach name="customer_data" item="vo" key="k"}
+              <tr>
+                  <td style="text-align: center; vertical-align: middle;">{$vo.name}</td>
+                  <td id='today_sales_money' style="text-align: center; vertical-align: middle;">{$vo.group_name}</td>
+                  {if isset($vo['two'])}
+                  <td id='today_order_num' style="text-align: center; vertical-align: middle;">
+                    <ul class="customer_table">
+                        <li>{$vo.one.time}</li>
+                        <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                        <li>{$vo.two.time}</li>
+                    </ul>
+                  </td>
+                  <td id='today_order_success' style="text-align: center; vertical-align: middle;">
+                    <ul class="customer_table">
+                        <li>{$vo.one.deal_num}</li>
+                        <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                        <li>{$vo.two.deal_num}</li>
+                    </ul>
+                </td>
+                  <td id='today_unit_price' style="text-align: center; vertical-align: middle;">
+                    <ul class="customer_table">
+                        <li>{$vo.one.no_up_to_day}</li>
+                        <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                        <li>{$vo.two.no_up_to_day}</li>
+                    </ul>
+                </td>
+                  {else/}
+                  <td id='today_order_num' style="text-align: center; vertical-align: middle;">{$vo.one.time}</td>
+                  <td id='today_order_success' style="text-align: center; vertical-align: middle;">{$vo.one.deal_num}</td>
+                  <td id='today_unit_price' style="text-align: center; vertical-align: middle;">{$vo.one.no_up_to_day}</td>
+                  {/if}
+                  <td class="click_look" data-id="{$vo.admin_id}" data-value="{$vo.time}">点击查看</td>
+              </tr>
+              {/foreach}
+              {/if}	
                 </table>
                 </div>
             </div>                                   
