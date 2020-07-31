@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id') },
+                        { field: 'id', title: __('Id'),operate:false},
                         { field: 'transfer_order_number', title: __('Transfer_order_number') },
                         // {field: 'call_out_site', title: __('Call_out_site')},
                         // {field: 'call_in_site', title: __('Call_in_site')},
@@ -78,6 +78,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                         return false;
                                     }
                                 },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-cancel btn-danger',
+                                    icon: 'fa fa-remove',
+                                    // url: 'warehouse/transfer_order/cancel',
+                                    // callback: function (data) {
+                                    //     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    // },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }
+                                },
                             ]
                         }
                     ]
@@ -97,7 +115,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     table.bootstrapTable('refresh');
                 });
             })
-
+            //取消调拨单
+            $(document).on('click', '.btn-cancel', function () {
+                // var ids = $(this).data('id');
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要取消吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "warehouse/transfer_order/cancel",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
             //审核拒绝
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
@@ -153,7 +187,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
                 var _this = $(this);
+
                 var id = $(this).parent().parent().find('.item_id').val();
+                console.log(id);
+                console.log((_this.parent().parent().find('.item_id').val());
                 if (id) {
                     Layer.confirm(__('确定删除此数据吗?'), function () {
                         _this.parent().parent().remove();
@@ -165,7 +202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         });
                     });
                 } else {
-                    _this.parent().parent().remove();
+                    // _this.parent().parent().remove();
                 }
             })
         },

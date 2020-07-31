@@ -95,6 +95,25 @@ class TransferOrder extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $sku = $this->request->post("sku/a");
+            $num = $this->request->post("num/a");
+            $sku_stock = $this->request->post("sku_stock/a");
+//            dump($params);die;
+            if ($params['call_out_site'] == $params['call_in_site']){
+                $this->error('调入仓和调出仓不能为同一个站');
+            }
+            foreach($sku as $k=>$v){
+                if (empty($v)){
+                    $this->error('sku不能为空');
+                }
+                if ($num[$k] <= 0){
+                    $this->error('调出数量不能为0，请确认'.$v.'调出数量');
+                }
+                if ($sku_stock[$k] == 0){
+                    $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku在调出仓的库存');
+                }
+            }
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
@@ -257,7 +276,24 @@ class TransferOrder extends Backend
 
         return $this->view->fetch();
     }
-
+    public function cancel()
+    {
+        if ($this->request->isAjax()) {
+//            $id = $this->request->params('ids');
+            $id = $this->request->post("ids/a");
+//            dump($id);die;
+            $map['id'] = $id[0];
+            $data['status'] = 4;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('取消成功');
+            } else {
+                $this->error('取消失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
     /**
      * 获取对应站点虚拟库存
      *
