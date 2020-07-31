@@ -55,7 +55,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'sales_num', title: __('90天总销量'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
-                        { field: 'platform_type', title: __('平台'), operate: false },
+                        { field: 'platform_type', title: __('平台'), custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog',5:'wesee'},
+                            formatter: Table.api.formatter.status},
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         // { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
                         // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
@@ -112,6 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                         }
                                     }
                                 },
+
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -177,15 +180,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 //     }
                 // );
             });
+
             //商品审核拒绝
             $(document).on('click', '.btn-auditRefused', function () {
                 var ids = Table.api.selectedids(table);
+                var idd = $(this).data('id');
                 Layer.confirm(
                     __('确定要审核拒绝吗'),
                     function (index) {
                         Backend.api.ajax({
                             url: "new_product/auditRefused",
-                            data: { ids: ids }
+                            data: { ids: ids,idd:idd }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -233,7 +238,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         add: function () {
             Controller.api.bindevent();
-
+            $(document).on('click', '.btn-ok', function () {
+                $('#status').val(0);
+            })
+            Form.api.bindevent($("form[role=form]"));
 
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
@@ -300,7 +308,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         edit: function () {
             Controller.api.bindevent();
-
         },
         detail: function () {
             Controller.api.bindevent();

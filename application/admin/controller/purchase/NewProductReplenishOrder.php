@@ -533,7 +533,7 @@ class NewProductReplenishOrder extends Backend
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
             if (count($supplier) > 1) {
-                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
+                $this->error(('必须选择相同的供应商！！'), url('new_product/index'));
             }
             $this->assign('row', $row);
             $this->assign('is_new_product', 1);
