@@ -40,6 +40,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
+                        { field: 'create_user_name', title: __('create_user_name'), operate: 'like', visible: false },
+
                         /*{
                             field: 'order_sku',
                             title: __('Order_sku'),
