@@ -131,7 +131,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)+8*3600));
             //写入主表
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
@@ -371,7 +371,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)+8*3600));
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
 
             //写入主表
