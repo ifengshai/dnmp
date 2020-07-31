@@ -25,12 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('Id') },
-                        { field: 'replenish_id', title: __('需求单ID') },
+                        {checkbox: true},
+                        {field: 'id', title: __('Id')},
+                        {field: 'replenish_id', title: __('需求单ID')},
 
-                        { field: 'sku', title: __(' sku') },
-                        { field: 'replenishment_num', title: __('Replenishment_num'), operate: false },
+                        {field: 'sku', title: __(' sku')},
+                        {field: 'replenishment_num', title: __('Replenishment_num'), operate: false},
                         {
                             field: 'supplier',
                             title: __('分配数量'),
@@ -49,8 +49,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'status',
                             title: __('状态'),
-                            custom: { 1: 'blue', 2: 'danger', 3: 'orange', 4: 'red' },
-                            searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
+                            searchList: {1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理'},
                             formatter: Table.api.formatter.status
                         },
                         // {
@@ -63,8 +63,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'type',
                             title: __('补货需求单类型'),
-                            custom: { 1: 'green', 2: 'danger' },
-                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            custom: {1: 'green', 2: 'danger'},
+                            searchList: {1: '计划补货', 2: '紧急补货'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -130,7 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Backend.api.ajax({
                             url: "purchase/new_product_replenish_order/morePassAudit",
-                            data: { ids: ids }
+                            data: {ids: ids}
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -146,7 +146,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Backend.api.ajax({
                             url: "purchase/new_product_replenish_order/moreAuditRefused",
-                            data: { ids: ids }
+                            data: {ids: ids}
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -198,23 +198,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false ,visible: false},
-                        { field: 'id', title: __('补货需求单')},
-                        { field: 'sku', title: ('SKU'),visible: false},
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {field: 'id', title: __('补货需求单')},
+                        {field: 'sku', title: ('SKU'), visible: false},
 
                         {
                             field: 'type',
                             title: __('补货需求单类型'),
-                            custom: { 1: 'blue', 2: 'danger' },
-                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            custom: {1: 'blue', 2: 'danger'},
+                            searchList: {1: '计划补货', 2: '紧急补货'},
                             formatter: Table.api.formatter.status
                         }, {
-                            field: 'status',
-                            title: __('状态'),
-                            custom: { 1: 'green', 2: 'orange', 3: 'red', 4: 'blue' },
-                            searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
-                            formatter: Table.api.formatter.status
-                        },
+                        field: 'status',
+                        title: __('状态'),
+                        custom: {1: 'green', 2: 'orange', 3: 'red', 4: 'blue'},
+                        searchList: {1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理'},
+                        formatter: Table.api.formatter.status
+                    },
                         {
                             field: 'create_person',
                             title: __('创建人')
@@ -247,7 +247,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-list',
                                     url: 'purchase/new_product_replenish_order/handle_detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -286,7 +286,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-pencil',
                                     url: 'purchase/new_product_replenish_order/handle',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -349,8 +349,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false, visible: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __(' sku'), operate: 'LIKE' },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'sku', title: __(' sku'), operate: 'LIKE'},
                         // {
                         //     field: 'status',
                         //     title: __('状态'),
@@ -358,7 +358,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         //     searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
                         //     formatter: Table.api.formatter.status
                         // },
-                        { field: 'replenishment_num', title: __('Replenishment_num'), operate: false },
+                        {field: 'replenishment_num', title: __('Replenishment_num'), operate: false},
                         {
                             field: 'supplier',
                             title: __('分配数量'),
@@ -370,7 +370,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         // all_user_name += '<div class="step_recept"><b class="step">' + value[i].name + '：</b><input id="'+ rows +'" type="text" class="form-control" style="display: inline-block;width: 180px;text-align: center;" value="'+ value[i].num +'"></div>';
                                         all_user_name += '<div class="step_recept"><b class="step">' + value[i].supplier_name + '：</b><b class="recept text-red">' + value[i].distribute_num + '</b></div>';
                                     }
-                                }else{
+                                } else {
                                     all_user_name = '-';
                                 }
                                 return all_user_name;
@@ -470,7 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
 
                             field: '', title: __('序号'), formatter: function (value, row, index) {
@@ -482,18 +482,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false, visible: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __(' sku'), operate: 'LIKE' },
-                        { field: 'num', title: __('总需求数量'), operate: false },
-                        { field: 'supplier_name', title: __('供应商'), operate: false },
-                        { field: 'distribute_num', title: __('分配数量'), operate: false },
-                        { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
-                        { field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE' },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {field: 'num', title: __('总需求数量'), operate: false},
+                        {field: 'supplier_name', title: __('供应商'), operate: false},
+                        {field: 'distribute_num', title: __('分配数量'), operate: false},
+                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
                         {
                             field: 'status',
                             title: __('状态'),
-                            custom: { 1: 'green', 2: 'danger' },
-                            searchList: { 1: '未采购', 2: '已采购' },
+                            custom: {1: 'green', 2: 'danger'},
+                            searchList: {1: '未采购', 2: '已采购'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -532,23 +532,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //创建采购单
             $(document).on('click', '.btn-createPurchaseOrder', function () {
                 var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要创建采购单吗'),
-                    function (index) {
-                        Layer.closeAll();
-                        var options = {
-                            shadeClose: false,
-                            shade: [0.3, '#393D49'],
-                            area: ['100%', '100%'], //弹出层宽高
-                            callback: function (value) {
-
+                        $.ajax({
+                            type: "GET",
+                            url: "purchase/purchase_order/add",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                label: 'replenish',
+                                ids: ids,
+                                dialog: 1,
+                            },
+                            success: function (data, ret) {
+                                if (data.code == 0) {
+                                    Layer.alert(data.msg);
+                                    table.bootstrapTable('refresh');
+                                    return false;
+                                }
+                                var options = {
+                                    shadeClose: false,
+                                    shade: [0.3, '#393D49'],
+                                    area: ['100%', '100%'], //弹出层宽高
+                                    callback: function (value) {
+                                        table.bootstrapTable('refresh');
+                                    }
+                                };
+                                Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
                             }
-                        };
-                        // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
-
-                    }
-                );
+                        });
+                        // Backend.api.ajax({
+                        //     url: "purchase/purchase_order/add?label=replenish&ids=" + ids.join(',') + "&dialog=1",
+                        //     data: {ids: ids},
+                        //     type: GET,
+                        // }, function (data, ret) {
+                        //     table.bootstrapTable('refresh');
+                        //     Layer.close(index);
+                        // });
+                ;
+                // Layer.confirm(
+                //     __('确定要创建采购单吗'),
+                //     function (index) {
+                //         Layer.closeAll();
+                //         var options = {
+                //             shadeClose: false,
+                //             shade: [0.3, '#393D49'],
+                //             area: ['100%', '100%'], //弹出层宽高
+                //             callback: function (value) {
+                //
+                //             }
+                //         };
+                //         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
+                //         Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
+                //
+                //     }
+                // );
             });
         },
 
@@ -573,7 +610,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
 
                             field: '', title: __('序号'), formatter: function (value, row, index) {
@@ -585,21 +622,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false, visible: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __(' sku'), operate: 'LIKE' },
-                        { field: 'num', title: __('总需求数量'), operate: false },
-                        { field: 'supplier_name', title: __('供应商'), operate: false },
-                        { field: 'distribute_num', title: __('分配数量'), operate: false },
-                        { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
-                        { field: 'purchase_person', title: __('采购负责人'), operate: false },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {field: 'num', title: __('总需求数量'), operate: false},
+                        {field: 'supplier_name', title: __('供应商'), operate: false},
+                        {field: 'distribute_num', title: __('分配数量'), operate: false},
+                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: false},
                         {
                             field: 'status',
                             title: __('状态'),
-                            custom: { 1: 'green', 2: 'danger' },
-                            searchList: { 1: '未采购', 2: '已采购' },
+                            custom: {1: 'green', 2: 'danger'},
+                            searchList: {1: '未采购', 2: '已采购'},
                             formatter: Table.api.formatter.status
                         },
-                        ]
+                    ]
                 ]
             });
 
