@@ -613,8 +613,7 @@ class WorkOrderList extends Model
         $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
-        $lens = $prescription[$prescription_type] ?? [];
-        return $lens;       
+        $lens = $prescription[$prescription_type] ?? [];       
         $lensName = $coatingName = $colorName = $lensType = '';
         if (!$colorId) {
             foreach ($lens as $len) {
