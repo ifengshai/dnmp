@@ -60,7 +60,7 @@ return [
         14 => '其他'
     ],
     'platform_url'=>[
-        1   => 'https://www.zeelool.com/index.php/GW05pqxvzpEVjIYTALLNumrCf/sales_order/view/order_id/',
+        1   => 'https://www.zeelool.com/index.php/nextmarvel/sales_order/view/order_id/',
         2   => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/',
         3   => 'https://pc.nihaooptical.com/index.php/xiaomoshou/sales_order/view/order_id/'
     ],
