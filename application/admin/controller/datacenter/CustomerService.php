@@ -201,10 +201,11 @@ class CustomerService extends Backend
      */
     public function workload()
     {
-        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
         $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
         //处理量
-        $deal_num = $this->zendeskComments->dealnum_statistical(1);
+        $deal_num = $this->zendeskTasks->dealnum_statistical(1);
         //未达标天数
         $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
         //人效
@@ -221,8 +222,21 @@ class CustomerService extends Backend
     {
         $data = array();
         $i = 0;
+        if ($time_str1) {
+            $createat1 = explode(' ', $time_str1);
+            $one_time = $createat1[0].' - '.$createat1[3];
+            $where['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
+            $time_time = $time_str1;
+        }else{
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d");
+            $one_time = $seven_startdate.' - '.$seven_enddate;
+            $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $time_time = '';
+        }
         //查询所有客服人员
-        $all_service = Db::name('zendesk_agents')->column('admin_id');
+        $all_service_ids = Db::name('zendesk_tasks')->where($where)->column('admin_id');
+        $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
             $data[$i]['admin_id'] = $value;
@@ -236,20 +250,11 @@ class CustomerService extends Backend
             } else {
                 $data[$i]['group_name'] = '';
             }
-            if ($time_str1) {
-                $createat1 = explode(' ', $time_str1);
-                $one_time = $createat1[0].' - '.$createat1[3];
-                $data[$i]['time'] = $time_str1;
-            }else{
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d");
-                $one_time = $seven_startdate.' - '.$seven_enddate;
-                $data[$i]['time'] = '';
-            }
+            $data[$i]['time'] = $time_time;
             //时间
             $data[$i]['one']['time'] = $one_time;
             //处理量
-            $data[$i]['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
+            $data[$i]['one']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
             //未达标天数
             $data[$i]['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str1, $admin['group_id'], $value);
             if ($time_str2) {
@@ -258,7 +263,7 @@ class CustomerService extends Backend
                 //对比时间
                 $data[$i]['two']['time'] = $two_time;
                 //对比处理量
-                $data[$i]['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
+                $data[$i]['two']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
                 //对比未达标天数
                 $data[$i]['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str2, $admin['group_id'], $value);
             }
@@ -280,7 +285,7 @@ class CustomerService extends Backend
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
             //处理量
-            $arr['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str, $group_id);
+            $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数
             $arr['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str, $group_id);
             //人效

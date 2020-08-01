@@ -2893,6 +2893,7 @@ class WorkOrderList extends Backend
         $this->view->assign('url', $url);
         $this->view->assign('remarkList', $remarkList);
         $this->assignconfig('work_status',$row->work_status);
+        $this->assignconfig('create_user_id',$row->create_user_id);
         return $this->view->fetch();
     }
 
@@ -3607,7 +3608,7 @@ EOF;
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
