@@ -38,13 +38,12 @@ class ZendeskTasks extends Model
         if($admin_id){
             $where['admin_id'] = $admin_id;
         }
-        $where['target_count']  = array('exp',Db::raw(' lt reply_count '));
+        $where['target_count']  = array('exp',Db::raw(' < reply_count '));
         if($platform){
             $where['type'] = $platform;
         }
 
         $count = $this->where($where)->count();
-        echo $count;exit;
 
         return $count;
     }
