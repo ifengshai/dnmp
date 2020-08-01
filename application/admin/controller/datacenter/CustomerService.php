@@ -254,7 +254,7 @@ class CustomerService extends Backend
             //时间
             $data[$i]['one']['time'] = $one_time;
             //处理量
-            $data[$i]['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
+            $data[$i]['one']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
             //未达标天数
             $data[$i]['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str1, $admin['group_id'], $value);
             if ($time_str2) {
@@ -263,7 +263,7 @@ class CustomerService extends Backend
                 //对比时间
                 $data[$i]['two']['time'] = $two_time;
                 //对比处理量
-                $data[$i]['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
+                $data[$i]['two']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
                 //对比未达标天数
                 $data[$i]['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str2, $admin['group_id'], $value);
             }
@@ -285,7 +285,7 @@ class CustomerService extends Backend
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
             //处理量
-            $arr['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str, $group_id);
+            $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数
             $arr['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str, $group_id);
             //人效
