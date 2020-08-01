@@ -51,7 +51,7 @@ class ZendeskComments extends Model
             $group_admin_id = Db::name('admin')->where(['group_id'=>$group_id,'status'=>'normal'])->column('id');
             $where['due_id'] = array('in',$group_admin_id);
         }
-        $count = $this->where($where)->count();
+        $count = $this->where($where)->select(false);
         return $count;
     }
     /*
