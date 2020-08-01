@@ -1277,6 +1277,11 @@ class NewProduct extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             $wait_in_arr = $purchase->getWaitInStockNum($skus);
             foreach ($list as &$v) {
+                //查询每个SKU的15天日均销量 及90天日均销量
+                
+
+
+
                 $v['category_name'] = $category[$v['category_id']];
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']]['counter'] ?: 0;
