@@ -651,7 +651,7 @@ class WorkOrderList extends Model
             }
             //lsw添加
             if(!$lensName){
-                foreach ($colorList as $cval) {
+                foreach ($lensColorList as $cval) {
                     if ($cval['lens_id'] == $lens_id) {
                         $lensName = $cval['lens_data_name'] . "({$colorName})";
                         $lensType = $cval['lens_data_index'];
