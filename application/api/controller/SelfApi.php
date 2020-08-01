@@ -209,7 +209,7 @@ class SelfApi extends Api
         if (!$track_number) {
             $this->error(__('缺少快递单号参数'), [], 400);
         }
-  
+
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -569,13 +569,13 @@ class SelfApi extends Api
         if ($list) {
             //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
             //判断查询的工单中有没有其他措施
-            $measure_choose_id = Db::name('work_order_measure')->where('work_id',$list['id'])->column('measure_choose_id');
-            if(count($measure_choose_id) == 1 && in_array(8,$measure_choose_id)){
+            $measure_choose_id = Db::name('work_order_measure')->where('work_id', $list['id'])->column('measure_choose_id');
+            if (count($measure_choose_id) == 1 && in_array(8, $measure_choose_id)) {
                 //如果只有一个补差价，就更改主表的状态
-                $workorder->where('id',$list['id'])->update(['work_status'=>6]);
+                $workorder->where('id', $list['id'])->update(['work_status' => 6]);
             }
-            Db::name('work_order_measure')->where('work_id',$list['id'])->update(['operation_type'=>1]);
-            Db::name('work_order_recept')->where('work_id',$list['id'])->update(['recept_status'=>1]);
+            Db::name('work_order_measure')->where('work_id', $list['id'])->update(['operation_type' => 1]);
+            Db::name('work_order_recept')->where('work_id', $list['id'])->update(['recept_status' => 1]);
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }
@@ -610,6 +610,16 @@ class SelfApi extends Api
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'sku' => $sku])->save(['outer_sku_status' => $status]);
             if (false !== $res) {
+                //如果是上架 则查询此sku是否存在当天有效sku表里
+                if ($status == 1) {
+                   $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                   //如果不存在则插入此sku
+                   if ($count < 1) {
+                        $data['sku'] = $sku;
+                        $data['site'] = $site;
+                        Db::name('sku_sales_num')->insert($data);
+                   }
+                }
                 $this->success('同步成功', [], 200);
             } else {
                 $this->error('同步失败', [], 400);
