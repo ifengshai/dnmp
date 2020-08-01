@@ -40,18 +40,17 @@ class ZendeskComments extends Model
             $where['update_time'] = ['between', [$start,$end]];
         }
         $where['is_admin'] = 1;
-        $where['due_id'] = array('not in','75,117,95,105');
-        if($admin_id){
-            $where['due_id'] = $admin_id;
-        }else{
-            $where['due_id'] = ['neq',0];
-        }
         if($group_id){
             //查询客服类型
             $group_admin_id = Db::name('admin')->where(['group_id'=>$group_id,'status'=>'normal'])->column('id');
             $where['due_id'] = array('in',$group_admin_id);
         }
-        $count = $this->where($where)->select(false);
+        if($admin_id){
+            $where['due_id'] = $admin_id;
+        }else{
+            $where['due_id'] = ['neq',0];
+        }
+        $count = $this->where($where)->count();
         return $count;
     }
     /*
