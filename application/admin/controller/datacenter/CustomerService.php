@@ -203,6 +203,7 @@ class CustomerService extends Backend
     {
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
+
         //处理量
         $deal_num = $this->zendeskComments->dealnum_statistical(1);
         //未达标天数
@@ -211,6 +212,7 @@ class CustomerService extends Backend
         $positive_effect_num = $this->zendeskComments->positive_effect_num(1);
         //获取表格内容
         $customer_data = $this->get_worknum_table(1);
+        dump($customer_data);exit;
         $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));
         return $this->view->fetch();
     }
