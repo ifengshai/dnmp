@@ -1,0 +1,324 @@
+<style type="text/css">
+table.altrowstable {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
+table.altrowstable tr:nth-child(odd){
+    background:#E9F1F4;
+    background: #F5F5F5;
+}
+table.altrowstable tr:nth-child(even){
+    background: #fff;
+    background: #eee;
+}
+
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+
+    .tab-content > .active {
+       display: block;
+       clear: both;
+    }
+    .work_title{
+        display: flex;
+    }
+    .work_title li{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        list-style: none;
+    }
+    .work_title li span{
+        display: inline-block;
+        font-size: 14px;
+    }
+    .work_title li b{
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 28px;
+    }
+    .work_title li.active span,.work_title li.active b{
+        color:#396FFF;
+    }
+    .plat_form,.plat_form1{
+        margin-right: 10px;
+    }
+    .plat_form.active,.plat_form1.active{
+        color:#396FFF;
+    }
+    .echart-style td{
+        width:60px;
+    }
+
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="row">
+                    <div>
+                        <div class="form-group">
+                            <div style="font-size: 16px;"><b>工单处理概况</b></div><br>
+                            <div style="margin-left: 57px;font-size: 14px;margin-top: 20px;">
+                                时间：
+                                <span>
+                            <input type="hidden" class="form-control operate" name="workload_time-operate" data-name="one_time" value="RANGE" readonly="">
+                            <input type="text" autocomplete="off" class="datetimerange" name="workload_time"  placeholder="输入时间" id="workload_time" value="" data-index="14" style="width: 300px;">
+                        </span>
+                            </div>
+                        </div>                                                                 
+                </div>  
+                <table id="workload-info" class="altrowstable"
+                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                width="100%">
+             <thead>                    
+             <tr>
+                 <th style="text-align: center; vertical-align: middle;">日期</th>
+                 <th style="text-align: center; vertical-align: middle;">工单创建数量</th>
+                 <th style="text-align: center; vertical-align: middle;">工单完成数量</th>
+                 <th style="text-align: center; vertical-align: middle;">补发订单比（%）</th>
+                 <th style="text-align: center; vertical-align: middle;">退款订单比（%）</th>
+                 <th style="text-align: center; vertical-align: middle;">退款金额比（%）</th>
+             </tr>
+             </thead>
+                  <tr>
+                      <td style="text-align: center; vertical-align: middle;">今天</td>
+                      <td id="today_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
+                      <td id="today_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
+                      <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                      <td id="today_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_percent}</td>
+                      <td id="today_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_refund_money_percent}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: center; vertical-align: middle;">昨天</td>
+                    <td id="yesterday_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
+                    <td id="yesterday_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
+                    <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
+                    <td id="yesterday_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_percent}</td>
+                    <td id="yesterday_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">过去7天</td>
+                    <td id="seven_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
+                    <td id="seven_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
+                    <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
+                    <td id="seven_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_percent}</td>
+                    <td id="seven_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">过去30天</td>
+                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
+                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
+                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
+                    <td id="thirty_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_percent}</td>
+                    <td id="thirty_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">当月</td>
+                    <td id="nowmonth_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_num}</td>
+                    <td id="nowmonth_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_complete_num}</td>
+                    <td id="nowmonth_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_bufa_percent}</td>
+                    <td id="nowmonth_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_percent}</td>
+                    <td id="nowmonth_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.nowmonth.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">上月</td>
+                    <td id="premonth_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_num}</td>
+                    <td id="premonth_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_complete_num}</td>
+                    <td id="premonth_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_bufa_percent}</td>
+                    <td id="premonth_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_percent}</td>
+                    <td id="premonth_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.premonth.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">今年</td>
+                    <td id="year_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_num}</td>
+                    <td id="year_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_complete_num}</td>
+                    <td id="year_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_bufa_percent}</td>
+                    <td id="year_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_percent}</td>
+                    <td id="year_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.year.wo_refund_money_percent}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">总计</td>
+                    <td id="total_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_num}</td>
+                    <td id="total_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_complete_num}</td>
+                    <td id="total_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_bufa_percent}</td>
+                    <td id="total_wo_refund_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_percent}</td>
+                    <td id="total_wo_refund_money_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.total.wo_refund_money_percent}</td>
+                </tr>
+                </table>                
+            </div>
+            <div class="tab-panes fade active in">
+                <div id="form2" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <div style="font-size: 16px;"><b>工作量概况</b></div><br>
+                    <div style="margin-left: 57px;font-size: 14px;">
+                        站点：
+                        <span class="plat_form1 active" data-id="plat_form1" data-value="1"> Zeelool</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="2">Voogueme</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="3">Nihao</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="4">Wesee</span>
+                        <span class="plat_form1" data-id="plat_form1" data-value="0">全部</span>
+                        <input type="hidden" id="web_platform" value="1">
+                    </div>
+                    <div style="margin-left: 57px;font-size: 14px;margin-top: 20px;">
+                        时间：
+                        <span>
+                            <input type="hidden" class="form-control operate" name="workload_time-operate" data-name="one_time" value="RANGE" readonly="">
+                            <input type="text" autocomplete="off" class="datetimerange" name="workload_time"  placeholder="输入时间" id="workload_time" value="" data-index="14" style="width: 300px;">
+                        </span>
+                    </div>
+
+                    <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                    <input type="hidden" id="title_type" value="1">
+                    <ul class="work_title">
+                        <li>
+                            <span>待处理</span>
+                            <b id="wait_deal_num">{$worknum_situation.wait_deal_num}</b>
+                        </li>
+                        <li data-value="1" class="title title_click active">
+                            <span>新增</span>
+                            <b id="new_create_num">{$worknum_situation.new_create_num}</b>
+                        </li>
+                        <li data-value="2" class="title title_click">
+                            <span>已回复</span>
+                            <b id="already_reply_num">{$worknum_situation.already_reply_num}</b>
+                        </li>
+                        <li class="title">
+                            <span>待分配</span>
+                            <b id="wait_allot_num">{$worknum_situation.wait_allot_num}</b>
+                        </li>
+                        <li class="title">
+                            <span>人效</span>
+                            <b id="positive_effect_num">{$worknum_situation.positive_effect_num}</b>
+                        </li>
+                        <li class="title">
+                            <span>回复时效（h）</span>
+                            <b id="reply_failure_num">{$worknum_situation.reply_failure_num}</b>
+                        </li>
+                    </ul>
+                    <div id="echart2" style="height:200px;width:100%;"></div>
+                </div>
+            </div>
+            <div class="tab-pane fade active in">
+
+                <div class="row item_info" style="background:#f5f5f5;float: left;width: 48%;margin-top: 20px;clear:both;margin-left: 0px;">
+                    <div id="form3" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">
+                    <div class="col-xs-12 col-md-9">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="control-label col-xs-2">工单平台</label>
+                            <div class="col-xs-4">
+                                <select  id="plat_form2" data-rule="required" class="form-control" name="plat_form2">
+                                    <option value="1" selected>Zeelool</option>
+                                    <option value="2">Voogueme</option>
+                                    <option value="3">Nihao</option>
+                                    <option value="4">Wesee</option>
+                                    <option value="0">全部</option>
+                                </select>
+                            </div>
+                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
+                            <div class="col-xs-4">
+                                <input type="hidden" class="form-control operate" name="create_time_one-operate" data-name="create_time_one" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_one"  placeholder="创建时间" id="create_time_one" value="" data-index="14">
+                            </div>
+                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
+                                <input type="button" class="btn btn-success echart1-btn" id="question_type_submit" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_one reset" id="question_type_reset" value="重置"></div>                                                        
+                        </div>                                                                 
+                    </div>
+                  </div>                    
+                    <div class="col-lg-12">
+                        <div style="float: left;width:60%;">
+                            <div style="font-size: 16px;"><b>工单问题类型统计</b></div><br>
+                            <div id="echart1" style="float: left;height:400px;width:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row item_info" style="background:#f5f5f5;float:right;width: 48%;margin-top: 20px;margin-right: 0px;">
+                 <div id="form5" class="form-commonsearch form-horizontal" action="#" role="form6" method="post">
+                    <div class="col-xs-12 col-md-9">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="control-label col-xs-2">工单平台</label>
+                            <div class="col-xs-4">
+                                <select  id="plat_form3" data-rule="required" class="form-control" name="plat_form3">
+                                    <option value="1" selected>Zeelool</option>
+                                    <option value="2">Voogueme</option>
+                                    <option value="3">Nihao</option>
+                                    <option value="4">Wesee</option>
+                                    <option value="0">全部</option>
+                                </select>
+                            </div>
+                            <label class="control-label col-xs-1 col-sm-2">时间:</label>
+                            <div class="col-xs-4">
+                                <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
+                            </div>
+                            <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
+                                <input type="button" class="btn btn-success echart3-btn" id="question_type_submit1" value="提交">
+                                <input type="reset" class="btn btn-default btn-create_time_two reset" id="question_type_reset1" value="重置"></div>                                                        
+                        </div>                                                                 
+                    </div>
+                  </div>                    
+                    <div class="col-lg-12">
+                        <div class="col-lg-12" style="float: left;">
+                            <div style="font-size: 16px;"><b>工单处理措施统计</b></div><br>
+                            <div id="echart3" style="float: left;height:400px;width:100%;"></div>                                 
+                        </div>
+                    </div>
+                </div>                                                
+            </div>                                                                    
+        </div>     		
+	</div>
+</div>

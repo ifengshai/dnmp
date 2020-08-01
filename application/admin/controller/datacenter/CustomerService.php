@@ -384,6 +384,12 @@ class CustomerService extends Backend
         $this->view->assign(compact('admin_id', 'time_str'));
         return $this->view->fetch();
     }
+    /*
+     * 工单处理统计
+     * */
+    public function worklist_deal(){
+        return $this->view->fetch();
+    }
     /**
      * 客服数据(首页)
      *
