@@ -222,8 +222,21 @@ class CustomerService extends Backend
     {
         $data = array();
         $i = 0;
+        if ($time_str1) {
+            $createat1 = explode(' ', $time_str1);
+            $one_time = $createat1[0].' - '.$createat1[3];
+            $where['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
+            $time_time = $time_str1;
+        }else{
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d");
+            $one_time = $seven_startdate.' - '.$seven_enddate;
+            $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $time_time = '';
+        }
         //查询所有客服人员
-        $all_service = Db::name('zendesk_agents')->column('admin_id');
+        $all_service_ids = Db::name('zendesk_tasks')->where($where)->column('admin_id');
+        $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
             $data[$i]['admin_id'] = $value;
@@ -237,16 +250,7 @@ class CustomerService extends Backend
             } else {
                 $data[$i]['group_name'] = '';
             }
-            if ($time_str1) {
-                $createat1 = explode(' ', $time_str1);
-                $one_time = $createat1[0].' - '.$createat1[3];
-                $data[$i]['time'] = $time_str1;
-            }else{
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d");
-                $one_time = $seven_startdate.' - '.$seven_enddate;
-                $data[$i]['time'] = '';
-            }
+            $data[$i]['time'] = $time_time;
             //时间
             $data[$i]['one']['time'] = $one_time;
             //处理量
