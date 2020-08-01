@@ -71,22 +71,37 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+
+            if ($filter['platform_type']) {
+                unset($map['platform_type']);
+            }
+
+            //可用库存搜索
+            if ($filter['available_stock']) {
+                $item = new \app\admin\model\itemmanage\Item();
+                $item_where['available_stock'] = ['between', explode(',', $filter['available_stock'])];
+                $skus = $item->where($item_where)->where(['is_del' => 1, 'is_open' => 1])->column('sku');
+                $map['sku'] = ['in', $skus];
+                unset($filter['available_stock']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-//                ->alias('a')
-//                ->field('a.*,b.sku,b.available_stock')
-//                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-//                ->alias('a')
-//                ->field('a.*,b.sku,b.available_stock')
-//                ->join(['stock.fa_item' => 'b'], 'a.sku=b.sku')
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -122,7 +137,7 @@ class NewProduct extends Backend
                     $v['item_status_text'] = '选品拒绝';
                 } elseif ($v['item_status'] == 4) {
                     $v['item_status_text'] = '已取消';
-                }elseif ($v['item_status'] == 0) {
+                } elseif ($v['item_status'] == 0) {
                     $v['item_status_text'] = '新建';
                 }
                 //90天总销量
@@ -142,7 +157,7 @@ class NewProduct extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-//            dump($params);die;
+            //            dump($params);die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
@@ -655,7 +670,7 @@ class NewProduct extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-//            dump($params);die;
+            //            dump($params);die;
             //编辑保存的选品状态改为待选品
             $params['item_status'] = 1;
             if ($params) {
@@ -1101,7 +1116,7 @@ class NewProduct extends Backend
             $where['new_product.id'] = ['in', $ids];
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-//            dump($row);die;
+            //            dump($row);die;
             foreach ($row as $k => $v) {
                 if ($v['item_status'] != 1) {
                     $this->error('此状态不能审核！！');
@@ -1205,7 +1220,7 @@ class NewProduct extends Backend
      */
     public function replenishEscalationList()
     {
-//        $this->relationSearch = true;
+        //        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1229,19 +1244,19 @@ class NewProduct extends Backend
 
             $this->request->get(['filter' => json_encode($filter)]);
             $params = $this->request->get();
-            if ($filter['sku']){
-                $where['a.sku'] = ['like','%'.$filter['sku'].'%'];
+            if ($filter['sku']) {
+                $where['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }
-            if ($filter['category_id']){
-                $where['a.category_id'] = ['=',$filter['category_id']];
+            if ($filter['category_id']) {
+                $where['a.category_id'] = ['=', $filter['category_id']];
             }
-            if ($filter['available_stock']){
-                $where['b.available_stock'] = ['between',explode(',',$filter['available_stock'])];
+            if ($filter['available_stock']) {
+                $where['b.available_stock'] = ['between', explode(',', $filter['available_stock'])];
             }
-            if ($filter['platform_type']){
-                $where['a.platform_type'] = ['=',$filter['platform_type']];
+            if ($filter['platform_type']) {
+                $where['a.platform_type'] = ['=', $filter['platform_type']];
             }
-//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            //            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->alias('a')
                 ->field('a.*,b.sku,b.available_stock')
@@ -1264,9 +1279,6 @@ class NewProduct extends Backend
             $skus = array_column($list, 'sku');
             //查询商品分类
             $category = $this->category->where('is_del', 1)->column('name', 'id');
-            //查询90天总销量
-            $productgrade = new \app\admin\model\ProductGrade();
-            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter,grade', 'true_sku');
 
             //查询生产周期
             $suppliersku = new \app\admin\model\purchase\SupplierSku();
@@ -1277,19 +1289,14 @@ class NewProduct extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             $wait_in_arr = $purchase->getWaitInStockNum($skus);
             foreach ($list as &$v) {
-                //查询每个SKU的15天日均销量 及90天日均销量
-                
-
-
-
                 $v['category_name'] = $category[$v['category_id']];
-                //90天总销量
-                $v['sales_num'] = $productarr[$v['sku']]['counter'] ?: 0;
-                $v['grade'] = $productarr[$v['sku']]['grade'];
                 $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
                 $v['product_cycle'] = $product_cycle_arr[$v['sku']] ?: 7;
                 $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
+                $v['sales_days'] = $v['sales_num_90days'] > 0 ? round($v['stock'] / $v['sales_num_90days']) : 0;
+                $num = $v['stock'] - ($v['sales_num_90days'] * 30);
+                $v['replenish_num'] =  $num > 0 ? $num : 0;
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1326,7 +1333,7 @@ class NewProduct extends Backend
             $params = $this->request->post("row/a");
             $mapping = new \app\admin\model\NewProductMapping();
             //判断如果有此SKU 则累加补货数量 否则添加
-            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type'],'is_show'=>1])->count();
+            $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type'], 'is_show' => 1])->count();
             $params['create_time'] = date('Y-m-d H:i:s');
             $params['create_person'] = session('admin.nickname');
             if ($count > 0) {
@@ -1509,7 +1516,8 @@ class NewProduct extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
         if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');die;
+            echo ('暂时没有紧急补货单需要处理');
+            die;
         }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
@@ -1533,7 +1541,9 @@ class NewProduct extends Backend
             $int = 0;
             foreach ($sku_list as $k => $v) {
                 //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {return $val['replenish_num'];}, $v));
+                $sku_whole_num = array_sum(array_map(function ($val) {
+                    return $val['replenish_num'];
+                }, $v));
                 //求出比例赋予新数组
                 foreach ($v as $ko => $vo) {
                     $date[$int]['id'] = $vo['id'];
@@ -1573,7 +1583,6 @@ class NewProduct extends Backend
             Db::rollback();
             echo $e->getMessage();
         }
-
     }
 
     /**
@@ -1647,7 +1656,9 @@ class NewProduct extends Backend
             $int = 0;
             foreach ($sku_list as $k => $v) {
                 //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {return $val['replenish_num'];}, $v));
+                $sku_whole_num = array_sum(array_map(function ($val) {
+                    return $val['replenish_num'];
+                }, $v));
                 //求出比例赋予新数组
                 foreach ($v as $ko => $vo) {
                     $date[$int]['id'] = $vo['id'];

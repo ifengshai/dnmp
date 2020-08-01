@@ -306,22 +306,16 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->cache(7200)->select();
+        $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-
-
         
         foreach ($list as $k => $v) {
             //15天日均销量
-            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->find()->toArray();
-            echo $skuSalesNum->getLastSql();die;
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->select();
             $params['sales_num_15days'] = $days15_data->num > 0 ? round($days15_data->sales_num / $days15_data->num) : 0;
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find()->toArray();
             //90天日均销量
             $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
-
-            dump($days15_data);
-            dump($days90_data);die;
             //计算等级 30天预估销量
             $num = round($params[$k]['sales_num_90days'] * 1 * 30);
             if ($num >= 300) {
