@@ -311,7 +311,7 @@ order by sfoi.item_id asc limit 1000";
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Tinted Prescription Sunglasses') !== false) {
+            if (strpos($final_params['index_type'], 'Tinted') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 

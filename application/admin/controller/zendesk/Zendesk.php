@@ -329,6 +329,12 @@ class Zendesk extends Backend
                             'attachments' => $params['image'],
                             'platform'=>$type
                         ]);
+                        ZendeskTasks::whereTime('create_time', 'today')
+                            ->where([
+                                'admin_id' => session('admin.id'),
+                                'type' => $type,
+                            ])
+                            ->setInc('reply_count',1);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -530,8 +536,13 @@ class Zendesk extends Backend
                             'attachments' => $params['image'],
                             'platform'=>$ticket->type
                         ]);
+                        ZendeskTasks::whereTime('create_time', 'today')
+                            ->where([
+                                'admin_id' => session('admin.id'),
+                                'type' => $ticket->type,
+                            ])
+                            ->setInc('reply_count',1);
                     }
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
