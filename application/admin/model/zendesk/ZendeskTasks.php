@@ -51,6 +51,8 @@ class ZendeskTasks extends Model
         $reply_num = $this->zendeskComments->where($where)->count();
         //目标量
         $complete_num = $this->where($task_where)->sum('target_count');
+        dump($reply_num);
+        dump($complete_num);exit;
         if($reply_num>=$complete_num){
             $count = 0;
         }else{
