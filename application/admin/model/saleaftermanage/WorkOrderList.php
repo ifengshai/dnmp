@@ -649,6 +649,17 @@ class WorkOrderList extends Model
                     break;
                 }
             }
+            //lsw添加
+            if(!$lensName){
+                foreach ($colorList as $cval) {
+                    if ($cval['lens_id'] == $lens_id) {
+                        $lensName = $cval['lens_data_name'] . "({$colorName})";
+                        $lensType = $cval['lens_data_index'];
+                        break;
+                    }
+                }
+            }
+
         }
 
         foreach ($coatingLists as $coatingList) {
