@@ -8,13 +8,13 @@ use think\Model;
 class WorkOrderStepType extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'work_order_step_type';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -24,16 +24,8 @@ class WorkOrderStepType extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
     protected $resultSetType = 'collection';
+
     
-
-
-
-
-
-
-
 }
