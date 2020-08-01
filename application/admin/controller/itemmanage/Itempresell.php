@@ -62,10 +62,10 @@ class Itempresell extends Backend
                 unset($map['platform_type']);
             }
             //默认显示 开启过预售的SKU
-            if ((!$filter['presell_status'] && $filter['presell_status'] != 0) || !$filter) {
+            if (!isset($filter['presell_status'])) {
                 $map['presell_status'] = ['in', [1, 2]];
             }
-      
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($map)
