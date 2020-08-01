@@ -205,7 +205,7 @@ class CustomerService extends Backend
         ini_set('memory_limit', '1024M');
         $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
         //处理量
-        $deal_num = $this->zendeskComments->dealnum_statistical(1);
+        $deal_num = $this->zendeskTasks->dealnum_statistical(1);
         //未达标天数
         $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
         //人效
