@@ -103,7 +103,7 @@
                 </tr>
                 {foreach $item as $k => $v}
                 <tr>
-                    <input  class="form-control" name="item_id[]" value="{$v.id}" type="hidden">
+                    <input  class="form-control item_id" name="item_id[]" value="{$v.id}" type="hidden">
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" value="{$v.sku}" type="text">
                     </td>
