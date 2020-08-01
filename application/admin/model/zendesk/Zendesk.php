@@ -369,8 +369,6 @@ class Zendesk extends Model
     {
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
-        //设置所有的隐藏
-        self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
@@ -401,17 +399,17 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
+            $flag = 0;
             $task = array();
             //电话不分配
             if($ticket->channel == 'voice') {continue;}
-
-            if($ticket->assign_id == 0 || $ticket->assignee_id == 382940274852){
+            if($ticket->status == 1){
                 //判断是否处理过该用户的邮件
-                $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->order('id','desc')->column('id');
+                $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->column('id');
                 //查询接触过该用户邮件的最后一条评论
                 $commentAuthorId = Db::name('zendesk_comments')
                     ->alias('c')
@@ -421,15 +419,30 @@ class Zendesk extends Model
                     ->order('c.id','desc')
                     ->value('due_id');
                 if($commentAuthorId){
-                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                    //查询该用户当天的工单分配量以达到目标数量，则承接给其他人
+                    $customer_task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
                             'admin_id' => $commentAuthorId,
                             'type' => $ticket->getType(),
                             'target_count' => ['>',0]
                         ])
                         ->find();
+                    if($customer_task->id){
+                        //用户今天没休息
+                        if($customer_task->target_count > $customer_task->complete_count){
+                            //判断该用户当天任务是否以达到目标量，未达到，承接给当前用户
+                            $task = $customer_task;
+                        }else{
+                            //已达到目标量，承接给任务量最少的人
+                            $task = ZendeskTasks::whereTime('create_time', 'today')
+                                ->where(['type' => $ticket->getType()])
+                                ->order('complete_count', 'asc')
+                                ->limit(1)
+                                ->find();
+                        }
+                    }
                 }else{
-                    //则分配给最少单的用户
+                    //则承接给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
                         ->order('complete_count', 'asc')
@@ -439,12 +452,13 @@ class Zendesk extends Model
             }else{
                 //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
                 if(in_array($ticket->assign_id,$targetAccount)){
-                    //离职，则分配给最少单的用户
+                    //如果离职，承接不变，分配给最少单的人，手动改承接人
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
+                    $flag = 1;
                 }else{
                     //如果承接人没有离职
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -460,9 +474,12 @@ class Zendesk extends Model
                     $str = '';
                     $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
                     //修改zendesk的assign_id,assign_time
-                    $ticket->assign_id = $task->admin_id;
+                    if($flag != 1){
+                        //修改承接人
+                        $ticket->assignee_id = $task->assignee_id;
+                        $ticket->assign_id = $task->admin_id;
+                    }
                     $ticket->due_id = $task->admin_id;
-                    $ticket->assignee_id = $task->assignee_id;
                     $ticket->assign_time = date('Y-m-d H:i:s', time());
                     $ticket->save();
                     //修改task的字段

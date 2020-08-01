@@ -70,7 +70,7 @@ class Zendesk extends Backend
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $now_admin_id = session('admin.id');
-                $map[] = ['exp', Db::raw("(zendesk.assign_id=$now_admin_id and zendesk.due_id = 0) or zendesk.due_id=$now_admin_id")];
+                $map[] = ['exp', Db::raw("zendesk.due_id=$now_admin_id")];
                 $map['zendesk.status'] = ['in', [1, 2]];
                 $map['zendesk.is_hide'] = 0;
                 $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
@@ -881,23 +881,24 @@ DOC;
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
         $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
-        if($now > 0){
+        if($now >= 5){
             $this->error("请先处理完成已分配的工单");
         }
         //获取用户assignee_id 以及对应站点
         $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['admin_id' => $admin_id])
                 ->find();
-        //查询当前用户负责的邮件
-        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['assign_id'=>$admin_id,'is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
-        if(count($tickets) < 10){
-            //当前用户负责的邮件不够10条，按照更新时间查询不是该用户负责的未分配的open和new的邮件
-            $other_tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1,'assign_id'=>['neq',$admin_id]])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->select();
-            foreach($other_tickets as $item){
+        //按照更新时间查询未分配的open和new的邮件
+        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
+
+        $arr = array();
+        $i = 0;
+        foreach($tickets as $item){
+            if($i<10){
                 if($item['status'] == 1){
-                    //new的邮件分配，去查找曾经负责该用户的处理人，如果是当前用户就能申请，如果不是不能申请
+                    //new的邮件分配，去查找曾经负责该用户的处理人，承接人改成该老用户，分配人改成当前用户
                     //判断是否处理过该用户的邮件
-                    $zendesk_id = Db::name('zendesk')->where(['email'=>$item['email'],'type'=>$item['type']])->order('id','desc')->column('id');
+                    $zendesk_id = Db::name('zendesk')->where(['email'=>$item['email'],'type'=>$item['type']])->column('id');
                     if($zendesk_id){
                         //查询接触过该用户邮件的最后一条评论
                         $commentAuthorId = Db::name('zendesk_comments')
@@ -907,36 +908,28 @@ DOC;
                             ->where(['c.zid' => ['in',$zendesk_id],'c.is_admin' => 1,'c.author_id' => ['neq',382940274852],'a.status'=>['neq','hidden'],'c.due_id'=>['not in','75,105,95,117'],'z.type'=>$item['type']])
                             ->order('c.id','desc')
                             ->value('due_id');
-                        if($commentAuthorId == $admin_id || !$commentAuthorId){
-                            //可以申请
-                            if(count($tickets) < 10){
-                                $tickets[] = $item;
-                            }else{
-                                break;
-                            }
-                        }
-                    }else{
-                        if(count($tickets) < 10){
-                            $tickets[] = $item;
+                        if($commentAuthorId){
+                            $item['flag'] = 1;
+                            $item['old_assign_id'] = $commentAuthorId;
+                            //查询该老用户的assignee_id
+                            $old_assign_id = Db::name('zendesk_agents')->where('admin_id',$commentAuthorId)->value('agent_id');
+                            $item['old_assignee_id'] = $old_assign_id;
+                            $arr[$i] = $item;
                         }else{
-                            break;
+                            $arr[$i] = $item;
                         }
-                    }
-
-                }else{
-                    if(count($tickets) < 10){
-                        $tickets[] = $item;
                     }else{
-                        break;
+                        $arr[$i] = $item;
                     }
+                }else{
+                    $arr[$i] = $item;
                 }
-            }
-        }
-        $i = 0;
-        foreach($tickets as $ticket){
-            if ($i == 10) {
+                $i++;
+            }else{
                 break;
             }
+        }
+        foreach($arr as $ticket){
             if ($ticket['status'] == 2) {
                 //open
                 //修改zendesk的assign_id,assign_time
@@ -949,22 +942,28 @@ DOC;
                 $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->apply_count = $task->apply_count + 1;
                 $task->save();
-                $i++;
+
             } elseif($ticket['status'] == 1) {
                 //new
+                if($ticket['flag'] == 1){
+                    $assign_id = $ticket['old_assign_id'];
+                    $assignee_id = $ticket['old_assignee_id'];
+                }else{
+                    $assign_id = $admin_id;
+                    $assignee_id = $task->assignee_id;
+                }
                 //修改zendesk的assign_id,assign_time
                 $res = $this->model->where('id',$ticket['id'])->update([
                     'is_hide' => 0,
                     'due_id' => $admin_id,
-                    'assign_id' => $admin_id,
-                    'assignee_id' => $task->assignee_id,
+                    'assign_id' => $assign_id,
+                    'assignee_id' => $assignee_id,
                     'assign_time' => date('Y-m-d H:i:s', time()),
                 ]);
                 //分配数目+1
                 $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->apply_count = $task->apply_count + 1;
                 $task->save();
-                $i++;
             }
         }
         if (false !== $res) {
@@ -1251,17 +1250,13 @@ DOC;
             if(!$params['id']){
                 $this->error('承接人不存在，请重新尝试');
             }
+            //查询当前邮件原本的承接人数据
+            $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
             $data['assign_id']  = $params['id'];
             $data['due_id']     = $params['id'];
             $data['recipient']  = $params['id'];
+            $data['assignee_id']  = $agent_id;
             $result = $this->model->where(['id'=>$ids])->update($data);
-            if($result){
-                $where['due_id'] = 0;
-                $where['is_admin'] = 1;
-                $where['zid'] = $ids;
-                $dataInfo['due_id'] = $params['id'];
-                $resultInfo = ZendeskComments::where($where)->update($dataInfo);
-            }
             if($result){
                 $this->success('修改成功');
             }
