@@ -1205,6 +1205,7 @@ class NewProduct extends Backend
      */
     public function replenishEscalationList()
     {
+//        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1226,28 +1227,28 @@ class NewProduct extends Backend
                 unset($map['platform_type']);
             }
 
-//            if ($filter['stock']) {
-//                $arr = explode(',',$filter['stock']);
-//                $maps['available_stock']  = ['between',[$arr[0],$arr[1]]];
-//                if (empty($arr[0]) || empty($arr[1])){
-//                    $this->error('请输入可用库存的起始值');die;
-//                }
-//                unset($filter['stock']);
-//            }else{
-//                $maps = array();
-//            }
             $this->request->get(['filter' => json_encode($filter)]);
-
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-//            dump($sort);dump($order);
+            $params = $this->request->get();
+            if ($filter['sku']){
+                $where['a.sku'] = ['like','%'.$filter['sku'].'%'];
+            }
+            if ($filter['category_id']){
+                $where['a.category_id'] = ['=',$filter['category_id']];
+            }
+            if ($filter['available_stock']){
+                $where['b.available_stock'] = ['between',explode(',',$filter['available_stock'])];
+            }
+            if ($filter['platform_type']){
+                $where['a.platform_type'] = ['=',$filter['platform_type']];
+            }
+//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->alias('a')
                 ->field('a.*,b.sku,b.available_stock')
                 ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
-//                ->where($maps)
-                ->order('a.id', $order)
+                ->order('a.id', 'desc')
                 ->count();
 
             $list = $this->model
@@ -1256,9 +1257,8 @@ class NewProduct extends Backend
                 ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
-//                ->where($maps)
-                ->order('a.id', $order)
-                ->limit($offset, $limit)
+                ->order('a.id', 'desc')
+                ->limit($params['offset'], $params['limit'])
                 ->select();
             $list = collection($list)->toArray();
             $skus = array_column($list, 'sku');

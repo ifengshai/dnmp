@@ -47,7 +47,7 @@ class TransferOrder extends Backend
     public function index()
     {
         //当前是否为关联查询
-        // $this->relationSearch = true;
+//         $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
