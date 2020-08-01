@@ -2,6 +2,7 @@
 
 namespace app\admin\model;
 
+use app\admin\model\itemmanage\Item;
 use think\Model;
 
 
@@ -31,7 +32,10 @@ class NewProduct extends Model
     {
         return $this->belongsTo('NewProductAttribute', 'id', 'item_id', [], 'LEFT')->setEagerlyType(0);
     }
-
+    public function item()
+    {
+        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku', [], 'LEFT')->setEagerlyType(0);
+    }
     /***
      * 查询商品名称是否重复
      */
