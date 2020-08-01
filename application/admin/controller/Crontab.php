@@ -301,12 +301,17 @@ order by sfoi.item_id asc limit 1000";
             if ($final_params['prescription_type'] == 'Progressive') {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
+            
 
             if (strpos($final_params['index_type'], 'Polarized') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Tinted Prescription Sunglasses') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
