@@ -369,8 +369,6 @@ class Zendesk extends Model
     {
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
-        //设置所有的隐藏
-        self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
@@ -401,7 +399,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
