@@ -266,6 +266,14 @@ class TrackReg extends Backend
     public function get_sku_sales_num()
     {
         //记录当天上架的SKU
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $list = $itemPlatformSku->where(['outer_sku_status' => 1])->select();
+        $list = collection($list)->toArray();
+        foreach($list as $k => $v) 
+        {
+            $skuSalesNum->allowField(true)->isUpdate(false);
+        }
 
 
 
