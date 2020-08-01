@@ -439,6 +439,7 @@ class WorkOrderList extends Model
                     $coatingId = $changeLens['coating_type'][$key];
 
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
+                    echo '<pre>';
                     var_dump($type,$lensId,$coatingId,$colorId,$recipe_type,$work->is_new_version);
                     var_dump($lensCoatName);
                     exit;
