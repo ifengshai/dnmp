@@ -261,6 +261,34 @@ class TrackReg extends Backend
     }
 
     /**
+     * 获取前一天有效SKU销量
+     * 记录当天有效SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/31 16:52:46 
+     * @return void
+     */
+    public function get_sku_sales_num()
+    {
+        //记录当天上架的SKU
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $list = $itemPlatformSku->where(['outer_sku_status' => 1])->select();
+        $list = collection($list)->toArray();
+        foreach($list as $k => $v) 
+        {
+            $skuSalesNum->allowField(true)->isUpdate(false);
+        }
+
+
+
+    }
+
+
+
+
+    /**
      * 获取每日SKU各站销量
      *
      * @Description
