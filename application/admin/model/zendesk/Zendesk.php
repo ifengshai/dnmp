@@ -554,4 +554,22 @@ class Zendesk extends Model
         );
         return $zendesk;
     }
+    /*
+     *  工单统计超时审批情况
+     * */
+    public function worklist_deal($admin_id = 0,$time_str = ''){
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['check_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        }else{
+            //默认显示一周的数据
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d 23:59:59");
+            $where['check_time'] = ['between', [$seven_startdate, $seven_enddate]];
+        }
+        if($admin_id){
+            $where['assign_user_id'] = $admin_id;
+        }
+        $this->where($where)->count();
+    }
 }
