@@ -37,15 +37,15 @@ class ZendeskTasks extends Model
             $where['platform'] = $platform;
             $task_where['type'] = $platform;
         }
-        if($admin_id){
-            $where['due_id'] = $admin_id;
-            $task_where['admin_id'] = $admin_id;
-        }
         if($group_id){
             //查询客服类型
             $group_admin_id = Db::name('admin')->where(['group_id'=>$group_id,'status'=>'normal'])->column('id');
             $where['due_id'] = array('in',$group_admin_id);
             $task_where['admin_id'] = array('in',$group_admin_id);
+        }
+        if($admin_id){
+            $where['due_id'] = $admin_id;
+            $task_where['admin_id'] = $admin_id;
         }
         //回复数量
         $reply_num = $this->zendeskComments->where($where)->count();
