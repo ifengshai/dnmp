@@ -201,8 +201,11 @@ class CustomerService extends Backend
      */
     public function workload()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
+
         //处理量
         $deal_num = $this->zendeskComments->dealnum_statistical(1);
         //未达标天数

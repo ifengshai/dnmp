@@ -450,8 +450,10 @@ class Zendesk extends Model
                         ->find();
                 }
             }else{
+                //查询当前用户站点是否和当前邮件站点一致，如果不一致，按照离职处理
+                $customer_web = Db::name('zendesk_agents')->where('admin_id',$ticket->assign_id)->column('type');
                 //判断有承接的邮件的承接人是否离职  ---根据admin中的status是否是hidden判断是否离职
-                if(in_array($ticket->assign_id,$targetAccount)){
+                if(in_array($ticket->assign_id,$targetAccount) || !in_array($ticket->getType(),$customer_web)){
                     //如果离职，承接不变，分配给最少单的人，手动改承接人
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
