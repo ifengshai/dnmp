@@ -62,7 +62,7 @@ class Itempresell extends Backend
                 unset($map['platform_type']);
             }
             //默认显示 开启过预售的SKU
-            if (!isset($filter['presell_status'])) {
+            if (!isset($filter['presell_status']) && !isset($filter['sku']) && !isset($filter['platform_sku'])) {
                 $map['presell_status'] = ['in', [1, 2]];
             }
 
