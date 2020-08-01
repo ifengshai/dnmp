@@ -65,18 +65,4 @@ class ZendeskTasks extends Model
         }
         return $no_qualified_day;
     }
-    public function unupto_day($time_str){
-        if($time_str){
-            $createat = explode(' ', $time_str);
-            $where['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
-            $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
-
-        }else{
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $where['update_time'] = ['between', [$start,$end]];
-            $task_where['create_time'] = ['between', [$start,$end]];
-        }
-    }
-
 }
