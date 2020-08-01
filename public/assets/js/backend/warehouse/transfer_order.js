@@ -190,7 +190,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                 var id = $(this).parent().parent().find('.item_id').val();
                 console.log(id);
-                console.log((_this.parent().parent().find('.item_id').val());
+                console.log(_this.parent().parent().find('.item_id').val());
                 if (id) {
                     Layer.confirm(__('确定删除此数据吗?'), function () {
                         _this.parent().parent().remove();
