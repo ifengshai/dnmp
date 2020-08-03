@@ -291,8 +291,8 @@ class Test3 extends Backend
             $where['is_admin'] = 1;
             $where['due_id'] = $item['admin_id'];
             $where['update_time'] = ['between', [$start, $end]];
-            dump($where);exit;
             $count = $this->zendeskComments->where($where)->count();
+            dump($count);exit;
             Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
             echo $item['admin_id'].'--'.$count.' is ok'."\n";
         }
