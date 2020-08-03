@@ -436,6 +436,7 @@ class Zendesk extends Model
                             //已达到目标量，承接给任务量最少的人
                             $task = ZendeskTasks::whereTime('create_time', 'today')
                                 ->where(['type' => $ticket->getType()])
+                                ->where('surplus_count','>',0)
                                 ->order('complete_count', 'asc')
                                 ->limit(1)
                                 ->find();
@@ -445,6 +446,7 @@ class Zendesk extends Model
                     //则承接给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
+                        ->where('surplus_count','>',0)
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
@@ -457,6 +459,7 @@ class Zendesk extends Model
                     //如果离职，承接不变，分配给最少单的人，手动改承接人
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
+                        ->where('surplus_count','>',0)
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
