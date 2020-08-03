@@ -280,7 +280,7 @@ class Test3 extends Backend
     //每天的回复量
     public function zendesk_data(){
         $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
-        $this->zendeskAgents = new \app\admin\model\zendesk\ZendeskAgents;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
         $customer = $this->zendeskTasks->where('id',2069)->select();
         $customer = collection($customer)->toArray();
         foreach ($customer as $item){
@@ -292,7 +292,6 @@ class Test3 extends Backend
             $where['due_id'] = $item['admin_id'];
             $where['update_time'] = ['between', [$start, $end]];
             $count = $this->zendeskComments->where($where)->count();
-            dump($count);exit;
             Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
             echo $item['admin_id'].'--'.$count.' is ok'."\n";
         }
