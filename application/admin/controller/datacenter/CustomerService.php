@@ -243,6 +243,7 @@ class CustomerService extends Backend
             $data[$i]['admin_id'] = $value;
             //用户姓名
             $data[$i]['name'] = $admin['nickname'];
+            $data[$i]['group_id'] = $admin['group_id'] ? $admin['group_id'] : 0;
             //分组名称
             if ($admin['group_id'] == 1) {
                 $data[$i]['group_name'] = 'A组';
@@ -270,7 +271,19 @@ class CustomerService extends Backend
             }
             $i++;
         }
-        return $data;
+        $arr = array();
+        $j = 0;
+        if($group_id){
+            foreach ($data as $v){
+                if($group_id == $v['group_id']){
+                    $arr[$j] = $v;
+                    $j++;
+                }
+            }
+        }else{
+            $arr = $data;
+        }
+        return $arr;
     }
     /*
      * ajax获取工作量统计信息
