@@ -55,16 +55,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'sales_num', title: __('90天总销量'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
-                        { field: 'platform_type', title: __('平台'), custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog',5:'wesee'},
-                            formatter: Table.api.formatter.status},
+                        {
+                            field: 'platform_type', title: __('平台'), custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         // { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
                         // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
-                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' , 0: 'red'},
+                            searchList: {0:'新建', 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'newproductattribute.frame_remark', title: __('选品备注'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
@@ -190,7 +192,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     function (index) {
                         Backend.api.ajax({
                             url: "new_product/auditRefused",
-                            data: { ids: ids,idd:idd }
+                            data: { ids: ids, idd: idd }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -308,6 +310,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-ok', function () {
+                console.log($('#status').val())
+                $('#status').val(0);
+            });
+            $(document).on('click', '.btn-submit', function () {
+                console.log($('#status').val())
+                $('#status').val(1);
+            })
+
+            Form.api.bindevent($("form[role=form]"));
         },
         detail: function () {
             Controller.api.bindevent();
@@ -347,14 +359,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'available_stock', title: __('可用库存'), sortable: true, operate: 'between', formatter: Controller.api.formatter.int_format },
                         { field: 'grade', title: __('销量等级'), operate: false, },
                         { field: 'product_cycle', title: '生产周期', operate: false },
-                        { field: 'available_stock', title: '可用库存', operate: false },
-                        { field: 'available_stock', title: '虚拟仓库存', operate: false },
+                        { field: 'available_stock', title: '可用库存', operate: false, visible: false },
+                        { field: 'stock', title: '虚拟仓库存', operate: false },
                         { field: 'on_way_stock', title: '在途库存', operate: false },
                         { field: 'wait_in_num', title: '待入库数量', operate: false },
-                        { field: 'product_cycle', title: '过去15天日均销量', operate: false },
-                        { field: 'product_cycle', title: '过去90天日均销量', operate: false },
-                        { field: 'product_cycle', title: '预估售卖天数', operate: false },
-                        { field: 'product_cycle', title: '建议补货量', operate: false },
+                        { field: 'sales_num_15days', title: '过去15天日均销量', operate: false },
+                        { field: 'sales_num_90days', title: '过去90天日均销量', operate: false },
+                        { field: 'sales_days', title: '预估售卖天数', operate: false },
+                        { field: 'replenish_num', title: '建议补货量', operate: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
 
@@ -444,7 +456,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        // { checkbox: true },
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -525,7 +537,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }
                         };
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('new_product/emergency_replenishment','创建紧急补货需求单',options);
+                        Fast.api.open('new_product/emergency_replenishment', '创建紧急补货需求单', options);
 
                     }
                 );
