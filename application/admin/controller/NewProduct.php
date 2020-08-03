@@ -1229,11 +1229,8 @@ class NewProduct extends Backend
      */
     public function replenishEscalationList()
     {
-<<<<<<< HEAD
 //        $this->relationSearch = true;
-=======
-        //        $this->relationSearch = true;
->>>>>>> supplychain
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1257,21 +1254,7 @@ class NewProduct extends Backend
 
             $this->request->get(['filter' => json_encode($filter)]);
             $params = $this->request->get();
-<<<<<<< HEAD
-            if ($filter['sku']){
-                $where['a.sku'] = ['like','%'.$filter['sku'].'%'];
-            }
-            if ($filter['category_id']){
-                $where['a.category_id'] = ['=',$filter['category_id']];
-            }
-            if ($filter['available_stock']){
-                $where['b.available_stock'] = ['between',explode(',',$filter['available_stock'])];
-            }
-            if ($filter['platform_type']){
-                $where['a.platform_type'] = ['=',$filter['platform_type']];
-            }
-//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-=======
+
             if ($filter['sku']) {
                 $where['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }
@@ -1285,7 +1268,6 @@ class NewProduct extends Backend
                 $where['a.platform_type'] = ['=', $filter['platform_type']];
             }
             //            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
->>>>>>> supplychain
             $total = $this->model
                 ->alias('a')
                 ->field('a.*,b.sku,b.available_stock')
