@@ -520,14 +520,14 @@ class Zendesk extends Model
         if($workload_time){
             $createat = explode(' ', $workload_time);
             $where['c.update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
-            $map['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['zendesk_update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
             $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             //默认显示一周的数据
             $seven_startdate = date("Y-m-d", strtotime("-6 day"));
             $seven_enddate = date("Y-m-d 23:59:59");
             $where['c.update_time'] = ['between', [$seven_startdate, $seven_enddate]];
-            $map['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['zendesk_update_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
         $where['z.channel'] = array('neq','voice');
