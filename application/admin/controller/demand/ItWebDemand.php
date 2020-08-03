@@ -229,6 +229,8 @@ class ItWebDemand extends Backend
             foreach ($list as $k => $v){
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
+                $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
+
 
                 $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
@@ -908,7 +910,7 @@ class ItWebDemand extends Backend
                         if(!$params['web_designer_expect_time']){
                             $this->error('计划完成时间必选');
                         }
-                        $update['web_designer_expect_time'] = $params['web_designer_expect_time'].' 18:00:00';
+                        $update['web_designer_expect_time'] = $params['web_designer_expect_time'].' 22:00:00';
                         if(!$params['web_designer_complexity']){
                             $this->error('预期难度必选');
                         }
@@ -928,7 +930,7 @@ class ItWebDemand extends Backend
                         if(!$params['phper_expect_time']){
                             $this->error('计划完成时间必选');
                         }
-                        $update['phper_expect_time'] = $params['phper_expect_time'].' 18:00:00';
+                        $update['phper_expect_time'] = $params['phper_expect_time'].' 22:00:00';
                         if(!$params['phper_complexity']){
                             $this->error('预期难度必选');
                         }
@@ -948,7 +950,7 @@ class ItWebDemand extends Backend
                         if(!$params['app_expect_time']){
                             $this->error('计划完成时间必选');
                         }
-                        $update['app_expect_time'] = $params['app_expect_time'].' 18:00:00';
+                        $update['app_expect_time'] = $params['app_expect_time'].' 22:00:00';
                         if(!$params['app_complexity']){
                             $this->error('预期难度必选');
                         }
@@ -1221,6 +1223,75 @@ class ItWebDemand extends Backend
         $this->view->assign("status", $status);
         $this->view->assign("day", $day);
         $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 查看详情
+     * 包含操作：标记异常，分配
+     * */
+    public function detail($ids = null){
+        if ($this->request->isAjax()) {
+            dump(11111);exit;
+            $params = $this->request->post("row/a");
+
+            if ($params) {
+                if($params['pm_audit_status']){
+                    $add['priority'] = $params['priority'];
+                    $add['node_time'] = $params['node_time'];
+                    $time_data = $this->start_time($params['priority'],$params['node_time']);
+                    $add['start_time'] = $time_data['start_time'];
+                    $add['end_time'] = $time_data['end_time'];
+                    $add['pm_audit_status'] = $params['pm_audit_status'];
+                    $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
+                }
+                $add['type'] = $params['type'];
+                $add['site'] = $params['site'];
+                $add['site_type'] = implode(',',$params['site_type']);
+                $add['entry_user_id'] = $this->auth->id;
+                $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
+                $add['title'] = $params['title'];
+                $add['content'] = $params['content'];
+                $add['accessory'] = $params['accessory'];
+                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
+                if ($res) {
+
+                    /*$row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();*/
+
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+
+        /*$row['site_type_arr'] = explode(',',$row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);*/
+
+        //$this->view->assign("type", input('type'));
+        $this->view->assign("row", $row );
+
+        //获取各组人员
+        $php_user = array(
+            1 => '李想1',
+            2 => '李想2',
+            3 => '李想3',
+            4 => '李想4',
+            5 => '李想5',
+        );
+
+
+        //确认权限
+        /*$this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
+        $this->view->assign('admin_id', session('admin.id'));*/
+        $this->view->assign('php_user', $php_user);
         return $this->view->fetch();
     }
 

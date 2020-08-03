@@ -126,10 +126,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         {field: 'test_user_id', title: __('测试'),operate:false},
 
                         {
-                            field: 'pm_audit_status',
+                            field: 'detail',
                             title: __('详情记录'),
-                            events: Controller.api.events.ge_pm_status,
-                            formatter: Controller.api.formatter.ge_pm_status,
+                            events: Controller.api.events.get_detail,
+                            formatter: Controller.api.formatter.get_detail,
                         },
 
 
@@ -2601,6 +2601,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
             });
             /*测试确认、分配 end*/
         },
+        detail: function () {
+            Controller.api.bindevent();
+        },
         group_finish: function () {
             Controller.api.bindevent();
         },
@@ -2734,6 +2737,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     }
                 },
 
+                //详情记录点击查看
+                get_detail: function (value, row, index) {
+                    return '<div><span class="check_detail">查看</span></div>';
+                },
+
                 getClear: function (value) {
 
                     if (value == null || value == undefined) {
@@ -2804,6 +2812,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
 
 
                         //Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '50%'] });
+                    }
+                },
+
+                //详情记录点击查看
+                get_detail: {
+                    'click .check_detail': function (e, value, row, index) {
+                        Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '51%'] });
                     }
                 },
 

@@ -1,0 +1,259 @@
+<style>
+    .dialong-container {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    .left_div,.center_div,.right_div{
+        float: left;
+        width: 32%;
+        height: 400px;
+    }
+    .center_div,.right_div {
+        border: 1px solid #000000;
+    }
+    .left_input_top,.left_input_bottom{
+        border: 1px solid #000;
+    }
+    .left_input_top {
+        margin-bottom: 20px;
+        padding: 20px 20px;
+        box-sizing: border-box;
+    }
+    .input_tiem_label2 span {
+        vertical-align: 1px;
+        margin-left: 5px;
+        user-select: none;
+    }
+    .left_input_bottom {
+        padding: 20px 20px 38px;
+        box-sizing: border-box;
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .item_title {
+        margin-bottom: 15px;
+    }
+    .input_item {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .input_item label {
+        margin-bottom: 0;
+    }
+    .input_item:last-child {
+        margin-bottom: 0;
+    }
+    .top {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 300px;
+        border-bottom: 1px solid #333333;
+    }
+    .center_div_title {
+        display: flex;
+        justify-content: center;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+        font-size: 18px;
+        margin: 0!important;
+    }
+    .center_div_container {
+        display: flex;
+        flex-direction: column;
+        margin: 0!important;
+        padding: 0!important;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        list-style: none;
+    }
+    .center_div_container .item {
+        width: 100%;
+        margin-bottom: 14px;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    .center_div_container .item p {
+        margin: 0!important;
+        padding: 0!important;
+    }
+    .center_div_container .item .name {
+        color: #999999;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    .center_div_container .item .time {
+        color: #999999;
+        font-size: 14px;
+    }
+    .center_div_container .item .text-content {
+        width: 100%;
+        word-break: break-word;
+    }
+    .bottom {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 10px;
+        box-sizing: border-box;
+        height: 100px;
+    }
+    .bottom textarea {
+        width: 100%;
+        height: 40px;
+        margin-bottom: 10px;
+        border: none;
+        outline: none;
+        resize: none;
+    }
+    .bottom  button {
+        width: 70px;
+        height: 30px;
+        line-height: 30px;
+        border: none;
+        outline: none;
+        text-align: center;
+        background-color: #333333;
+        color: #ffffff;
+    }
+</style>
+<div class="dialong-container">
+    <div class="left_div">
+        <form role="form" method="POST" data-toggle="validator" action="">
+            <div class="left_input_top">
+
+                <div class="input_item">
+                    <label class="input_tiem_label2">
+                        <input name="row[is_small_probability]" type="checkbox" value="1"><span>小概率</span>
+                    </label>
+                </div>
+
+                <div class="input_item">
+                    <label class="input_tiem_label2">
+                        <input name="row[is_low_level_error]" type="checkbox" value="1"><span>低级错误</span>
+                    </label>
+                </div>
+
+                <div class="input_item">
+                    <label class="input_tiem_label2">
+                        <input name="row[is_difficult]" type="checkbox" value="1"><span>疑难</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="left_input_bottom">
+                <div class="item_title">
+                    <label class="">责任人分配</label>
+                </div>
+
+                <div class="input_item">
+                <span class="input_tiem_span">
+                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                </span>
+                </div>
+
+                <div class="input_item">
+                <span class="input_tiem_span">
+                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                </span>
+                </div>
+
+                <div class="input_item">
+                <span class="input_tiem_span">
+                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                </span>
+                </div>
+
+                <div class="input_item">
+                <span class="input_tiem_span">
+                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                </span>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="center_div">
+        <div class="top">
+            <p class="center_div_title">测试</p>
+            <ul class="center_div_container">
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+            </ul>
+        </div>
+        <form class="bottom" role="form" method="POST" data-toggle="validator" action="">
+            <textarea name="" id="" cols="30" rows="10"></textarea>
+            <button>确定</button>
+        </form>
+    </div>
+
+    <div class="right_div">
+        <div class="top">
+            <p class="center_div_title">回归测试</p>
+            <ul class="center_div_container">
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+                <li class="item">
+                    <p>
+                        <span class="name">测试</span><span class="time">07/06</span>
+                    </p>
+                    <p class="text-content">asdasdasda</p>
+                </li>
+            </ul>
+        </div>
+        <form class="bottom" role="form" method="POST" data-toggle="validator" action="">
+            <textarea name="" id="" cols="30" rows="10"></textarea>
+            <button>确定</button>
+        </form>
+    </div>
+</div>
+
