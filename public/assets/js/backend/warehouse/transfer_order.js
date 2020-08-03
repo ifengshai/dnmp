@@ -169,11 +169,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-del', function () {
                 var _this = $(this);
                 var id = $(this).parent().parent().find('.item_id').val();
-<<<<<<< HEAD
-                console.log(id);
-                console.log($(this).parent().parent().find('.item_id').val());
-=======
->>>>>>> supplychain
                 if (id) {
                     Layer.confirm(__('确定删除此数据吗?'), function () {
                         _this.parent().parent().remove();
