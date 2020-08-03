@@ -22,6 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 searchFormVisible: true,
                 columns: [
                     [
+                        {checkbox: true},
                         {field: 'id', title: __('Id'),sortable: true},
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
@@ -157,6 +158,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
             $(document).on("click", ".btn-synchronous", function () {
                 Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
+            });
+            //上面的修改承接人
+            $(document).on("click", ".batch-edit-recipient", function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
         },
         add: function () {
@@ -375,6 +381,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         edit_recipient:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
+        batch_edit_recipient:function(){
             Form.api.bindevent($("form[role=form]"));
         },
         artificial_synchronous:function(){

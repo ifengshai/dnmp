@@ -1276,4 +1276,33 @@ DOC;
         $this->assign('issueList',$issueList);
         return $this->view->fetch();
     }
+    /**
+     * 批量修改承接人
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-08-03 10:04:18
+     * @return void
+     */
+    public function batch_edit_recipient($ids=null)
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->post("row/a");
+            if(!$params['id']){
+                $this->error('承接人不存在，请重新尝试');
+            }
+            //查询当前邮件原本的承接人数据
+            $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
+            $data['assign_id']  = $params['id'];
+            $data['due_id']     = $params['id'];
+            $data['recipient']  = $params['id'];
+            $data['assignee_id']  = $agent_id;
+            $result = $this->model->where('id','in',$ids)->update($data);
+            if($result){
+                $this->success('修改成功');
+            }
+        }
+        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $this->assign('issueList',$issueList);
+        return $this->view->fetch('edit_recipient');
+    }
 }

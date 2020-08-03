@@ -439,10 +439,6 @@ class WorkOrderList extends Model
                     $coatingId = $changeLens['coating_type'][$key];
 
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
-                    echo '<pre>';
-                    var_dump($type,$lensId,$coatingId,$colorId,$recipe_type,$work->is_new_version);
-                    var_dump($lensCoatName);
-                    exit;
                     $data = [
                         'work_id' => $work_id,
                         'increment_id' => $params['platform_order'],
@@ -613,8 +609,7 @@ class WorkOrderList extends Model
         $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
-        $lens = $prescription[$prescription_type] ?? [];
-        return $lens;       
+        $lens = $prescription[$prescription_type] ?? [];       
         $lensName = $coatingName = $colorName = $lensType = '';
         if (!$colorId) {
             foreach ($lens as $len) {
@@ -650,6 +645,17 @@ class WorkOrderList extends Model
                     break;
                 }
             }
+            //lsw添加
+            if(!$lensName){
+                foreach ($lensColorList as $cval) {
+                    if ($cval['lens_id'] == $lens_id) {
+                        $lensName = $cval['lens_data_name'] . "({$colorName})";
+                        $lensType = $cval['lens_data_index'];
+                        break;
+                    }
+                }
+            }
+
         }
 
         foreach ($coatingLists as $coatingList) {
