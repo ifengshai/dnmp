@@ -555,7 +555,7 @@ class Zendesk extends Model
         }
         $zendesk_where['status'] = array('in','1,2');
         $zendesk_where['channel'] = array('neq','voice');
-        $id = $this->where($zendesk_where)->order('update_time','asc')->value('id');
+        $id = $this->where($zendesk_where)->order('zendesk_update_time','asc')->value('id');
         $reply_where['is_admin'] = 0;
         $reply_where['zid'] = $id;
         $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
