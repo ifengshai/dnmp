@@ -281,7 +281,7 @@ class Test3 extends Backend
     public function zendesk_data(){
         $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
         $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
-        $customer = $this->zendeskTasks->where('id',2069)->select();
+        $customer = $this->zendeskTasks->where(['reply_count'=>['neq',0]])->select();
         $customer = collection($customer)->toArray();
         foreach ($customer as $item){
             //获取当前时间
@@ -294,6 +294,7 @@ class Test3 extends Backend
             $count = $this->zendeskComments->where($where)->count();
             Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
             echo $item['admin_id'].'--'.$count.' is ok'."\n";
+            sleep(1);
         }
     }
 }
