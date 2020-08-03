@@ -509,28 +509,49 @@ class Instock extends Backend
                         //样品入库单独逻辑给现在库存最大的那个站
                         if ($v['type_id'] == 6){
                             $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock desc')->field('platform_type,stock')->find();
-
                             $stock_num = $v['in_stock_num'];
-//                            dump($stock_num);
-//                            dump(collection($item_platform_sku)->toArray());die;
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $stock_num);
-
                         }else{
                             //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
                             $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
                             $all_num = count($item_platform_sku);
-                            $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+
                             $stock_num = $v['in_stock_num'];
-                            foreach ($item_platform_sku as $key => $val) {
-                                //最后一个站点 剩余数量分给最后一个站
-                                if (($all_num - $key) == 1) {
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
-                                } else {
-                                    $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
-                                    $stock_num -= $num;
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                            //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照‘发牌’规则进行分库存
+                            $stock_all_num = array_sum(array_column($item_platform_sku,'stock'));
+                            if ($stock_all_num == 0){
+                                //当前入库数量有几个就循环几次
+                                    foreach ($item_platform_sku as $key => $val) {
+
+                                        //一直发直到$v['in_stock_num']为0
+                                        $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock');
+                                        $stock_num --;
+                                        if ($stock_num == 0){
+                                            break;
+                                        }else{
+                                            if (($all_num - $key) == 1) {
+                                                $this->send_stock($item_platform_sku, $stock_num, $v['sku'],$all_num);
+                                            }
+                                        }
+                                    }
+
+                            }else{
+                                //某個平台這個sku存在庫存 就按照當前各站的虛擬庫存進行分配
+                                $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+//                                dump($whole_num);die;
+                                $stock_num = $v['in_stock_num'];
+                                foreach ($item_platform_sku as $key => $val) {
+                                    //最后一个站点 剩余数量分给最后一个站
+                                    if (($all_num - $key) == 1) {
+                                        $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                    } else {
+                                        $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
+                                        $stock_num -= $num;
+                                        $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                    }
                                 }
                             }
+
                         }
 
                     }
@@ -583,6 +604,33 @@ class Instock extends Backend
             $this->success();
         } else {
             $this->error();
+        }
+    }
+
+    /**
+     * @$item_platform_sku 平台映射关系列表
+     * @$stock_all_num 当前剩余未分配的数量
+     * @$sku 当前sku
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/8/3
+     * Time: 14:52
+     */
+    function send_stock($item_platform_sku,$stock_all_num,$sku,$all_num){
+//        dump(collection($item_platform_sku)->toArray());dump($stock_all_num);dump($sku);
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($item_platform_sku as $key => $val) {
+            //一直发直到$v['in_stock_num']为0
+            $platform->where(['sku' => $sku, 'platform_type' => $val['platform_type']])->setInc('stock');
+            $stock_all_num --;
+            if ($stock_all_num == 0){
+                break;
+            }else{
+                if (($all_num - $key) == 1) {
+                    $this->send_stock($item_platform_sku,$stock_all_num,$sku,$all_num);
+                }
+            }
         }
     }
 

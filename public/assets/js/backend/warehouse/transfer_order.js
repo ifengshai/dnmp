@@ -180,7 +180,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         });
                     });
                 } else {
-                    // _this.parent().parent().remove();
+                    _this.parent().parent().remove();
                 }
             })
         },
