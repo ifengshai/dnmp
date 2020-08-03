@@ -126,34 +126,44 @@ table.altrowstable tr:nth-child(even){
                             <thead>
                             <tr>
                                 <th style="text-align: center; vertical-align: middle;">措施</th>
-                                <th style="text-align: center; vertical-align: middle;">白青青</th>
-                                <th style="text-align: center; vertical-align: middle;">韩雨薇</th>
-                                <th style="text-align: center; vertical-align: middle;">王伟</th>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <th style="text-align: center; vertical-align: middle;">{$vo}</th>
+                                {/foreach}
+                                {/if}
                             </tr>
                             </thead>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">未超时未审批</td>
-                                <td id="bai_noouttime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                <td id="han_noouttime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                <td id="wang_noouttime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></td>
+                                {/foreach}
+                                {/if}
                             </tr>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">未超时已审批</td>
-                                <td id="bai_noouttime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                <td id="han_noouttime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                <td id="wang_noouttime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></td>
+                                {/foreach}
+                                {/if}
                             </tr>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">超时未审批</td>
-                                <td id="bai_outtime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                <td id="han_outtime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                <td id="wang_outtime_nodeal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></td>
+                                {/foreach}
+                                {/if}
                             </tr>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">超时已审批</td>
-                                <td id="bai_outtime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                <td id="han_outtime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                <td id="wang_outtime_deal" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_checked'];?></th>
+                                {/foreach}
+                                {/if}
                             </tr>
                         </table>
                         <table  id="workload-info" class="altrowstable measure-table"
@@ -169,83 +179,17 @@ table.altrowstable tr:nth-child(even){
                                 <th style="text-align: center; vertical-align: middle;">超时已处理</th>
                             </tr>
                             </thead>
+                            {if isset($step)}
+                            {foreach name="step" item="vo" key="k"}
                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">更改</td>
-                                <td id="today_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                <td id="today_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
-                                <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handle'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['no_time_out_handled'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handle'];?></td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_right_data[$k]['time_out_handled'];?></td>
                             </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">退款</td>
-                                <td id="yesterday_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
-                                <td id="yesterday_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
-                                <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
-                                <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">取消</td>
-                                <td id="seven_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
-                                <td id="seven_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
-                                <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
-                                <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">催单</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">赠品</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">补发</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">优惠券</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">积分</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">暂缓</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">补价</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">退件</td>
-                                <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                            </tr>
+                            {/foreach}
+                            {/if}
                         </table>
                     </div>
             </div>
@@ -286,83 +230,17 @@ table.altrowstable tr:nth-child(even){
                                     <th style="text-align: center; vertical-align: middle;">超时已处理</th>
                                 </tr>
                                 </thead>
+                                {if isset($warehouse_problem_type)}
+                                {foreach name="warehouse_problem_type" item="vo" key="k"}
                                 <tr>
-                                    <td style="text-align: center; vertical-align: middle;">镜框缺货</td>
-                                    <td id="today_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_num}</td>
-                                    <td id="today_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_complete_num}</td>
-                                    <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
-                                    <td id="today_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.today.wo_bufa_percent}</td>
+                                    <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handle'];?></td>
+                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handled'];?></td>
+                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handle'];?></td>
+                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handled'];?></td>
                                 </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">镜片缺货</td>
-                                    <td id="yesterday_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_num}</td>
-                                    <td id="yesterday_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_complete_num}</td>
-                                    <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
-                                    <td id="yesterday_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.yesterday.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">镜片重做</td>
-                                    <td id="seven_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_num}</td>
-                                    <td id="seven_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_complete_num}</td>
-                                    <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
-                                    <td id="seven_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.seven.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">定制片超时</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">不可加工</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">核实处方</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">核实地址</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">系统漏单</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">配错镜框</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">物流退件</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center; vertical-align: middle;">客户退件</td>
-                                    <td id="thirty_wo_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_num}</td>
-                                    <td id="thirty_wo_complete_num" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_complete_num}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                    <td id="thirty_wo_bufa_percent" style="text-align: center; vertical-align: middle;">{$workorder_situation.thirty.wo_bufa_percent}</td>
-                                </tr>
+                                {/foreach}
+                                {/if}
                             </table>
                         </div>
                     </div>
