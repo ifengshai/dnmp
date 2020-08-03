@@ -407,7 +407,7 @@ class Zendesk extends Model
             $task = array();
             //电话不分配
             if($ticket->channel == 'voice') {continue;}
-            if($ticket->status == 1){
+            if($ticket->status == 1 || !$ticket->assign_id){
                 //判断是否处理过该用户的邮件
                 $zendesk_id = Zendesk::where(['email'=>$ticket->email,'type'=>$ticket->getType()])->column('id');
                 //查询接触过该用户邮件的最后一条评论
