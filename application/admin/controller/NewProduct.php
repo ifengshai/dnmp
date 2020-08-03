@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\NewProductMapping;
 use app\admin\model\purchase\NewProductReplenishOrder;
 use app\common\controller\Backend;
 use function fast\array_except;
@@ -76,9 +77,6 @@ class NewProduct extends Backend
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
 
-            if ($filter['platform_type']) {
-                unset($map['platform_type']);
-            }
 
             //可用库存搜索
             if ($filter['available_stock']) {
@@ -90,11 +88,21 @@ class NewProduct extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            //平台搜索
+            if ($filter['platform_type']) {
+                $new_product_mapping = new \app\admin\model\NewProductMapping();
+                $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
+                $map1['sku'] = ['in', $skus];
+                unset($filter['platform_type']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->where($map)
+                ->where($map1)
                 ->order($sort, $order)
                 ->count();
 
@@ -102,6 +110,7 @@ class NewProduct extends Backend
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->where($map)
+                ->where($map1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
