@@ -284,7 +284,6 @@ class CustomerService extends Backend
             $contrast_time_str = $params['contrast_time_str'];
             $group_id = $params['group_id'];
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
-            $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
             //处理量
             $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数

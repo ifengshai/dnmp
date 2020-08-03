@@ -30,21 +30,23 @@ class ZendeskTasks extends Model
             $seven_enddate = date("Y-m-d 23:59:59");
             $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
+
         if($group_id){
             //查询该组别下的人员
             $ids = Db::name('admin')->where('group_id',$group_id)->column('id');
-            $where['admin_id'] = $ids;
+            $where['admin_id'] = array('in',$ids);
         }
+
         if($admin_id){
             $where['admin_id'] = $admin_id;
         }
-        $where['target_count']  = array('exp',Db::raw(' > reply_count '));
+
+        $where[]  = ['exp', Db::raw("target_count > reply_count")];
         if($platform){
             $where['type'] = $platform;
         }
 
         $count = $this->where($where)->count();
-
         return $count;
     }
     /*
