@@ -418,7 +418,7 @@ class CustomerService extends Backend
         $warehouse_problem_type = config('workorder.warehouse_problem_type');
         $warehouse_handle       = $this->warehouse_handle($map_create, $warehouse_problem_type);
         //跟单概况 end
-        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step','warehouse_handle'));
+        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step','warehouse_handle','warehouse_problem_type'));
         return $this->view->fetch();
     }
     /**
