@@ -297,4 +297,33 @@ class Test3 extends Backend
             sleep(1);
         }
     }
+    //没有承接人的数据
+    public function zendesk_no_assign(){
+        //查询没有承接人的数据
+        $where[] = ['exp',Db::raw("assign_id is null or assign_id = 0")];
+        $where['due_id'] = ['neq',0];
+        $zendesk = Db::name('zendesk')->where($where)->select();
+        foreach ($zendesk as $item){
+            //查询评论最多的人
+            $arr['is_admin'] = 1;
+            $arr['zid'] = $item['id'];
+            $arr['due_id'] = ['not in','75,105,95,117'];
+            $comments = Db::name('zendesk_comments')->where($arr)->group('due_id')->field('due_id,count(due_id) as count')->order('count','desc')->select();
+            $assign_id = 0;
+            foreach ($comments as $value){
+                //查询该用户的站点是否和当前站点一致
+                $types = Db::name('zendesk_agents')->where('admin_id',$value['due_id'])->column('type');
+                if($types && in_array($item['type'],$types)){
+                    $assign_id = $value['due_id'];
+                    break;
+                }
+            }
+            if($assign_id == 0){
+                $assign_id = $item['due_id'];
+            }
+            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$assign_id]);
+            echo $item['id'].'--'.$assign_id.' is ok'."\n";exit;
+        }
+        echo "all is ok";
+    }
 }
