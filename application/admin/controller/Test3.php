@@ -322,7 +322,7 @@ class Test3 extends Backend
                 $assign_id = $item['due_id'];
             }
             Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$assign_id]);
-            echo $item['id'].'--'.$assign_id.' is ok'."\n";exit;
+            echo $item['id'].'--'.$item['assign_id'].'--'.$assign_id.' is ok'."\n";
         }
         echo "all is ok";
     }
