@@ -623,7 +623,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {field: 'sku', title: __(' sku'), operate: false},
+                        // {field: 'sku', title: __(' sku'), operate: 'LIKE'},
                         {field: 'num', title: __('总需求数量'), operate: false},
                         {field: 'supplier_name', title: __('供应商'), operate: false},
                         {field: 'distribute_num', title: __('分配数量'), operate: false},
@@ -632,6 +633,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'status',
                             title: __('状态'),
+                            operate: false,
                             custom: {1: 'green', 2: 'danger'},
                             searchList: {1: '未采购', 2: '已采购'},
                             formatter: Table.api.formatter.status
