@@ -9,6 +9,7 @@ use app\admin\model\OrderNodeCourier;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
+use app\admin\model\StockLog;
 
 
 /**
@@ -612,13 +613,13 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
-                   $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
-                   //如果不存在则插入此sku
-                   if ($count < 1) {
+                    $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                    //如果不存在则插入此sku
+                    if ($count < 1) {
                         $data['sku'] = $sku;
                         $data['site'] = $site;
                         Db::name('sku_sales_num')->insert($data);
-                   }
+                    }
                 }
                 $this->success('同步成功', [], 200);
             } else {
@@ -626,4 +627,109 @@ class SelfApi extends Api
             }
         }
     }
+
+    /**
+     * 扣减库存及虚拟库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/03 15:54:42 
+     * @return void
+     */
+    public function set_goods_stock()
+    {
+        if ($this->request->isPost()) {
+            $site = $this->request->post('site'); //站点
+            $sku = $this->request->post('sku'); //true_sku
+            $qty = $this->request->post('qty'); //扣减数量 占用增加数量
+            $orderid = $this->request->post('orderid'); //订单id
+            $order_number = $this->request->post('order_number'); //订单号
+            if (!$sku) {
+                $this->error(__('缺少SKU参数'), [], 400);
+            }
+
+            if (!$site) {
+                $this->error(__('缺少站点参数'), [], 400);
+            }
+
+            if (!$qty) {
+                $this->error(__('缺少数量参数'), [], 400);
+            }
+
+            if (!$orderid) {
+                $this->error(__('缺少订单id参数'), [], 400);
+            }
+
+            if (!$order_number) {
+                $this->error(__('缺少订单号参数'), [], 400);
+            }
+            $item = new \app\admin\model\itemmanage\Item();
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //查询sku可用库存
+            $res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => $sku])->field('available_stock')->find();
+            //查询此站点sku预售情况
+            $list = $platform->where(['sku' => $sku, 'platform_type' => $site])->find();
+            if (!$res || !$list) {
+                $this->error(__('未查询到数据'), [], 400);
+            }
+
+            //扣减对应站点虚拟仓库存
+            $platform_res = $platform->where(['sku' => $sku, 'platform_type' => $site])->setDec('stock', $qty);
+            if ($platform_res === false) {
+                file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '扣减虚拟库存失败：site:' . $site . '|订单id:' . $orderid . '|sku:' . $sku . "\r\n", FILE_APPEND);
+                $this->error(__('虚拟库存扣减失败'), [], 400);
+            }
+
+            //扣减可用库存 增加订单占用库存
+            $item_res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => $sku])->dec('available_stock', $qty)->inc('occupy_stock', $qty)->update();
+
+            //如果可用库存不足 判断此sku 对应站点是否开启预售
+            if ($res->available_stock < $qty) {
+                //判断是否开启预售 并且在有效时间内 并且预售剩余数量大于0
+                if ($list->presell_status == 1 && strtotime($list->presell_create_time) <= time() && strtotime($list->presell_end_time) >= time() && $list->presell_residue_num > 0) {
+                    $available_stock = $res->available_stock;
+                    //判断可用库存小于0时 应扣减预售数量为当前qty 否则预售数量等于 qty 减去现有的可用库存
+                    if ($available_stock <= 0) {
+                        $presell_num = $qty;
+                    } else {
+                        $presell_num = $qty - $res->available_stock;
+                    }
+
+                    //判断如果剩余预售数量 大于 应扣减预售数量时 剩余预售数量= 现有剩余预售数量减去应扣减预售数量   否则 剩余预售数量全部扣减为0
+                    if ($list->presell_residue_num >= $presell_num) {
+                        $presell_residue_num = $list->presell_residue_num - $presell_num;
+                    } else {
+                        $presell_residue_num = 0;
+                    }
+                    //扣减剩余预售数量
+                    $platform_res = $platform->where(['sku' => $sku, 'platform_type' => $site])->update(['presell_residue_num' => $presell_residue_num]);
+                    if ($platform_res === false) {
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '扣减预售数量：site:' . $site . '|订单id:' . $orderid . '|sku:' . $sku . '|扣减预售数量：' . $presell_residue_num . "\r\n", FILE_APPEND);
+                    }
+                }
+            }
+
+            if (false !== $item_res) {
+                //生成扣减库存日志
+                (new StockLog())->setData([
+                    'type'                      => 1,
+                    'site'                      => $site,
+                    'one_type'                  => 1,
+                    'sku'                       => $sku,
+                    'order_number'              => $order_number,
+                    'public_id'                 => $orderid,
+                    'occupy_stock_change'       => $qty,
+                    'available_stock_change'    => -$qty,
+                    'create_person'             => session('admin.nickname'),
+                    'create_time'               => date('Y-m-d H:i:s'),
+                    'remark'                    => '生成订单扣减可用库存,增加占用库存'
+                ]);
+                $this->success('处理成功', [], 200);
+            } else {
+                $this->error('处理失败', [], 400);
+            }
+        }
+    }
+
+    
 }
