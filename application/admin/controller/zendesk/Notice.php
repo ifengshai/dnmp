@@ -498,7 +498,6 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            dump($ticket->updated_at);exit;
             $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
