@@ -283,6 +283,7 @@ class Test3 extends Backend
         $this->zendeskAgents = new \app\admin\model\zendesk\ZendeskAgents;
         $customer = $this->zendeskTasks->where('id',2069)->select();
         $customer = collection($customer)->toArray();
+        dump($customer);exit;
         foreach ($customer as $item){
             //获取当前时间
             $create = explode(' ',$item['create_time']);
