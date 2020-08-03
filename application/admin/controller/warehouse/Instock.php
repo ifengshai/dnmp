@@ -506,21 +506,33 @@ class Instock extends Backend
                             }
                         }
                     }else{
-                        //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
-                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
-                        $all_num = count($item_platform_sku);
-                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
-                        $stock_num = $v['in_stock_num'];
-                        foreach ($item_platform_sku as $key => $val) {
-                            //最后一个站点 剩余数量分给最后一个站
-                            if (($all_num - $key) == 1) {
-                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
-                            } else {
-                                $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
-                                $stock_num -= $num;
-                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                        //样品入库单独逻辑给现在库存最大的那个站
+                        if ($v['type_id'] == 6){
+                            $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock desc')->field('platform_type,stock')->find();
+
+                            $stock_num = $v['in_stock_num'];
+//                            dump($stock_num);
+//                            dump(collection($item_platform_sku)->toArray());die;
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $stock_num);
+
+                        }else{
+                            //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
+                            $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                            $all_num = count($item_platform_sku);
+                            $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                            $stock_num = $v['in_stock_num'];
+                            foreach ($item_platform_sku as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                } else {
+                                    $num = round($v['in_stock_num'] * $val['stock']/$whole_num);
+                                    $stock_num -= $num;
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                }
                             }
                         }
+
                     }
 
                     //插入日志表

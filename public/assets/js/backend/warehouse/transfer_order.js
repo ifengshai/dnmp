@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id'),operate:false},
+                        { field: 'id', title: __('Id'), operate: false },
                         { field: 'transfer_order_number', title: __('Transfer_order_number') },
                         // {field: 'call_out_site', title: __('Call_out_site')},
                         // {field: 'call_in_site', title: __('Call_in_site')},
@@ -37,7 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'sku', title: ('SKU'),visible: false},
+                        { field: 'sku', title: ('SKU'), visible: false },
 
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'create_person', title: __('Create_person') },
@@ -156,25 +156,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $(this).parent().parent().remove();
             })
 
-            //获取sku信息
-            $(document).on('change', '.sku', function () {
-                var sku = $(this).val();
-                var platform_type = $('.call_out_site.selectpicker').val();
-                var _this = $(this);
-                if (!sku || !platform_type) {
-                    Toastr.error('SKU和调出虚拟仓不能为空');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url: 'warehouse/transfer_order/getSkuData',
-                    data: { sku: sku, platform_type: platform_type }
-                }, function (data, ret) {
-                    _this.parent().parent().find('.sku_stock').val(data);
-                }, function (data, ret) {
-                    Fast.api.error(ret.msg);
-                });
-
-            })
         },
         edit: function () {
             Controller.api.bindevent();
@@ -187,10 +168,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
                 var _this = $(this);
-
                 var id = $(this).parent().parent().find('.item_id').val();
+<<<<<<< HEAD
                 console.log(id);
                 console.log($(this).parent().parent().find('.item_id').val());
+=======
+>>>>>>> supplychain
                 if (id) {
                     Layer.confirm(__('确定删除此数据吗?'), function () {
                         _this.parent().parent().remove();
@@ -249,6 +232,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     pagingMore: true,
                     max: 5000
                 });
+
+
+                //获取sku信息
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var platform_type = $('.call_out_site.selectpicker').val();
+                    var _this = $(this);
+                    if (!sku || !platform_type) {
+                        Toastr.error('SKU和调出虚拟仓不能为空');
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'warehouse/transfer_order/getSkuData',
+                        data: { sku: sku, platform_type: platform_type }
+                    }, function (data, ret) {
+                        _this.parent().parent().find('.sku_stock').val(data);
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
+                })
             }
         }
     };
