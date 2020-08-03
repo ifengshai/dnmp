@@ -283,7 +283,6 @@ class Test3 extends Backend
         $this->zendeskAgents = new \app\admin\model\zendesk\ZendeskAgents;
         $customer = $this->zendeskTasks->where('id',2069)->select();
         $customer = collection($customer)->toArray();
-        dump($customer);exit;
         foreach ($customer as $item){
             //获取当前时间
             $create = explode(' ',$item['create_time']);
@@ -292,6 +291,7 @@ class Test3 extends Backend
             $where['is_admin'] = 1;
             $where['due_id'] = $item['admin_id'];
             $where['update_time'] = ['between', [$start, $end]];
+            dump($where);exit;
             $count = $this->zendeskComments->where($where)->count();
             Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
             echo $item['admin_id'].'--'.$count.' is ok'."\n";
