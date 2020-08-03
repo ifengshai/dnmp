@@ -260,7 +260,7 @@ class TrackReg extends Backend
         exit;
     }
 
-    /**
+     /**
      * 获取前一天有效SKU销量
      * 记录当天有效SKU
      *
@@ -298,7 +298,6 @@ class TrackReg extends Backend
 
         echo "ok";
     }
-
     /**
      * 统计有效天数日均销量 并按30天预估销量分级
      *

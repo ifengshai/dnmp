@@ -1229,7 +1229,8 @@ class NewProduct extends Backend
      */
     public function replenishEscalationList()
     {
-        //        $this->relationSearch = true;
+//        $this->relationSearch = true;
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1253,6 +1254,7 @@ class NewProduct extends Backend
 
             $this->request->get(['filter' => json_encode($filter)]);
             $params = $this->request->get();
+
             if ($filter['sku']) {
                 $where['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }

@@ -3608,7 +3608,7 @@ EOF;
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
