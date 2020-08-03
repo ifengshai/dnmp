@@ -107,7 +107,7 @@ table.altrowstable tr:nth-child(even){
             <div class="tab-pane fade active in">
                 <div class="row">
                     <div>
-                        <div class="form-group">
+                        <div class="form-group" id="form" role="form" >
                             <div style="font-size: 16px;"><b>工单处理概况</b></div><br>
                             <div style="margin-left: 57px;font-size: 14px;margin-top: 20px;">
                             时间：
@@ -217,7 +217,7 @@ table.altrowstable tr:nth-child(even){
                             </div>
                         </div>
                         <div class="table-box">
-                            <table class="altrowstable measure-table"
+                            <table id="warehouse" class="altrowstable measure-table"
                                     data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                                     data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                                     width="100%">
@@ -233,11 +233,11 @@ table.altrowstable tr:nth-child(even){
                                 {if isset($warehouse_problem_type)}
                                 {foreach name="warehouse_problem_type" item="vo" key="k"}
                                 <tr>
-                                    <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handle'];?></td>
-                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handled'];?></td>
-                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handle'];?></td>
-                                    <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handled'];?></td>
+                                    <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                                    <td style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handle'];?></td>
+                                    <td style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['no_time_out_handled'];?></td>
+                                    <td style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handle'];?></td>
+                                    <td style="text-align: center; vertical-align: middle;"><?php echo $warehouse_handle[$k]['time_out_handled'];?></td>
                                 </tr>
                                 {/foreach}
                                 {/if}
