@@ -2204,8 +2204,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }
                             // if(count == 1){
                             //     appoint_users.push(Config.userid);
+                            //     //appoint_users.push(Config.create_user_id);
                             // }else{
-                            //      if(appoint_users[Config.userid]){
+                            //      if(appoint_users[Config.create_user_id]){
                             //         delOne(Config.userid,appoint_users);
                             //     }                         
                             // }

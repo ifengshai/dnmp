@@ -131,7 +131,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //写入主表
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
@@ -255,7 +255,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -371,7 +371,7 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
 
             //写入主表
@@ -498,7 +498,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)+8*3600));
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -1290,7 +1290,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-10T23:00:00Z updated_at<=2020-07-15T23:59:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-30T23:00:00Z updated_at<=2020-08-01T23:59:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 

@@ -260,7 +260,7 @@ class TrackReg extends Backend
         exit;
     }
 
-    /**
+     /**
      * 获取前一天有效SKU销量
      * 记录当天有效SKU
      *
@@ -275,7 +275,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\Order();
-        $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
         //批量插入当天各站点上架sku
         $skuSalesNum->saveAll($list);
@@ -286,7 +286,7 @@ class TrackReg extends Backend
         if ($data) {
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
-                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['sku'], $where, $v['site']);
+                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
                 $params[$k]['census_date'] = date("Y-m-d", strtotime("-1 day"));
                 $params[$k]['id'] = $v['id'];
             }
@@ -298,7 +298,6 @@ class TrackReg extends Backend
 
         echo "ok";
     }
-
     /**
      * 统计有效天数日均销量 并按30天预估销量分级
      *
