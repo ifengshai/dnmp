@@ -679,9 +679,9 @@ class NewProduct extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            //            dump($params);die;
+//                        dump($params);die;
             //编辑保存的选品状态改为待选品
-            $params['item_status'] = 1;
+//            $params['item_status'] = 1;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;

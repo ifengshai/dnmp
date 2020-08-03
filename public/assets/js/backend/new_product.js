@@ -65,8 +65,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
-                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' , 0: 'red'},
+                            searchList: {0:'新建', 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'newproductattribute.frame_remark', title: __('选品备注'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
@@ -310,6 +310,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-ok', function () {
+                console.log($('#status').val())
+                $('#status').val(0);
+            });
+            $(document).on('click', '.btn-submit', function () {
+                console.log($('#status').val())
+                $('#status').val(1);
+            })
+
+            Form.api.bindevent($("form[role=form]"));
         },
         detail: function () {
             Controller.api.bindevent();
