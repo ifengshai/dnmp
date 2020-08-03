@@ -277,17 +277,22 @@ class Test3 extends Backend
         }
         dump($i);exit;
     }
+    //每天的回复量
     public function zendesk_data(){
-        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
-        foreach ($zendesk as $item){
-            $where['zid'] = $item;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
+        $this->zendeskAgents = new \app\admin\model\zendesk\ZendeskAgents;
+        $customer = $this->zendeskTasks->where('id',2069)->select();
+        foreach ($customer as $item){
+            //获取当前时间
+            $create = explode(' ',$item['create_time']);
+            $start = $create[0];
+            $end = date('Y-m-d 23:59:59',strtotime($start));
             $where['is_admin'] = 1;
-            $where['due_id'] = array('neq',0);
-            $assign = Db::name('zendesk_comments')->where($where)->order('id','desc')->value('due_id');
-            $params['assign_id'] = $assign;
-            Db::name('zendesk')->where('id',$item)->update($params);
-            echo $item.'--'.$assign.' is ok'."\n";
+            $where['due_id'] = $item['admin_id'];
+            $where['update_time'] = ['between', [$start, $end]];
+            $count = $this->zendeskComments->where($where)->count();
+            Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
+            echo $item['admin_id'].'--'.$count.' is ok'."\n";
         }
-
     }
 }
