@@ -24,6 +24,7 @@ class CustomerService extends Backend
         $this->problem_type = new \app\admin\model\saleaftermanage\WorkOrderProblemType();
         $this->problem_step = new \app\admin\model\saleaftermanage\WorkOrderProblemStep();
         $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
     }
     /**
      * 客服数据大屏
@@ -339,7 +340,6 @@ class CustomerService extends Backend
                 $date_arr = array(
                     $createat[0] => $this->zendeskTasks->where($where)->sum('reply_count')
                 );
-
                 if ($createat[0] != $createat[3]) {
                     for ($i = 0; $i <= 100; $i++) {
                         $m = $i + 1;
@@ -354,15 +354,16 @@ class CustomerService extends Backend
                     }
                 }
             } else {
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d 23:59:59");
-                $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+
                 for ($i = 6; $i >= 0; $i--) {
+                    $j = $i-1;
                     $next_day = date("Y-m-d", strtotime("-$i day"));
-                    $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
+                    $next_next_day = date("Y-m-d", strtotime("-$j day"));
+                    $where['create_time'] = ['between', [$next_day, $next_next_day]];
+                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->select(false);
                 }
             }
+
             $name = '处理量';
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
