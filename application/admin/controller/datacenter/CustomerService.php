@@ -360,7 +360,7 @@ class CustomerService extends Backend
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $next_next_day = date("Y-m-d", strtotime("-$j day"));
                     $where['create_time'] = ['between', [$next_day, $next_next_day]];
-                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->select(false);
+                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
                 }
             }
 
