@@ -1143,8 +1143,168 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             EchartObj.api.ajax(options, chartOptions)
 
             Controller.api.bindevent();
+        },
+        //工单处理统计
+        worklist_deal: function(){
+            Controller.api.formatter.daterangepicker($("div[role=form]"));
+            Form.api.bindevent($("div[role=form]"));
+            $(document).on('click', '#customer_submit', function () {
+                var create_time = $('#customer_time').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'datacenter/customer_service/workorder_general',
+                    data: { time: create_time }
+                }, function (data, ret) {
+                    $("#customer_meause1 tr").remove();
+                    $("#workload-info tr").remove();
+                    var examineArr = ret.data.examineArr;
+                    var step = ret.data.step;
+                    var workorder_handle_left_data = ret.data.workorder_handle_left_data;
+                    var workorder_handle_right_data = ret.data.workorder_handle_right_data;
+                    //工单处理概况左边数据 start
+                    var left_tr = '<tr>';
+                    left_tr += '<th style="text-align: center; vertical-align: middle;">措施</th>';
+                    for (let key in examineArr) {
+                        left_tr += '<th style="text-align: center; vertical-align: middle;">' + examineArr[key] + '</th>';
+                    }
+                    left_tr += '</tr>';
+                    left_tr += '<tr>';
+                    left_tr += '<td style="text-align: center; vertical-align: middle;">未超时未审批</td>';
+                    for (let key in examineArr) {
+                        if (workorder_handle_left_data != false) {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_left_data[key].no_time_out_check + '</td>';
+                        } else {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">0</td>';
+                        }
+                    }
+                    left_tr += '</tr>';
+                    left_tr += '<tr>';
+                    left_tr += '<td style="text-align: center; vertical-align: middle;">未超时已审批</td>';
+                    for (let key in examineArr) {
+                        if (workorder_handle_left_data != false) {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_left_data[key].no_time_out_checked + '</td>';
+                        } else {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">0</td>';
+                        }
+                    }
+                    left_tr += '</tr>';
+                    left_tr += '<tr>';
+                    left_tr += '<td style="text-align: center; vertical-align: middle;">超时未审批</td>';
+                    for (let key in examineArr) {
+                        if (workorder_handle_left_data != false) {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_left_data[key].time_out_check + '</td>';
+                        } else {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">0</td>';
+                        }
+                    }
+                    left_tr += '</tr>';
+                    left_tr += '<tr>';
+                    left_tr += '<td style="text-align: center; vertical-align: middle;">超时已审批</td>';
+                    for (let key in examineArr) {
+                        if (workorder_handle_left_data != false) {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_left_data[key].time_out_checked + '</td>';
+                        } else {
+                            left_tr += '<td style="text-align: center; vertical-align: middle;">0</td>';
+                        }
+                    }
+                    left_tr += '</tr>';
+                    $("#customer_meause1").append(left_tr);
+                    //工单处理概况左边数据 end
+                    //工单处理概况右边数据 start
+                    var right_tr = '<tr>';
+                    right_tr += '<th style="text-align: center; vertical-align: middle;">措施</th>';
+                    right_tr += '<th style="text-align: center; vertical-align: middle;">未超时未处理</th>';
+                    right_tr += '<th style="text-align: center; vertical-align: middle;">未超时已处理</th>';
+                    right_tr += '<th style="text-align: center; vertical-align: middle;">超时未处理</th>';
+                    right_tr += '<th style="text-align: center; vertical-align: middle;">超时已处理</th>';
+                    right_tr += '</tr>';
+                    for (let key in step) {
+                        if (workorder_handle_right_data != false) {
+                            right_tr += '<tr>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + step[key] + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_right_data[key].no_time_out_handle + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_right_data[key].no_time_out_handled + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_right_data[key].time_out_handle + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + workorder_handle_right_data[key].time_out_handled + '</td>' +
+                                '</tr>';
+                        } else {
+                            right_tr += '<tr>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + step[key] + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '</tr>';
+                        }
+                    }
+                    //工单处理概况右边数据 end     
+                    $("#workload-info").append(right_tr);
+                    return false;
+                }, function (data, ret) {
+                    Layer.alert(ret.msg);
+                    return false;
+                });
+            });
+            $(document).on('click','#customer_reset',function(){
+                $('#customer_time').val('');
+            });
+            Controller.api.formatter.daterangepicker($("div[role=form8]"));
+            Form.api.bindevent($("div[role=form8]"));
+            
+            $(document).on('click', '#worknum_submit', function () {
+                var create_time = $('#workload_time').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'datacenter/customer_service/warehouse_general',
+                    data: { time: create_time }
+                }, function (data, ret) {
+                    var warehouse_data = ret.data.warehouse_data;
+                    var warehouse_problem_type = ret.data.warehouse_problem_type;
+                    $("#warehouse tr").remove();
+                    var tr = '<tr>';
+                    tr += '<th style="text-align: center; vertical-align: middle;">跟单概况</th>';
+                    tr += '<th style="text-align: center; vertical-align: middle;">未超时未处理</th>';
+                    tr += '<th style="text-align: center; vertical-align: middle;">未超时已处理</th>';
+                    tr += '<th style="text-align: center; vertical-align: middle;">超时未处理</th>';
+                    tr += '<th style="text-align: center; vertical-align: middle;">超时已处理</th>';
+                    tr += '</tr>';
+                    for (let key in warehouse_problem_type) {
+                        if (warehouse_data != false) {
+                            tr += '<tr>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_problem_type[key] + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_data[key].no_time_out_handle + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_data[key].no_time_out_handled + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_data[key].time_out_handle + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_data[key].time_out_handled + '</td>' +
+                                '</tr>';
+                        } else {
+                            tr += '<tr>' +
+                                '<td style="text-align: center; vertical-align: middle;">' + warehouse_problem_type[key] + '</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '<td style="text-align: center; vertical-align: middle;">0</td>' +
+                                '</tr>';
+                        }
+                    }
+                    //工单处理概况右边数据 end     
+                    $("#warehouse").append(tr);
+                    return false;
+                }, function (data, ret) {
+                    Layer.alert(ret.msg);
+                    return false;
+                });
+            });
+            $(document).on('click','#worknum_reset',function(){
+                $('#workload_time').val('');
+            });
         }
-
     };
     return Controller;
 });

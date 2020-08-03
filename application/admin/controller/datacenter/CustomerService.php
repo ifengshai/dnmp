@@ -389,6 +389,38 @@ class CustomerService extends Backend
         $this->view->assign(compact('admin_id', 'time_str'));
         return $this->view->fetch();
     }
+    /*
+     * 工单处理统计
+     * */
+    public function worklist_deal(){
+        $kefumanage = config('workorder.kefumanage');
+        $examine = [];
+        foreach ($kefumanage as $k => $v) {
+            $examine[] = $k;
+        }
+        $examine[] = config('workorder.customer_manager');
+        $examinePerson = $this->customers();
+
+        $examineArr = [];
+        foreach ($examinePerson as $ek => $ev) {
+            if (in_array($ek, $examine)) {
+                $examineArr[$ek] = $ev;
+            }
+        }
+        //左边右边的措施
+        $step = config('workorder.step');
+        $start = date("Y-m-d", strtotime("-6 day"));
+        $end = date("Y-m-d 23:59:59");
+        $map_create['create_time'] =  $map_measure['w.create_time'] = ['between', [$start,$end]];
+        $workorder_handle_left_data = $this->workorder_handle_left($map_create, $examineArr);
+        $workorder_handle_right_data = $this->workorder_handle_right($map_measure, $step);
+        //跟单概况 start
+        $warehouse_problem_type = config('workorder.warehouse_problem_type');
+        $warehouse_handle       = $this->warehouse_handle($map_create, $warehouse_problem_type);
+        //跟单概况 end
+        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step','warehouse_handle','warehouse_problem_type'));
+        return $this->view->fetch();
+    }
     /**
      * 客服数据(首页)
      *
@@ -537,6 +569,7 @@ class CustomerService extends Backend
         }
         $examine[] = config('workorder.customer_manager');
         $examinePerson = $this->customers();
+
         $examineArr = [];
         foreach ($examinePerson as $ek => $ev) {
             if (in_array($ek, $examine)) {
