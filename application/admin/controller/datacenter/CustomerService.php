@@ -210,7 +210,7 @@ class CustomerService extends Backend
         //未达标天数
         $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
         //人效
-        $positive_effect_num = $this->zendeskComments->positive_effect_num(1);
+        $positive_effect_num = $this->zendeskTasks->positive_effect_num(1);
         //获取表格内容
         $customer_data = $this->get_worknum_table(1);
         $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));
@@ -296,13 +296,12 @@ class CustomerService extends Backend
             $time_str = $params['time_str'];
             $contrast_time_str = $params['contrast_time_str'];
             $group_id = $params['group_id'];
-            $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             //处理量
             $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数
             $arr['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str, $group_id);
             //人效
-            $arr['positive_effect_num'] = $this->zendeskComments->positive_effect_num($platform, $time_str, $group_id);
+            $arr['positive_effect_num'] = $this->zendeskTasks->positive_effect_num($platform, $time_str, $group_id);
             //获取表格中的时间
             $customer_data = $this->get_worknum_table($platform,$time_str,$contrast_time_str,$group_id);
             if($customer_data){
