@@ -236,8 +236,6 @@ class CustomerService extends Backend
             $time_time = '';
         }
         //查询所有客服人员
-        $all_service_ids = $this->zendeskTasks->where($where)->select(false);
-        echo $all_service_ids;exit;
         $all_service_ids = $this->zendeskTasks->where($where)->column('admin_id');
         $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
