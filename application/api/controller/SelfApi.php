@@ -655,14 +655,13 @@ class SelfApi extends Api
                 $this->error(__('缺少订单号参数'), [], 400);
             }
 
-            if (!$order_data) {
-                $this->error(__('缺少订单号参数'), [], 400);
-            }
-
             $item = new \app\admin\model\itemmanage\Item();
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //订单json数据 包含sku qty
             $order_data = json_decode($order_data, true);
+            if (!$order_data) {
+                $this->error(__('缺少数据参数'), [], 400);
+            }
             $skus = array_column($order_data, 'sku');
             //查询所有true sku
             $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->column('*', 'platform_sku'); 
