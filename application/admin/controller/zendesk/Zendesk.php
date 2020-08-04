@@ -594,7 +594,6 @@ class Zendesk extends Backend
                 $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
             }
             $comment['sign'] = $sign ? $sign : '';
-            $comment['zendesk_nickname'] = $zendesk_nickname;
         }
 
         //获取该用户的所有状态不为close，sloved的ticket
