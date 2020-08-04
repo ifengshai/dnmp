@@ -891,7 +891,7 @@ DOC;
     {
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
-        $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
+        $now = $this->model->where('due_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
         if($now >= 5){
             $this->error("请先处理完成已分配的工单");
         }

@@ -24,6 +24,7 @@ class CustomerService extends Backend
         $this->problem_type = new \app\admin\model\saleaftermanage\WorkOrderProblemType();
         $this->problem_step = new \app\admin\model\saleaftermanage\WorkOrderProblemStep();
         $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
     }
     /**
      * 客服数据大屏
@@ -242,6 +243,7 @@ class CustomerService extends Backend
             $data[$i]['admin_id'] = $value;
             //用户姓名
             $data[$i]['name'] = $admin['nickname'];
+            $data[$i]['group_id'] = $admin['group_id'] ? $admin['group_id'] : 0;
             //分组名称
             if ($admin['group_id'] == 1) {
                 $data[$i]['group_name'] = 'A组';
@@ -269,7 +271,19 @@ class CustomerService extends Backend
             }
             $i++;
         }
-        return $data;
+        $arr = array();
+        $j = 0;
+        if($group_id){
+            foreach ($data as $v){
+                if($group_id == $v['group_id']){
+                    $arr[$j] = $v;
+                    $j++;
+                }
+            }
+        }else{
+            $arr = $data;
+        }
+        return $arr;
     }
     /*
      * ajax获取工作量统计信息
@@ -283,7 +297,6 @@ class CustomerService extends Backend
             $contrast_time_str = $params['contrast_time_str'];
             $group_id = $params['group_id'];
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
-            $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
             //处理量
             $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数
@@ -323,47 +336,46 @@ class CustomerService extends Backend
             $group_id = $params['group_id'];
             $admin_id = $params['admin_id'];
             if($platform){
-                $where['platform'] = $platform;
+                $where['type'] = $platform;
             }
-            $where['is_admin'] = 1;
             if($group_id){
                 //查询客服类型
                 $group_admin_id = Db::name('admin')->where(['group_id' => $group_id, 'status' => 'normal'])->column('id');
-                $where['due_id'] = array('in', $group_admin_id);
+                $where['admin_id'] = array('in', $group_admin_id);
             }
             if($admin_id){
-                $where['due_id'] = $admin_id;
+                $where['admin_id'] = $admin_id;
             }
             if($time_str){
                 $createat = explode(' ', $time_str);
-                $where['update_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                $where['create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => $this->zendeskComments->where($where)->count()
+                    $createat[0] => $this->zendeskTasks->where($where)->sum('reply_count')
                 );
-
                 if ($createat[0] != $createat[3]) {
                     for ($i = 0; $i <= 100; $i++) {
                         $m = $i + 1;
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date, date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date, "Y-m-d");
-                        $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        $date_arr[$next_day] = $this->zendeskComments->where($where)->count();
+                        $where['create_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
                         if ($next_day == $createat[3]) {
                             break;
                         }
                     }
                 }
             } else {
-                $seven_startdate = date("Y-m-d", strtotime("-6 day"));
-                $seven_enddate = date("Y-m-d 23:59:59");
-                $where['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+
                 for ($i = 6; $i >= 0; $i--) {
+                    $j = $i-1;
                     $next_day = date("Y-m-d", strtotime("-$i day"));
-                    $where['update_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                    $date_arr[$next_day] = $this->zendeskComments->where($where)->count();
+                    $next_next_day = date("Y-m-d", strtotime("-$j day"));
+                    $where['create_time'] = ['between', [$next_day, $next_next_day]];
+                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
                 }
             }
+
             $name = '处理量';
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
@@ -387,6 +399,38 @@ class CustomerService extends Backend
         $admin_id = $params['admin_id'];
         $time_str = $params['time_str'];
         $this->view->assign(compact('admin_id', 'time_str'));
+        return $this->view->fetch();
+    }
+    /*
+     * 工单处理统计
+     * */
+    public function worklist_deal(){
+        $kefumanage = config('workorder.kefumanage');
+        $examine = [];
+        foreach ($kefumanage as $k => $v) {
+            $examine[] = $k;
+        }
+        $examine[] = config('workorder.customer_manager');
+        $examinePerson = $this->customers();
+
+        $examineArr = [];
+        foreach ($examinePerson as $ek => $ev) {
+            if (in_array($ek, $examine)) {
+                $examineArr[$ek] = $ev;
+            }
+        }
+        //左边右边的措施
+        $step = config('workorder.step');
+        $start = date("Y-m-d", strtotime("-6 day"));
+        $end = date("Y-m-d 23:59:59");
+        $map_create['create_time'] =  $map_measure['w.create_time'] = ['between', [$start,$end]];
+        $workorder_handle_left_data = $this->workorder_handle_left($map_create, $examineArr);
+        $workorder_handle_right_data = $this->workorder_handle_right($map_measure, $step);
+        //跟单概况 start
+        $warehouse_problem_type = config('workorder.warehouse_problem_type');
+        $warehouse_handle       = $this->warehouse_handle($map_create, $warehouse_problem_type);
+        //跟单概况 end
+        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step','warehouse_handle','warehouse_problem_type'));
         return $this->view->fetch();
     }
     /**
@@ -537,6 +581,7 @@ class CustomerService extends Backend
         }
         $examine[] = config('workorder.customer_manager');
         $examinePerson = $this->customers();
+
         $examineArr = [];
         foreach ($examinePerson as $ek => $ev) {
             if (in_array($ek, $examine)) {

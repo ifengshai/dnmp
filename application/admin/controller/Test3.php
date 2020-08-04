@@ -277,17 +277,53 @@ class Test3 extends Backend
         }
         dump($i);exit;
     }
+    //每天的回复量
     public function zendesk_data(){
-        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
-        foreach ($zendesk as $item){
-            $where['zid'] = $item;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $customer = $this->zendeskTasks->where(['reply_count'=>0])->order('id','desc')->select();
+        $customer = collection($customer)->toArray();
+        foreach ($customer as $item){
+            //获取当前时间
+            $create = explode(' ',$item['create_time']);
+            $start = $create[0];
+            $end = date('Y-m-d 23:59:59',strtotime($start));
             $where['is_admin'] = 1;
-            $where['due_id'] = array('neq',0);
-            $assign = Db::name('zendesk_comments')->where($where)->order('id','desc')->value('due_id');
-            $params['assign_id'] = $assign;
-            Db::name('zendesk')->where('id',$item)->update($params);
-            echo $item.'--'.$assign.' is ok'."\n";
+            $where['due_id'] = $item['admin_id'];
+            $where['update_time'] = ['between', [$start, $end]];
+            $count = $this->zendeskComments->where($where)->count();
+            Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
+            echo $item['id'].'--'.$item['admin_id'].'--'.$count.' is ok'."\n";
+            sleep(1);
         }
-
+    }
+    //没有承接人的数据
+    public function zendesk_no_assign(){
+        //查询没有承接人的数据
+        $where[] = ['exp',Db::raw("assign_id is null or assign_id = 0")];
+        $where['due_id'] = ['neq',0];
+        $zendesk = Db::name('zendesk')->where($where)->select();
+        foreach ($zendesk as $item){
+            //查询评论最多的人
+            $arr['is_admin'] = 1;
+            $arr['zid'] = $item['id'];
+            $arr['due_id'] = ['not in','75,105,95,117'];
+            $comments = Db::name('zendesk_comments')->where($arr)->group('due_id')->field('due_id,count(due_id) as count')->order('count','desc')->select();
+            $assign_id = 0;
+            foreach ($comments as $value){
+                //查询该用户的站点是否和当前站点一致
+                $types = Db::name('zendesk_agents')->where('admin_id',$value['due_id'])->column('type');
+                if($types && in_array($item['type'],$types)){
+                    $assign_id = $value['due_id'];
+                    break;
+                }
+            }
+            if($assign_id == 0){
+                $assign_id = $item['due_id'];
+            }
+            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$assign_id]);
+            echo $item['id'].'--'.$item['assign_id'].'--'.$assign_id.' is ok'."\n";
+        }
+        echo "all is ok";
     }
 }

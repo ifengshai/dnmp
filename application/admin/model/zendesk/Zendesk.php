@@ -399,7 +399,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('update_time asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('zendesk_update_time asc')->select();
         //找出所有离职用户id
         $targetAccount = Admin::where(['status' => ['=','hidden']])->column('id');
         foreach ($waitTickets as $ticket) {
@@ -436,6 +436,7 @@ class Zendesk extends Model
                             //已达到目标量，承接给任务量最少的人
                             $task = ZendeskTasks::whereTime('create_time', 'today')
                                 ->where(['type' => $ticket->getType()])
+                                ->where('surplus_count','>',0)
                                 ->order('complete_count', 'asc')
                                 ->limit(1)
                                 ->find();
@@ -445,6 +446,7 @@ class Zendesk extends Model
                     //则承接给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
+                        ->where('surplus_count','>',0)
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
@@ -457,6 +459,7 @@ class Zendesk extends Model
                     //如果离职，承接不变，分配给最少单的人，手动改承接人
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where(['type' => $ticket->getType()])
+                        ->where('surplus_count','>',0)
                         ->order('complete_count', 'asc')
                         ->limit(1)
                         ->find();
@@ -517,14 +520,14 @@ class Zendesk extends Model
         if($workload_time){
             $createat = explode(' ', $workload_time);
             $where['c.update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
-            $map['update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['zendesk_update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
             $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             //默认显示一周的数据
             $seven_startdate = date("Y-m-d", strtotime("-6 day"));
             $seven_enddate = date("Y-m-d 23:59:59");
             $where['c.update_time'] = ['between', [$seven_startdate, $seven_enddate]];
-            $map['update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['zendesk_update_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
         $where['z.channel'] = array('neq','voice');
@@ -552,7 +555,7 @@ class Zendesk extends Model
         }
         $zendesk_where['status'] = array('in','1,2');
         $zendesk_where['channel'] = array('neq','voice');
-        $id = $this->where($zendesk_where)->order('update_time','asc')->value('id');
+        $id = $this->where($zendesk_where)->order('zendesk_update_time','asc')->value('id');
         $reply_where['is_admin'] = 0;
         $reply_where['zid'] = $id;
         $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
@@ -572,5 +575,23 @@ class Zendesk extends Model
             'reply_failure_num' => $reply_failure_num,
         );
         return $zendesk;
+    }
+    /*
+     *  工单统计超时审批情况
+     * */
+    public function worklist_deal($admin_id = 0,$time_str = ''){
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['check_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        }else{
+            //默认显示一周的数据
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d 23:59:59");
+            $where['check_time'] = ['between', [$seven_startdate, $seven_enddate]];
+        }
+        if($admin_id){
+            $where['assign_user_id'] = $admin_id;
+        }
+        $this->where($where)->count();
     }
 }
