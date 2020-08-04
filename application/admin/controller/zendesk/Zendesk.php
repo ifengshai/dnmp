@@ -107,6 +107,17 @@ class Zendesk extends Backend
                         break;
                 }
             }
+        
+            //承接人筛选
+            if($filter['assign_id']){
+                $map['zendesk.assign_id'] = $filter['assign_id'];
+                unset($filter['assign_id']);
+            }
+            //处理人筛选
+            if($filter['due_id']){
+                $map['zendesk.due_id'] = $filter['due_id'];
+                unset($filter['due_id']);
+            }
             if($filter['tags']) {
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);
@@ -129,7 +140,7 @@ class Zendesk extends Backend
                 $orderSet = "{$sort} {$order}";
             }
             $total = $this->model
-                ->with(['admin'])
+                ->with('admin')
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
@@ -137,7 +148,7 @@ class Zendesk extends Backend
                 ->count();
 
             $list = $this->model
-                ->with(['admin'])
+                ->with('admin')
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
@@ -146,6 +157,11 @@ class Zendesk extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $admin = Db::name('admin')->column('nickname','id');
+            foreach($list as $k=>$v){
+                $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
+                $list[$k]['due_id_nickname'] = $admin[$v['due_id']];
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -578,6 +594,7 @@ class Zendesk extends Backend
                 $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
             }
             $comment['sign'] = $sign ? $sign : '';
+            $comment['zendesk_nickname'] = $zendesk_nickname;
         }
 
         //获取该用户的所有状态不为close，sloved的ticket
