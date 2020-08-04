@@ -23,6 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 searchFormVisible: true,
                 columns: [
                     [
+                        {checkbox: true},
                         {field: 'id', title: __('Id'),sortable: true},
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
@@ -48,7 +49,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'channel', title: __('Channel')},
                         {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
-                        {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
+                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -158,6 +159,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
             $(document).on("click", ".btn-synchronous", function () {
                 Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
+            });
+            //上面的修改承接人
+            $(document).on("click", ".batch-edit-recipient", function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
         },
         add: function () {
@@ -376,6 +382,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         edit_recipient:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
+        batch_edit_recipient:function(){
             Form.api.bindevent($("form[role=form]"));
         },
         artificial_synchronous:function(){

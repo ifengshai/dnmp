@@ -190,7 +190,7 @@ class TrackReg extends Backend
                 return false;
                 break;
         }
-        
+
         if ($params['site'] == 4) {
             $url = $url . 'rest/mj/update_order_handle';
         } else {
@@ -260,7 +260,7 @@ class TrackReg extends Backend
         exit;
     }
 
-    /**
+     /**
      * 获取前一天有效SKU销量
      * 记录当天有效SKU
      *
@@ -271,82 +271,78 @@ class TrackReg extends Backend
      */
     public function get_sku_sales_num()
     {
-        //记录当天上架的SKU
+        //记录当天上架的SKU 
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $list = $itemPlatformSku->where(['outer_sku_status' => 1])->select();
+        $order = new \app\admin\model\order\order\Order();
+        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-        foreach($list as $k => $v) 
-        {
-            $skuSalesNum->allowField(true)->isUpdate(false);
+        //批量插入当天各站点上架sku
+        $skuSalesNum->saveAll($list);
+
+        //查询昨天上架SKU 并统计当天销量
+        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
+                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
+                $params[$k]['census_date'] = date("Y-m-d", strtotime("-1 day"));
+                $params[$k]['id'] = $v['id'];
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+           
         }
 
-
-
+        echo "ok";
     }
-
-
-
-
     /**
-     * 获取每日SKU各站销量
+     * 统计有效天数日均销量 并按30天预估销量分级
      *
      * @Description
      * @author wpl
-     * @since 2020/07/14 09:41:49 
+     * @since 2020/08/01 15:29:23 
      * @return void
      */
-    public function getSkuSalesNum()
+    public function get_days_sales_num()
     {
-        set_time_limit(0);
-        $item = new \app\admin\model\itemmanage\Item();
-        $zeelool = new \app\admin\model\order\order\Zeelool();
-        $voogueme = new \app\admin\model\order\order\Voogueme();
-        $nihao = new \app\admin\model\order\order\Nihao();
-        $meeloog = new \app\admin\model\order\order\Meeloog();
-        $wesee = new \app\admin\model\order\order\Weseeoptical();
-        $map['is_open'] = 1;
-        $map['is_del'] = 1;
-        $map['item_status'] = 3;
-        $list = $item->where($map)->limit(300)->select();
-        $skus = [];
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $date = date('Y-m-d');
+        $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = collection($list)->toArray();
+        
         foreach ($list as $k => $v) {
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
-            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
-            $meeloog_sku = $itemPlatformSku->getWebSku($v['sku'], 4);
-            $wesee_sku = $itemPlatformSku->getWebSku($v['sku'], 5);
-            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $stime = date("Y-m-d 00:00:00");
-            $etime = date("Y-m-d 23:59:59");
-            $where['a.created_at'] = ['between', [$stime, $etime]];
-            //Zeelool
-            $where['sku'] = $zeelool_sku;
-            $zeelool_num = $zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Voogueme
-            $where['sku'] = $voogueme_sku;
-            $voogueme_num = $voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Nihao
-            $where['sku'] = $nihao_sku;
-            $nihao_num = $nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-
-            //meeloog
-            $where['sku'] = $meeloog_sku;
-            $meeloog_num = $meeloog->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-
-            //wesee
-            $where['sku'] = $wesee_sku;
-            $wesee_num = $wesee->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-
-            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
-                $skus[] = $v['sku'];
+            //15天日均销量
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->select();
+            $params['sales_num_15days'] = $days15_data->num > 0 ? round($days15_data->sales_num / $days15_data->num) : 0;
+            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find()->toArray();
+            //90天日均销量
+            $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
+            //计算等级 30天预估销量
+            $num = round($params[$k]['sales_num_90days'] * 1 * 30);
+            if ($num >= 300) {
+                $params['grade'] = 'A+';
+            } elseif ($num >= 150 && $num < 300) {
+                $params['grade'] = 'A';
+            } elseif ($num >= 90 && $num < 150) {
+                $params['grade'] = 'B';
+            } elseif ($num >= 60 && $num < 90) {
+                $params['grade'] = 'C+';
+            } elseif ($num >= 30 && $num < 60) {
+                $params['grade'] = 'C';
+            } elseif ($num >= 15 && $num < 30) {
+                $params['grade'] = 'D';
+            } elseif ($num >= 1 && $num < 15) {
+                $params['grade'] = 'E';
+            } else {
+                $params['grade'] = 'F';
             }
+            $itemPlatformSku->isUpdate(true,['id' => $v['id']])->save($params);
         }
-        $data['is_change'] = 1;
-        $data['is_open'] = 3;
-        $res = $item->save($data, ['sku' => ['in', $skus]]);
-        dump($res);
-        die;
+       
+        echo "ok";
     }
 }

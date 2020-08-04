@@ -331,7 +331,12 @@ class Outstock extends Backend
             if ($data['status'] == 2) {
                 //查询入库单商品信息
                 $where['out_stock_id'] = ['in', $ids];
-                $list = $this->item->where($where)->select();
+                $list = $this->item
+                    ->alias('a')
+                    ->join('fa_out_stock o','a.out_stock_id = o.id')
+                    ->where($where)
+                    ->select();
+//                dump(collection($list)->toArray());die;
                 $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
                 //出库扣减库存
@@ -342,24 +347,30 @@ class Outstock extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
 
-                    //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
-                    //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                    $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
-                    $all_num = count($item_platform_sku);
-                    $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
-                    //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
-                    $stock_num = $v['out_stock_num'];
-                    foreach ($item_platform_sku as $key => $val) {
-                        //最后一个站点 剩余数量分给最后一个站
-                        if (($all_num - $key) == 1) {
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stock_num)->update();
-                        } else {
-                            $num = round($v['out_stock_num'] * $val['stock']/$whole_num);
-                            $stock_num -= $num;
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+
+                    //同事配镜 厂家质量问题 带回办公室 扣减库存最大的那个站
+                    if (in_array($v['type_id'], [3, 5, 9,23])) {
+                        $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock desc')->field('platform_type,stock')->find();
+                        $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->dec('stock', $v['out_stock_num'])->update();
+                    }else{
+                        //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
+                        //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
+                        $stock_num = $v['out_stock_num'];
+                        foreach ($item_platform_sku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stock_num)->update();
+                            } else {
+                                $num = round($v['out_stock_num'] * $val['stock']/$whole_num);
+                                $stock_num -= $num;
+                                $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                            }
                         }
                     }
-
                 }
 
                 //插入日志表

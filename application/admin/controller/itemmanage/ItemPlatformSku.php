@@ -453,6 +453,7 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['meta_keyword']          = 'Product meta keyword';
             $uploadItemArr['meta_description']      = 'Product meta description';
             $uploadItemArr['sku']                   = $itemPlatformRow['platform_sku'];
+            $itemPlatformRow['id'] = $itemPlatformRow['platform_id'];
             $soap_res = Soap::createProduct($itemPlatformRow, $uploadItemArr);
             if ($soap_res) {
                 $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
