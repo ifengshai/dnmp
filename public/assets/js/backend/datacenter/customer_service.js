@@ -672,12 +672,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             });
             //点击重置按钮
             $(document).on('click', '.btn-reset', function () {
-
+                // $(".form-commonsearch [type=reset]").trigger("click");
                 var now_val = $(".user_group").val();
                 var now_val_test = $(".user_group").find("option:selected").text();
                 $(".user_group option:eq("+now_val+")").remove();
+                $(".user_group option").remove();
+
                 $(".user_group option:eq(0)").attr('selected','selected');
-                $(".user_group").append("<option value="+now_val+">"+now_val_test+"</option>");
+                // $(".user_group").append("<option value="+now_val+">"+now_val_test+"</option>");
+                $(".user_group").append("<option value='0'>全部</option>");
+                $(".user_group").append("<option value='1'>A</option>");
+                $(".user_group").append("<option value='0'>B</option>");
+
 
             });
         },
