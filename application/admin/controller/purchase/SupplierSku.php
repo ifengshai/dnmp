@@ -192,6 +192,7 @@ class SupplierSku extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+//            dump($params);die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -215,7 +216,9 @@ class SupplierSku extends Backend
                     //如果选择主供应商 则同SKU下 其他记录设置为辅供应商
                     if ($params['label'] == 1) {
                         $map['sku'] = $params['sku'];
-                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                        $map['supplier_id'] = ['neq',$params['supplier_id']];
+//                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                        $this->model->where($map)->update(['label' => 0]);
                     }
 
                     $result = $row->allowField(true)->save($params);
