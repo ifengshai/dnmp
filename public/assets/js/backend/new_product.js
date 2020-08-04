@@ -641,6 +641,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                     source: function (request, response) {
                         var origin_sku = $('#c-origin_skus').val();
+                        console.log(origin_sku);
                         $.ajax({
                             type: "POST",
                             url: "new_product/ajaxGetLikeOriginSku",
@@ -652,6 +653,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             },
                             success: function (json) {
                                 var data = json.data;
+                                console.log(data);
                                 response($.map(data, function (item) {
                                     return {
                                         label: item,//下拉框显示值

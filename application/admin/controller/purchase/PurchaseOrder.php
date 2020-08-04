@@ -145,6 +145,7 @@ class PurchaseOrder extends Backend
 
                     $batch_sku = $this->request->post("batch_sku/a");
                     $arrival_num = $this->request->post("arrival_num/a");
+//                    dump($arrival_num);die;
                     if ($arrival_num) {
                         //现在分批到货数量必须等于采购数量
                         $arr = [];
@@ -159,7 +160,8 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
-
+//                    dump($arr);
+//                    dump($arrival_num);die;
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
@@ -190,7 +192,9 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $arrival_num = $this->request->post("arrival_num/a");
-
+//                       dump($batch_sku);
+//                       dump($arrival_num);
+//                        dump($batch_arrival_time);
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {
                             $i = 0;
@@ -204,14 +208,17 @@ class PurchaseOrder extends Backend
                                 $i++;
                                 $list = [];
                                 foreach ($batch_sku[$k] as $key => $val) {
-                                    if (!$val || !$arrival_num[$k][$key]) {
+//                                    if (!$val || !$arrival_num[$k][$key]) {
+//                                        continue;
+//                                    }
+                                    if (!$val) {
                                         continue;
                                     }
                                     $list[$key]['sku'] = $val;
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                     $list[$key]['purchase_batch_id'] = $batch_id;
                                 }
-
+//                        dump($list);die;
                                 $this->batch_item->saveAll($list);
                             }
                         }
