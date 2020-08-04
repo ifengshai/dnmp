@@ -424,8 +424,6 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
-        //获取签名
-        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
         $siteName = 'zeelool';
         if($ticket->type == 2){
             $siteName = 'voogueme';
@@ -467,6 +465,8 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
@@ -586,6 +586,8 @@ class Zendesk extends Backend
         }])->where('zid', $ids)->order('id', 'desc')->select();
         foreach ($comments as $comment){
             if($comment->is_admin == 1){
+                //获取签名
+                $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
                 $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
                 $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
