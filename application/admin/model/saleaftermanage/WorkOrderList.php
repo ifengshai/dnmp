@@ -904,6 +904,10 @@ class WorkOrderList extends Model
                     if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                        //存在补发审核通过后生成补发单
+                        if(7 == $measure_choose_id){
+                            $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        }
                         $key++;
                     } else {
                         $allComplete = 0;
