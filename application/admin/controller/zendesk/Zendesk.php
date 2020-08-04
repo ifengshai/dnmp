@@ -591,7 +591,7 @@ class Zendesk extends Backend
             $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
             //替换签名中的昵称
             if(strpos($sign,'{{agent.name}}')!==false){
-                $sign = str_replace('{{agent.name}}','Mark',$sign);
+                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
             }
             $comment['sign'] = $sign ? $sign : '';
         }
