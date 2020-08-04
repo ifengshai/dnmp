@@ -331,7 +331,12 @@ class Outstock extends Backend
             if ($data['status'] == 2) {
                 //查询入库单商品信息
                 $where['out_stock_id'] = ['in', $ids];
-                $list = $this->item->where($where)->select();
+                $list = $this->item
+                    ->alias('a')
+                    ->join('fa_out_stock o','a.out_stock_id = o.id')
+                    ->where($where)
+                    ->select();
+//                dump(collection($list)->toArray());die;
                 $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
                 //出库扣减库存
