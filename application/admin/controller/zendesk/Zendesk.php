@@ -584,8 +584,7 @@ class Zendesk extends Backend
         $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
-
-        foreach ($comments as &$comment){
+        foreach ($comments as $comment){
             if($comment->is_admin == 1){
                 //获取当前评论的用户的昵称
                 $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
@@ -594,10 +593,9 @@ class Zendesk extends Backend
                 if(strpos($sign,'{{agent.name}}')!==false){
                     $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
                 }
-                $comment['sign'] = $sign ? $sign : '';
+                $comment->sign= $sign ? $sign : '';
             }
         }
-
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
