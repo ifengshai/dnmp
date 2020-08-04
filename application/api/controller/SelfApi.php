@@ -639,10 +639,10 @@ class SelfApi extends Api
     public function set_goods_stock()
     {
         if ($this->request->isPost()) {
-            $site = $this->request->post('site'); //站点
-            $orderid = $this->request->post('orderid'); //订单id
-            $order_number = $this->request->post('order_number'); //订单号
-            $order_data = $this->request->post('order_data'); //订单json数据
+            $site = $this->request->request('site'); //站点
+            $orderid = $this->request->request('orderid'); //订单id
+            $order_number = $this->request->request('order_number'); //订单号
+            $order_data = $this->request->request('order_data'); //订单json数据
             $order_data = '[{"sku":"ZOP008546-01","qty":2},{"sku":"ZOP008617-01","qty":3},{"sku":"ZWO483822-02","qty":5}]';
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
@@ -660,8 +660,6 @@ class SelfApi extends Api
                 $this->error(__('缺少订单号参数'), [], 400);
             }
 
-            $order_data = json_decode($order_data);
-
             $item = new \app\admin\model\itemmanage\Item();
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //订单json数据 包含sku qty
@@ -672,7 +670,6 @@ class SelfApi extends Api
             $true_skus = array_column($platform_data, 'sku');
             //查询sku可用库存
             $res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => ['in', $true_skus]])->column('available_stock', 'sku');
-
             foreach ($order_data as $k => $v) {
                 $true_sku = $platform_data[$v['sku']]['sku'];
                 $qty = $v['qty'];
