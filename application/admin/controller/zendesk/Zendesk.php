@@ -426,6 +426,12 @@ class Zendesk extends Backend
         $ticket = $this->model->where('id', $ids)->find();
         //获取签名
         $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+        $siteName = 'zeelool';
+        if($ticket->type == 2){
+            $siteName = 'voogueme';
+        } elseif($ticket->type == 3){
+            $siteName = 'nihaooptical';
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -442,12 +448,6 @@ class Zendesk extends Backend
                     $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
-                    }
-                    $siteName = 'zeelool';
-                    if($ticket->type == 2){
-                        $siteName = 'voogueme';
-                    } elseif($ticket->type == 3){
-                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
