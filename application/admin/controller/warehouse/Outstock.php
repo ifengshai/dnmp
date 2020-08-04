@@ -347,6 +347,13 @@ class Outstock extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
 
+
+                    //同事配镜 厂家质量问题 带回办公室 扣减库存最大的那个站
+                    if (in_array($v['type_id'], [3, 5, 9])) {
+                        $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock desc')->field('platform_type,stock')->find();
+                        $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->dec('stock', $v['out_stock_num'])->update();
+                    }
+                    
                     //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                     //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                     $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
