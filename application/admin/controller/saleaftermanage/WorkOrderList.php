@@ -3733,7 +3733,7 @@ EOF;
                     $value['work_platform'] = 'nihao';
                     break;
                 case 4:
-                    $value['work_platform'] = 'amazon';
+                    $value['work_platform'] = 'meeloog';
                     break;
                 case 5:
                     $value['work_platform'] = 'wesee';
