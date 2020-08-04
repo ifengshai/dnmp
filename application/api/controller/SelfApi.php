@@ -643,6 +643,9 @@ class SelfApi extends Api
             $orderid = $this->request->request('orderid'); //订单id
             $order_number = $this->request->request('order_number'); //订单号
             $order_data = $this->request->request('order_data'); //订单json数据
+            // $order_data = '[{"sku":"ZOX02095-01","qty":1},{"sku":"FA0178-02","qty":1}]';
+
+           
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
             }
@@ -658,7 +661,7 @@ class SelfApi extends Api
             $item = new \app\admin\model\itemmanage\Item();
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //订单json数据 包含sku qty
-            $order_data = json_decode($order_data, true);
+            $order_data = json_decode(htmlspecialchars_decode($order_data), true);
             if (!$order_data) {
                 $this->error(__('缺少数据参数'), [], 400);
             }
