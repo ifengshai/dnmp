@@ -345,6 +345,15 @@ class NewProductReplenishOrder extends Backend
         }else{
             $id = $ids;
         }
+        $replenish = $this->replenish->where('id',$id)->find();
+        switch ($replenish['status']){
+            case 1:$replenish['name']='待分配';break;
+            case 2:$replenish['name']='待处理';break;
+            case 3:$replenish['name']='部分处理';break;
+            case 4:$replenish['name']='已处理';break;
+        }
+        $this->assign('replenish', $replenish);
+//        dump(collection($replenish)->toArray());die;
 //        if (!$replenish_id){
 //            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
 //        }else{
