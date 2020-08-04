@@ -236,8 +236,9 @@ class CustomerService extends Backend
             $time_time = '';
         }
         //查询所有客服人员
+        $all_service_ids = $this->zendeskTasks->where($where)->select(false);
+        echo $all_service_ids;exit;
         $all_service_ids = $this->zendeskTasks->where($where)->column('admin_id');
-        dump($all_service_ids);
         $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
@@ -256,7 +257,6 @@ class CustomerService extends Backend
             $data[$i]['time'] = $time_time;
             //时间
             $data[$i]['one']['time'] = $one_time;
-            dump($data);exit;
             //处理量
             $data[$i]['one']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
             //未达标天数
