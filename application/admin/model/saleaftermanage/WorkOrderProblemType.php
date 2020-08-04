@@ -57,9 +57,7 @@ class WorkOrderProblemType extends Model
         //全部
         if ($site < 10) {
             $map['work_platform'] = $site;
-        } else {
-            unset($map['create_time']);
-        }
+        } 
         
         $work_data = $work->where($map)->field('problem_type_id,count(*) as num')->group('problem_type_id')->select();
 
