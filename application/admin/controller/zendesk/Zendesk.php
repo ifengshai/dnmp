@@ -157,9 +157,10 @@ class Zendesk extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $admin = Db::name('admin')->column('nickname','id');
             foreach($list as $k=>$v){
-                $list[$k]['assign_id'] = Db::name('admin')->where('id',$v['assign_id'])->value('nickname');
-                $list[$k]['due_id'] = Db::name('admin')->where('id',$v['due_id'])->value('nickname');
+                $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
+                $list[$k]['due_id_nickname'] = $admin[$v['due_id']];
             }
             $result = array("total" => $total, "rows" => $list);
 
