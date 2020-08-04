@@ -191,7 +191,7 @@
                                 </div>
                                 <!-- /.user-block -->
                                 <div style="margin:0px 0px 0px 70px;">
-                                   {$vo->html_body}{$vo->due_id}{if condition="$vo['is_admin'] eq 1"}{$vo->sign}{/if}
+                                   {$vo->html_body}{$vo->zendesk_nickname}{if condition="$vo['is_admin'] eq 1"}{$vo->sign}{/if}
                                     {if condition="$vo.attachments"}
                                     <ul class="mailbox-attachments clearfix">
                                         {foreach name="$vo['attachments']|explode=',',###" item="vv"}
