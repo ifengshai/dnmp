@@ -207,11 +207,11 @@ class ZendeskAgents extends Backend
         $agents = $this->model->with('admin')->select();
         $res = [];
         foreach($agents as $agent){
-            $res[] = $agent->admin->nickname;
+            $res[$agent['admin_id']] = $agent->admin->nickname;
         }
-        return $res;
+        $res = array_unique($res);
+        return json($res);
     }
-
     /**
      * 删除
      * @param string $ids

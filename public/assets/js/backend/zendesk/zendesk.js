@@ -30,12 +30,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
-                            field: 'admin.nickname',
+                            field: 'assign_id',
                             title: __('Assign_id'),
                             align: 'left',
                             searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList')
                         },
-                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status },
+                        {field: 'due_id',title: __('Due_id'),align: 'left',searchList: $.getJSON("zendesk/zendesk_agents/getAgentsList")},
+                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status},
                         {
                             field: 'tags', title: __('Tags'), searchList: function (column) {
                                 return Template('tagstpl', {});
