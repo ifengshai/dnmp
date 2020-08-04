@@ -643,7 +643,6 @@ class SelfApi extends Api
             $orderid = $this->request->request('orderid'); //订单id
             $order_number = $this->request->request('order_number'); //订单号
             $order_data = $this->request->request('order_data'); //订单json数据
-            $order_data = '[{"sku":"ZOP008546-01","qty":2},{"sku":"ZOP008617-01","qty":3},{"sku":"ZWO483822-02","qty":5}]';
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
             }
@@ -666,10 +665,7 @@ class SelfApi extends Api
             $order_data = json_decode($order_data, true);
             $skus = array_column($order_data, 'sku');
             //查询所有true sku
-            $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->column('*', 'platform_sku');
-            $true_skus = array_column($platform_data, 'sku');
-            //查询sku可用库存
-            $res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => ['in', $true_skus]])->column('available_stock', 'sku');
+            $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->column('*', 'platform_sku'); 
             foreach ($order_data as $k => $v) {
                 $true_sku = $platform_data[$v['sku']]['sku'];
                 $qty = $v['qty'];
@@ -682,11 +678,11 @@ class SelfApi extends Api
                     file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '扣减虚拟库存失败：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
                 }
 
-                //如果可用库存不足 判断此sku 对应站点是否开启预售
-                if ($res[$true_sku] < $qty) {
+                //如果虚拟仓库存不足 判断此sku 对应站点是否开启预售
+                if ($platform_data[$v['sku']]['stock'] < $qty) {
                     //判断是否开启预售 并且在有效时间内 并且预售剩余数量大于0
                     if ($platform_data[$v['sku']]['presell_status'] == 1 && strtotime($platform_data[$v['sku']]['presell_create_time']) <= time() && strtotime($platform_data[$v['sku']]['presell_end_time']) >= time() && $platform_data[$v['sku']]['presell_residue_num'] > 0) {
-                        $available_stock = $res[$true_sku];
+                        $available_stock = $platform_data[$v['sku']]['stock'];
                         //判断可用库存小于0时 应扣减预售数量为当前qty 否则预售数量等于 qty 减去现有的可用库存
                         if ($available_stock <= 0) {
                             $presell_num = $qty;
@@ -719,7 +715,7 @@ class SelfApi extends Api
                         'public_id'                 => $orderid,
                         'occupy_stock_change'       => $qty,
                         'available_stock_change'    => -$qty,
-                        'create_person'             => session('admin.nickname'),
+                        'create_person'             => 'admin',
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '生成订单扣减可用库存,增加占用库存'
                     ]);
