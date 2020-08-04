@@ -589,10 +589,9 @@ class Zendesk extends Backend
             //获取当前评论的用户的昵称
             $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
             $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-            $zendesk_nickname = 111;
             //替换签名中的昵称
             if(strpos($sign,'{{agent.name}}')!==false){
-                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                $sign = str_replace('{{agent.name}}','Mark',$sign);
             }
             $comment['sign'] = $sign ? $sign : '';
         }
