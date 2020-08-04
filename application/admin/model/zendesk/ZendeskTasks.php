@@ -48,7 +48,7 @@ class ZendeskTasks extends Model
             $all_positive_num = round($all_already_num/$people_day,2);
         }
         //获取该范围内的人员id
-        $customer_ids = $this->where($where)->column('id');
+        $customer_ids = $this->where($where)->column('admin_id');
         $work_ids = array();
         $nowork_ids = array();
         foreach($customer_ids as $id){
