@@ -643,9 +643,6 @@ class SelfApi extends Api
             $orderid = $this->request->request('orderid'); //订单id
             $order_number = $this->request->request('order_number'); //订单号
             $order_data = $this->request->request('order_data'); //订单json数据
-            // $order_data = '[{"sku":"ZOX02095-01","qty":1},{"sku":"FA0178-02","qty":1}]';
-
-           
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
             }
@@ -667,7 +664,7 @@ class SelfApi extends Api
             }
             $skus = array_column($order_data, 'sku');
             //查询所有true sku
-            $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->column('*', 'platform_sku'); 
+            $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->column('*', 'platform_sku');
             foreach ($order_data as $k => $v) {
                 $true_sku = $platform_data[$v['sku']]['sku'];
                 $qty = $v['qty'];
@@ -781,6 +778,52 @@ class SelfApi extends Api
                 $this->success('处理成功', $list, 200);
             } else {
                 $this->error('处理失败', [], 400);
+            }
+        }
+    }
+
+    /**
+     * 获取全部上架sku库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/04 10:00:37 
+     * @return void
+     */
+    public function get_all_goods_stock()
+    {
+        if ($this->request->isPost()) {
+            $site = $this->request->request('site'); //站点
+            if (!$site) {
+                $this->error(__('缺少站点参数'), [], 400);
+            }
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //查询所有true sku
+            $platform_data = $platform->where(['platform_type' => $site, 'outer_sku_status' => 1])->select();
+            $platform_data = collection($platform_data)->toArray();
+            if (!$platform_data) {
+                $this->error(__('未查询到数据'), [], 400);
+            }
+            $list = [];
+            foreach ($platform_data as $k => $v) {
+                //判断是否开启预售
+                if ($v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                    $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
+                } else {
+                    $list[$k]['stock'] = $v['stock'];
+                }
+                $list[$k]['sku'] = $v['platform_sku'];
+                if ($list[$k]['stock'] <= 0) {
+                    $list[$k]['is_sell_out'] = 1;
+                } else {
+                    $list[$k]['is_sell_out'] = 0;
+                }
+            }
+
+            if ($list) {
+                $this->success('返回成功', $list, 200);
+            } else {
+                $this->error('返回失败', [], 400);
             }
         }
     }
