@@ -586,14 +586,16 @@ class Zendesk extends Backend
         }])->where('zid', $ids)->order('id', 'desc')->select();
 
         foreach ($comments as &$comment){
-            //获取当前评论的用户的昵称
-            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
-            //$zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-            //替换签名中的昵称
-            if(strpos($sign,'{{agent.name}}')!==false){
-                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+            if($comment->is_admin == 1){
+                //获取当前评论的用户的昵称
+                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                //替换签名中的昵称
+                if(strpos($sign,'{{agent.name}}')!==false){
+                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                }
+                $comment['sign'] = $sign ? $sign : '';
             }
-            $comment['sign'] = $sign ? $sign : '';
         }
 
         //获取该用户的所有状态不为close，sloved的ticket
