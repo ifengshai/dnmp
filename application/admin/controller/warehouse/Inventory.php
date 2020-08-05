@@ -1689,8 +1689,8 @@ class Inventory extends Backend
         $item = new \app\admin\model\itemmanage\Item;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         foreach ($changeRow as $v) {
-            $arr = explode('-', trim($v['original_sku']));
-            $sku = $arr[0] . '-' . $arr[1];
+            // $arr = explode('-', trim($v['original_sku']));
+            // $sku = $arr[0] . '-' . $arr[1];
             //原先sku
             $original_sku    = $sku;
             //原先sku数量
