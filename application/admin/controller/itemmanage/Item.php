@@ -1372,7 +1372,7 @@ class Item extends Backend
 
                 //查询同步的平台
                 $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+                $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
                 $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
                 $error_num = [];
                 $uploadItemArr = [];
@@ -1533,7 +1533,7 @@ class Item extends Backend
                 foreach ($row as $val) {
                     //查询同步的平台
                     $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                    $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+                    $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
                     $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
                     $uploadItemArr = [];
                     foreach ($platformArr as $k => $v) {
