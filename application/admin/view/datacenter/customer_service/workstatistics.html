@@ -141,7 +141,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="form-group" style="margin-left:1px;">
                                 <label class="control-label col-xs-1 col-sm-1">员工分组:</label>
                                 <div class="col-xs-2">
-                                    <select  id="c-order_platform" class="form-control" name="customer_type">
+                                    <select  id="c-order_platform" class="form-control user_group" name="customer_type">
                                         {foreach name="customer_type" item="vo" key=}
                                         <option value="{$key}"{if $customerType == $key}selected="selected"{/if}>{$vo}</option>
                                         {/foreach}
@@ -159,7 +159,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
                                     <input type="submit" class="btn btn-success" value="提交"> 
-                                    <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                                    <input type="reset" class="btn btn-default reset btn-reset" value="重置" ></div>
                             </div>                                                            
                             </div>
                             <div class="btn btn-div">
