@@ -1440,10 +1440,14 @@ class WorkOrderList extends Backend
         //根据平台sku转sku
         foreach (array_filter($skus) as $k => $v) {
             //判断库存时去掉-s 等
-            // $arr = explode('-', $v);
-            // $sku = $arr[0] . '-' . $arr[1];
+            $arr = explode('-', $v);
+            if(!empty($arr[1])){
+                $sku = $arr[0] . '-' . $arr[1];
+            }else{
+                $sku = trim($v);
+            }
             //转换sku
-            $sku = $itemPlatFormSku->getTrueSku(trim($v), $siteType);
+            $sku = $itemPlatFormSku->getTrueSku($sku, $siteType);
             //查询库存 判断是否开启预售
             $res = $item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
             //判断可用库存
