@@ -430,14 +430,44 @@ class PurchaseOrder extends Model
     public function getWaitInStockNum($skus = [])
     {
         $where['is_del'] = 1;
-        $where['purchase_status'] = 7;
+        $where['purchase_status'] = ['in',[7,9]];
         $where['stock_status'] = 0;
-        $where['sku'] = ['in', $skus];
+        $where['b.sku'] = ['in', $skus];
         $list = $this->alias('a')
+            ->field('a.id,sum(purchase_num) as purchase_num,b.sku,a.purchase_status')
             ->where($where)
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+//            ->join(['fa_purchase_batch' => 'c'], 'c.purchase_id=b.purchase_id')
+//            ->join(['fa_purchase_batch_item' => 'd'], 'd.purchase_batch_id=c.id')
+//            ->select();
             ->group('sku')
-            ->column('sum(purchase_num) as purchase_num', 'sku');
-        return $list;
+            ->select();
+//            ->column('sum(purchase_num) as purchase_num', 'sku');
+//        $list = collection($list)->toArray();
+        foreach ($list as $k=>$v){
+            if ($v['purchase_status'] == 9){
+                $v['batch'] = Db::name('logistics_info')
+                    ->field('a.batch_id,a.purchase_id,d.*,c.*,sum(arrival_num) as purchase_num1')
+                    ->alias('a')
+                    ->where('a.purchase_id',$v['id'])
+                    ->where('a.status',1)
+                    ->join(['fa_purchase_batch'=>'d'],'a.batch_id=d.id')
+                    ->join(['fa_purchase_batch_item'=>'c'],'d.id=c.purchase_batch_id')
+                    ->select();
+            }
+        }
+        $list = collection($list)->toArray();
+        foreach ($list as $key=>$val) {
+            if ($val['batch']){
+                $arr[$val['sku']] = $val['batch'][0]['purchase_num1'];
+            }else{
+                $arr[$val['sku']] = $val['purchase_num'];
+            }
+        }
+//        dump($list);
+//        dump($arr);
+////        dump(collection($list)->toArray());
+//        die;
+        return $arr;
     }
 }
