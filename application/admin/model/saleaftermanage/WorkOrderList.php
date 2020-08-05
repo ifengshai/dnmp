@@ -784,6 +784,7 @@ class WorkOrderList extends Model
                 //补发扣库存
                 $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
+                file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
                 exception($e->getMessage());
             }
         }
