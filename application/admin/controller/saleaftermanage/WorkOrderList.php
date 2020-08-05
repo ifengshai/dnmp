@@ -1443,7 +1443,7 @@ class WorkOrderList extends Backend
             // $arr = explode('-', $v);
             // $sku = $arr[0] . '-' . $arr[1];
             //转换sku
-            $sku = $itemPlatFormSku->getTrueSku(trim($sku), $siteType);
+            $sku = $itemPlatFormSku->getTrueSku(trim($v), $siteType);
             //查询库存 判断是否开启预售
             $res = $item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
             //判断可用库存
