@@ -281,7 +281,6 @@ class TrackReg extends Backend
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
                 $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
-                $params[$k]['census_date'] = date("Y-m-d", strtotime("-1 day"));
                 $params[$k]['id'] = $v['id'];
             }
             if ($params) {
@@ -305,15 +304,15 @@ class TrackReg extends Backend
     {
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $date = date('Y-m-d');
+        $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
         
         foreach ($list as $k => $v) {
             //15天日均销量
-            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->select();
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->select();
             $params['sales_num_15days'] = $days15_data->num > 0 ? round($days15_data->sales_num / $days15_data->num) : 0;
-            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find()->toArray();
+            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find()->toArray();
             //90天日均销量
             $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
             //计算等级 30天预估销量
