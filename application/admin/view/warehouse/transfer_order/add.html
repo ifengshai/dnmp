@@ -60,18 +60,20 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">调出虚拟仓:</label>
         <div class="col-xs-12 col-sm-3">
-            <select id="platformarr" data-rule="required" class="form-control selectpicker call_out_site"
-                name="row[call_out_site]" data-rule="required">
+            <select id="platformarr" class="form-control selectpicker call_out_site" name="row[call_out_site]" data-rule="required">
                 <option value="">请选择</option>
                 {foreach name="magentoplatformarr" item="vo"}
                 <option value="{$key}">{$vo}</option>
                 {/foreach}
             </select>
         </div>
+
+    </div>
+    <div class="form-group">
+
         <label class="control-label col-xs-12 col-sm-2">调入虚拟仓:</label>
         <div class="col-xs-12 col-sm-3">
-            <select id="platformarr" data-rule="required" class="form-control selectpicker call_in_site"
-                name="row[call_in_site]">
+            <select id="platformarr1" class="form-control selectpicker call_in_site" name="row[call_in_site]" data-rule="required">
                 <option value="">请选择</option>
                 {foreach name="magentoplatformarr" item="vo"}
                 <option value="{$key}">{$vo}</option>
@@ -79,7 +81,6 @@
             </select>
         </div>
     </div>
-
     <div class="form-group">
 
         <label class="control-label col-xs-12 col-sm-2">备注:</label>
@@ -124,7 +125,7 @@
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
             <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+            <!--<button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>-->
         </div>
     </div>
 </form>
