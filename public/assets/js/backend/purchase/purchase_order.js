@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 sortOrder: 'desc',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -37,62 +37,95 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
-                        { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
-                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
-                        { field: 'product_total', title: __('Product_total'), operate: false },
-                        { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
-                        { field: 'purchase_total', title: __('Purchase_total'), operate: false },
-                        { field: 'purchase_remark', title: __('采购备注'), formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {field: 'purchase_number', title: __('Purchase_number'), operate: 'like'},
+                        {field: 'purchase_name', title: __('Purchase_name'), operate: 'like'},
+                        {field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like'},
+                        {field: 'product_total', title: __('Product_total'), operate: false},
+                        {field: 'purchase_freight', title: __('Purchase_freight'), operate: false},
+                        {field: 'purchase_total', title: __('Purchase_total'), operate: false},
+                        {
+                            field: 'purchase_remark',
+                            title: __('采购备注'),
+                            formatter: Controller.api.formatter.getClear,
+                            operate: false
+                        },
+                        {field: 'sku', title: __('sku'), operate: 'like', visible: false},
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success', 8: 'success', 9: 'success', 10: 'success' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款', 9: '部分签收', 10: '已完成' },
+                            custom: {
+                                0: 'success',
+                                1: 'yellow',
+                                2: 'blue',
+                                3: 'danger',
+                                4: 'gray',
+                                5: 'yellow',
+                                6: 'yellow',
+                                7: 'success',
+                                8: 'success',
+                                9: 'success',
+                                10: 'success'
+                            },
+                            searchList: {
+                                0: '新建',
+                                1: '待审核',
+                                2: '已审核',
+                                3: '已拒绝',
+                                4: '已取消',
+                                5: '待发货',
+                                6: '待收货',
+                                7: '已收货',
+                                8: '已退款',
+                                9: '部分签收',
+                                10: '已完成'
+                            },
                             addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'payment_status', title: __('Payment_status'),
-                            custom: { 1: 'danger', 2: 'blue', 3: 'success' },
-                            searchList: { 1: '未付款', 2: '部分付款', 3: '已付款' },
+                            custom: {1: 'danger', 2: 'blue', 3: 'success'},
+                            searchList: {1: '未付款', 2: '部分付款', 3: '已付款'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'check_status', title: __('Check_status'),
-                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
-                            searchList: { 0: '未质检', 1: '部分质检', 2: '已质检' },
+                            custom: {0: 'danger', 1: 'blue', 2: 'success'},
+                            searchList: {0: '未质检', 1: '部分质检', 2: '已质检'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'stock_status', title: __('Stock_status'),
-                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
-                            searchList: { 0: '未入库', 1: '部分入库', 2: '已入库' },
+                            custom: {0: 'danger', 1: 'blue', 2: 'success'},
+                            searchList: {0: '未入库', 1: '部分入库', 2: '已入库'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'return_status', title: __('Return_status'),
-                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
-                            searchList: { 0: '未退回', 1: '部分退回', 2: '已退回' },
+                            custom: {0: 'danger', 1: 'blue', 2: 'success'},
+                            searchList: {0: '未退回', 1: '部分退回', 2: '已退回'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_add_logistics', title: __('Is_add_logistics'),
-                            custom: { 0: 'danger', 1: 'success' },
-                            searchList: { 0: '否', 1: '是' },
+                            custom: {0: 'danger', 1: 'success'},
+                            searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_sample', title: __('是否为留样采购单'),
-                            custom: { 0: 'danger', 1: 'success' },
-                            searchList: { 0: '否', 1: '是' },
+                            custom: {0: 'danger', 1: 'success'},
+                            searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {field: 'create_person', title: __('Create_person'), operate: 'like'},
+                        {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
 
                                 {
                                     name: 'detail',
@@ -103,7 +136,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     url: 'purchase/purchase_order/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -118,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     icon: 'fa fa-remove',
                                     url: 'purchase/purchase_order/cancel',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -139,7 +172,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     url: 'purchase/purchase_return/add',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -159,7 +192,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     url: 'purchase/purchase_order/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -192,7 +225,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     }
                                 } */
 
-                            ], formatter: Table.api.formatter.operate
+                            ],
+                            formatter: Table.api.formatter.operate
                         }
                     ]
                 ]
@@ -235,7 +269,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     return false;
                 }
                 var url = 'purchase/purchase_order/remark?ids=' + ids;
-                Fast.api.open(url, __('添加备注'), { area: ['900px', '500px'] });
+                Fast.api.open(url, __('添加备注'), {area: ['900px', '500px']});
 
                 return false;
             });
@@ -244,7 +278,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
 
                 var url = 'purchase/purchase_order/logistics?ids=' + ids;
-                Fast.api.open(url, __('录入物流单号'), { area: ['50%', '60%'] });
+                Fast.api.open(url, __('录入物流单号'), {area: ['50%', '60%']});
 
                 return false;
             });
@@ -254,7 +288,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/purchase_order/setStatus',
-                    data: { ids: ids, status: 2 }
+                    data: {ids: ids, status: 2}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -265,7 +299,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/purchase_order/setStatus',
-                    data: { ids: ids, status: 3 }
+                    data: {ids: ids, status: 3}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -277,7 +311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var url = $(this).attr('href');
                 Backend.api.ajax({
                     url: url,
-                    data: { status: 4 }
+                    data: {status: 4}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -338,7 +372,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
                 Backend.api.ajax({
                     url: 'ajax/getSkuList',
-                    data: { sku: sku, supplier_id: supplier_id }
+                    data: {sku: sku, supplier_id: supplier_id}
                 }, function (data, ret) {
                     _this.parent().parent().find('.product_name').val(data.name);
                     _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
@@ -371,7 +405,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         '            <td>\n' +
                         '                <input id="c-purchase_remark" class="form-control" readonly name="batch_sku[' + z + '][' + i + ']" value="' + sku + '" type="text">\n' +
                         '            </td>\n' +
-                        '            <td><input id="c-purchase_remark" class="form-control arrival_num"  name="arrival_num[' + z + '][' + i + ']" type="text"></td>\n' +
+                        '            <td><input id="c-purchase_remark" class="form-control arrival_num"  name="arrival_num[' + z + '][' + i + ']" type="text" min="1"></td>\n' +
                         '        </tr>\n';
 
                 }
@@ -389,7 +423,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var id = $(this).val();
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/contract/getSupplierData',
-                    data: { id: id }
+                    data: {id: id}
                 }, function (data, ret) {
                     $('.supplier_address').val(data.address);
                 });
@@ -407,7 +441,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                     Backend.api.ajax({
                         url: url,
-                        data: { id: id }
+                        data: {id: id}
                     }, function (data, ret) {
                         $('.contract_name').val(data.contract_name);
                         $('.delivery_address').val(data.delivery_address);
@@ -431,7 +465,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             $('.final_amount').removeClass('hidden');
                         }
 
-                        $('.freight').attr("readonly", "readonly");;
+                        $('.freight').attr("readonly", "readonly");
+                        ;
 
                         //总计
                         var purchase_total = data.total * 1 + data.freight * 1;
@@ -547,7 +582,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
-
             //获取sku信息
             $(document).on('change', '.sku', function () {
                 var sku = $(this).val();
@@ -558,7 +592,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
                 Backend.api.ajax({
                     url: 'ajax/getSkuList',
-                    data: { sku: sku, supplier_id: supplier_id }
+                    data: {sku: sku, supplier_id: supplier_id}
                 }, function (data, ret) {
                     _this.parent().parent().find('.product_name').val(data.name);
                     _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
@@ -575,7 +609,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                     Backend.api.ajax({
                         url: url,
-                        data: { id: id }
+                        data: {id: id}
                     }, function (data, ret) {
                         $('.contract_name').val(data.contract_name);
                         $('.delivery_address').val(data.delivery_address);
@@ -599,7 +633,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             $('.final_amount').removeClass('hidden');
                         }
 
-                        $('.freight').attr("readonly", "readonly");;
+                        $('.freight').attr("readonly", "readonly");
+                        ;
 
                         //总计
                         var purchase_total = data.total * 1 + data.freight * 1;
@@ -625,7 +660,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             shtml += '</tr>'
                         }
                         $('.caigou table tbody').append(shtml);
-
 
 
                         //模糊匹配订单
@@ -672,7 +706,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                 Backend.api.ajax({
                     url: url,
-                    data: { id: contract_id }
+                    data: {id: contract_id}
                 }, function (data, ret) {
                     $('.contract_name').val(data.contract_name);
                     $('.delivery_address').val(data.delivery_address);
@@ -694,14 +728,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         _this.parent().parent().remove();
                         Backend.api.ajax({
                             url: Config.moduleurl + '/purchase/purchase_order/deleteItem',
-                            data: { id: id }
+                            data: {id: id}
                         }, function () {
                             Layer.closeAll();
                         });
                     });
                 }
             })
-
 
 
         },
@@ -742,7 +775,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         function (index) {
                             Backend.api.ajax({
                                 url: Config.moduleurl + '/purchase/purchase_order/deleteLogisticsItem',
-                                data: { id: id }
+                                data: {id: id}
                             }, function (data, ret) {
                                 _this.parent().remove();
                                 Layer.closeAll();
@@ -772,7 +805,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 if (id) {
                     Backend.api.ajax({
                         url: Config.moduleurl + '/purchase/purchase_order/confirmDiff',
-                        data: { id: id }
+                        data: {id: id}
                     }, function (data, ret) {
                         location.reload();
                     });
@@ -785,10 +818,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var url = $(this).attr('data-url');
                 Fast.api.open(
                     'warehouse/check/uploads?img_url=' + url, '上传文件', {
-                    callback: function (data) {
-                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                        callback: function (data) {
+                            _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                        }
                     }
-                }
                 )
             })
 
@@ -801,7 +834,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                 Backend.api.ajax({
                     url: url,
-                    data: { id: contract_id }
+                    data: {id: contract_id}
                 }, function (data, ret) {
                     $('.contract_name').val(data.contract_name);
                     $('.delivery_address').val(data.delivery_address);
@@ -837,7 +870,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 sortOrder: 'desc',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -846,26 +879,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'supplier_name', title: __('供应商名称'), operate: 'like' },
-                        { field: 'purchase_person', title: __('采购创建人'), operate: 'like' },
-                        { field: 'true_sku', title: __('SKU'), operate: 'like' },
-                        { field: 'grade', title: __('等级'), operate: 'like' },
-                        { field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like' },
-                        { field: 'voogueme_sku', title: __('Voogueme_Sku'), operate: 'like' },
-                        { field: 'nihao_sku', title: __('Nihao_Sku'), operate: 'like' },
+                        {field: 'supplier_name', title: __('供应商名称'), operate: 'like'},
+                        {field: 'purchase_person', title: __('采购创建人'), operate: 'like'},
+                        {field: 'true_sku', title: __('SKU'), operate: 'like'},
+                        {field: 'grade', title: __('等级'), operate: 'like'},
+                        {field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like'},
+                        {field: 'voogueme_sku', title: __('Voogueme_Sku'), operate: 'like'},
+                        {field: 'nihao_sku', title: __('Nihao_Sku'), operate: 'like'},
                         {
                             field: 'counter', title: __('总销量'), operate: false, formatter: function (value, rows) {
                                 return rows.days + '天:' + rows.counter;
                             }
                         },
 
-                        { field: 'num', title: __('30天预估销量'), operate: false },
-                        { field: 'days_sales_num', title: __('日均销量'), operate: false },
-                        { field: 'replenish_days', title: __('预估售卖天数'), operate: false },
-                        { field: 'stock', title: __('可用库存'), operate: false },
-                        { field: 'purchase_qty', title: __('在途库存'), operate: false },
-                        { field: 'replenish_num', title: __('建议补货量'), operate: false },
-                        { field: 'created_at', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {field: 'num', title: __('30天预估销量'), operate: false},
+                        {field: 'days_sales_num', title: __('日均销量'), operate: false},
+                        {field: 'replenish_days', title: __('预估售卖天数'), operate: false},
+                        {field: 'stock', title: __('可用库存'), operate: false},
+                        {field: 'purchase_qty', title: __('在途库存'), operate: false},
+                        {field: 'replenish_num', title: __('建议补货量'), operate: false},
+                        {field: 'created_at', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange'},
 
                     ]
                 ]
@@ -896,19 +929,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 sortName: 'check.createtime',
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('Id') },
-                        { field: 'check_order_number', title: __('质检单号'), operate: 'like' },
-                        { field: 'purchaseorder.purchase_number', title: __('采购单号'), operate: 'like' },
-                        { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
-                        { field: 'supplier.supplier_name', title: __('供应商'), operate: 'like' },
-                        { field: 'remark', title: __('质检备注'), formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
+                        {checkbox: true},
+                        {field: 'id', title: __('Id')},
+                        {field: 'check_order_number', title: __('质检单号'), operate: 'like'},
+                        {field: 'purchaseorder.purchase_number', title: __('采购单号'), operate: 'like'},
+                        {field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like'},
+                        {field: 'supplier.supplier_name', title: __('供应商'), operate: 'like'},
+                        {
+                            field: 'remark',
+                            title: __('质检备注'),
+                            formatter: Controller.api.formatter.getClear,
+                            operate: false
+                        },
+                        {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'sku', title: __('sku'), operate: 'like', visible: false},
 
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
 
                                 {
                                     name: 'detail',
@@ -919,7 +961,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     url: 'warehouse/check/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -927,7 +969,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     }
                                 }
 
-                            ], formatter: Table.api.formatter.operate
+                            ],
+                            formatter: Table.api.formatter.operate
                         }
                     ]
                 ]
@@ -955,7 +998,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/warehouse/check/setStatus',
-                    data: { ids: ids, status: 2 }
+                    data: {ids: ids, status: 2}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -966,7 +1009,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/warehouse/check/setStatus',
-                    data: { ids: ids, status: 3 }
+                    data: {ids: ids, status: 3}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -978,7 +1021,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var url = $(this).attr('href');
                 Backend.api.ajax({
                     url: url,
-                    data: { status: 4 }
+                    data: {status: 4}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -989,7 +1032,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-matching', function () {
                 var ids = Table.api.selectedids(table);
 
-                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["60%", "60%"] });
+                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', {area: ["60%", "60%"]});
 
             });
 
@@ -1016,8 +1059,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     $('.status').val(1);
                 })
                 Form.api.bindevent($("form[role=form]"));
-
-
 
 
                 //计算金额
@@ -1067,8 +1108,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     //总计
                     $('.purchase_total').val(total * 1 + freight * 1);
                 })
-
-
 
 
                 //模糊匹配订单
@@ -1175,7 +1214,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 })
 
 
-
             },
             formatter: {
 
@@ -1230,7 +1268,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 sortOrder: 'desc',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -1239,41 +1277,70 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
-                        { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
-                        { field: 'supplier.supplier_name', title: __('供应商') },
-                        { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
-                        { field: 'purchase_virtual_total', title: __('实际采购金额（元）'), operate: 'BETWEEN' },
-                        { field: 'refund_amount', title: __('退款金额（元）'), operate: false },
-                        { field: 'purchase_settle_money', title: __('采购结算金额（元）') },
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {field: 'purchase_number', title: __('Purchase_number'), operate: 'like'},
+                        {field: 'purchase_name', title: __('Purchase_name'), operate: 'like'},
+                        {field: 'supplier.supplier_name', title: __('供应商')},
+                        {field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN'},
+                        {field: 'purchase_virtual_total', title: __('实际采购金额（元）'), operate: 'BETWEEN'},
+                        {field: 'refund_amount', title: __('退款金额（元）'), operate: false},
+                        {field: 'purchase_settle_money', title: __('采购结算金额（元）')},
                         //{ field: 'purchase_freight', title: __('邮费（元）') },
-                        { field: 'payment_money', title: __('已付款金额') },
+                        {field: 'payment_money', title: __('已付款金额')},
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款' },
+                            custom: {
+                                0: 'success',
+                                1: 'yellow',
+                                2: 'blue',
+                                3: 'danger',
+                                4: 'gray',
+                                5: 'yellow',
+                                6: 'yellow',
+                                7: 'success'
+                            },
+                            searchList: {
+                                0: '新建',
+                                1: '待审核',
+                                2: '已审核',
+                                3: '已拒绝',
+                                4: '已取消',
+                                5: '待发货',
+                                6: '待收货',
+                                7: '已收货',
+                                8: '已退款'
+                            },
                             addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'settlement_method', title: __('Settlement_method'),
-                            custom: { 1: 'bule', 2: 'yellow', 3: 'gray' },
-                            searchList: { 1: '先付款', 2: '货到付款', 3: '付定金 货到付款' },
+                            custom: {1: 'bule', 2: 'yellow', 3: 'gray'},
+                            searchList: {1: '先付款', 2: '货到付款', 3: '付定金 货到付款'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'payment_status', title: __('Payment_status'),
-                            custom: { 1: 'danger', 2: 'blue', 3: 'success' },
-                            searchList: { 1: '未付款', 2: '部分付款', 3: '已付款' },
+                            custom: {1: 'danger', 2: 'blue', 3: 'success'},
+                            searchList: {1: '未付款', 2: '部分付款', 3: '已付款'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        {field:'pay_person',title:__('付款人'),visible:false},
-                        {field:'pay_time',title:__('付款时间'),operate: 'RANGE', addclass: 'datetimerange',visible:false},
+                        {field: 'create_person', title: __('Create_person'), operate: 'like'},
+                        {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {field: 'pay_person', title: __('付款人'), visible: false},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'pay_time',
+                            title: __('付款时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            visible: false
+                        },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
                                 {
                                     name: 'submitAudit',
                                     text: '提交审核',
@@ -1331,7 +1398,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -1347,7 +1414,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     url: 'purchase/purchase_order/purchase_order_pay',
                                     extend: 'data-area = \'["60%","60%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         return true;
@@ -1384,7 +1451,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     }
                                 }
 
-                            ], formatter: Table.api.formatter.operate
+                            ],
+                            formatter: Table.api.formatter.operate
                         }
                     ]
                 ]
