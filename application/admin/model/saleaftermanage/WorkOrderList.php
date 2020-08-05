@@ -785,7 +785,8 @@ class WorkOrderList extends Model
                 $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
                 file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
-                exception($e->getMessage());
+                //exception($e->getMessage());
+                exception(123);
             }
         }
     }
