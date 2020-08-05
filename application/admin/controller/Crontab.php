@@ -301,7 +301,7 @@ order by sfoi.item_id asc limit 1000";
             if ($final_params['prescription_type'] == 'Progressive') {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-            
+
 
             if (strpos($final_params['index_type'], 'Polarized') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
@@ -2061,7 +2061,7 @@ order by sfoi.item_id asc limit 1000";
         INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
         WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON substring_index(a.sku,'-',2) = b.sku where a.sku NOT LIKE 'Price%' ORDER BY counter DESC";
-       
+
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -2121,7 +2121,7 @@ order by sfoi.item_id asc limit 1000";
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
-      
+
         $data = [];
         foreach ($lists as $k => $v) {
             if ($v['true_sku'] == 'Express Shipping') {
@@ -2146,7 +2146,7 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-    
+
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
         // $where['a.label'] = 1;
@@ -2248,7 +2248,7 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
-              
+
                 $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2, 2);
             }
 
@@ -4076,12 +4076,58 @@ order by sfoi.item_id asc limit 1000";
     {
 
         $skus = [
-            'OA01901-02'
+            'VFT0269-03',
+            'VFT0269-03',
+            'OA02007-04',
+            'FX0239-03',
+            'FX0170-01',
+            'OP725733-01',
+            'OX723043-02',
+            'OP725733-01',
+            'VFM0176-09',
+            'FP0180-02',
+            'VFP0292-03',
+            'OP233677-04',
+            'FT0127-01',
+            'GP0347-01',
+            'OP754442-01',
+            'ZM0957-01',
+            'ZM0957-01',
+            'FP0885-01',
+            'OA01880-01',
+            'FM0088-02',
+            'OA01968-02',
+            'VFP0258-01',
+            'OM01935-01',
+            'OM01454-01',
+            'OA01829-01',
+            'FP0886-01',
+            'OP006101-03',
+            'VFM0176-09',
+            'OA01822-03',
+            'OT361266-01',
+            'OA02076-01',
+            'OM01949-01',
+            'OP019117-02',
+            'FP0434-01',
+            'OA02007-02',
+            'TX893639-04',
+            'OP754442-02',
+            'OA02007-04',
+            'VFP0290-07',
+            'OM01454-01',
+            'WA01647-02',
+            'OO075562-01',
+            'GSM0001-01',
+            'GM0354-01',
+            'OA01508-01',
+            'FX0199-01',
+            'OP01887-04'
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = 157;
+            $data['real_time_qty'] = 0;
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -4106,18 +4152,53 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
+            'VFT0269-03',
+            'VFT0269-03',
+            'OA02007-04',
+            'FX0239-03',
+            'FX0170-01',
+            'OP725733-01',
+            'OX723043-02',
+            'OP725733-01',
+            'VFM0176-09',
+            'FP0180-02',
+            'VFP0292-03',
+            'OP233677-04',
+            'FT0127-01',
+            'GP0347-01',
+            'OP754442-01',
+            'ZM0957-01',
+            'ZM0957-01',
+            'FP0885-01',
+            'OA01880-01',
+            'FM0088-02',
+            'OA01968-02',
+            'VFP0258-01',
+            'OM01935-01',
+            'OM01454-01',
+            'OA01829-01',
             'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
+            'OP006101-03',
+            'VFM0176-09',
+            'OA01822-03',
+            'OT361266-01',
+            'OA02076-01',
+            'OM01949-01',
+            'OP019117-02',
+            'FP0434-01',
+            'OA02007-02',
+            'TX893639-04',
+            'OP754442-02',
+            'OA02007-04',
+            'VFP0290-07',
+            'OM01454-01',
+            'WA01647-02',
+            'OO075562-01',
+            'GSM0001-01',
+            'GM0354-01',
+            'OA01508-01',
+            'FX0199-01',
+            'OP01887-04'
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4177,18 +4258,53 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
+            'VFT0269-03',
+            'VFT0269-03',
+            'OA02007-04',
+            'FX0239-03',
+            'FX0170-01',
+            'OP725733-01',
+            'OX723043-02',
+            'OP725733-01',
+            'VFM0176-09',
+            'FP0180-02',
+            'VFP0292-03',
+            'OP233677-04',
+            'FT0127-01',
+            'GP0347-01',
+            'OP754442-01',
+            'ZM0957-01',
+            'ZM0957-01',
+            'FP0885-01',
+            'OA01880-01',
+            'FM0088-02',
+            'OA01968-02',
+            'VFP0258-01',
+            'OM01935-01',
+            'OM01454-01',
+            'OA01829-01',
             'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
+            'OP006101-03',
+            'VFM0176-09',
+            'OA01822-03',
+            'OT361266-01',
+            'OA02076-01',
+            'OM01949-01',
+            'OP019117-02',
+            'FP0434-01',
+            'OA02007-02',
+            'TX893639-04',
+            'OP754442-02',
+            'OA02007-04',
+            'VFP0290-07',
+            'OM01454-01',
+            'WA01647-02',
+            'OO075562-01',
+            'GSM0001-01',
+            'GM0354-01',
+            'OA01508-01',
+            'FX0199-01',
+            'OP01887-04'
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4236,7 +4352,53 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'OA01901-02'
+            'VFT0269-03',
+            'VFT0269-03',
+            'OA02007-04',
+            'FX0239-03',
+            'FX0170-01',
+            'OP725733-01',
+            'OX723043-02',
+            'OP725733-01',
+            'VFM0176-09',
+            'FP0180-02',
+            'VFP0292-03',
+            'OP233677-04',
+            'FT0127-01',
+            'GP0347-01',
+            'OP754442-01',
+            'ZM0957-01',
+            'ZM0957-01',
+            'FP0885-01',
+            'OA01880-01',
+            'FM0088-02',
+            'OA01968-02',
+            'VFP0258-01',
+            'OM01935-01',
+            'OM01454-01',
+            'OA01829-01',
+            'FP0886-01',
+            'OP006101-03',
+            'VFM0176-09',
+            'OA01822-03',
+            'OT361266-01',
+            'OA02076-01',
+            'OM01949-01',
+            'OP019117-02',
+            'FP0434-01',
+            'OA02007-02',
+            'TX893639-04',
+            'OP754442-02',
+            'OA02007-04',
+            'VFP0290-07',
+            'OM01454-01',
+            'WA01647-02',
+            'OO075562-01',
+            'GSM0001-01',
+            'GM0354-01',
+            'OA01508-01',
+            'FX0199-01',
+            'OP01887-04'
         ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {

@@ -424,8 +424,12 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
-        //获取签名
-        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+        $siteName = 'zeelool';
+        if($ticket->type == 2){
+            $siteName = 'voogueme';
+        } elseif($ticket->type == 3){
+            $siteName = 'nihaooptical';
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -442,12 +446,6 @@ class Zendesk extends Backend
                     $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
-                    }
-                    $siteName = 'zeelool';
-                    if($ticket->type == 2){
-                        $siteName = 'voogueme';
-                    } elseif($ticket->type == 3){
-                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -467,6 +465,8 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
@@ -584,19 +584,20 @@ class Zendesk extends Backend
         $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
-
-        foreach ($comments as &$comment){
-            //获取当前评论的用户的昵称
-            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
-            $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-            //替换签名中的昵称
-            if(strpos($sign,'{{agent.name}}')!==false){
-                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+        foreach ($comments as $comment){
+            if($comment->is_admin == 1){
+                //获取签名
+                $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+                //获取当前评论的用户的昵称
+                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                //替换签名中的昵称
+                if(strpos($sign,'{{agent.name}}')!==false){
+                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                }
+                $comment->sign= $sign ? $sign : '';
             }
-            $comment['sign'] = $sign ? $sign : '';
-            $comment['zendesk_nickname'] = $zendesk_nickname;
         }
-
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
