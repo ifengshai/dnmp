@@ -1692,7 +1692,7 @@ class Inventory extends Backend
             // $arr = explode('-', trim($v['original_sku']));
             // $sku = $arr[0] . '-' . $arr[1];
             //原先sku
-            $original_sku    = $sku;
+            $original_sku    = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku
