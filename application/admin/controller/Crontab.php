@@ -4076,12 +4076,15 @@ order by sfoi.item_id asc limit 1000";
     {
 
         $skus = [
-            'OA01901-02'
+            'FM0088-02',
+            'OO075562-01',
+            'OA01968-02',
+            'VFT0269-03',
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = 157;
+            $data['real_time_qty'] = 0;
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -4106,18 +4109,10 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
+            'FM0088-02',
+            'OO075562-01',
+            'OA01968-02',
+            'VFT0269-03',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4177,18 +4172,10 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
+            'FM0088-02',
+            'OO075562-01',
+            'OA01968-02',
+            'VFT0269-03',
         ];
         foreach ($skus as $k => $v) {
             $map = [];
@@ -4236,7 +4223,10 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'OA01901-02'
+            'FM0088-02',
+            'OO075562-01',
+            'OA01968-02',
+            'VFT0269-03',
         ];
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
