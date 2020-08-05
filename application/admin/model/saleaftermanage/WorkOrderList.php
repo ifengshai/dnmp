@@ -769,6 +769,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
+            return false;
             try {
                 //file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
                 if($isNewVersion == 0){
