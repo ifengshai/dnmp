@@ -666,8 +666,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $("#contrast").change(function () {
                 if ($("#contrast").is(':checked')) {
                     $("#two-time-node").show();
+                    $("#time_hide").remove();
                 } else {
                     $("#two-time-node").hide();
+                    $("#time_hide").remove();
                 }
             });
             //点击重置按钮
@@ -684,6 +686,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 $(".user_group").append("<option value='1'>A</option>");
                 $(".user_group").append("<option value='0'>B</option>");
 
+                // $(".range_inputs .cancelBtn").trigger("click");
+                $("#one_time").remove();
+                $("#timetime").append("<input type='text' autocomplete='off' class='form-control datetimerange' name='one_time'  placeholder='创建时间' id='one_time' value='' data-index='14'>");
+                $("#contrast").attr('checked','')
+                $("#two_time").remove();
+                $("#time_hide").remove();
+                $("#timetime2").append("<input type='text' autocomplete='off' class='form-control datetimerange' name='one_time'  placeholder='创建时间' id='one_time' value='' data-index='14'>");
 
             });
         },
