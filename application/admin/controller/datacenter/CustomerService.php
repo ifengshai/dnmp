@@ -235,6 +235,9 @@ class CustomerService extends Backend
             $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $time_time = '';
         }
+        if($platform){
+            $where['type'] = $platform;
+        }
         //查询所有客服人员
         $all_service_ids = $this->zendeskTasks->where($where)->column('admin_id');
         $all_service = array_unique($all_service_ids);
