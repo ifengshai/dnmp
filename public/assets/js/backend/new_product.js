@@ -728,6 +728,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         var resultData = ret.data;
                         if (resultData != false) {
                             $('.ajax-add').remove();
+                            $('.upload-photo').remove();
                             $('#item-stock').after(resultData);
                             Form.api.bindevent($("form[role=form]"));
                             $(".selectpicker").selectpicker('refresh');
