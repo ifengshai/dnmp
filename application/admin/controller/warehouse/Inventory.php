@@ -1689,7 +1689,7 @@ class Inventory extends Backend
         $item = new \app\admin\model\itemmanage\Item;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         foreach ($changeRow as $v) {
-            $arr = explode('-', $v);
+            $arr = explode('-', $v['original_sku']);
             if(!empty($arr[1])){
                 $original_sku = $arr[0] . '-' . $arr[1];
             }else{
