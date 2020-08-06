@@ -481,7 +481,7 @@ class Zendesk extends Model
                     if ($task->target_count > $task->complete_count) {
                         Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
                         $str = '';
-                        $str .= $ticket->ticket_id."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
+                        $str .= $ticket->ticket_id.'--'.$ticket->zendesk_update_time."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
                         //修改zendesk的assign_id,assign_time
                         if($flag != 1){
                             //修改承接人
