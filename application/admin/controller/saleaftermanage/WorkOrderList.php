@@ -1441,7 +1441,11 @@ class WorkOrderList extends Backend
         foreach (array_filter($skus) as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v);
-            $sku = $arr[0] . '-' . $arr[1];
+            if(!empty($arr[1])){
+                $sku = $arr[0] . '-' . $arr[1];
+            }else{
+                $sku = trim($v);
+            }
             //转换sku
             $sku = $itemPlatFormSku->getTrueSku(trim($sku), $siteType);
             //查询库存 判断是否开启预售
