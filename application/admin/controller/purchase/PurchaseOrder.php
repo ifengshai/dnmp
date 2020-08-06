@@ -119,6 +119,9 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if ($params['product_total'] == 0){
+                    $this->error('商品总额不能为0');
+                }
 
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
