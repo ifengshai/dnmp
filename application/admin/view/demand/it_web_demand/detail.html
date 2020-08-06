@@ -154,25 +154,25 @@
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
+                    {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'phper_user_id','title'=>'后端责任人(多选)','multiple'=>true])}
+                    {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker php_group_status','id'=>'phper_user_id','title'=>'后端责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
+                    {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
+                    {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
             </div>

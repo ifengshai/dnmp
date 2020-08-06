@@ -2605,7 +2605,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
             Controller.api.bindevent();
 
 
-            $(document).on('change', ".check_value", function () {
+            $(document).on('change', ".check_value,#web_designer_user_id,#phper_user_id,#app_user_id,#test_user_id", function () {
                 var layer_index = layer.load(2, {
                     shade: [0.2,'#000']
                 });
@@ -2647,8 +2647,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         test_user_id: test_user_id
                     },
                     success: function (json) {
-                        console.log(json);
-
+                        Toastr.success(json.msg);
+                        layer.close(layer_index);
                     }
                 });
             });

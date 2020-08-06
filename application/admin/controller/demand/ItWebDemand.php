@@ -1238,19 +1238,13 @@ class ItWebDemand extends Backend
                 $update['is_small_probability'] = $params['is_small_probability'];
                 $update['is_low_level_error'] = $params['is_low_level_error'];
                 $update['is_difficult'] = $params['is_difficult'];
-                $update['web_designer_user_id'] = implode(',',$params['web_designer_user_id']);
-                $update['phper_user_id'] = implode(',',$params['phper_user_id']);
-                $update['app_user_id'] = implode(',',$params['app_user_id']);
-                $update['test_user_id'] = implode(',',$params['test_user_id']);
+                $update['web_designer_user_id'] = $params['web_designer_user_id'] ? implode(',',$params['web_designer_user_id']) : null;
+                $update['phper_user_id'] = $params['phper_user_id'] ? implode(',',$params['phper_user_id']) : null;
+                $update['app_user_id'] = $params['app_user_id'] ? implode(',',$params['app_user_id']) : null;
+                $update['test_user_id'] = $params['test_user_id'] ? implode(',',$params['test_user_id']) : null;
 
-
-
-                dump($update);exit;
-                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
                 if ($res) {
-
-                    /*$row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();*/
 
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
@@ -1263,6 +1257,10 @@ class ItWebDemand extends Backend
 
         $row = $this->model->get($ids);
         $row = $row->toArray();
+        $row['web_designer_user_id'] = explode(',',$row['web_designer_user_id']);
+        $row['phper_user_id'] = explode(',',$row['phper_user_id']);
+        $row['app_user_id'] = explode(',',$row['app_user_id']);
+        $row['test_user_id'] = explode(',',$row['test_user_id']);
 
         //获取各组人员
         $authgroup = new AuthGroup();
