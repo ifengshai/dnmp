@@ -428,11 +428,7 @@ class CustomerService extends Backend
         $map_create['create_time'] =  $map_measure['w.create_time'] = ['between', [$start,$end]];
         $workorder_handle_left_data = $this->workorder_handle_left($map_create, $examineArr);
         $workorder_handle_right_data = $this->workorder_handle_right($map_measure, $step);
-        //跟单概况 start
-        $warehouse_problem_type = config('workorder.warehouse_problem_type');
-        $warehouse_handle       = $this->warehouse_handle($map_create, $warehouse_problem_type);
-        //跟单概况 end
-        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step','warehouse_handle','warehouse_problem_type'));
+        $this->view->assign(compact('workorder_handle_left_data', 'workorder_handle_right_data','examineArr','step'));
         return $this->view->fetch();
     }
     /**
