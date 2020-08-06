@@ -1235,7 +1235,17 @@ class ItWebDemand extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->post();
             if ($params) {
-                dump($params);exit;
+                $update['is_small_probability'] = $params['is_small_probability'];
+                $update['is_low_level_error'] = $params['is_low_level_error'];
+                $update['is_difficult'] = $params['is_difficult'];
+                $update['web_designer_user_id'] = implode(',',$params['web_designer_user_id']);
+                $update['phper_user_id'] = implode(',',$params['phper_user_id']);
+                $update['app_user_id'] = implode(',',$params['app_user_id']);
+                $update['test_user_id'] = implode(',',$params['test_user_id']);
+
+
+
+                dump($update);exit;
                 $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
 
