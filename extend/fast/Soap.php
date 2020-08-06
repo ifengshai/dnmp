@@ -105,65 +105,14 @@ class Soap
             if ($res === null) {
                 return false;
             }
-            if ($res['status'] == 200) {
-                return $res['data'];
+            if ($res['code'] == 200) {
+                return true;
             }
-            exception($res['msg'] . '   error_code:' . $res['status']);
+            exception($res['msg']);
         } catch (\Exception $e) {
             exception($e->getMessage());
         }
     }
 
-    /**
-     * http请求 创建商品接口
-     * @param $siteType
-     * @param $pathinfo
-     * @param array $params
-     * @param string $method
-     * @return bool
-     * @throws \Exception
-     */
-    public function httpRequest($siteType, $pathinfo, $params = [], $method = 'POST')
-    {
-        switch ($siteType) {
-            case 1:
-                $url = config('url.zeelool_url');
-                break;
-            case 2:
-                $url = config('url.voogueme_url');
-                break;
-            case 3:
-                $url = config('url.nihao_url');
-                break;
-            case 5:
-                $url = config('url.wesee_url');
-                break;
-            default:
-                return false;
-                break;
-        }
-        $url = $url . $pathinfo;
-
-        $client = new Client(['verify' => false]);
-        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
-        try {
-            if ($method == 'GET') {
-                $response = $client->request('GET', $url, array('query' => $params));
-            } else {
-                $response = $client->request('POST', $url, array('form_params' => $params));
-            }
-            $body = $response->getBody();
-            $stringBody = (string) $body;
-            $res = json_decode($stringBody, true);
-            if ($res === null) {
-                exception('网络异常');
-            }
-            if ($res['status'] == 200) {
-                return $res['data'];
-            }
-            exception($res['msg'] . '   error_code:' . $res['status']);
-        } catch (\Exception $e) {
-            exception($e->getMessage());
-        }
-    }
+   
 }

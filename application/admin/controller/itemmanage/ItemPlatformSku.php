@@ -431,7 +431,7 @@ class ItemPlatformSku extends Backend
             }
 
             //审核通过把SKU同步到有映射关系的平台
-            $uploadItemArr['sku']  = [$itemPlatformRow['platform_sku']];
+            $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             $soap_res = Soap::createProduct($uploadItemArr);
             if ($soap_res) {

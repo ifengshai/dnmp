@@ -1379,7 +1379,7 @@ class Item extends Backend
                 foreach ($platformArr as $k => $v) {
                     // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                     //审核通过把SKU同步到有映射关系的平台
-                    $uploadItemArr['sku']  = [$v['platform_sku']];
+                    $uploadItemArr['skus']  = [$v['platform_sku']];
                     $uploadItemArr['site']  = $v['platform_type'];
                     $soap_res = Soap::createProduct($uploadItemArr);
                     if (!$soap_res) {
@@ -1528,7 +1528,7 @@ class Item extends Backend
                         // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                         //审核通过把SKU同步到有映射关系的平台
                       
-                        $uploadItemArr['sku']  = [$v['platform_sku']];
+                        $uploadItemArr['skus']  = [$v['platform_sku']];
                         $uploadItemArr['site']  = $v['platform_type'];
                         $soap_res = Soap::createProduct($uploadItemArr);
                         if ($soap_res) {
