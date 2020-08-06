@@ -7,6 +7,7 @@ use app\common\controller\Backend;
 use app\common\model\Auth;
 use think\Db;
 use think\Request;
+use app\admin\model\AuthGroup;
 
 /**
  * 技术部网站组需求管理
@@ -1232,28 +1233,9 @@ class ItWebDemand extends Backend
      * */
     public function detail($ids = null){
         if ($this->request->isAjax()) {
-            dump(11111);exit;
-            $params = $this->request->post("row/a");
-
+            $params = $this->request->post();
             if ($params) {
-                if($params['pm_audit_status']){
-                    $add['priority'] = $params['priority'];
-                    $add['node_time'] = $params['node_time'];
-                    $time_data = $this->start_time($params['priority'],$params['node_time']);
-                    $add['start_time'] = $time_data['start_time'];
-                    $add['end_time'] = $time_data['end_time'];
-                    $add['pm_audit_status'] = $params['pm_audit_status'];
-                    $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
-                }
-                $add['type'] = $params['type'];
-                $add['site'] = $params['site'];
-                $add['site_type'] = implode(',',$params['site_type']);
-                $add['entry_user_id'] = $this->auth->id;
-                $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
-                $add['title'] = $params['title'];
-                $add['content'] = $params['content'];
-                $add['accessory'] = $params['accessory'];
-                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                dump($params);exit;
                 $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
 
@@ -1272,26 +1254,78 @@ class ItWebDemand extends Backend
         $row = $this->model->get($ids);
         $row = $row->toArray();
 
-        /*$row['site_type_arr'] = explode(',',$row['site_type']);
-        $row['copy_to_user_id_arr'] = explode(',',$row['copy_to_user_id']);*/
-
-        //$this->view->assign("type", input('type'));
-        $this->view->assign("row", $row );
-
         //获取各组人员
-        $php_user = array(
-            1 => '李想1',
-            2 => '李想2',
-            3 => '李想3',
-            4 => '李想4',
-            5 => '李想5',
-        );
+        $authgroup = new AuthGroup();
 
+        //获取php组长&组员
+        $php_group_ids = $authgroup->getChildrenIds(69);
+        $p_id[] = 69;
+        $php_group_ids = array_merge($php_group_ids,$p_id);
+        $php_users =  Db::name("auth_group_access")
+            ->alias("aga")
+            ->join("admin a", "aga.uid=a.id")
+            ->field("a.*")
+            ->whereIn("aga.group_id", $php_group_ids)
+            ->where('status','normal')
+            ->column('nickname','id');
+
+        //获取web组长&组员
+        $web_group_ids = $authgroup->getChildrenIds(69);
+        $w_id[] = 69;
+        $web_group_ids = array_merge($web_group_ids,$w_id);
+        $web_users =  Db::name("auth_group_access")
+            ->alias("aga")
+            ->join("admin a", "aga.uid=a.id")
+            ->field("a.*")
+            ->whereIn("aga.group_id", $web_group_ids)
+            ->where('status','normal')
+            ->column('nickname','id');
+
+        //获取app组长&组员
+        $app_group_ids = $authgroup->getChildrenIds(69);
+        $a_id[] = 69;
+        $app_group_ids = array_merge($app_group_ids,$a_id);
+        $app_users =  Db::name("auth_group_access")
+            ->alias("aga")
+            ->join("admin a", "aga.uid=a.id")
+            ->field("a.*")
+            ->whereIn("aga.group_id", $app_group_ids)
+            ->where('status','normal')
+            ->column('nickname','id');
+
+        //获取test组长&组员
+        $test_group_ids = $authgroup->getChildrenIds(69);
+        $t_id[] = 69;
+        $test_group_ids = array_merge($test_group_ids,$t_id);
+        $test_users =  Db::name("auth_group_access")
+            ->alias("aga")
+            ->join("admin a", "aga.uid=a.id")
+            ->field("a.*")
+            ->whereIn("aga.group_id", $test_group_ids)
+            ->where('status','normal')
+            ->column('nickname','id');
+
+        //获取评论--测试站
+        $test_review = Db::name("it_web_demand_review")
+            ->where('type',1)
+            ->where('pid',$ids)
+            ->select();
+        //获取评论--正式站
+        $review = Db::name("it_web_demand_review")
+            ->where('type',2)
+            ->where('pid',$ids)
+            ->select();
 
         //确认权限
         /*$this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
         $this->view->assign('admin_id', session('admin.id'));*/
-        $this->view->assign('php_user', $php_user);
+        $this->view->assign('php_users', $php_users);
+        $this->view->assign('web_users', $web_users);
+        $this->view->assign('app_users', $app_users);
+        $this->view->assign('test_users', $test_users);
+        $this->view->assign('test_review', $test_review);
+        $this->view->assign('review', $review);
+        $this->view->assign("row", $row );
         return $this->view->fetch();
     }
 

@@ -125,23 +125,24 @@
 <div class="dialong-container">
     <div class="left_div">
         <form role="form" method="POST" data-toggle="validator" action="">
+            <input type="hidden" id="demand_id" value="{$row['id']}" />
             <div class="left_input_top">
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        <input name="row[is_small_probability]" type="checkbox" value="1"><span>小概率</span>
+                        <input name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_small_probability'><span>小概率</span>
                     </label>
                 </div>
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        <input name="row[is_low_level_error]" type="checkbox" value="1"><span>低级错误</span>
+                        <input name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_low_level_error'><span>低级错误</span>
                     </label>
                 </div>
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        <input name="row[is_difficult]" type="checkbox" value="1"><span>疑难</span>
+                        <input name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
                     </label>
                 </div>
             </div>
@@ -153,25 +154,25 @@
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                    {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                    {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'phper_user_id','title'=>'后端责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                    {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
 
                 <div class="input_item">
                 <span class="input_tiem_span">
-                    {:Form::select('row[phper_user_id]', $php_user, $row['phper_user_id'], ['class'=>'selectpicker select_input php_group_status','title'=>'后端责任人(多选)'])}
+                    {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker check_value php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
                 </span>
                 </div>
             </div>
@@ -182,30 +183,14 @@
         <div class="top">
             <p class="center_div_title">测试</p>
             <ul class="center_div_container">
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
+                {volist name="test_review" id="tr"}
+                    <li class="item">
+                        <p>
+                            <span class="name">{$tr['group_name']}</span><span class="time">{$tr['create_time']}</span>
+                        </p>
+                        <p class="text-content">{$tr['content']}</p>
+                    </li>
+                {/volist}
             </ul>
         </div>
         <form class="bottom" role="form" method="POST" data-toggle="validator" action="">
@@ -218,36 +203,14 @@
         <div class="top">
             <p class="center_div_title">回归测试</p>
             <ul class="center_div_container">
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasdaasdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
-                <li class="item">
-                    <p>
-                        <span class="name">测试</span><span class="time">07/06</span>
-                    </p>
-                    <p class="text-content">asdasdasda</p>
-                </li>
+                {volist name="review" id="r"}
+                    <li class="item">
+                        <p>
+                            <span class="name">{$r['group_name']}</span><span class="time">{$r['create_time']}</span>
+                        </p>
+                        <p class="text-content">{$r['content']}</p>
+                    </li>
+                {/volist}
             </ul>
         </div>
         <form class="bottom" role="form" method="POST" data-toggle="validator" action="">

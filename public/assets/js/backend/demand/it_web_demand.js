@@ -2603,6 +2603,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
         },
         detail: function () {
             Controller.api.bindevent();
+
+
+            $(document).on('change', ".check_value", function () {
+                var layer_index = layer.load(2, {
+                    shade: [0.2,'#000']
+                });
+
+                var id = $('#demand_id').val();
+
+                var is_small_probability = 0;
+                if($('#is_small_probability').is(":checked")){
+                    is_small_probability = 1;
+                }
+                var is_low_level_error = 0;
+                if($('#is_low_level_error').is(":checked")){
+                    is_low_level_error = 1;
+                }
+                var is_difficult = 0;
+                if($('#is_difficult').is(":checked")){
+                    is_difficult = 1;
+                }
+
+                var web_designer_user_id = $('#web_designer_user_id').val();
+                var phper_user_id = $('#phper_user_id').val();
+                var app_user_id = $('#app_user_id').val();
+                var test_user_id = $('#test_user_id').val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "demand/it_web_demand/detail",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        id: id,
+                        is_small_probability: is_small_probability,
+                        is_low_level_error: is_low_level_error,
+                        is_difficult: is_difficult,
+                        web_designer_user_id: web_designer_user_id,
+                        phper_user_id: phper_user_id,
+                        app_user_id: app_user_id,
+                        test_user_id: test_user_id
+                    },
+                    success: function (json) {
+                        console.log(json);
+
+                    }
+                });
+            });
+
+
+
         },
         group_finish: function () {
             Controller.api.bindevent();
