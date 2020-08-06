@@ -1377,23 +1377,11 @@ class Item extends Backend
                 $error_num = [];
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
-                    $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                    // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                     //审核通过把SKU同步到有映射关系的平台
-                    $uploadItemArr['categories']            = array(2);
-                    $uploadItemArr['websites']              = array(1);
-                    $uploadItemArr['name']                  = 'product name';
-                    $uploadItemArr['description']           = 'Product description';
-                    $uploadItemArr['short_description']     = 'Product short description';
-                    $uploadItemArr['url_key']               = $row['sku'];
-                    $uploadItemArr['url_path']              = $v['platform_sku'];
-                    $uploadItemArr['true_sku']              = $row['sku'];
-                    $uploadItemArr['status']                = 2;
-                    $uploadItemArr['visibility']            = 4;
-                    $uploadItemArr['meta_title']            = 'Product meta title';
-                    $uploadItemArr['meta_keyword']          = 'Product meta keyword';
-                    $uploadItemArr['meta_description']      = 'Product meta description';
-                    $uploadItemArr['sku']                   = $v['platform_sku'];
-                    $soap_res = Soap::createProduct($magentoArr, $uploadItemArr);
+                    $uploadItemArr['sku']  = [$v['platform_sku']];
+                    $uploadItemArr['site']  = $v['platform_type'];
+                    $soap_res = Soap::createProduct($uploadItemArr);
                     if (!$soap_res) {
                         $error_num[] = $v['platform_type'];
                     } else {
@@ -1533,27 +1521,16 @@ class Item extends Backend
                 foreach ($row as $val) {
                     //查询同步的平台
                     $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                    $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
+                    // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
                     $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
                     $uploadItemArr = [];
                     foreach ($platformArr as $k => $v) {
-                        $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                        // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                         //审核通过把SKU同步到有映射关系的平台
-                        $uploadItemArr['categories']            = array(2);
-                        $uploadItemArr['websites']              = array(1);
-                        $uploadItemArr['name']                  = 'product name';
-                        $uploadItemArr['description']           = 'Product description';
-                        $uploadItemArr['short_description']     = 'Product short description';
-                        $uploadItemArr['url_key']               = $val['sku'];
-                        $uploadItemArr['url_path']              = $v['platform_sku'];
-                        $uploadItemArr['true_sku']              = $val['sku'];
-                        $uploadItemArr['status']                = 2;
-                        $uploadItemArr['visibility']            = 4;
-                        $uploadItemArr['meta_title']            = 'Product meta title';
-                        $uploadItemArr['meta_keyword']          = 'Product meta keyword';
-                        $uploadItemArr['meta_description']      = 'Product meta description';
-                        $uploadItemArr['sku']                   = $v['platform_sku'];
-                        $soap_res = Soap::createProduct($magentoArr, $uploadItemArr);
+                      
+                        $uploadItemArr['sku']  = [$v['platform_sku']];
+                        $uploadItemArr['site']  = $v['platform_type'];
+                        $soap_res = Soap::createProduct($uploadItemArr);
                         if ($soap_res) {
                             $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
                         }

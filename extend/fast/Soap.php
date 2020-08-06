@@ -2,6 +2,8 @@
 
 namespace fast;
 
+use GuzzleHttp\Client;
+
 class Soap
 {
     /**
@@ -16,7 +18,7 @@ class Soap
      * @param [type] $params
      * @return void
      */
-    public static function createProduct($config = [], $params)
+    public static function createProduct_bak($config = [], $params)
     {
         if (!$config) {
             return false;
@@ -35,11 +37,10 @@ class Soap
                     )
                 ))
             );
-
         } else {
             $options = array("trace" => 1, 'cache_wsdl' => 0);
         }
-        
+
         try {
             $client = new \SoapClient($config['magento_url'] . '/api/soap/?wsdl', $options);
             $session = $client->login($config['magento_account'], $config['magento_key']);
@@ -57,5 +58,112 @@ class Soap
             return false;
         }
         return true;
+    }
+
+    /**
+     * 创建商品
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/06 14:33:16 
+     * @return void
+     */
+    public static function createProduct($params)
+    {
+        if (!$params) {
+            return false;
+        }
+        switch ($params['site']) {
+            case 1:
+                $url = config('url.zeelool_url');
+                break;
+            case 2:
+                $url = config('url.voogueme_url');
+                break;
+            case 3:
+                $url = config('url.nihao_url');
+                break;
+            case 4:
+                $url = config('url.api_meeloog_url');
+                break;
+            case 5:
+                $url = config('url.wesee_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+
+        $client = new Client(['verify' => false]);
+        try {
+            // $response = $client->request('GET', $url, array('query' => $params));
+            unset($params['site']);
+            $response = $client->request('POST', $url, array('form_params' => $params));
+            $body = $response->getBody();
+            $stringBody = (string) $body;
+            $res = json_decode($stringBody, true);
+            if ($res === null) {
+                return false;
+            }
+            if ($res['status'] == 200) {
+                return $res['data'];
+            }
+            exception($res['msg'] . '   error_code:' . $res['status']);
+        } catch (\Exception $e) {
+            exception($e->getMessage());
+        }
+    }
+
+    /**
+     * http请求 创建商品接口
+     * @param $siteType
+     * @param $pathinfo
+     * @param array $params
+     * @param string $method
+     * @return bool
+     * @throws \Exception
+     */
+    public function httpRequest($siteType, $pathinfo, $params = [], $method = 'POST')
+    {
+        switch ($siteType) {
+            case 1:
+                $url = config('url.zeelool_url');
+                break;
+            case 2:
+                $url = config('url.voogueme_url');
+                break;
+            case 3:
+                $url = config('url.nihao_url');
+                break;
+            case 5:
+                $url = config('url.wesee_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+        $url = $url . $pathinfo;
+
+        $client = new Client(['verify' => false]);
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+        try {
+            if ($method == 'GET') {
+                $response = $client->request('GET', $url, array('query' => $params));
+            } else {
+                $response = $client->request('POST', $url, array('form_params' => $params));
+            }
+            $body = $response->getBody();
+            $stringBody = (string) $body;
+            $res = json_decode($stringBody, true);
+            if ($res === null) {
+                exception('网络异常');
+            }
+            if ($res['status'] == 200) {
+                return $res['data'];
+            }
+            exception($res['msg'] . '   error_code:' . $res['status']);
+        } catch (\Exception $e) {
+            exception($e->getMessage());
+        }
     }
 }

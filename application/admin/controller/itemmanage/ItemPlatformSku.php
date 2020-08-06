@@ -422,15 +422,7 @@ class ItemPlatformSku extends Backend
         if ($this->request->isAjax()) {
 
             $itemPlatformRow = $this->model->findItemPlatform($ids);
-            if (!$itemPlatformRow) { //对应商品不正确或者平台不正确
-                $this->error(__('Incorrect product or incorrect platform'));
-            }
-            if ($itemPlatformRow['is_upload_item'] == 2) { //控制不上传商品信息
-                $this->error(__('The corresponding platform does not need to upload product information, please do not upload'));
-            }
-            if (!$itemPlatformRow['magento_url']) {
-                $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
-            }
+
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
@@ -439,29 +431,16 @@ class ItemPlatformSku extends Backend
             }
 
             //审核通过把SKU同步到有映射关系的平台
-            $uploadItemArr['categories']            = array(2);
-            $uploadItemArr['websites']              = array(1);
-            $uploadItemArr['name']                  = 'product name';
-            $uploadItemArr['description']           = 'Product description';
-            $uploadItemArr['short_description']     = 'Product short description';
-            $uploadItemArr['url_key']               = $itemPlatformRow['sku'];
-            $uploadItemArr['url_path']              = $itemPlatformRow['platform_sku'];
-            $uploadItemArr['true_sku']              = $itemPlatformRow['sku'];
-            $uploadItemArr['status']                = 2;
-            $uploadItemArr['visibility']            = 4;
-            $uploadItemArr['meta_title']            = 'Product meta title';
-            $uploadItemArr['meta_keyword']          = 'Product meta keyword';
-            $uploadItemArr['meta_description']      = 'Product meta description';
-            $uploadItemArr['sku']                   = $itemPlatformRow['platform_sku'];
-            $itemPlatformRow['id'] = $itemPlatformRow['platform_id'];
-            $soap_res = Soap::createProduct($itemPlatformRow, $uploadItemArr);
+            $uploadItemArr['sku']  = [$itemPlatformRow['platform_sku']];
+            $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
+            $soap_res = Soap::createProduct($uploadItemArr);
             if ($soap_res) {
                 $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
                 $this->success('同步成功！！');
             } else {
                 $this->success('同步失败！！');
-            }  
-        } 
+            }
+        }
     }
 
 
@@ -567,7 +546,7 @@ class ItemPlatformSku extends Backend
                     $uploadItemArr[$vs['code']] = $vs['platformValue'];
                 }
             }
-           
+
             //添加上传商品的信息
             $uploadItemArr['categories']            = array(2);
             $uploadItemArr['websites']              = array(1);
