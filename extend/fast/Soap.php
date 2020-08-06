@@ -75,19 +75,19 @@ class Soap
         }
         switch ($params['site']) {
             case 1:
-                $url = config('url.zeelool_url');
+                $url = config('url.api_zeelool_url');
                 break;
             case 2:
-                $url = config('url.voogueme_url');
+                $url = config('url.api_voogueme_url');
                 break;
             case 3:
-                $url = config('url.nihao_url');
+                $url = config('url.api_nihao_url');
                 break;
             case 4:
                 $url = config('url.api_meeloog_url');
                 break;
             case 5:
-                $url = config('url.wesee_url');
+                $url = config('url.api_wesee_url');
                 break;
             default:
                 return false;
