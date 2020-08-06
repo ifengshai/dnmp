@@ -1,0 +1,275 @@
+<style>
+    /*左边div -- start*/
+    .left_input{
+        width: 100%;
+    }
+    .left_input .item_title{
+        text-align: center;
+        font-size: 18px;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 20px;
+    }
+    .left_input .item_button{
+        text-align: center;
+        height: 70px;
+        line-height: 70px;
+        margin-top: 40px;
+    }
+    .left_input .input_item{
+        margin-top: 18px;
+        width: 98%;
+        height: 50px;
+        line-height: 50px;
+        margin-left: 1%;
+    }
+    .left_input .input_tiem_label{
+        width: 25%;
+        text-align: right;
+        margin-right: 10px;
+    }
+    .left_input .select_input{
+        width: 65%!important;
+        max-height: 30px!important;
+    }
+    /*左边div -- end*/
+    .all_div{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin:0 auto;
+    }
+    .all_div form{
+        width: 33%;
+    }
+    .bootstrap-datetimepicker-widget .accordion-toggle{
+        display: none;
+    }
+</style>
+
+<div class="all_div">
+    {if $row['web_designer_group'] == 2 && $row['test_status'] >= 2}
+        <!--如果测试已经确认，并且不需要前端的话，不显示前端的操作-->
+    {else}
+    <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}">
+        <input type="hidden" name="row[web_status]" value="1">
+        <input type="hidden" name="row[type]" id="input_web_group" value="1"><!--1:响应，修改；2：完成-->
+        <div class="left_input">
+            <div class="item_title">
+                <label class="">前端</label>
+            </div>
+            <div class="input_item">
+                <label class="input_tiem_label">需求响应：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        {:Form::select('row[web_designer_group]', $status, $row['web_designer_group'], ['class'=>'selectpicker select_input web_group_status','title'=>'请选择'])}
+                    {else}
+                        {:Form::select('row[web_designer_group]', $status, $row['web_designer_group'], ['class'=>'selectpicker select_input web_group_status','title'=>'请选择','disabled'=>'true'])}
+                    {/if}
+                </span>
+            </div>
+            <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">计划完成：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        <input class="selectpicker datetimepicker select_input" type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                    {else}
+                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                    {/if}
+                </span>
+            </div>
+            <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">预期难度：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        {:Form::select('row[web_designer_complexity]', config('demand.allComplexity'), $row['web_designer_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择'])}
+                    {else}
+                        {:Form::select('row[web_designer_complexity]', config('demand.allComplexity'), $row['web_designer_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择','disabled'=>'true'])}
+                    {/if}
+                </span>
+            </div>
+
+            <div class="item_button">
+                {if $row['test_status'] == 1}
+                    {if $row['web_designer_group'] == 0}
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {/if}
+                    {else}
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {/if}
+                    {/if}
+                {else}
+                    {if $row['web_designer_is_finish'] == 0}
+                        {if $distribution_status}
+                            <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {else}
+                            <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {/if}
+                    {else}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
+                    {/if}
+                {/if}
+            </div>
+
+        </div>
+    </form>
+    {/if}
+
+    {if $row['phper_group'] == 2 && $row['test_status'] >= 2}
+        <!--如果测试已经确认，并且不需要后端的话，不显示后端的操作-->
+    {else}
+    <form role="form" method="POST" id="form_php_group" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}">
+        <input type="hidden" name="row[php_status]" value="1">
+        <input type="hidden" name="row[type]" id="input_php_group" value="1"><!--1:响应，修改；2：完成-->
+        <div class="left_input">
+            <div class="item_title">
+                <label class="">后端</label>
+            </div>
+            <div class="input_item">
+                <label class="input_tiem_label">需求响应：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        {:Form::select('row[phper_group]', $status, $row['phper_group'], ['class'=>'selectpicker select_input php_group_status','title'=>'请选择'])}
+                    {else}
+                        {:Form::select('row[phper_group]', $status, $row['phper_group'], ['class'=>'selectpicker select_input php_group_status','title'=>'请选择','disabled'=>'true'])}
+                    {/if}
+                </span>
+            </div>
+            <div class="input_item php_html" style="{if $row['phper_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">计划完成：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        <input class="selectpicker datetimepicker select_input" type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                    {else}
+                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                    {/if}
+                </span>
+            </div>
+            <div class="input_item php_html" style="{if $row['phper_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">预期难度：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                        {:Form::select('row[phper_complexity]', config('demand.allComplexity'), $row['phper_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择'])}
+                    {else}
+                        {:Form::select('row[phper_complexity]', config('demand.allComplexity'), $row['phper_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择','disabled'=>'true'])}
+                    {/if}
+                </span>
+            </div>
+
+            <div class="item_button">
+                {if $row['test_status'] == 1}
+                    {if $row['phper_group'] == 0}
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                        {/if}
+                    {else}
+                        {if $distribution_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {else}
+                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {/if}
+                    {/if}
+                {else}
+                    {if $row['phper_is_finish'] == 0}
+                        {if $distribution_status}
+                            <button type="submit" value="php_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端完成')}</button>
+                        {else}
+                            <button type="submit" value="php_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端完成')}</button>
+                        {/if}
+                    {else}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端已完成')}</button>
+                    {/if}
+                {/if}
+            </div>
+        </div>
+    </form>
+    {/if}
+
+    {if $row['app_group'] == 2 && $row['test_status'] >= 2}
+    <!--如果测试已经确认，并且不需要APP的话，不显示APP的操作-->
+    {else}
+        {if strpos($row['site_type'],'3') !== false}
+        <form role="form" method="POST" id="form_app_group" data-toggle="validator" action="">
+            <input type="hidden" name="row[id]" value="{$row.id}">
+            <input type="hidden" name="row[app_status]" value="1">
+            <input type="hidden" name="row[type]" id="input_app_group" value="1"><!--1:响应，修改；2：完成-->
+            <div class="left_input">
+                <div class="item_title">
+                    <label class="">APP</label>
+                </div>
+                <div class="input_item">
+                    <label class="input_tiem_label">需求响应：</label>
+                    <span class="input_tiem_span">
+                        {if $row['test_status'] == 1}
+                            {:Form::select('row[app_group]', $status, $row['app_group'], ['class'=>'selectpicker select_input app_group_status', 'title'=>'请选择'])}
+                        {else}
+                            {:Form::select('row[app_group]', $status, $row['app_group'], ['class'=>'selectpicker select_input app_group_status', 'title'=>'请选择','disabled'=>'true'])}
+                        {/if}
+                    </span>
+                </div>
+                <div class="input_item app_html" style="{if $row['app_group'] != 1}display:none;{/if}">
+                    <label class="input_tiem_label">计划完成：</label>
+                    <span class="input_tiem_span">
+                        {if $row['test_status'] == 1}
+                            <input class="selectpicker datetimepicker select_input" type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                        {else}
+                            <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                        {/if}
+                    </span>
+                </div>
+                <div class="input_item app_html" style="{if $row['app_group'] != 1}display:none;{/if}">
+                    <label class="input_tiem_label">预期难度：</label>
+                    <span class="input_tiem_span">
+                        {if $row['test_status'] == 1}
+                            {:Form::select('row[app_complexity]', config('demand.allComplexity'), $row['app_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择'])}
+                        {else}
+                            {:Form::select('row[app_complexity]', config('demand.allComplexity'), $row['app_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择','disabled'=>'true'])}
+                        {/if}
+                    </span>
+                </div>
+
+                <div class="item_button">
+                    {if $row['test_status'] == 1}
+                        {if $row['app_group'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                            {/if}
+                        {else}
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {/if}
+                        {/if}
+                    {else}
+                        {if $row['app_is_finish'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" value="app_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP完成')}</button>
+                            {else}
+                                <button type="submit" value="app_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP完成')}</button>
+                            {/if}
+                        {else}
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP已完成')}</button>
+                        {/if}
+                    {/if}
+                </div>
+            </div>
+        </form>
+        {/if}
+    {/if}
+</div>
+
+

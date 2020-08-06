@@ -1,0 +1,148 @@
+<style>
+    /*左边div -- start*/
+    .left_input{
+        width: 100%;
+    }
+    .left_input .item_title{
+        font-size: 14px;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 10px;
+    }
+
+    .left_input .input_item{
+        width: 100%;
+        height: 60px;
+        line-height: 60px;
+    }
+    .left_input .input_tiem_label{
+        width: 15%;
+        text-align: right;
+        margin-right: 10px;
+    }
+    .left_input .select_input{
+        width: 76%!important;
+        max-height: 30px!important;
+    }
+    /*左边div -- end*/
+    .all_div{
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin:0 auto;
+    }
+    .all_div form{
+        width: 100%;
+    }
+    .bootstrap-datetimepicker-widget .accordion-toggle{
+        display: none;
+    }
+    .item_button1,.item_button{
+        margin-top: 10px;
+        height: 40px;
+        line-height: 40px;
+    }
+</style>
+
+<div class="all_div">
+
+    <form role="form" method="POST" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}">
+        <input type="hidden" name="row[type]" value="queren">
+
+        <div class="left_input">
+            {if $row['test_status'] <= 4 && $row['status'] >= 3}
+            <div class="item_title" style="height: 30px;line-height: 30px;">
+                <label class="input_tiem_label"></label>
+                <label class="" style="width: 76%;text-align: center">—— 预计测试时间<span style="color: red;font-weight: 700;font-size: 18px;"> {$day} </span>天——</label>
+            </div>
+            {/if}
+            <div class="input_item">
+                <label class="input_tiem_label">测试确认：</label>
+                <span class="input_tiem_span">
+                {:Form::select('row[test_group]', $status, $row['test_group'], ['class'=>'selectpicker select_input web_group_status','title'=>'请选择','data-rule'=>'required'])}
+                </span>
+            </div>
+            <div class="item_button1">
+                <label class="input_tiem_label"></label>
+                {if $row['status'] == 3}
+                    {if $row['test_status'] == 1}
+                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('确认')}</button>
+                    {else}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已确认')}</button>
+                    {/if}
+                {else}
+                    {if $row['test_status'] == 1}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('确认')}</button>
+                    {else}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已确认')}</button>
+                    {/if}
+                {/if}
+
+            </div>
+        </div>
+    </form>
+
+    <form role="form" method="POST" id="tongguo_form" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}">
+        <input type="hidden" name="row[type]" value="tongguo">
+        <input type="hidden" name="row[test_group]" value="{$row.test_group}">
+        <input type="hidden" id="tongguo_status" name="row[status]" value="">
+
+        <div class="left_input">
+            <div class="item_title">
+                <label class="input_tiem_label"></label>
+                <label class="" style="width: 80%;text-align: center">—— 开发完成，进行测试 ——</label>
+            </div>
+
+            <div class="item_button">
+                <label class="input_tiem_label"></label>
+
+                {if $row['develop_finish_status'] != 3}
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                {else}
+                    {if $row['test_status'] == 3}
+                        {if $row['test_group'] == 2}
+                            <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                        {else}
+                            <button type="submit" value="tongguo_no" class="btn btn-sub" style='background-color: #03A7EF;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                        {/if}
+                        <button type="submit" value="tongguo_yes" class="btn btn-sub" style='background-color: #03A7EF;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                    {else}
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                    {/if}
+                {/if}
+
+
+            </div>
+        </div>
+    </form>
+
+    <form role="form" method="POST" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}">
+        <input type="hidden" name="row[type]" value="shangxian">
+        <div class="left_input">
+            <div class="item_title">
+                <label class="input_tiem_label"></label>
+                <label class="" style="width: 80%;text-align: center">—— 测试完成 ——</label>
+            </div>
+            <div class="item_button">
+                <label class="input_tiem_label"></label>
+                {if $row['test_status'] == 4}
+                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                {elseif $row['test_status'] == 5}
+                <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
+                {else}
+                <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                {/if}
+            </div>
+        </div>
+    </form>
+
+
+
+</div>
+
+

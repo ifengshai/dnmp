@@ -1,0 +1,175 @@
+<style>
+    #accordion div{
+        text-align: center;
+    }
+</style>
+    <ul class="timeline">
+        <li class="time-label">
+            <span class="bg-red">
+                {:__('Hope_time')}：{$year_time}
+            </span>
+
+        </li>
+        <li>
+            {if $row['type'] == 1}
+            <div class="timeline-item">
+                                <span style="float: left;">小概率:</span>
+                <!--                <label class="control-label col-xs-12 col-sm-2">{:__('is_small_probability')}:</label>-->
+                <div class="col-xs-12 col-sm-9">
+                    <select  id="is_small_probability" class="form-control " onchange="onchangeSelect(this)">
+                        <option value="0" {:$row['is_small_probability'] == 0 ? 'selected' : ''}>否</option>
+                        <option value="1" {:$row['is_small_probability'] == 1 ? 'selected' : ''}>是</option>
+                    </select>
+                </div>
+            </div>
+        </li>
+    {/if}
+        {if $web_userid_arr['group'] == 1}
+            <li>
+                <i class="fa fa-user bg-aqua"></i>
+                <div class="timeline-item">
+                    <span class="time"><i class="fa fa-clock-o"></i>{:__('All_expect_time')}：{$web_userid_arr['expect_time']}</span>
+                    <h3 class="timeline-header"><a href="#">前端</a></h3>
+                    {if $demand_type == 2}
+                    <div class="timeline-body">
+                        {:__('all_complexity')}<span><b>{$web_userid_arr['complexity']}</b></span>
+                    </div>
+                    {/if}
+                    <div class="timeline-body">
+                        {:__('All_user_id')}：<span><b>{$web_userid_arr['user_name']}</b></span>
+                    </div>
+                    {if $demand_type == 1 && $web_userid_arr['is_finish'] == 1}
+                        <div class="timeline-body">
+                            {:__('bug_note')}：<span><b>{$web_userid_arr['note']}</b></span>
+                        </div>
+                    {/if}
+                    {if $web_userid_arr['is_finish'] == 0}
+                        <form role="form" data-toggle="validator" method="POST" action="{:url('group_finish')}">
+                            <input type="hidden" name="row[group_finish]" value="1"/>
+                            <input type="hidden" name="row[web_finish]" value="1"/>
+                            <input type="hidden" name="row[id]" value="{$row.id}"/>
+                            <input type="hidden" name="row[status]" value="{$row.status}"/>
+                            <input type="hidden" name="row[type]" value="{$row.type}"/>
+                            <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
+
+                            {if $demand_type == 1}
+                            <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
+                            <div style="overflow: hidden">
+                                <span style="float: left;padding: 10px;">{:__('bug_note')}：</span>
+                                <textarea style="float: left;width: 70%;resize:none;margin-top: 10px;height: 60px;" id="c-describe" class="form-control" data-rule="required" rows="5" name="row[web_designer_note]" cols="50"></textarea>
+                            </div>
+                            {/if}
+                            <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                                <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                            </div>
+                        </form>
+                    {else}
+                        <div class="timeline-body">
+                            {:__('All_finish_time')}：<span><b>{$web_userid_arr['finish_time']}</b></span>
+                        </div>
+                    {/if}
+                </div>
+            </li>
+        {/if}
+
+        {if $phper_userid_arr['group'] == 1}
+        <li>
+            <i class="fa fa-user bg-aqua"></i>
+            <div class="timeline-item">
+                <span class="time"><i class="fa fa-clock-o"></i>{:__('All_expect_time')}：{$phper_userid_arr['expect_time']}</span>
+                <h3 class="timeline-header"><a href="#">后端</a></h3>
+                {if $demand_type == 2}
+                <div class="timeline-body">
+                    {:__('all_complexity')}<span><b>{$phper_userid_arr['complexity']}</b></span>
+                </div>
+                {/if}
+                <div class="timeline-body">
+                    {:__('All_user_id')}：<span><b>{$phper_userid_arr['user_name']}</b></span>
+                </div>
+                {if $demand_type == 1 && $phper_userid_arr['is_finish'] == 1}
+                <div class="timeline-body">
+                    {:__('bug_note')}：<span><b>{$phper_userid_arr['note']}</b></span>
+                </div>
+                {/if}
+                {if $phper_userid_arr['is_finish'] == 0}
+                <form role="form" data-toggle="validator" method="POST" action="{:url('group_finish')}">
+                    <input type="hidden" name="row[group_finish]" value="1"/>
+                    <input type="hidden" name="row[php_finish]" value="1"/>
+                    <input type="hidden" name="row[id]" value="{$row.id}"/>
+                    <input type="hidden" name="row[type]" value="{$row.type}"/>
+                    <input type="hidden" name="row[status]" value="{$row.status}"/>
+                    <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
+                    {if $demand_type == 1}
+                    <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
+                    <div style="overflow: hidden">
+                        <span style="float: left;padding: 10px;">{:__('bug_note')}：</span>
+                        <textarea style="float: left;width: 70%;resize:none;margin-top: 10px;height: 60px;" id="c-describe" class="form-control" data-rule="required" rows="5" name="row[phper_note]" cols="50"></textarea>
+                    </div>
+                    {/if}
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                    </div>
+                </form>
+                {else}
+                <div class="timeline-body">
+                    {:__('All_finish_time')}：<span><b>{$phper_userid_arr['finish_time']}</b></span>
+                </div>
+                {/if}
+            </div>
+        </li>
+        {/if}
+
+        {if $app_userid_arr['group'] == 1}
+        <li>
+            <i class="fa fa-user bg-aqua"></i>
+            <div class="timeline-item">
+                <span class="time"><i class="fa fa-clock-o"></i>{:__('All_expect_time')}：{$app_userid_arr['expect_time']}</span>
+                <h3 class="timeline-header"><a href="#">APP</a></h3>
+                {if $demand_type == 2}
+                <div class="timeline-body">
+                    {:__('all_complexity')}<span><b>{$app_userid_arr['complexity']}</b></span>
+                </div>
+                {/if}
+                <div class="timeline-body">
+                    {:__('All_user_id')}：<span><b>{$app_userid_arr['user_name']}</b></span>
+                </div>
+                {if $demand_type == 1 && $app_userid_arr['is_finish'] == 1}
+                <div class="timeline-body">
+                    {:__('bug_note')}：<span><b>{$app_userid_arr['note']}</b></span>
+                </div>
+                {/if}
+                {if $app_userid_arr['is_finish'] == 0}
+                <form role="form" data-toggle="validator" method="POST" action="{:url('group_finish')}">
+                    <input type="hidden" name="row[group_finish]" value="1"/>
+                    <input type="hidden" name="row[app_finish]" value="1"/>
+                    <input type="hidden" name="row[id]" value="{$row.id}"/>
+                    <input type="hidden" name="row[type]" value="{$row.type}"/>
+                    <input type="hidden" name="row[status]" value="{$row.status}"/>
+                    <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
+                    {if $demand_type == 1}
+                    <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
+                    <div style="overflow: hidden">
+                        <span style="float: left;padding: 10px;">{:__('bug_note')}：</span>
+                        <textarea style="float: left;width: 70%;resize:none;margin-top: 10px;height: 60px;" id="c-describe" class="form-control" data-rule="required" rows="5" name="row[app_note]" cols="50"></textarea>
+                    </div>
+                    {/if}
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                    </div>
+                </form>
+                {else}
+                <div class="timeline-body">
+                    {:__('All_finish_time')}：<span><b>{$app_userid_arr['finish_time']}</b></span>
+                </div>
+                {/if}
+            </div>
+        </li>
+        {/if}
+    </ul>
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close" onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>
