@@ -542,7 +542,7 @@ class Zendesk extends Model
             $task_where['type'] = $platform;
         }
         $where['c.is_admin'] = 1;
-        $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+        $all_already_num = $this->zendeskTasks->where($task_where)->sum('reply_count');
         $people_day = $this->zendeskTasks->where($task_where)->count();
         if($people_day == 0){
             $positive_effect_num = 0;
