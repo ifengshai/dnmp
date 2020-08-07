@@ -920,7 +920,7 @@ DOC;
                 ->where(['admin_id' => $admin_id])
                 ->find();
         //按照更新时间查询未分配的open和new的邮件
-        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
+        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time','asc')->limit(10)->select();
 
         $arr = array();
         $i = 0;
