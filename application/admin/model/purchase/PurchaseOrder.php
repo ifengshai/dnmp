@@ -451,6 +451,7 @@ class PurchaseOrder extends Model
                     ->alias('a')
                     ->where('a.purchase_id',$v['id'])
                     ->where('a.status',1)
+                    ->where('c.sku',$v['sku'])
                     ->join(['fa_purchase_batch'=>'d'],'a.batch_id=d.id')
                     ->join(['fa_purchase_batch_item'=>'c'],'d.id=c.purchase_batch_id')
                     ->select();
