@@ -339,7 +339,10 @@ class TrackReg extends Backend
             } else {
                 $params['grade'] = 'F';
             }
+
+            dump($params);
             $itemPlatformSku->isUpdate(true,['id' => $v['id']])->save($params);
+            echo $itemPlatformSku->getLastSql();
         }
        
         echo "ok";
