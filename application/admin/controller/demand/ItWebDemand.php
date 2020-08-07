@@ -105,7 +105,7 @@ class ItWebDemand extends Backend
         $time_update['status'] = 2;
         $time = date('Y-m-d H:i',time());
         $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time],'status'=>1,'pm_audit_status'=>3]);
-        //dump(input());exit;
+        
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
