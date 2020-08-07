@@ -437,6 +437,7 @@ class WorkOrderList extends Model
                     $lensId = $changeLens['lens_type'][$key];
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
+
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     $data = [
                         'work_id' => $work_id,
@@ -768,9 +769,8 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            //file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
             try {
-                file_put_contents('/www/wwwroot/mojing_test/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
                 if($isNewVersion == 0){
                     $url = 'magic/order/createOrder';
                 }elseif($isNewVersion == 1){
@@ -785,7 +785,6 @@ class WorkOrderList extends Model
                 //补发扣库存
                 $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
-                //file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
                 exception($e->getMessage());
             }
         }
@@ -917,7 +916,6 @@ class WorkOrderList extends Model
                     if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                        //存在补发审核通过后生成补发单
                         if(7 == $measure_choose_id){
                             $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                         }

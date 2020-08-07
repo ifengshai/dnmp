@@ -31,12 +31,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
-                            field: 'admin.nickname',
+                            field: 'assign_id',
                             title: __('Assign_id'),
                             align: 'left',
-                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList')
+                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList'),
+                            visible:false
                         },
-                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status },
+                        {
+                            field: 'assign_id_nickname',
+                            title: __('Assign_id'),
+                            align: 'left',
+                            operate:false
+                        },
+                        {field: 'due_id',title: __('Due_id'),align: 'left',searchList: $.getJSON("zendesk/zendesk_agents/getAgentsList"),visible:false},
+                        {field: 'due_id_nickname',title: __('Due_id'),align: 'left',operate:false},
+                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status},
                         {
                             field: 'tags', title: __('Tags'), searchList: function (column) {
                                 return Template('tagstpl', {});
@@ -49,7 +58,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'channel', title: __('Channel')},
                         {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
-                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
+                        {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {

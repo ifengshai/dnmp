@@ -607,6 +607,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     $("#two-time-node").show();
                 } else {
                     $("#two-time-node").hide();
+                    $("#two_time").val('');
                 }
             }); 
             $("#worknum_submit").click(function(){
