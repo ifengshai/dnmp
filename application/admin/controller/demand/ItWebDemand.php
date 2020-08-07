@@ -774,10 +774,36 @@ class ItWebDemand extends Backend
 
             if ($params) {
                 if($params['pm_audit_status']){
-                    $add['priority'] = $params['priority'];
-                    if($params['priority'] == 1){
-                        $add['status'] = 2;
+                    $row = $this->model->get($params['id']);
+                    $row = $row->toArray();
+                    $add['site_type'] = implode(',',$params['site_type']);
+
+                    if($row['status'] == 1){
+                        if($params['priority'] == 1){
+                            $add['status'] = 2;
+                        }
+                    }else{
+                        if($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']){
+                            $add['status'] = 2;
+
+                            $add['web_designer_group'] = 0;
+                            $add['web_designer_complexity'] = null;
+                            $add['web_designer_expect_time'] = null;
+
+                            $add['phper_group'] = 0;
+                            $add['phper_complexity'] = null;
+                            $add['phper_expect_time'] = null;
+
+                            $add['app_group'] = 0;
+                            $add['app_complexity'] = null;
+                            $add['app_expect_time'] = null;
+
+                            $add['develop_finish_status'] = 1;
+                        }
                     }
+
+                    $add['priority'] = $params['priority'];
+
                     $add['node_time'] = $params['node_time'];
                     $time_data = $this->start_time($params['priority'],$params['node_time']);
                     $add['start_time'] = $time_data['start_time'];
@@ -787,7 +813,7 @@ class ItWebDemand extends Backend
                 }
                 $add['type'] = $params['type'];
                 $add['site'] = $params['site'];
-                $add['site_type'] = implode(',',$params['site_type']);
+
                 $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
                 $add['title'] = $params['title'];
                 $add['content'] = $params['content'];
