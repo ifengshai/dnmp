@@ -120,10 +120,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         },
 
 
-                        {field: 'web_designer_user_id', title: __('前端'),operate:false},
+                        /*{field: 'web_designer_user_id', title: __('前端'),operate:false},
                         {field: 'phper_user_id', title: __('后端'),operate:false},
                         {field: 'app_user_id', title: __('APP'),operate:false},
-                        {field: 'test_user_id', title: __('测试'),operate:false},
+                        {field: 'test_user_id', title: __('测试'),operate:false},*/
+
+                        {
+                            field: 'all_user_id',
+                            title: __('责任人'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.web_designer_group == 1){
+                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
+                                }
+                                if(rows.phper_group == 1){
+                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.php_user_name + '</b></span><br>';
+                                }
+                                if(rows.app_group == 1){
+                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
+                                }
+                                if(rows.test_group == 1){
+                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_user_name + '</b></span><br>';
+                                }
+                                return all_user_name;
+                            },
+                        },
 
                         {
                             field: 'detail',
@@ -2649,6 +2671,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     success: function (json) {
                         Toastr.success(json.msg);
                         layer.close(layer_index);
+                        parent.$('#table').bootstrapTable('refresh');
                     }
                 });
             });

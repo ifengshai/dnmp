@@ -67,7 +67,11 @@
                 <label class="input_tiem_label"></label>
                 {if $row['status'] == 3}
                     {if $row['test_status'] == 1}
-                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('确认')}</button>
+                        {if $test_status}
+                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('确认')}</button>
+                        {else}
+                            <button type="submit" class="btn btn-sub" disabled style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('确认')}</button>
+                        {/if}
                     {else}
                     <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已确认')}</button>
                     {/if}
@@ -106,16 +110,22 @@
                         {if $row['test_group'] == 2}
                             <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
                         {else}
-                            <button type="submit" value="tongguo_no" class="btn btn-sub" style='background-color: #03A7EF;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                            {if $test_status || $user_status == 1}
+                                <button type="submit" value="tongguo_no" class="btn btn-sub" style='background-color: #03A7EF;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                            {else}
+                                <button type="submit" value="tongguo_no" class="btn btn-sub" disabled style='background-color: #03A7EF;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
+                            {/if}
                         {/if}
-                        <button type="submit" value="tongguo_yes" class="btn btn-sub" style='background-color: #03A7EF;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                        {if $test_status || $user_status == 1}
+                            <button type="submit" value="tongguo_yes" class="btn btn-sub" style='background-color: #03A7EF;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                        {else}
+                            <button type="submit" value="tongguo_yes" class="btn btn-sub" disabled style='background-color: #03A7EF;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+                        {/if}
                     {else}
                         <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;margin-right:2%;width: 33%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('未通过')}</button>
                         <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 40%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
                     {/if}
                 {/if}
-
-
             </div>
         </div>
     </form>
@@ -131,7 +141,11 @@
             <div class="item_button">
                 <label class="input_tiem_label"></label>
                 {if $row['test_status'] == 4}
-                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                    {if $test_status}
+                        <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                    {else}
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                    {/if}
                 {elseif $row['test_status'] == 5}
                 <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
                 {else}

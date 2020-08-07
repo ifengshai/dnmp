@@ -22,7 +22,7 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del','distribution'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution','test_handle','detail'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -232,7 +232,6 @@ class ItWebDemand extends Backend
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
                 $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
 
-
                 $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
                 //检查权限
@@ -243,13 +242,51 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_test_handle'] = $this->auth->check('demand/it_web_demand/test_handle');//测试响应
 
 
+                //获取各组负责人
+                $list[$k]['web_designer_user_name'] = '';
+                if($v['web_designer_group'] == 1){
+                    //获取php组长&组员
+                    $web_userid_arr = explode(',',$v['web_designer_user_id']);
+                    $web_users =  Db::name("admin")
+                        ->whereIn("id", $web_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['web_designer_user_name'] = $web_users ? implode(',',$web_users) : '-';
+                }
 
+                $list[$k]['php_user_name'] = '';
+                if($v['phper_group'] == 1){
+                    //获取php组长&组员
+                    $php_userid_arr = explode(',',$v['phper_user_id']);
+                    $php_users =  Db::name("admin")
+                        ->whereIn("id", $php_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['php_user_name'] = $php_users ? implode(',',$php_users) : '-';
+                }
 
+                $list[$k]['app_user_name'] = '';
+                if($v['app_group'] == 1){
+                    //获取php组长&组员
+                    $app_userid_arr = explode(',',$v['app_user_id']);
+                    $app_users =  Db::name("admin")
+                        ->whereIn("id", $app_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['app_user_name'] = $app_users ? implode(',',$app_users) : '-';
+                }
+
+                $list[$k]['test_user_name'] = '';
+                if($v['test_group'] == 1){
+                    //获取php组长&组员
+                    $test_userid_arr = explode(',',$v['test_user_id']);
+                    $test_users =  Db::name("admin")
+                        ->whereIn("id", $test_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['test_user_name'] = $test_users ? implode(',',$test_users) : '-';
+                }
                 //$list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
 
 
                 /*分配*/
-                $list[$k]['Allgroup'] = array();
+                /*$list[$k]['Allgroup'] = array();
                 if($v['web_designer_group'] == 1){
                     $list[$k]['Allgroup'][] = '前端';
                     $list[$k]['web_designer_user_name'] = $this->extract_username($v['web_designer_user_id'],'web_designer_user');
@@ -278,7 +315,7 @@ class ItWebDemand extends Backend
                     foreach (explode(',',$v['test_user_id']) as $t){
                         $list[$k]['test_user_id_arr'][] = config('demand.test_user')[$t];
                     }
-                }
+                }*/
                 /*分配*/
 
                 //权限赋值
@@ -1224,6 +1261,17 @@ class ItWebDemand extends Backend
         $this->view->assign("status", $status);
         $this->view->assign("day", $day);
         $this->view->assign("row", $row_arr);
+
+        //确认权限
+        $user_status = 0;
+        if($row_arr['test_user_id']){
+            if (in_array($this->auth->id,explode(',',$row_arr['test_user_id']))) {
+                $user_status = 1;
+            }
+        }
+        $this->view->assign("user_status", $user_status);
+        $this->view->assign("test_status", $this->auth->check('demand/it_web_demand/test_handle'));
+
         return $this->view->fetch();
     }
 
@@ -1325,6 +1373,9 @@ class ItWebDemand extends Backend
             ->select();
 
         //确认权限
+        $this->view->assign("test_status", $this->auth->check('demand/it_web_demand/test_handle'));//测试分配权限
+        $this->view->assign("distribution_status", $this->auth->check('demand/it_web_demand/distribution'));//开发分配权限
+
         /*$this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
         $this->view->assign('admin_id', session('admin.id'));*/
         $this->view->assign('php_users', $php_users);
