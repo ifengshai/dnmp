@@ -164,7 +164,11 @@
         <div class="col-xs-12 col-sm-8" style="width: 99.9%!important;">
             {if $type == 'view'}
                 {if $pm_status || $admin_id == $row['entry_user_id']}
-                <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                    {if $row['test_status'] == 1}
+                        <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                    {else}
+                        <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                    {/if}
                 {else}
                 <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
                 {/if}
