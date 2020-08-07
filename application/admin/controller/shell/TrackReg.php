@@ -312,8 +312,7 @@ class TrackReg extends Backend
         $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-        dump($list);die;
-        
+       
         foreach ($list as $k => $v) {
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->find();
@@ -342,7 +341,7 @@ class TrackReg extends Backend
             }
 
             dump($params);
-            $itemPlatformSku->isUpdate(true,['id' => $v['id']])->save($params);
+            $itemPlatformSku->where('id', $v['id'])->update($params);
             echo $itemPlatformSku->getLastSql();
         }
        
