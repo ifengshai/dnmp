@@ -316,7 +316,7 @@ class TrackReg extends Backend
             //90天日均销量
             $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
             //计算等级 30天预估销量
-            $num = round($params[$k]['sales_num_90days'] * 1 * 30);
+            $num = round($params['sales_num_90days'] * 1 * 30);
             if ($num >= 300) {
                 $params['grade'] = 'A+';
             } elseif ($num >= 150 && $num < 300) {
