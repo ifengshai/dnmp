@@ -269,7 +269,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\Order();
-        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
         //批量插入当天各站点上架sku
         $skuSalesNum->saveAll($list);
@@ -305,7 +305,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
         
         foreach ($list as $k => $v) {
