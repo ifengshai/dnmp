@@ -788,7 +788,6 @@ class ItWebDemand extends Backend
                 $add['type'] = $params['type'];
                 $add['site'] = $params['site'];
                 $add['site_type'] = implode(',',$params['site_type']);
-                $add['entry_user_id'] = $this->auth->id;
                 $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
                 $add['title'] = $params['title'];
                 $add['content'] = $params['content'];
