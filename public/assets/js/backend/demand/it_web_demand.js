@@ -2702,9 +2702,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         content: content,
                     },
                     success: function (json) {
-                        var str = '<li class="item"><p><span class="name">'+json.data.group_name+'</span><span class="time">'+json.data.create_time+'</span></p><p class="text-content">'+json.data.content+'</p></li>'
-                        $('#'+form_id).append(str);
-                        $('#c_'+form_id).val('');
+                        if(json.data){
+                            var str = '<li class="item"><p><span class="name">'+json.data.group_name+'</span><span class="time">'+json.data.create_time+'</span></p><p class="text-content">'+json.data.content+'</p></li>'
+                            $('#'+form_id).append(str);
+                            $('#c_'+form_id).val('');
+                        }
+
 
                         Toastr.success(json.msg);
                         layer.close(layer_index);
