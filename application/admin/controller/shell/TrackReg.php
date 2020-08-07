@@ -312,6 +312,7 @@ class TrackReg extends Backend
         $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
+        dump($list);die;
         
         foreach ($list as $k => $v) {
             //15天日均销量
