@@ -801,4 +801,91 @@ class Test4 extends Backend
         }
         return ['title' => $title, 'carrierId' => $carrierId];
     }
+
+    /**
+     * 跑需求数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/07 09:18:21 
+     * @return void
+     */
+    public function test()
+    {
+        //查询
+        $list = db('it_web_old_demand')->where('status', 7)->select();
+        $data = [];
+        foreach ($list as $k => $v) {
+            if ($v['type'] == 1) {
+                $data[$k]['type'] = $v['type'];
+            } else {
+                $data[$k]['type'] = 2;
+            }
+            $data[$k]['site'] = $v['site_type'];
+
+            $str = '';
+            if ($v['web_designer_group'] == 1 || $v['phper_group'] == 1) {
+                $str .= '1,2';
+            } elseif ($v['app_group'] == 1) {
+                $str .= ',3';
+            }
+            $data[$k]['site_type'] = $str;
+            $data[$k]['status'] = 4;
+            $data[$k]['create_time'] = $v['create_time'];
+            $data[$k]['entry_user_id'] = $v['entry_user_id'];
+            $data[$k]['entry_user_confirm'] = $v['entry_user_confirm'];
+            $data[$k]['entry_user_confirm_time'] = $v['entry_user_confirm_time'];
+            $data[$k]['copy_to_user_id'] = $v['copy_to_user_id'];
+            $data[$k]['title'] = $v['title'];
+            $data[$k]['content'] = $v['content'];
+            $data[$k]['priority'] = 1;
+            //计算周期
+            $time = ceil((strtotime($v['all_finish_time']) - strtotime($v['create_time'])) / 86400);
+            $data[$k]['node_time'] = $time;
+            $data[$k]['start_time'] = $v['create_time'];
+            $data[$k]['end_time'] = date('Y-m-d H:i:s', strtotime($v['all_finish_time']) + 7200);
+            $data[$k]['pm_audit_status'] = 3;
+            $data[$k]['pm_audit_status_time'] = date('Y-m-d H:i:s', strtotime($v['create_time']) + 3600);;
+            $data[$k]['pm_confirm'] = 1;
+            $data[$k]['pm_confirm_time'] = $v['entry_user_confirm_time'];
+            $data[$k]['web_designer_group'] = $v['web_designer_group'];
+            $data[$k]['web_designer_complexity'] = $v['web_designer_complexity'];
+            $data[$k]['web_designer_user_id'] = $v['web_designer_user_id'];
+            $data[$k]['web_designer_expect_time'] = $v['web_designer_expect_time'];
+            $data[$k]['web_designer_is_finish'] = $v['web_designer_is_finish'];
+            $data[$k]['web_designer_finish_time'] = $v['web_designer_finish_time'];
+            $data[$k]['phper_group'] = $v['phper_group'];
+            $data[$k]['phper_complexity'] = $v['phper_complexity'];
+            $data[$k]['phper_user_id'] = $v['phper_user_id'];
+            $data[$k]['phper_expect_time'] = $v['phper_expect_time'];
+            $data[$k]['phper_is_finish'] = $v['phper_is_finish'];
+            $data[$k]['phper_finish_time'] = $v['phper_finish_time'];
+            $data[$k]['app_group'] = $v['app_group'];
+            $data[$k]['app_complexity'] = $v['app_complexity'];
+            $data[$k]['app_user_id'] = $v['app_user_id'];
+            $data[$k]['app_expect_time'] = $v['app_expect_time'];
+            $data[$k]['app_is_finish'] = $v['app_is_finish'];
+            $data[$k]['app_finish_time'] = $v['app_finish_time'];
+            $data[$k]['test_group'] = $v['test_group'];
+            $data[$k]['test_confirm_time'] = $v['test_confirm_time'];
+            $data[$k]['test_user_id'] = $v['test_user_id'];
+            $data[$k]['test_is_finish'] = $v['test_is_finish'];
+            $data[$k]['test_finish_time'] = $v['test_finish_time'];
+            $data[$k]['test_status'] = 5;
+            $data[$k]['develop_finish_status'] = 3;
+            $finish_time = max(array($v['web_designer_finish_time'], $v['phper_finish_time'], $v['app_finish_time']));
+            $data[$k]['develop_finish_time'] = $finish_time;
+            $data[$k]['all_finish_time'] = $v['all_finish_time'];
+           
+            $data[$k]['is_small_probability'] = $v['is_small_probability'];
+            if ($v['type'] == 3) {
+                $data[$k]['is_difficult'] = 1;
+            } else {
+                $data[$k]['is_difficult'] = 0;
+            }
+            
+            $data[$k]['is_del'] = $v['is_del'];
+        }
+        db('it_web_demand_copy1')->insertAll($data);
+    }
 }
