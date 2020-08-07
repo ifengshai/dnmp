@@ -131,16 +131,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if(rows.web_designer_group == 1){
+                                if(rows.web_designer_user_id){
                                     all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
                                 }
-                                if(rows.phper_group == 1){
+                                if(rows.phper_user_id){
                                     all_user_name += '<span class="all_user_name">后端：<b>'+ rows.php_user_name + '</b></span><br>';
                                 }
-                                if(rows.app_group == 1){
+                                if(rows.app_user_id){
                                     all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
                                 }
-                                if(rows.test_group == 1){
+                                if(rows.test_user_id){
                                     all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_user_name + '</b></span><br>';
                                 }
                                 return all_user_name;
@@ -2676,6 +2676,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 });
             });
 
+            $(document).on('click', ".sub_review", function () {
+                var layer_index = layer.load(2, {
+                    shade: [0.2,'#000']
+                });
+
+                var form_id = $(this).attr('data');
+                var content = $('#c_'+form_id).val();
+                var id = $('#demand_id').val();
+                if(form_id == 'test_review'){
+                    var type = 1;
+                }else{
+                    var type = 2;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "demand/it_web_demand/demand_review",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        pid: id,
+                        type: type,
+                        content: content,
+                    },
+                    success: function (json) {
+                        var str = '<li class="item"><p><span class="name">'+json.data.group_name+'</span><span class="time">'+json.data.create_time+'</span></p><p class="text-content">'+json.data.content+'</p></li>'
+                        $('#'+form_id).append(str);
+                        $('#c_'+form_id).val('');
+
+                        Toastr.success(json.msg);
+                        layer.close(layer_index);
+                    }
+                });
+            });
+
 
 
         },
@@ -2893,7 +2929,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 //详情记录点击查看
                 get_detail: {
                     'click .check_detail': function (e, value, row, index) {
-                        Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '51%'] });
+                        Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '55%'] });
                     }
                 },
 

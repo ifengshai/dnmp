@@ -8,7 +8,6 @@ use app\common\model\Auth;
 use think\Db;
 use think\Request;
 use app\admin\model\AuthGroup;
-
 /**
  * 技术部网站组需求管理
  *
@@ -22,14 +21,15 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del','distribution','test_handle','detail'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
         $this->view->assign('getTabList', $this->model->getTabList());
-        $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
+        $this->ItWebDemandReview = new \app\admin\model\demand\ItWebDemandReview;
         $this->assignconfig('admin_id', session('admin.id'));
+
     }
 
     /**
@@ -44,7 +44,7 @@ class ItWebDemand extends Backend
      * */
     public function start_time($priority,$node_time){
         $day_17 = mktime(17,0,0,date('m'),date('d'),date('Y'));//当天5点
-        $week_17 = strtotime ("+17 hour", strtotime("next friday"));//本周5，下午5点
+        $week_17 = strtotime ("+17 hour", strtotime("friday"));//本周5，下午5点
 
         $data = array();
         switch ($priority){
@@ -102,6 +102,9 @@ class ItWebDemand extends Backend
      */
     public function index()
     {
+        $time_update['status'] = 2;
+        $time = date('Y-m-d H:i',time());
+        $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time],'status'=>1,'pm_audit_status'=>3]);
         //dump(input());exit;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -244,7 +247,7 @@ class ItWebDemand extends Backend
 
                 //获取各组负责人
                 $list[$k]['web_designer_user_name'] = '';
-                if($v['web_designer_group'] == 1){
+                if($v['web_designer_user_id']){
                     //获取php组长&组员
                     $web_userid_arr = explode(',',$v['web_designer_user_id']);
                     $web_users =  Db::name("admin")
@@ -254,7 +257,7 @@ class ItWebDemand extends Backend
                 }
 
                 $list[$k]['php_user_name'] = '';
-                if($v['phper_group'] == 1){
+                if($v['phper_user_id']){
                     //获取php组长&组员
                     $php_userid_arr = explode(',',$v['phper_user_id']);
                     $php_users =  Db::name("admin")
@@ -264,7 +267,7 @@ class ItWebDemand extends Backend
                 }
 
                 $list[$k]['app_user_name'] = '';
-                if($v['app_group'] == 1){
+                if($v['app_user_id']){
                     //获取php组长&组员
                     $app_userid_arr = explode(',',$v['app_user_id']);
                     $app_users =  Db::name("admin")
@@ -274,7 +277,7 @@ class ItWebDemand extends Backend
                 }
 
                 $list[$k]['test_user_name'] = '';
-                if($v['test_group'] == 1){
+                if($v['test_user_id']){
                     //获取php组长&组员
                     $test_userid_arr = explode(',',$v['test_user_id']);
                     $test_users =  Db::name("admin")
@@ -656,7 +659,7 @@ class ItWebDemand extends Backend
                     $add['title'] = $data['title'];
                     $add['content'] = $data['content'];
                     $add['accessory'] = $data['accessory'];
-                    $add['is_emergency'] = $data['is_emergency']?$params['is_emergency']:0;
+                    $add['is_emergency'] = $data['is_emergency'] ? $data['is_emergency'] : 0;
                     //以下默认状态
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i',time());
@@ -772,6 +775,9 @@ class ItWebDemand extends Backend
             if ($params) {
                 if($params['pm_audit_status']){
                     $add['priority'] = $params['priority'];
+                    if($params['priority'] == 1){
+                        $add['status'] = 2;
+                    }
                     $add['node_time'] = $params['node_time'];
                     $time_data = $this->start_time($params['priority'],$params['node_time']);
                     $add['start_time'] = $time_data['start_time'];
@@ -787,7 +793,7 @@ class ItWebDemand extends Backend
                 $add['title'] = $params['title'];
                 $add['content'] = $params['content'];
                 $add['accessory'] = $params['accessory'];
-                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
                 $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
 
@@ -1388,6 +1394,46 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 查看详情--评论
+     * 任何人都有权限
+     * */
+    public function demand_review(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->post();
+            if ($params) {
+                if($params['content'] == ''){
+                    $this->error('内容不能为空');
+                }
+
+                $update['pid'] = $params['pid'];
+                $update['type'] = $params['type'];
+
+                $users =  Db::name("auth_group_access")
+                    ->alias("aga")
+                    ->join("auth_group ag", "aga.group_id=ag.id")
+                    ->field("ag.*")
+                    ->where('aga.uid',$this->auth->id)
+                    ->find();
+                $update['group_id'] = $users['id'];
+                $update['group_name'] = $users['name'];
+                $update['user_id'] = $this->auth->id;
+                $update['user_name'] = $this->auth->nickname;
+                $update['content'] = $params['content'];
+                $update['create_time'] = date('Y-m-d H:i:s',time());
+
+                $res = $this->ItWebDemandReview->allowField(true)->save($update);
+                if ($res) {
+
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功',$url = null, $update);
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+    }
 
 /*-----------------------------------------------------------------------------------*/
 

@@ -111,7 +111,7 @@
         outline: none;
         resize: none;
     }
-    .bottom  button {
+    .bottom  a {
         width: 70px;
         height: 30px;
         line-height: 30px;
@@ -122,38 +122,53 @@
         color: #ffffff;
     }
 </style>
+
+<input type="hidden" id="demand_id" value="{$row['id']}" />
+
 <div class="dialong-container">
     <div class="left_div">
         <form role="form" method="POST" data-toggle="validator" action="">
-            <input type="hidden" id="demand_id" value="{$row['id']}" />
+
             <div class="left_input_top">
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        {if $test_status || $distribution_status}
-                        <input name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_small_probability'><span>小概率</span>
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                <input name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_small_probability'><span>小概率</span>
+                            {else}
+                                <input disabled name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" id='is_small_probability'><span>小概率</span>
+                            {/if}
                         {else}
-                        <input disabled name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" id='is_small_probability'><span>小概率</span>
+                            <input disabled name="row[is_small_probability]" {if $row['is_small_probability'] == 1}checked{/if} type="checkbox" value="1" id='is_small_probability'><span>小概率</span>
                         {/if}
                     </label>
                 </div>
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        {if $test_status || $distribution_status}
-                        <input name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_low_level_error'><span>低级错误</span>
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                <input name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_low_level_error'><span>低级错误</span>
+                            {else}
+                                <input disabled name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" id='is_low_level_error'><span>低级错误</span>
+                            {/if}
                         {else}
-                        <input disabled name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" id='is_low_level_error'><span>低级错误</span>
+                            <input disabled name="row[is_low_level_error]" {if $row['is_low_level_error'] == 1}checked{/if} type="checkbox" value="1" id='is_low_level_error'><span>低级错误</span>
                         {/if}
                     </label>
                 </div>
 
                 <div class="input_item">
                     <label class="input_tiem_label2">
-                        {if $test_status || $distribution_status}
-                        <input name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" id='is_difficult'><span>疑难</span>
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                <input name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" id='is_difficult'><span>疑难</span>
+                            {else}
+                                <input disabled name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
+                            {/if}
                         {else}
-                        <input disabled name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
+                            <input disabled name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
                         {/if}
                     </label>
                 </div>
@@ -166,8 +181,12 @@
 
                 <div class="input_item">
                     <span class="input_tiem_span">
-                        {if $test_status || $distribution_status}
-                            {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
+                            {else}
+                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
+                            {/if}
                         {else}
                             {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
                         {/if}
@@ -176,8 +195,12 @@
 
                 <div class="input_item">
                     <span class="input_tiem_span">
-                        {if $test_status || $distribution_status}
-                            {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker php_group_status','id'=>'phper_user_id','title'=>'后端责任人(多选)','multiple'=>true])}
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker php_group_status','id'=>'phper_user_id','title'=>'后端责任人(多选)','multiple'=>true])}
+                            {else}
+                                {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'后端责任人(多选)','multiple'=>true])}
+                            {/if}
                         {else}
                             {:Form::select('row[phper_user_id]', $php_users, $row['phper_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'后端责任人(多选)','multiple'=>true])}
                         {/if}
@@ -186,8 +209,12 @@
 
                 <div class="input_item">
                     <span class="input_tiem_span">
-                        {if $test_status || $distribution_status}
-                            {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
+                            {else}
+                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
+                            {/if}
                         {else}
                             {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
                         {/if}
@@ -196,8 +223,12 @@
 
                 <div class="input_item">
                     <span class="input_tiem_span">
-                        {if $test_status || $distribution_status}
-                            {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
+                        {if $row['test_status'] < 5}
+                            {if $test_status || $distribution_status}
+                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
+                            {else}
+                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
+                            {/if}
                         {else}
                             {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
                         {/if}
@@ -210,7 +241,7 @@
     <div class="center_div">
         <div class="top">
             <p class="center_div_title">测试</p>
-            <ul class="center_div_container">
+            <ul class="center_div_container" id="test_review">
                 {volist name="test_review" id="tr"}
                     <li class="item">
                         <p>
@@ -221,16 +252,16 @@
                 {/volist}
             </ul>
         </div>
-        <form class="bottom" role="form" method="POST" data-toggle="validator" action="">
-            <textarea name="" id="" cols="30" rows="10"></textarea>
-            <button>确定</button>
+        <form class="bottom">
+            <textarea name="" id="c_test_review" cols="30" rows="10"></textarea>
+            <a data="test_review" class="sub_review">确定</a>
         </form>
     </div>
 
     <div class="right_div">
         <div class="top">
             <p class="center_div_title">回归测试</p>
-            <ul class="center_div_container">
+            <ul class="center_div_container" id="review">
                 {volist name="review" id="r"}
                     <li class="item">
                         <p>
@@ -241,9 +272,9 @@
                 {/volist}
             </ul>
         </div>
-        <form class="bottom" role="form" method="POST" data-toggle="validator" action="">
-            <textarea name="" id="" cols="30" rows="10"></textarea>
-            <button>确定</button>
+        <form class="bottom">
+            <textarea name="" id="c_review" cols="30" rows="10"></textarea>
+            <a data="review" class="sub_review">确定</a>
         </form>
     </div>
 </div>
