@@ -132,9 +132,11 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'priority desc,zendesk_update_time asc,id asc';
+            //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
+            $orderSet = 'zendesk_update_time asc';
             if($me_task == 2){
-                $orderSet = 'priority desc,zendesk_update_time asc,id asc';
+                //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
+                $orderSet = 'zendesk_update_time asc';
             }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
