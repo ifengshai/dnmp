@@ -105,7 +105,7 @@ class Soap
             if ($res === null) {
                 return false;
             }
-            if ($res['code'] == 200) {
+            if ($res['code'] == 200 || $res['status'] == 200) {
                 return true;
             }
             exception($res['msg']);
