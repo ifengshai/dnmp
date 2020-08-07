@@ -21,7 +21,7 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review','del','edit'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -105,7 +105,7 @@ class ItWebDemand extends Backend
         $time_update['status'] = 2;
         $time = date('Y-m-d H:i',time());
         $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time],'status'=>1,'pm_audit_status'=>3]);
-        
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
