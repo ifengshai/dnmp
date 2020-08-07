@@ -116,7 +116,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     title: __('入库'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-plus',
-                                    url: 'warehouse/instock/add',
+                                    url: 'warehouse/instock/add?type=1',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });

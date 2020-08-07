@@ -74,14 +74,26 @@
                 </select>
             </div>
         </div>
-        <div class="form-group order_number">
-            <label class="control-label col-xs-12 col-sm-2">关联订单:</label>
+        <!--<div class="form-group order_number">-->
+            <!--<label class="control-label col-xs-12 col-sm-2">关联订单:</label>-->
+            <!--<div class="col-xs-12 col-sm-8">-->
+                <!--<input id="c-order_number" class="form-control" name="row[order_number]"-->
+                    <!--value=""  type="text">-->
+            <!--</div>-->
+        <!--</div>-->
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">平台:</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-order_number" class="form-control" name="row[order_number]"
-                    value=""  type="text">
+                <select name="row[platform_id]" class="form-control type" data-rule='required'>
+                    <option value="">请选择</option>
+                    <option value="1">zeelool</option>
+                    <option value="2">voogueme</option>
+                    <option value="3">nihao</option>
+                    <option value="4">wesee</option>
+                    <option value="5">meloog</option>
+                </select>
             </div>
         </div>
-        
        
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>

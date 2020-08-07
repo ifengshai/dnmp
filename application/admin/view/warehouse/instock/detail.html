@@ -73,7 +73,8 @@
                 </select>
             </div>
         </div>
-     
+
+        {if condition="$types eq 1"}
         <div class="form-group purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">质检单:</label>
             <div class="col-xs-12 col-sm-8">
@@ -85,6 +86,22 @@
                 </select>
             </div>
         </div>
+        {/if}
+        {if condition="$types eq 2"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">平台:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[platform_id]" class="form-control selectpicker" disabled data-live-search='true'>
+                    <option value="">请选择</option>
+                    <option value="1" {:$row['platform_id'] == 1 ? 'selected' : ''}>zeelool</option>
+                    <option value="2" {:$row['platform_id'] == 2 ? 'selected' : ''}>voogueme</option>
+                    <option value="3" {:$row['platform_id'] == 3 ? 'selected' : ''}>nihao</option>
+                    <option value="4" {:$row['platform_id'] == 4 ? 'selected' : ''}>wesee</option>
+                    <option value="5" {:$row['platform_id'] == 5 ? 'selected' : ''}>meloog</option>
+                </select>
+            </div>
+        </div>
+        {/if}
        
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
