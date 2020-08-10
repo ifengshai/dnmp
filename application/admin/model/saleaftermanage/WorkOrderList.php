@@ -444,7 +444,7 @@ class WorkOrderList extends Model
                         'increment_id' => $params['platform_order'],
                         'platform_type' => $type,
                         'original_name' => $changeLens['original_name'][$key] ?? '',
-                        'original_sku' => $changeLens['original_sku'][$key],
+                        'original_sku' => trim($changeLens['original_sku'][$key]),
                         'original_number' => intval($changeLens['original_number'][$key]),
                         'change_type' => $change_type,
                         'change_sku' => $changeLens['original_sku'][$key],
