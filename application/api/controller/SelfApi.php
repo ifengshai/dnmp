@@ -827,4 +827,72 @@ class SelfApi extends Api
             }
         }
     }
+
+    /**
+     * 小程序取消订单回滚库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/10 09:23:55 
+     * @return void
+     */
+    public function cancel_order_set_stock()
+    {
+        if ($this->request->isPost()) {
+            $site = $this->request->request('site'); //站点
+            $orderid = $this->request->request('orderid'); //订单id
+            $order_number = $this->request->request('order_number'); //订单号
+            $order_data = $this->request->request('order_data'); //订单json数据
+            if (!$site) {
+                $this->error(__('缺少站点参数'), [], 400);
+            }
+
+            if (!$orderid) {
+                $this->error(__('缺少订单id参数'), [], 400);
+            }
+
+            if (!$order_number) {
+                $this->error(__('缺少订单号参数'), [], 400);
+            }
+
+            $item = new \app\admin\model\itemmanage\Item();
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //订单json数据 包含sku qty
+            $order_data = json_decode(htmlspecialchars_decode($order_data), true);
+            if (!$order_data) {
+                $this->error(__('缺少数据参数'), [], 400);
+            }
+            
+            foreach ($order_data as $k => $v) {
+                $true_sku = $v['sku'];
+                $qty = $v['qty'];
+                //扣减可用库存 增加订单占用库存
+                $item_res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => $true_sku])->inc('available_stock', $qty)->dec('occupy_stock', $qty)->update();
+                if (false !== $item_res) {
+                    //生成扣减库存日志
+                    (new StockLog())->setData([
+                        'type'                      => 1,
+                        'site'                      => $site,
+                        'one_type'                  => 2,
+                        'sku'                       => $true_sku,
+                        'order_number'              => $order_number,
+                        'public_id'                 => $orderid,
+                        'occupy_stock_change'       => $qty,
+                        'available_stock_change'    => -$qty,
+                        'create_person'             => 'admin',
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '如佛小程序取消订单增加可用库存,扣减占用库存'
+                    ]);
+                } else {
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '如佛小程序取消订单增加可用库存：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
+                }
+            }
+
+            if (false !== $item_res) {
+                $this->success('处理成功', [], 200);
+            } else {
+                $this->error('处理失败', [], 400);
+            }
+        }
+    }
 }
