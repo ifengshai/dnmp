@@ -28,6 +28,7 @@ class ZendeskAgents extends Backend
         $type = [
             1 => 'zeelool',
             2 => 'voogueme',
+            3 => 'nihao',
         ];
         $agent_type = [
             1 => '邮件组',
@@ -206,11 +207,11 @@ class ZendeskAgents extends Backend
         $agents = $this->model->with('admin')->select();
         $res = [];
         foreach($agents as $agent){
-            $res[] = $agent->admin->nickname;
+            $res[$agent['admin_id']] = $agent->admin->nickname;
         }
-        return $res;
+        $res = array_unique($res);
+        return json($res);
     }
-
     /**
      * 删除
      * @param string $ids

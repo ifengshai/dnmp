@@ -22,6 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 searchFormVisible: true,
                 columns: [
                     [
+                        {checkbox: true},
                         {field: 'id', title: __('Id'),sortable: true},
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
@@ -29,12 +30,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
-                            field: 'admin.nickname',
+                            field: 'assign_id',
                             title: __('Assign_id'),
                             align: 'left',
-                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList')
+                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList'),
+                            visible:false
                         },
-                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status },
+                        {
+                            field: 'assign_id_nickname',
+                            title: __('Assign_id'),
+                            align: 'left',
+                            operate:false
+                        },
+                        {field: 'due_id',title: __('Due_id'),align: 'left',searchList: $.getJSON("zendesk/zendesk_agents/getAgentsList"),visible:false},
+                        {field: 'due_id_nickname',title: __('Due_id'),align: 'left',operate:false},
+                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray'}, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close'}, formatter: Table.api.formatter.status},
                         {
                             field: 'tags', title: __('Tags'), searchList: function (column) {
                                 return Template('tagstpl', {});
@@ -45,7 +55,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         },
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
-                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
+                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
@@ -73,14 +83,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         if( Config.admin_id == 1 || Config.admin_id == 75){
                                             return true;
                                         }
-                                        // if(row.assign_id != Config.admin_id){
-                                        //     return false;
-                                        // }
+                                        if(row.due_id != Config.admin_id){
+                                            return false;
+                                        }
                                         return true;
                                     }
                                 },
                                 {
-                                    name: 'edit',
+                                    name: 'edit_recipient',
                                     text:__('修改承接人'),
                                     title:__('修改承接人'),
                                     extend: 'data-area = \'["50%","50%"]\'',
@@ -92,9 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        if(Config.admin_id == 75){
                                             return true;
-                                        }
                                     }
                                 }
 
@@ -159,6 +167,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
             $(document).on("click", ".btn-synchronous", function () {
                 Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
+            });
+            //上面的修改承接人
+            $(document).on("click", ".batch-edit-recipient", function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
         },
         add: function () {
@@ -377,6 +390,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         edit_recipient:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
+        batch_edit_recipient:function(){
             Form.api.bindevent($("form[role=form]"));
         },
         artificial_synchronous:function(){

@@ -1062,17 +1062,16 @@ class PurchaseOrder extends Backend
     public function matching()
     {
         //查询SKU为空的采购单
-
-        $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
+        $data = $this->purchase_order_item->alias('a')->field('a.id,a.purchase_num,a.skuid,supplier_id')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
         $new_product = new \app\admin\model\NewProduct();
         $item = new \app\admin\model\itemmanage\Item();
         foreach ($data as $k => $v) {
             //匹配SKU
             if ($v['skuid']) {
-                $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
+                $params['sku'] = (new SupplierSku())->getSkuData($v['skuid'], $v['supplier_id']);
 
-                $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
+                $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid'], $v['supplier_id']);
             }
 
             if ($params['sku']) {
@@ -1270,8 +1269,8 @@ class PurchaseOrder extends Backend
 
                         //匹配SKU 供应商SKU
                         if ($val['skuID']) {
-                            $params[$key]['sku'] = (new SupplierSku())->getSkuData($val['skuID']);
-                            $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val['skuID']);
+                            $params[$key]['sku'] = (new SupplierSku())->getSkuData($val['skuID'], $list['supplier_id']);
+                            $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val['skuID'], $list['supplier_id']);
                         }
 
                         //判断sku是否为选品库SKU
@@ -1357,6 +1356,7 @@ class PurchaseOrder extends Backend
             $skus = array_column($list, 'true_sku');
             //查询所有产品库存
             $map['is_del'] = 1;
+            $map['is_open']= ['lt',3];
             $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
             $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');

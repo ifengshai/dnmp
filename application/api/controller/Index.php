@@ -43,6 +43,12 @@ class Index extends Api
     {
         $this->success('请求成功');
     }
+    public function test()
+    {
+        echo date('Y-m-d H:i:s',time())."\n";
+        echo time()."\n";
+        echo date('Y-m-d H:i:s',strtotime('2020-07-30 18:57:00'));
+    }
 
     /**
      * 目标导入

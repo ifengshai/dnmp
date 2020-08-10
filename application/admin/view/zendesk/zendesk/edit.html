@@ -173,7 +173,7 @@
                         <div class="active tab-pane" id="activity">
                             <!-- Post -->
                             {foreach name="comments" item="vo"}
-                            <div class="post" style="word-break: break-all;" {if condition="$vo['comment_id'] eq 0"}style="background-color: #f7f7bf!important"{/if}>
+                            <div class="post"  {if condition="$vo['comment_id'] eq 0"}style="word-break: break-all;background-color: #f7f7bf!important"{else}style="word-break: break-all;"{/if}>
                                 <div class="user-block">
                                     {if condition="$vo['is_admin']"}
                                     <img class="img-circle img-bordered-sm" src="{:session('admin.avatar')}" alt="user image">
@@ -191,7 +191,7 @@
                                 </div>
                                 <!-- /.user-block -->
                                 <div style="margin:0px 0px 0px 70px;">
-                                   {$vo->html_body}{if condition="$vo['is_admin'] eq 1"}{$sign}{/if}
+                                   {$vo->html_body}{if condition="$vo['is_admin'] eq 1"}{$vo->sign}{/if}
                                     {if condition="$vo.attachments"}
                                     <ul class="mailbox-attachments clearfix">
                                         {foreach name="$vo['attachments']|explode=',',###" item="vv"}

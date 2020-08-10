@@ -806,8 +806,8 @@ class WorkOrderList extends Backend
                             throw new Exception("措施不能为空");
                         }
                     }
+                    
                     //判断是否选择措施
-
                     //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
@@ -1161,6 +1161,10 @@ class WorkOrderList extends Backend
                         //     }
                         // }
                         //如果不是客服人员则指定审核人为客服经理 end
+                        if($params['order_type'] == 100){
+                            $params['base_grand_total'] = $params['refund_money'];
+                            $params['grand_total'] = $params['refund_money'];
+                        }
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
@@ -1437,17 +1441,24 @@ class WorkOrderList extends Backend
         foreach (array_filter($skus) as $k => $v) {
             //判断库存时去掉-s 等
             $arr = explode('-', $v);
-            $sku = $arr[0] . '-' . $arr[1];
-            //转换sku
-            $sku = $itemPlatFormSku->getTrueSku(trim($sku), $siteType);
-            //查询库存 判断是否开启预售
-            $res = $item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
-            //判断可用库存
-            if ($res->available_stock < $num[$k]) {
-                //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-                if ($res->presell_status != 1 ||  ($res->presell_status == 1  && (time() < strtotime($res->presell_create_time) || time() > strtotime($res->presell_end_time) || $res->presell_residue_num < $num[$k]))) {
-                    throw new Exception($v . '暂无库存！！');
-                }
+            if(!empty($arr[1])){
+                $sku = $arr[0] . '-' . $arr[1];
+            }else{
+                $sku = trim($v);
+            }
+          
+            //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'sku' => $sku,'platform_type' => $siteType])->find();
+            //判断是否开启预售
+            if ($res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
+                $stock = $res['stock'] + $res['presell_residue_num'];
+            } else {
+                $stock = $res['stock'];
+            }
+
+            //判断库存是否足够
+            if ($stock < $num[$k]) {
+                throw new Exception($sku . '暂无库存！！');
             }
         }
         return true;
@@ -2252,6 +2263,10 @@ class WorkOrderList extends Backend
                     //如果不是客服人员则指定审核人为客服经理 end
                     // dump($params);
                     // exit;
+                    if($params['order_type'] == 100){
+                        $params['base_grand_total'] = $params['refund_money'];
+                        $params['grand_total'] = $params['refund_money'];
+                    }
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
                         throw new Exception("编辑失败！！");
@@ -2885,6 +2900,7 @@ class WorkOrderList extends Backend
         $this->view->assign('url', $url);
         $this->view->assign('remarkList', $remarkList);
         $this->assignconfig('work_status',$row->work_status);
+        $this->assignconfig('create_user_id',$row->create_user_id);
         return $this->view->fetch();
     }
 
@@ -3599,7 +3615,7 @@ EOF;
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
@@ -3724,7 +3740,7 @@ EOF;
                     $value['work_platform'] = 'nihao';
                     break;
                 case 4:
-                    $value['work_platform'] = 'amazon';
+                    $value['work_platform'] = 'meeloog';
                     break;
                 case 5:
                     $value['work_platform'] = 'wesee';

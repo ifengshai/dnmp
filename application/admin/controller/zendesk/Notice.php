@@ -29,13 +29,12 @@ class Notice extends Controller
 {
     public $postData = [];
 
-    /**
+    /**time();
      * 方法初始化
      * @throws \Exception
      */
     public function __construct($request = null, $postData = [])
     {
-        set_time_limit(0);
         parent::__construct();
         if (!$postData) {
             $postData = json_decode(file_get_contents("php://input"), true);
@@ -53,12 +52,19 @@ class Notice extends Controller
                 }
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
                 $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.voogueme')['token']]);
-            } else {
+            } elseif($this->postData['type'] == 'zeelool') {
                 if (!$username) {
                     $username = config('zendesk.zeelool')['username'];
                 }
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
                 $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.zeelool')['token']]);
+            }
+            else {
+                if (!$username) {
+                    $username = config('zendesk.nihaooptical')['username'];
+                }
+                $this->client = new ZendeskAPI(config('zendesk.nihaooptical')['subdomain']);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.nihaooptical')['token']]);
             }
         } catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
@@ -83,8 +89,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -103,6 +111,7 @@ class Notice extends Controller
             return 'success';
         }
         $via = $ticket->via;
+        $channel = $via->channel == 'api' ? 'email' : $via->channel;
         $priority = 0;
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
@@ -122,12 +131,12 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //写入主表
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
-                'channel' => $via->channel,
+                'channel' => $channel,
                 'email' => $userInfo->email,
                 'username' => $userInfo->name,
                 'user_id' => $ticket->requester_id,
@@ -140,8 +149,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', time()),
-                'update_time' => date('Y-m-d H:i:s', time()),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
             ]);
             $zid = $zendesk;
             foreach ($comments as $comment) {
@@ -168,8 +177,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', time()),
-                        'update_time' => date('Y-m-d H:i:s', time()),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
                     ]);
                 }
                 ZendeskComments::create([
@@ -185,8 +194,8 @@ class Notice extends Controller
                     'due_id' => 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                    'update_time' => date('Y-m-d H:i:s', time()),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                 ]);
             }
             Db::commit();
@@ -209,8 +218,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
@@ -244,7 +255,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -290,6 +301,8 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => 0,
                         'platform' => $type,
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                     ]);
                 }
             }
@@ -315,8 +328,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
@@ -336,6 +351,7 @@ class Notice extends Controller
             return 'success';
         }
         $via = $ticket->via;
+        $channel = $via->channel == 'api' ? 'email' : $via->channel;
         $priority = 0;
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
@@ -355,14 +371,14 @@ class Notice extends Controller
             if (!$ticket->subject && !$ticket->raw_subject) {
                 $subject = $rawSubject = substr($ticket->description, 0, 60) . '...';
             }
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id');
 
             //写入主表
             $zendesk = Db::name('zendesk')->insertGetId([
                 'ticket_id' => $id,
                 'type' => $type,
-                'channel' => $via->channel,
+                'channel' => $channel,
                 'email' => $userInfo->email,
                 'username' => $userInfo->name,
                 'user_id' => $ticket->requester_id,
@@ -375,8 +391,8 @@ class Notice extends Controller
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => $admin_id ?: 0,
                 'zendesk_update_time' => $zendesk_update_time,
-                'create_time' => date('Y-m-d H:i:s', time()),
-                'update_time' => date('Y-m-d H:i:s', time()),
+                'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
+                'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
             ]);
 
             $zid = $zendesk;
@@ -404,8 +420,8 @@ class Notice extends Controller
                         'attachments' => '',
                         'is_created' => 1,
                         'due_id' => ZendeskAgents::where('old_agent_id', $ticket->assignee_id)->value('admin_id'),
-                        'create_time' => date('Y-m-d H:i:s', time()),
-                        'update_time' => date('Y-m-d H:i:s', time()),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
                     ]);
                 }
                 ZendeskComments::create([
@@ -421,8 +437,8 @@ class Notice extends Controller
                     'due_id' => $due_id ? $due_id : 0,
                     'platform' => $type,
                     'attachments' => join(',', $attachments),
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                    'update_time' => date('Y-m-d H:i:s', time()),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                 ]);
             }
             //Db::commit();
@@ -445,8 +461,10 @@ class Notice extends Controller
         $type = $postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         try {
             //$channel = $postData['channel'];
@@ -480,7 +498,7 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
-            $zendesk_update_time = date('Y-m-d H:i:s', strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600);
+            $zendesk_update_time = date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600));
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -596,6 +614,8 @@ class Notice extends Controller
                         'is_created' => 2,
                         'due_id' => $due_id ? $due_id : 0,
                         'platform' => $type,
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                     ]);
                 }
             }
@@ -791,7 +811,13 @@ class Notice extends Controller
     {
         $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);
         $page_count = $res->page_count;
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        if($this->postData['type'] == 'zeelool'){
+            $type = 1;
+        }elseif($this->postData['type'] == 'voogueme'){
+            $type = 2;
+        }else{
+            $type = 3;
+        }
         for ($i = 1; $i <= $page_count; $i++) {
             $res = $this->client->helpCenter->articles()->findAll(['page' => $i, 'per_page' => 100]);
             $articles = $res->articles;
@@ -822,7 +848,6 @@ class Notice extends Controller
     {
         $res = $this->client->crasp()->findTags();
         $page_count = intval(ceil($res->count / 100));
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
         for ($i = 1; $i <= $page_count; $i++) {
             $res = $this->client->crasp()->findTags(['page' => $i, 'per_page' => 100]);
             $tags = $res->tags;
@@ -848,7 +873,13 @@ class Notice extends Controller
 
         $res = $this->client->macros()->findAllActive();
         $macros = $res->macros;
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        if($this->postData['type'] == 'zeelool'){
+            $type = 1;
+        }elseif($this->postData['type'] == 'voogueme'){
+            $type = 2;
+        }else{
+            $type = 3;
+        }
         foreach ($macros as $macro) {
             $data = [];
             $title = $macro->title;
@@ -958,6 +989,7 @@ class Notice extends Controller
         foreach ($tickets as $ticket) {
             ++$key;
             $via = $ticket->via;
+            $channel = $via->channel == 'api' ? 'email' : $via->channel;
             $priority = 0;
             if ($ticket->priority) {
                 $priority = array_search($ticket->priority, config('zendesk.priority'));
@@ -985,7 +1017,7 @@ class Notice extends Controller
                 $zendesk = Zendesk::create([
                     'ticket_id' => $ticket->id,
                     'type' => $type,
-                    'channel' => $via->channel,
+                    'channel' => $channel,
                     'email' => $userInfo->email,
                     'username' => $userInfo->name,
                     'user_id' => $ticket->requester_id,
@@ -1002,9 +1034,9 @@ class Notice extends Controller
                     'rating_type' => $ticket->satisfaction_rating->score == 'bad' ? 2 : 1,
                     'comment' => $ticket->satisfaction_rating->comment,
                     'reason' => $ticket->satisfaction_rating->reason,
-                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600)),
-                    'assign_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at)) + 8 * 3600)),
+                    'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600)),
+                    'assign_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->created_at))+8*3600)),
                     'shell' => 1
                 ]);
                 $zid = $zendesk->id;
@@ -1048,8 +1080,8 @@ class Notice extends Controller
                         'is_admin' => $is_admin ? 1 : 0,
                         'attachments' => json($attachments),
                         'is_created' => 1,
-                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)) + 8 * 3600)),
-                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at)) + 8 * 3600)),
+                        'create_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                     ]);
                 }
                 echo $zendesk->ticket_id . "\r\n";
@@ -1102,8 +1134,10 @@ class Notice extends Controller
         $type = $this->postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
-        } else {
+        } elseif($type == 'voogueme') {
             $type = 2;
+        } else{
+            $type = 3;
         }
         $a = 1;
         $ticket_ids = Zendesk::where('ticket_id', 'in', '105010,104326,105024,104644,104913,105119')->where('type', $type)->column('ticket_id');
@@ -1132,7 +1166,7 @@ class Notice extends Controller
                 $updateData = [
                     'tags' => $tags,
                     'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
-                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at)) + 8 * 3600)),
+                    'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $ticket->updated_at))+8*3600)),
                 ];
                 //如果分配人修改，则同步修改分配人
                 if ($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id) {
@@ -1247,7 +1281,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-07-19T00:10:00Z updated_at<=2020-07-19T00:20:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2020-07-30T23:00:00Z updated_at<=2020-08-01T23:59:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1281,7 +1315,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=15minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=6minutes order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
@@ -1291,7 +1325,7 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 15 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 

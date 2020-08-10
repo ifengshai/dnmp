@@ -439,9 +439,6 @@ class WorkOrderList extends Model
                     $coatingId = $changeLens['coating_type'][$key];
 
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
-                    // var_dump($type,$lensId,$coatingId,$colorId,$recipe_type,$work->is_new_version);
-                    // var_dump($lensCoatName);
-                    // exit;
                     $data = [
                         'work_id' => $work_id,
                         'increment_id' => $params['platform_order'],
@@ -612,7 +609,7 @@ class WorkOrderList extends Model
         $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
-        $lens = $prescription[$prescription_type] ?? [];
+        $lens = $prescription[$prescription_type] ?? [];       
         $lensName = $coatingName = $colorName = $lensType = '';
         if (!$colorId) {
             foreach ($lens as $len) {
@@ -648,6 +645,17 @@ class WorkOrderList extends Model
                     break;
                 }
             }
+            //lsw添加
+            if(!$lensName){
+                foreach ($lensColorList as $cval) {
+                    if ($cval['lens_id'] == $lens_id) {
+                        $lensName = $cval['lens_data_name'] . "({$colorName})";
+                        $lensType = $cval['lens_data_index'];
+                        break;
+                    }
+                }
+            }
+
         }
 
         foreach ($coatingLists as $coatingList) {
@@ -908,6 +916,9 @@ class WorkOrderList extends Model
                     if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                        if(7 == $measure_choose_id){
+                            $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        }
                         $key++;
                     } else {
                         $allComplete = 0;
@@ -1283,5 +1294,256 @@ class WorkOrderList extends Model
         $postData = array('order_number'=>$order_number);
         $res = $this->httpRequest($siteType, 'magic/order/cancelVip', $postData, 'POST');
         return $res;
+    }
+    /**
+     * 客服数据大屏 -- 工单概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/23 18:06:03 
+     * @return void
+     */
+    public function workorder_situation($platform){
+        //今天的工单数据统计
+        $today_startdate = date('Y-m-d');
+        $today_enddate = date('Y-m-d', strtotime("+1 day"));
+        $today = array(
+            'wo_num' => $this->wo_sum($today_startdate,$today_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($today_startdate,$today_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($today_startdate,$today_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($today_startdate,$today_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($today_startdate,$today_enddate,$platform,1),
+        );
+        //昨天的工单数据统计
+        $yesterday_startdate = date("Y-m-d", strtotime("-1 day"));
+        $yesterday_enddate = date("Y-m-d");
+        $yesterday = array(
+            'wo_num' => $this->wo_sum($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+        );
+        //过去7天的工单数据统计
+        $seven_startdate = date("Y-m-d", strtotime("-7 day"));
+        $seven_enddate = date("Y-m-d");
+        $seven = array(
+            'wo_num' => $this->wo_sum($seven_startdate,$seven_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($seven_startdate,$seven_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($seven_startdate,$seven_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($seven_startdate,$seven_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($seven_startdate,$seven_enddate,$platform,1),
+        );
+        //过去30天的工单数据统计
+        $thirty_startdate = date("Y-m-d", strtotime("-30 day"));
+        $thirty_enddate = date("Y-m-d");
+        $thirty = array(
+            'wo_num' => $this->wo_sum($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($thirty_startdate,$thirty_enddate,$platform,1),
+        );
+        //当月
+        $nowmonth_startdate = date('Y-m-01', strtotime($today_startdate));
+        $nowmonth_enddate = date("Y-m-d", strtotime("$nowmonth_startdate +1 month"));
+        $nowmonth = array(
+            'wo_num' => $this->wo_sum($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+        );
+        //上月
+        $premonth_startdate = date('Y-m-01', strtotime("$today_startdate -1 month"));
+        $premonth_enddate = date('Y-m-d', strtotime("$premonth_startdate +1 month"));
+        $premonth = array(
+            'wo_num' => $this->wo_sum($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($premonth_startdate,$premonth_enddate,$platform,1),
+        );
+        //今年
+        $year_startdate = date("Y",time())."-1"."-1"; //本年开始
+        $year_enddate = date("Y",time())."-12"."-31"." 23:59:59"; //本年结束
+        $year = array(
+            'wo_num' => $this->wo_sum($year_startdate,$year_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($year_startdate,$year_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($year_startdate,$year_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($year_startdate,$year_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($year_startdate,$year_enddate,$platform,1),
+        );
+        //统计
+        $total = array(
+            'wo_num' => $this->wo_sum($year_startdate,$year_enddate,$platform),
+            'wo_complete_num' => $this->wo_complete_num($year_startdate,$year_enddate,$platform),
+            'wo_bufa_percent' => $this->wo_bufa_percent($year_startdate,$year_enddate,$platform),
+            'wo_refund_percent' => $this->wo_refund_percent($year_startdate,$year_enddate,$platform),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($year_startdate,$year_enddate,$platform),
+        );
+        $worklist = array(
+            'today' => $today,
+            'yesterday' => $yesterday,
+            'seven' => $seven,
+            'thirty' => $thirty,
+            'nowmonth' => $nowmonth,
+            'premonth' => $premonth,
+            'year' => $year,
+            'total' => $total,
+        );
+        return $worklist;
+    }
+    /**
+     * 统计工单创建数量
+     */
+    public function wo_sum($start,$end,$platform = 0,$type = 0){
+        if($type == 1){
+            $map['create_time'] = array('between',[$start,$end]);
+        }
+        $map['work_status'] = array('not in','0,4,7');
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+
+        $count = $this->where($map)->count();
+        return $count ? $count : 0;
+    }
+    /**
+     * 统计工单完成数量
+     */
+    public function wo_complete_num($start,$end,$platform = 0,$type = 0){
+        if($type == 1){
+            $map['complete_time'] = array('between',[$start,$end]);
+        }
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $count = $this->where($map)->count();
+        return $count ? $count : 0;
+    }
+    /**
+     * 统计补发订单比
+     */
+    public function wo_bufa_percent($start,$end,$platform = 0,$type = 0){
+        $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
+        if($type == 1){
+            $map['z.complete_time'] = array('between',[$start,$end]);
+        }
+        $map['z.work_status'] = 6;
+        if($platform != 0){
+            $map['z.work_platform'] = $platform;
+        }
+        $map['m.measure_choose_id'] = 7;
+        $count = $this->alias('z')->join('fa_work_order_measure m','z.id=m.work_id')->where($map)->count();
+        $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /**
+     * 统计退款订单比
+     */
+    public function wo_refund_percent($start,$end,$platform = 0,$type = 0){
+        $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
+        if($type == 1){
+            $map['complete_time'] = array('between',[$start,$end]);
+        }
+        $map['is_refund'] = 1;
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $count = $this->where($map)->count();
+        $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /**
+     * 统计退款金额比
+     */
+    public function wo_refund_money_percent($start,$end,$platform = 0,$type = 0){
+        if($type == 1){
+            $map['complete_time'] = array('between',[$start,$end]);
+        }
+        $map['is_refund'] = 1;
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $complete_money = $this->where($map)->sum('base_grand_total');
+        $money = $this->where($map)->sum('refund_money');
+        $sum = $complete_money == 0 ? 0 : round($money/$complete_money*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /*
+     * 问题类型统计
+     * */
+    public function workorder_question_type($platform,$time_where){
+        //客户问题
+        $kefu_arr = $this->get_question_type(4,$platform,$time_where);
+        //物流仓储
+        $wuliu_arr = $this->get_question_type(2,$platform,$time_where);
+        //产品问题
+        $product_arr = $this->get_question_type(3,$platform,$time_where);
+        //其他
+        $other_arr = $this->get_question_type(6,$platform,$time_where);
+        //仓库跟单
+        $warehouse_arr = $this->get_question_type(5,$platform,$time_where);
+        $arr = array(
+            array(
+                'name'=>'客户问题',
+                'value'=>$kefu_arr
+            ),
+            array(
+                'name'=>'物流仓储',
+                'value'=>$wuliu_arr
+            ),
+            array(
+                'name'=>'产品问题',
+                'value'=>$product_arr
+            ),
+            array(
+                'name'=>'其他',
+                'value'=>$other_arr
+            ),
+            array(
+                'name'=>'仓库跟单',
+                'value'=>$warehouse_arr
+            ),
+        );
+        return $arr;
+    }
+    /*
+     * 问题类型通用方法
+     * */
+    public function get_question_type($type,$platform,$time_where){
+        $kehu_where['problem_belong'] = $type;
+        $kehu_where['is_del'] = 1;
+        $problem_ids = Db::name('work_order_problem_type')->where($kehu_where)->column('id');
+        $where['work_status'] = 6;
+        $where['problem_type_id'] = array('in',$problem_ids);
+        if($platform){
+            $where['work_platform'] = $platform;
+        }
+        $count = $this->where($where)->where($time_where)->count();
+        return $count;
+    }
+    /*
+     * 措施统计
+     * */
+    public function workorder_measures($platform,$time_where){
+        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $measures = Db::name('work_order_step_type')->where('is_del',1)->field('id,step_name')->select();
+        $arr = array();
+        foreach ($measures as $key=>$value){
+            $arr[$key]['name'] = $value['step_name'];
+            $where['m.operation_type'] = 1;
+            $where['m.measure_choose_id'] = $value['id'];
+            if($platform){
+                $where['w.work_platform'] = $platform;
+            }
+            $arr[$key]['value'] = $this->step->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
+        }
+
+        return $arr;
     }
 }
