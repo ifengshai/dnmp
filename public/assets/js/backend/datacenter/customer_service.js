@@ -671,6 +671,29 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     $("#two-time-node").hide();
                 }
             });
+            //点击重置按钮
+            $(document).on('click', '.btn-reset', function () {
+                // $(".form-commonsearch [type=reset]").trigger("click");
+                var now_val = $(".user_group").val();
+                var now_val_test = $(".user_group").find("option:selected").text();
+                $(".user_group option:eq("+now_val+")").remove();
+                $(".user_group option").remove();
+
+                $(".user_group option:eq(0)").attr('selected','selected');
+                // $(".user_group").append("<option value="+now_val+">"+now_val_test+"</option>");
+                $(".user_group").append("<option value='0'>全部</option>");
+                $(".user_group").append("<option value='1'>A</option>");
+                $(".user_group").append("<option value='0'>B</option>");
+
+                // $(".range_inputs .cancelBtn").trigger("click");
+                $("#one_time").remove();
+                $("#timetime").append("<input type='text' autocomplete='off' class='form-control datetimerange' name='one_time'  placeholder='创建时间' id='one_time' value='' data-index='14'>");
+                $("#contrast").attr('checked','')
+                $("#two_time").remove();
+                $("#time_hide").remove();
+                $("#timetime2").append("<input type='text' autocomplete='off' class='form-control datetimerange' name='one_time'  placeholder='创建时间' id='one_time' value='' data-index='14'>");
+
+            });
         },
         //工单问题措施详情
         detail: function () {
