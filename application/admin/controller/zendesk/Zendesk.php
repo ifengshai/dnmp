@@ -1297,7 +1297,7 @@ DOC;
                 $this->success('修改成功');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->column('admin_id,nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch();
     }
@@ -1331,7 +1331,7 @@ DOC;
                 $this->success('修改成功');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->column('admin_id,nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch('edit_recipient');
     }
