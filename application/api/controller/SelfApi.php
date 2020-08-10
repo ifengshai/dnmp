@@ -609,14 +609,19 @@ class SelfApi extends Api
                 $this->error(__('缺少状态参数'), [], 400);
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'sku' => $sku])->save(['outer_sku_status' => $status]);
+            $list = $platform->where(['platform_type' => $site, 'platform_sku' => $sku])->find();
+            if (!$list) {
+                $this->error(__('未查询到记录'), [], 400);
+            }
+
+            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'platform_sku' => $sku])->save(['outer_sku_status' => $status]);
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
                     $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
-                        $data['sku'] = $sku;
+                        $data['sku'] = $list['sku'];
                         $data['site'] = $site;
                         Db::name('sku_sales_num')->insert($data);
                     }
