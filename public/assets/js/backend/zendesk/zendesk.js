@@ -97,6 +97,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'zendesk/zendesk/edit_recipient',
                                     icon: '',
+                                    area: ['50%', '45%'],
                                     //extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });

@@ -1283,10 +1283,15 @@ DOC;
             }
             //查询当前邮件原本的承接人数据
             $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
+            if($params['type'] == 1 || $params['type'] == 3){
+                //修改承接人
+                $data['assign_id']  = $params['id'];
+                $data['assignee_id']  = $agent_id;
+            }
+            if($params['type'] == 2 || $params['type'] == 3){
+                //修改处理人
+                $data['due_id']     = $params['id'];
+            }
             $result = $this->model->where(['id'=>$ids])->update($data);
             if($result){
                 $this->success('修改成功');
@@ -1312,10 +1317,15 @@ DOC;
             }
             //查询当前邮件原本的承接人数据
             $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
+            if($params['type'] == 1 || $params['type'] == 3){
+                //修改承接人
+                $data['assign_id']  = $params['id'];
+                $data['assignee_id']  = $agent_id;
+            }
+            if($params['type'] == 2 || $params['type'] == 3){
+                //修改处理人
+                $data['due_id']     = $params['id'];
+            }
             $result = $this->model->where('id','in',$ids)->update($data);
             if($result){
                 $this->success('修改成功');
