@@ -1298,6 +1298,7 @@ DOC;
             }
         }
         $issueList = Db::name('zendesk_agents')->column('admin_id,nickname');
+        dump($issueList);exit;
         $this->assign('issueList',$issueList);
         return $this->view->fetch();
     }
