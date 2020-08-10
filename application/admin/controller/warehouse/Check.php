@@ -143,6 +143,7 @@ class Check extends Backend
 
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['type'] = 1;
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加质检产品
