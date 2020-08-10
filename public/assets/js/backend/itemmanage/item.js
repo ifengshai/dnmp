@@ -346,6 +346,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-status', function () {
                 $('#status').val(2);
             });
+            $('.btn-add').hide();
+            $('.btn-del').hide();
         },
         api: {
             bindevent: function () {
