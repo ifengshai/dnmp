@@ -1436,7 +1436,6 @@ class WorkOrderList extends Backend
         }
 
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $item = new \app\admin\model\itemmanage\Item();
         //根据平台sku转sku
         foreach (array_filter($skus) as $k => $v) {
             //判断库存时去掉-s 等
@@ -1446,9 +1445,9 @@ class WorkOrderList extends Backend
             }else{
                 $sku = trim($v);
             }
-          
+         
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'sku' => $sku,'platform_type' => $siteType])->find();
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku,'platform_type' => $siteType])->find();
             //判断是否开启预售
             if ($res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -1458,7 +1457,7 @@ class WorkOrderList extends Backend
 
             //判断库存是否足够
             if ($stock < $num[$k]) {
-                throw new Exception($sku . '暂无库存！！');
+                throw new Exception($sku . '库存不足！！');
             }
         }
         return true;
