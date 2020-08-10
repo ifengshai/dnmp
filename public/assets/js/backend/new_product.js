@@ -635,6 +635,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }, function (data, ret) {
                         var resultData = ret.data;
                         $('.ajax-add').remove();
+                        $('.upload-photo').remove();
                         //console.log(resultData);
                         $('#item-stock').after(resultData);
                         Form.api.bindevent($("form[role=form]"));

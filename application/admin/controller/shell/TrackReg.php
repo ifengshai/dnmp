@@ -260,7 +260,7 @@ class TrackReg extends Backend
         exit;
     }
 
-     /**
+    /**
      * 获取前一天有效SKU销量
      * 记录当天有效SKU
      *

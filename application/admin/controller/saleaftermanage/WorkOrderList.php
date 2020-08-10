@@ -806,10 +806,10 @@ class WorkOrderList extends Backend
                             throw new Exception("措施不能为空");
                         }
                     }
+                    
                     //判断是否选择措施
-
                     //更换镜框判断是否有库存 
-                    if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
+                    if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
@@ -1446,16 +1446,19 @@ class WorkOrderList extends Backend
             }else{
                 $sku = trim($v);
             }
-            //转换sku
-            $sku = $itemPlatFormSku->getTrueSku($sku, $siteType);
-            //查询库存 判断是否开启预售
-            $res = $item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
-            //判断可用库存
-            if ($res->available_stock < $num[$k]) {
-                //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-                if ($res->presell_status != 1 ||  ($res->presell_status == 1  && (time() < strtotime($res->presell_create_time) || time() > strtotime($res->presell_end_time) || $res->presell_residue_num < $num[$k]))) {
-                    throw new Exception($v . '暂无库存！！');
-                }
+          
+            //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'sku' => $sku,'platform_type' => $siteType])->find();
+            //判断是否开启预售
+            if ($res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
+                $stock = $res['stock'] + $res['presell_residue_num'];
+            } else {
+                $stock = $res['stock'];
+            }
+
+            //判断库存是否足够
+            if ($stock < $num[$k]) {
+                throw new Exception($sku . '暂无库存！！');
             }
         }
         return true;
@@ -1910,7 +1913,7 @@ class WorkOrderList extends Backend
                     }
 
                     //更换镜框判断是否有库存
-                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                    if ($params['change_frame'] && in_array(1, array_filter($params['measure_choose_id']))) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
