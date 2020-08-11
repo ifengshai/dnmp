@@ -113,7 +113,7 @@ class TransferOrder extends Backend
                     $this->error('调出数量不能为0，请确认'.$v.'调出数量');
                 }
                 if ($sku_stock[$k] == 0){
-                    $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku在调出仓的库存');
+                    $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku:'.$v.'在调出仓的库存');
                 }
                 $item_platform = new ItemPlatformSku();
                 $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
@@ -230,7 +230,7 @@ class TransferOrder extends Backend
                                 $this->error('调出数量不能为0，请确认'.$v.'调出数量');
                             }
                             if ($sku_stock[$k] == 0){
-                                $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku在调出仓的库存');
+                                $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku:'.$v.'在调出仓的库存');
                             }
                             $item_platform = new ItemPlatformSku();
                             $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
