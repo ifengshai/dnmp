@@ -227,7 +227,7 @@ class ItWebDemand extends Backend
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
                 $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
 
-                $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
+                // $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
                 //检查权限
                 $list[$k]['demand_pm_status'] = $permissions['demand_pm_status'];//产品确认权限
