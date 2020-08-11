@@ -4,6 +4,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'demand/it_web_demand/index' + location.search,
                     add_url: 'demand/it_web_demand/add',
@@ -31,11 +34,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             custom:{1: 'black', 2: 'black', 3: 'black' , 4: 'black', 5: 'black', 6:'black',7:'black',8:'black'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'entry_user_id', title: __('提出人'),visible:false},
-                        {field: 'entry_user_name', title: __('提出人')},
+                        // {field: 'entry_user_id', title: __('提出人'), visible:false},
+                        {field: 'entry_user_name', title: __('提出人'), operate:'like'},
                         {
                             field: 'type',
-                            title: __('类型'),
+                            title: __('任务类型'),
                             searchList: { 1: 'Bug', 2: '维护', 3: '优化' , 4: '新功能', 5: '开发'},
                             custom:{1: 'red', 2: 'blue', 3: 'blue' , 4: 'blue', 5: 'green'},
                             formatter: Table.api.formatter.status
@@ -48,14 +51,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             events: Controller.api.events.gettitle,
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.gettitle,
+                            operate:false
                         },
 
-                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE'},
+                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime},
 
                         {
                             field: 'pm_audit_status',
                             title: __('评审'),
                             events: Controller.api.events.ge_pm_status,
+                            searchList: { 1: '待审', 2: 'Pending', 3: '通过'},
                             formatter: Controller.api.formatter.ge_pm_status,
                         },
                         {
@@ -63,7 +68,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             title: __('优先级'),
                             searchList: { '':'-', 1: 'D1', 2: 'D2', 3: 'V1' , 4: 'V2', 5: 'V3'},
                             custom:{1: 'black', 2: 'black', 3: 'black' , 4: 'black', 5: 'black'},
-                            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status,
+                            operate:false
                         },
                         {field: 'node_time', title: __('任务周期'),operate:false},
                         {
@@ -71,19 +77,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             title: __('任务状态'),
                             searchList: { 1: '未激活', 2: '激活', 3: '已响应' , 4: '完成', 5: '超时完成'},
                             custom:{1: 'gray', 2: 'blue', 3: 'green' , 4: 'gray', 5: 'yellow'},
-                            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status,
+                            operate:false
                         },
                         {
                             field: 'develop_finish_status',
                             title: __('开发进度'),
                             events: Controller.api.events.get_develop_status,
                             formatter: Controller.api.formatter.get_develop_status,
+                            operate:false
                         },
                         {
                             field: 'test_status',
                             title: __('测试进度'),
                             events: Controller.api.events.get_test_status,
                             formatter: Controller.api.formatter.get_test_status,
+                            operate:false
                         },
                         /*{field: 'develop_finish_time', title: __('开发完成时间'), formatter: Table.api.formatter.datetime},
                         {field: 'test_finish_time', title: __('测试完成时间'), formatter: Table.api.formatter.datetime},*/
@@ -117,6 +126,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             title: __('完成确认'),
                             events: Controller.api.events.get_user_confirm,
                             formatter: Controller.api.formatter.get_user_confirm,
+                            operate:false
                         },
 
 
@@ -152,6 +162,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             title: __('详情记录'),
                             events: Controller.api.events.get_detail,
                             formatter: Controller.api.formatter.get_detail,
+                            operate:false
                         },
 
 

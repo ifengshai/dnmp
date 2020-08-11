@@ -8,7 +8,6 @@ use app\common\model\Auth;
 use think\Db;
 use think\Request;
 use app\admin\model\AuthGroup;
-
 /**
  * 技术部网站组需求管理
  *
@@ -18,18 +17,19 @@ class RdcItWebDemand extends Backend
 {
 
     /**
-     * ItWebDemand模型对象
-     * @var \app\admin\model\demand\ItWebDemand
+     * RdcItWebDemand模型对象
+     * @var \app\admin\model\demand\RdcItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del','distribution'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review','del','edit'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
         $this->view->assign('getTabList', $this->model->getTabList());
-        $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
+        $this->ItWebDemandReview = new \app\admin\model\demand\ItWebDemandReview;
         $this->assignconfig('admin_id', session('admin.id'));
+
     }
 
     /**
@@ -44,7 +44,7 @@ class RdcItWebDemand extends Backend
      * */
     public function start_time($priority,$node_time){
         $day_17 = mktime(17,0,0,date('m'),date('d'),date('Y'));//当天5点
-        $week_17 = strtotime ("+17 hour", strtotime("next friday"));//本周5，下午5点
+        $week_17 = strtotime ("+17 hour", strtotime("friday"));//本周5，下午5点
 
         $data = array();
         switch ($priority){
@@ -102,7 +102,10 @@ class RdcItWebDemand extends Backend
      */
     public function index()
     {
-        //dump(input());exit;
+        $time_update['status'] = 2;
+        $time = date('Y-m-d H:i',time());
+        $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time],'status'=>1,'pm_audit_status'=>3]);
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -232,7 +235,6 @@ class RdcItWebDemand extends Backend
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
                 $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
 
-
                 $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
                 //检查权限
@@ -243,13 +245,51 @@ class RdcItWebDemand extends Backend
                 $list[$k]['demand_test_handle'] = $this->auth->check('demand/it_web_demand/test_handle');//测试响应
 
 
+                //获取各组负责人
+                $list[$k]['web_designer_user_name'] = '';
+                if($v['web_designer_user_id']){
+                    //获取php组长&组员
+                    $web_userid_arr = explode(',',$v['web_designer_user_id']);
+                    $web_users =  Db::name("admin")
+                        ->whereIn("id", $web_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['web_designer_user_name'] = $web_users ? implode(',',$web_users) : '-';
+                }
 
+                $list[$k]['php_user_name'] = '';
+                if($v['phper_user_id']){
+                    //获取php组长&组员
+                    $php_userid_arr = explode(',',$v['phper_user_id']);
+                    $php_users =  Db::name("admin")
+                        ->whereIn("id", $php_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['php_user_name'] = $php_users ? implode(',',$php_users) : '-';
+                }
 
+                $list[$k]['app_user_name'] = '';
+                if($v['app_user_id']){
+                    //获取php组长&组员
+                    $app_userid_arr = explode(',',$v['app_user_id']);
+                    $app_users =  Db::name("admin")
+                        ->whereIn("id", $app_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['app_user_name'] = $app_users ? implode(',',$app_users) : '-';
+                }
+
+                $list[$k]['test_user_name'] = '';
+                if($v['test_user_id']){
+                    //获取php组长&组员
+                    $test_userid_arr = explode(',',$v['test_user_id']);
+                    $test_users =  Db::name("admin")
+                        ->whereIn("id", $test_userid_arr)
+                        ->column('nickname','id');
+                    $list[$k]['test_user_name'] = $test_users ? implode(',',$test_users) : '-';
+                }
                 //$list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
 
 
                 /*分配*/
-                $list[$k]['Allgroup'] = array();
+                /*$list[$k]['Allgroup'] = array();
                 if($v['web_designer_group'] == 1){
                     $list[$k]['Allgroup'][] = '前端';
                     $list[$k]['web_designer_user_name'] = $this->extract_username($v['web_designer_user_id'],'web_designer_user');
@@ -278,7 +318,7 @@ class RdcItWebDemand extends Backend
                     foreach (explode(',',$v['test_user_id']) as $t){
                         $list[$k]['test_user_id_arr'][] = config('demand.test_user')[$t];
                     }
-                }
+                }*/
                 /*分配*/
 
                 //权限赋值
@@ -619,7 +659,7 @@ class RdcItWebDemand extends Backend
                     $add['title'] = $data['title'];
                     $add['content'] = $data['content'];
                     $add['accessory'] = $data['accessory'];
-                    $add['is_emergency'] = $data['is_emergency']?$params['is_emergency']:0;
+                    $add['is_emergency'] = $data['is_emergency'] ? $data['is_emergency'] : 0;
                     //以下默认状态
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i',time());
@@ -734,7 +774,36 @@ class RdcItWebDemand extends Backend
 
             if ($params) {
                 if($params['pm_audit_status']){
+                    $row = $this->model->get($params['id']);
+                    $row = $row->toArray();
+                    $add['site_type'] = implode(',',$params['site_type']);
+
+                    if($row['status'] == 1){
+                        if($params['priority'] == 1){
+                            $add['status'] = 2;
+                        }
+                    }else{
+                        if($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']){
+                            $add['status'] = 2;
+
+                            $add['web_designer_group'] = 0;
+                            $add['web_designer_complexity'] = null;
+                            $add['web_designer_expect_time'] = null;
+
+                            $add['phper_group'] = 0;
+                            $add['phper_complexity'] = null;
+                            $add['phper_expect_time'] = null;
+
+                            $add['app_group'] = 0;
+                            $add['app_complexity'] = null;
+                            $add['app_expect_time'] = null;
+
+                            $add['develop_finish_status'] = 1;
+                        }
+                    }
+
                     $add['priority'] = $params['priority'];
+
                     $add['node_time'] = $params['node_time'];
                     $time_data = $this->start_time($params['priority'],$params['node_time']);
                     $add['start_time'] = $time_data['start_time'];
@@ -744,13 +813,12 @@ class RdcItWebDemand extends Backend
                 }
                 $add['type'] = $params['type'];
                 $add['site'] = $params['site'];
-                $add['site_type'] = implode(',',$params['site_type']);
-                $add['entry_user_id'] = $this->auth->id;
+
                 $add['copy_to_user_id'] = implode(',',$params['copy_to_user_id']);
                 $add['title'] = $params['title'];
                 $add['content'] = $params['content'];
                 $add['accessory'] = $params['accessory'];
-                $add['is_emergency'] = $params['is_emergency']?$params['is_emergency']:0;
+                $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
                 $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
                 if ($res) {
 
@@ -1224,6 +1292,17 @@ class RdcItWebDemand extends Backend
         $this->view->assign("status", $status);
         $this->view->assign("day", $day);
         $this->view->assign("row", $row_arr);
+
+        //确认权限
+        $user_status = 0;
+        if($row_arr['test_user_id']){
+            if (in_array($this->auth->id,explode(',',$row_arr['test_user_id']))) {
+                $user_status = 1;
+            }
+        }
+        $this->view->assign("user_status", $user_status);
+        $this->view->assign("test_status", $this->auth->check('demand/it_web_demand/test_handle'));
+
         return $this->view->fetch();
     }
 
@@ -1235,12 +1314,16 @@ class RdcItWebDemand extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->post();
             if ($params) {
-                dump($params);exit;
-                $res = $this->model->allowField(true)->save($add,['id'=> $params['id']]);
-                if ($res) {
+                $update['is_small_probability'] = $params['is_small_probability'];
+                $update['is_low_level_error'] = $params['is_low_level_error'];
+                $update['is_difficult'] = $params['is_difficult'];
+                $update['web_designer_user_id'] = $params['web_designer_user_id'] ? implode(',',$params['web_designer_user_id']) : null;
+                $update['phper_user_id'] = $params['phper_user_id'] ? implode(',',$params['phper_user_id']) : null;
+                $update['app_user_id'] = $params['app_user_id'] ? implode(',',$params['app_user_id']) : null;
+                $update['test_user_id'] = $params['test_user_id'] ? implode(',',$params['test_user_id']) : null;
 
-                    /*$row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();*/
+                $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+                if ($res) {
 
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
@@ -1253,6 +1336,10 @@ class RdcItWebDemand extends Backend
 
         $row = $this->model->get($ids);
         $row = $row->toArray();
+        $row['web_designer_user_id'] = explode(',',$row['web_designer_user_id']);
+        $row['phper_user_id'] = explode(',',$row['phper_user_id']);
+        $row['app_user_id'] = explode(',',$row['app_user_id']);
+        $row['test_user_id'] = explode(',',$row['test_user_id']);
 
         //获取各组人员
         $authgroup = new AuthGroup();
@@ -1317,6 +1404,9 @@ class RdcItWebDemand extends Backend
             ->select();
 
         //确认权限
+        $this->view->assign("test_status", $this->auth->check('demand/it_web_demand/test_handle'));//测试分配权限
+        $this->view->assign("distribution_status", $this->auth->check('demand/it_web_demand/distribution'));//开发分配权限
+
         /*$this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
         $this->view->assign('admin_id', session('admin.id'));*/
         $this->view->assign('php_users', $php_users);
@@ -1329,6 +1419,46 @@ class RdcItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 查看详情--评论
+     * 任何人都有权限
+     * */
+    public function demand_review(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->post();
+            if ($params) {
+                if($params['content'] == ''){
+                    $this->error('内容不能为空');
+                }
+
+                $update['pid'] = $params['pid'];
+                $update['type'] = $params['type'];
+
+                $users =  Db::name("auth_group_access")
+                    ->alias("aga")
+                    ->join("auth_group ag", "aga.group_id=ag.id")
+                    ->field("ag.*")
+                    ->where('aga.uid',$this->auth->id)
+                    ->find();
+                $update['group_id'] = $users['id'];
+                $update['group_name'] = $users['name'];
+                $update['user_id'] = $this->auth->id;
+                $update['user_name'] = $this->auth->nickname;
+                $update['content'] = $params['content'];
+                $update['create_time'] = date('Y-m-d H:i:s',time());
+
+                $res = $this->ItWebDemandReview->allowField(true)->save($update);
+                if ($res) {
+
+                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $this->success('成功',$url = null, $update);
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+    }
 
 /*-----------------------------------------------------------------------------------*/
 
