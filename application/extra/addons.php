@@ -20,6 +20,10 @@ return array (
     array (
       0 => 'markdown',
     ),
+    'config_init' => 
+    array (
+      0 => 'nkeditor',
+    ),
   ),
   'route' => 
   array (

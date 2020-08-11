@@ -38,4 +38,20 @@ class Auth extends Model
         $uids = array_merge($uids,[1]);
         return $uids ?: [];
     }
+
+    /**
+     * 根据组ID获取用户ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/11 10:31:37 
+     * @return void
+     */
+    public static function getGroupUserId($groupId = null)
+    {  
+        //根据角色组获取用户id
+        $authGroupAccess = new \app\admin\model\AuthGroupAccess();
+        $uids = $authGroupAccess->where(['group_id' => $groupId])->column('uid');
+        return $uids ?: [];
+    }
 }
