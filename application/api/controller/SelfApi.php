@@ -766,8 +766,12 @@ class SelfApi extends Api
             $list = [];
             foreach ($platform_data as $k => $v) {
                 //判断是否开启预售
-                if ($v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                //如果开启预售并且库存大于0
+                if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
+                    //如果开启预售并且库存小于0
+                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                    $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
                 }
@@ -812,8 +816,12 @@ class SelfApi extends Api
             $list = [];
             foreach ($platform_data as $k => $v) {
                 //判断是否开启预售
-                if ($v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                //如果开启预售并且库存大于0
+                if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
+                    //如果开启预售并且库存小于0
+                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                    $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
                 }
