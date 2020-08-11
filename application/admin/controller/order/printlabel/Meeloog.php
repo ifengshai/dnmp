@@ -463,7 +463,7 @@ class Meeloog extends Backend
                 $number = 0;
                 foreach ($list as $k => &$v) {
                     //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
                     if (!$trueSku) {
                         throw new Exception("增加配货占用库存失败1！！请检查SKU:" . $v['sku']);
                     }
