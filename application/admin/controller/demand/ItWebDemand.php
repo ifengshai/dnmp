@@ -116,37 +116,22 @@ class ItWebDemand extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-            $smap = array();
-            if ($filter['Allgroup_sel'] == 1) {
-                $smap['web_designer_group'] = 1;
-            }
-            if ($filter['Allgroup_sel'] == 2) {
-                $smap['phper_group'] = 1;
-            }
-            if ($filter['Allgroup_sel'] == 3) {
-                $smap['app_group'] = 1;
-            }
-            if ($filter['Allgroup_sel'] == 4) {
-                $smap['test_group'] = 1;
-            }
-
+            
+            //筛选提出人
             if ($filter['entry_user_name']){
                 $admin = new \app\admin\model\Admin();
                 $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
                 $id = $admin->where($smap)->value('id');
-                if (!empty($id)){
-                    $smap['entry_user_id'] = $id;
-                }else{
-                    $smap['entry_user_id'] =  trim($filter['entry_user_name']);
+                if ($id){
+                    $map['entry_user_id'] = $id;
                 }
                 unset($filter['entry_user_name']);
                 unset($smap['nickname']);
             }
             $meWhere = '';
+            $adminId = session('admin.id');
             //我的
-            if(isset($filter['me_task'])){
-
-                $adminId = session('admin.id');
+            if($filter['label'] == 1){
                 //是否是开发主管
                 $authUserIds = Auth::getGroupUserId(71) ?: [];
                 if (in_array($adminId, $authUserIds)) {
@@ -154,7 +139,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(72);
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere .= "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";    
+                    $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";    
                 }
 
                 //是否是测试主管
@@ -165,90 +150,69 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(68);
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere .= "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";    
+                    $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";    
                 }
 
                 //是否是前端主管
-                $webAuthUserIds = Auth::getGroupUserId(102) ?: [];
+                $webAuthUserIds = Auth::getGroupUserId(104) ?: [];
                 if (in_array($adminId, $webAuthUserIds)) {
                     $usersId = [];
                     //组员ID
                     $usersId = Auth::getGroupUserId(103);
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere .= "FIND_PART_IN_SET(web_designer_user_id,{$webAuthUserIds})";    
+                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$webAuthUserIds})";    
                 }
 
-
-                //是否是测试主管
-                $testAuthUserIds = Auth::getGroupUserId('demand/it_web_demand/test_handle') ?: [];
-
-                //判断是否是测试
-                if(in_array($adminId,$authUserIds)){
-                    $meWhere = "(status = 1 or test_group = 1)";
+                //是否是app主管
+                $appAuthUserIds = Auth::getGroupUserId(110) ?: [];
+                if (in_array($adminId, $appAuthUserIds)) {
+                    $usersId = [];
+                    //组员ID
+                    $usersId = Auth::getGroupUserId(116);
+                    $usersId = array_merge($usersId, $adminId);
+                    $usersIdStr = implode(',', $usersId);
+                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$appAuthUserIds})";    
                 }
-                //判断是否是普通的测试
-                $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
-                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
-                    $meWhere = "(test_group = 1 and FIND_IN_SET({$adminId},test_user_id))";
-                }
-                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
-                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
-                if(in_array($adminId,$assignAuthUserIds)){
-                    $meWhere = "1 = 1";
-                }
-                //拼接我创建的所有和负责人是我的,抄送人是我的
-                if($meWhere){
-                    $meWhere .= "  or entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
-                }else{
-                    $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
-                }
-                unset($filter['me_task']);
-            } elseif(isset($filter['none_complete'])){//未完成
-                $meWhere="status !=7";
-                unset($filter['none_complete']);
-            }
 
-            $user_map='';
-            if ($filter['all_user_name']){
-                $admin = new \app\admin\model\Admin();
-                $admin_user['nickname'] = ['like', '%' . trim($filter['all_user_name']) . '%'];
-                $id = $admin->where($admin_user)->value('id');
-                if (!empty($id)){
-                    $user_map = "FIND_IN_SET({$id},web_designer_user_id) or FIND_IN_SET({$id},phper_user_id) or FIND_IN_SET({$id},app_user_id) ";
-                }else{
-                    $user_map="web_designer_user_id =  '".trim($filter['all_user_name'])."'";
+                //不是主管
+                if (!$meWhere) {
+                    $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
-                unset($filter['all_user_name']);
-                unset($admin_user['nickname']);
-            }
-
-            //测试负责人筛选
-            $testuser = array();
-            if ($filter['test_user_id_arr']) {
-                $testuser = "FIND_IN_SET({$filter['test_user_id_arr']},test_user_id)";
-                unset($filter['test_user_id_arr']);
-            }
-
-            if(isset($filter['Allgroup_sel'])){
-                unset($filter['Allgroup_sel']);
-            }
+            } elseif ($filter['label'] == 2) { //未完成
+                /**
+                 * 其他人：展示任务状态为未激活、激活、已响应的任务
+                 * 产品：展示评审状态为待审、pending的任务
+                 */
+                //是否为产品
+                $authUserIds = array_merge(Auth::getGroupUserId(105), Auth::getGroupUserId(111));
+                if (in_array($adminId, $authUserIds)) {
+                    $map['pm_audit_status'] = ['in', [1, 2]];
+                } else {
+                    //非产品
+                    $map['status'] = ['in', [1, 2, 3]];
+                }
+            } elseif ($filter['label'] == 3) { //BUG任务
+                $map['type'] = 1;
+            } elseif ($filter['label'] == 4) { //开发任务
+                $map['type'] = 5;
+            } elseif ($filter['label'] == 5) { //其他任务
+                $map['type'] = ['in', [2, 3, 4]];
+            } 
+            unset($filter['label']);
+            $map['demand_type'] = 1; //默认任务列表
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where($smap)
                 ->where($meWhere)
-                ->where($user_map)
-                ->where($testuser)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
-                ->where($smap)
                 ->where($meWhere)
-                ->where($user_map)
-                ->where($testuser)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
