@@ -177,9 +177,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op     = params.op ? JSON.parse(params.op) : {};
-                    filter[field] = value;
                     if (field == ''){
                         delete filter.label;
+                    } else {
+                        filter[field] = value;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op     = JSON.stringify(op);

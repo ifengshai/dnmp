@@ -116,7 +116,7 @@ class ItWebDemand extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-            
+           
             //筛选提出人
             if ($filter['entry_user_name']){
                 $admin = new \app\admin\model\Admin();
@@ -128,7 +128,6 @@ class ItWebDemand extends Backend
                 unset($filter['entry_user_name']);
                 unset($smap['nickname']);
             }
-            $meWhere = '';
             $adminId = session('admin.id');
             //我的
             if($filter['label'] == 1){
