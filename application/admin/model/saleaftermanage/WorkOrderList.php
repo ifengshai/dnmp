@@ -447,7 +447,7 @@ class WorkOrderList extends Model
                         'original_sku' => trim($changeLens['original_sku'][$key]),
                         'original_number' => intval($changeLens['original_number'][$key]),
                         'change_type' => $change_type,
-                        'change_sku' => $changeLens['original_sku'][$key],
+                        'change_sku' => trim($changeLens['original_sku'][$key]),
                         'change_number' => intval($changeLens['original_number'][$key]),
                         'recipe_type' => $recipe_type,
                         'lens_type' => $lensCoatName['lensName'],
