@@ -3496,15 +3496,22 @@ EOF;
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
             //转换sku
-            $sku = $itemPlatFormSku->getTrueSku(trim($v['original_sku']), $v['platform_type']);
-            //查询库存 判断是否开启预售
-            $res = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
+            $sku = trim($v['original_sku']);
+            //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku,'platform_type' => $v['platform_type']])->find();
+            //判断是否开启预售
+            if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
+                $stock = $res['stock'] + $res['presell_residue_num'];
+            } elseif($res['stock'] < 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
+                $stock = $res['presell_residue_num'];
+            } else {
+                $stock = $res['stock'];
+            }
+
             //判断可用库存
-            if ($res->available_stock < $v['original_number']) {
+            if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-                if ($res->presell_status != 1 ||  ($res->presell_status == 1  && (time() < strtotime($res->presell_create_time) || time() > strtotime($res->presell_end_time) || $res->presell_residue_num <  $v['original_number']))) {
-                    $notEnough[] = $sku;
-                }
+                $notEnough[] = $sku;
             }
         }
         if ($notEnough) {
