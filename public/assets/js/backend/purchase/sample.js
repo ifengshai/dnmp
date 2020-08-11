@@ -442,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 },
                             ],
-                            formatter: Table.api.formatter.buttons
+                            formatter: Table.api.formatter.buttons,events: Table.api.events.operate
                         },
                     ]
                 ]
