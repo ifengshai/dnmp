@@ -161,7 +161,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(103);
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$webAuthUserIds})";    
+                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";    
                 }
 
                 //是否是app主管
@@ -172,7 +172,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(116);
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$appAuthUserIds})";    
+                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";    
                 }
 
                 //不是主管
