@@ -1,10 +1,6 @@
 <?php
 
-<<<<<<< HEAD:application/admin/model/demand/testmanage/ItTestOptimize.php
-namespace app\admin\model\demand\testmanage;
-=======
 namespace app\admin\model\demand;
->>>>>>> new_demand:application/admin/model/demand/ItWebDemandReview.php
 
 use think\Model;
 
