@@ -748,7 +748,7 @@ class SelfApi extends Api
     {
         if ($this->request->isPost()) {
             $site = $this->request->request('site'); //站点
-            $skus = $this->request->request('skus/a'); // sku 数组
+            $skus = $this->request->request('skus'); // sku 数组
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
             }
@@ -757,6 +757,7 @@ class SelfApi extends Api
                 $this->error(__('缺少sku参数'), [], 400);
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $skus = json_decode(htmlspecialchars_decode($skus), true);
             //查询所有true sku
             $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->select();
             $platform_data = collection($platform_data)->toArray();
