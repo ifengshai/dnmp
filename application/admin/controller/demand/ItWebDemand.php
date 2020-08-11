@@ -122,9 +122,7 @@ class ItWebDemand extends Backend
                 $admin = new \app\admin\model\Admin();
                 $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
                 $id = $admin->where($smap)->value('id');
-                if ($id){
-                    $map['entry_user_id'] = $id;
-                }
+                $map['entry_user_id'] = $id;
                 unset($filter['entry_user_name']);
                 unset($smap['nickname']);
             }
@@ -304,15 +302,101 @@ class ItWebDemand extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+           
+            //筛选提出人
+            if ($filter['entry_user_name']){
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['entry_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                $map['entry_user_id'] = $id;
+                unset($filter['entry_user_name']);
+                unset($smap['nickname']);
+            }
+            $adminId = session('admin.id');
+            //我的
+            if($filter['label'] == 1){
+                //是否是开发主管
+                $authUserIds = Auth::getGroupUserId(71) ?: [];
+                if (in_array($adminId, $authUserIds)) {
+                    //组员ID
+                    $usersId = Auth::getGroupUserId(72);
+                    $usersId = array_merge($usersId, $adminId);
+                    $usersIdStr = implode(',', $usersId);
+                    $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";    
+                }
+
+                //是否是测试主管
+                $testAuthUserIds = Auth::getGroupUserId(67) ?: [];
+                if (in_array($adminId, $testAuthUserIds)) {
+                    $usersId = [];
+                    //组员ID
+                    $usersId = Auth::getGroupUserId(68);
+                    $usersId = array_merge($usersId, $adminId);
+                    $usersIdStr = implode(',', $usersId);
+                    $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";    
+                }
+
+                //是否是前端主管
+                $webAuthUserIds = Auth::getGroupUserId(104) ?: [];
+                if (in_array($adminId, $webAuthUserIds)) {
+                    $usersId = [];
+                    //组员ID
+                    $usersId = Auth::getGroupUserId(103);
+                    $usersId = array_merge($usersId, $adminId);
+                    $usersIdStr = implode(',', $usersId);
+                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";    
+                }
+
+                //是否是app主管
+                $appAuthUserIds = Auth::getGroupUserId(110) ?: [];
+                if (in_array($adminId, $appAuthUserIds)) {
+                    $usersId = [];
+                    //组员ID
+                    $usersId = Auth::getGroupUserId(116);
+                    $usersId = array_merge($usersId, $adminId);
+                    $usersIdStr = implode(',', $usersId);
+                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";    
+                }
+
+                //不是主管
+                if (!$meWhere) {
+                    $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }
+            } elseif ($filter['label'] == 2) { //未完成
+                /**
+                 * 其他人：展示任务状态为未激活、激活、已响应的任务
+                 * 产品：展示评审状态为待审、pending的任务
+                 */
+                //是否为产品
+                $authUserIds = array_merge(Auth::getGroupUserId(105), Auth::getGroupUserId(111));
+                if (in_array($adminId, $authUserIds)) {
+                    $map['pm_audit_status'] = ['in', [1, 2]];
+                } else {
+                    //非产品
+                    $map['status'] = ['in', [1, 2, 3]];
+                }
+            } elseif ($filter['label'] == 3) { //BUG任务
+                $map['type'] = 1;
+            } elseif ($filter['label'] == 4) { //开发任务
+                $map['type'] = 5;
+            } elseif ($filter['label'] == 5) { //其他任务
+                $map['type'] = ['in', [2, 3, 4]];
+            } 
+            unset($filter['label']);
+            $map['demand_type'] = 2; //默认任务列表
 
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($meWhere)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
+                ->where($meWhere)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
