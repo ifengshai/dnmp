@@ -21,7 +21,7 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review','del','edit'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight=['del','distribution','test_handle','detail','demand_review','del','edit','rdc_demand_pass'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -696,12 +696,41 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
     /*
-     * RDC
+     * RDC 产品通过按钮
      * */
     public function rdc_demand_pass(){
         if ($this->request->isPost()) {
             $params = input();
-            dump($params);exit;
+
+            $row = $this->model->get($params['ids']);
+            $row = $row->toArray();
+
+            $time_data = $this->start_time($row['priority'],$row['node_time']);
+            $add['start_time'] = $time_data['start_time'];
+            $add['end_time'] = $time_data['end_time'];
+
+            $add['pm_audit_status'] = 3;
+            $add['pm_audit_status_time'] = date('Y-m-d H:i',time());
+
+            /*提出人直接确认*/
+            $add['pm_confirm'] = 1;
+            $add['pm_confirm_time'] = date('Y-m-d H:i',time());
+            $add['entry_user_confirm'] = 1;
+            $add['entry_user_confirm_time'] = date('Y-m-d H:i',time());
+            /*提出人直接确认*/
+
+            $add['status'] = 2;
+            $res = $this->model->allowField(true)->save($add,['id'=> $params['ids']]);
+            if ($res) {
+
+                /*$row = $this->model->get(['id' => $params['id']]);
+                $row_arr = $row->toArray();*/
+
+                //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
         }
     }
     /**

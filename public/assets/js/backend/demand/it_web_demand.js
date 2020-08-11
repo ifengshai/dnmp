@@ -716,14 +716,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             searchList: { 1: '待通过', 3: '通过'},
                             formatter: Controller.api.formatter.ge_rdcpm_status,
                         },
-                        {
-                            field: 'priority',
-                            title: __('优先级'),
-                            searchList: { '':'-', 1: 'D1', 2: 'D2', 3: 'V1' , 4: 'V2', 5: 'V3'},
-                            custom:{1: 'black', 2: 'black', 3: 'black' , 4: 'black', 5: 'black'},
-                            formatter: Table.api.formatter.status,
-                            operate:false
-                        },
                         {field: 'node_time', title: __('任务周期'),operate:false},
                         {
                             field: 'status',
@@ -774,20 +766,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                 return all_user_name;
                             },
                         },
-                        {
-                            field: 'entry_user_confirm',
-                            title: __('完成确认'),
-                            events: Controller.api.events.get_user_confirm,
-                            formatter: Controller.api.formatter.get_user_confirm,
-                            operate:false
-                        },
-
-
-                        /*{field: 'web_designer_user_id', title: __('前端'),operate:false},
-                        {field: 'phper_user_id', title: __('后端'),operate:false},
-                        {field: 'app_user_id', title: __('APP'),operate:false},
-                        {field: 'test_user_id', title: __('测试'),operate:false},*/
-
                         {
                             field: 'all_user_id',
                             title: __('责任人'),
@@ -3132,15 +3110,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         Backend.api.ajax({
                             url:'demand/it_web_demand/rdc_demand_pass/ids/' +row.id,
                         }, function(data, ret){
-                            //$("#table").bootstrapTable('refresh');
+                            $("#table").bootstrapTable('refresh');
                         }, function(data, ret){
                             //失败的回调
-                            //$("#table").bootstrapTable('refresh');
+                            $("#table").bootstrapTable('refresh');
                         });
-
-
-
-                        //Backend.api.open('demand/it_web_demand/test_handle/ids/' +row.id, __('测试进度'), { area: ['40%', '50%'] });
                     }
                 },
                 //开发进度，弹出窗口
