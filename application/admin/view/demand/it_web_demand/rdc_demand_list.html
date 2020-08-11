@@ -1,0 +1,124 @@
+<style>
+    .btn-gettitle{
+        cursor: pointer;
+    }
+    /*评审颜色控制--start*/
+    .status1_color{
+        border: 1px solid #03A7EF;
+        background-color: #03A7EF;
+    }
+    .status1_color:hover{
+        background-color: #216CAA;
+        border: 1px solid #216CAA;
+    }
+    .status2_color{
+        border: 1px solid #F39A24;
+        background-color: #F39A24;
+    }
+    .status2_color:hover{
+        background-color: #CF6C15;
+        border: 1px solid #CF6C15;
+    }
+    .status3_color{
+        border: 1px solid #7F7F7F;
+        background-color: #7F7F7F;
+    }
+    .status3_color:hover{
+        background-color: #5F5F5F;
+        border: 1px solid #5F5F5F;
+    }
+    .status4_color{
+        border: 1px solid #f39c12;
+        background-color: #f39c12;
+    }
+    .status4_color:hover{
+        border: 1px solid #BE7412;
+        background-color: #BE7412;
+    }
+    /*评审颜色控制--end*/
+    .pm_audit_status{
+        float: left;
+        width: 100%;
+    }
+    .check_pm_status,.check_develop_status,.check_test_status,.check_user_confirm,.check_rdcpm_status{
+        height: 26px;
+        line-height: 26px;
+        margin: auto;
+        display: block;
+        width: 68px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #fff;
+        content: "\e003";
+    }
+    .check_detail{
+        cursor: pointer;
+        font-size: 12px;
+        color: #03A7EF;
+    }
+    .all_user_name{
+        text-align: left;
+        width: 100%;
+        float: left;
+        font-weight: 400;
+        margin-top: 2px;
+    }
+
+    .table td{
+        font-weight: 700;
+    }
+
+    .text-black i,.text-gray i,.text-blue i,.text-red i,.text-green i,.text-yellow i{
+        display: none!important;
+    }
+    .user_confirm{
+        padding: 0;
+        font-weight: 700;
+        width: 68px;
+        height: 26px;
+        line-height: 26px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    .disabled{
+        cursor: not-allowed;
+        opacity: 0.65;
+        filter: alpha(opacity=65);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs" >
+            <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li>
+            {foreach name="getTabList" item="vo"}
+            <li><a href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {/foreach}
+        </ul>
+    </div>
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div id="toolbar" class="toolbar">
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
+                        <a href="javascript:;" data-area='["70%","70%"]' class="btn btn-success btn-add {:$auth->check('demand/it_web_demand/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+
+
+                    </div>
+                    <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                           data-operate-through_demand="{:$auth->check('demand/it_web_demand/through_demand')}"
+                           data-operate-edit="{:$auth->check('demand/it_web_demand/edit')}"
+                           data-operate-del="{:$auth->check('demand/it_web_demand/del')}"
+                           width="100%">
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

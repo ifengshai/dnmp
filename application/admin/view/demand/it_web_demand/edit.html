@@ -134,6 +134,16 @@
         </div>
         {/if}
 
+        {if $demand_type == 2}
+        <input type="hidden" name="row[demand_type]" value="{$demand_type}">
+        <div class="input_item">
+            <label class="input_tiem_label ">任务周期：</label>
+            <span class="input_tiem_span">
+                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">
+            </span>
+        </div>
+        {/if}
+
     </div>
 
     <div class="right_input">
