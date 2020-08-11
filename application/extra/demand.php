@@ -136,7 +136,17 @@ return [
         1=> 'bug',
         2=> '需求',
         3=> '疑难',
-    ]
+    ],
 
+    'php_group_id' => 69,
+    'php_group_person_id' => 70,
+    'web_group_id' => 103,
+    'web_group_person_id' => 104,
+    'test_group_id' => 107,
+    'test_group_person_id' => 108,
+    'app_group_id' => 105,
+    'app_group_person_id' => 106,
+    'product_group_id' => 74,
+    'product_group_person_id' => 102,
 
 ];

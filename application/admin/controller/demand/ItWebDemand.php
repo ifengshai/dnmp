@@ -130,43 +130,43 @@ class ItWebDemand extends Backend
             //我的
             if($filter['label'] == 1){
                 //是否是开发主管
-                $authUserIds = Auth::getGroupUserId(71) ?: [];
+                $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
                 if (in_array($adminId, $authUserIds)) {
                     //组员ID
-                    $usersId = Auth::getGroupUserId(72);
+                    $usersId = Auth::getGroupUserId(config('demand.php_group_person_id'));
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";    
                 }
 
                 //是否是测试主管
-                $testAuthUserIds = Auth::getGroupUserId(67) ?: [];
+                $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
                 if (in_array($adminId, $testAuthUserIds)) {
                     $usersId = [];
                     //组员ID
-                    $usersId = Auth::getGroupUserId(68);
+                    $usersId = Auth::getGroupUserId(config('demand.test_group_person_id'));
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";    
                 }
 
                 //是否是前端主管
-                $webAuthUserIds = Auth::getGroupUserId(104) ?: [];
+                $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
                 if (in_array($adminId, $webAuthUserIds)) {
                     $usersId = [];
                     //组员ID
-                    $usersId = Auth::getGroupUserId(103);
+                    $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";    
                 }
 
                 //是否是app主管
-                $appAuthUserIds = Auth::getGroupUserId(110) ?: [];
+                $appAuthUserIds = Auth::getGroupUserId(config('demand.product_group_id')) ?: [];
                 if (in_array($adminId, $appAuthUserIds)) {
                     $usersId = [];
                     //组员ID
-                    $usersId = Auth::getGroupUserId(116);
+                    $usersId = Auth::getGroupUserId(config('demand.product_group_person_id'));
                     $usersId = array_merge($usersId, $adminId);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";    
@@ -182,7 +182,7 @@ class ItWebDemand extends Backend
                  * 产品：展示评审状态为待审、pending的任务
                  */
                 //是否为产品
-                $authUserIds = array_merge(Auth::getGroupUserId(105), Auth::getGroupUserId(111));
+                $authUserIds = array_merge(Auth::getGroupUserId(74), Auth::getGroupUserId(102));
                 if (in_array($adminId, $authUserIds)) {
                     $map['pm_audit_status'] = ['in', [1, 2]];
                 } else {
@@ -326,7 +326,7 @@ class ItWebDemand extends Backend
                 }
 
                 //是否是测试主管
-                $testAuthUserIds = Auth::getGroupUserId(67) ?: [];
+                $testAuthUserIds = Auth::getGroupUserId(107) ?: [];
                 if (in_array($adminId, $testAuthUserIds)) {
                     $usersId = [];
                     //组员ID
