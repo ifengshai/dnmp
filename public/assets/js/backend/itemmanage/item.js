@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         // return true;
                                         //返回true时按钮显示,返回false隐藏
                                         //console.log(row.item_status);
-                                        if (row.item_status == 1 || row.item_status == 2 ||row.item_status == 4) {
+                                        if (row.item_status == 1 || row.item_status == 4) {
                                             return true;
                                         } else {
                                             return false;

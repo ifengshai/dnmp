@@ -32,7 +32,7 @@
 
         <label class="control-label col-xs-2 col-sm-2" style="text-align: right;">{:__('数量')}:</label>
         <div class="col-xs-8 col-sm-3">
-            <input id="c-id" data-rule="required" class="form-control"  name="row[replenish_num]" type="number" value="" min="1">
+            <input id="c-id" data-rule="required" class="form-control"  name="row[replenish_num]" type="number" value="" min="1" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 1}">
         </div>
     </div>
 
