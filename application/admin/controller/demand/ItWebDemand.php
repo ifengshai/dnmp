@@ -227,7 +227,10 @@ class ItWebDemand extends Backend
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
                 $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
 
-                // $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
+                $list[$k]['create_time'] = date('Y-m-d H:i',strtotime($v['create_time']));
+                $list[$k]['develop_finish_time'] = date('Y-m-d H:i',strtotime($v['develop_finish_time']));
+                $list[$k]['test_finish_time'] = date('Y-m-d H:i',strtotime($v['test_finish_time']));
+                $list[$k]['all_finish_time'] = date('Y-m-d H:i',strtotime($v['all_finish_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
                 //检查权限
                 $list[$k]['demand_pm_status'] = $permissions['demand_pm_status'];//产品确认权限
@@ -244,7 +247,7 @@ class ItWebDemand extends Backend
                     $web_users =  Db::name("admin")
                         ->whereIn("id", $web_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['web_designer_user_name'] = $web_users ? implode(',',$web_users) : '-';
+                    $list[$k]['web_designer_user_name'] = $web_users;
                 }
 
                 $list[$k]['php_user_name'] = '';
@@ -254,7 +257,7 @@ class ItWebDemand extends Backend
                     $php_users =  Db::name("admin")
                         ->whereIn("id", $php_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['php_user_name'] = $php_users ? implode(',',$php_users) : '-';
+                    $list[$k]['php_user_name'] = $php_users;
                 }
 
                 $list[$k]['app_user_name'] = '';
@@ -264,7 +267,7 @@ class ItWebDemand extends Backend
                     $app_users =  Db::name("admin")
                         ->whereIn("id", $app_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['app_user_name'] = $app_users ? implode(',',$app_users) : '-';
+                    $list[$k]['app_user_name'] = $app_users;
                 }
 
                 $list[$k]['test_user_name'] = '';
@@ -274,7 +277,7 @@ class ItWebDemand extends Backend
                     $test_users =  Db::name("admin")
                         ->whereIn("id", $test_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['test_user_name'] = $test_users ? implode(',',$test_users) : '-';
+                    $list[$k]['test_user_name'] = $test_users;
                 }
             }
             $result = array("total" => $total, "rows" => $list);
@@ -498,7 +501,22 @@ class ItWebDemand extends Backend
             $add['status'] = 2;
             $res = $this->model->allowField(true)->save($add,['id'=> $params['ids']]);
             if ($res) {
-                //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                //任务评审状态变为“通过”时 推送给抄送人
+                if ($row['copy_to_user_id']) {
+                    $usersId = explode(',',$row['copy_to_user_id']);
+                    Ding::cc_ding($usersId,  '任务ID:' . $params['ids'] . '+任务已抄送给你', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                }
+
+                //任务激活 推送主管
+                //是否是开发主管
+                $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+                //是否是前端主管
+                $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
+                //是否是app主管
+                $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
+                $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
+                Ding::cc_ding($usersIds,  '任务ID:' . $params['ids'] . '+任务激活，等待响应', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -510,11 +528,6 @@ class ItWebDemand extends Backend
      */
     public function add()
     {
-        /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
-         $user_id[] =  '0550643549844645';//李想
-         $user_id[] =  '0333543233781107';//张晓
-         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-         dump($res);exit;*/
         if ($this->request->isPost()) {
             $params = input();
 
@@ -579,7 +592,8 @@ class ItWebDemand extends Backend
                     $result = $this->model->allowField(true)->save($add);
 
                     if($result){
-                        //Ding::dingHook(__FUNCTION__,$this->model);
+                        //首次添加 钉钉推送产品
+                        Ding::cc_ding(80,  '任务ID:' . $this->model->id . '+任务等待评审', $data['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                         $this->success('添加成功');
                     }else{
                         $this->error('新增失败，请联系技术，并说明操作过程');
@@ -587,7 +601,6 @@ class ItWebDemand extends Backend
                 }
             }
         }
-
 
         $this->view->assign('demand_type',input('demand_type'));
         return $this->view->fetch();
@@ -610,7 +623,9 @@ class ItWebDemand extends Backend
 
                     if($row['status'] == 1){
                         if($params['priority'] == 1){
-                            $add['status'] = 2;
+                            if($params['pm_audit_status'] == 3){
+                                $add['status'] = 2;
+                            }
                         }
                     }else{
                         if($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']){
@@ -756,8 +771,19 @@ class ItWebDemand extends Backend
                         $update['develop_finish_time'] = date('Y-m-d H:i',time());
                         $update['test_status'] = 3;
                         $this->model->allowField(true)->save($update,['id'=> $params['id']]);
+
+                        //任务完成 钉钉推送抄送人 提出人
+                        Ding::cc_ding($row->entry_user_id,  '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                        if ($row->copy_to_user_id) {
+                            $usersId = explode(',',$row->copy_to_user_id);
+                            Ding::cc_ding($usersId,  '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                        }
+
+                        //测试主管
+                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        Ding::cc_ding($testAuthUserIds,  '任务ID:' .  $params['id'] . '+任务等待完成', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -849,7 +875,13 @@ class ItWebDemand extends Backend
                             }
                         }
                     }
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+
+                    //开发中
+                    if ($develop_finish_status['develop_finish_status'] == 2) {
+                        //测试主管
+                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        Ding::cc_ding($testAuthUserIds,  '任务ID:' .  $params['id'] . '+任务等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    }
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -886,6 +918,7 @@ class ItWebDemand extends Backend
 
             if ($params) {
                 $update = array();
+                $label = 0;
                 if($params['type'] == 'queren'){
                     $update['test_group'] = $params['test_group'];
                     $update['test_status'] = 2;
@@ -895,14 +928,15 @@ class ItWebDemand extends Backend
                 if($params['type'] == 'tongguo'){
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
-
                     if($params['status'] == 1){
                         //通过
-                        if($params['test_group'] == 1){
+                        if($params['test_group'] == 1 || $params['test_group'] == 2){
                             $update['test_is_finish'] = 1;
                             $update['test_finish_time'] = date('Y-m-d H:i',time());
                         }
                         $update['test_status'] = 4;
+
+                        $label = 1;
                     }else{
                         //未通过
                         if($row_arr['web_designer_group'] == 1){
@@ -919,6 +953,8 @@ class ItWebDemand extends Backend
                         }
                         $update['develop_finish_status'] = 2;
                         $update['develop_finish_time'] = null;
+
+                        $label = 2;
                     }
                 }
 
@@ -934,11 +970,27 @@ class ItWebDemand extends Backend
                     }else{
                         $update['status'] = 4;
                     }
+
+                    $label = 3;
                 }
 
                 $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
                 if ($res) {
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    //未通过 推送给主管
+                    if ($label == 2) {
+                        //任务激活 推送主管
+                        //是否是开发主管
+                        $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+                        //是否是前端主管
+                        $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
+                        //是否是app主管
+                        $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
+                        $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
+                        Ding::cc_ding($usersIds,  '任务ID:' .  $params['id'] . '+测试未通过', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    } elseif ($label == 3) { //任务上线 通知提出人
+                        Ding::cc_ding($row['entry_user_id'],  '任务ID:' .  $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    }
+
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -1002,6 +1054,7 @@ class ItWebDemand extends Backend
     public function detail($ids = null){
         if ($this->request->isAjax()) {
             $params = $this->request->post();
+            $row = $this->model->get($ids);
             if ($params) {
                 $update['is_small_probability'] = $params['is_small_probability'];
                 $update['is_low_level_error'] = $params['is_low_level_error'];
@@ -1013,8 +1066,12 @@ class ItWebDemand extends Backend
 
                 $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
                 if ($res) {
-
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    $web_designer_user_id = $params['web_designer_user_id'] ?: [];
+                    $phper_user_id = $params['phper_user_id']  ?: [];
+                    $app_user_id = $params['app_user_id']  ?: [];
+                    $test_user_id = $params['test_user_id']  ?: [];
+                    $usersIds = array_merge($web_designer_user_id, $phper_user_id, $app_user_id, $test_user_id);
+                    Ding::cc_ding($usersIds,  '任务ID:' .  $params['id'] . '+任务已分配', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                     $this->success('成功');
                 } else {
                     $this->error('失败');
