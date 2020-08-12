@@ -32,7 +32,13 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'ajaxGoodsInfo'];
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['ajaxGoodsInfo'];
 
     public function _initialize()
     {
