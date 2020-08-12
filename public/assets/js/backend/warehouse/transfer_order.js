@@ -150,6 +150,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $('.table_list table tbody').append(content);
                 Controller.api.bindevent();
             })
+            //调出仓选项改变时 清空下方显示的sku以及虚拟仓库存 及数量
+            $(document).on('change', '.call_out_site', function () {
+                $(".sku").val("");
+                $(".sku_stock").val("");
+                $(".num").val("");
+            });
 
             //删除商品数据
             $(document).on('click', '.btn-del', function () {

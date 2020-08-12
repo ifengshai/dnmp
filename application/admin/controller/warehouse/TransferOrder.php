@@ -99,11 +99,11 @@ class TransferOrder extends Backend
             $sku = $this->request->post("sku/a");
             $num = $this->request->post("num/a");
             $sku_stock = $this->request->post("sku_stock/a");
-           //  dump($sku);
-           // dump($params);die;
+
             if ($params['call_out_site'] == $params['call_in_site']){
                 $this->error('调入仓和调出仓不能为同一个站');
             }
+            //添加调拨单保存或提交审核时数据有效性的判断
             foreach($sku as $k=>$v){
 
                 if (empty($v)){
@@ -119,6 +119,9 @@ class TransferOrder extends Backend
                 $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
                 if (empty($item_platform_sku)){
                     $this->error('此sku'.$v.'暂未同步到调出仓，请先同步再进行操作');
+                }
+                if ($item_platform_sku['stock'] < $num[$k]){
+                    $this->error('调出数量不能大于当前站点虚拟仓库存');
                 }
             }
 
@@ -236,6 +239,9 @@ class TransferOrder extends Backend
                             $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
                             if (empty($item_platform_sku)){
                                 $this->error('此sku'.$v.'暂未同步到调出仓，请先同步再进行操作');
+                            }
+                            if ($item_platform_sku['stock'] < $num[$k]){
+                                $this->error('调出数量不能大于当前站点虚拟仓库存');
                             }
                         }
                         $data = [];
