@@ -227,7 +227,10 @@ class ItWebDemand extends Backend
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
                 $list[$k]['detail'] = '';//前台调用详情字段使用，并无实际意义
 
-                // $list[$k]['create_time'] = date('m-d H:i',strtotime($v['create_time']));
+                $list[$k]['create_time'] = date('Y-m-d H:i',strtotime($v['create_time']));
+                $list[$k]['develop_finish_time'] = date('Y-m-d H:i',strtotime($v['develop_finish_time']));
+                $list[$k]['test_finish_time'] = date('Y-m-d H:i',strtotime($v['test_finish_time']));
+                $list[$k]['all_finish_time'] = date('Y-m-d H:i',strtotime($v['all_finish_time']));
                 $list[$k]['node_time'] = $v['node_time']?$v['node_time'].'Day':'-';//预计时间
                 //检查权限
                 $list[$k]['demand_pm_status'] = $permissions['demand_pm_status'];//产品确认权限
@@ -244,7 +247,7 @@ class ItWebDemand extends Backend
                     $web_users =  Db::name("admin")
                         ->whereIn("id", $web_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['web_designer_user_name'] = $web_users ? implode(',',$web_users) : '-';
+                    $list[$k]['web_designer_user_name'] = $web_users;
                 }
 
                 $list[$k]['php_user_name'] = '';
@@ -254,7 +257,7 @@ class ItWebDemand extends Backend
                     $php_users =  Db::name("admin")
                         ->whereIn("id", $php_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['php_user_name'] = $php_users ? implode(',',$php_users) : '-';
+                    $list[$k]['php_user_name'] = $php_users;
                 }
 
                 $list[$k]['app_user_name'] = '';
@@ -264,7 +267,7 @@ class ItWebDemand extends Backend
                     $app_users =  Db::name("admin")
                         ->whereIn("id", $app_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['app_user_name'] = $app_users ? implode(',',$app_users) : '-';
+                    $list[$k]['app_user_name'] = $app_users;
                 }
 
                 $list[$k]['test_user_name'] = '';
@@ -274,7 +277,7 @@ class ItWebDemand extends Backend
                     $test_users =  Db::name("admin")
                         ->whereIn("id", $test_userid_arr)
                         ->column('nickname','id');
-                    $list[$k]['test_user_name'] = $test_users ? implode(',',$test_users) : '-';
+                    $list[$k]['test_user_name'] = $test_users;
                 }
             }
             $result = array("total" => $total, "rows" => $list);
@@ -1063,10 +1066,10 @@ class ItWebDemand extends Backend
 
                 $res = $this->model->allowField(true)->save($update,['id'=> $params['id']]);
                 if ($res) {
-                    $web_designer_user_id = $params['web_designer_user_id'];
-                    $phper_user_id = $params['phper_user_id'];
-                    $app_user_id = $params['app_user_id'];
-                    $test_user_id = $params['test_user_id'];
+                    $web_designer_user_id = $params['web_designer_user_id'] ?: [];
+                    $phper_user_id = $params['phper_user_id']  ?: [];
+                    $app_user_id = $params['app_user_id']  ?: [];
+                    $test_user_id = $params['test_user_id']  ?: [];
                     $usersIds = array_merge($web_designer_user_id, $phper_user_id, $app_user_id, $test_user_id);
                     Ding::cc_ding($usersIds,  '任务ID:' .  $params['id'] . '+任务已分配', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                     $this->success('成功');

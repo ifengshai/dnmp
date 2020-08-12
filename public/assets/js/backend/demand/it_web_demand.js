@@ -52,7 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             operate:false
                         },
 
-                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('创建时间'), operate: false},
 
                         {
                             field: 'pm_audit_status',
@@ -123,27 +123,84 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Controller.api.formatter.get_user_confirm,
                             operate:false
                         },
+                        // {
+                        //     field: 'all_user_id',
+                        //     title: __('责任人'),
+                        //     operate: false,
+                        //     formatter: function (value, rows) {
+                        //         var all_user_name = '';
+                        //         if(rows.web_designer_user_id){
+                        //             all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
+                        //         }
+                        //         if(rows.phper_user_id){
+                        //             all_user_name += '<span class="all_user_name">后端：<b>'+ rows.php_user_name + '</b></span><br>';
+                        //         }
+                        //         if(rows.app_user_id){
+                        //             all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
+                        //         }
+                        //         if(rows.test_user_id){
+                        //             all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_user_name + '</b></span><br>';
+                        //         }
+                        //         return all_user_name;
+                        //     },
+                        // },
                         {
-                            field: 'all_user_id',
-                            title: __('责任人'),
+                            field: 'web_designer_user_name',
+                            title: __('前端'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if(rows.web_designer_user_id){
-                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
+                                if(rows.web_designer_user_name){
+                                    for(var i in rows.web_designer_user_name) {
+                                        all_user_name += rows.web_designer_user_name[i] + '<br>';
+                                    }
                                 }
-                                if(rows.phper_user_id){
-                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.php_user_name + '</b></span><br>';
-                                }
-                                if(rows.app_user_id){
-                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
-                                }
-                                if(rows.test_user_id){
-                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_user_name + '</b></span><br>';
-                                }
-                                return all_user_name;
+                                return all_user_name ? all_user_name : '-';
                             },
                         },
+                        {
+                            field: 'php_user_name',
+                            title: __('后端'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.php_user_name){
+                                    for(var i in rows.php_user_name) {
+                                        all_user_name += rows.php_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
+                        {
+                            field: 'app_user_name',
+                            title: __('APP'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.app_user_name){
+                                    for(var i in rows.app_user_name) {
+                                        all_user_name += rows.app_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
+                        {
+                            field: 'test_user_name',
+                            title: __('测试'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.test_user_name){
+                                    for(var i in rows.test_user_name) {
+                                        all_user_name += rows.test_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
+                   
                         {
                             field: 'detail',
                             title: __('详情记录'),
