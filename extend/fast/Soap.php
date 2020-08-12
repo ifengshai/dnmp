@@ -96,7 +96,6 @@ class Soap
 
         $client = new Client(['verify' => false]);
         try {
-            // $response = $client->request('GET', $url, array('query' => $params));
             unset($params['site']);
             $response = $client->request('POST', $url, array('form_params' => $params));
             $body = $response->getBody();
@@ -108,9 +107,9 @@ class Soap
             if ($res['code'] == 200 || $res['status'] == 200) {
                 return true;
             }
-            exception($res['msg']);
+            return false;
         } catch (\Exception $e) {
-            exception($e->getMessage());
+            return false;
         }
     }
 
