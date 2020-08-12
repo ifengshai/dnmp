@@ -1200,7 +1200,7 @@ class WorkOrderList extends Backend
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
                         //措施
-                        $integral_auto_complete = $coupon_auto_complete = 0;
+                        $integral_auto_complete = $coupon_auto_complete = $changeArr_auto_complete = 0;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $work_id;
                             $measureList['measure_choose_id'] = $v;
@@ -2275,6 +2275,7 @@ class WorkOrderList extends Backend
                         WorkOrderChangeSku::where(['work_id' => $row->id])->delete();
                         // dump($params['measure_choose_id']);
                         // exit;
+                        $integral_auto_complete = $coupon_auto_complete = $changeArr_auto_complete = 0;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $row->id;
                             $measureList['measure_choose_id'] = $v;
