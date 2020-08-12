@@ -114,8 +114,13 @@ class Outstock extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $out_stock_num = $this->request->post("out_stock_num/a");
+                    // dump($sku);dump($out_stock_num);die;
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
+                    }
+                    if (count($sku) != count(array_unique($sku))) {
+                        $this->error('请不要填写相同的sku');
                     }
                     foreach (array_filter($sku) as $k => $v) {
                         $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -123,6 +128,9 @@ class Outstock extends Backend
                         $sku_platform = $item_platform_sku->where(['sku' => $v, 'platform_type' => $params['platform_id']])->find();
                         if (!$sku_platform) {
                             $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
+                        }
+                        if ($out_stock_num[$k] > $sku_platform['stock']){
+                            $this->error('sku：' . $v . '出库数量不能大于当前站点虚拟仓库存');
                         }
                     }
 
@@ -132,7 +140,7 @@ class Outstock extends Backend
 
                     //添加入库信息
                     if ($result !== false) {
-                        $out_stock_num = $this->request->post("out_stock_num/a");
+
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -210,8 +218,13 @@ class Outstock extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    $out_stock_num = $this->request->post("out_stock_num/a");
+
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
+                    }
+                    if (count($sku) != count(array_unique($sku))) {
+                        $this->error('请不要填写相同的sku');
                     }
                     foreach (array_filter($sku) as $k => $v) {
                         $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -220,13 +233,15 @@ class Outstock extends Backend
                         if (!$sku_platform) {
                             $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
                         }
+                        if ($out_stock_num[$k] > $sku_platform['stock']){
+                            $this->error('sku：' . $v . '出库数量不能大于当前站点虚拟仓库存');
+                        }
                     }
                     $result = $row->allowField(true)->save($params);
 
                     //修改产品
                     if ($result !== false) {
                         $item_id = $this->request->post("item_id/a");
-                        $out_stock_num = $this->request->post("out_stock_num/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;

@@ -1677,9 +1677,21 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $sku = input('sku');
+            $site = input('site');
+            if ($site == 0){
+                $this->error('请先选择平台！！');
+            }
+            $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $info = $itemplatform->where(['sku'=>$sku,'platform_type'=>$site])->field('stock')->find();
             $res = $this->model->getGoodsInfo($sku);
+            $res['platform_stock'] = $info['stock'];
+            // dump($res);die;
             if ($res) {
-                $this->success('', '', $res);
+                if ($info) {
+                    $this->success('', '', $res);
+                } else {
+                    $this->error('当前平台未同步sku！！');
+                }
             } else {
                 $this->error('未找到数据！！');
             }
