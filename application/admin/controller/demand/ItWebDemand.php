@@ -773,6 +773,10 @@ class ItWebDemand extends Backend
                             $usersId = explode(',',$row->copy_to_user_id);
                             Ding::cc_ding($usersId,  '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         }
+
+                        //测试主管
+                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        Ding::cc_ding($testAuthUserIds,  '任务ID:' .  $params['id'] . '+任务等待完成', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     
                     $this->success('成功');
@@ -866,7 +870,13 @@ class ItWebDemand extends Backend
                             }
                         }
                     }
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+
+                    //开发中
+                    if ($develop_finish_status['develop_finish_status'] == 2) {
+                        //测试主管
+                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        Ding::cc_ding($testAuthUserIds,  '任务ID:' .  $params['id'] . '+任务等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    }
                     $this->success('成功');
                 } else {
                     $this->error('失败');
