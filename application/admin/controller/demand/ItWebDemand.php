@@ -620,7 +620,9 @@ class ItWebDemand extends Backend
 
                     if($row['status'] == 1){
                         if($params['priority'] == 1){
-                            $add['status'] = 2;
+                            if($params['pm_audit_status'] == 3){
+                                $add['status'] = 2;
+                            }
                         }
                     }else{
                         if($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']){
