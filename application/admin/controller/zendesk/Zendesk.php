@@ -1283,16 +1283,21 @@ DOC;
             }
             //查询当前邮件原本的承接人数据
             $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
+            if($params['type'] == 1 || $params['type'] == 3){
+                //修改承接人
+                $data['assign_id']  = $params['id'];
+                $data['assignee_id']  = $agent_id;
+            }
+            if($params['type'] == 2 || $params['type'] == 3){
+                //修改处理人
+                $data['due_id']     = $params['id'];
+            }
             $result = $this->model->where(['id'=>$ids])->update($data);
             if($result){
                 $this->success('修改成功');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->alias('z')->join('fa_admin a','z.admin_id=a.id')->column('z.admin_id,a.nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch();
     }
@@ -1306,22 +1311,33 @@ DOC;
     public function batch_edit_recipient($ids=null)
     {
         if($this->request->isAjax()){
-            $params = $this->request->post("row/a");
-            if(!$params['id']){
-                $this->error('承接人不存在，请重新尝试');
-            }
-            //查询当前邮件原本的承接人数据
-            $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
-            $result = $this->model->where('id','in',$ids)->update($data);
-            if($result){
-                $this->success('修改成功');
+            $type_arr = $this->model->where('id','in',$ids)->column('type');
+            $type_arr = array_unique($type_arr);
+            if(count($type_arr) == 1){
+                $params = $this->request->post("row/a");
+                if(!$params['id']){
+                    $this->error('承接人不存在，请重新尝试');
+                }
+                //查询当前邮件原本的承接人数据
+                $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
+                if($params['type'] == 1 || $params['type'] == 3){
+                    //修改承接人
+                    $data['assign_id']  = $params['id'];
+                    $data['assignee_id']  = $agent_id;
+                }
+                if($params['type'] == 2 || $params['type'] == 3){
+                    //修改处理人
+                    $data['due_id']     = $params['id'];
+                }
+                $result = $this->model->where('id','in',$ids)->update($data);
+                if($result){
+                    $this->success('修改成功');
+                }
+            }else{
+                $this->error('不同站点的工单不能批量修改承接人');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->alias('z')->join('fa_admin a','z.admin_id=a.id')->column('z.admin_id,a.nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch('edit_recipient');
     }

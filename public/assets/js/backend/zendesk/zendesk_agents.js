@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'nickname', title: __('nickname')},
                         // {field: 'admin.email', title: __('admin.email')},
                         {field: 'agent.account_user', title: __('Name'),operate: false},
-                        {field: 'type', title: __('type'), custom: { 1: 'blue', 2: 'yellow' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
+                        {field: 'type', title: __('type'), custom: { 1: 'blue', 2: 'yellow' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3:'Nihaooptical'}, formatter: Table.api.formatter.status },
                         {field: 'agent_type', title: __('Agent_type'), custom: { 1: 'success', 2: 'danger' }, searchList: { 1: '邮件组', 2: '电话组' }, formatter: Table.api.formatter.status },
                         {field: 'count', title: __('Count')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
