@@ -424,7 +424,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     themeType: typeof Config.nkeditor != 'undefined' ? Config.nkeditor.theme : 'black', //编辑器皮肤,这个值从后台获取
                     fileManagerJson: Fast.api.fixurl("/addons/nkeditor/index/attachment/module/" + Config.modulename),
                     items: [
-                        'source'
+                         'image', 'multiimage','insertfile',
                     ],
                     afterCreate: function () {
                         var self = this;
@@ -509,7 +509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     themeType: typeof Config.nkeditor != 'undefined' ? Config.nkeditor.theme : 'black', //编辑器皮肤,这个值从后台获取
                     fileManagerJson: Fast.api.fixurl("/addons/nkeditor/index/attachment/module/" + Config.modulename),
                     items: [
-                        'source'
+                        'image', 'multiimage','insertfile',
                     ],
                     afterCreate: function () {
                         var self = this;
