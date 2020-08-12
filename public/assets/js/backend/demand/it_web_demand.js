@@ -736,11 +736,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             return '<div><span class="check_develop_status status1_color">未响应</span></div>';
                         }else if (row.develop_finish_status == 2){
                             return '<div><span class="check_develop_status status1_color">开发中</span></div>';
-                        }else{
-                            if(row.status == 4){
-                                return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
-                            }else{
+                        }else if(row.develop_finish_status == 3){
+                            if(row.status == 5){
                                 return '<div><span class="check_develop_status status4_color">开发完成</span></div>';
+                            }else{
+                                return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
                             }
                         }
                     }else{
