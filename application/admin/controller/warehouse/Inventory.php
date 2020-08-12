@@ -681,7 +681,7 @@ class Inventory extends Backend
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                 } else {
-                                    $num = round($stock_num * $rate_rate);
+                                    $num = round($v['error_qty'] * $rate_rate);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                 }
@@ -692,7 +692,7 @@ class Inventory extends Backend
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                 } else {
-                                    $num = round($stock_num * $val['stock']/$whole_num);
+                                    $num = round($v['error_qty'] * $val['stock']/$whole_num);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                 }
