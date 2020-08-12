@@ -29,7 +29,7 @@ require(['form'], function (Form) {
     var _bindevent = Form.events.bindevent;
     Form.events.bindevent = function (form) {
         _bindevent.apply(this, [form]);
-        if ($(".editor", form).size() > 0) {
+        if ($(".editor_nkeditor", form).size() > 0) {
             require(['nkeditor', 'upload'], function (Nkeditor, Upload) {
                 var getImageFromClipboard, getImageFromDrop, getFileFromBase64;
                 getImageFromClipboard = function (data) {
@@ -192,7 +192,7 @@ require(['form'], function (Form) {
                     editor.clickToolbar(name, editor.plugin.remoteimage.download);
                 });
 
-                $(".editor", form).each(function () {
+                $(".editor_nkeditor", form).each(function () {
                     var that = this;
                     Nkeditor.create(that, {
                         width: '100%',
