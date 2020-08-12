@@ -102,11 +102,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                     all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
-                                if(rows.test_group == 1){
-                                    if(rows.test_is_finish == 1){
-                                        all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
-                                    }
+                                if(rows.test_is_finish == 1){
+                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
+
                                 if(rows.all_finish_time){
                                     all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
@@ -274,11 +273,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                     all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
-                                if(rows.test_group == 1){
-                                    if(rows.test_is_finish == 1){
-                                        all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
-                                    }
+
+                                if(rows.test_is_finish == 1){
+                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
+
                                 if(rows.all_finish_time){
                                     all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
@@ -903,7 +902,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                 //详情记录点击查看
                 get_detail: {
                     'click .check_detail': function (e, value, row, index) {
-                        Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '55%'] });
+                        Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '60%'] });
                     }
                 },
             }            

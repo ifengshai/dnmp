@@ -927,7 +927,7 @@ class ItWebDemand extends Backend
                     $row_arr = $row->toArray();
                     if($params['status'] == 1){
                         //通过
-                        if($params['test_group'] == 1){
+                        if($params['test_group'] == 1 || $params['test_group'] == 2){
                             $update['test_is_finish'] = 1;
                             $update['test_finish_time'] = date('Y-m-d H:i',time());
                         }

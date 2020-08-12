@@ -142,14 +142,14 @@
                 <label class="input_tiem_label"></label>
                 {if $row['test_status'] == 4}
                     {if $test_status}
-                        <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                        <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
                     {else}
-                        <button type="submit" class="btn btn-sub" disabled style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #03A7EF;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
                     {/if}
                 {elseif $row['test_status'] == 5}
                 <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
                 {else}
-                <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('上线')}</button>
+                <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 76%;height:40px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
                 {/if}
             </div>
         </div>
