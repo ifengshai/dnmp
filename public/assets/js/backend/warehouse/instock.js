@@ -198,6 +198,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
         },
         add: function () {
             Controller.api.bindevent();
+            $('.tdtd').hide();
             //移除
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
