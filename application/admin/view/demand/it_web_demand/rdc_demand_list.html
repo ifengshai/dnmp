@@ -64,17 +64,21 @@
         font-weight: 400;
         margin-top: 2px;
     }
-
-    .table td{
-        font-weight: 700;
+    #table tr th:nth-child(5){
+        width: 40%!important;
     }
-
+    #table tr td:nth-child(4), #table tr td:nth-child(9){
+        font-weight: bold;
+    }
+    #table tr td>div>span{
+        height: 20px;
+        line-height: 20px;
+    }
     .text-black i,.text-gray i,.text-blue i,.text-red i,.text-green i,.text-yellow i{
         display: none!important;
     }
     .user_confirm{
         padding: 0;
-        font-weight: 700;
         width: 68px;
         height: 26px;
         line-height: 26px;
@@ -88,6 +92,9 @@
         filter: alpha(opacity=65);
         -webkit-box-shadow: none;
         box-shadow: none;
+    }
+    b, strong{
+        font-weight: normal!important;
     }
 </style>
 <div class="panel panel-default panel-intro">
