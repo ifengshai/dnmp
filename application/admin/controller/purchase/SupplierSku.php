@@ -145,6 +145,14 @@ class SupplierSku extends Backend
                         if ($params['label'] == 1) {
                             $map['sku'] = $v;
                             $this->model->where($map)->update(['label' => 0]);
+                        } else {
+                            //查询此sku 是否有主供应商 如果没有 则当前的默认为主供货商
+                            $map['sku'] = $v;
+                            $map['label'] = 1;
+                            $count = $this->model->where($map)->count();
+                            if ($count < 1) {
+                                $data[$k]['label'] = 1;
+                            }
                         }
                     }
                     $result = $this->model->allowField(true)->saveAll($data);
@@ -216,6 +224,21 @@ class SupplierSku extends Backend
                     if ($params['label'] == 1) {
                         $map['sku'] = $params['sku'];
                         $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                    }
+
+                    //如果选择主供应商 则同SKU下 其他记录设置为辅供应商
+                    if ($params['label'] == 1) {
+                        $map['sku'] = $params['sku'];
+                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                    } else {
+                        //查询此sku 是否有主供应商 如果没有 则当前的默认为主供货商
+                        $map['sku'] = $params['sku'];
+                        $map['label'] = 1;
+                        $map['id'] = ['<>', $ids];
+                        $count = $this->model->where($map)->count();
+                        if ($count < 1) {
+                            $params['label'] = 1;
+                        }
                     }
 
                     $result = $row->allowField(true)->save($params);
