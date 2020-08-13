@@ -32,7 +32,7 @@ class PurchaseOrder extends Model
      */
     public function getPurchaseData()
     {
-        $where['purchase_status'] = ['in', [6, 7]];
+        $where['purchase_status'] = ['in', [6, 7,8, 9]];
         $where['is_del'] = 1;
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
@@ -137,10 +137,13 @@ class PurchaseOrder extends Model
             return false;
         }
         $map['purchase_id'] = ['in', $totalArr];
+        //退销单的退销金额
         $returnResult = Db::name('purchase_return')->where($map)->field('purchase_id,round(sum(return_money),2) return_money')->group('purchase_id')->select();
+        //收货异常的退销金额 start
+        $abnormalResult = Db::name('purchase_abnormal_item')->where($map)->where(['error_type'=>2])->field('purchase_id,round(sum((should_arrival_num-arrival_num)*purchase_price)) return_price')->group('purchase_id')->select();
         $arr = [];
         $arr['return_money'] = 0;
-        if (!$returnResult) {
+        if (!$returnResult && !$abnormalResult) {
             $arr['thisPageArr'] = [];
             return $arr;
         }
@@ -149,6 +152,15 @@ class PurchaseOrder extends Model
             $arr['return_money'] += $v['return_money'];
             if (in_array($v['purchase_id'], $thisPageIdArr)) {
                 $arr['thisPageArr'][$v['purchase_id']] = $v['return_money'];
+            }
+        }
+
+        if($abnormalResult){
+            foreach($abnormalResult as $av){
+                $arr['return_money'] += $av['return_price'];
+                if(in_array($av['purchase_id'],$thisPageIdArr)){
+                    $arr['thisPageArr'][$av['purchase_id']] += $av['return_price'];
+                }
             }
         }
         return $arr;
@@ -352,7 +364,7 @@ class PurchaseOrder extends Model
         }
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
-        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('a.create_person')->column('sum(b.purchase_num)','a.create_person');
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('a.create_person')->column('sum(b.purchase_num)', 'a.create_person');
     }
 
     /**
@@ -372,7 +384,7 @@ class PurchaseOrder extends Model
         }
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
-        return $this->where($where)->group('create_person')->column('count(1)','create_person');
+        return $this->where($where)->group('create_person')->column('count(1)', 'create_person');
     }
 
     /**
@@ -389,18 +401,18 @@ class PurchaseOrder extends Model
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         $list = $this->alias('a')
-        ->where($where)
-        ->field('sum(b.purchase_num) as num,sku')
-        ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-        ->group('sku')
-        ->order('num desc')
-        ->limit(30)
-        ->select();
+            ->where($where)
+            ->field('sum(b.purchase_num) as num,sku')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->group('sku')
+            ->order('num desc')
+            ->limit(30)
+            ->select();
         $list = collection($list)->toArray();
         //查询SKU分类名称
         $item = new \app\admin\model\itemmanage\Item();
         $skuCategoryName = $item->getSkuCategoryName();
-        foreach($list as &$v) {
+        foreach ($list as &$v) {
             $v['category_name'] = $skuCategoryName[$v['sku']];
         }
         unset($v);

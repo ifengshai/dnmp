@@ -12,7 +12,7 @@ use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -69,7 +69,7 @@ class Nihao extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 3;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -145,7 +145,7 @@ class Nihao extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 3;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -197,7 +197,7 @@ class Nihao extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 3;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0, 4, 6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -262,9 +262,6 @@ class Nihao extends Backend
                 $data = [];
                 $list = [];
                 foreach ($res as $k => $v) {
-                    $data['site'] = 3;
-                    $data['order_id'] = $v['entity_id'];
-                    $data['order_number'] = $v['increment_id'];
                     $data['update_time'] = date('Y-m-d H:i:s');
                     //打标签
                     $list[$k]['order_node'] = 1;
@@ -279,7 +276,7 @@ class Nihao extends Backend
 
                     $data['order_node'] = 1;
                     $data['node_type'] = 2;
-                    Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 3])->update($data);
                 }
                 if ($list) {
                     $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -320,6 +317,7 @@ class Nihao extends Backend
         if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -331,6 +329,8 @@ class Nihao extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -429,14 +429,17 @@ class Nihao extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 3,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 3,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -446,12 +449,13 @@ class Nihao extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -472,7 +476,7 @@ class Nihao extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -483,14 +487,17 @@ class Nihao extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 3,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 3,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -534,16 +541,19 @@ class Nihao extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 3,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 3,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -557,6 +567,7 @@ class Nihao extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -579,16 +590,19 @@ class Nihao extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 3,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 3,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -615,9 +629,7 @@ class Nihao extends Backend
             $data = [];
             $list = [];
             foreach ($order_res as $k => $v) {
-                $data['site'] = 3;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
+
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -632,7 +644,7 @@ class Nihao extends Backend
                     $list[$k]['order_node'] = 2;
                     $list[$k]['node_type'] = 3; //配镜架
                     $list[$k]['content'] = 'Frame(s) is/are ready, waiting for lenses';
-                  
+
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
                 }
@@ -642,7 +654,7 @@ class Nihao extends Backend
                     $list[$k]['order_node'] = 2;
                     $list[$k]['node_type'] = 4; //配镜片
                     $list[$k]['content'] = 'Lenses production completed, waiting for customizing';
-                  
+
                     $data['order_node'] = 2;
                     $data['node_type'] = 4;
                 }
@@ -667,7 +679,7 @@ class Nihao extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 3])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -955,6 +967,8 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
             $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+            $finalResult[$key]['lens_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_type'];
+            $finalResult[$key]['color_name'] = $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
 
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
@@ -1075,16 +1089,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), "左眼");
 
             // $objSheet->setCellValue("E" . ($key*2 + 2), $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . (float) $value['od_sph'] * 1 : ' ' . $value['od_sph']);
 
             // $objSheet->setCellValue("E" . ($key*2 + 3), $value['os_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . (float) $value['os_sph'] * 1 : ' ' . $value['os_sph']);
 
             // $objSheet->setCellValue("F" . ($key*2 + 2), $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . (float) $value['od_cyl'] * 1 : ' ' . $value['od_cyl']);
 
             // $objSheet->setCellValue("F" . ($key*2 + 3), $value['os_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . (float) $value['os_cyl'] * 1 : ' ' . $value['os_cyl']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
@@ -1105,7 +1119,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['four_name']);
 
 
-            if ($value['od_add'] && $value['os_add'] && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
+            if ($value['od_add'] && $value['os_add'] && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
@@ -1121,7 +1135,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
                 $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['zsl'] . ' ' . $value['third_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['third_name'] . ' ' . $value['prescription_type'] . ' ' . $value['lens_type'] . ' ' . $value['color_name']);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
@@ -1331,8 +1345,10 @@ EOF;
                 $final_print['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
                 $final_print['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
                 $final_print['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+                $final_print['lens_type'] = $product_options['info_buyRequest']['tmplens']['lens_type'];
+                $final_print['color_name'] = $product_options['info_buyRequest']['tmplens']['color_name'];
 
-                $final_print['index_type'] = $final_print['zsl'] . ' ' . $final_print['third_name'];
+                $final_print['index_type'] = $final_print['third_name'] . ' ' . $final_print['prescription_type'] . ' ' . $final_print['lens_type'] . ' ' . $final_print['color_name'];
 
                 $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
 
@@ -1341,7 +1357,7 @@ EOF;
                 // exit;
 
                 //处理ADD  当ReadingGlasses时 是 双PD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['os_add'] * 1 != 0 && (float) $final_print['od_add'] * 1 != 0) {
                     // echo '双PD值';
                     $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $os_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1378,7 +1394,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" .  $final_print['second_name'] . '<br>' . $final_print['four_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" .  $final_print['second_name'] . '<br>' . $final_print['four_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1392,7 +1408,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
                         <tbody cellpadding='0'>
                             <tr>
                               <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1403,17 +1419,17 @@ EOF;
                               </td>
                             </tr>  
                             <tr class='title'>      
-                                <td></td>  
-                                <td>SPH</td>
-                                <td>CYL</td>
-                                <td>AXI</td>
+                                <td width='20px'></td>  
+                                <td width='42px'>SPH</td>
+                                <td width='50px'>CYL</td>
+                                <td width='42px'>AXI</td>
                                 " . $prismcheck_title . "
-                                <td>ADD</td>
-                                <td>PD</td> 
+                                <td width='42px'>ADD</td>
+                                <td width='36px'>PD</td> 
                                 " . $coatiing_name . "
                             </tr>   
                             <tr>  
-                                <td>Right</td>      
+                                <td>R</td>      
                                 <td>" . $final_print['od_sph'] . "</td> 
                                 <td>" . $final_print['od_cyl'] . "</td>
                                 <td>" . $final_print['od_axis'] . "</td>    
@@ -1421,14 +1437,14 @@ EOF;
                     $od_pd . "   
                             </tr>
                             <tr>
-                                <td>Left</td> 
+                                <td>L</td> 
                                 <td>" . $final_print['os_sph'] . "</td>    
                                 <td>" . $final_print['os_cyl'] . "</td>  
                                 <td>" . $final_print['os_axis'] . "</td> 
                                  " . $prismcheck_os_value . $os_add . $os_pd . " 
                             </tr>
                             <tr>
-                              <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($item_res[$processing_value['sku']]) . "</td>
+                              <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($item_res[$processing_value['sku']]), -7) . "</td>
                               <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
                             </tr>  
                             </tbody></table></div>";

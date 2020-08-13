@@ -28,6 +28,7 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_zeelool', 1);
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
     }
 
     /**
@@ -39,17 +40,33 @@ class TrackReg extends Backend
         $order_shipment = Db::connect($site_str)
             ->table('sales_flat_shipment_track')->alias('a')
             ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
-            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,b.increment_id')
+            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
             ->where('a.created_at', '>=', '2020-03-31 00:00:00')
             ->where('a.handle', '=', '0')
             ->group('a.order_id')
             ->select();
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
-            if ($title == 'china-post') {
-                $order_shipment[$k]['title'] = 'china-ems';
+            //区分usps运营商
+            if (strtolower($title) == 'usps') {
+                $track_num1 = substr($v['track_number'], 0, 4);
+                if ($track_num1 == '9200' || $track_num1 == '9205') {
+                    //郭伟峰
+                    $shipment_data_type = 'USPS_1';
+                } else {
+                    $track_num2 = substr($v['track_number'], 0, 4);
+                    if ($track_num2 == '9400') {
+                        //加诺
+                        $shipment_data_type = 'USPS_2';
+                    } else {
+                        //杜明明
+                        $shipment_data_type = 'USPS_3';
+                    }
+                }
+            } else {
+                $shipment_data_type = $title;
             }
-            $carrier = $this->getCarrier($v['title']);
+            $carrier = $this->getCarrier($title);
             $shipment_reg[$k]['number'] =  $v['track_number'];
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] =  $v['order_id'];
@@ -57,24 +74,28 @@ class TrackReg extends Backend
 
             $list[$k]['order_node'] = 2;
             $list[$k]['node_type'] = 7; //出库
-            $list[$k]['create_time'] = $v['updated_at'];
-            $list[$k]['site'] = 1;
-            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['create_time'] = $v['created_at'];
+            $list[$k]['site'] = $site_type;
+            $list[$k]['order_id'] = $v['order_id'];
             $list[$k]['order_number'] = $v['increment_id'];
             $list[$k]['shipment_type'] = $v['title'];
+            $list[$k]['shipment_data_type'] = $shipment_data_type;
             $list[$k]['track_number'] = $v['track_number'];
+            $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
             $data['order_node'] = 2;
             $data['node_type'] = 7;
-            $data['update_time'] = $v['updated_at'];
+            $data['update_time'] = $v['created_at'];
             $data['shipment_type'] = $v['title'];
+            $data['shipment_data_type'] = $shipment_data_type;
             $data['track_number'] = $v['track_number'];
-            Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
+            $data['delivery_time'] = $v['created_at'];
+            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
         }
         if ($list) {
             $this->ordernodedetail->saveAll($list);
         }
-        
+
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
@@ -92,10 +113,11 @@ class TrackReg extends Backend
             }
             $order_ids = array();
 
-            sleep(1);
+            usleep(500000);
         }
         echo $site_str . ' is ok' . "\n";
     }
+
     /**
      * 获取快递号
      * @param $title
@@ -142,7 +164,7 @@ class TrackReg extends Backend
     }
 
     /**
-     * 更新物流表状态
+     * 更新物流表状态 handle 改为1
      *
      * @Description
      * @author wpl
@@ -161,12 +183,20 @@ class TrackReg extends Backend
             case 3:
                 $url = config('url.nihao_url');
                 break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
             default:
                 return false;
                 break;
         }
+        
+        if ($params['site'] == 4) {
+            $url = $url . 'rest/mj/update_order_handle';
+        } else {
+            $url = $url . 'magic/order/logistics';
+        }
         unset($params['site']);
-        $url = $url . 'magic/order/logistics';
         $client = new Client(['verify' => false]);
         //请求URL
         $response = $client->request('POST', $url, array('form_params' => $params));
@@ -174,5 +204,100 @@ class TrackReg extends Backend
         $stringBody = (string) $body;
         $res = json_decode($stringBody);
         return $res;
+    }
+    /**
+     * zendesk10分钟更新前20分钟的数据
+     * @return [type] [description]
+     */
+    public function zeelool_zendesk()
+    {
+        $this->zendeskUpateData('zeelool', 1);
+        echo 'all ok';
+        exit;
+    }
+    public function voogueme_zendesk()
+    {
+        $this->zendeskUpateData('voogueme', 2);
+        echo 'all ok';
+        exit;
+    }
+    public function nihao_zendesk()
+    {
+        $this->zendeskUpateData('nihaooptical', 3);
+        echo 'all ok';
+        exit;
+    }
+    /**
+     * zendesk10分钟更新前20分钟的数据方法
+     * @return [type] [description]
+     */
+    public function zendeskUpateData($siteType, $type)
+    {
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+
+        $this->model = new \app\admin\model\zendesk\Zendesk;
+        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType]))->autoAsyncUpdate($siteType);
+
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
+
+        //求交集的更新
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+        foreach ($intersects as $intersect) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $intersect]))->auto_update();
+            echo $intersect . 'is ok' . "\n";
+        }
+        //新增
+        foreach ($diffs as $diff) {
+            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
+            echo $diff . 'ok' . "\n";
+        }
+        echo 'all ok';
+        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+        exit;
+    }
+
+
+
+     /**
+     * 获取前一天有效SKU销量
+     * 记录当天有效SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/31 16:52:46 
+     * @return void
+     */
+    public function get_sku_sales_num()
+    {
+        //记录当天上架的SKU 
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $order = new \app\admin\model\order\order\Order();
+        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = collection($list)->toArray();
+        //批量插入当天各站点上架sku
+        $skuSalesNum->saveAll($list);
+
+        //查询昨天上架SKU 并统计当天销量
+        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
+                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
+                $params[$k]['census_date'] = date("Y-m-d", strtotime("-1 day"));
+                $params[$k]['id'] = $v['id'];
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+           
+        }
+
+        echo "ok";
     }
 }

@@ -11,7 +11,7 @@ class NihaoPrescriptionDetailHelper{
 	*/
 	public static function get_one_by_entity_id($entity_id){
 		if($entity_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id=$entity_id";
@@ -36,7 +36,7 @@ class NihaoPrescriptionDetailHelper{
 	public static function get_one_by_increment_id($increment_id){
 		
 		if($increment_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id='{$increment_id}'";
@@ -59,7 +59,7 @@ class NihaoPrescriptionDetailHelper{
 	*/
 	public static function get_list_by_entity_ids($entity_id){
 		if($entity_id){
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -82,7 +82,7 @@ class NihaoPrescriptionDetailHelper{
 	public static function get_list_by_increment_ids($increment_ids){
 		if($increment_ids){
 			$increment_ids = rtrim($increment_ids,',');
-			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id in($increment_ids)";
@@ -106,6 +106,7 @@ class NihaoPrescriptionDetailHelper{
 	protected function list_convert($item_list){
 		$items = array();	
 		foreach ($item_list as $item_key => $item_value) {
+			
 			$product_options = unserialize($item_value['product_options']);
             
             $final_params['prescription_type'] = substr($product_options['info_buyRequest']['tmplens']['prescription_type'],0,100);
@@ -129,11 +130,11 @@ class NihaoPrescriptionDetailHelper{
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];      
 			$items[$item_key]['options']  = $product_options['options'];
 
-            $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['third_name'];
+            $items[$item_key]['index_type']  = $product_options['info_buyRequest']['tmplens']['third_name'] . ' ' . $product_options['info_buyRequest']['tmplens']['prescription_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['lens_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['color_name'];
             $items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
             $items[$item_key]['coatiing_name']  = $product_options['info_buyRequest']['tmplens']['four_name'];
             $items[$item_key]['coatiing_price']  = $product_options['info_buyRequest']['tmplens']['four_price'];
-            $items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
+            $items[$item_key]['index_name']  =  $product_options['info_buyRequest']['tmplens']['third_name'] . ' ' . $product_options['info_buyRequest']['tmplens']['prescription_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['lens_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['color_name'];
             $items[$item_key]['index_id']  = $product_options['info_buyRequest']['tmplens']['third_id'];
             $items[$item_key]['index_price']  = $product_options['info_buyRequest']['tmplens']['lens_price'];
                                                 
@@ -146,7 +147,8 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['increment_id'] = $item_value['increment_id'];
             $items[$item_key]['status'] = $item_value['status'];
             $items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];            
-            $items[$item_key]['discount_amount'] = $item_value['discount_amount'];            
+			$items[$item_key]['discount_amount'] = $item_value['base_discount_amount'];    
+			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];    
 			$items[$item_key]['original_price'] = $item_value['original_price'];
             $items[$item_key]['sku'] = $item_value['sku'];
             $items[$item_key]['name'] = $item_value['name'];        
@@ -159,7 +161,7 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
             $items[$item_key]['second_name'] = $final_params['second_name'];
-            $items[$item_key]['third_name'] = $final_params['third_name'];
+            $items[$item_key]['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'] . ' ' . $product_options['info_buyRequest']['tmplens']['prescription_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['lens_type'] . ' ' . $product_options['info_buyRequest']['tmplens']['color_name'];
             $items[$item_key]['four_name'] = $final_params['four_name'];
 
             $items[$item_key]['od_sph'] = $final_params['od_sph'];

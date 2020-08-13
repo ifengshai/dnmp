@@ -37,9 +37,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'username', title: __('Username')},
                         {field: 'nickname', title: __('Nickname')},
                         {field: 'groups_text', title: __('Group'), operate:false, formatter: Table.api.formatter.label},
-                        {field: 'email', title: __('Email')},
-						{field: 'department_id', title: __('Department'), addClass: "selectpage", extend: "data-source='auth/admin/department_list' data-field='name' data-primary-key='department_id'"},
-                        {field: 'status', title: __("Status"), formatter: Table.api.formatter.status},
+                        {field: 'email', title: __('Email')}, 
+						{field: 'department_id', title: __('Department'), operate: 'LIKE %...%', placeholder: '模糊搜索，*表示任意字符', addClass: "selectpage", extend: "data-source='auth/admin/department_list' data-field='name' data-primary-key='department_id' data-pagination='true' data-page-size='10'"},
+                      
+						//{field: 'department_id', title: __('Department'), formatter: Table.api.formatter.search},
+						{field: 'status', title: __("Status"), formatter: Table.api.formatter.status},
                         {field: 'logintime', title: __('Login time'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: function (value, row, index) {
                                 if(row.id == Config.admin.id){
@@ -54,6 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
+
         add: function () {
             Form.api.bindevent($("form[role=form]"));
         },

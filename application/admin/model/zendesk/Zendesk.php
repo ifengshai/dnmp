@@ -7,16 +7,13 @@ use think\Db;
 use think\Model;
 use think\Exception;
 
-
 class Zendesk extends Model
 {
-
-
     // 表名
     protected $name = 'zendesk';
 
     // 定义时间戳字段名
-    protected $autoWriteTimestamp = 'datetime';
+    protected $autoWriteTimestamp = 'timestamp';
     protected $dateFormat = 'Y-m-d H:i:s';
 
     // 追加属性
@@ -34,8 +31,8 @@ class Zendesk extends Model
         self::beforeInsert(function ($zendesk) {
             //如果存在assignee_id,则不需要自动分配
             //判断是否已分配，chat的情况会存在自动分配的情况，所有此处需要判断下
-            if($zendesk->assignee_id){
-                $assign_id = $due_id = ZendeskAgents::where('agent_id',$zendesk->assignee_id)->value('admin_id');
+            if($zendesk->user_id){
+                $assign_id = $due_id = Zendesk::where('user_id',$zendesk->user_id)->order('id','desc')->value('assign_id');
                 $zendesk->assign_id = $assign_id;
                 $zendesk->due_id = $due_id;
                 $zendesk->assign_time = date('Y-m-d H:i:s',time());
@@ -239,11 +236,11 @@ class Zendesk extends Model
 
     /**
      * 修改后的分单脚本
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * 一、判断当天是否分配任务，若没有分配任务就在分配任务量表中插入用户的任务量分配信息
+     * 二、分配任务：
+     *          1.如果有老用户（未离职）处理过邮件，就把任务分配给该老用户
      */
-    public static function shellAssignTicketChange()
+    public static function shellAssignTicketChange1()
     {
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
@@ -252,21 +249,30 @@ class Zendesk extends Model
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
-            $agents = ZendeskAgents::all();
+            $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->where('a.status','<>','hidden')->where('z.count','<>',0)->select();
+            //查询该用户今天是否休息
+            $userlist_arr = array_filter(array_column($agents,'userid'));
+            $userlist_str = implode(',',$userlist_arr);
+            $time = strtotime(date('Y-m-d 0:0:0',time()));
+            //通过接口获取休息人员名单
+            $ding = new \app\api\controller\Ding;
+            $restuser_arr=$ding->getRestList($userlist_str,$time);
             foreach ($agents as $agent) {
-                //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
-                ZendeskTasks::create([
-                    'type' => $agent->getType(),
-                    'admin_id' => $agent->admin_id,
-                    'assignee_id' => $agent->agent_id,
-                    'leave_count' => 0,
-                    'target_count' => $agent->count,
-                    'surplus_count' => $agent->count,
-                    'complete_count' => 0,
-                    'check_count' => $agent->count,
-                    'apply_count' => 0,
-                    'complete_apply_count' => 0
-                ]);
+                if(!in_array($agent['admin_id'],$restuser_arr)){
+                    //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
+                     ZendeskTasks::create([
+                        'type' => $agent['type'],
+                        'admin_id' => $agent['admin_id'],
+                        'assignee_id' => $agent['agent_id'],
+                        'leave_count' => 0,
+                        'target_count' => $agent['count'],
+                        'surplus_count' => $agent['count'],
+                        'complete_count' => 0,
+                        'check_count' => $agent['count'],
+                        'apply_count' => 0,
+                        'complete_apply_count' => 0
+                    ]); 
+                }
             }
         }
         //获取所有的open和new的邮件
@@ -359,5 +365,221 @@ class Zendesk extends Model
             usleep(1000);
         }
     }
+    public static function shellAssignTicketChange()
+    {
+        $now_date = date('Y-m-d H:i:s');
+        $limit_date = date('Y-m-d 16:30:0');
+        if($now_date<$limit_date){
+            //当天下午4点半之后不进行分配操作
+            //1，判断今天有无task，无，创建
+            $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+            if (!$tasks) {
+                //创建所有的tasks
+                //获取所有的agents
+                $agents = Db::name('zendesk_agents')->alias('z')->join(['fa_admin'=>'a'],'z.admin_id=a.id')->field('z.*,a.userid')->where('a.status','<>','hidden')->where('z.count','<>',0)->select();
+                //查询该用户今天是否休息
+                $userlist_arr = array_filter(array_column($agents,'userid'));
+                $userlist_str = implode(',',$userlist_arr);
+                $time = strtotime(date('Y-m-d 0:0:0',time()));
+                //通过接口获取休息人员名单
+                $ding = new \app\api\controller\Ding;
+                $restuser_arr=$ding->getRestList($userlist_str,$time);
+                foreach ($agents as $agent) {
+                    if(!in_array($agent['admin_id'],$restuser_arr)){
+                        ZendeskTasks::create([
+                            'type' => $agent['type'],
+                            'admin_id' => $agent['admin_id'],
+                            'assignee_id' => $agent['agent_id'],
+                            'leave_count' => 0,
+                            'target_count' => $agent['count'],
+                            'surplus_count' => $agent['count'],
+                            'complete_count' => 0,
+                            'check_count' => $agent['count'],
+                            'apply_count' => 0,
+                            'complete_apply_count' => 0
+                        ]);
+                    }
+                }
+            }
+            //获取所有的open和new的邮件
+            $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('zendesk_update_time','asc')->select();
+            foreach ($waitTickets as $ticket) {
+                $task = array();
+                $assign_id = 0;  //承接人id
+                $assignee_id = 0;       //承接人zendesk_id
+                $due_id = 0;       //分配人id
+                if($ticket->channel == 'voice') {continue;}
+                //判断是否有承接人，并且该承接人在职，并且站点和当前邮件的站点一致
+                $recipient = Db::name('zendesk')
+                        ->alias('z')
+                        ->join('fa_admin a','z.assign_id=a.id')
+                        ->join('fa_zendesk_agents za','z.assign_id = za.admin_id')
+                        ->where(['a.status'=>['neq','hidden'],'za.count'=>['neq',0],'za.type'=>$ticket->getType(),'z.id'=>$ticket->id])
+                        ->field('z.assign_id,za.agent_id,z.id')
+                        ->find();
+                if($recipient['id']){
+                    $assign_id = $recipient['assign_id'];
+                    $assignee_id = $recipient['agent_id'];
+                    //有承接人，判断该承接人是否上班
+                    $customer_task = ZendeskTasks::whereTime('create_time', 'today')
+                            ->where(['admin_id' => $assign_id])
+                            ->find();
+                    if($customer_task->id){
+                        //承接人上班，判断工作量是否满额
+                        if($customer_task->target_count > $customer_task->complete_count){
+                            //没有满额，分配给当前承接人
+                            $task = $customer_task;
+                            $due_id = $customer_task->admin_id;
+                        }else{
+                            //承接人任务量满额，分配给任务量最少的人
+                            $task = ZendeskTasks::whereTime('create_time', 'today')
+                            ->where(['type' => $ticket->getType()])
+                            ->where('surplus_count','>',0)
+                            ->order('complete_count', 'asc')
+                            ->limit(1)
+                            ->find();
+                            $due_id = $task->admin_id;
+                        }
+                    }else{
+                        //承接人未上班，分配给任务量最少的人
+                        $task = ZendeskTasks::whereTime('create_time', 'today')
+                            ->where(['type' => $ticket->getType()])
+                            ->where('surplus_count','>',0)
+                            ->order('complete_count', 'asc')
+                            ->limit(1)
+                            ->find();
+                        $due_id = $task->admin_id;
+                    }
+                }else{
+                    //没有承接人，承接并分配给任务量最少的人
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['type' => $ticket->getType()])
+                    ->where('surplus_count','>',0)
+                    ->order('complete_count', 'asc')
+                    ->limit(1)
+                    ->find();
+                    $assign_id = $task->admin_id;
+                    $assignee_id = $task->assignee_id;
+                    $due_id = $task->admin_id;
+                }
+                if ($task) {
+                    //判断该用户是否已经分配满了，满的话则不分配
+                    if ($task->target_count > $task->complete_count) {
+                        Db::name('zendesk')->where('id',$ticket->id)->update(['is_hide'=>0]);
+                        $str = '';
+                        $str .= $ticket->ticket_id.'--'.$ticket->zendesk_update_time."--".$ticket->status."--".$ticket->getType()."--".$ticket->assign_id.'--';
+                        //修改承接人,分配人
+                        $ticket->assignee_id = $assignee_id;
+                        $ticket->assign_id = $assign_id;
+                        $ticket->due_id = $due_id;
+                        $ticket->assign_time = date('Y-m-d H:i:s', time());
+                        $ticket->save();
+                        //修改task的字段
+                        $task->surplus_count = $task->surplus_count - 1;
+                        $task->complete_count = $task->complete_count + 1;
+                        $task->complete_apply_count = $task->complete_apply_count + 1;
+                        $task->save();
 
+                        $str .= $assign_id.'--'.$due_id;
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
+                        echo $str." is ok"."\n";
+                    }
+                }
+                usleep(1000);
+            }
+        }
+    }
+    /*
+     * 统计工作量概况
+     * */
+    public function worknum_situation($platform = 0,$workload_time = ''){
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
+        if($platform){
+            $map['type'] = $platform;
+        }
+        //待处理
+        $wait_deal_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
+
+        //新增
+        if($platform){
+            $where['c.platform'] = $platform;
+        }
+        if($workload_time){
+            $createat = explode(' ', $workload_time);
+            $where['c.update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['zendesk_update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $task_where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        }else{
+            //默认显示一周的数据
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d 23:59:59");
+            $where['c.update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['zendesk_update_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+        }
+        $where['z.channel'] = array('neq','voice');
+        $new_create_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
+        //已回复
+        $already_reply_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1])->count();
+        //待分配
+        $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
+        $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
+        //人效
+        if($platform){
+            $task_where['type'] = $platform;
+        }
+        $where['c.is_admin'] = 1;
+        $all_already_num = $this->zendeskTasks->where($task_where)->sum('reply_count');
+        $people_day = $this->zendeskTasks->where($task_where)->count();
+        if($people_day == 0){
+            $positive_effect_num = 0;
+        }else{
+            $positive_effect_num = round($all_already_num/$people_day,2);
+        }
+        //回复时效
+        if($platform){
+            $zendesk_where['type'] = $platform;
+        }
+        $zendesk_where['status'] = array('in','1,2');
+        $zendesk_where['channel'] = array('neq','voice');
+        $id = $this->where($zendesk_where)->order('zendesk_update_time','asc')->value('id');
+        $reply_where['is_admin'] = 0;
+        $reply_where['zid'] = $id;
+        $reply_time = $this->zendeskComments->where($reply_where)->order('id','desc')->value('update_time');
+        if($reply_time){
+            $reply_time = strtotime($reply_time);
+            $reply_failure_num=ceil((time()-$reply_time)/3600);
+        }else{
+            $reply_failure_num = 0;
+        }
+
+        $zendesk = array(
+            'wait_deal_num' => $wait_deal_num,
+            'new_create_num' => $new_create_num,
+            'already_reply_num' => $already_reply_num,
+            'wait_allot_num' => $wait_allot_num,
+            'positive_effect_num' => $positive_effect_num,
+            'reply_failure_num' => $reply_failure_num,
+        );
+        return $zendesk;
+    }
+    /*
+     *  工单统计超时审批情况
+     * */
+    public function worklist_deal($admin_id = 0,$time_str = ''){
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['check_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        }else{
+            //默认显示一周的数据
+            $seven_startdate = date("Y-m-d", strtotime("-6 day"));
+            $seven_enddate = date("Y-m-d 23:59:59");
+            $where['check_time'] = ['between', [$seven_startdate, $seven_enddate]];
+        }
+        if($admin_id){
+            $where['assign_user_id'] = $admin_id;
+        }
+        $this->where($where)->count();
+    }
 }

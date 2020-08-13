@@ -113,9 +113,12 @@ class WorkOrderList extends Model
      */
     public function getSkuList($order_platform, $increment_id)
     {
+        $is_new_version = 0;
         switch ($order_platform) {
             case 1:
                 $this->model = new \app\admin\model\order\order\Zeelool();
+                $is_new_version = $this->model->where('increment_id', $increment_id)
+                    ->value('is_new_version');
                 break;
             case 2:
                 $this->model = new \app\admin\model\order\order\Voogueme();
@@ -123,6 +126,9 @@ class WorkOrderList extends Model
             case 3:
                 $this->model = new \app\admin\model\order\order\Nihao();
                 break;
+            case 4:
+                $this->model = new \app\admin\model\order\order\Meeloog();
+                break;    
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
                 break;
@@ -136,17 +142,21 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,a.base_grand_total,a.grand_total,a.base_to_order_rate,c.method,a.customer_email,a.order_type,a.mw_rewardpoint_discount')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
+        $register_email = $this->model->alias('m')->where('m.increment_id',$increment_id)->join(['customer_entity' => 'r'], 'm.customer_id=r.entity_id')->value('email');
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
+        $result['is_new_version'] = $is_new_version;
         $result['base_grand_total'] = $orderInfo['base_grand_total'];
         $result['grand_total']    = $orderInfo['grand_total'];
         $result['base_to_order_rate'] = $orderInfo['base_to_order_rate'];
-        $result['customer_email'] = $orderInfo['customer_email'];
+        $result['customer_email'] = $register_email ?: $orderInfo['customer_email'];
+        $result['order_type']     = $orderInfo['order_type'];
+        $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
         return $result ? $result : [];
     }
 
@@ -216,20 +226,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1)
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -237,11 +252,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','isNewVersion'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -300,7 +315,74 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
-
+    
+    /**
+     * 更改地址
+     * @param $params
+     * @param $work_id
+     * @throws \Exception
+     */
+    public function changeAddress($params, $work_id, $measure_choose_id, $measure_id)
+    {
+        $work = $this->find($work_id);
+        $siteType = $params['work_platform'];
+        //修改地址
+        if (($work->work_type == 1 && $measure_choose_id == 13) || ($work->work_type == 2 && $measure_choose_id == 13)) {
+            Db::startTrans();
+            try {
+                if (!$params['modify_address']['country_id']) {
+                    exception('国家不能为空');
+                }
+                //查询是否有该地址
+                $is_exist = WorkOrderChangeSku::where(['work_id' => $work_id])->value('id');
+                if(!$is_exist){
+                    $data = [
+                        'work_id' => $work_id,
+                        'increment_id' => $params['platform_order'],
+                        'platform_type' => $params['work_platform'],
+                        'change_type' => 6,
+                        'measure_id' => $measure_id,
+                        'create_person' => session('admin.nickname'),
+                        'update_time' => date('Y-m-d H:i:s'),
+                        'create_time' => date('Y-m-d H:i:s')
+                    ];
+                    //修改地址
+                    $data['email'] = $params['modify_address']['email'];
+ 
+                    $data['userinfo_option'] = serialize($params['modify_address']);
+                    WorkOrderChangeSku::create($data);
+                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 6]);
+                }else{
+                    //更新
+                    $data['email'] = $params['modify_address']['email'];
+                    $data['userinfo_option'] = serialize($params['modify_address']);
+                    WorkOrderChangeSku::where(['work_id' => $work_id])->update($data);
+                }
+                if($params['work_status'] != 1){
+                    $changeAddress = $params['modify_address'];
+                    $postData = array(
+                        'increment_id'=>$params['platform_order'],
+                        'type'=>$changeAddress['address_id'],
+                        'first_name'=>$changeAddress['firstname'],
+                        'last_name'=>$changeAddress['lastname'],
+                        'email'=>$changeAddress['email'],
+                        'telephone'=>$changeAddress['telephone'],
+                        'country'=>$changeAddress['country_id'],
+                        'region_id'=>$changeAddress['region_id'],
+                        'region'=>$changeAddress['region'],
+                        'city'=>$changeAddress['city'],
+                        'street'=>$changeAddress['street'],
+                        'postcode'=>$changeAddress['postcode'],
+                    );
+                    $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
+                }
+                Db::commit();
+            } catch (\Exception $e) {
+                Db::rollback();
+                exception($e->getMessage());
+            }
+        } 
+    }
     /**
      * 更改镜片，赠品，
      * @param $params
@@ -312,8 +394,8 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $measure = '';
         //修改镜片
-        if (($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)) {
-            $measure = 1;
+        if (($work->work_type == 1  && $measure_choose_id == 12) || ($work->work_type == 2  && $measure_choose_id == 12)) {
+            $measure = 12;
         } elseif ($measure_choose_id == 6) { //赠品
             $measure = 2;
         } elseif ($measure_choose_id == 7) { //补发
@@ -323,7 +405,7 @@ class WorkOrderList extends Model
             Db::startTrans();
             try {
                 //如果是更改镜片
-                if ($measure == 1) {
+                if ($measure == 12) {
                     $changeLens = $params['change_lens'];
                     $change_type = 2;
                 } elseif ($measure == 2) { //赠品
@@ -356,16 +438,16 @@ class WorkOrderList extends Model
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
 
-                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
+                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     $data = [
                         'work_id' => $work_id,
                         'increment_id' => $params['platform_order'],
                         'platform_type' => $type,
                         'original_name' => $changeLens['original_name'][$key] ?? '',
-                        'original_sku' => $changeLens['original_sku'][$key],
+                        'original_sku' => trim($changeLens['original_sku'][$key]),
                         'original_number' => intval($changeLens['original_number'][$key]),
                         'change_type' => $change_type,
-                        'change_sku' => $changeLens['original_sku'][$key],
+                        'change_sku' => trim($changeLens['original_sku'][$key]),
                         'change_number' => intval($changeLens['original_number'][$key]),
                         'recipe_type' => $recipe_type,
                         'lens_type' => $lensCoatName['lensName'],
@@ -438,7 +520,7 @@ class WorkOrderList extends Model
         $orderChangeList = [];
         //判断是否选中更改镜框问题类型
         if ($params['change_frame']) {
-            if (($params['problem_type_id'] == 1 && $params['work_type'] == 1 && $measure_choose_id == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2 && $measure_choose_id == 1) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2 && $measure_choose_id == 1)) {
+            if (( $params['work_type'] == 1 && $measure_choose_id == 1) || ($params['work_type'] == 2 && $measure_choose_id == 1)) {
                 $original_sku = $params['change_frame']['original_sku'];
                 $original_number = $params['change_frame']['original_number'];
                 $change_sku = $params['change_frame']['change_sku'];
@@ -509,20 +591,25 @@ class WorkOrderList extends Model
      * @param $prescription_type
      * @return array
      */
-    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type)
+    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type,$isNewVersion)
     {
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 0){
+                $url = 'magic/product/lensData';
+            }elseif($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
         $coatingLists = $data['coating_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
-        $lens = $prescription[$prescription_type] ?? [];
+        $lens = $prescription[$prescription_type] ?? [];       
         $lensName = $coatingName = $colorName = $lensType = '';
         if (!$colorId) {
             foreach ($lens as $len) {
@@ -534,28 +621,58 @@ class WorkOrderList extends Model
             }
         } else {
             //colorname
-            foreach ($colorList as $key => $val) {
-                if ($val['id'] == $colorId) {
-                    $colorName = $val['name'];
-                    break;
+            if($isNewVersion == 1){
+                foreach ($lensColorList as $key => $val) {
+                    if ($val['lens_id'] == $colorId) {
+                        $colorName = $val['lens_data_name'];
+                        break;
+                    }
+                }
+            }else{
+                foreach ($colorList as $key => $val) {
+                    if ($val['id'] == $colorId) {
+                        $colorName = $val['name'];
+                        break;
+                    }
                 }
             }
+
             //lensName
-            foreach ($lensColorList as $val) {
+            foreach ($lens as $val) {
                 if ($val['lens_id'] == $lens_id) {
                     $lensName = $val['lens_data_name'] . "({$colorName})";
                     $lensType = $val['lens_data_index'];
                     break;
                 }
             }
+            //lsw添加
+            if(!$lensName){
+                foreach ($lensColorList as $cval) {
+                    if ($cval['lens_id'] == $lens_id) {
+                        $lensName = $cval['lens_data_name'] . "({$colorName})";
+                        $lensType = $cval['lens_data_index'];
+                        break;
+                    }
+                }
+            }
+
         }
 
         foreach ($coatingLists as $coatingList) {
-            if ($coatingList['id'] == $coating_id) {
-                $coatingName = $coatingList['name'];
-                break;
+            if($isNewVersion == 1){
+                if ($coatingList['coating_id'] == $coating_id) {
+                    $coatingName = $coatingList['coating_name'];
+                    break;
+                }
+            }else{
+                if ($coatingList['id'] == $coating_id) {
+                    $coatingName = $coatingList['name'];
+                    break;
+                }
             }
+
         }
+
         return ['lensName' => $lensName, 'lensType' => $lensType, 'colorName' => $colorName, 'coatingName' => $coatingName];
     }
 
@@ -567,7 +684,7 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function createOrder($siteType, $work_id)
+    public function createOrder($siteType, $work_id, $isNewVersion = 0)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
@@ -616,7 +733,7 @@ class WorkOrderList extends Model
                 }
 
                 $postData['product'][$key] = [
-                    'sku' => strtoupper($changeSku['original_sku']),
+                    'sku' => $changeSku['original_sku'],
                     'qty' => $changeSku['original_number'],
                     'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
@@ -649,15 +766,24 @@ class WorkOrderList extends Model
                     'color_id' => $prescriptions['color_id'],
                     'color_name' => $prescriptions['color_name'],
                 ];
+                $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', json_encode($postData), FILE_APPEND);
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
+                if($isNewVersion == 0){
+                    $url = 'magic/order/createOrder';
+                }elseif($isNewVersion == 1){
+                    $url = 'magic/order/newCreateOrder';
+                }
+                $res = $this->httpRequest($siteType, $url, $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
                 self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+
+                //补发扣库存
+                $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
                 exception($e->getMessage());
             }
@@ -683,6 +809,7 @@ class WorkOrderList extends Model
             $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
             return true;
         } catch (Exception $e) {
+            //exception('赠送积分失败');
             exception($e->getMessage());
         }
     }
@@ -716,20 +843,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '')
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$is_new_version = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $is_new_version;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($is_new_version == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -737,11 +869,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type','is_new_version'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -757,8 +889,8 @@ class WorkOrderList extends Model
      */
     public function checkWork($work_id, $params = [])
     {
-        $work = self::find($work_id);
 
+        $work = self::find($work_id);
         //判断是否已审核
         if ($work->check_time) return true;
         Db::startTrans();
@@ -780,10 +912,13 @@ class WorkOrderList extends Model
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
-                    //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [9, 10])) {
+                    //承接人的自动完成状态
+                    if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                        if(7 == $measure_choose_id){
+                            $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        }
                         $key++;
                     } else {
                         $allComplete = 0;
@@ -826,10 +961,11 @@ class WorkOrderList extends Model
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
+
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (in_array($measure_choose_id, [8, 9, 10])) {
+                        if ((1 == $orderRecept->is_auto_complete)) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -863,7 +999,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id);
+                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();
@@ -879,7 +1015,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    //Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -903,10 +1039,11 @@ class WorkOrderList extends Model
      * @author lsw
      * @since 2020/04/21 10:13:28
      */
-    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note)
+    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete)
     {
         $work = self::find($work_id);
-
+        Db::startTrans();
+        try {
         if (1 == $success) {
             $data['recept_status'] = 1;
         } else {
@@ -945,18 +1082,35 @@ class WorkOrderList extends Model
                 $dataWorkOrder['work_status'] = 6;
 
                 //通知
-                Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
+                //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
             } else {
                 $dataWorkOrder['work_status'] = 5;
             }
             $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-            WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+            
+        }else{
+            $dataWorkOrder['work_status'] = 5;
         }
+        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
         if ($resultInfo  && (1 == $data['recept_status'])) {
             $this->deductionStock($work_id, $measure_id);
         }
+        //不是自动处理完成
+        if($is_auto_complete != 1){
+            $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
+            if ($measure_choose_id == 9) {
+                $this->presentCoupon($work->id);
+            } elseif ($measure_choose_id == 10) {
+                $this->presentIntegral($work->id);
+            }
+        }
+        Db::commit();
         return true;
-    }
+    } catch (Exception $e) {
+        Db::rollback();
+        exception($e->getMessage());
+    }        
+  }
     //扣减库存逻辑
     public function deductionStock($work_id, $measure_id)
     {
@@ -1127,5 +1281,268 @@ class WorkOrderList extends Model
         $data['list'] = $workOrderLists;
         $data['replenish_list'] = $replenish_list;
         return $data;
+    }
+    /**
+     * vip退款
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/03 11:43:04 
+     * @return void
+     */
+    public function vipOrderRefund($siteType,$order_number){
+        $postData = array('order_number'=>$order_number);
+        $res = $this->httpRequest($siteType, 'magic/order/cancelVip', $postData, 'POST');
+        return $res;
+    }
+    /**
+     * 客服数据大屏 -- 工单概况
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/23 18:06:03 
+     * @return void
+     */
+    public function workorder_situation($platform){
+        //今天的工单数据统计
+        $today_startdate = date('Y-m-d');
+        $today_enddate = date('Y-m-d', strtotime("+1 day"));
+        $today = array(
+            'wo_num' => $this->wo_sum($today_startdate,$today_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($today_startdate,$today_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($today_startdate,$today_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($today_startdate,$today_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($today_startdate,$today_enddate,$platform,1),
+        );
+        //昨天的工单数据统计
+        $yesterday_startdate = date("Y-m-d", strtotime("-1 day"));
+        $yesterday_enddate = date("Y-m-d");
+        $yesterday = array(
+            'wo_num' => $this->wo_sum($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($yesterday_startdate,$yesterday_enddate,$platform,1),
+        );
+        //过去7天的工单数据统计
+        $seven_startdate = date("Y-m-d", strtotime("-7 day"));
+        $seven_enddate = date("Y-m-d");
+        $seven = array(
+            'wo_num' => $this->wo_sum($seven_startdate,$seven_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($seven_startdate,$seven_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($seven_startdate,$seven_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($seven_startdate,$seven_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($seven_startdate,$seven_enddate,$platform,1),
+        );
+        //过去30天的工单数据统计
+        $thirty_startdate = date("Y-m-d", strtotime("-30 day"));
+        $thirty_enddate = date("Y-m-d");
+        $thirty = array(
+            'wo_num' => $this->wo_sum($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($thirty_startdate,$thirty_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($thirty_startdate,$thirty_enddate,$platform,1),
+        );
+        //当月
+        $nowmonth_startdate = date('Y-m-01', strtotime($today_startdate));
+        $nowmonth_enddate = date("Y-m-d", strtotime("$nowmonth_startdate +1 month"));
+        $nowmonth = array(
+            'wo_num' => $this->wo_sum($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($nowmonth_startdate,$nowmonth_enddate,$platform,1),
+        );
+        //上月
+        $premonth_startdate = date('Y-m-01', strtotime("$today_startdate -1 month"));
+        $premonth_enddate = date('Y-m-d', strtotime("$premonth_startdate +1 month"));
+        $premonth = array(
+            'wo_num' => $this->wo_sum($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($premonth_startdate,$premonth_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($premonth_startdate,$premonth_enddate,$platform,1),
+        );
+        //今年
+        $year_startdate = date("Y",time())."-1"."-1"; //本年开始
+        $year_enddate = date("Y",time())."-12"."-31"." 23:59:59"; //本年结束
+        $year = array(
+            'wo_num' => $this->wo_sum($year_startdate,$year_enddate,$platform,1),
+            'wo_complete_num' => $this->wo_complete_num($year_startdate,$year_enddate,$platform,1),
+            'wo_bufa_percent' => $this->wo_bufa_percent($year_startdate,$year_enddate,$platform,1),
+            'wo_refund_percent' => $this->wo_refund_percent($year_startdate,$year_enddate,$platform,1),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($year_startdate,$year_enddate,$platform,1),
+        );
+        //统计
+        $total = array(
+            'wo_num' => $this->wo_sum($year_startdate,$year_enddate,$platform),
+            'wo_complete_num' => $this->wo_complete_num($year_startdate,$year_enddate,$platform),
+            'wo_bufa_percent' => $this->wo_bufa_percent($year_startdate,$year_enddate,$platform),
+            'wo_refund_percent' => $this->wo_refund_percent($year_startdate,$year_enddate,$platform),
+            'wo_refund_money_percent' => $this->wo_refund_money_percent($year_startdate,$year_enddate,$platform),
+        );
+        $worklist = array(
+            'today' => $today,
+            'yesterday' => $yesterday,
+            'seven' => $seven,
+            'thirty' => $thirty,
+            'nowmonth' => $nowmonth,
+            'premonth' => $premonth,
+            'year' => $year,
+            'total' => $total,
+        );
+        return $worklist;
+    }
+    /**
+     * 统计工单创建数量
+     */
+    public function wo_sum($start,$end,$platform = 0,$type = 0){
+        if($type == 1){
+            $map['create_time'] = array('between',[$start,$end]);
+        }
+        $map['work_status'] = array('not in','0,4,7');
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+
+        $count = $this->where($map)->count();
+        return $count ? $count : 0;
+    }
+    /**
+     * 统计工单完成数量
+     */
+    public function wo_complete_num($start,$end,$platform = 0,$type = 0){
+        if($type == 1){
+            $map['complete_time'] = array('between',[$start,$end]);
+        }
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $count = $this->where($map)->count();
+        return $count ? $count : 0;
+    }
+    /**
+     * 统计补发订单比
+     */
+    public function wo_bufa_percent($start,$end,$platform = 0,$type = 0){
+        $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
+        if($type == 1){
+            $map['z.complete_time'] = array('between',[$start,$end]);
+        }
+        $map['z.work_status'] = 6;
+        if($platform != 0){
+            $map['z.work_platform'] = $platform;
+        }
+        $map['m.measure_choose_id'] = 7;
+        $count = $this->alias('z')->join('fa_work_order_measure m','z.id=m.work_id')->where($map)->count();
+        $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /**
+     * 统计退款订单比
+     */
+    public function wo_refund_percent($start,$end,$platform = 0,$type = 0){
+        $complete_count = $this->wo_complete_num($start,$end,$platform,$type);
+        if($type == 1){
+            $map['complete_time'] = array('between',[$start,$end]);
+        }
+        $map['is_refund'] = 1;
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $count = $this->where($map)->count();
+        $sum = $complete_count == 0 ? 0 : round($count/$complete_count*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /**
+     * 统计退款金额比
+     */
+    public function wo_refund_money_percent($start,$end,$platform = 0,$type = 0){
+        if($type == 1) {
+            $map['complete_time'] = array('between', [$start, $end]);
+        }
+        $map['work_status'] = 6;
+        if($platform != 0){
+            $map['work_platform'] = $platform;
+        }
+        $complete_money = $this->where($map)->sum('base_grand_total');
+        $money = $this->where($map)->where('is_refund',1)->sum('refund_money');
+        $sum = $complete_money == 0 ? 0 : round($money/$complete_money*100,2);
+        return $sum ? $sum.'%' : 0;
+    }
+    /*
+     * 问题类型统计
+     * */
+    public function workorder_question_type($platform,$time_where){
+        //客户问题
+        $kefu_arr = $this->get_question_type(4,$platform,$time_where);
+        //物流仓储
+        $wuliu_arr = $this->get_question_type(2,$platform,$time_where);
+        //产品问题
+        $product_arr = $this->get_question_type(3,$platform,$time_where);
+        //其他
+        $other_arr = $this->get_question_type(6,$platform,$time_where);
+        //仓库跟单
+        $warehouse_arr = $this->get_question_type(5,$platform,$time_where);
+        $arr = array(
+            array(
+                'name'=>'客户问题',
+                'value'=>$kefu_arr
+            ),
+            array(
+                'name'=>'物流仓储',
+                'value'=>$wuliu_arr
+            ),
+            array(
+                'name'=>'产品问题',
+                'value'=>$product_arr
+            ),
+            array(
+                'name'=>'其他',
+                'value'=>$other_arr
+            ),
+            array(
+                'name'=>'仓库跟单',
+                'value'=>$warehouse_arr
+            ),
+        );
+        return $arr;
+    }
+    /*
+     * 问题类型通用方法
+     * */
+    public function get_question_type($type,$platform,$time_where){
+        $kehu_where['problem_belong'] = $type;
+        $kehu_where['is_del'] = 1;
+        $problem_ids = Db::name('work_order_problem_type')->where($kehu_where)->column('id');
+        $where['work_status'] = 6;
+        $where['problem_type_id'] = array('in',$problem_ids);
+        if($platform){
+            $where['work_platform'] = $platform;
+        }
+        $count = $this->where($where)->where($time_where)->count();
+        return $count;
+    }
+    /*
+     * 措施统计
+     * */
+    public function workorder_measures($platform,$time_where){
+        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $measures = Db::name('work_order_step_type')->where('is_del',1)->field('id,step_name')->select();
+        $arr = array();
+        foreach ($measures as $key=>$value){
+            $arr[$key]['name'] = $value['step_name'];
+            $where['m.operation_type'] = 1;
+            $where['m.measure_choose_id'] = $value['id'];
+            if($platform){
+                $where['w.work_platform'] = $platform;
+            }
+            $arr[$key]['value'] = $this->step->alias('m')->join('fa_work_order_list w','m.work_id=w.id')->where($time_where)->where($where)->count();
+        }
+
+        return $arr;
     }
 }

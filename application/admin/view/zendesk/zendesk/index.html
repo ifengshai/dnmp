@@ -16,12 +16,19 @@
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
                         <a href="{:url('zendesk/zendesk/add',['type' => 1])}" class="btn btn-info  {:$auth->check('zendesk/zendesk/add')?'':'hide'}"  data-area = '["100%","100%"]' title="zeelool发送"   target="_blank"><i class="fa fa-plus"></i> zeelool发送</a>
                         <a href="{:url('zendesk/zendesk/add',['type' => 2])}" class="btn btn-warning  {:$auth->check('zendesk/zendesk/add')?'':'hide'}" data-area = '["100%","100%"]' title="voogueme发送" target="_blank" ><i class="fa fa-plus"></i> voogueme发送</a>
+                        <a href="{:url('zendesk/zendesk/add',['type' => 3])}" class="btn btn-danger  {:$auth->check('zendesk/zendesk/add')?'':'hide'}" data-area = '["100%","100%"]' title="nihao发送" target="_blank" ><i class="fa fa-plus"></i> nihao发送</a>
                         <a class="btn btn-success btn-change btn-start"  data-url="{:url('zendesk/zendesk/moreTasks')}" href="javascript:;"><i class="fa fa-play"></i> 申请工单</a>
+
+                        {if $artificial_synchronous != false}
+                            <a class="btn btn-info btn-selected btn-synchronous" href="javascript:;"><i class="fa fa-leaf"></i> 同步数据</a>
+                        {/if}
+                        <a class="btn btn-info btn-selected batch-edit-recipient {:$auth->check('zendesk/zendesk/batch_edit_recipient')?'':'hide'}"" href="javascript:;"><i class="fa fa-pencil"></i> 修改承接人</a>
                     </div>
                         <table id="table" class="table table-striped table-bordered table
                         -hover table-nowrap"
                                data-operate-edit="{:$auth->check('zendesk/zendesk/edit')}"
                                data-operate-del="{:$auth->check('zendesk/zendesk/del')}"
+                               data-operate-edit_recipient="{:$auth->check('zendesk/zendesk/edit_recipient')}"
                                width="100%">
                         </table>
                     </div>

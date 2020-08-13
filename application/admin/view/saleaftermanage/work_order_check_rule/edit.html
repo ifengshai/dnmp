@@ -1,0 +1,73 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-problem_belong" class="form-control selectpicker" name="row[create_belong]">
+                {if condition="$row.is_group_create eq 1"}
+                <option value="0">组创建</option>
+                {else /} <option value="1">人创建</option>
+                {/if}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('创建者')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[create_group_name]', $row['work_create_person'], null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[step_name]', $step, $row['step_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Symbol')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select class="form-control selectpicker" name="row[symbol]">
+                <option value="0" {eq name="0" value="$row.symbol" }selected{/eq}>大于</option>
+                <option value="1" {eq name="1" value="$row.symbol" }selected{/eq}>等于</option>
+                <option value="2" {eq name="2" value="$row.symbol" }selected{/eq}>小于</option>
+                <option value="3" {eq name="3" value="$row.symbol" }selected{/eq}>大于等于</option>
+                <option value="4" {eq name="4" value="$row.symbol" }selected{/eq}>小于等于</option>
+            </select>
+<!--            <input id="c-symbol" data-rule="required" class="form-control" name="row[symbol]" type="text" value="{$row.symbol}">-->
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Step_value')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-step_value" data-rule="required" class="form-control" name="row[step_value]" type="number" value="{$row.step_value}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('审核组')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[check_group_id]', $groupdata, $row['check_group_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">权重:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row.weight}">
+        </div>
+    </div>
+    <div class="form-group quanzhong">
+        <div>
+            <label class="control-label col-xs-12 col-sm-2"></label>
+            <div class="col-xs-12 col-sm-8" style="margin-top: -10px;color: #ccc;">
+                数字越大权重越高
+            </div>
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

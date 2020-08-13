@@ -1,0 +1,63 @@
+<style>
+    .form-group{
+        float: left;
+        width: 32%;
+    }
+    .col-sm-2 {
+        width:30%
+    }
+    #add_entry_product{
+        width: 73px;
+        height: 31px;
+        line-height: 31px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 0 10px 0px;
+    }
+    #del{
+        float: left;
+        width: 25%;
+        height: 28px;
+        line-height: 12px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 8px;
+        margin-top: 9px;
+        background: #e74c3c;
+    }
+    .desc{
+        display: flex;
+        margin: 10px 0 ;
+    }
+    .desc textarea{
+        margin: 0 10px 10px;
+        border-radius: 4px;
+        resize: none;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+        <thead>
+        <tr role="row">
+            <th style="width: 150px;">SKU</th>
+            <th style="width: 150px;">借出数量</th>
+            <th style="width: 150px;">库位</th>
+        </thead>
+        <tbody id="product_data">
+            {volist name="product_list" id="vo"}
+            <tr role="row" class="odd">
+                <td>{$vo.sku}</td>
+                <td>{$vo.lend_num}</td>
+                <td>{$vo.location}</td>
+            </tr>
+            {/volist}
+        </tbody>
+    </table>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+    </div>
+</form>

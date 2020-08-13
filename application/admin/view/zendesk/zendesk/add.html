@@ -57,9 +57,11 @@
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="user-block pull-left">
-                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image">
+                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image" style="margin-left: 27px;">
                                 <span class="username">
-                                  <span href="#"><input id="c-subject" data-rule="required" value="" class="form-control ticket-subject" name="row[subject]" type="text"></span>
+                                  <span href="#">
+                                      <input id="c-subject" data-rule="required" value="" class="form-control ticket-subject" name="row[subject]" type="text" style="width: 450px;margin-left: 37px;">
+                                    </span>
                                 </span>
                             </div>
                         </div>
@@ -76,7 +78,7 @@
                                     <option value="1">new</option>
                                     <option value="2">open</option>
                                     <option value="3">pending</option>
-                                    <option value="4">solved</option>
+                                    <option value="4" selected>solved</option>
                                 </select>
                             </div>
                         </div>

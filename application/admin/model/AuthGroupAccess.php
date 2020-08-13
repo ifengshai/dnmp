@@ -225,5 +225,5 @@ class AuthGroupAccess extends Model
             }
         }
         return $arr ?? [];
-    }        
+    }      
 }

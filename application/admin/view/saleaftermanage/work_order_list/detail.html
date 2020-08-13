@@ -345,7 +345,45 @@
         padding: 0 10px;
         margin: 0;
     }
+    .step52_function1 {
+        background-color: #f4f4f4;
+        border: solid 1px #d2d6de;
+        width: 96%;
+        float: left;
+        padding: 20px;
+    }
 
+    .step52_function1_child {
+        float: left;
+        width: 32%;
+        padding: 8px;
+    }
+
+    .step52_function1_child label {
+        width: 40%;
+    }
+
+    .step52_function1_child div {
+        width: 58%;
+    }
+    .step52_function2_child label {
+        width: 40%;
+    }
+    .step52_function2_child div {
+        width: 58%;
+    }
+    .step52_function3_child label {
+        width: 40%;
+    }
+
+    .step52_function3_child div {
+        width: 58%;
+    }
+
+    .step52_function3 table {
+        float: left;
+        margin-top: 2px;
+    }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -357,6 +395,8 @@
     <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
     <!--订单支付的支付方式 根据订单号读出来-->
     <input type="hidden" id='work_platform' name="row[work_platform]" value="{$row.work_platform}" />
+
+    <input type="hidden" name="row[is_new_version]" id="is_new_version" value="{$row.is_new_version}">
     <!--站点类型-->
 
     <div class="form-group">
@@ -388,7 +428,20 @@
                 </select>                
             </div>
         </div>
-
+        <div class="form-group-child">
+            <label class="control-label col-xs-12 col-sm-2">{:__('订单类型')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-order_type" class="form-control selectpicker" disabled  name="row[work_order_type]">
+                    <option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>普通订单</option>
+                    <option value="2" {eq name="2" value="$row.order_type"}selected{/eq}>批发单</option>
+                    <option value="3" {eq name="3" value="$row.order_type"}selected{/eq}>网红单</option>
+                    <option value="4" {eq name="4" value="$row.order_type"}selected{/eq}>补发单</option>
+                    <option value="5" {eq name="5" value="$row.order_type"}selected{/eq}>补差价订单</option>
+                    <option value="7" {eq name="7" value="$row.order_type"}selected{/eq}>paypal手动补单</option>
+                    <option value="100" {eq name="100" value="$row.order_type"}selected{/eq}>VIP订单</option>
+                </select>
+            </div>
+        </div>
         <div class="form-group-child2" style="margin-left: 1%;width: 47%;">
             <label class="control-label col-xs-12 col-sm-2">{:__('problem_description')}：</label>
             <div class="col-xs-12 col-sm-8" style="width: 83%;">
@@ -496,8 +549,10 @@
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
                
-                <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
-                <input type="hidden" name="row[after_user_id]" id="after_user_id"  value="">
+                <!-- <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[after_user_id]" id="after_user_id"  value=""> -->
+                <label class="control-label col-xs-12 col-sm-2" id="all_after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[all_after_user_id][]" id="all_after_user_id" value="">  
             </div>
         </div>
     </div>    
@@ -669,6 +724,12 @@
                     value="{$row.refund_way}">
             </div>
         </div>
+        <div class="form-group-child3 measure step2" style="display:none;">
+            <label class="control-label col-xs-12 col-sm-2">{:__('使用积分抵扣的金额')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-rewardpoint_discount_money" class="form-control" name="row[rewardpoint_discount_money]" type="text" readonly value="{$row.rewardpoint_discount_money}">
+            </div>
+        </div>
 
 
         <div class="form-group-child3 measure step8" style="display:none;">
@@ -772,7 +833,7 @@
         <!--更换镜框 end-->
 
         <!--更换处方 start-->
-        <div class="form-group-child4 measure step2-1" style="display:none;" >
+        <div class="form-group-child4 measure step12-12" style="display:none;" >
             <div class="col-xs-12 col-sm-8" style="width: 100%">
                 <p style="font-size: 16px;"><b>更改镜片</b></p>
 
@@ -984,7 +1045,7 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('Fast name')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('First name')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-firstname" class="form-control" disabled name="row[address][firstname]" type="text" value="">
                         </div>
@@ -1195,7 +1256,92 @@
             </div>
         </div>
         <!--补发 end-->
+        <!--修改地址 start-->
+        <div class="form-group-child4 measure step52" style="display:none;" id="user_address">
+            <div class="col-xs-12 col-sm-8" style="width: 100%;margin-left: 1%;">
+                <p style="font-size: 16px;"><b>修改地址</b></p>
 
+                <div class="step52_function1">
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="address_select1" class="form-control selectpicker" name="row[modify_address][address_id]">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('First name')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-firstname1" class="form-control" name="row[modify_address][firstname]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Last name')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-lastname1" class="form-control" name="row[modify_address][lastname]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Email')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-email1" class="form-control" name="row[modify_address][email]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Telephone')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-telephone1" class="form-control" name="row[modify_address][telephone]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Country')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="c-country1" class="form-control selectpicker" name="row[modify_address][country_id]" disabled>
+                                <option value="">请选择</option>
+                                {foreach name="country" item="vo" key="key"}
+                                <option value="{$key}">{$vo['country']}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('State/Province')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="c-region2" class="form-control selectpicker" name="row[modify_address][region_id]" disabled>
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Region')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-region12" class="form-control" name="row[modify_address][region]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('City')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-city1" class="form-control" name="row[modify_address][city]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Street Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-street1" class="form-control" name="row[modify_address][street]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="step52_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Zip/Postal Code')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-postcode1" class="form-control" name="row[modify_address][postcode]" type="text" value="" disabled>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!--修改地址 end-->
     </div>
 
 

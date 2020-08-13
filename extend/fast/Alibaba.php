@@ -58,7 +58,7 @@ class Alibaba
 
         $client = new Client(['verify' => false]);
         $response = $client->request('POST', $url, array('form_params' => $params));
-        
+
         //请求URL
         $body = $response->getBody();
         $stringBody = (string) $body;
@@ -260,7 +260,7 @@ class Alibaba
         //请求URL
         $body = $response->getBody();
         $stringBody = (string) $body;
-        $res = json_decode($stringBody);
+        $res = json_decode($stringBody, true);
         if ($res === null) {
             exception('网络异常');
         }

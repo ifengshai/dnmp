@@ -24,7 +24,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 {
-    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls'];
+    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls'];
     protected $model = null;
 
     public function _initialize()
@@ -35,6 +35,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->rufoo = new \app\admin\model\order\order\Rufoo;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
@@ -217,22 +218,18 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         return $this->view->fetch();
     }
 
-
-
     /**
      * 订单信息2
      */
     public function orderDetail($order_number = null)
     {
-
         $order_number = $order_number ?? $this->request->get('order_number');
-        //$order_number = 100077570;
         //查询订单详情		
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
-		
-		$new_ruleList = array_column($ruleList,NULL,'node_type');	
+
+        $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
-		
+
         $entity_id = $this->request->get('id');
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
@@ -291,7 +288,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("row", $row);
         $this->view->assign("label", $label);
         return $this->view->fetch();
-    } 
+    }
 
 
     /**
@@ -311,6 +308,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 return $this->selectpage();
             }
             $rep    = $this->request->get('filter');
+
             $addWhere = '1=1';
             if ($rep != '{}') {
                 // $whereArr = json_decode($rep,true);
@@ -340,6 +338,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             $list = $model
                 ->where($where)
+                //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -354,6 +353,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->column('entity_id');
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
             $list = collection($list)->toArray();
+
             foreach ($list as $k => $v) {
                 //原先
                 // if(isset($costInfo['thisPagePayPrice'])){
@@ -899,15 +899,185 @@ EOF;
 
         $writer->save('php://output');
     }
+
     /**
-     * 财务模块成本统计
+     * 批量导出订单成本核算xls
      *
-     * @Author lsw 1461069578@qq.com
-     * @DateTime 2020-08-13 14:34:46
+     * @Description
+     * @since 2020/6/12 15:48
+     * @author jhh
      * @return void
      */
-    public function cost_statistics()
+    public function account_order_batch_export_xls()
     {
-        
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        //根据传的标签切换对应站点数据库
+        $label = $this->request->get('label', 1);
+        switch ($label) {
+            case 1:
+                $model = $this->zeelool;
+                break;
+            case 2:
+                $model = $this->voogueme;
+                break;
+            case 3:
+                $model = $this->nihao;
+                break;
+            default:
+                return false;
+                break;
+        }
+
+        $ids = input('ids');
+        //        $ids = "345168,259,258,256,255,254,253,252,251,250";
+        if ($ids) {
+            $map['entity_id'] = ['in', $ids];
+        }
+        $rep = $this->request->get('filter');
+        //        dump($rep);die;
+        $addWhere = '1=1';
+        if ($rep != '{}') {
+        } else {
+            $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
+        }
+        list($where) = $this->buildparams();
+
+        $list = $model
+            ->field('entity_id,increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+            ->where($where)
+            ->where($map)
+            ->select();
+        $totalId = $model
+            ->where($where)
+            ->where($addWhere)
+            ->column('entity_id');
+        $thisPageId = $model
+            ->where($where)
+            ->column('entity_id');
+        $costInfo = $model->getOrderCostInfoExcel($totalId, $thisPageId);
+        $list = collection($list)->toArray();
+        //        dump($list);die;
+        //遍历以获得导出所需要的数据
+        foreach ($list as $k => $v) {
+            //订单支付金额
+            if (in_array($v['status'], ['processing', 'complete', 'creditcard_proccessing', 'free_processing'])) {
+                $list[$k]['total_money']      =  round($v['base_total_paid'] + $v['base_total_due'], 2);
+            }
+            //订单镜架成本
+            if (isset($costInfo['thispageFramePrice'])) {
+                if (array_key_exists($v['increment_id'], $costInfo['thispageFramePrice'])) {
+                    $list[$k]['frame_cost']   = $costInfo['thispageFramePrice'][$v['increment_id']];
+                }
+            }
+            //订单镜片成本
+            if (isset($costInfo['thispageLensPrice'])) {
+                if (array_key_exists($v['increment_id'], $costInfo['thispageLensPrice'])) {
+                    $list[$k]['lens_cost']    = $costInfo['thispageLensPrice'][$v['increment_id']];
+                }
+            }
+            //订单退款金额
+            if (isset($costInfo['thispageRefundMoney'])) {
+                if (array_key_exists($v['increment_id'], $costInfo['thispageRefundMoney'])) {
+                    $list[$k]['refund_money'] = $costInfo['thispageRefundMoney'][$v['increment_id']];
+                }
+            }
+            //订单补差价金额
+            if (isset($costInfo['thispageFullPostMoney'])) {
+                if (array_key_exists($v['increment_id'], $costInfo['thispageFullPostMoney'])) {
+                    $list[$k]['fill_post']    = $costInfo['thispageFullPostMoney'][$v['increment_id']];
+                }
+            }
+            //订单加工费
+            if (isset($costInfo['thisPageProcessCost'])) {
+                if (array_key_exists($v['entity_id'], $costInfo['thisPageProcessCost'])) {
+                    $list[$k]['process_cost'] = $costInfo['thisPageProcessCost'][$v['entity_id']];
+                }
+            }
+        }
+        //        dump($list);die;
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "记录标识")
+            ->setCellValue("B1", "订单号")
+            ->setCellValue("C1", "邮箱");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "状态")
+            ->setCellValue("E1", "支付金额($)");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "镜架成本金额(￥)")
+            ->setCellValue("G1", "镜片成本金额(￥)");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "邮费成本金额(￥)")
+            ->setCellValue("I1", "加工费成本金额(￥)");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("J1", "退款金额")
+            ->setCellValue("K1", "补差价金额")
+            ->setCellValue("L1", "创建时间");
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['entity_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['customer_email']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['total_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['frame_cost']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['lens_cost']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['frame_cost']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['process_cost']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['refund_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['fill_post']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['created_at']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:L' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '订单成本核算数据' . date("YmdHis", time());
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
+
 }
