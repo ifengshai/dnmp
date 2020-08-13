@@ -285,5 +285,7 @@ return [
     ],
 
     //后台地址
-    'admin_url' => 'admin_1biSSnWyfW.php'
+    'admin_url' => 'admin_1biSSnWyfW.php',
+    //GA
+    "GOOGLE_ANALYTICS_VIEW_ID" => '168154683',
 ];
