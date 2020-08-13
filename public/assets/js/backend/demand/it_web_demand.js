@@ -94,20 +94,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         },
                         {
                             field: 'all_finish_time',
-                            title: __('时间节点'),
+                            title: __('完成时间节点'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 if(rows.develop_finish_time){
-                                    all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">开发：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.test_is_finish == 1){
-                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.all_finish_time){
-                                    all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">上线：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
                                 if(all_user_name == ''){
                                     all_user_name = '-';
@@ -322,21 +322,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         },
                         {
                             field: 'all_finish_time',
-                            title: __('时间节点'),
+                            title: __('完成时间节点'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 if(rows.develop_finish_time){
-                                    all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">开发：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
 
                                 if(rows.test_is_finish == 1){
-                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.all_finish_time){
-                                    all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">上线：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
                                 if(all_user_name == ''){
                                     all_user_name = '-';
@@ -346,27 +346,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             },
                         },
                         {
-                            field: 'all_user_id',
-                            title: __('责任人'),
+                            field: 'web_designer_user_name',
+                            title: __('前端'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if(rows.web_designer_user_id){
-                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
+                                if(rows.web_designer_user_name){
+                                    for(var i in rows.web_designer_user_name) {
+                                        all_user_name += rows.web_designer_user_name[i] + '<br>';
+                                    }
                                 }
-                                if(rows.phper_user_id){
-                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.php_user_name + '</b></span><br>';
-                                }
-                                if(rows.app_user_id){
-                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
-                                }
-                                if(rows.test_user_id){
-                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_user_name + '</b></span><br>';
-                                }
-                                return all_user_name;
+                                return all_user_name ? all_user_name : '-';
                             },
                         },
-
+                        {
+                            field: 'php_user_name',
+                            title: __('后端'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.php_user_name){
+                                    for(var i in rows.php_user_name) {
+                                        all_user_name += rows.php_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
+                        {
+                            field: 'app_user_name',
+                            title: __('APP'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.app_user_name){
+                                    for(var i in rows.app_user_name) {
+                                        all_user_name += rows.app_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
+                        {
+                            field: 'test_user_name',
+                            title: __('测试'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.test_user_name){
+                                    for(var i in rows.test_user_name) {
+                                        all_user_name += rows.test_user_name[i] + '<br>';
+                                    }
+                                }
+                                return all_user_name ? all_user_name : '-';
+                            },
+                        },
                         {
                             field: 'detail',
                             title: __('详情记录'),
