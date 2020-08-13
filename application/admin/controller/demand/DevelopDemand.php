@@ -64,13 +64,20 @@ class DevelopDemand extends Backend
                 if (in_array($adminId, $authUserIds)) {
                     $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
                 }
-                //开发主管
+                /* old
+				//开发主管
                 $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
                 if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
                     $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))"; //主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
                 }
-
-                //判断是否是普通的测试
+				*/
+                 //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
+                    $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
+                }
+				
+				//判断是否是普通的测试
                 $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
                 if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
                     $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
@@ -93,6 +100,16 @@ class DevelopDemand extends Backend
                 $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['nickname'] )->value('id');
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
+            //搜索责任人
+            if ($filter['duty_nickname']) {
+                //查询用户表id
+                $admin = new \app\admin\model\Admin();
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
+                unset($filter['duty_nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
           
@@ -119,6 +136,16 @@ class DevelopDemand extends Backend
             $admin = new \app\admin\model\Admin();
             $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
             foreach ($list as $k => $val) {
+                $duty_userid = explode(',', $val['duty_user_id']);
+                $duty_nickname = [];
+                foreach ($duty_userid as $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $duty_nickname[] = $userInfo[$v];
+                }
+                $list[$k]['duty_nickname'] = implode(',', $duty_nickname);
+
                 $userids = explode(',', $val['assign_developer_ids']);
                 $nickname = [];
                 foreach ($userids as $v) {
@@ -145,9 +172,9 @@ class DevelopDemand extends Backend
 
 
                 if ($val['review_status_manager'] == 0) {
-                    $list[$k]['status_str'] = '经理待审核';
+                    $list[$k]['status_str'] = '产品待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
-                    $list[$k]['status_str'] = '主管待审核';
+                    $list[$k]['status_str'] = '开发待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
                     $list[$k]['status_str'] = '审核通过';
                 } else {
@@ -273,6 +300,17 @@ class DevelopDemand extends Backend
                 unset($filter['nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
+
+
+            //搜索责任人
+            if ($filter['duty_nickname']) {
+                //查询用户表id
+                $admin = new \app\admin\model\Admin();
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
+                unset($filter['duty_nickname']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -297,6 +335,16 @@ class DevelopDemand extends Backend
             $admin = new \app\admin\model\Admin();
             $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
             foreach ($list as $k => $val) {
+                $duty_userid = explode(',', $val['duty_user_id']);
+                $duty_nickname = [];
+                foreach ($duty_userid as $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $duty_nickname[] = $userInfo[$v];
+                }
+                $list[$k]['duty_nickname'] = implode(',', $duty_nickname);
+
                 $userids = explode(',', $val['assign_developer_ids']);
                 $nickname = [];
                 foreach ($userids as $v) {
@@ -410,6 +458,7 @@ class DevelopDemand extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['duty_user_id'] = implode(',', $params['duty_user_id']);
                     $params['create_person'] = session('admin.nickname');
                     $params['create_person_id'] = session('admin.id');
                     $params['createtime'] = date('Y-m-d H:i:s');
@@ -440,6 +489,12 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        $admin = new \app\admin\model\Admin();
+        $userlist = $admin->where('status', 'normal')->column('nickname','id');
+        $userlist = collection($userlist)->toArray();
+
+        $this->view->assign('userlist', $userlist);
         $this->view->assign('demand_type', input('demand_type'));
         return $this->view->fetch();
     }

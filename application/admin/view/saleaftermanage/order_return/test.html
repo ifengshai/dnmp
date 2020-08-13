@@ -47,6 +47,7 @@
             <li class="num">快递单号</li>
             <li>快递名称</li>
             <li>订单状态</li>
+            <li style="width: 45px;">是否<br>更换<br>地址</li>
             <li>支付货币</li>
             <li>原币种<br>支付金额</li>
             <li>美金($)<br>支付金额</li>
@@ -70,6 +71,7 @@
                     data-id='{$orderInfoList.entity_id}'>{$orderInfoList.track_number}</a></li>
             <li>{$orderInfoList.title}</li>
             <li>{$orderInfoList.status}</li>
+            <li style="width: 45px;">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>
             <li>{$orderInfoList.order_currency_code}</li>
             <li>{:round($orderInfoList.grand_total,3)}</li>
             <li>{:round($orderInfoList.base_grand_total,2)}</li>
@@ -205,7 +207,7 @@
                             <td>{:round($itemInfoList.index_price,2)}</td>
                             <td>{:round($itemInfoList.original_price,2)}</td>
                             <td>{:round($itemInfoList.discount_amount,2)}</td>
-                            <td>{:round($itemInfoList.total,2)}</td>
+                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['discount_amount'],2)}</td>
                         </tr>
                         {/foreach}
                     </table>

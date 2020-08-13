@@ -13,6 +13,7 @@ use Util\VooguemePrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -71,7 +72,7 @@ class Voogueme extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0,4,6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -146,7 +147,7 @@ class Voogueme extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0,4,6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -200,7 +201,7 @@ class Voogueme extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 2;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0,4,6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -329,9 +330,6 @@ class Voogueme extends Backend
                 $data = [];
                 $list = [];
                 foreach ($res as $k => $v) {
-                    $data['site'] = 2;
-                    $data['order_id'] = $v['entity_id'];
-                    $data['order_number'] = $v['increment_id'];
                     $data['update_time'] = date('Y-m-d H:i:s');
                     //打标签
                     $list[$k]['order_node'] = 1;
@@ -346,7 +344,7 @@ class Voogueme extends Backend
 
                     $data['order_node'] = 1;
                     $data['node_type'] = 2;
-                    Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
                 }
                 if ($list) {
                     $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -387,6 +385,7 @@ class Voogueme extends Backend
         if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -398,6 +397,7 @@ class Voogueme extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -496,14 +496,17 @@ class Voogueme extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 2,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 2,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -513,12 +516,13 @@ class Voogueme extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -539,7 +543,7 @@ class Voogueme extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -550,14 +554,17 @@ class Voogueme extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 2,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 2,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -601,16 +608,19 @@ class Voogueme extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 2,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 2,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -624,6 +634,7 @@ class Voogueme extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -646,16 +657,19 @@ class Voogueme extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 2,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 2,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -682,9 +696,6 @@ class Voogueme extends Backend
             $data = [];
             $list = [];
             foreach ($order_res as $k => $v) {
-                $data['site'] = 2;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -734,7 +745,7 @@ class Voogueme extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -1035,10 +1046,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
+            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
                 $value['od_axis'] =  $value['od_axis'];
             } else {
@@ -1051,8 +1062,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $value['os_axis'] = '';
             }
 
-            $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
-            $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
+            $value['od_add'] = isset($value['od_add']) ? urldecode($value['od_add']) : '';
+            $value['os_add'] = isset($value['os_add']) ? urldecode($value['os_add']) : '';
 
             $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
             $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
@@ -1070,16 +1081,16 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && $value['od_add'] * 1 != 0 && $value['os_add'] * 1 != 0) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1222,99 +1233,81 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     {
 
         /*************修改为筛选导出****************/
-
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '430115832
-        430115827
-        430115866
-        130041398
-        430115989
-        130041429
-        430116120
-        430116129
-        430116104
-        430116122
-        430116065
-        430116090
-        430116070
-        130041434
-        430115906
-        430115993
-        130041384
-        430115976
-        430115736
-        130041451
-        430115996
-        430116113
-        130041488
-        130041477
-        430116134
-        130041450
-        130041490
-        430115973
-        130041460
-        430115880
-        430116002
-        130041380
-        430116138
-        430115995
-        130041406
-        430115966
-        430115770
-        430115753
-        430115855
-        130041476
-        430116058
-        430115820
-        430116007
-        430116092
-        430116005
-        430115757
-        430116048
-        430116006
-        130041389
-        430116059
-        430115893
-        130041473
-        430116055
-        430115850
-        430115978
-        430115934
-        430115908
-        130041383
-        430115810
-        430116080
-        130041413
-        430115777
-        430115771
-        430116062
-        430115956
-        130041416
-        430115950
-        430115431
-        430115826
-        430115933
-        130041459
-        430116029
-        130041412
-        430115924
-        430115783
-        430116137
-        430115895
-        430115824
-        430115814
-        130041444
-        430115833
-        430115946
-        430115779
-        130041425
-        430115994
-        430115748
-        130041404';
-        $str = explode('
-        ', $str);
+        $str = [
+            '130054744',
+            '430160491',
+            '130054902',
+            '430160336',
+            '430160534',
+            '430159879',
+            '130054860',
+            '430160589',
+            '130054755',
+            '130054836',
+            '430160696',
+            '130051533',
+            '130054875',
+            '430159483',
+            '430160578',
+            '130054651',
+            '430160332',
+            '430160640',
+            '430159501',
+            '430160321',
+            '430160104',
+            '430160694',
+            '430160286',
+            '430121503',
+            '430159650',
+            '430160098',
+            '430159231',
+            '130054726',
+            '130054775',
+            '430160024',
+            '130054469',
+            '430160076',
+            '430160377',
+            '130051443',
+            '430160650',
+            '430160569',
+            '430160507',
+            '130054838',
+            '430151013',
+            '430160093',
+            '430159430',
+            '130054888',
+            '430160287',
+            '430155422',
+            '430160323',
+            '430151413',
+            '430151019',
+            '430160050',
+            '430159272',
+            '430154164',
+            '430159401',
+            '430160511',
+            '430160239',
+            '430159292',
+            '430159694',
+            '430159691',
+            '130052945',
+            '430159740',
+            '130052029',
+            '430159842',
+            '430159797',
+            '430159835',
+            '430159645',
+            '430159426',
+            '430159662',
+            '400291059',
+            '130054737',
+            '430159519',
+            '430159594',
+            '430159887',
+        ];
 
         $map['sfo.increment_id'] = ['in', $str];
 
@@ -1701,15 +1694,15 @@ EOF;
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
-                $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-                $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                $final_print['od_sph'] = isset($final_print['od_sph']) ? urldecode($final_print['od_sph']) : '';
+                $final_print['os_sph'] = isset($final_print['os_sph']) ? urldecode($final_print['os_sph']) : '';
+                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? urldecode($final_print['od_cyl']) : '';
+                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? urldecode($final_print['os_cyl']) : '';
                 $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
                 $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
 
-                $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-                $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+                $final_print['od_add'] = isset($final_print['od_add']) ? urldecode($final_print['od_add']) : '';
+                $final_print['os_add'] = isset($final_print['os_add']) ? urldecode($final_print['os_add']) : '';
 
                 $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
                 $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
@@ -1720,7 +1713,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add'] * 1 != 0 && $final_print['os_add'] * 1 != 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1754,7 +1747,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1768,7 +1761,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
             <tbody cellpadding='0'>
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1779,31 +1772,31 @@ EOF;
             </td>
             </tr>  
             <tr class='title'>      
-            <td></td>  
-            <td>SPH</td>
-            <td>CYL</td>
-            <td>AXI</td>
+            <td width='20px'></td>  
+            <td width='42px'>SPH</td>
+            <td width='50px'>CYL</td>
+            <td width='42px'>AXI</td>
             " . $prismcheck_title . "
-            <td>ADD</td>
-            <td>PD</td> 
+            <td width='42px'>ADD</td>
+            <td width='36px'>PD</td> 
             " . $coatiing_name . "
             </tr>   
             <tr>  
-            <td>Right</td>      
+            <td>R</td>      
             <td>" . $final_print['od_sph'] . "</td> 
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
                     "</tr>
             <tr>
-            <td>Left</td> 
+            <td>L</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

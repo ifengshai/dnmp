@@ -1,43 +1,72 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
+    {if $batch_data}
+    {foreach $batch_data as $v}
+    <b>第{$v.batch}批 批次ID号:{$v.id}</b>
+    <div id="toolbar" class="toolbar">
+        <a href="javascript:;" style="margin-left: 30px;" class="btn btn-success btn-add-batch" title="增加"><i
+                class="fa fa-plus"></i> 增加</a>
+    </div>
+    <input type="hidden" name="batch_id[]" class="batch_id" value="{$v.id}">
+    <div class='logistics_content'>
+        {if $logistics_data}
+        {foreach $logistics_data as $val}
+        {if $val['batch_id'] == $v['id']}
+        <div class="form-group">
+            <input type="hidden" name="logistics_ids[{$v.id}][]" class="logistics_ids" value="{$val.id}"/>
+            <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[{$v.id}][]" value="{$val.logistics_company_no}"
+                    type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-logistics_number" class="form-control" name="logistics_number[{$v.id}][]" type="text" value="{$val.logistics_number}">
+
+
+            </div>
+            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
+        </div>
+        {/if}
+        {/foreach}
+        {/if}
+    </div>
+    {/foreach}
+    {else/}
+    <div id="toolbar" class="toolbar">
+        <a href="javascript:;" style="margin-left: 30px;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+    </div>
+
+    <div class='logistics_content'>
+        {if $logistics_data}
+        {foreach $logistics_data as $val}
+        <div class="form-group">
+            <input type="hidden" name="logistics_ids[]" class="logistics_ids" value="{$val.id}"/>
+            <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="{$val.logistics_company_no}"
+                    type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text" value="{$val.logistics_number}">
+
+
+            </div>
+            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
+        </div>
+        {/foreach}
+        {/if}
+    </div>
+    {/if}
+
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" name="row[logistics_company_no]" placeholder="注意复制下方手册对应物流公司编码,多个英文逗号拼接。例如：yunda,yuantong">{$row.logistics_company_no}</textarea>
+        <div class="col-xs-12 col-sm-8" style="line-height: 31px;">
+            <a href="/template/kuaidi100.xlsx">下载快递100快递公司标准编码</a>
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" name="row[logistics_number]" placeholder="注意多个物流单号英文逗号拼接,并与上方物流公司顺序一一对应。">{$row.logistics_number}</textarea>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">物流公司编码手册:</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" style="height: 240px;">
-韵达快递 => yunda
-邮政快递包裹 =>  youzhengguonei
-中通快递 =>  zhongtong
-圆通速递 =>  yuantong
-申通快递 =>  shentong
-百世快递 =>  huitongkuaidi
-顺丰速运 =>  shunfeng
-京东物流 =>  jd
-天天快递 =>  tiantian
-EMS => ems
-德邦 =>  debangwuliu
-德邦快递 => debangkuaidi
-安能快递 => ane66
-安能快运 => annengwuliu
-壹米滴答 => yimidida
-东风快递 => dfkuaidi
-优速快递 => youshuwuliu
-百世快运 => baishiwuliu
-            </textarea>
-        </div>
-    </div>
-    
+
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
@@ -47,3 +76,18 @@ EMS => ems
         </div>
     </div>
 </form>
+
+
+<div id='logistics_div' style="display: none;">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text">
+        </div>
+        <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
+    </div>
+</div>

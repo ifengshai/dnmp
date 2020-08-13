@@ -32,18 +32,20 @@ class SupplierSku extends Model
     }
 
     //根据SKUID 匹配sku
-    public function getSkuData($skuid)
+    public function getSkuData($skuid, $supplier_id)
     {
         $map['skuid'] = $skuid;
         $map['status'] = 1;
+        $map['supplier_id'] = $supplier_id;
         return $this->where($map)->value('sku');
     }
 
     //根据SKUID 匹配sku
-    public function getSupplierData($skuid)
+    public function getSupplierData($skuid, $supplier_id)
     {
         $map['skuid'] = $skuid;
         $map['status'] = 1;
+        $map['supplier_id'] = $supplier_id;
         return $this->where($map)->value('supplier_sku');
     }
 

@@ -1,0 +1,44 @@
+<style>
+    .dropdown-menu open{
+        display: block;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('承接人')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
+        </div>
+        <input type="hidden" name="row[type]" value="1">
+        <div style="left: 50%;">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<form id="add-form1" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('处理人')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
+        </div>
+        <input type="hidden" name="row[type]" value="2">
+        <div style="left: 50%;">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<form id="add-form2" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('承接人+处理人')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
+        </div>
+        <input type="hidden" name="row[type]" value="3">
+        <div style="left: 50%;">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

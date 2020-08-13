@@ -28,6 +28,12 @@ class Contract extends Backend
 
     protected $relationSearch = true;
 
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['getSupplierData'];
+
     public function _initialize()
     {
         parent::_initialize();

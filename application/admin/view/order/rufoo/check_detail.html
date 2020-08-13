@@ -1,0 +1,224 @@
+<style>
+    .list-div {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        height: 400px;
+        margin-bottom: 10px;
+    }
+
+    .caigou {
+        width: 100%;
+        margin-bottom: 10px;
+        float: left;
+    }
+
+    #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .caigou-table-lens tbody tr td input {
+        text-align: center;
+    }
+</style>
+<div class="panel-heading">
+    {:build_heading()}
+    <ul class="nav nav-tabs" style="margin-bottom: 20px;">
+        <li><a href="{:url('detail')}?id={$row.entity_id}&label={$label}">订单信息</a></li>
+		<li><a href="{:url('orderDetail')}?order_number={$row.increment_id}&id={$row.entity_id}&label={$label}">订单节点</a></li>
+        <li class="active"><a href="{:url('checkDetail')}?id={$row.entity_id}&label={$label}">订单执行信息</a></li>
+        <!-- <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li> -->
+    </ul>
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="row item_info" style="margin-top:15px;width: 50%;float: left;">
+        <p style="font-size: 16px;text-align: center;"><b>配货信息</b></p>
+
+
+        <div id="detailWin" class="easyui-window panel-body panel-body-noborder window-body" title=""
+            data-options="modal:true,closed:true,border:'thin',cls:'c6'"
+            style="padding: 10px; width: 100%; height: 200px;">
+            <style type="text/css">
+                table.altrowstable {
+                    margin: 0 auto;
+                    width: 95%;
+                    font-family: verdana, arial, sans-serif;
+                    font-size: 11px;
+                    color: #333333;
+                    border-width: 1px;
+                    border-color: #247692;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+
+                table.altrowstable th {
+                    border-width: 1px;
+                    padding: 8px;
+                    font-size: 14px;
+                    border-style: solid;
+                    border-color: #a9c6c9;
+                }
+
+                table.altrowstable td {
+                    border-width: 1px;
+                    padding: 8px;
+                    text-align: center;
+                    font-size: 14px;
+                    border-style: solid;
+                    border-color: #a9c6c9;
+                }
+            </style>
+            <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
+                <tbody>
+                    <tr></tr>
+
+                    <tr>
+
+                        <td>操作内容</td>
+                        <td>操作人</td>
+                        <td>操作时间</td>
+                    </tr>
+
+                    <tr>
+                        <td>打标签</td>
+                        <td>{$row['custom_print_label_person_new']}</td>
+                        <td>{$row['custom_print_label_created_at_new']}</td>
+
+                    </tr>
+                    <tr>
+                        <td>配镜架</td>
+                        <td>{$row['custom_match_frame_person_new']}</td>
+                        <td>{$row['custom_match_frame_created_at_new']}</td>
+
+                    </tr>
+
+                    <tr>
+                        <td>配镜片</td>
+                        <td>{$row['custom_match_lens_person_new']}</td>
+                        <td>{$row['custom_match_lens_created_at_new']}</td>
+                    </tr>
+
+                    <tr>
+                        <td>加工</td>
+                        <td>{$row['custom_match_factory_person_new']}</td>
+                        <td>{$row['custom_match_factory_created_at_new']}</td>
+                    </tr>
+
+                    <tr>
+                        <td>提货</td>
+                        <td>{$row['custom_match_delivery_person_new']}</td>
+                        <td>{$row['custom_match_delivery_created_at_new']}</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="row item_info" style="margin-top:15px;width: 50%;float: right;">
+        <p style="font-size: 16px;text-align: center;"><b>物流信息</b></p>
+
+        <div class='caigou'>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-3">承运公司:</label>
+                <label class="control-label col-xs-12 col-sm-5"
+                    style="text-align: left;">{$express_data.carrier_code}</label>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-3">物流单号:</label>
+                <label class="control-label col-xs-12 col-sm-5"
+                    style="text-align: left;">{$express_data.tracking_number}</label>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-3">物流信息:</label>
+                <label class="control-label col-xs-12 col-sm-3" style="width: 450px;text-align: left;">
+                    {foreach name="express_data.origin_info.trackinfo" item="vi"}
+                    <p>{$vi.Date} <br>{$vi.StatusDescription} <br>{$vi.checkpoint_status}</p>
+                    {/foreach}
+                </label>
+                
+            </div>
+        </div>
+    </div>
+
+
+
+</form>

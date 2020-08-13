@@ -311,7 +311,8 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order_address')->where('telephone', 'like', "%{$customer_phone}%")->field('telephone')->limit(10)->select();
+        $map[] = ['exp', Db::raw("replace(telephone,'-','') like '%{$customer_phone}%'")];
+        $result = Db::connect($db)->table('sales_flat_order_address')->where($map)->field('telephone')->limit(10)->select();
         if (!$result) {
             return false;
         }
@@ -590,7 +591,7 @@ class SaleAfterTask extends Model
             //如果输入的是订单号
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id', $increment_id)->value('customer_email');
             //如果输入的是vip订单号
-            if (!$customer_email) {
+            if (!$customer_email && $order_platform != 3) {
                 $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number', $increment_id)->value('customer_email');
             }
         }
@@ -625,7 +626,7 @@ class SaleAfterTask extends Model
                 ->join('sales_flat_shipment_track s', 'o.entity_id=s.order_id', 'left')
                 ->join('sales_flat_order_payment p', 'o.entity_id=p.parent_id', 'left')
                 ->where('customer_email', $customer_email)
-                ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.mw_rewardpoint,o.mw_rewardpoint_discount_show,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.grand_total,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,round(o.total_qty_ordered,0) total_qty_ordered,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information
+                ->field('o.is_modify_address,o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.mw_rewardpoint,o.mw_rewardpoint_discount_show,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.grand_total,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,round(o.total_qty_ordered,0) total_qty_ordered,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information
            ')
                 ->group('o.entity_id')
                 ->order('o.entity_id desc')->select();
@@ -651,7 +652,7 @@ class SaleAfterTask extends Model
 
                 //补差价列表
                 $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
-               
+
                 $result[$k]['workOrderList'] = $workOrderListResult['list'];
                 $result[$k]['differencePriceList'] = $differencePriceList;
                 switch ($v['order_type']) {
@@ -716,7 +717,7 @@ class SaleAfterTask extends Model
         } else {
             $result = false;
         }
-      
+
         return $result;
     }
     /***

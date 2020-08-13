@@ -430,7 +430,7 @@ class Dashboard extends Backend
         $voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 		$nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 		$meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $status['status']  = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
         $app['store_id']   = 5;

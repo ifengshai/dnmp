@@ -160,9 +160,7 @@
 			<li {in name="6" value="$key_list" } class="on" {/in}><span>已成品质检</span></li>
 			<li {in name="7" value="$key_list" } class="on" {/in}><span>已出库</span></li>
 			<li {in name="8" value="$key_list" } class="on" {/in}><span>物流上网</span></li>
-			<li {in name="9" value="$key_list" } class="on" {/in}><span>已交航</span></li>
 			<li {in name="10" value="$key_list" } class="on" {/in}><span>运输途中</span></li>
-			<li {in name="11" value="$key_list" } class="on" {/in}><span>到达目的国</span></li>
 			
 			<?php if(in_array(30,$key_list)){ ?>
 			<li  class="on" ><span>到达待取</span></li>	
@@ -207,16 +205,7 @@
 				</div>
 			</li>
 			<?php }else{ ?>			
-			<?php } ?>			
-			{in name="11" value="$key_list" }
-			<li>
-				<span>{$list[11]['create_time']}</span>
-				<div>
-					<p>到达目的国</p>
-				</div>
-			</li>
-			{/in}						
-			
+			<?php } ?>
 			{in name="10" value="$key_list" }
 			<li>
 				<span>{$list[10]['create_time']} </span>
@@ -224,16 +213,7 @@
 					<p>运输途中</p>
 				</div>
 			</li>
-			{/in}						
-			
-			{in name="9" value="$key_list" }
-			<li>
-				<span>{$list[9]['create_time']}</span>
-				<div>
-					<p>已交航</p>
-				</div>
-			</li>
-			{/in}					
+			{/in}
 			
 			{in name="8" value="$key_list" }
 			<li> 

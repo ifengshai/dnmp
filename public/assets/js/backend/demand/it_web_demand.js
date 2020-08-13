@@ -48,7 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
+                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange'},
                         {
                             field: 'Allgroup_sel',
                             title: __('All_group'),
@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
                             operate: 'in',
-                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 255:'陈玉晓', 242:'张鹏' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -440,13 +440,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status <= 4){
-                                            if(row.demand_del){//操作权限
-                                                return true;
-                                            }
+                                        if(row.demand_supper_edit){
+                                            return true;
                                         }else{
-                                            return false;
+                                            if(row.status <= 4){
+                                                if(row.demand_del){//操作权限
+                                                    return true;
+                                                }
+                                            }else{
+                                                return false;
+                                            }
                                         }
+                                        
                                         /* if(row.status == 1 || row.status == 2){
                                             if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
                                                 return true;
@@ -623,7 +628,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
                             operate: 'in',
-                            searchList: { 195: '马红亚', 200: '陈亚蒙', 202:'贾梦丽' },
+                            searchList: { 195: '马红亚', 200: '陈亚蒙', 255:'陈玉晓', 242:'张鹏' },
                             formatter: function (value, rows) {
                                 var res = '';
                                 if(value){
@@ -1803,7 +1808,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Layer.open({
                             closeBtn: 1,
                             title: row.title,
-                            area:['60%'],
+                            maxWidth:800,
+                            maxHeight:800,
                             shadeClose:true,
                             anim: 0,
                             content: value

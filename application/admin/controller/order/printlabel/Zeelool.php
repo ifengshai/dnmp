@@ -12,7 +12,7 @@ use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-use app\admin\model\WorkChangeSkuLog;
+use app\admin\model\StockLog;
 
 /**
  * Sales Flat Order
@@ -70,7 +70,7 @@ class Zeelool extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 1;
-                $swhere['work_status'] = ['<>', 0];
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -146,7 +146,7 @@ class Zeelool extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 1;
-            $swhere['work_status'] = ['<>', 0];
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -199,7 +199,7 @@ class Zeelool extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 1;
-                    $swhere['work_status'] = ['<>', 0];
+                    $swhere['work_status'] = ['not in', [0, 4, 6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -282,9 +282,6 @@ class Zeelool extends Backend
             $data = [];
             $list = [];
             foreach ($res as $k => $v) {
-                $data['site'] = 1;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
                 $data['update_time'] = date('Y-m-d H:i:s');
                 //打标签
                 $list[$k]['order_node'] = 1;
@@ -299,7 +296,7 @@ class Zeelool extends Backend
 
                 $data['order_node'] = 1;
                 $data['node_type'] = 2;
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 1])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -340,6 +337,7 @@ class Zeelool extends Backend
         if (!$order_res) {
             $this->error('未查询到订单数据！！');
         }
+        $orderList = [];
         foreach ($order_res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
@@ -351,6 +349,8 @@ class Zeelool extends Backend
             if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
+
+            $orderList[$v['increment_id']] = $v['entity_id'];
         }
 
         //判断订单是否存在未处理完成的工单
@@ -448,14 +448,17 @@ class Zeelool extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                     => 1,
-                            'type'                     => 5, //配镜架
-                            'sku'                     => $trueSku,
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 1,
+                            'two_type'                  => 1,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => $v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '配镜架增加配货占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -465,12 +468,13 @@ class Zeelool extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -491,7 +495,7 @@ class Zeelool extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -502,14 +506,17 @@ class Zeelool extends Backend
                     }
 
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                     => 1,
-                        'type'                     => 5, //配镜架
-                        'sku'                     => $trueSku,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 1,
+                        'two_type'                  => 1,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => $qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配镜架增加配货占用库存'
                     ]);
                 }
                 unset($v);
@@ -535,6 +542,7 @@ class Zeelool extends Backend
                     ])
                     ->group('change_sku')
                     ->select();
+                $infoRes = collection($infoRes)->toArray();
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -553,16 +561,19 @@ class Zeelool extends Backend
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
                         //插入日志表
-                        (new WorkChangeSkuLog())->setData([
-                            'increment_id'            => $v['increment_id'],
-                            'site'                    => 1,
-                            'type'                    => 6, //质检通过
-                            'sku'                     => $trueSku,
-                            'stock_change_num'        => $v['qty'],
-                            'occupy_change_num'       => $v['qty'],
-                            'distribution_change_num' => $v['qty'],
-                            'operation_person'        => session('admin.nickname'),
-                            'create_time'             => date('Y-m-d H:i:s')
+                        (new StockLog())->setData([
+                            'type'                      => 2,
+                            'site'                      => 1,
+                            'two_type'                  => 2,
+                            'sku'                       => $trueSku,
+                            'order_number'              => $v['increment_id'],
+                            'public_id'                 => $orderList[$v['increment_id']],
+                            'distribution_stock_change' => -$v['qty'],
+                            'stock_change'              => -$v['qty'],
+                            'occupy_stock_change'       => -$v['qty'],
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存,存在更换镜框工单'
                         ]);
                     }
                 }
@@ -576,6 +587,7 @@ class Zeelool extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }
@@ -598,16 +610,19 @@ class Zeelool extends Backend
                         $number = 0;
                     }
                     //插入日志表
-                    (new WorkChangeSkuLog())->setData([
-                        'increment_id'            => $v['increment_id'],
-                        'site'                    => 1,
-                        'type'                    => 6, //质检通过
-                        'sku'                     => $trueSku,
-                        'stock_change_num'        => $qty,
-                        'occupy_change_num'       => $qty,
-                        'distribution_change_num' => $qty,
-                        'operation_person'        => session('admin.nickname'),
-                        'create_time'             => date('Y-m-d H:i:s')
+                    (new StockLog())->setData([
+                        'type'                      => 2,
+                        'site'                      => 1,
+                        'two_type'                  => 2,
+                        'sku'                       => $trueSku,
+                        'order_number'              => $v['increment_id'],
+                        'public_id'                 => $orderList[$v['increment_id']],
+                        'distribution_stock_change' => -$qty,
+                        'stock_change'              => -$qty,
+                        'occupy_stock_change'       => -$qty,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '质检通过减少配货占用库存,减少总库存,减少订单占用库存'
                     ]);
                 }
                 unset($v);
@@ -635,9 +650,6 @@ class Zeelool extends Backend
             $data = [];
             $list = [];
             foreach ($order_res as $k => $v) {
-                $data['site'] = 1;
-                $data['order_id'] = $v['entity_id'];
-                $data['order_number'] = $v['increment_id'];
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -645,7 +657,7 @@ class Zeelool extends Backend
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
-                $list[$k]['handle_user_name'] = session('admin.nickname');;
+                $list[$k]['handle_user_name'] = session('admin.nickname');
 
                 //配镜架
                 if ($status == 1) {
@@ -687,7 +699,7 @@ class Zeelool extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 1])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -1095,11 +1107,11 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
@@ -1119,7 +1131,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             } else {
 
-                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                if ($value['os_add'] && (float) $value['os_add'] * 1 != 0) {
                     //数值在上一行合并有效，数值在下一行合并后为空
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                     $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
@@ -1256,8 +1268,109 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = ['100117395','400250565','400250621','400250705','400249311','100117261','100117544','400250865','100117573','100117582','400250924','500003521','500003522','100117621','100117653','100117671','100117266','100117692','100117718','400251347','400251347','400251347','100117735','100117748','100117749','400251382','400251383','100117759','100117766','100117796','100117800','100117801','400251480','400251506','100117892','400251728','400251774','400251782','400251856','400251865','100117933','100117944','400251910','400251990','400252004','100118010','400252061','400252070','400252086','400252088','400252103','400252119','400252125','100118031','400252320','100118121','400252454','500003611','500003612','100118144','100118147','400252521','100118186','400252748','400252838','100118274','400252873','100118297','100118340','100118346','100118392','400253095','100118407','100118412','100118419','100118419','400253210','100118444','100118444','400055496','100118493','100118493','100118516','100118518','100118541','100118582','100118590','100118606','400253623','100118653','500003722','100118688'];
-       
+        $str = [
+            400303475,
+            400302697,
+            400302989,
+            400302959,
+            400304649,
+            400302940,
+            500007412,
+            500007417,
+            400302964,
+            400302894,
+            400303050,
+            400302708,
+            400302839,
+            400302902,
+            400303398,
+            400289655,
+            400303016,
+            400304579,
+            400302702,
+            400302840,
+            400303734,
+            400302900,
+            400302991,
+            100137394,
+            400303588,
+            400303638,
+            400302781,
+            400303002,
+            400302551,
+            400302920,
+            400302829,
+            400303680,
+            400303041,
+            500007430,
+            400303602,
+            100137089,
+            400302932,
+            400303559,
+            400302845,
+            400303657,
+            400302811,
+            400304592,
+            100137097,
+            400303046,
+            400302795,
+            500007482,
+            100137383,
+            400303786,
+            500007428,
+            400303706,
+            400305086,
+            400304501,
+            400303027,
+            400302698,
+            400304610,
+            400304618,
+            400303777,
+            400303773,
+            400303480,
+            400303485,
+            400302836,
+            400302834,
+            400304550,
+            400304505,
+            400304593,
+            500007422,
+            400302965,
+            100137389,
+            400302565,
+            400302685,
+            500007465,
+            400302922,
+            400303020,
+            400304646,
+            100137172,
+            400304514,
+            500007395,
+            400304625,
+            400304445,
+            400303770,
+            400303781,
+            400304524,
+            400302710,
+            400303731,
+            400304464,
+            400303269,
+            100137390,
+            100137367,
+            400303687,
+            400303583,
+            400305084,
+            400303369,
+            400303537,
+            400303738,
+            400288529,
+            400303614,
+            100137402,
+            100137411,
+            100137520,
+            400303608
+        ];
+
         $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
@@ -1679,11 +1792,11 @@ EOF;
                     $final_print['od_add'] = urldecode($final_print['od_add']);
 
                     //处理ADD
-                    if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
+                    if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['os_add'] * 1 != 0 && (float) $final_print['od_add'] * 1 != 0) {
                         $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $os_add = "<td>" . $final_print['os_add'] . "</td> ";
                     } else {
-                        if ($final_print['os_add'] && $final_print['os_add'] * 1 != 0) {
+                        if ($final_print['os_add'] && (float) $final_print['os_add'] * 1 != 0) {
                             $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                             $os_add = "";
                         } else {
@@ -1732,7 +1845,7 @@ EOF;
 
 
                     //处理ADD  当ReadingGlasses时 是 双ADD值 双ADD值时，左右眼互换
-                    if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add'] * 1 != 0 && $final_print['od_add'] * 1 != 0) {
+                    if ($final_print['os_add'] && $final_print['od_add'] && (float) $final_print['os_add'] * 1 != 0 && (float) $final_print['od_add'] * 1 != 0) {
                         // echo '双ADD值';
                         $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                         $od_add = "<td>" . $final_print['os_add'] . "</td> ";
@@ -1769,7 +1882,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' width='45' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1783,7 +1896,7 @@ EOF;
                 }
 
                 $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;table-layout: inherit;' >
             <tbody cellpadding='0'>
             <tr>
             <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
@@ -1794,31 +1907,31 @@ EOF;
             </td>
             </tr>  
             <tr class='title'>      
-            <td></td>  
-            <td>SPH</td>
-            <td>CYL</td>
-            <td>AXI</td>
+            <td width='20px'></td>  
+            <td width='42px'>SPH</td>
+            <td width='50px'>CYL</td>
+            <td width='42px'>AXI</td>
             " . $prismcheck_title . "
-            <td>ADD</td>
-            <td>PD</td> 
+            <td width='42px'>ADD</td>
+            <td width='36px'>PD</td> 
             " . $coatiing_name . "
             </tr>   
             <tr>  
-            <td>Right</td>      
+            <td>R</td>      
             <td>" . $final_print['od_sph'] . "</td> 
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
                     "</tr>
             <tr>
-            <td>Left</td> 
+            <td>L</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

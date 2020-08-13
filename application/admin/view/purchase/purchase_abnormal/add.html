@@ -1,0 +1,40 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Error_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-error_number" class="form-control" name="row[error_number]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-supplier_name" class="form-control" name="row[supplier_name]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-purchase_id" data-rule="required" data-source="purchase/index" class="form-control selectpage" name="row[purchase_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Batch_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-batch_id" data-rule="required" data-source="batch/index" class="form-control selectpage" name="row[batch_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_error')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_error" data-rule="required" class="form-control" name="row[is_error]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

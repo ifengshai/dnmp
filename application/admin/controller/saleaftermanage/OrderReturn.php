@@ -291,11 +291,10 @@ class OrderReturn extends Backend
     {
         $order_platform = intval(input('order_platform', 1));
         $customer_email = input('email', '');
-        if ($request->isPost() || ($order_platform && $customer_email)) {
+        if ($request->isPost()) {
             //获取输入的订单号
             $increment_id = trim($request->post('increment_id'));
-            //            dump($increment_id);
-            //            exit;
+           
             //获取输入的平台
             if (!$order_platform) {
                 $order_platform = trim($request->post('order_platform'));
