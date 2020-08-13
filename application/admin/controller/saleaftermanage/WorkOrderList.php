@@ -809,6 +809,11 @@ class WorkOrderList extends Backend
                     //判断是否选择措施
                     //更换镜框判断是否有库存 
                     if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
+                        //添加判断订单号是否已经质检
+                        $check_info = $this->check_order_quality($params['work_platform'],$params['platform_order']);
+                        if($check_info){
+                            throw new Exception("该订单已出库，不能更换镜架");
+                        }
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
@@ -1909,6 +1914,11 @@ class WorkOrderList extends Backend
 
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && in_array(1, array_filter($params['measure_choose_id']))) {
+                        //添加判断订单号是否已经质检
+                        $check_info = $this->check_order_quality($params['work_platform'],$params['platform_order']);
+                        if($check_info){
+                            throw new Exception("该订单已出库，不能更换镜架");
+                        }
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
@@ -4134,5 +4144,42 @@ EOF;
             }    
         }
 
+    }
+    /**
+     * 判断订单是否已质检
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-08-13 18:21:10
+     * @return void
+     */
+    public function check_order_quality($platform,$order)
+    {
+        switch ($platform) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            case 4:
+                $model = Db::connect('database.db_meeloog');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        if($platform == 4){
+            $info = $model->table('sales_flat_order')->where('increment_id',$order)->value('custom_is_delivery');
+        }else{
+            $info = $model->table('sales_flat_order')->where('increment_id',$order)->value('custom_is_delivery_new');
+        }
+        if($info == 1){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
