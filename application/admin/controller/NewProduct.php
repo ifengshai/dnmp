@@ -1110,6 +1110,8 @@ class NewProduct extends Backend
 
         //查询对应平台
         $magentoplatformarr = $this->magentoplatformarr;
+        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name','id');
+
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
     }
