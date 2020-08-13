@@ -151,18 +151,16 @@ class Test3 extends Backend
      */
     public function test()
     {
-        session_start();
+        //session_start();
         $client = new \Google_Client();
         $client->setAuthConfig('./oauth-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
         // Create an authorized analytics service object.
         $analytics = new \Google_Service_AnalyticsReporting($client);
-
-        $startDate = '7daysAgo';
-        $endDate = 'today';
+        $startDate = '2020-08-12';
+        $endDate = '2020-08-12';
         // Call the Analytics Reporting API V4.
         $response = $this->getReport($analytics, $startDate, $endDate);
-
         // Print the response.
         $result = $this->printResults($response);
 
@@ -188,33 +186,65 @@ class Test3 extends Backend
      * @param service An authorized Analytics Reporting API V4 service object.
      * @return The Analytics Reporting API V4 response.
      */
+    // protected function getReport($analytics, $startDate, $endDate)
+    // {
+
+    //     // Replace with your view ID, for example XXXX.
+    //     $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
+
+    //     // Create the DateRange object.
+    //     $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+    //     $dateRange->setStartDate($startDate);
+    //     $dateRange->setEndDate($endDate);
+
+    //     // Create the Metrics object.
+    //     $sessions = new \Google_Service_AnalyticsReporting_Metric();
+    //     $sessions->setExpression("ga:sessions");
+    //     $sessions->setAlias("sessions");
+
+    //     // Create the ReportRequest object.
+    //     $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+    //     $request->setViewId($VIEW_ID);
+    //     $request->setDateRanges($dateRange);
+    //     $request->setMetrics(array($sessions));
+
+    //     $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+    //     $body->setReportRequests(array($request));
+    //     return $analytics->reports->batchGet($body);
+    // }
+
     protected function getReport($analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
         $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
 
-        // Create the DateRange object.
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
-        $dateRange->setEndDate($endDate);
+        $dateRange->setEndDate($endDate);   
 
-        // Create the Metrics object.
-        $sessions = new \Google_Service_AnalyticsReporting_Metric();
-        $sessions->setExpression("ga:sessions");
-        $sessions->setAlias("sessions");
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:adCost");
+        $adCostMetric->setAlias("ga:adCost");
 
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($VIEW_ID);
         $request->setDateRanges($dateRange);
-        $request->setMetrics(array($sessions));
+        $request->setMetrics(array($adCostMetric));
+        // $request->setDimensions(array($sessionDayDimension));
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
-    }
 
+    }
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *

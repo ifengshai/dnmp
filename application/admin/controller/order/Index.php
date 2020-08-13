@@ -899,4 +899,15 @@ EOF;
 
         $writer->save('php://output');
     }
+    /**
+     * 财务模块成本统计
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-08-13 14:34:46
+     * @return void
+     */
+    public function cost_statistics()
+    {
+        
+    }
 }
