@@ -1057,6 +1057,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                 Fast.api.close($("input[name=callback]").val());
             });
         },
+        cost_statistics:function(){
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
+            Form.api.bindevent($("form[role=form]"));
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: true,
+                showColumns: true,
+                showToggle: true,
+                pagination: false,
+                extend: {
+                    index_url: 'financial/index/cost_statistics/' + location.search + '?time=' + Config.create_time + '&platform=' + Config.platform + '&type=list',
+                }
+            });
+            var table = $("#table");
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'type', title: __('类型'), operate: false },
+                        { field: 'money_us', title: __('金额（$）'), operate: false },
+                        { field: 'money_cn', title: __('金额（￥）'), operate: false },
+                        { field: 'percent', title: __('百分比'), operate: false },
+                    ]
+                ]
+            });
+            // 为表格绑定事件
+            Table.api.bindevent(table);  
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -1083,6 +1125,50 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                 },
                 int_format: function (value, row, index) {
                     return parseInt(value);
+                },
+                daterangepicker: function (form) {
+                    //绑定日期时间元素事件
+                    if ($(".datetimerange", form).size() > 0) {
+                        require(['bootstrap-daterangepicker'], function () {
+                            var ranges = {};
+                            ranges[__('Today')] = [Moment().startOf('day'), Moment().endOf('day')];
+                            ranges[__('Yesterday')] = [Moment().subtract(1, 'days').startOf('day'), Moment().subtract(1, 'days').endOf('day')];
+                            ranges[__('Last 7 Days')] = [Moment().subtract(6, 'days').startOf('day'), Moment().endOf('day')];
+                            ranges[__('Last 30 Days')] = [Moment().subtract(29, 'days').startOf('day'), Moment().endOf('day')];
+                            ranges[__('This Month')] = [Moment().startOf('month'), Moment().endOf('month')];
+                            ranges[__('Last Month')] = [Moment().subtract(1, 'month').startOf('month'), Moment().subtract(1, 'month').endOf('month')];
+                            var options = {
+                                timePicker: false,
+                                autoUpdateInput: false,
+                                timePickerSeconds: true,
+                                timePicker24Hour: true,
+                                autoApply: true,
+                                locale: {
+                                    format: 'YYYY-MM-DD HH:mm:ss',
+                                    customRangeLabel: __("Custom Range"),
+                                    applyLabel: __("Apply"),
+                                    cancelLabel: __("Clear"),
+                                },
+                                ranges: ranges,
+                                timePicker : true,
+                                timePickerIncrement : 1
+                            };
+                            var origincallback = function (start, end) {
+                                $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));
+                                $(this.element).trigger('blur');
+                            };
+                            $(".datetimerange", form).each(function () {
+                                var callback = typeof $(this).data('callback') == 'function' ? $(this).data('callback') : origincallback;
+                                $(this).on('apply.daterangepicker', function (ev, picker) {
+                                    callback.call(picker, picker.startDate, picker.endDate);
+                                });
+                                $(this).on('cancel.daterangepicker', function (ev, picker) {
+                                    $(this).val('').trigger('blur');
+                                });
+                                $(this).daterangepicker($.extend({}, options, $(this).data()), callback);
+                            });
+                        });
+                    }
                 },
             },
             events: {//绑定事件的方法

@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use app\admin\model\order\order\ProcessOrder;
-
+use app\admin\model\platformmanage\MagentoPlatform;
 /**
  * 财务管理
  *
@@ -163,5 +163,79 @@ class Index extends Backend
     public function testItem()
     {
         
+    }
+    /**
+     * 财务成本统计
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-08-13 16:05:43
+     * @return void
+     */
+    public function cost_statistics()
+    {
+        $orderPlatform = (new MagentoPlatform())->getOrderPlatformList();
+        $create_time = input('create_time');
+        $platform    = input('order_platform', 1);	
+        //头部数据
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            //默认当天
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
+                $map['create_date'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['create_date'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $order_platform = $params['platform'];
+            if(4<=$order_platform){
+                //return json(['code' => 0, 'data' =>'该平台暂时没有数据']);
+                return $this->error('该平台暂时没有数据');
+            }
+            // $orderStatistics = new OrderStatistics();
+            // $list = $orderStatistics->getDataBySite($order_platform,$map);
+            // $list = collection($list)->toArray();
+            $list = Config('workorder.cost_arr');
+            // if(!empty($list)){
+            //     $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
+            //     $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
+            //     foreach ($list as $v) {
+            //         $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
+            //         $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
+            //         $create_date[]                    = $v['create_date'];
+            //         $total_sales_money += $v['sales_money'];
+            //         $total_shoppingcart_update_total += $v['shoppingcart_update_total'];
+            //         $total_sales_num   += $v['sales_num'];
+            //     }
+            // }
+            // $json['xcolumnData'] = $create_date ? $create_date :[];
+            // $json['columnData'] = [
+            //     [
+            //         'type' => 'line',
+            //         'data' => $shoppingCartUpdateTotal ? $shoppingCartUpdateTotal:[],
+            //         'name' => '购物车数量'
+            //     ],
+            //     [
+            //         'type' => 'line',
+            //         'data' => $shoppingCartUpdateConversion ? $shoppingCartUpdateConversion:[],
+			// 		'yAxisIndex'=>1,
+            //         'name' => '购物车转化率'                    
+            //     ]
+
+            // ];
+            /***********END*************/
+            //列表           
+            return json(['code' => 1, 'data' => $json,'rows' => $list]);
+        }
+        $this->view->assign(
+            [
+
+                'orderPlatformList'	=> $orderPlatform,
+                'platform'          => $platform,
+                'create_time'       => $create_time
+            ]
+        );
+        $this->assignconfig('platform', $platform);
+        $this->assignconfig('create_time',$create_time);
+        return  $this->view->fetch();
     }
 }
