@@ -154,10 +154,10 @@
                 <tr>
                     <th>SKU</th>
                     <th>供应商SKU</th>
-                    <th>采购数量</th>
-                    <th>到货数量</th>
-                    <th>质检合格数量</th>
-                    <th>留样数量</th>
+                    <th class="tdtd">采购数量</th>
+                    <th class="tdtd">到货数量</th>
+                    <th class="tdtd">质检合格数量</th>
+                    <th class="tdtd">留样数量</th>
                     <th>入库数量</th>
                     <th>操作
                     </td>
@@ -167,10 +167,10 @@
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
                     </td>
                     <td class='supplier_sku'></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><input id="c-sample_num" class="form-control sample_num" readonly
+                    <td class="tdtd"></td>
+                    <td class="tdtd"></td>
+                    <td class="tdtd"></td>
+                    <td class="tdtd"><input id="c-sample_num" class="form-control sample_num" readonly
                                oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="sample_num[]" type="text">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control in_stock_num"
@@ -209,10 +209,10 @@
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
             <td class='supplier_sku'></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><input id="c-sample_num" class="form-control sample_num" readonly
+            <td class="tdtd"></td>
+            <td class="tdtd"></td>
+            <td class="tdtd"></td>
+            <td class="tdtd"><input id="c-sample_num" class="form-control sample_num" readonly
                        oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="sample_num[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control in_stock_num"
                        oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="in_stock_num[]" type="text"></td>
