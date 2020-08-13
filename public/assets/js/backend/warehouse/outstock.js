@@ -210,7 +210,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('change', '.platform', function () {
+                $(".sku").val("");
+                $(".out_stock_num").val("");
+                $(".product_name").text("");
+                $(".tdtd").text("");
 
+            });
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
@@ -336,7 +342,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     }, function (res) {
                         if (res) {
                             _this.parent().next().text(res.name);
-                            _this.parent().next().next().text(res.real_time_qty);
+                            _this.parent().next().next().text(res.now_stock);
                             _this.parent().next().next().next().text(res.occupy_stock);
                             _this.parent().next().next().next().next().text(res.available_stock);
                             _this.parent().next().next().next().next().next().text(res.platform_stock);

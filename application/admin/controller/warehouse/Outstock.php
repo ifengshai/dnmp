@@ -284,7 +284,27 @@ class Outstock extends Backend
         //查询入库单商品信息
         $item_map['out_stock_id'] = $ids;
         $item = $this->item->where($item_map)->select();
-
+        $this->iitem = new \app\admin\model\itemmanage\Item;
+        $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //查询数据以显示在出库单编辑界面
+        foreach ($item as $k=>$v){
+            $res = $this->iitem->getGoodsInfo($item[$k]['sku']);
+            $item[$k]['stock'] = $res['stock'];
+            //名字
+            $item[$k]['name'] = $res['name'];
+            //实时库存
+            $item[$k]['now_stock'] = $res['stock'] - $res['distribution_occupy_stock'];
+            //可用库存
+            $item[$k]['available_stock'] = $res['available_stock'];
+            //占用库存
+            $item[$k]['occupy_stock'] = $res['occupy_stock'];
+            $info = $itemplatform->where(['sku'=>$item[$k]['sku'],'platform_type'=>$row['platform_id']])->field('stock')->find();
+            //虚拟仓库存
+            $item[$k]['platform_stock'] = $info['stock'];
+        }
+//
+//         dump(collection($row)->toArray());
+// dump(collection($item)->toArray());die;
         $this->assign('item', $item);
         $this->view->assign("row", $row);
         return $this->view->fetch();

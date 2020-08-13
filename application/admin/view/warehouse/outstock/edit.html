@@ -84,7 +84,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">平台:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[platform_id]" class="form-control selectpicker" data-live-search='true'>
+                <select name="row[platform_id]" class="form-control type platform" data-rule='required'>
                     <option value="">请选择</option>
                     <option value="1" {:$row['platform_id'] == 1 ? 'selected' : ''}>zeelool</option>
                     <option value="2" {:$row['platform_id'] == 2 ? 'selected' : ''}>voogueme</option>
@@ -124,6 +124,7 @@
                     <th>实时库存</th>
                     <th>占用库存</th>
                     <th>可用库存</th>
+                    <th>虚拟仓库存</th>
                     <th>出库数量</th>
                     <th>操作</td>
                 </tr>
@@ -133,11 +134,11 @@
                     <td>
                         <input  id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td class="product_name"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  
+                    <td class="product_name">{$v.name}</td>
+                    <td class="tdtd">{$v.now_stock}</td>
+                    <td class="tdtd">{$v.occupy_stock}</td>
+                    <td class="tdtd">{$v.available_stock}</td>
+                    <td class="tdtd">{$v.platform_stock}</td>
                     <td><input id="c-purchase_remark" class="form-control out_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="out_stock_num[]" value="{$v.out_stock_num}" type="text"></td>
                  
                     <td>
@@ -173,10 +174,10 @@
                 <input  id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
             <td class="product_name"></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          
+            <td class="tdtd"></td>
+            <td class="tdtd"></td>
+            <td class="tdtd"></td>
+            <td class="tdtd"></td>
             <td><input id="c-purchase_remark" class="form-control out_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="out_stock_num[]" type="text"></td>
          
             <td>

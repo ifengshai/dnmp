@@ -1685,6 +1685,7 @@ class Item extends Backend
             $info = $itemplatform->where(['sku'=>$sku,'platform_type'=>$site])->field('stock')->find();
             $res = $this->model->getGoodsInfo($sku);
             $res['platform_stock'] = $info['stock'];
+            $res['now_stock'] = $res['stock'] - $res['distribution_occupy_stock'];
             // dump($res);die;
             if ($res) {
                 if ($info) {
