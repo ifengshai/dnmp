@@ -118,9 +118,10 @@ class TransferOrder extends Backend
                 $item_platform = new ItemPlatformSku();
                 $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
                 if (empty($item_platform_sku)){
-                    $this->error('此sku'.$v.'暂未同步到调出仓，请先同步再进行操作');
+                    $this->error('此sku'.$v.'暂未同步到调入仓，请先同步再进行操作');
                 }
-                if ($item_platform_sku['stock'] < $num[$k]){
+                $in_item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_out_site']])->find();
+                if ($in_item_platform_sku['stock'] < $num[$k]){
                     $this->error('调出数量不能大于当前站点虚拟仓库存');
                 }
             }
