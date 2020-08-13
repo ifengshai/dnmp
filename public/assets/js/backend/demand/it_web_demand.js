@@ -94,20 +94,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         },
                         {
                             field: 'all_finish_time',
-                            title: __('时间节点'),
+                            title: __('完成时间节点'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 if(rows.develop_finish_time){
-                                    all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">开发：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.test_is_finish == 1){
-                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.all_finish_time){
-                                    all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">上线：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
                                 if(all_user_name == ''){
                                     all_user_name = '-';
@@ -322,21 +322,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         },
                         {
                             field: 'all_finish_time',
-                            title: __('时间节点'),
+                            title: __('完成时间节点'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 if(rows.develop_finish_time){
-                                    all_user_name += '<span class="all_user_name">开发完成：<b>'+ rows.develop_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">开发：<b>'+ rows.develop_finish_time + '</b></span><br>';
                                 }
 
 
                                 if(rows.test_is_finish == 1){
-                                    all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">测试：<b>'+ rows.test_finish_time + '</b></span><br>';
                                 }
 
                                 if(rows.all_finish_time){
-                                    all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
+                                    all_user_name += '<span class="all_user_name">上线：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
                                 if(all_user_name == ''){
                                     all_user_name = '-';
