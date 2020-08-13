@@ -101,6 +101,7 @@ class Zendesk extends Backend
                         break;
                     case 4:
                         //获取所有的账号admin_id
+                        $map['zendesk.is_hide'] = 1;
                         $map['zendesk.status'] = ['in', [1, 2]];
                         break;
                 }
