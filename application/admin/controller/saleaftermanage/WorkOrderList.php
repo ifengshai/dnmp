@@ -3617,7 +3617,7 @@ EOF;
      * @since 2020/04/30 09:34:48 
      * @return void
      */
-    public function batch_export_xls_bak()
+    public function batch_export_xls()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -3951,7 +3951,7 @@ EOF;
      * @since 2020/08/14 14:42:55 
      * @return void
      */
-    public function batch_export_xls()
+    public function batch_export_xls_bak()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -4124,6 +4124,7 @@ EOF;
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
 
         // $fp = fopen('php://output', 'a');//打开output流
