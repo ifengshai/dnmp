@@ -29,27 +29,28 @@ class ZendeskComments extends Model
       * */
     public function dealnum_statistical($platform = 0,$time_str = '',$group_id = 0,$admin_id = 0){
         if($platform){
-            $where['platform'] = $platform;
+            $where['c.platform'] = $platform;
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $where['c.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $where['create_time'] = ['between', [$start,$end]];
+            $where['c.create_time'] = ['between', [$start,$end]];
         }
         if($group_id){
             //查询客服类型
             $group_admin_id = Db::name('admin')->where(['group_id'=>$group_id])->column('id');
-            $where['due_id'] = array('in',$group_admin_id);
+            $where['c.due_id'] = array('in',$group_admin_id);
         }
         if($admin_id){
-            $where['due_id'] = $admin_id;
+            $where['c.due_id'] = $admin_id;
         }
-        $where['is_admin'] = 1;
-        $where['is_public'] = ['neq',2];
-        $count = $this->where($where)->count();
+        $where['c.is_admin'] = 1;
+        $where['c.is_public'] = ['neq',2];
+        $where['z.channel'] = ['neq','voice'];
+        $count = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
         return $count;
     }
 
