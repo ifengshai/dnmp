@@ -289,7 +289,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             operate:false
                         },
 
-                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('创建时间'), operate: false},
 
                         {
                             field: 'pm_audit_status',
