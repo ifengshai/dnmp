@@ -172,7 +172,6 @@ class ItemPlatformSku extends Model
         $map['platform_type'] = $platform_type;
         return $this->where($map)->value('sku');
     }
-
     /**
      * 根据仓库SKU查询各平台SKU
      *

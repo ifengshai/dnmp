@@ -342,14 +342,14 @@ class Test3 extends Backend
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
         // Create an authorized analytics service object.
         $analytics = new \Google_Service_AnalyticsReporting($client);
-        $startDate = '2020-08-12';
-        $endDate = '2020-08-12';
+        $startDate = '2020-08-14';
+        $endDate = '2020-08-14';
         // Call the Analytics Reporting API V4.
         $response = $this->getReport($analytics, $startDate, $endDate);
         // Print the response.
         $result = $this->printResults($response);
-
-        dump($result);die;
+        dump($result);
+        dump($result[0]['ga:adCost']);die;
 
 
         // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
@@ -394,36 +394,37 @@ class Test3 extends Backend
         return $analytics->reports->batchGet($body);
 
     }
-        /**
+    /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
      * @param An Analytics Reporting API V4 response.
      */
     protected function printResults($reports)
     {
+        $finalResult = array();
         for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
             $report = $reports[$reportIndex];
             $header = $report->getColumnHeader();
             $dimensionHeaders = $header->getDimensions();
             $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
             $rows = $report->getData()->getRows();
-
             for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
                 $row = $rows[$rowIndex];
                 $dimensions = $row->getDimensions();
                 $metrics = $row->getMetrics();
                 for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
-                    print($dimensionHeaders[$i] . ": " . $dimensions[$i] . "\n");
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
                 }
 
                 for ($j = 0; $j < count($metrics); $j++) {
                     $values = $metrics[$j]->getValues();
                     for ($k = 0; $k < count($values); $k++) {
                         $entry = $metricHeaders[$k];
-                        print($entry->getName() . ": " . $values[$k] . "\n");
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
                     }
                 }
             }
+            return $finalResult;
         }
     }
 }

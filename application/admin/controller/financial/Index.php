@@ -195,24 +195,26 @@ class Index extends Backend
             // $list = $orderStatistics->getDataBySite($order_platform,$map);
             // $list = collection($list)->toArray();
             $list = Config('workorder.cost_arr');
+            $platform = new  \app\admin\model\financial\Zeelool;
+            $rs = $platform->facebook_cost('2020-08-14','2020-08-14');
+            dump($rs);
+            exit;
             if(!empty($list)){
-                
+                $column = $columnData = [];
+                foreach($list as $k=> $v){
+                   if($v['type'] == '销售额'){
+                       continue;
+                   } 
+                    $column[] = $v['type'];
+                    $columnData[$k]['name'] = $v['type'];
+                    $columnData[$k]['value'] = $v['money_cn'];
+                }   
+                $json['column'] = $column;
+                $json['columnData'] = $columnData; 
             }
-            $json['xcolumnData'] = $create_date ? $create_date :[];
-            $json['columnData'] = [
-                [
-                    'type' => 'line',
-                    'data' => $shoppingCartUpdateTotal ? $shoppingCartUpdateTotal:[],
-                    'name' => '购物车数量'
-                ],
-                [
-                    'type' => 'line',
-                    'data' => $shoppingCartUpdateConversion ? $shoppingCartUpdateConversion:[],
-					'yAxisIndex'=>1,
-                    'name' => '购物车转化率'                    
-                ]
-
-            ];
+            if($params['key'] == 'echart1'){
+                return json(['code' => 1, 'data' => $json]);
+            }
             /***********END*************/
             //列表           
             return json(['code' => 1, 'data' => $json,'rows' => $list]);

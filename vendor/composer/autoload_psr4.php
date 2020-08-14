@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'voku\\tests\\' => array($vendorDir . '/voku/portable-ascii/tests', $vendorDir . '/voku/portable-utf8/tests'),
     'voku\\helper\\' => array($vendorDir . '/voku/anti-xss/src/voku/helper', $vendorDir . '/voku/email-check/src/voku/helper', $vendorDir . '/voku/urlify/src/voku/helper'),
     'voku\\' => array($vendorDir . '/voku/portable-ascii/src/voku', $vendorDir . '/voku/portable-utf8/src/voku', $vendorDir . '/voku/stop-words/src/voku'),
     'think\\migration\\' => array($vendorDir . '/topthink/think-migration/src'),
@@ -53,6 +52,7 @@ return array(
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'Google\\Auth\\' => array($vendorDir . '/google/auth/src'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
+    'FacebookAds\\' => array($vendorDir . '/facebook/php-business-sdk/src/FacebookAds'),
     'Endroid\\QrCode\\' => array($vendorDir . '/endroid/qr-code/src'),
     'EasyWeChat\\' => array($vendorDir . '/overtrue/wechat/src'),
     'EasyDingTalk\\' => array($vendorDir . '/mingyoung/dingtalk/src'),

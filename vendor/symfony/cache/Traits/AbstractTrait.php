@@ -78,7 +78,7 @@ trait AbstractTrait
      *
      * @return array|bool The identifiers that failed to be cached or a boolean stating if caching succeeded or not
      */
-    abstract protected function doSave(array $values, $lifetime);
+    abstract protected function doSave(array $values, int $lifetime);
 
     /**
      * {@inheritdoc}
@@ -250,7 +250,7 @@ trait AbstractTrait
             if (false !== $value = unserialize($value)) {
                 return $value;
             }
-            throw new \DomainException('Failed to unserialize cached value');
+            throw new \DomainException('Failed to unserialize cached value.');
         } catch (\Error $e) {
             throw new \ErrorException($e->getMessage(), $e->getCode(), E_ERROR, $e->getFile(), $e->getLine());
         } finally {

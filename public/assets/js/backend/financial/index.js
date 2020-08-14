@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function ($, undefined, Backend, Table, Form, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsobj'], function ($, undefined, Backend, Table, Form, Template,EchartObj) {
 
     var Controller = {
         order: function () {
@@ -1068,14 +1068,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                     tooltip: { //提示框组件。
                         trigger: 'item',
                         formatter: function (param) {
-                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            return param.data.name + '<br/>成本金额：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                         }
                     },
                 }
             };
             var create_time = $('#workload_time').val();
             //console.log(time_two);
-            var platform = 10;
+            var platform = 1;
             var options1 = {
                 type: 'post',
                 url: 'financial/index/cost_statistics',
