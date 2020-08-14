@@ -2895,11 +2895,11 @@ class WorkOrderList extends Backend
         $this->view->assign('recepts', $recepts);
         //判断站点
         if ($row['work_platform'] == 1 && $row['replenish_money']) {
-            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . date('mdHis') . rand(100,999);
+            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='. $row->id;
         } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
-            $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . date('mdHis') . rand(100,999);
+            $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . $row->id;
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
-            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . date('mdHis') . rand(100,999);
+            $url = config('url.nihao_url') . 'common/Differenceprice/difference_price?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
@@ -4125,7 +4125,7 @@ EOF;
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
-        
+
         // $fp = fopen('php://output', 'a');//打开output流
         // fputcsv($fp, $list);//将数据格式化为csv格式并写入到output流中
         // $dataNum = count( $list );
