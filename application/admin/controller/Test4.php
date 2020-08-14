@@ -106,7 +106,19 @@ class Test4 extends Backend
      */
     public function proccess_sku_stock()
     {
-        
+        $item = new \app\admin\model\itemmanage\Item();
+        $list = $item->where(['is_del' => 1, 'is_open' => 1, 'available_stock' => ['>', 0]])->select();
+
+        //查询临时表比例数据
+        $data = Db::name('zzz_temp')->column('*', 'sku');
+        foreach ($list as $k => $v) {
+            //如果存在比例
+            if ($data[$v['sku']]) {
+                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? round($v['available_stock'] * $data[$v['sku']]['zeelool']/100) : 0;
+                $voogueme_stock = $data[$v['sku']]['voogueme']  > 0 ? round($v['available_stock'] * $data[$v['sku']]['voogueme']/100) : 0;
+                $nihao_stock = $data[$v['sku']]['nihao']  > 0 ? round($v['available_stock'] * $data[$v['sku']]['nihao']/100) : 0;
+            }
+        }
     }
 
 
