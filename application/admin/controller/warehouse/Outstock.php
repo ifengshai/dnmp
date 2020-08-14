@@ -379,19 +379,20 @@ class Outstock extends Backend
             ->select();
         $data['status'] = input('status');
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-
-        //批量审核出库 扣减sku的总数量不能大于当前sku的虚拟仓库存量
-        foreach ($list as $k=>$v) {
-            if (!$arr[$v['sku']]){
-                $arr[$v['sku']] = $v['out_stock_num'];
-            }else{
-                $arr[$v['sku']] = $v['out_stock_num'] + $arr[$v['sku']];
+        if ($data['status'] == 2) {
+            //批量审核出库 扣减sku的总数量不能大于当前sku的虚拟仓库存量
+            foreach ($list as $k => $v) {
+                if (!$arr[$v['sku']]) {
+                    $arr[$v['sku']] = $v['out_stock_num'];
+                } else {
+                    $arr[$v['sku']] = $v['out_stock_num'] + $arr[$v['sku']];
+                }
             }
-        }
-        foreach ($arr as $k=>$v){
-            $item_platform_sku = $platform->where('sku',$k)->field('stock')->find();
-            if ($v > $item_platform_sku['stock']){
-                $this->error('出库的数量大于sku:'.$k.'的虚拟仓库存，请检查后重试');
+            foreach ($arr as $k => $v) {
+                $item_platform_sku = $platform->where('sku', $k)->field('stock')->find();
+                if ($v > $item_platform_sku['stock']) {
+                    $this->error('出库的数量大于sku:' . $k . '的虚拟仓库存，请检查后重试');
+                }
             }
         }
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
