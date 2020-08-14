@@ -102,7 +102,8 @@ class Nihao extends Backend
                 $swhere = [];
                 $swhere['problem_type_id'] = $filter['category_id'];
                 $swhere['work_type'] = $filter['p_id'];
-                $swhere['work_platform'] = 1;
+                $swhere['work_platform'] = 3;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['category_id']);
