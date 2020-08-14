@@ -145,6 +145,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         //     },
                         // },
                         {
+                            field: 'detail',
+                            title: __('详情记录'),
+                            events: Controller.api.events.get_detail,
+                            formatter: Controller.api.formatter.get_detail,
+                            operate:false
+                        },
+                        {
                             field: 'web_designer_user_name',
                             title: __('前端'),
                             operate: false,
@@ -201,13 +208,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             },
                         },
                    
-                        {
-                            field: 'detail',
-                            title: __('详情记录'),
-                            events: Controller.api.events.get_detail,
-                            formatter: Controller.api.formatter.get_detail,
-                            operate:false
-                        },
+
                     ]
                 ]
             });
@@ -346,6 +347,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             },
                         },
                         {
+                            field: 'detail',
+                            title: __('详情记录'),
+                            events: Controller.api.events.get_detail,
+                            formatter: Controller.api.formatter.get_detail,
+                            operate:false
+                        },
+                        {
                             field: 'web_designer_user_name',
                             title: __('前端'),
                             operate: false,
@@ -401,13 +409,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                 return all_user_name ? all_user_name : '-';
                             },
                         },
-                        {
-                            field: 'detail',
-                            title: __('详情记录'),
-                            events: Controller.api.events.get_detail,
-                            formatter: Controller.api.formatter.get_detail,
-                            operate:false
-                        },
+
 
                     ]
                 ]
