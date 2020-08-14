@@ -99,6 +99,77 @@ class Test4 extends Backend
         die;
     }
 
+    /**
+     * 处理各站虚拟仓库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/14 09:30:39 
+     * @return void
+     */
+    public function proccess_sku_stock()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemPlatformSKU = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $item->where(['is_del' => 1, 'is_open' => 1, 'available_stock' => ['>', 0]])->select();
+
+        //查询临时表比例数据
+        $data = Db::name('zzz_temp')->column('*', 'sku');
+        foreach ($list as $k => $v) {
+            //如果存在比例
+            if ($data[$v['sku']]) {
+                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool']/100) : 0;
+                if (($v['available_stock'] - $zeelool_stock) > 0) {
+                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) : ($v['available_stock'] - $zeelool_stock);
+                }
+
+                if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
+                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
+                }
+                
+
+                if (($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > 0) {
+                    $meeloog_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock);
+                } 
+
+                $stock = $v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock - $meeloog_stock;
+                $wesee_stock = $stock > 0 ? $stock : 0;
+                
+            }  else {
+                continue;
+            }
+            
+            // else {
+            //     $zeelool_stock = $v['available_stock'];
+            // }
+
+            if ($zeelool_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 1])->update(['stock' => $zeelool_stock]);
+            }
+
+            if ($voogueme_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 2])->update(['stock' => $voogueme_stock]);
+            }
+
+            if ($nihao_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 3])->update(['stock' => $nihao_stock]);
+            }
+
+            if ($meeloog_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 4])->update(['stock' => $meeloog_stock]);
+            }
+
+            if ($wesee_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 5])->update(['stock' => $wesee_stock]);
+            }
+        }
+
+        echo 'ok';
+    }
+
+
+
+
      /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
