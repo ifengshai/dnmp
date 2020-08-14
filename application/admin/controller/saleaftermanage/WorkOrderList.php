@@ -3980,26 +3980,16 @@ EOF;
         }
         $this->request->get(['filter' => json_encode($filter)]);
         list($where) = $this->buildparams();
-        $list = $this->model
+        $list = $this->model->field('id,platform_order,work_platform,work_status,email,refund_money,problem_type_content,problem_description,create_time,create_user_name')
             ->where($where)
             ->where($map)
             ->where($addWhere)
             ->select();
         $list = collection($list)->toArray();
-        //查询用户id对应姓名
-        $admin = new \app\admin\model\Admin();
-        $users = $admin->where('status', 'normal')->column('nickname', 'id');
-
         $arr = array_column($list,'id');
         //求出所有的措施
         $info = $this->step->fetchMeasureRecord($arr);
-        if ($info) {
-            $info = collection($info)->toArray();
-        } else {
-            $info = [];
-        }
-
-
+       
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
@@ -4110,7 +4100,7 @@ EOF;
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
+        $format = 'csv';
         $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
@@ -4123,6 +4113,10 @@ EOF;
             //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }  elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
         }
 
         //输出名称
@@ -4130,8 +4124,25 @@ EOF;
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-
         $writer->save('php://output');
+        
+        // $fp = fopen('php://output', 'a');//打开output流
+        // fputcsv($fp, $list);//将数据格式化为csv格式并写入到output流中
+        // $dataNum = count( $list );
+        // $perSize = 1000;//每次导出的条数
+        // $pages = ceil($dataNum / $perSize);
+
+        // for ($i = 1; $i <= $pages; $i++) {
+        //     foreach ($list as $item) {
+        //         fputcsv($fp, $item);
+        //     }
+        //     //刷新输出缓冲到浏览器
+        //     ob_flush();
+        //     flush();//必须同时使用 ob_flush() 和flush() 函数来刷新输出缓冲。
+        // }
+        // fclose($fp);
+        // exit();
+
     }
 
 
