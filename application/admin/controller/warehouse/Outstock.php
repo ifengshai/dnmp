@@ -369,8 +369,31 @@ class Outstock extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-    
+
+        //查询入库单商品信息
+        $where['out_stock_id'] = ['in', $ids];
+        $list = $this->item
+            ->alias('a')
+            ->join('fa_out_stock o','a.out_stock_id = o.id')
+            ->where($where)
+            ->select();
         $data['status'] = input('status');
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+        //批量审核出库 扣减sku的总数量不能大于当前sku的虚拟仓库存量
+        foreach ($list as $k=>$v) {
+            if (!$arr[$v['sku']]){
+                $arr[$v['sku']] = $v['out_stock_num'];
+            }else{
+                $arr[$v['sku']] = $v['out_stock_num'] + $arr[$v['sku']];
+            }
+        }
+        foreach ($arr as $k=>$v){
+            $item_platform_sku = $platform->where('sku',$k)->field('stock')->find();
+            if ($v > $item_platform_sku['stock']){
+                $this->error('出库的数量大于sku:'.$k.'的虚拟仓库存，请检查后重试');
+            }
+        }
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 
         if ($res != false) {
@@ -379,15 +402,7 @@ class Outstock extends Backend
              */
 
             if ($data['status'] == 2) {
-                //查询入库单商品信息
-                $where['out_stock_id'] = ['in', $ids];
-                $list = $this->item
-                    ->alias('a')
-                    ->join('fa_out_stock o','a.out_stock_id = o.id')
-                    ->where($where)
-                    ->select();
 //                dump(collection($list)->toArray());die;
-                $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
                 //出库扣减库存
                 foreach ($list as $v) {
