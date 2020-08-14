@@ -1029,8 +1029,6 @@ class CustomerService extends Backend
                     'endOne'       => $endOne,
                     'startTwo'     => $startTwo,
                     'endTwo'       => $endTwo,
-                    'startTwo'     => $startTwo,
-                    'endTwo'       => $endTwo,
                     'platform'     => $platform,
                     'one_time'  => $params['one_time'],
                     'check'  => 1,
