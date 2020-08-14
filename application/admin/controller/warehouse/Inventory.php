@@ -1724,6 +1724,9 @@ class Inventory extends Backend
                     $two_type = 8;
                     $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
                 }
+
+                //追加对应站点虚拟库存
+                $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setDec('stock', $original_number);
                 
                 if (false !== $res) {
                     //插入日志表
