@@ -54,9 +54,6 @@ class Test4 extends Backend
         die;
     }
 
-
-
-
     /**
      * 处理在途库存
      *
@@ -99,6 +96,18 @@ class Test4 extends Backend
         die;
     }
 
+    /**
+     * 处理各站虚拟仓库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/14 09:30:39 
+     * @return void
+     */
+    public function proccess_sku_stock()
+    {
+        
+    }
 
 
 
