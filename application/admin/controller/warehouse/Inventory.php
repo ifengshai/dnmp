@@ -1673,19 +1673,24 @@ class Inventory extends Backend
                 }
                 
                 if (false !== $res) {
-                    //插入日志表
-                    (new StockLog())->setData([
+                    $data = [
                         'type'                      => 2,
                         'two_type'                  => $two_type ?: 0,
                         'sku'                       => $warehouse_original_sku,
                         'order_number'              => $increment_id,
                         'public_id'                 => $id,
                         'available_stock_change'    => -$original_number,
-                        'occupy_stock_change'       => $original_number,
                         'create_person'             => session('admin.nickname'),
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
-                    ]);
+                    ];
+                    if($type == 3){
+                        $data['stock_change']        = -$original_number;
+                    }elseif ($type == 4){
+                        $data['occupy_stock_change'] = $original_number;
+                    }
+                    //插入日志表
+                    (new StockLog())->setData($data);
                 }
 
                 Db::commit();
