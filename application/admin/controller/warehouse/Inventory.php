@@ -1664,14 +1664,15 @@ class Inventory extends Backend
             //回滚
             Db::startTrans();
             try {
-                $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+                if ($type == 3) { //赠品
+                    $two_type = 9;
+                    $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->dec('stock', $original_number)->update();
+                } elseif ($type == 4) { //补发
+                    $two_type = 8;
+                    $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+                }
+                
                 if (false !== $res) {
-                    if ($type == 3) {
-                        $two_type = 9;
-                    } elseif ($type == 4) {
-                        $two_type = 8;
-                    }
-                   
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
