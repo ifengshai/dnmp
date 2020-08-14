@@ -114,6 +114,13 @@ class SupplierSku extends Backend
                     array_walk($supplier_skus, 'trim_value');
                     if (count(array_filter($supplier_skus)) < 1) {
                         $this->error('供应商sku不能为空！！');
+                    }  
+
+                    //是否为大货
+                    if ($params['is_big_goods'] == 1 && !$params['product_cycle']) {
+                        $this->error('生产周期不能为空');
+                    } elseif ($params['is_big_goods'] == 0 && !$params['product_cycle']) {
+                        $params['product_cycle'] = 7;
                     }
 
                     $link = $this->request->post("link/a");
@@ -145,6 +152,14 @@ class SupplierSku extends Backend
                         if ($params['label'] == 1) {
                             $map['sku'] = $v;
                             $this->model->where($map)->update(['label' => 0]);
+                        } else {
+                            //查询此sku 是否有主供应商 如果没有 则当前的默认为主供货商
+                            $map['sku'] = $v;
+                            $map['label'] = 1;
+                            $count = $this->model->where($map)->count();
+                            if ($count < 1) {
+                                $data[$k]['label'] = 1;
+                            }
                         }
                     }
                     $result = $this->model->allowField(true)->saveAll($data);
@@ -212,13 +227,27 @@ class SupplierSku extends Backend
                     if ($count > 1) {
                         $this->error('记录已存在！！SKU:' . $params['sku']);
                     }
+                    
+                    //是否为大货
+                    if ($params['is_big_goods'] == 1 && !$params['product_cycle']) {
+                        $this->error('生产周期不能为空');
+                    } elseif ($params['is_big_goods'] == 0 && !$params['product_cycle']) {
+                        $params['product_cycle'] = 7;
+                    }
 
                     //如果选择主供应商 则同SKU下 其他记录设置为辅供应商
                     if ($params['label'] == 1) {
                         $map['sku'] = $params['sku'];
-                        $map['supplier_id'] = ['neq',$params['supplier_id']];
-//                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
-                        $this->model->where($map)->update(['label' => 0]);
+                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                    } else {
+                        //查询此sku 是否有主供应商 如果没有 则当前的默认为主供货商
+                        $map['sku'] = $params['sku'];
+                        $map['label'] = 1;
+                        $map['id'] = ['<>', $ids];
+                        $count = $this->model->where($map)->count();
+                        if ($count < 1) {
+                            $params['label'] = 1;
+                        }
                     }
 
                     $result = $row->allowField(true)->save($params);
