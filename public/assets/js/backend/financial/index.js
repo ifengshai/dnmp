@@ -1060,6 +1060,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
         cost_statistics:function(){
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));
+            var chartOptions1 = {
+                targetId: 'echart1',
+                downLoadTitle: '图表',
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
+            };
+            var create_time = $('#workload_time').val();
+            //console.log(time_two);
+            var platform = 10;
+            var options1 = {
+                type: 'post',
+                url: 'financial/index/cost_statistics',
+                data: {
+                    'time': create_time,
+                    'platform': platform,
+                    'key':'echart1' 
+                }
+            }
+            EchartObj.api.ajax(options1, chartOptions1); 
             // 初始化表格参数配置
             Table.api.init({
                 commonSearch: false,

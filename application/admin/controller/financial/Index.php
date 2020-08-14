@@ -195,33 +195,24 @@ class Index extends Backend
             // $list = $orderStatistics->getDataBySite($order_platform,$map);
             // $list = collection($list)->toArray();
             $list = Config('workorder.cost_arr');
-            // if(!empty($list)){
-            //     $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
-            //     $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
-            //     foreach ($list as $v) {
-            //         $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
-            //         $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
-            //         $create_date[]                    = $v['create_date'];
-            //         $total_sales_money += $v['sales_money'];
-            //         $total_shoppingcart_update_total += $v['shoppingcart_update_total'];
-            //         $total_sales_num   += $v['sales_num'];
-            //     }
-            // }
-            // $json['xcolumnData'] = $create_date ? $create_date :[];
-            // $json['columnData'] = [
-            //     [
-            //         'type' => 'line',
-            //         'data' => $shoppingCartUpdateTotal ? $shoppingCartUpdateTotal:[],
-            //         'name' => '购物车数量'
-            //     ],
-            //     [
-            //         'type' => 'line',
-            //         'data' => $shoppingCartUpdateConversion ? $shoppingCartUpdateConversion:[],
-			// 		'yAxisIndex'=>1,
-            //         'name' => '购物车转化率'                    
-            //     ]
+            if(!empty($list)){
+                
+            }
+            $json['xcolumnData'] = $create_date ? $create_date :[];
+            $json['columnData'] = [
+                [
+                    'type' => 'line',
+                    'data' => $shoppingCartUpdateTotal ? $shoppingCartUpdateTotal:[],
+                    'name' => '购物车数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => $shoppingCartUpdateConversion ? $shoppingCartUpdateConversion:[],
+					'yAxisIndex'=>1,
+                    'name' => '购物车转化率'                    
+                ]
 
-            // ];
+            ];
             /***********END*************/
             //列表           
             return json(['code' => 1, 'data' => $json,'rows' => $list]);
