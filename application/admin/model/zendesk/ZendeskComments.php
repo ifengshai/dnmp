@@ -48,7 +48,7 @@ class ZendeskComments extends Model
             $where['due_id'] = $admin_id;
         }
         $where['is_admin'] = 1;
-        $where['is_public'] = 1;
+        $where['is_public'] = ['neq',2];
         $count = $this->where($where)->count();
         return $count;
     }
