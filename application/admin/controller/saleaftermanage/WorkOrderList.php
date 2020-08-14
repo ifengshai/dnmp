@@ -3617,7 +3617,7 @@ EOF;
      * @since 2020/04/30 09:34:48 
      * @return void
      */
-    public function batch_export_xls()
+    public function batch_export_xls_bak()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -3941,6 +3941,200 @@ EOF;
 
         $writer->save('php://output');
     }
+
+
+    /**
+     * 导出工单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/14 14:42:55 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere .= " AND id IN ({$ids})";
+        }
+        $filter = json_decode($this->request->get('filter'), true);
+        $map = [];
+        if ($filter['recept_person']) {
+            $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
+            $map['id'] = ['in', $workIds];
+            unset($filter['recept_person']);
+        }
+        //筛选措施
+        if ($filter['measure_choose_id']) {
+            $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+            if (!empty($map['id'])) {
+                $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                $map['id']  = ['in', $newWorkIds];
+            } else {
+                $map['id']  = ['in', $measuerWorkIds];
+            }
+            unset($filter['measure_choose_id']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
+        list($where) = $this->buildparams();
+        $list = $this->model
+            ->where($where)
+            ->where($map)
+            ->where($addWhere)
+            ->select();
+        $list = collection($list)->toArray();
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+
+        $arr = array_column($list,'id');
+        //求出所有的措施
+        $info = $this->step->fetchMeasureRecord($arr);
+        if ($info) {
+            $info = collection($info)->toArray();
+        } else {
+            $info = [];
+        }
+
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单ID")
+            ->setCellValue("B1", "订单号")
+            ->setCellValue("C1", "订单平台");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "工单状态")
+            ->setCellValue("E1", "客户邮箱")
+            ->setCellValue("F1", "退款金额");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "问题分类")
+            ->setCellValue("H1", "问题描述")
+            ->setCellValue("I1", "解决方案");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("J1", "创建时间")
+            ->setCellValue("K1", "创建人");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
+        foreach ($list as $key => $value) {
+           
+            switch ($value['work_platform']) {
+                case 2:
+                    $value['work_platform'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['work_platform'] = 'nihao';
+                    break;
+                case 4:
+                    $value['work_platform'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['work_platform'] = 'wesee';
+                    break;
+                default:
+                    $value['work_platform'] = 'zeelool';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['id']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['platform_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['work_platform']);
+            switch ($value['work_status']) {
+                case 1:
+                    $value['work_status'] = '新建';
+                    break;
+                case 2:
+                    $value['work_status'] = '待审核';
+                    break;
+                case 3:
+                    $value['work_status'] = '待处理';
+                    break;
+                case 4:
+                    $value['work_status'] = '审核拒绝';
+                    break;
+                case 5:
+                    $value['work_status'] = '部分处理';
+                    break;
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;
+                default:
+                    $value['work_status'] = '已处理';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['work_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['email']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['refund_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['problem_type_content']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['problem_description']);
+            //措施
+            if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $info['step'][$value['id']]);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '');
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_user_name']);
+
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+   
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:k' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '工单数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+
 
     /**
      * 批量导入
