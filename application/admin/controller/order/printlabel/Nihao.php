@@ -405,7 +405,7 @@ class Nihao extends Backend
                         'a.platform_type' => 3, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -535,7 +535,7 @@ class Nihao extends Backend
                         'a.platform_type' => 3, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {

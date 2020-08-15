@@ -425,7 +425,7 @@ class Zeelool extends Backend
                         'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -554,9 +554,10 @@ class Zeelool extends Backend
                         'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
+                
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
