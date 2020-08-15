@@ -404,7 +404,7 @@ class Nihao extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 3, //平台类型
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -522,7 +522,7 @@ class Nihao extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 3, //平台类型
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {

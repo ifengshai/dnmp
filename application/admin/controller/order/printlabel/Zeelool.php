@@ -423,7 +423,7 @@ class Zeelool extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 1, //平台类型
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -541,9 +541,10 @@ class Zeelool extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 1, //平台类型
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
+                
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -578,6 +579,7 @@ class Zeelool extends Backend
                         ]);
                     }
                 }
+
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
                     //查出订单SKU映射表对应的仓库SKU
