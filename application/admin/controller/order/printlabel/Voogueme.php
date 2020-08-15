@@ -105,7 +105,8 @@ class Voogueme extends Backend
                 $swhere = [];
                 $swhere['problem_type_id'] = $filter['category_id'];
                 $swhere['work_type'] = $filter['p_id'];
-                $swhere['work_platform'] = 1;
+                $swhere['work_platform'] = 2;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['category_id']);
@@ -464,11 +465,12 @@ class Voogueme extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 2, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 2, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('change_sku')
                     ->select();
@@ -510,9 +512,20 @@ class Voogueme extends Backend
                         ]);
                     }
                 }
+
+                //查询是否有取消订单
+                $skus = array_column($list, 'sku');
+                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.change_type' => 3, 'a.platform_type' => 2,'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('original_sku');
+
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
+
+                    //如果SKU 存在取消订单 则不处理库存
+                    if (in_array($v['sku'], $cancel_skus)) {
+                        continue;
+                    }
+
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
@@ -582,11 +595,12 @@ class Voogueme extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 2, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 2, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('change_sku')
                     ->select();
@@ -624,8 +638,19 @@ class Voogueme extends Backend
                         ]);
                     }
                 }
+                
+                //查询是否有取消订单
+                $skus = array_column($list, 'sku');
+                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.change_type' => 3,'a.platform_type' => 2, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('original_sku');
+
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
+
+                    //如果SKU 存在取消订单 则不处理库存
+                    if (in_array($v['sku'], $cancel_skus)) {
+                        continue;
+                    }
+
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {

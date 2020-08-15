@@ -115,49 +115,48 @@ class Test4 extends Backend
         foreach ($list as $k => $v) {
             //如果存在比例
             if ($data[$v['sku']]) {
-                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool']/100) : 0;
+                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
                 if (($v['available_stock'] - $zeelool_stock) > 0) {
-                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) : ($v['available_stock'] - $zeelool_stock);
+                    $voogueme_stock = $data[$v['sku']]['voogueme']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : 0;
                 }
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
-                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
+                    $nihao_stock = $data[$v['sku']]['nihao']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : 0;
                 }
-                
+
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > 0) {
-                    $meeloog_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock);
-                } 
+                    $meeloog_stock = $data[$v['sku']]['meeloog']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) : 0;
+                }
 
                 $stock = $v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock - $meeloog_stock;
                 $wesee_stock = $stock > 0 ? $stock : 0;
-                
-            }  else {
+            } else {
                 continue;
             }
-            
+
             // else {
             //     $zeelool_stock = $v['available_stock'];
             // }
 
             if ($zeelool_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 1])->update(['stock' => $zeelool_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 1])->update(['stock' => $zeelool_stock]);
             }
 
             if ($voogueme_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 2])->update(['stock' => $voogueme_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 2])->update(['stock' => $voogueme_stock]);
             }
 
             if ($nihao_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 3])->update(['stock' => $nihao_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 3])->update(['stock' => $nihao_stock]);
             }
 
             if ($meeloog_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 4])->update(['stock' => $meeloog_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 4])->update(['stock' => $meeloog_stock]);
             }
 
             if ($wesee_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 5])->update(['stock' => $wesee_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 5])->update(['stock' => $wesee_stock]);
             }
         }
 
@@ -167,21 +166,23 @@ class Test4 extends Backend
 
 
 
-     /************************跑库存数据用START**********************************/
+
+
+    /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
+        // $skus = [
 
-        $skus = [
-            'OA01901-02'
-        ];
+        // ];
+        $list = Db::table('fa_zz_temp2')->select();
 
-        foreach ($skus as $k => $v) {
-            $p_map['sku'] = $v;
-            $data['real_time_qty'] = 157;
+        foreach ($list as $k => $v) {
+            $p_map['sku'] = $v['sku'];
+            $data['real_time_qty'] = $v['stock'];
             $res = $this->item->where($p_map)->update($data);
         }
-        echo $res;
+        echo 'ok';
         die;
     }
 
@@ -202,20 +203,9 @@ class Test4 extends Backend
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
-        ];
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -245,12 +235,14 @@ class Test4 extends Backend
 
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
-            dump($v);
-            dump($data);
+
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
 
-        echo $res;
+        echo 'ok';
         die;
     }
 
@@ -273,20 +265,10 @@ class Test4 extends Backend
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
-        ];
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        // $skus = [
+
+        // ];
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -313,8 +295,11 @@ class Test4 extends Backend
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
-        dump($res);
+        echo 'ok';
         die;
     }
 
@@ -332,20 +317,22 @@ class Test4 extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = [
-            'OA01901-02'
-        ];
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
             $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
             $p_map['sku'] = $v['sku'];
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
+        echo 'ok';
+        die;
     }
 
     /************************跑库存数据用END**********************************/
-
 
 
 
@@ -1045,92 +1032,5 @@ class Test4 extends Backend
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
         return ['title' => $title, 'carrierId' => $carrierId];
-    }
-
-    /**
-     * 跑需求数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/08/07 09:18:21 
-     * @return void
-     */
-    public function test()
-    {
-        //查询
-        $list = db('it_web_old_demand')->where('status', 7)->select();
-        $data = [];
-        foreach ($list as $k => $v) {
-            if ($v['type'] == 1) {
-                $data[$k]['type'] = $v['type'];
-            } else {
-                $data[$k]['type'] = 2;
-            }
-            $data[$k]['site'] = $v['site_type'];
-
-            $str = '';
-            if ($v['web_designer_group'] == 1 || $v['phper_group'] == 1) {
-                $str .= '1,2';
-            } elseif ($v['app_group'] == 1) {
-                $str .= ',3';
-            }
-            $data[$k]['site_type'] = $str;
-            $data[$k]['status'] = 4;
-            $data[$k]['create_time'] = $v['create_time'];
-            $data[$k]['entry_user_id'] = $v['entry_user_id'];
-            $data[$k]['entry_user_confirm'] = $v['entry_user_confirm'];
-            $data[$k]['entry_user_confirm_time'] = $v['entry_user_confirm_time'];
-            $data[$k]['copy_to_user_id'] = $v['copy_to_user_id'];
-            $data[$k]['title'] = $v['title'];
-            $data[$k]['content'] = $v['content'];
-            $data[$k]['priority'] = 1;
-            //计算周期
-            $time = ceil((strtotime($v['all_finish_time']) - strtotime($v['create_time'])) / 86400);
-            $data[$k]['node_time'] = $time;
-            $data[$k]['start_time'] = $v['create_time'];
-            $data[$k]['end_time'] = date('Y-m-d H:i:s', strtotime($v['all_finish_time']) + 7200);
-            $data[$k]['pm_audit_status'] = 3;
-            $data[$k]['pm_audit_status_time'] = date('Y-m-d H:i:s', strtotime($v['create_time']) + 3600);;
-            $data[$k]['pm_confirm'] = 1;
-            $data[$k]['pm_confirm_time'] = $v['entry_user_confirm_time'];
-            $data[$k]['web_designer_group'] = $v['web_designer_group'];
-            $data[$k]['web_designer_complexity'] = $v['web_designer_complexity'];
-            $data[$k]['web_designer_user_id'] = $v['web_designer_user_id'];
-            $data[$k]['web_designer_expect_time'] = $v['web_designer_expect_time'];
-            $data[$k]['web_designer_is_finish'] = $v['web_designer_is_finish'];
-            $data[$k]['web_designer_finish_time'] = $v['web_designer_finish_time'];
-            $data[$k]['phper_group'] = $v['phper_group'];
-            $data[$k]['phper_complexity'] = $v['phper_complexity'];
-            $data[$k]['phper_user_id'] = $v['phper_user_id'];
-            $data[$k]['phper_expect_time'] = $v['phper_expect_time'];
-            $data[$k]['phper_is_finish'] = $v['phper_is_finish'];
-            $data[$k]['phper_finish_time'] = $v['phper_finish_time'];
-            $data[$k]['app_group'] = $v['app_group'];
-            $data[$k]['app_complexity'] = $v['app_complexity'];
-            $data[$k]['app_user_id'] = $v['app_user_id'];
-            $data[$k]['app_expect_time'] = $v['app_expect_time'];
-            $data[$k]['app_is_finish'] = $v['app_is_finish'];
-            $data[$k]['app_finish_time'] = $v['app_finish_time'];
-            $data[$k]['test_group'] = $v['test_group'];
-            $data[$k]['test_confirm_time'] = $v['test_confirm_time'];
-            $data[$k]['test_user_id'] = $v['test_user_id'];
-            $data[$k]['test_is_finish'] = $v['test_is_finish'];
-            $data[$k]['test_finish_time'] = $v['test_finish_time'];
-            $data[$k]['test_status'] = 5;
-            $data[$k]['develop_finish_status'] = 3;
-            $finish_time = max(array($v['web_designer_finish_time'], $v['phper_finish_time'], $v['app_finish_time']));
-            $data[$k]['develop_finish_time'] = $finish_time;
-            $data[$k]['all_finish_time'] = $v['all_finish_time'];
-           
-            $data[$k]['is_small_probability'] = $v['is_small_probability'];
-            if ($v['type'] == 3) {
-                $data[$k]['is_difficult'] = 1;
-            } else {
-                $data[$k]['is_difficult'] = 0;
-            }
-            
-            $data[$k]['is_del'] = $v['is_del'];
-        }
-        db('it_web_demand_copy1')->insertAll($data);
     }
 }
