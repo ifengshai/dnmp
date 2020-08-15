@@ -405,7 +405,7 @@ class Nihao extends Backend
                         'a.platform_type' => 3, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -448,12 +448,28 @@ class Nihao extends Backend
 
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
-                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.increment_id' => ['in', $arr], 'a.change_type' => 3, 'a.platform_type' => 3, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('sum(original_number) as num', 'original_sku');
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 3,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach ($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
 
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
-                   
+
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
                     if (!$trueSku) {
@@ -469,8 +485,8 @@ class Nihao extends Backend
                     }
 
                     //如果SKU 存在取消订单 则判断取消的数量
-                    if ($cancel_skus[$v['sku']] > 0) {
-                        $qty = $qty - $cancel_skus[$v['sku']];
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
                     }
 
                     if ($qty == 0) {
@@ -535,7 +551,7 @@ class Nihao extends Backend
                         'a.platform_type' => 3, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -574,7 +590,23 @@ class Nihao extends Backend
 
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
-                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.increment_id' => ['in', $arr], 'a.change_type' => 3, 'a.platform_type' => 3, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('sum(original_number) as num', 'original_sku');
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 3,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach ($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
 
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
@@ -592,8 +624,8 @@ class Nihao extends Backend
                     }
 
                     //如果SKU 存在取消订单 则判断取消的数量
-                    if ($cancel_skus[$v['sku']] > 0) {
-                        $qty = $qty - $cancel_skus[$v['sku']];
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
                     }
 
                     if ($qty == 0) {
