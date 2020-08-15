@@ -423,7 +423,7 @@ class Zeelool extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 1, //平台类型
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -467,6 +467,8 @@ class Zeelool extends Backend
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
                 $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.increment_id' => ['in', $arr], 'a.change_type' => 3, 'a.platform_type' => 1, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('sum(original_number) as num', 'original_sku');
+
+
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
@@ -551,7 +553,7 @@ class Zeelool extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 1, //平台类型
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
                 

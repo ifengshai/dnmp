@@ -471,7 +471,7 @@ class Voogueme extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 2, //平台类型
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -599,7 +599,7 @@ class Voogueme extends Backend
                         'change_type' => 1,    //更改类型 1更改镜架
                         'platform_type' => 2, //平台类型
                     ])
-                    ->group('original_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
