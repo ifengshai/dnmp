@@ -409,6 +409,7 @@ class Zeelool extends Backend
             if ($status == 1) {
                 //查询出质检通过的订单
                 $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = collection($list)->toArray();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -417,11 +418,12 @@ class Zeelool extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 1, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 1, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
@@ -466,8 +468,23 @@ class Zeelool extends Backend
 
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
-                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.increment_id' => ['in', $arr], 'a.change_type' => 3, 'a.platform_type' => 1, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('sum(original_number) as num', 'original_sku');
-
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 1,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
 
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
@@ -488,8 +505,8 @@ class Zeelool extends Backend
                     }
 
                     //如果SKU 存在取消订单 则判断取消的数量
-                    if ($cancel_skus[$v['sku']] > 0) {
-                        $qty = $qty - $cancel_skus[$v['sku']];
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
                     }
 
                     if ($qty == 0) {
@@ -547,16 +564,17 @@ class Zeelool extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 1, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 1, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
-                
+
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -594,7 +612,23 @@ class Zeelool extends Backend
 
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
-                $cancel_skus = $infotask->alias('a')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')->where(['a.increment_id' => ['in', $arr], 'a.change_type' => 3, 'a.platform_type' => 1, 'a.original_sku' => ['in', $skus], 'b.work_status' => ['in', [5, 6]]])->column('sum(original_number) as num', 'original_sku');
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 1,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
 
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
@@ -612,8 +646,8 @@ class Zeelool extends Backend
                     }
 
                     //如果SKU 存在取消订单 则判断取消的数量
-                    if ($cancel_skus[$v['sku']] > 0) {
-                        $qty = $qty - $cancel_skus[$v['sku']];
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
                     }
 
                     if ($qty == 0) {
