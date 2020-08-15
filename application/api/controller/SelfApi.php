@@ -558,15 +558,13 @@ class SelfApi extends Api
     public function order_pay_ding()
     {
         //校验参数
-        $order_number = $this->request->request('order_number'); //订单号
-        $site = $this->request->request('site'); //站点
-        if (!$order_number) {
-            $this->error(__('缺少订单号参数'), [], 400);
+        $work_order_id = $this->request->request('work_order_id');//魔晶工单id
+        if (!$work_order_id) {
+            $this->error(__('缺少工单号参数'), [], 400);
         }
-
-        //根据订单号查询工单
+        //根据工单id查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3, 'work_platform' => $site])->field('create_user_id,id')->find();
+        $list = $workorder->where(['id' => $work_order_id])->field('create_user_id,id')->find();
         if ($list) {
             //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
             //判断查询的工单中有没有其他措施
