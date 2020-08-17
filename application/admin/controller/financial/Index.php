@@ -186,6 +186,9 @@ class Index extends Backend
             } else {
                 $time[0] = $time[3] = date('Y-m-d');
             }
+            dump($time[0]);
+            dump($time[1]);
+            exit;
             $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
             $whereFrame['o.created_at'] = ['between',[$time[0],$time[3]]];
             $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
