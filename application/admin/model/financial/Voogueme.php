@@ -64,7 +64,7 @@ class Voogueme extends Model
     public function goole_cost($start_time,$end_time)
     {
         $client = new \Google_Client();
-        $client->setAuthConfig('./oauth-credentials.json');
+        $client->setAuthConfig('./oauth/zeelool-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
         // Create an authorized analytics service object.
         $analytics = new \Google_Service_AnalyticsReporting($client);

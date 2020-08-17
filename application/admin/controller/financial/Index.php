@@ -192,8 +192,14 @@ class Index extends Backend
                 //return json(['code' => 0, 'data' =>'该平台暂时没有数据']);
                 return $this->error('该平台暂时没有数据');
             }
-            $platform = new  \app\admin\model\financial\Zeelool;
-            $list = $platform->index_cost($rate,$time[0],$time[3]);
+            if(1 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Zeelool;
+            }elseif(2 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Voogueme;
+            }elseif(3 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Nihao;
+            }
+            $list = $platform_cost->index_cost($rate,$time[0],$time[3]);
             if(!empty($list)){
                 $column = $columnData = [];
                 foreach($list as $k=> $v){
