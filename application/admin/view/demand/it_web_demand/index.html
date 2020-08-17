@@ -106,7 +106,10 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
+
+                        {if $auth_label == 1}
                         <a href="javascript:;" data-area='["70%","70%"]' class="btn btn-success btn-add {:$auth->check('demand/it_web_demand/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        {/if}
                         <!--<a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('demand/it_web_demand/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>-->
                         <!--<a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('demand/it_web_demand/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>-->
                         <!--<a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('demand/it_web_demand/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>-->
