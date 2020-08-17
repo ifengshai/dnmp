@@ -32,7 +32,11 @@ class ItWebDemand extends Model
     public function getTabList()
     {
         return [
-            ['name' => '我的', 'field' => 'me_task', 'value' => 1],['name' => '未完成', 'field' => 'none_complete', 'value' => 1]
+            ['name' => '我的', 'field' => 'label', 'value' => 1],
+            ['name' => '未完成', 'field' => 'label', 'value' => 2],
+            ['name' => 'BUG任务', 'field' => 'label', 'value' => 3],
+            ['name' => '开发任务', 'field' => 'label', 'value' => 4],
+            ['name' => '其他任务', 'field' => 'label', 'value' => 5],
         ];
     }
 }
