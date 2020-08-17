@@ -213,7 +213,7 @@ class Voogueme extends Model
         //运费
         $all_shipping_amount        = $all_money['all_shipping_amount'];
         //镜架成本
-        $all_frame_price            = $all_money['all_frame_price'];
+        $all_frame_price            = round($all_money['all_frame_price']/$rate,2);
         //镜片成本
         $all_lens_price             = $all_money['all_lens_price'];
         //利润
