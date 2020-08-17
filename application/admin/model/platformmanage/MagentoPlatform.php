@@ -124,7 +124,7 @@ class MagentoPlatform extends Model
     {
         $this->auth = Auth::instance();
         //查询对应平台
-        $magentoplatformarr = $this->field('name,id')->cache(86400)->select();
+        $magentoplatformarr = $this->field('name,id')->select();
         foreach ($magentoplatformarr as $k => $v) {
             //判断当前用户拥有的站点权限
             if (!$this->auth->check('dashboard/' . $v['name'])) {

@@ -54,9 +54,6 @@ class Test4 extends Backend
         die;
     }
 
-
-
-
     /**
      * 处理在途库存
      *
@@ -99,21 +96,93 @@ class Test4 extends Backend
         die;
     }
 
-     /************************跑库存数据用START**********************************/
+    /**
+     * 处理各站虚拟仓库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/14 09:30:39 
+     * @return void
+     */
+    public function proccess_sku_stock()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemPlatformSKU = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $item->where(['is_del' => 1, 'is_open' => 1, 'available_stock' => ['>', 0]])->select();
+
+        //查询临时表比例数据
+        $data = Db::name('zzz_temp')->column('*', 'sku');
+        foreach ($list as $k => $v) {
+            //如果存在比例
+            if ($data[$v['sku']]) {
+                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
+                if (($v['available_stock'] - $zeelool_stock) > 0) {
+                    $voogueme_stock = $data[$v['sku']]['voogueme']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : 0;
+                }
+
+                if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
+                    $nihao_stock = $data[$v['sku']]['nihao']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : 0;
+                }
+
+
+                if (($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > 0) {
+                    $meeloog_stock = $data[$v['sku']]['meeloog']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) : 0;
+                }
+
+                $stock = $v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock - $meeloog_stock;
+                $wesee_stock = $stock > 0 ? $stock : 0;
+            } else {
+                continue;
+            }
+
+            // else {
+            //     $zeelool_stock = $v['available_stock'];
+            // }
+
+            if ($zeelool_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 1])->update(['stock' => $zeelool_stock]);
+            }
+
+            if ($voogueme_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 2])->update(['stock' => $voogueme_stock]);
+            }
+
+            if ($nihao_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 3])->update(['stock' => $nihao_stock]);
+            }
+
+            if ($meeloog_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 4])->update(['stock' => $meeloog_stock]);
+            }
+
+            if ($wesee_stock > 0) {
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 5])->update(['stock' => $wesee_stock]);
+            }
+        }
+
+        echo 'ok';
+    }
+
+
+
+
+
+
+    /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
+        // $skus = [
 
-        $skus = [
-            'OA01901-02'
-        ];
+        // ];
+        $list = Db::table('fa_zz_temp2')->select();
 
-        foreach ($skus as $k => $v) {
-            $p_map['sku'] = $v;
-            $data['real_time_qty'] = 157;
+        foreach ($list as $k => $v) {
+            $p_map['sku'] = $v['sku'];
+            $data['real_time_qty'] = $v['stock'];
             $res = $this->item->where($p_map)->update($data);
         }
-        echo $res;
+        echo 'ok';
         die;
     }
 
@@ -134,20 +203,9 @@ class Test4 extends Backend
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
-        ];
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -177,12 +235,14 @@ class Test4 extends Backend
 
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
-            dump($v);
-            dump($data);
+
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
 
-        echo $res;
+        echo 'ok';
         die;
     }
 
@@ -205,20 +265,10 @@ class Test4 extends Backend
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = [
-            'FP0044-06',
-            'FX0206-01',
-            'FA0457-01',
-            'FP0341-01',
-            'FA0457-02',
-            'VHP0189-01',
-            'FX0206-03',
-            'FP0886-02',
-            'FP0886-01',
-            'OA01451-03',
-            'OT652438-02',
-            'OT652438-04',
-        ];
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        // $skus = [
+
+        // ];
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -245,8 +295,11 @@ class Test4 extends Backend
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty;
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
-        dump($res);
+        echo 'ok';
         die;
     }
 
@@ -264,20 +317,22 @@ class Test4 extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = [
-            'OA01901-02'
-        ];
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
             $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
             $p_map['sku'] = $v['sku'];
             $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(200000);
         }
+        echo 'ok';
+        die;
     }
 
     /************************跑库存数据用END**********************************/
-
 
 
 

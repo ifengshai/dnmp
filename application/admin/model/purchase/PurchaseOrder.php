@@ -9,7 +9,6 @@ class PurchaseOrder extends Model
 {
 
 
-
     //数据库
     protected $connection = 'database';
     // 表名
@@ -32,12 +31,11 @@ class PurchaseOrder extends Model
      */
     public function getPurchaseData()
     {
-        $where['purchase_status'] = ['in', [6, 7,8, 9]];
+        $where['purchase_status'] = ['in', [6, 7, 8, 9]];
         $where['is_del'] = 1;
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }
-
 
 
     /**
@@ -54,7 +52,7 @@ class PurchaseOrder extends Model
         }
 
         $where['purchase_status'] = ['in', [6, 7]];
-        $where['check_status']  = ['in', $check_status];
+        $where['check_status'] = ['in', $check_status];
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }
@@ -91,6 +89,7 @@ class PurchaseOrder extends Model
         }
         return $arr;
     }
+
     /***
      * 求出总共的实际采购金额和本页面的实际采购金额 create@lsw
      */
@@ -119,7 +118,7 @@ class PurchaseOrder extends Model
             return $arr;
         }
         $purchaseResult = collection($purchaseResult)->toArray();
-        foreach ($purchaseResult  as $v) {
+        foreach ($purchaseResult as $v) {
             //$arr['total_money'] += round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
             if (in_array($v['purchase_id'], $thisPageIdArr)) {
                 $arr['thisPageArr'][$v['purchase_id']] = round($v['purchase_price'] * ($v['quantity_num'] + $v['unqualified_num']), 2);
@@ -128,6 +127,7 @@ class PurchaseOrder extends Model
         $arr['total_money'] = $totalPostage[0]['purchase_total'];
         return $arr;
     }
+
     /***
      * 求出总共退款金额和本页面的实际退款金额 create@lsw
      */
@@ -165,6 +165,7 @@ class PurchaseOrder extends Model
         }
         return $arr;
     }
+
     /***
      * 求出采购单核算成本详情页面所需要的信息 create@lsw
      * @param id 采购单ID
@@ -188,7 +189,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseNum()
@@ -204,7 +205,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getOnlinePurchaseNum()
@@ -221,7 +222,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getUnderPurchaseNum()
@@ -238,7 +239,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchasePrice()
@@ -254,7 +255,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseFrameNum()
@@ -274,7 +275,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseFramePrice()
@@ -294,7 +295,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseSkuNum()
@@ -310,7 +311,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseNumNow($where = [], $time = [])
@@ -331,7 +332,7 @@ class PurchaseOrder extends Model
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchasePriceNow($where = [], $time = [])
@@ -348,11 +349,11 @@ class PurchaseOrder extends Model
 
 
     /**
-     * 每个人当月采购总数 
+     * 每个人当月采购总数
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseNumNowPerson($where = [], $time = [])
@@ -368,11 +369,11 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * 每个人当月采购总单量 
+     * 每个人当月采购总单量
      *
      * @Description
      * @author wpl
-     * @since 2020/03/05 17:08:36 
+     * @since 2020/03/05 17:08:36
      * @return void
      */
     public function getPurchaseOrderNumNowPerson($where = [], $time = [])
@@ -430,14 +431,57 @@ class PurchaseOrder extends Model
     public function getWaitInStockNum($skus = [])
     {
         $where['is_del'] = 1;
-        $where['purchase_status'] = 7;
+        $where['purchase_status'] = ['in', [7, 9]];
         $where['stock_status'] = 0;
-        $where['sku'] = ['in', $skus];
+        $where['b.sku'] = ['in', $skus];
         $list = $this->alias('a')
+            ->field('a.id,sum(purchase_num) as purchase_num,b.sku,a.purchase_status')
             ->where($where)
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->group('sku')
-            ->column('sum(purchase_num) as purchase_num', 'sku');
-        return $list;
+            //->join(['fa_purchase_batch' => 'c'], 'c.purchase_id=b.purchase_id')
+            //->join(['fa_purchase_batch_item' => 'd'], 'd.purchase_batch_id=c.id')
+            //->select();
+            ->group('a.id')
+            ->select();
+        //->column('sum(purchase_num) as purchase_num', 'sku');
+        //$list = collection($list)->toArray();
+        //dump($list);
+        foreach ($list as $k => $v) {
+            //如果是部分签收的话 应该是带有批次
+            if ($v['purchase_status'] == 9) {
+                $v['batch'] = Db::name('logistics_info')
+                    ->field('a.batch_id,a.purchase_id,d.*,c.*,sum(arrival_num) as purchase_num')
+                    ->alias('a')
+                    ->where('a.purchase_id', $v['id'])
+                    ->where('a.status', 1)
+                    ->where('c.sku', $v['sku'])
+                    ->join(['fa_purchase_batch' => 'd'], 'a.batch_id=d.id')
+                    ->join(['fa_purchase_batch_item' => 'c'], 'd.id=c.purchase_batch_id')
+                    ->select();
+            }
+        }
+        $list = collection($list)->toArray();
+        foreach ($list as $key => $val) {
+            //存在带有批次的物流单 也有可能批次到了和另一个没划分批次的
+            if ($val['batch']) {
+                if ($arr[$val['sku']]) {
+                    $arr[$val['sku']] = $arr[$val['sku']] + $val['batch'][0]['purchase_num'];
+                } else {
+                    $arr[$val['sku']] = $val['batch'][0]['purchase_num'];
+                }
+            } else {
+                if ($arr[$val['sku']]) {
+                    $arr[$val['sku']] = $arr[$val['sku']] + $val['purchase_num'];
+                } else {
+                    $arr[$val['sku']] = $val['purchase_num'];
+                }
+            }
+            // dump($arr);
+        }
+        // dump($list);
+        // dump($arr);
+        //dump(collection($list)->toArray());
+        // die;
+        return $arr;
     }
 }

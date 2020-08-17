@@ -19,59 +19,6 @@ class Test3 extends Backend
         //$this->es = new Elaticsearch();
     }
 
-    /*
-     * 跑数据
-     * */
-    public function track_time2()
-    {
-        $where['node_type'] = ['neq', 40];
-        $order_node = Db::name('order_node')->where($where)->where('signing_time is not null')->select();
-        $order_node = collection($order_node)->toArray();
-
-        foreach ($order_node as $k => $v) {
-            $update['signing_time'] = null;
-            Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
-
-            echo $v['id'] . "\n";
-            usleep(20000);
-        }
-        echo "ok";
-        die;
-    }
-
-    /*
-     * 跑数据
-     * */
-    public function track_time()
-    {
-
-        set_time_limit(0);
-        ini_set('memory_limit', '512M');
-
-        $order_node = Db::name('order_node')->select();
-        $order_node = collection($order_node)->toArray();
-
-        foreach ($order_node as $k => $v) {
-            if ($k > 88981) {
-                if ($v['node_type'] >= 7) {
-                    $where['site'] = $v['site'];
-                    $where['order_id'] = $v['order_id'];
-                    $where['node_type'] = 7;
-                    $order_create_time = Db::name('order_node_detail')->where($where)->field('create_time')->find();
-
-                    $update['delivery_time'] = $order_create_time['create_time']; //更新上网时间
-
-                    Db::name('order_node')->where('id', $v['id'])->update($update); //更新时间
-                    $update = array();
-                    echo $k . '_' . $v['id'] . "\n";
-                    usleep(20000);
-                }
-            }
-        }
-        echo "ok";
-        die;
-    }
-
     /**
      * id 订单号，物流商，运单号，当前节点状态，从上网到最终状态的时间有多久(如果大状态为4，则代表最终状态)
      *

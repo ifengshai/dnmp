@@ -119,6 +119,9 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if ($params['product_total'] == 0){
+                    $this->error('商品总额不能为0');
+                }
 
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
@@ -1353,7 +1356,7 @@ class PurchaseOrder extends Backend
             $skus = array_column($list, 'true_sku');
             //查询所有产品库存
             $map['is_del'] = 1;
-            $map['is_open']= ['lt',3];
+            $map['is_open'] = ['lt', 3];
             $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
             $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');
@@ -1849,6 +1852,101 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         $spreadsheet->getActiveSheet()->getStyle('A1:O' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '采购单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+
+    /**
+     * 批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_test()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $map['a.createtime'] = ['between', ['2020-02-01 00:00:00', '2020-08-15 00:00:00']];
+        $map['stock_status'] = ['in', [1, 2]];
+        list($where) = $this->buildparams();
+        $list = $this->model->alias('a')
+            ->field('purchase_number,b.sku,purchase_num,in_stock_num,d.check_time,purchase_remark')
+            ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=a.id')
+            ->join(['fa_in_stock_item' => 'c'], 'c.purchase_id=a.id and c.sku=b.sku')
+            ->join(['fa_in_stock' => 'd'], 'd.id=c.in_stock_id')
+            ->where($where)
+            ->where($map)
+            ->select();
+        $list = collection($list)->toArray();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "采购单号")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "采购数量");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "入库数量")
+            ->setCellValue("E1", "入库时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "备注");
+        
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['in_stock_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['check_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_remark']);
+        }
+        
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(35);
+       
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:F' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';

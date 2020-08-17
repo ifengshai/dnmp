@@ -312,7 +312,9 @@ class NewProduct extends Backend
 
                     Db::startTrans();
                     try {
-
+                        if (empty($itemName)){
+                            throw new Exception('商品不能为空！！');
+                        }
                         if (!array_filter($itemName)) {
                             throw new Exception('商品名称不能为空！！');
                         }
@@ -1108,6 +1110,8 @@ class NewProduct extends Backend
 
         //查询对应平台
         $magentoplatformarr = $this->magentoplatformarr;
+        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name','id');
+
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
     }

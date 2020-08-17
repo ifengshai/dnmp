@@ -260,7 +260,7 @@ class TrackReg extends Backend
         exit;
     }
 
-     /**
+    /**
      * 获取前一天有效SKU销量
      * 记录当天有效SKU
      *
@@ -275,7 +275,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\Order();
-        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
         //批量插入当天各站点上架sku
         $skuSalesNum->saveAll($list);
@@ -287,7 +287,6 @@ class TrackReg extends Backend
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
                 $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
-                $params[$k]['census_date'] = date("Y-m-d", strtotime("-1 day"));
                 $params[$k]['id'] = $v['id'];
             }
             if ($params) {
@@ -310,19 +309,19 @@ class TrackReg extends Backend
     {
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $date = date('Y-m-d');
-        $list = $itemPlatformSku->field('sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $date = date('Y-m-d 00:00:00');
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-        
+       
         foreach ($list as $k => $v) {
             //15天日均销量
-            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->select();
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->find();
             $params['sales_num_15days'] = $days15_data->num > 0 ? round($days15_data->sales_num / $days15_data->num) : 0;
-            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'census_date' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find()->toArray();
+            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find();
             //90天日均销量
             $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
             //计算等级 30天预估销量
-            $num = round($params[$k]['sales_num_90days'] * 1 * 30);
+            $num = round($params['sales_num_90days'] * 1 * 30);
             if ($num >= 300) {
                 $params['grade'] = 'A+';
             } elseif ($num >= 150 && $num < 300) {
@@ -340,7 +339,7 @@ class TrackReg extends Backend
             } else {
                 $params['grade'] = 'F';
             }
-            $itemPlatformSku->isUpdate(true,['id' => $v['id']])->save($params);
+            $itemPlatformSku->where('id', $v['id'])->update($params);
         }
        
         echo "ok";

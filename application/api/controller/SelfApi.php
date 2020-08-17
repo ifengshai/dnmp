@@ -555,6 +555,14 @@ class SelfApi extends Api
      * @since 2020/06/05 13:37:18 
      * @return void
      */
+    /**
+     * 补差价订单支付成功 钉钉通知工单创建人
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/05 13:37:18 
+     * @return void
+     */
     public function order_pay_ding()
     {
         //校验参数
@@ -567,6 +575,31 @@ class SelfApi extends Api
         //根据订单号查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $list = $workorder->where(['platform_order' => $order_number, 'work_status' => 3, 'work_platform' => $site])->field('create_user_id,id')->find();
+        if ($list) {
+            //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
+            //判断查询的工单中有没有其他措施
+            $measure_choose_id = Db::name('work_order_measure')->where('work_id', $list['id'])->column('measure_choose_id');
+            if (count($measure_choose_id) == 1 && in_array(8, $measure_choose_id)) {
+                //如果只有一个补差价，就更改主表的状态
+                $workorder->where('id', $list['id'])->update(['work_status' => 6]);
+            }
+            Db::name('work_order_measure')->where('work_id', $list['id'])->update(['operation_type' => 1]);
+            Db::name('work_order_recept')->where('work_id', $list['id'])->update(['recept_status' => 1]);
+        } else {
+            $this->error(__('未查询到数据'), [], 400);
+        }
+        $this->success('成功', [], 200);
+    }
+    public function order_pay_ding1()
+    {
+        //校验参数
+        $work_order_id = $this->request->request('work_order_id');//魔晶工单id
+        if (!$work_order_id) {
+            $this->error(__('缺少工单号参数'), [], 400);
+        }
+        //根据工单id查询工单
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $list = $workorder->where(['id' => $work_order_id])->field('create_user_id,id')->find();
         if ($list) {
             //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
             //判断查询的工单中有没有其他措施
@@ -609,14 +642,19 @@ class SelfApi extends Api
                 $this->error(__('缺少状态参数'), [], 400);
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'sku' => $sku])->save(['outer_sku_status' => $status]);
+            $list = $platform->where(['platform_type' => $site, 'platform_sku' => $sku])->find();
+            if (!$list) {
+                $this->error(__('未查询到记录'), [], 400);
+            }
+
+            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $site, 'platform_sku' => $sku])->save(['outer_sku_status' => $status]);
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
                     $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
-                        $data['sku'] = $sku;
+                        $data['sku'] = $list['sku'];
                         $data['site'] = $site;
                         Db::name('sku_sales_num')->insert($data);
                     }
@@ -743,7 +781,7 @@ class SelfApi extends Api
     {
         if ($this->request->isPost()) {
             $site = $this->request->request('site'); //站点
-            $skus = $this->request->request('skus/a'); // sku 数组
+            $skus = $this->request->request('skus'); // sku 数组
             if (!$site) {
                 $this->error(__('缺少站点参数'), [], 400);
             }
@@ -752,6 +790,7 @@ class SelfApi extends Api
                 $this->error(__('缺少sku参数'), [], 400);
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $skus = json_decode(htmlspecialchars_decode($skus), true);
             //查询所有true sku
             $platform_data = $platform->where(['platform_sku' => ['in', $skus], 'platform_type' => $site])->select();
             $platform_data = collection($platform_data)->toArray();
@@ -761,8 +800,12 @@ class SelfApi extends Api
             $list = [];
             foreach ($platform_data as $k => $v) {
                 //判断是否开启预售
-                if ($v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                //如果开启预售并且库存大于0
+                if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
+                    //如果开启预售并且库存小于0
+                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                    $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
                 }
@@ -807,8 +850,12 @@ class SelfApi extends Api
             $list = [];
             foreach ($platform_data as $k => $v) {
                 //判断是否开启预售
-                if ($v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                //如果开启预售并且库存大于0
+                if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
+                    //如果开启预售并且库存小于0
+                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                    $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
                 }
@@ -824,6 +871,74 @@ class SelfApi extends Api
                 $this->success('返回成功', $list, 200);
             } else {
                 $this->error('返回失败', [], 400);
+            }
+        }
+    }
+
+    /**
+     * 小程序取消订单回滚库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/10 09:23:55 
+     * @return void
+     */
+    public function cancel_order_set_stock()
+    {
+        if ($this->request->isPost()) {
+            $site = $this->request->request('site'); //站点
+            $orderid = $this->request->request('orderid'); //订单id
+            $order_number = $this->request->request('order_number'); //订单号
+            $order_data = $this->request->request('order_data'); //订单json数据
+            if (!$site) {
+                $this->error(__('缺少站点参数'), [], 400);
+            }
+
+            if (!$orderid) {
+                $this->error(__('缺少订单id参数'), [], 400);
+            }
+
+            if (!$order_number) {
+                $this->error(__('缺少订单号参数'), [], 400);
+            }
+
+            $item = new \app\admin\model\itemmanage\Item();
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //订单json数据 包含sku qty
+            $order_data = json_decode(htmlspecialchars_decode($order_data), true);
+            if (!$order_data) {
+                $this->error(__('缺少数据参数'), [], 400);
+            }
+            
+            foreach ($order_data as $k => $v) {
+                $true_sku = $v['sku'];
+                $qty = $v['qty'];
+                //扣减可用库存 增加订单占用库存
+                $item_res = $item->where(['is_del' => 1, 'is_open' => 1, 'sku' => $true_sku])->inc('available_stock', $qty)->dec('occupy_stock', $qty)->update();
+                if (false !== $item_res) {
+                    //生成扣减库存日志
+                    (new StockLog())->setData([
+                        'type'                      => 1,
+                        'site'                      => $site,
+                        'one_type'                  => 2,
+                        'sku'                       => $true_sku,
+                        'order_number'              => $order_number,
+                        'public_id'                 => $orderid,
+                        'occupy_stock_change'       => $qty,
+                        'available_stock_change'    => -$qty,
+                        'create_person'             => 'admin',
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '如佛小程序取消订单增加可用库存,扣减占用库存'
+                    ]);
+                } else {
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '如佛小程序取消订单增加可用库存：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
+                }
+            }
+
+            if (false !== $item_res) {
+                $this->success('处理成功', [], 200);
+            } else {
+                $this->error('处理失败', [], 400);
             }
         }
     }

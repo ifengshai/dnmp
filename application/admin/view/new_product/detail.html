@@ -88,11 +88,11 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[sku]" type="text" disabled="disabled" value="{$row['sku']}">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[sku]" type="text" disabled="disabled" value="{$row['sku']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('商品名称')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row['name']}">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row['name']}" disabled="disabled">
         </div>
         
     </div>
@@ -105,7 +105,7 @@
 
         <label class="control-label col-xs-12 col-sm-2">{:__('单价')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-price" data-rule="required" class="form-control" name="row[price]" type="text" value="{$row['price']}">
+            <input id="c-price" data-rule="required" class="form-control" name="row[price]" type="text" value="{$row['price']}" disabled="disabled">
         </div>
     </div>
 
@@ -113,22 +113,22 @@
         
         <label class="control-label col-xs-12 col-sm-2">{:__('商品颜色')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_color" data-rule="required" class="form-control" name="row[frame_color]" type="text" value="{$row['newproductattribute']['frame_color']}">
+            <input id="c-frame_color" data-rule="required" class="form-control" name="row[frame_color]" type="text" value="{$row['newproductattribute']['frame_color']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[supplier_id]', $AllSupplier, $row['supplier_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:Form::select('row[supplier_id]', $AllSupplier, $row['supplier_id'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>"disabled"])}
         </div>
     </div>
     <div class="form-group ajax-add">
         
         <label class="control-label col-xs-12 col-sm-2">{:__('供应商SKU')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-supplier_sku" class="form-control" name="row[supplier_sku]" type="text" value="{$row['supplier_sku']}">
+            <input id="c-supplier_sku" class="form-control" name="row[supplier_sku]" type="text" value="{$row['supplier_sku']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('1688链接')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}">
+            <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}" disabled="disabled">
         </div>
     </div>
 
@@ -136,42 +136,42 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['newproductattribute']['frame_bridge']}">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['newproductattribute']['frame_bridge']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['newproductattribute']['mirror_width']}">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['newproductattribute']['mirror_width']}" disabled="disabled">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_height')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['newproductattribute']['frame_height']}">
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['newproductattribute']['frame_height']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['newproductattribute']['frame_width']}">
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['newproductattribute']['frame_width']}" disabled="disabled">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['newproductattribute']['frame_length']}">
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['newproductattribute']['frame_length']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['newproductattribute']['frame_temple_length']}">
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['newproductattribute']['frame_temple_length']}" disabled="disabled">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row['newproductattribute']['frame_weight']}">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row['newproductattribute']['frame_weight']}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
+            <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]" disabled="disabled">
                 {foreach name="AllGlassesType" item="vo"}
                 <option value="{$key}"{eq name="$row['newproductattribute']['glasses_type']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -181,7 +181,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Shape')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-shape" data-rule="required" class="form-control selectpicker" name="row[shape]">
+            <select  id="c-shape" data-rule="required" class="form-control selectpicker" name="row[shape]" disabled="disabled">
                 {foreach name="AllShape" item="vo"}
                 <option value="{$key}"{eq name="$row['newproductattribute']['shape']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -189,7 +189,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
+            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]" disabled="disabled">
                 {foreach name="AllTexture" item="vo"}
                 <option value="{$key}" {eq name="$row['newproductattribute']['frame_texture']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -199,7 +199,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_shape')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">
+            <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]" disabled="disabled">
                 {foreach name="AllFrameShape" item="vo"}
                 <option value="{$key}"{eq name="$row['newproductattribute']['frame_shape']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -207,7 +207,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_gender')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_gender" data-rule="required" class="form-control selectpicker" name="row[frame_gender]">
+            <select  id="c-frame_gender" data-rule="required" class="form-control selectpicker" name="row[frame_gender]" disabled="disabled">
                 {foreach name="AllFrameGender" item="vo"}
                 <option value="{$key}"{eq name="$row['newproductattribute']['frame_gender']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -217,7 +217,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_size')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">
+            <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]" disabled="disabled">
                 {foreach name="AllFrameSize" item="vo"}
                 <option value="{$key}" {eq name="$row['newproductattribute']['frame_size']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -225,7 +225,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
+            <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]" disabled="disabled">
                 {foreach name="AllFrameType" item="vo"}
                 <option value="{$key}" {eq name="$row['newproductattribute']['frame_type']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -235,14 +235,14 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]">
+            <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]" disabled="disabled">
                 <option value="1" {eq name="$row['newproductattribute']['frame_piece']" value="1"}selected{/eq}>是</option>
                 <option value="2" {eq name="$row['newproductattribute']['frame_piece']" value="2"}selected{/eq}>否</option>
             </select>
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]">
+            <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]" disabled="disabled">
                 <option value="1" {eq name="$row['newproductattribute']['frame_is_advance']" value="1"}selected{/eq}>是</option>
                 <option value="2" {eq name="$row['newproductattribute']['frame_is_advance']" value="2"}selected{/eq}>否</option>
             </select>
@@ -251,14 +251,14 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_is_spring')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_temple_is_spring" data-rule="required" class="form-control selectpicker" name="row[frame_temple_is_spring]">
+            <select  id="c-frame_temple_is_spring" data-rule="required" class="form-control selectpicker" name="row[frame_temple_is_spring]" disabled="disabled">
                 <option value="1"{eq name="$row['newproductattribute']['frame_temple_is_spring']" value="1"}selected{/eq}>是</option>
                 <option value="2"{eq name="$row['newproductattribute']['frame_temple_is_spring']" value="2"}selected{/eq}>否</option>
             </select>
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">
+            <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]" disabled="disabled">
                 <option value="1"{eq name="$row['newproductattribute']['frame_is_adjust_nose_pad']" value="1"}selected{/eq}>是</option>
                 <option value="2"{eq name="$row['newproductattribute']['frame_is_adjust_nose_pad']" value="2"}selected{/eq}>否</option>
             </select>
@@ -267,7 +267,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]">
+            <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]" disabled="disabled">
                 <option value="1"{eq name="$row['newproductattribute']['frame_is_recipe']" value="1"}selected{/eq}>是</option>
                 <option value="2"{eq name="$row['newproductattribute']['frame_is_recipe']" value="2"}selected{/eq}>否</option>
             </select>
@@ -277,7 +277,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50">{$row['newproductattribute']['frame_remark']}</textarea>
+            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50" disabled="disabled">{$row['newproductattribute']['frame_remark']}</textarea>
         </div>
     </div>
 
@@ -285,7 +285,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-3">
             <div class="input-group" style="display: none;">
-                <input id="c-upload_photos" data-rule="required" class="form-control" name="row[frame_images]" type="text" value="{$row['newproductattribute']['frame_images']}">
+                <input id="c-upload_photos" data-rule="required" class="form-control" name="row[frame_images]" type="text" value="{$row['newproductattribute']['frame_images']}" disabled="disabled">
                 <div class="input-group-addon no-border no-padding" >
                     <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="false" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
                 </div>
@@ -319,7 +319,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('1688链接')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}">
+            <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}" disabled="disabled">
         </div>
     </div>
 

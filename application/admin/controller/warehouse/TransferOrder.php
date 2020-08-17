@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -98,11 +99,13 @@ class TransferOrder extends Backend
             $sku = $this->request->post("sku/a");
             $num = $this->request->post("num/a");
             $sku_stock = $this->request->post("sku_stock/a");
-//            dump($params);die;
+
             if ($params['call_out_site'] == $params['call_in_site']){
                 $this->error('调入仓和调出仓不能为同一个站');
             }
+            //添加调拨单保存或提交审核时数据有效性的判断
             foreach($sku as $k=>$v){
+
                 if (empty($v)){
                     $this->error('sku不能为空');
                 }
@@ -110,7 +113,16 @@ class TransferOrder extends Backend
                     $this->error('调出数量不能为0，请确认'.$v.'调出数量');
                 }
                 if ($sku_stock[$k] == 0){
-                    $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku在调出仓的库存');
+                    $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku:'.$v.'在调出仓的库存');
+                }
+                $item_platform = new ItemPlatformSku();
+                $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
+                if (empty($item_platform_sku)){
+                    $this->error('此sku'.$v.'暂未同步到调入仓，请先同步再进行操作');
+                }
+                $in_item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_out_site']])->find();
+                if ($in_item_platform_sku['stock'] < $num[$k]){
+                    $this->error('调出数量不能大于当前站点虚拟仓库存');
                 }
             }
 
@@ -190,6 +202,10 @@ class TransferOrder extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            if ($params['call_out_site'] == $params['call_in_site']){
+                $this->error('调入仓和调出仓不能为同一个站');
+            }
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -209,6 +225,26 @@ class TransferOrder extends Backend
                         $num = $this->request->post("num/a");
                         $item_id = $this->request->post("item_id/a");
                         $sku_stock = $this->request->post("sku_stock/a");
+                        foreach($sku as $k=>$v){
+
+                            if (empty($v)){
+                                $this->error('sku不能为空');
+                            }
+                            if ($num[$k] <= 0){
+                                $this->error('调出数量不能为0，请确认'.$v.'调出数量');
+                            }
+                            if ($sku_stock[$k] == 0){
+                                $this->error('请先选择调出仓及调入仓再填写sku，或检查当前sku:'.$v.'在调出仓的库存');
+                            }
+                            $item_platform = new ItemPlatformSku();
+                            $item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_in_site']])->find();
+                            if (empty($item_platform_sku)){
+                                $this->error('此sku'.$v.'暂未同步到调出仓，请先同步再进行操作');
+                            }
+                            if ($item_platform_sku['stock'] < $num[$k]){
+                                $this->error('调出数量不能大于当前站点虚拟仓库存');
+                            }
+                        }
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = trim($v);

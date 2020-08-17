@@ -8,10 +8,6 @@ use think\Model;
 class ItWebTask extends Model
 {
 
-
-
-    
-
     // 表名
     protected $name = 'it_web_task';
     
@@ -28,14 +24,6 @@ class ItWebTask extends Model
 
     ];
     
-
-    
-
-
-
-
-
-
 
     public function itwebtaskitem()
     {

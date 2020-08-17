@@ -425,7 +425,7 @@ class Meeloog extends Backend
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
                         //sku转换
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 4);
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
                         }
@@ -463,9 +463,9 @@ class Meeloog extends Backend
                 $number = 0;
                 foreach ($list as $k => &$v) {
                     //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败1！！请检查SKU:" . $v['sku']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -491,7 +491,7 @@ class Meeloog extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败2！！请检查SKU:" . $v['sku']);
                     }
 
                     $number++;
@@ -541,7 +541,7 @@ class Meeloog extends Backend
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 4);
                         if (!$trueSku) {
                             throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
                         }
@@ -575,7 +575,7 @@ class Meeloog extends Backend
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
                     //查出订单SKU映射表对应的仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 4);
                     if (!$trueSku) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
                     }

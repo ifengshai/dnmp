@@ -397,7 +397,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {field: 'sales_num_15days', title: '过去15天日均销量', operate: false},
                         {field: 'sales_num_90days', title: '过去90天日均销量', operate: false},
                         {field: 'sales_days', title: '预估售卖天数', operate: false},
-                        {field: 'replenish_num', title: '建议补货量', operate: false},
+                        // {field: 'replenish_num', title: '建议补货量', operate: false},
                         {
                             field: 'operate',
                             title: __('Operate'),
@@ -635,6 +635,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }, function (data, ret) {
                         var resultData = ret.data;
                         $('.ajax-add').remove();
+                        $('.upload-photo').remove();
                         //console.log(resultData);
                         $('#item-stock').after(resultData);
                         Form.api.bindevent($("form[role=form]"));
@@ -728,6 +729,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         var resultData = ret.data;
                         if (resultData != false) {
                             $('.ajax-add').remove();
+                            $('.upload-photo').remove();
                             $('#item-stock').after(resultData);
                             Form.api.bindevent($("form[role=form]"));
                             $(".selectpicker").selectpicker('refresh');

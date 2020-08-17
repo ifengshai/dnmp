@@ -2,6 +2,8 @@
 
 namespace fast;
 
+use GuzzleHttp\Client;
+
 class Soap
 {
     /**
@@ -16,7 +18,7 @@ class Soap
      * @param [type] $params
      * @return void
      */
-    public static function createProduct($config = [], $params)
+    public static function createProduct_bak($config = [], $params)
     {
         if (!$config) {
             return false;
@@ -35,11 +37,10 @@ class Soap
                     )
                 ))
             );
-
         } else {
             $options = array("trace" => 1, 'cache_wsdl' => 0);
         }
-        
+
         try {
             $client = new \SoapClient($config['magento_url'] . '/api/soap/?wsdl', $options);
             $session = $client->login($config['magento_account'], $config['magento_key']);
@@ -58,4 +59,59 @@ class Soap
         }
         return true;
     }
+
+    /**
+     * 创建商品
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/06 14:33:16 
+     * @return void
+     */
+    public static function createProduct($params)
+    {
+        if (!$params) {
+            return false;
+        }
+        switch ($params['site']) {
+            case 1:
+                $url = config('url.api_zeelool_url');
+                break;
+            case 2:
+                $url = config('url.api_voogueme_url');
+                break;
+            case 3:
+                $url = config('url.api_nihao_url');
+                break;
+            case 4:
+                $url = config('url.api_meeloog_url');
+                break;
+            case 5:
+                $url = config('url.api_wesee_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+
+        $client = new Client(['verify' => false]);
+        try {
+            unset($params['site']);
+            $response = $client->request('POST', $url, array('form_params' => $params));
+            $body = $response->getBody();
+            $stringBody = (string) $body;
+            $res = json_decode($stringBody, true);
+            if ($res === null) {
+                return false;
+            }
+            if ($res['code'] == 200 || $res['status'] == 200) {
+                return true;
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+   
 }

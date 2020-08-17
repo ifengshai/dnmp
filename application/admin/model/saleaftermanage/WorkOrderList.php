@@ -437,6 +437,7 @@ class WorkOrderList extends Model
                     $lensId = $changeLens['lens_type'][$key];
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
+
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     $data = [
                         'work_id' => $work_id,
@@ -768,9 +769,8 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            //file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
             try {
-                file_put_contents('/www/wwwroot/mojing_test/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
                 if($isNewVersion == 0){
                     $url = 'magic/order/createOrder';
                 }elseif($isNewVersion == 1){
@@ -785,7 +785,6 @@ class WorkOrderList extends Model
                 //补发扣库存
                 $this->deductionStock($work_id, $measure_id);
             } catch (Exception $e) {
-                //file_put_contents('/www/wwwroot/mojing/runtime/log/bbb.txt',json_encode($postData),FILE_APPEND);
                 exception($e->getMessage());
             }
         }

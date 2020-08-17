@@ -1,110 +1,223 @@
 <style>
-    #st_sel{
+    /*左边div -- start*/
+    .left_input{
         float: left;
+        width: 45%;
+        height: 100%;
     }
-    #add_entry_user{
+    .left_input .input_item{
         float: left;
-        width: 6%;
-        height: 31px;
-        line-height: 31px;
-        border:1px solid #000;
-        text-align: center;
-        border-radius: 30px;
-        cursor: pointer;
+        width: 84%;
+        height: 50px;
+        line-height: 50px;
+        margin-left: 10%;
     }
-    .user_list{
-        margin-right: 8px;
-        margin-top: 6px;
-        float: left;
-        height: 20px;
-        line-height: 20px;
-        border:1px solid #000;
-        text-align: center;
-        border-radius: 30px;
-        padding-left: 6px;
-        padding-right: 4px;
+    .left_input .input_tiem_label{
+        width: 20%;
+        text-align: right;
+        margin-right: 10px;
     }
-    .user_list span{
-        float: left;
+    .left_input .select_input{
+        width: 62%!important;
     }
-    .user_list a{
-        width: 20px;
-        text-align: center;
-        margin-left: 6px;
-        float: left;
-        height: 19px;
-        border-left: 1px solid #000;
+    .left_input .input_tiem_label2{
+        width: 100%;
+        text-align: right;
+        padding-right: 15%;
 
     }
+    .left_input .input_tiem_label2 span{
+        margin-left: 16px;
+    }
+    /*左边div -- end*/
+
+    /*右边div -- start*/
+    .right_input{
+        float: left;
+        width: 55%;
+        height: 100%;
+    }
+    .right_input .input_item{
+         float: left;
+         width: 84%;
+         height: 50px;
+         line-height: 50px;
+    }
+    .right_input .input_tiem_label{
+        width: 12%;
+        text-align: right;
+    }
+    .right_input .input_tiem_p{
+        float: right;
+        width: 84%;
+        height: 90%;
+    }
+    .input_tiem_p input{
+        height: 100%;
+        width: 100%;
+    }
+
+    .right_input .input_item2{
+        float: left;
+        width: 84%;
+        height: 180px;
+        margin-top: 10px;
+    }
+    .right_input .input_tiem_label2{
+        width: 12%;
+        text-align: right;
+    }
+    .right_input .input_tiem_p2{
+        float: right;
+        width: 84%;
+        height: 90%;
+    }
+
+    .input_tiem_p2 textarea{
+        height: 100%;
+        width: 100%;
+        resize: none;
+    }
+    .ke-container{
+        height: 280px;
+    }
+    /*右边div -- end*/
 </style>
 
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <input name="row[create_time]" type="hidden" value="{:date('Y-m-d H:i:s')}">
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}</label>
-        <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[site_type]', config('demand.siteType'), $row['site_type'], ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'site_type'])}
+<form role="form" method="POST" data-toggle="validator" id="demand_edit" action="">
+    <input type="hidden" name="row[id]" value="{$row.id}">
+    <div class="left_input">
+        <div class="input_item">
+            <label class="input_tiem_label">项目：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[site]', config('demand.site'), $row['site'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+            </span>
         </div>
+        <div class="input_item">
+            <label class="input_tiem_label">设备端：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[site_type][]', config('demand.siteType'), $row['site_type_arr'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label">抄送：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), $row['copy_to_user_id_arr'], ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label">类型：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[type]', config('demand.type'), $row['type'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label2">
+                <input name="row[is_emergency]" type="checkbox" value="1" {if $row['is_emergency'] == 1} checked {/if}><span>紧急需求</span>
+            </label>
+        </div>
+
+        {if $type == 'pm_audit'}
+        <div class="input_item">
+            <label class="input_tiem_label">优先级：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[priority]', config('demand.priority'), $row['priority'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+            </span>
+        </div>
+
+        <div class="input_item">
+            <label class="input_tiem_label ">任务周期：</label>
+            <span class="input_tiem_span">
+                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">
+            </span>
+        </div>
+        {/if}
+
+        {if $demand_type == 2}
+        <input type="hidden" name="row[demand_type]" value="{$demand_type}">
+        <div class="input_item">
+            <label class="input_tiem_label ">任务周期：</label>
+            <span class="input_tiem_span">
+                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">
+            </span>
+        </div>
+        {/if}
+
     </div>
 
-    {if $demand_type == 2}
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('Copy_to_user_id')}</label>
-            <div class="col-xs-12 col-sm-8" id="st_sel">
-                {:Form::select('', config('demand.copyToUserId'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Copy_to_user_id'])}
-                <div id="user_list">
-                    {volist name="copy_to_user_id_arr" id="ctu"  }
-                    <div class="user_list" id="userid_{$ctu.user_id}"><span>{$ctu.user_name}</span><a href="javascript:;" onclick="del_Entry_user('{$ctu.user_id}')"> Ｘ </a><input type="hidden" name="row[copy_to_user_id][]" value="{$ctu.user_id}"></div>
-                    {/volist}
-                </div>
-            </div>
-            <div id="add_entry_user" ><span>add</span></div>
+    <div class="right_input">
+        <div class="input_item">
+            <label class="input_tiem_label ">标题：</label>
+            <p class="input_tiem_p">
+                <input name="row[title]" data-rule="required" type="text" value="{$row['title']}">
+            </p>
         </div>
 
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('All_complexity')}</label>
-            <div class="col-xs-12 col-sm-8">
-                {:Form::select('row[all_complexity]', config('demand.allComplexity'), $row['all_complexity'], ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'all_complexity'])}
-            </div>
+        <div class="input_item2">
+            <label class="input_tiem_label2">内容：</label>
+            <p class="input_tiem_p2">
+                <textarea name="row[content]">{$row['content']}</textarea>
+            </p>
         </div>
-    {/if}
 
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Title')}</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-title" class="form-control" data-rule="required" name="row[title]" type="text" value="{$row['title']}">
+        <div class="input_item2">
+            <label class="input_tiem_label2">附件：</label>
+            <p class="input_tiem_p2">
+                <textarea class="editor_nkeditor input_tiem_p2_text form-control" name="row[accessory]" >{$row['accessory']}</textarea>
+            </p>
         </div>
     </div>
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Content')}</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-content" class="form-control editor" rows="5" name="row[content]" cols="50">{$row['content']}</textarea>
-        </div>
-    </div>
-
-    {if $demand_type == 2}
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('Hope_time')}</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-hope_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[hope_time]" type="text" value="{$row['hope_time']}">
-            </div>
-        </div>
-    {/if}
-
-    <!--<div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Test_group')}</label>
-        <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[test_group]', config('demand.testGroup'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'Test_group'])}
-        </div>
-    </div>-->
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        <div class="col-xs-12 col-sm-8" style="width: 99.9%!important;">
+            {if $type == 'view'}
+                {if $pm_status || $admin_id == $row['entry_user_id']}
+                    {if $row['test_status'] == 1}
+                        <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                    {else}
+                        <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                    {/if}
+                {else}
+                <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                {/if}
+
+                {if $row['pm_audit_status'] == 3}
+                <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;' disabled>{:__('已提交')}</button>
+                {else}
+                    {if $pm_status || $admin_id == $row['entry_user_id']}
+                    <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+                    {else}
+                    <button type="submit" value="edit" disabled class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+                    {/if}
+
+                {/if}
+            {/if}
+
+            {if $type == 'pm_audit'}
+                <input type="hidden" name="row[pm_audit_status]" id="pm_audit_status" value="" ><!--审核状态-->
+                {if $row['pm_audit_status'] == 1}
+                    {if $pm_status}
+                        <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+                    {else}
+                        <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+                    {/if}
+                {else}
+                    <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+                {/if}
+
+                {if $row['test_status'] >= 2}
+                    <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+                {else}
+                    {if $pm_status}
+                    <button type="submit" value="sub" class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改')}{else}{:__('提  交')}{/if}</button>
+                    {else}
+                    <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改')}{else}{:__('提  交')}{/if}</button>
+                    {/if}
+                {/if}
+
+            {/if}
         </div>
     </div>
 </form>

@@ -124,38 +124,38 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_height')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}">
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['itemAttribute']['frame_width']}">
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['itemAttribute']['frame_width']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}">
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}">
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row['itemAttribute']['frame_weight']}">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row['itemAttribute']['frame_weight']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
         <div class="col-xs-12 col-sm-3">
