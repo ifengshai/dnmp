@@ -186,6 +186,11 @@ class Index extends Backend
             } else {
                 $time[0] = $time[3] = date('Y-m-d');
             }
+            $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
+            $whereFrame['o.created_at'] = ['between',[$time[0],$time[3]]];
+            $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
+            ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select(false);
+            exit;
             $rate           = $params['rate'] ?:6.8;
             $order_platform = $params['platform'] ?:1;
             if(4<=$order_platform){
