@@ -2552,6 +2552,7 @@ class WorkOrderList extends Backend
                     //获取魔晶数据库中地址
                     $address = Db::name('work_order_change_sku')->where('work_id',$work_id)->value('userinfo_option');
                     $address = unserialize($address);
+                    dump($address);exit;
                     $res['address'][$address['address_id']] = $address;
                     $address_type = $address['address_id'] == 0 ? 'shipping' : 'billing';
                     $res['address'][$address['address_id']]['address_type'] = $address_type;
