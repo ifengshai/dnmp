@@ -13,6 +13,12 @@ class Zeelool extends Model
     // protected $app_id = "438689069966204";
     // protected $app_secret = "1480382aa32283c6c13692908f7738a7";
     // protected $access_token = "EAAGOZCEIuo3wBAMkIOgCGaUjUmgvY4CqtvXWQ2Jf8o2GkuyOls67R1kk04CDWD7BKSqwzQLTMBeaaeTJaRNyqHI5tihJVFoc6qsNvgJZCpf4mgxCHjZC99iZCu63fmPctNRpAyWyAJcdBq4x4eva0IU6Q7N8lk6vgq1yOLOF4hEqNWt8E5ie";
+        //数据库
+    protected $connection = 'database.db_zeelool';
+
+
+        // 表名
+    protected $table = 'sales_flat_order';
     protected $app_id = '';
     protected $app_secret = '';
     protected $access_token = '';
