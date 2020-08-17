@@ -886,6 +886,6 @@ class Test4 extends Backend
             
             $data[$k]['is_del'] = $v['is_del'];
         }
-        db('it_web_demand_copy1')->insertAll($data);
+        db('it_web_demand')->insertAll($data);
     }
 }
