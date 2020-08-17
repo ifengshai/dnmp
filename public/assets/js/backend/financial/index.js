@@ -1073,7 +1073,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsob
                     },
                 }
             };
-            var create_time = $('#workload_time').val();
+            var create_time = $('#create_time').val();
             //console.log(time_two);
             var platform = $('#c-order_platform').val();
             var rate     = $('#cost_rate').val();
