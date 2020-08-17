@@ -153,7 +153,7 @@ class Zeelool extends Model
         //查询所有镜架成本
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $where['is_visable'] = 1;
-        $sku_bid_price_list = Db::connect('database.db_zeelool_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
+        $sku_bid_price_list = Db::connect('database.db_zeelool_online')->table('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
