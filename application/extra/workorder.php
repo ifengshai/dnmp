@@ -783,5 +783,14 @@ return [
         2=>'电话组'
     ],
     //区分正式/试用期员工时间
-    'customer_category_time'=>60*60*24*60
+    'customer_category_time'=>60*60*24*60,
+    'cost_arr'=>[
+        ['type'=>'运费','money_us'=>10849.08,'money_cn'=>73773.74,'percent'=>'13.23'],
+        ['type'=>'镜架成本','money_us'=>7076.70,'money_cn'=>48121.54,'percent'=>'8.63'],
+        ['type'=>'镜片成本','money_us'=>0.00,'money_cn'=>0.00,'percent'=>'0.00'],
+        ['type'=>'Google Adwords','money_us'=>2664.64,'money_cn'=>18119.53,'percent'=>'3.25'],
+        ['type'=>'Facebook','money_us'=>29483.50,'money_cn'=>200487.80,'percent'=>'35.95'],
+        ['type'=>'毛利润','money_us'=>31938.88,'money_cn'=>217184.36,'percent'=>'38.94'],
+        ['type'=>'销售额','money_us'=>82012.79,'money_cn'=>557686.97,'percent'=>''],
+    ],
 ];

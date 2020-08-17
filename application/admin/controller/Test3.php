@@ -273,4 +273,105 @@ class Test3 extends Backend
         }
         echo "all is ok";
     }
+    /**
+     * 测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/06 15:19:57 
+     * @return void
+     */
+    public function test()
+    {
+        //session_start();
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        $startDate = '2020-08-14';
+        $endDate = '2020-08-14';
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport($analytics, $startDate, $endDate);
+        // Print the response.
+        $result = $this->printResults($response);
+        dump($result);
+        dump($result[0]['ga:adCost']);die;
+
+
+        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+        //     // Set the access token on the client.
+        //     $client->setAccessToken($_SESSION['access_token']);
+
+            
+        // } else {
+        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
+        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+        // }
+    }
+    protected function getReport($analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
+
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);   
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:adCost");
+        $adCostMetric->setAlias("ga:adCost");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        // $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+
+    }
+    /**
+     * Parses and prints the Analytics Reporting API V4 response.
+     *
+     * @param An Analytics Reporting API V4 response.
+     */
+    protected function printResults($reports)
+    {
+        $finalResult = array();
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+            }
+            return $finalResult;
+        }
+    }
 }

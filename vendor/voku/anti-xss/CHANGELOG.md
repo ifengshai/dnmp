@@ -1,5 +1,24 @@
 # Changelog
 
+### 4.1.26 (2020-08-08)
+
+- allow base64 encoded images in <img>-tags (issue #59)
+
+### 4.1.25 (2020-06-12)
+
+- fix false-positive (issue #58)
+
+### 4.1.24 (2020-03-08)
+
+- allow to change the "_never_allowed_str_afterwards" (issue #56)
+- fix false-positive (issue #55)
+
+### 4.1.23 (2020-03-06)
+
+- use some more bad strings from "https://github.com/s0md3v/AwesomeXSS"
+- optimize some regex (use strpos before the regex)
+
+
 ### 4.1.22 (2020-02-06)
 
 - fix false-positive (issue #54)

@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use app\admin\model\order\order\ProcessOrder;
-
+use app\admin\model\platformmanage\MagentoPlatform;
 /**
  * 财务管理
  *
@@ -163,5 +163,73 @@ class Index extends Backend
     public function testItem()
     {
         
+    }
+    /**
+     * 财务成本统计
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-08-13 16:05:43
+     * @return void
+     */
+    public function cost_statistics()
+    {
+        $orderPlatform = (new MagentoPlatform())->getOrderPlatformList();
+        $create_time = input('create_time');
+        $platform    = input('order_platform', 1);
+        $rate        = input('rate',6.8);	
+        //头部数据
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            //默认当天
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
+            } else {
+                $time[0] = $time[3] = date('Y-m-d');
+            }
+            $rate           = $params['rate'] ?:6.8;
+            $order_platform = $params['platform'] ?:1;
+            if(4<=$order_platform){
+                //return json(['code' => 0, 'data' =>'该平台暂时没有数据']);
+                return $this->error('该平台暂时没有数据');
+            }
+            if(1 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Zeelool;
+            }elseif(2 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Voogueme;
+            }elseif(3 == $order_platform){
+                $platform_cost = new  \app\admin\model\financial\Nihao;
+            }
+            $list = $platform_cost->index_cost($rate,$time[0],$time[3]);
+            if(!empty($list)){
+                $column = $columnData = [];
+                foreach($list as $k=> $v){
+                   if($v['type'] == '销售额'){
+                       continue;
+                   } 
+                    $column[] = $v['type'];
+                    $columnData[$k]['name'] = $v['type'];
+                    $columnData[$k]['value'] = $v['money_cn'];
+                }   
+                $json['column'] = $column;
+                $json['columnData'] = $columnData; 
+            }
+            if($params['key'] == 'echart1'){
+                return json(['code' => 1, 'data' => $json]);
+            }         
+            return json(['code' => 1, 'data' => $json,'rows' => $list]);
+        }
+        $this->view->assign(
+            [
+
+                'orderPlatformList'	=> $orderPlatform,
+                'platform'          => $platform,
+                'create_time'       => $create_time,
+                'rate'              => $rate
+            ]
+        );
+        $this->assignconfig('platform', $platform);
+        $this->assignconfig('create_time',$create_time);
+        $this->assignconfig('rate',$rate);
+        return  $this->view->fetch();
     }
 }
