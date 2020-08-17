@@ -137,8 +137,12 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
-                    foreach($usersId as $v) {
-                        $meWhere .= "or locate({$v},phper_user_id)";
+                    foreach($usersId as $k => $v) {
+                        if ($k == 0) {
+                            $meWhere .= " and locate({$v},phper_user_id)";
+                        } else {
+                            $meWhere .= " or locate({$v},phper_user_id)";
+                        }
                     }
                 }
 
@@ -149,9 +153,12 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.test_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
-
-                    foreach($usersId as $v) {
-                        $meWhere .= "or locate({$v},test_group_person_id)";
+                    foreach($usersId as $k => $v) {
+                        if ($k == 0) {
+                            $meWhere .= " and locate({$v},test_group_person_id)";
+                        } else {
+                            $meWhere .= " or locate({$v},test_group_person_id)";
+                        }
                     }
                 }
 
@@ -162,8 +169,12 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
-                    foreach($usersId as $v) {
-                        $meWhere .= "or locate({$v},web_group_person_id)";
+                    foreach($usersId as $k => $v) {
+                        if ($k == 0) {
+                            $meWhere .= " and locate({$v},web_group_person_id)";
+                        } else {
+                            $meWhere .= " or locate({$v},web_group_person_id)";
+                        }
                     }
                 }
 
@@ -174,8 +185,12 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
-                    foreach($usersId as $v) {
-                        $meWhere .= "or locate({$v},app_group_id)";
+                    foreach($usersId as $k => $v) {
+                        if ($k == 0) {
+                            $meWhere .= " and locate({$v},app_group_person_id)";
+                        } else {
+                            $meWhere .= " or locate({$v},app_group_person_id)";
+                        }
                     }
                 }
 
