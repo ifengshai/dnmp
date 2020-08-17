@@ -134,8 +134,8 @@ class ItWebDemand extends Backend
                 $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
                 if (in_array($adminId, $authUserIds)) {
                     //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.php_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
+                    $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
+                    $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";
                 }
@@ -145,8 +145,8 @@ class ItWebDemand extends Backend
                 if (in_array($adminId, $testAuthUserIds)) {
                     $usersId = [];
                     //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.test_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
+                    $usersId = Auth::getGroupUserId(config('demand.test_group_person_id')) ?: [];
+                    $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";
                 }
@@ -157,7 +157,7 @@ class ItWebDemand extends Backend
                     $usersId = [];
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
+                    $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";
                 }
@@ -168,7 +168,7 @@ class ItWebDemand extends Backend
                     $usersId = [];
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
+                    $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
                     $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";
                 }
@@ -183,7 +183,7 @@ class ItWebDemand extends Backend
                  * 产品：展示评审状态为待审、pending的任务
                  */
                 //是否为产品
-                $authUserIds = array_merge(Auth::getGroupUserId(config('demand.product_group_id')), Auth::getGroupUserId(config('demand.product_group_person_id')));
+                $authUserIds = array_merge(Auth::getGroupUserId(config('demand.product_group_id')) ?: [], Auth::getGroupUserId(config('demand.product_group_person_id')) ?: []);
                 if (in_array($adminId, $authUserIds)) {
                     $map['pm_audit_status'] = ['in', [1, 2]];
                 } else {
