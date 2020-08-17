@@ -383,14 +383,17 @@ class Outstock extends Backend
             //批量审核出库 扣减sku的总数量不能大于当前sku的虚拟仓库存量
             foreach ($list as $k => $v) {
                 if (!$arr[$v['sku']]) {
-                    $arr[$v['sku']] = $v['out_stock_num'];
+                    $arr[$v['sku']]['num'] = $v['out_stock_num'];
+                    $arr[$v['sku']]['platform_type'] = $v['platform_id'];
                 } else {
-                    $arr[$v['sku']] = $v['out_stock_num'] + $arr[$v['sku']];
+                    $arr[$v['sku']]['num'] = $v['out_stock_num'] + $arr[$v['sku']];
                 }
             }
+            // dump(collection($list)->toArray());
+            // dump($arr);die;
             foreach ($arr as $k => $v) {
-                $item_platform_sku = $platform->where('sku', $k)->field('stock')->find();
-                if ($v > $item_platform_sku['stock']) {
+                $item_platform_sku = $platform->where(['sku'=>$k,'platform_type'=>$v['platform_id']])->field('stock')->find();
+                if ($v['num'] > $item_platform_sku['stock']) {
                     $this->error('出库的数量大于sku:' . $k . '的虚拟仓库存，请检查后重试');
                 }
             }
