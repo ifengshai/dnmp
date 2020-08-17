@@ -55,6 +55,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {field: 'price', title: __('单价'), operate: false},
                         {field: 'sales_num', title: __('90天总销量'), operate: false},
                         {field: 'available_stock', title: __('可用库存'), operate: false},
+                        // {
+                        //     field: 'platform_plat', title: __('平台'), searchList: function (column) {
+                        //         return Template('receptperson1tpl', {});
+                        //     }, visible: false
+                        // },
                         {
                             field: 'platform_type',
                             title: __('平台'),

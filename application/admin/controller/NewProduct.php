@@ -46,9 +46,10 @@ class NewProduct extends Backend
         $num = $this->item->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
-
+        $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
+        $this->assign('platform_plat',$this->magentoplatform->field('id,name')->select());
     }
 
     /**
@@ -76,7 +77,7 @@ class NewProduct extends Backend
 
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-
+// dump($filter);die;
 
             //可用库存搜索
             if ($filter['available_stock']) {
@@ -88,7 +89,7 @@ class NewProduct extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            //平台搜索
+            //平台搜索 (单选)
             if ($filter['platform_type']) {
                 $new_product_mapping = new \app\admin\model\NewProductMapping();
                 $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
@@ -96,6 +97,24 @@ class NewProduct extends Backend
                 unset($filter['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            //平台搜索 改为多选2020.08.17
+            // if ($filter['platform_plat']) {
+            //     // $new_product_mapping = new \app\admin\model\NewProductMapping();
+            //     $wheres['platform_type'] = ['in',$filter['platform_plat']];
+            //     dump($wheres);
+            //     $skus = $this->platformsku
+            //         ->where($wheres)
+            //         // ->field('sku,platform_type,id')
+            //         // ->select();
+            //         ->column('sku,platform_type');
+            //     foreach ($skus as $k=>$v){
+            //
+            //     }
+            //     dump($skus);die;
+            //     $map1['sku'] = ['in', $skus];
+            //     unset($filter['platform_plat']);
+            //     $this->request->get(['filter' => json_encode($filter)]);
+            // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
