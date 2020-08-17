@@ -129,6 +129,7 @@ class ItWebDemand extends Backend
             }
             $adminId = session('admin.id');
             //我的
+            $meWhere = '1=1';
             if ($filter['label'] == 1) {
                 //是否是开发主管
                 $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
@@ -136,8 +137,9 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_IN_SET(phper_user_id,{$usersIdStr})";
+                    foreach($usersId as $v) {
+                        $meWhere .= "or locate({$v},phper_user_id)";
+                    }
                 }
 
                 //是否是测试主管
@@ -147,8 +149,10 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.test_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_IN_SET(test_user_id,{$usersIdStr})";
+
+                    foreach($usersId as $v) {
+                        $meWhere .= "or locate({$v},test_group_person_id)";
+                    }
                 }
 
                 //是否是前端主管
@@ -158,8 +162,9 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_IN_SET(web_designer_user_id,{$usersIdStr})";
+                    foreach($usersId as $v) {
+                        $meWhere .= "or locate({$v},web_group_person_id)";
+                    }
                 }
 
                 //是否是app主管
@@ -169,8 +174,9 @@ class ItWebDemand extends Backend
                     //组员ID
                     $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_IN_SET(app_user_id,{$usersIdStr})";
+                    foreach($usersId as $v) {
+                        $meWhere .= "or locate({$v},app_group_id)";
+                    }
                 }
 
                 //不是主管
