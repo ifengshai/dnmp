@@ -1075,7 +1075,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsob
             };
             var create_time = $('#workload_time').val();
             //console.log(time_two);
-            var platform = 1;
+            var platform = $('#c-order_platform').val();
             var rate     = $('#cost_rate').val();
             var options1 = {
                 type: 'post',
