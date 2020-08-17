@@ -157,9 +157,10 @@ class Zeelool extends Model
     public function all_cost($start_time,$end_time)
     {
         //查询所有镜架成本
+
+        $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $start_time = $start_time.' 00:00:00';
         $end_time   = $end_time.' 23:59:59';
-        $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $where['is_visable'] = 1;
         $sku_bid_price_list = Db::connect('database.db_voogueme_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
