@@ -81,7 +81,7 @@ class Nihao extends Model
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        $VIEW_ID = config('NIAHO_GOOGLE_ANALYTICS_VIEW_ID');
+        $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
 
 
         // Replace with your view ID, for example XXXX.
