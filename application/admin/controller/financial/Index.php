@@ -200,6 +200,8 @@ class Index extends Backend
                 $platform_cost = new  \app\admin\model\financial\Nihao;
             }
             $list = $platform_cost->index_cost($rate,$time[0],$time[3]);
+            dump($list);
+            exit;
             if(!empty($list)){
                 $column = $columnData = [];
                 foreach($list as $k=> $v){

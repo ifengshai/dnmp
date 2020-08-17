@@ -188,6 +188,7 @@ class Zeelool extends Model
         //求销售额、运费、毛利润
         $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
         ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
+        return $base_grand_total_result;
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'],2);
         //运费
@@ -209,11 +210,12 @@ class Zeelool extends Model
     public function index_cost($rate,$start_time,$end_time)
     {
         //facebook金额
-        $facebook_money = $this->facebook_cost($start_time,$end_time);
+        //$facebook_money = $this->facebook_cost($start_time,$end_time);
         //google金额
-        $google_money   = $this->goole_cost($start_time,$end_time);
+        //$google_money   = $this->goole_cost($start_time,$end_time);
         //镜框等价格
         $all_money      = $this->all_cost($start_time,$end_time);
+        return $all_money;
         //销售额
         $all_base_grand_total       = $all_money['all_base_grand_total'];
         //运费
