@@ -13,6 +13,12 @@ class Zeelool extends Model
     // protected $app_id = "438689069966204";
     // protected $app_secret = "1480382aa32283c6c13692908f7738a7";
     // protected $access_token = "EAAGOZCEIuo3wBAMkIOgCGaUjUmgvY4CqtvXWQ2Jf8o2GkuyOls67R1kk04CDWD7BKSqwzQLTMBeaaeTJaRNyqHI5tihJVFoc6qsNvgJZCpf4mgxCHjZC99iZCu63fmPctNRpAyWyAJcdBq4x4eva0IU6Q7N8lk6vgq1yOLOF4hEqNWt8E5ie";
+        //数据库
+    protected $connection = 'database.db_zeelool';
+
+
+        // 表名
+    protected $table = 'sales_flat_order';
     protected $app_id = '';
     protected $app_secret = '';
     protected $access_token = '';
@@ -153,7 +159,7 @@ class Zeelool extends Model
         //查询所有镜架成本
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $where['is_visable'] = 1;
-        $sku_bid_price_list = Db::connect('database.db_zeelool_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
+        $sku_bid_price_list = Db::connect('database.db_zeelool_online')->table('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
