@@ -195,10 +195,10 @@ class Zeelool extends Model
         //运费
         $all_shipping_amount  = round($base_grand_total_result[0]['shipping_amount'],2);
         return [
-            'all_frame_price'       => $all_frame_price ?: 0,
-            'all_lens_price'        => $all_lens_price ?:0,
-            'all_base_grand_total'  => $all_base_grand_total ?:0,
-            'all_shipping_amount'   => $all_shipping_amount ?:0
+            'all_frame_price'       => $all_frame_price ? round($all_frame_price,2): 0,
+            'all_lens_price'        => $all_lens_price ? round($all_lens_price,2):0,
+            'all_base_grand_total'  => $all_base_grand_total ? round($all_base_grand_total,2):0,
+            'all_shipping_amount'   => $all_shipping_amount ? round($all_shipping_amount,2):0
         ];
     }
     /**
