@@ -277,17 +277,154 @@ class Test3 extends Backend
         }
         dump($i);exit;
     }
+    //每天的回复量
     public function zendesk_data(){
-        $zendesk = Db::name('zendesk')->where('assign_id','4294967295')->limit(10)->column('id');
-        foreach ($zendesk as $item){
-            $where['zid'] = $item;
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $customer = $this->zendeskTasks->where(['reply_count'=>0])->order('id','desc')->select();
+        $customer = collection($customer)->toArray();
+        foreach ($customer as $item){
+            //获取当前时间
+            $create = explode(' ',$item['create_time']);
+            $start = $create[0];
+            $end = date('Y-m-d 23:59:59',strtotime($start));
             $where['is_admin'] = 1;
-            $where['due_id'] = array('neq',0);
-            $assign = Db::name('zendesk_comments')->where($where)->order('id','desc')->value('due_id');
-            $params['assign_id'] = $assign;
-            Db::name('zendesk')->where('id',$item)->update($params);
-            echo $item.'--'.$assign.' is ok'."\n";
+            $where['due_id'] = $item['admin_id'];
+            $where['update_time'] = ['between', [$start, $end]];
+            $count = $this->zendeskComments->where($where)->count();
+            Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
+            echo $item['id'].'--'.$item['admin_id'].'--'.$count.' is ok'."\n";
+            sleep(1);
         }
+    }
+    //没有承接人的数据
+    public function zendesk_no_assign(){
+        //查询没有承接人的数据
+        $where[] = ['exp',Db::raw("assign_id is null or assign_id = 0")];
+        $where['due_id'] = ['neq',0];
+        $zendesk = Db::name('zendesk')->where($where)->select();
+        foreach ($zendesk as $item){
+            //查询评论最多的人
+            $arr['is_admin'] = 1;
+            $arr['zid'] = $item['id'];
+            $arr['due_id'] = ['not in','75,105,95,117'];
+            $comments = Db::name('zendesk_comments')->where($arr)->group('due_id')->field('due_id,count(due_id) as count')->order('count','desc')->select();
+            $assign_id = 0;
+            foreach ($comments as $value){
+                //查询该用户的站点是否和当前站点一致
+                $types = Db::name('zendesk_agents')->where('admin_id',$value['due_id'])->column('type');
+                if($types && in_array($item['type'],$types)){
+                    $assign_id = $value['due_id'];
+                    break;
+                }
+            }
+            if($assign_id == 0){
+                $assign_id = $item['due_id'];
+            }
+            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$assign_id]);
+            echo $item['id'].'--'.$item['assign_id'].'--'.$assign_id.' is ok'."\n";
+        }
+        echo "all is ok";
+    }
+    /**
+     * 测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/06 15:19:57 
+     * @return void
+     */
+    public function test()
+    {
+        //session_start();
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        $startDate = '2020-08-14';
+        $endDate = '2020-08-14';
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport($analytics, $startDate, $endDate);
+        // Print the response.
+        $result = $this->printResults($response);
+        dump($result);
+        dump($result[0]['ga:adCost']);die;
 
+
+        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+        //     // Set the access token on the client.
+        //     $client->setAccessToken($_SESSION['access_token']);
+
+            
+        // } else {
+        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
+        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+        // }
+    }
+    protected function getReport($analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
+
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);   
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:adCost");
+        $adCostMetric->setAlias("ga:adCost");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        // $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+
+    }
+    /**
+     * Parses and prints the Analytics Reporting API V4 response.
+     *
+     * @param An Analytics Reporting API V4 response.
+     */
+    protected function printResults($reports)
+    {
+        $finalResult = array();
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+            }
+            return $finalResult;
+        }
     }
 }

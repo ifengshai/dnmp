@@ -107,6 +107,17 @@ class Zendesk extends Backend
                         break;
                 }
             }
+        
+            //承接人筛选
+            if($filter['assign_id']){
+                $map['zendesk.assign_id'] = $filter['assign_id'];
+                unset($filter['assign_id']);
+            }
+            //处理人筛选
+            if($filter['due_id']){
+                $map['zendesk.due_id'] = $filter['due_id'];
+                unset($filter['due_id']);
+            }
             if($filter['tags']) {
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);
@@ -121,15 +132,17 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'priority desc,zendesk_update_time asc,id asc';
+            //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
+            $orderSet = 'zendesk_update_time asc';
             if($me_task == 2){
-                $orderSet = 'priority desc,zendesk_update_time asc,id asc';
+                //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
+                $orderSet = 'zendesk_update_time asc';
             }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
             }
             $total = $this->model
-                ->with(['admin'])
+                ->with('admin')
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
@@ -137,7 +150,7 @@ class Zendesk extends Backend
                 ->count();
 
             $list = $this->model
-                ->with(['admin'])
+                ->with('admin')
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
@@ -146,6 +159,11 @@ class Zendesk extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $admin = Db::name('admin')->column('nickname','id');
+            foreach($list as $k=>$v){
+                $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
+                $list[$k]['due_id_nickname'] = $admin[$v['due_id']];
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -408,8 +426,12 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
-        //获取签名
-        $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+        $siteName = 'zeelool';
+        if($ticket->type == 2){
+            $siteName = 'voogueme';
+        } elseif($ticket->type == 3){
+            $siteName = 'nihaooptical';
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -426,12 +448,6 @@ class Zendesk extends Backend
                     $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
-                    }
-                    $siteName = 'zeelool';
-                    if($ticket->type == 2){
-                        $siteName = 'voogueme';
-                    } elseif($ticket->type == 3){
-                        $siteName = 'nihaooptical';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -451,6 +467,8 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
@@ -568,18 +586,20 @@ class Zendesk extends Backend
         $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
             $query->where('type',$ticket->type);
         }])->where('zid', $ids)->order('id', 'desc')->select();
-
-        foreach ($comments as &$comment){
-            //获取当前评论的用户的昵称
-            $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
-            $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
-            //替换签名中的昵称
-            if(strpos($sign,'{{agent.name}}')!==false){
-                $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+        foreach ($comments as $comment){
+            if($comment->is_admin == 1){
+                //获取签名
+                $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+                //获取当前评论的用户的昵称
+                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                //替换签名中的昵称
+                if(strpos($sign,'{{agent.name}}')!==false){
+                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                }
+                $comment->sign= $sign ? $sign : '';
             }
-            $comment['sign'] = $sign ? $sign : '';
         }
-
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
@@ -891,7 +911,7 @@ DOC;
     {
         $admin_id = session('admin.id');
         //判断是否已完成目标且不存在未完成的
-        $now = $this->model->where('assign_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
+        $now = $this->model->where('due_id',$admin_id)->where('is_hide',0)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
         if($now >= 5){
             $this->error("请先处理完成已分配的工单");
         }
@@ -900,7 +920,7 @@ DOC;
                 ->where(['admin_id' => $admin_id])
                 ->find();
         //按照更新时间查询未分配的open和new的邮件
-        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time asc')->limit(10)->select();
+        $tickets = Db::name('zendesk')->where('status', 'in', '1,2')->where(['is_hide'=>1])->where('type',$task->type)->where('channel', '<>', 'voice')->order('update_time','asc')->limit(10)->select();
 
         $arr = array();
         $i = 0;
@@ -1263,16 +1283,21 @@ DOC;
             }
             //查询当前邮件原本的承接人数据
             $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
+            if($params['type'] == 1 || $params['type'] == 3){
+                //修改承接人
+                $data['assign_id']  = $params['id'];
+                $data['assignee_id']  = $agent_id;
+            }
+            if($params['type'] == 2 || $params['type'] == 3){
+                //修改处理人
+                $data['due_id']     = $params['id'];
+            }
             $result = $this->model->where(['id'=>$ids])->update($data);
             if($result){
                 $this->success('修改成功');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->alias('z')->join('fa_admin a','z.admin_id=a.id')->column('z.admin_id,a.nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch();
     }
@@ -1286,22 +1311,33 @@ DOC;
     public function batch_edit_recipient($ids=null)
     {
         if($this->request->isAjax()){
-            $params = $this->request->post("row/a");
-            if(!$params['id']){
-                $this->error('承接人不存在，请重新尝试');
-            }
-            //查询当前邮件原本的承接人数据
-            $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
-            $data['assign_id']  = $params['id'];
-            $data['due_id']     = $params['id'];
-            $data['recipient']  = $params['id'];
-            $data['assignee_id']  = $agent_id;
-            $result = $this->model->where('id','in',$ids)->update($data);
-            if($result){
-                $this->success('修改成功');
+            $type_arr = $this->model->where('id','in',$ids)->column('type');
+            $type_arr = array_unique($type_arr);
+            if(count($type_arr) == 1){
+                $params = $this->request->post("row/a");
+                if(!$params['id']){
+                    $this->error('承接人不存在，请重新尝试');
+                }
+                //查询当前邮件原本的承接人数据
+                $agent_id = Db::name('zendesk_agents')->where('admin_id',$params['id'])->value('agent_id');
+                if($params['type'] == 1 || $params['type'] == 3){
+                    //修改承接人
+                    $data['assign_id']  = $params['id'];
+                    $data['assignee_id']  = $agent_id;
+                }
+                if($params['type'] == 2 || $params['type'] == 3){
+                    //修改处理人
+                    $data['due_id']     = $params['id'];
+                }
+                $result = $this->model->where('id','in',$ids)->update($data);
+                if($result){
+                    $this->success('修改成功');
+                }
+            }else{
+                $this->error('不同站点的工单不能批量修改承接人');
             }
         }
-        $issueList = ZendeskAgents::column('admin_id,nickname');
+        $issueList = Db::name('zendesk_agents')->alias('z')->join('fa_admin a','z.admin_id=a.id')->column('z.admin_id,a.nickname');
         $this->assign('issueList',$issueList);
         return $this->view->fetch('edit_recipient');
     }

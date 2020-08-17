@@ -443,10 +443,10 @@ class WorkOrderList extends Model
                         'increment_id' => $params['platform_order'],
                         'platform_type' => $type,
                         'original_name' => $changeLens['original_name'][$key] ?? '',
-                        'original_sku' => $changeLens['original_sku'][$key],
+                        'original_sku' => trim($changeLens['original_sku'][$key]),
                         'original_number' => intval($changeLens['original_number'][$key]),
                         'change_type' => $change_type,
-                        'change_sku' => $changeLens['original_sku'][$key],
+                        'change_sku' => trim($changeLens['original_sku'][$key]),
                         'change_number' => intval($changeLens['original_number'][$key]),
                         'recipe_type' => $recipe_type,
                         'lens_type' => $lensCoatName['lensName'],
@@ -917,7 +917,6 @@ class WorkOrderList extends Model
                     if ((1 == $orderRecept->is_auto_complete)) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                        //存在补发审核通过后生成补发单
                         if(7 == $measure_choose_id){
                             $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                         }
@@ -1463,16 +1462,15 @@ class WorkOrderList extends Model
      * 统计退款金额比
      */
     public function wo_refund_money_percent($start,$end,$platform = 0,$type = 0){
-        if($type == 1){
-            $map['complete_time'] = array('between',[$start,$end]);
+        if($type == 1) {
+            $map['complete_time'] = array('between', [$start, $end]);
         }
-        $map['is_refund'] = 1;
         $map['work_status'] = 6;
         if($platform != 0){
             $map['work_platform'] = $platform;
         }
         $complete_money = $this->where($map)->sum('base_grand_total');
-        $money = $this->where($map)->sum('refund_money');
+        $money = $this->where($map)->where('is_refund',1)->sum('refund_money');
         $sum = $complete_money == 0 ? 0 : round($money/$complete_money*100,2);
         return $sum ? $sum.'%' : 0;
     }

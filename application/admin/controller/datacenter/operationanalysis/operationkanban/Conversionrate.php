@@ -40,11 +40,36 @@ class Conversionrate extends Backend{
             }
             $orderStatistics = new OrderStatistics();
             $list = $orderStatistics->getDataBySite($order_platform,$map);
-            $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
-            foreach ($list as $v) {
-                $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
-                $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
-                $create_date[]                    = $v['create_date'];  
+            $list = collection($list)->toArray();
+            if(!empty($list)){
+                $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
+                $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
+                foreach ($list as $v) {
+                    $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
+                    $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
+                    $create_date[]                    = $v['create_date'];
+                    $total_sales_money += $v['sales_money'];
+                    $total_shoppingcart_update_total += $v['shoppingcart_update_total'];
+                    $total_sales_num   += $v['sales_num'];
+                }
+                $key = count($list);
+                $list[$key]['create_date'] = '总计';
+                //总销售额
+                $list[$key]['sales_money'] = round($total_sales_money,2);
+                //平均客单价
+                if(0< $total_sales_num){
+                    $list[$key]['unit_price'] = round($total_sales_money/$total_sales_num,2); 
+                }else{
+                    $list[$key]['unit_price'] = 0;
+                }
+                $list[$key]['shoppingcart_update_total'] = $total_shoppingcart_update_total;
+                $list[$key]['sales_num'] = $total_sales_num;
+                if(0< $total_shoppingcart_update_total){
+                    $list[$key]['shoppingcart_update_conversion'] = round($total_sales_num/$total_shoppingcart_update_total*100,2);
+                }else{
+                    $list[$key]['shoppingcart_update_conversion'] = 0;
+                }
+
             }
             $json['xcolumnData'] = $create_date ? $create_date :[];
             $json['columnData'] = [

@@ -366,7 +366,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     index_url: 'purchase/sample/sample_lendlog_index' + location.search,
                     add_url: 'purchase/sample/sample_lendlog_add',
                     edit_url: 'purchase/sample/sample_lendlog_edit',
-                    del_url: 'purchase/sample/sample_lendlog_del',
+                    // del_url: 'purchase/sample/sample_lendlog_del',
                     multi_url: 'purchase/sample/sample_lendlog_multi',
                     table: 'purchase_sample_lendlog',
                 }
@@ -442,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 },
                             ],
-                            formatter: Table.api.formatter.buttons
+                            formatter: Table.api.formatter.operate
                         },
                     ]
                 ]

@@ -807,16 +807,14 @@ class WorkOrderList extends Backend
                         }
                     }
                     //判断是否选择措施
-
                     //更换镜框判断是否有库存 
-                    if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
+                    if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
-
                     //判断赠品是否有库存
                     //判断补发是否有库存
                     if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
@@ -1202,7 +1200,7 @@ class WorkOrderList extends Backend
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
                         //措施
-                        $integral_auto_complete = $coupon_auto_complete = 0;
+                        $integral_auto_complete = $coupon_auto_complete = $changeArr_auto_complete = 0;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $work_id;
                             $measureList['measure_choose_id'] = $v;
@@ -1910,7 +1908,7 @@ class WorkOrderList extends Backend
                     }
 
                     //更换镜框判断是否有库存
-                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                    if ($params['change_frame'] && in_array(1, array_filter($params['measure_choose_id']))) {
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
@@ -2277,6 +2275,7 @@ class WorkOrderList extends Backend
                         WorkOrderChangeSku::where(['work_id' => $row->id])->delete();
                         // dump($params['measure_choose_id']);
                         // exit;
+                        $integral_auto_complete = $coupon_auto_complete = $changeArr_auto_complete = 0;
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $row->id;
                             $measureList['measure_choose_id'] = $v;

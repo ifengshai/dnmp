@@ -52,9 +52,7 @@ class WorkOrderProblemStep extends Model
 
         if ($site < 10) {
             $map['work_platform'] = $site;
-        } else {
-            unset($map['a.create_time']);
-        }
+        } 
         $map['problem_type_id'] = $problemType;
         $work_data = $work->alias('a')->where($map)->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')->field('measure_content as name,count(*) as value')->group('b.measure_choose_id')->select();
         $work_data = collection($work_data)->toArray();

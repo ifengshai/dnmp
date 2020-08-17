@@ -1353,6 +1353,7 @@ class PurchaseOrder extends Backend
             $skus = array_column($list, 'true_sku');
             //查询所有产品库存
             $map['is_del'] = 1;
+            $map['is_open']= ['lt',3];
             $map['sku'] = ['in', $skus];
             $item = new \app\admin\model\itemmanage\Item;
             $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');

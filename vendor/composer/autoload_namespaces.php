@@ -10,5 +10,7 @@ return array(
     'Zendesk\\API\\' => array($vendorDir . '/zendesk/zendesk_api_client_php/src'),
     'Pimple' => array($vendorDir . '/pimple/pimple/src'),
     'Inflect' => array($vendorDir . '/mmucklo/inflect/src'),
+    'Google_Service_' => array($vendorDir . '/google/apiclient-services/src'),
+    'Google_' => array($vendorDir . '/google/apiclient/src'),
     'Doctrine\\Common\\Cache\\' => array($vendorDir . '/doctrine/cache/lib'),
 );

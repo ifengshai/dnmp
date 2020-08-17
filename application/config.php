@@ -285,5 +285,9 @@ return [
     ],
 
     //后台地址
-    'admin_url' => 'admin_1biSSnWyfW.php'
+    'admin_url' => 'admin_1biSSnWyfW.php',
+    //GA
+    "ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID" => '168154683',
+    "VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID" => '168154683',
+    "NIHAO_GOOGLE_ANALYTICS_VIEW_ID" => '168154683',
 ];
