@@ -319,10 +319,12 @@ class TrackReg extends Backend
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->find();
             $params['sales_num_15days'] = $days15_data->num > 0 ? round($days15_data->sales_num / $days15_data->num) : 0;
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->find();
+            //90天总销量
+            $params['sales_num_90days'] = $days90_data->sales_num;
             //90天日均销量
-            $params['sales_num_90days'] = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
+            $sales_num_90days = $days90_data->num > 0 ? round($days90_data->sales_num / $days90_data->num) : 0;
             //计算等级 30天预估销量
-            $num = round($params['sales_num_90days'] * 1 * 30);
+            $num = round($sales_num_90days * 1 * 30);
             if ($num >= 300) {
                 $params['grade'] = 'A+';
             } elseif ($num >= 150 && $num < 300) {
@@ -345,4 +347,5 @@ class TrackReg extends Backend
        
         echo "ok";
     }
+
 }
