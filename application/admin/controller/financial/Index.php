@@ -190,6 +190,7 @@ class Index extends Backend
             $whereFrame['o.created_at'] = ['between',[$time[0],$time[3]]];
             $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
             ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select(false);
+            dump($base_grand_total_result);
             exit;
             $rate           = $params['rate'] ?:6.8;
             $order_platform = $params['platform'] ?:1;
