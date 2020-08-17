@@ -173,7 +173,7 @@ class Nihao extends Model
             }
         }
         //求镜片成本价格
-        $all_lens_result = Db::connect('database.db_nihao_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
+        $all_lens_result = Db::connect('database.db_voogueme_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
         ->join('sales_lens sl', 'sl.lens_id=m.lens_id','left')->where($whereFrame)
         ->field('round(sum(m.qty_ordered*sl.left_lens_cost_price),2) left_lens_cost_price,round(sum(m.qty_ordered*sl.right_lens_cost_price),2) right_lens_cost_price')
         ->select();
