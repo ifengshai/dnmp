@@ -159,7 +159,7 @@ class Voogueme extends Model
         ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
        //转换sku
         foreach ($all_frame_result as $key => $value) {
-            $all_frame_result[$key]['true_sku'] = $this->itemPlatform->getTrueSku($value['sku'],1);
+            $all_frame_result[$key]['true_sku'] = $this->itemPlatform->getTrueSku($value['sku'],2);
         }
         //镜架成本
         $all_frame_price=0;
