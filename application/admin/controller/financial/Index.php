@@ -175,30 +175,25 @@ class Index extends Backend
     {
         $orderPlatform = (new MagentoPlatform())->getOrderPlatformList();
         $create_time = input('create_time');
-        $platform    = input('order_platform', 1);	
+        $platform    = input('order_platform', 1);
+        $rate        = input('rate',6.8);	
         //头部数据
         if($this->request->isAjax()){
             $params = $this->request->param();
             //默认当天
             if ($params['time']) {
                 $time = explode(' ', $params['time']);
-                $map['create_date'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['create_date'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                $time[0] = $time[3] = date('Y-m-d');
             }
-            $order_platform = $params['platform'];
+            $rate           = $params['rate'] ?:6.8;
+            $order_platform = $params['platform'] ?:1;
             if(4<=$order_platform){
                 //return json(['code' => 0, 'data' =>'该平台暂时没有数据']);
                 return $this->error('该平台暂时没有数据');
             }
-            // $orderStatistics = new OrderStatistics();
-            // $list = $orderStatistics->getDataBySite($order_platform,$map);
-            // $list = collection($list)->toArray();
-            $list = Config('workorder.cost_arr');
             $platform = new  \app\admin\model\financial\Zeelool;
-            $rs = $platform->facebook_cost('2020-08-14','2020-08-14');
-            dump($rs);
-            exit;
+            $list = $platform->index_cost($rate,$time[0],$time[3]);
             if(!empty($list)){
                 $column = $columnData = [];
                 foreach($list as $k=> $v){
@@ -214,9 +209,7 @@ class Index extends Backend
             }
             if($params['key'] == 'echart1'){
                 return json(['code' => 1, 'data' => $json]);
-            }
-            /***********END*************/
-            //列表           
+            }         
             return json(['code' => 1, 'data' => $json,'rows' => $list]);
         }
         $this->view->assign(
@@ -224,11 +217,13 @@ class Index extends Backend
 
                 'orderPlatformList'	=> $orderPlatform,
                 'platform'          => $platform,
-                'create_time'       => $create_time
+                'create_time'       => $create_time,
+                'rate'              => $rate
             ]
         );
         $this->assignconfig('platform', $platform);
         $this->assignconfig('create_time',$create_time);
+        $this->assignconfig('rate',$rate);
         return  $this->view->fetch();
     }
 }

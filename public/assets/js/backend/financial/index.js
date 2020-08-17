@@ -1076,12 +1076,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsob
             var create_time = $('#workload_time').val();
             //console.log(time_two);
             var platform = 1;
+            var rate     = $('#cost_rate').val();
             var options1 = {
                 type: 'post',
                 url: 'financial/index/cost_statistics',
                 data: {
                     'time': create_time,
                     'platform': platform,
+                    'rate':rate,
                     'key':'echart1' 
                 }
             }
@@ -1095,7 +1097,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsob
                 showToggle: true,
                 pagination: false,
                 extend: {
-                    index_url: 'financial/index/cost_statistics/' + location.search + '?time=' + Config.create_time + '&platform=' + Config.platform + '&type=list',
+                    index_url: 'financial/index/cost_statistics/' + location.search + '?time=' + Config.create_time + '&platform=' + Config.platform +'&rate='+Config.rate+'&type=list',
                 }
             });
             var table = $("#table");
