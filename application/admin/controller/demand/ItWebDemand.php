@@ -137,7 +137,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";
+                    $meWhere = "FIND_IN_SET(phper_user_id,{$usersIdStr})";
                 }
 
                 //是否是测试主管
@@ -148,7 +148,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(config('demand.test_group_person_id')) ?: [];
                     $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";
+                    $meWhere = "FIND_IN_SET(test_user_id,{$usersIdStr})";
                 }
 
                 //是否是前端主管
@@ -159,7 +159,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";
+                    $meWhere = "FIND_IN_SET(web_designer_user_id,{$usersIdStr})";
                 }
 
                 //是否是app主管
@@ -170,7 +170,7 @@ class ItWebDemand extends Backend
                     $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
                     $usersId = array_merge($usersId, [$adminId]);
                     $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";
+                    $meWhere = "FIND_IN_SET(app_user_id,{$usersIdStr})";
                 }
 
                 //不是主管
