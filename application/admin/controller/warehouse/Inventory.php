@@ -669,7 +669,16 @@ class Inventory extends Backend
                         //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                         $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
                         $all_num = count($item_platform_sku);
-                        $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        // $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
+                        $whole_num = $platform
+                            ->where('sku',$v['sku'])
+                            ->field('stock')
+                            ->select();
+                        foreach ($whole_num as $kk =>$vv){
+                            $num_num += abs($vv['stock']);
+                        }
+                        // dump($num_num);
+                        // dump(collection($whole_num)->toArray());die;
                         //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
                         $stock_num = $v['error_qty'];
                         //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
@@ -688,11 +697,12 @@ class Inventory extends Backend
                             }
                         }else{
                             foreach ($item_platform_sku as $key => $val) {
+                                // dump($item_platform_sku);die;
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                 } else {
-                                    $num = round($v['error_qty'] * $val['stock']/$whole_num);
+                                    $num = round($v['error_qty'] * abs($val['stock'])/$num_num);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                 }
@@ -894,7 +904,7 @@ class Inventory extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/02/28 14:45:39 
+     * @since 2020/02/28 14:45:39
      * @return void
      */
     public function batch_export_xls()
@@ -1384,7 +1394,7 @@ class Inventory extends Backend
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                     }
                 }
-                //不需要添加出入库逻辑(主要针对总库存) 
+                //不需要添加出入库逻辑(主要针对总库存)
                 //修改库存结果为真
                 // if (($changeSku === false) || ($original_stock === false)) {
                 //     throw new Exception('更改镜架失败,请检查SKU');
@@ -1710,6 +1720,8 @@ class Inventory extends Backend
             }else{
                 $original_sku = trim($v['original_sku']);
             }
+            //原先sku
+            //$original_sku    = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku
@@ -1719,31 +1731,36 @@ class Inventory extends Backend
             //回滚
             Db::startTrans();
             try {
-                $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+                if ($type == 3) { //赠品
+                    $two_type = 9;
+                    $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->dec('stock', $original_number)->update();
+                } elseif ($type == 4) { //补发
+                    $two_type = 8;
+                    $res = $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+                }
 
-                //扣减对应站点虚拟库存
+                //追加对应站点虚拟库存
                 $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setDec('stock', $original_number);
 
                 if (false !== $res) {
-                    if ($type == 3) {
-                        $two_type = 9;
-                    } elseif ($type == 4) {
-                        $two_type = 8;
-                    }
-
-                    //插入日志表
-                    (new StockLog())->setData([
+                    $data = [
                         'type'                      => 2,
                         'two_type'                  => $two_type ?: 0,
                         'sku'                       => $warehouse_original_sku,
                         'order_number'              => $increment_id,
                         'public_id'                 => $id,
                         'available_stock_change'    => -$original_number,
-                        'occupy_stock_change'       => $original_number,
                         'create_person'             => session('admin.nickname'),
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
-                    ]);
+                    ];
+                    if($type == 3){
+                        $data['stock_change']        = -$original_number;
+                    }elseif ($type == 4){
+                        $data['occupy_stock_change'] = $original_number;
+                    }
+                    //插入日志表
+                    (new StockLog())->setData($data);
                 }
 
                 Db::commit();

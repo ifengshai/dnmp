@@ -87,8 +87,12 @@ class NewProduct extends Backend
 
             //平台搜索 (单选)
             if ($filter['platform_type']) {
-                $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
-                $map1['sku'] = ['in', $skus];
+                if ($filter['platform_type'] == 10){
+                    $map['item_status'] = ['=', 1];
+                }else{
+                    $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
+                    $map1['sku'] = ['in', $skus];
+                }
                 unset($filter['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -143,6 +147,16 @@ class NewProduct extends Backend
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
 
+            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
+            $platformarr1 = collection($platformarr1)->toArray();
+            foreach ($platformarr1 as $ka => $va){
+                if ($arrs[$va['sku']]){
+                    $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
+                }else{
+                    $arrs[$va['sku']] = $va['sales_num_90days'];
+                }
+            }
+
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
 
@@ -165,6 +179,7 @@ class NewProduct extends Backend
                 }
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
+                $v['sales_num_90days'] = $arrs[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
             }

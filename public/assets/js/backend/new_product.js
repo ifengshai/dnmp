@@ -63,8 +63,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'platform_type',
                             title: __('平台'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
-                            searchList: {1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee'},
+                            custom: {10: 'success',1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            searchList: {10:'无',1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -400,7 +400,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {field: 'on_way_stock', title: '在途库存', operate: false},
                         {field: 'wait_in_num', title: '待入库数量', operate: false},
                         {field: 'sales_num_15days', title: '过去15天日均销量', operate: false},
-                        {field: 'sales_num_90days', title: '过去90天日均销量', operate: false},
+                        {field: 'sales_num_90days', title: '90天总销量', operate: false},
                         {field: 'sales_days', title: '预估售卖天数', operate: false},
                         // {field: 'replenish_num', title: '建议补货量', operate: false},
                         {
