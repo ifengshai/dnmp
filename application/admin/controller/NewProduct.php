@@ -73,12 +73,8 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
-
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-// dump($filter);die;
-
             //可用库存搜索
             if ($filter['available_stock']) {
                 $item = new \app\admin\model\itemmanage\Item();
@@ -91,8 +87,7 @@ class NewProduct extends Backend
 
             //平台搜索 (单选)
             if ($filter['platform_type']) {
-                $new_product_mapping = new \app\admin\model\NewProductMapping();
-                $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
+                $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
                 $map1['sku'] = ['in', $skus];
                 unset($filter['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
