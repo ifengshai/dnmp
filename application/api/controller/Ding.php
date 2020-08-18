@@ -650,10 +650,17 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            //排除谢梦飞账号
+            
             if (is_array($send_ids)) {
+                //排除谢梦飞账号
                 if (in_array(240, $send_ids)) {
                     $key = array_search(240, $send_ids);
+                    unset($send_ids[$key]);
+                    $send_ids = array_values($send_ids);
+                }
+                //排除张晓账号
+                if (in_array(148, $send_ids)) {
+                    $key = array_search(148, $send_ids);
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
