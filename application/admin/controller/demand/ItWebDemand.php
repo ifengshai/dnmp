@@ -195,7 +195,7 @@ class ItWebDemand extends Backend
                 }
 
                 //不是主管
-                if ($meWhere !== '1=1') {
+                if ($meWhere != '1=1') {
                     $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
             } elseif ($filter['label'] == 2) { //未完成
