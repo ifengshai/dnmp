@@ -6,7 +6,7 @@
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
-                        
+
                         {:build_toolbar('refresh')}
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('new_product/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('新增')}</a>
                         <!-- <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('new_product/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->
@@ -67,7 +67,7 @@
                     <% if(item.item_status == 2) {  %>
                     <a href="javascript:;" data-id="<%=item.id%>" data-sku="<%=item.sku%>" class="btn btn-success btn-passAudit {:$auth->check('new_product/audit')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
                     <%}%>
-                    <a href="javascript:;" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a> 
+                    <a href="javascript:;" class="btn  btn-primary  btn-detail"  data-id="<%=item.id%>"><i class="fa fa-list"></i> 详情</a>
 
                     <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
                     <% if(item.item_status == 1) {  %>
@@ -78,7 +78,7 @@
                     <!--<a href="javascript:;" title='编辑' class="btn btn-primary btn-success btn-edit" data-area='["100%","100%"]' data-id="<%=item.id%>"><i class="fa fa-pencil"></i> </a>-->
                     <!--<a href="javascript:;" title='取消' class="btn btn-danger btn-cancel" data-id="<%=item.id%>"><i class="fa fa-remove"></i></a>-->
                     <%}%>
-                    
+
                     <span class="pull-right" style="margin-top:10px;">
                         <!--如果需要多选操作，请确保有下面的checkbox元素存在,可移除-->
                         <!-- <input name="checkbox" data-id="<%=item.id%>" type="checkbox" /> -->
