@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'financial/fackbook/index' + location.search,
                     add_url: 'financial/fackbook/add',
                     edit_url: 'financial/fackbook/edit',
-                    del_url: 'financial/fackbook/del',
+                    //del_url: 'financial/fackbook/del',
                     multi_url: 'financial/fackbook/multi',
                     table: 'facebook_api',
                 }
