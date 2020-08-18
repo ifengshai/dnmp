@@ -532,12 +532,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            //排除谢梦飞账号
-            if (in_array(240, $send_ids)) {
-                $key = array_search(240, $send_ids);
-                unset($send_ids[$key]);
-                $send_ids = array_values($send_ids);
-            }
+            
             return self::cc_ding(
                 $send_ids,
                 '【' . self::siteType($demand->site_type) . '】【' . self::demandType($demand->type) . '】' . $msg,
@@ -655,6 +650,12 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
+            //排除谢梦飞账号
+            if (in_array(240, $send_ids)) {
+                $key = array_search(240, $send_ids);
+                unset($send_ids[$key]);
+                $send_ids = array_values($send_ids);
+            }
             return self::cc_ding(
                 $send_ids,
                 '【开发组' . self::demandType($demand->type) . '】' . $msg,
