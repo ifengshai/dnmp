@@ -182,7 +182,9 @@
                 {else}
                 <!--<button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>-->
                 {/if}
+            {if $pm_status}
             <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+            {/if}
 
                 {if $row['pm_audit_status'] == 3}
                 <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;' disabled>{:__('已提交')}</button>
