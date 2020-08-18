@@ -831,7 +831,7 @@ class ItWebDemand extends Backend
                         $this->model->allowField(true)->save($update, ['id' => $params['id']]);
 
                         //任务完成 钉钉推送抄送人 提出人
-                        Ding::cc_ding($row->entry_user_id,  '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                        Ding::cc_ding($row->entry_user_id,  '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         if ($row->copy_to_user_id) {
                             $usersId = explode(',', $row->copy_to_user_id);
                             Ding::cc_ding($usersId,  '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
