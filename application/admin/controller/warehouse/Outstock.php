@@ -386,7 +386,7 @@ class Outstock extends Backend
                     $arr[$v['sku']]['num'] = $v['out_stock_num'];
                     $arr[$v['sku']]['platform_type'] = $v['platform_id'];
                 } else {
-                    $arr[$v['sku']]['num'] = $v['out_stock_num'] + $arr[$v['sku']];
+                    $arr[$v['sku']]['num'] = $v['out_stock_num'] + $arr[$v['sku']]['num'];
                 }
             }
             // dump(collection($list)->toArray());
