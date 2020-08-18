@@ -150,7 +150,10 @@ class NewProduct extends Backend
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
-
+            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
+            $platformarr1 = collection($platformarr1)->toArray();
+            // dump($platformarr);
+            // dump($platformarr1);
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
 
@@ -158,6 +161,8 @@ class NewProduct extends Backend
             foreach ($platformarr as $v) {
                 $arr[$v['sku']] .= $magentoplatformarr[$v['platform_type']] . ',';
             }
+            // dump($list);
+            // dump($arr);
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 if ($v['item_status'] == 1) {
@@ -173,9 +178,11 @@ class NewProduct extends Backend
                 }
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
+                $v['sales_num_90days'] = $platformarr1[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
             }
+            // dump($list);die;
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
