@@ -195,7 +195,7 @@ class ItWebDemand extends Backend
                 }
 
                 //不是主管
-                if (!$meWhere) {
+                if ($meWhere !== '1=1') {
                     $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
             } elseif ($filter['label'] == 2) { //未完成
@@ -351,54 +351,75 @@ class ItWebDemand extends Backend
             }
             $adminId = session('admin.id');
             //我的
+            $meWhere = '1=1';
             if ($filter['label'] == 1) {
-                //是否是开发主管
-                $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
-                if (in_array($adminId, $authUserIds)) {
-                    //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.php_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(phper_user_id,{$usersIdStr})";
-                }
-
-                //是否是测试主管
-                $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
-                if (in_array($adminId, $testAuthUserIds)) {
-                    $usersId = [];
-                    //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.test_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(test_user_id,{$usersIdStr})";
-                }
-
-                //是否是前端主管
-                $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
-                if (in_array($adminId, $webAuthUserIds)) {
-                    $usersId = [];
-                    //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(web_designer_user_id,{$usersIdStr})";
-                }
-
-                //是否是app主管
-                $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
-                if (in_array($adminId, $appAuthUserIds)) {
-                    $usersId = [];
-                    //组员ID
-                    $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
-                    $usersId = array_merge($usersId, $adminId);
-                    $usersIdStr = implode(',', $usersId);
-                    $meWhere = "FIND_PART_IN_SET(app_user_id,{$usersIdStr})";
-                }
-
-                //不是主管
-                if (!$meWhere) {
-                    $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
-                }
+                 //是否是开发主管
+                 $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+                 if (in_array($adminId, $authUserIds)) {
+                     //组员ID
+                     $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
+                     $usersId = array_merge($usersId, [$adminId]);
+                     foreach($usersId as $k => $v) {
+                         if ($k == 0) {
+                             $meWhere .= " and locate({$v},phper_user_id)";
+                         } else {
+                             $meWhere .= " or locate({$v},phper_user_id)";
+                         }
+                     }
+                 }
+ 
+                 //是否是测试主管
+                 $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                 if (in_array($adminId, $testAuthUserIds)) {
+                     $usersId = [];
+                     //组员ID
+                     $usersId = Auth::getGroupUserId(config('demand.test_group_person_id')) ?: [];
+                     $usersId = array_merge($usersId, [$adminId]);
+                     foreach($usersId as $k => $v) {
+                         if ($k == 0) {
+                             $meWhere .= " and locate({$v},test_group_person_id)";
+                         } else {
+                             $meWhere .= " or locate({$v},test_group_person_id)";
+                         }
+                     }
+                 }
+ 
+                 //是否是前端主管
+                 $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
+                 if (in_array($adminId, $webAuthUserIds)) {
+                     $usersId = [];
+                     //组员ID
+                     $usersId = Auth::getGroupUserId(config('demand.web_group_person_id'));
+                     $usersId = array_merge($usersId, [$adminId]);
+                     foreach($usersId as $k => $v) {
+                         if ($k == 0) {
+                             $meWhere .= " and locate({$v},web_group_person_id)";
+                         } else {
+                             $meWhere .= " or locate({$v},web_group_person_id)";
+                         }
+                     }
+                 }
+ 
+                 //是否是app主管
+                 $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
+                 if (in_array($adminId, $appAuthUserIds)) {
+                     $usersId = [];
+                     //组员ID
+                     $usersId = Auth::getGroupUserId(config('demand.app_group_person_id'));
+                     $usersId = array_merge($usersId, [$adminId]);
+                     foreach($usersId as $k => $v) {
+                         if ($k == 0) {
+                             $meWhere .= " and locate({$v},app_group_person_id)";
+                         } else {
+                             $meWhere .= " or locate({$v},app_group_person_id)";
+                         }
+                     }
+                 }
+ 
+                 //不是主管
+                 if ($meWhere !== '1=1') {
+                     $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                 }
             } elseif ($filter['label'] == 2) { //未完成
                 /**
                  * 其他人：展示任务状态为未激活、激活、已响应的任务
