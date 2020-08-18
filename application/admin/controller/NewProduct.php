@@ -88,12 +88,15 @@ class NewProduct extends Backend
                 unset($filter['available_stock']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
             //平台搜索 (单选)
             if ($filter['platform_type']) {
                 $new_product_mapping = new \app\admin\model\NewProductMapping();
-                $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
-                $map1['sku'] = ['in', $skus];
+                if ($filter['platform_type'] == 10){
+                    $map['item_status'] = ['=', 1];
+                }else{
+                    $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
+                    $map1['sku'] = ['in', $skus];
+                }
                 unset($filter['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
