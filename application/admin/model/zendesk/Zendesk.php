@@ -382,10 +382,10 @@ class Zendesk extends Model
                 $userlist_str = implode(',',$userlist_arr);
                 $time = strtotime(date('Y-m-d 0:0:0',time()));
                 //通过接口获取休息人员名单
-                // $ding = new \app\api\controller\Ding;
-                // $restuser_arr=$ding->getRestList($userlist_str,$time);
+                $ding = new \app\api\controller\Ding;
+                $restuser_arr=$ding->getRestList($userlist_str,$time);
                 foreach ($agents as $agent) {
-                    // if(!in_array($agent['admin_id'],$restuser_arr)){
+                    if(!in_array($agent['admin_id'],$restuser_arr)){
                         ZendeskTasks::create([
                             'type' => $agent['type'],
                             'admin_id' => $agent['admin_id'],
@@ -398,10 +398,9 @@ class Zendesk extends Model
                             'apply_count' => 0,
                             'complete_apply_count' => 0
                         ]);
-                    // }
+                    }
                 }
             }
-            exit;
             //获取所有的open和new的邮件
             $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice'],'is_hide'=>1])->order('zendesk_update_time','asc')->select();
             foreach ($waitTickets as $ticket) {
