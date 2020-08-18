@@ -150,9 +150,17 @@ class NewProduct extends Backend
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
-            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
+            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->field('sku,sales_num_90days')->select();
             $platformarr1 = collection($platformarr1)->toArray();
+            foreach ($platformarr1 as $k => $v){
+                if ($arrs[$v['sku']]){
+                    $arrs[$v['sku']] = $arrs[$v['sku']] + $v['sales_num_90days'];
+                }else{
+                    $arrs[$v['sku']] = $v['sales_num_90days'];
+                }
+            }
             // dump($platformarr);
+            // dump($arrs);
             // dump($platformarr1);
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
@@ -178,7 +186,7 @@ class NewProduct extends Backend
                 }
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
-                $v['sales_num_90days'] = $platformarr1[$v['sku']] ?: 0;
+                $v['sales_num_90days'] = $arrs[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
             }
