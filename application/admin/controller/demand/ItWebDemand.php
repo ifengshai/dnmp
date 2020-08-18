@@ -994,6 +994,14 @@ class ItWebDemand extends Backend
                         }
                         $update['test_status'] = 4;
 
+                        $time = date('Y-m-d H:i', time());
+                        $update['all_finish_time'] = $time;
+                        if ($update['all_finish_time'] > $row_arr['end_time']) {
+                            $update['status'] = 5;
+                        } else {
+                            $update['status'] = 4;
+                        }
+
                         $label = 1;
                     } else {
                         //未通过
@@ -1017,17 +1025,10 @@ class ItWebDemand extends Backend
                 }
 
                 if ($params['type'] == 'shangxian') {
-                    $row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();
+                    /*$row = $this->model->get(['id' => $params['id']]);
+                    $row_arr = $row->toArray();*/
 
-                    $time = date('Y-m-d H:i', time());
                     $update['test_status'] = 5;
-                    $update['all_finish_time'] = $time;
-                    if ($update['all_finish_time'] > $row_arr['end_time']) {
-                        $update['status'] = 5;
-                    } else {
-                        $update['status'] = 4;
-                    }
 
                     $label = 3;
                 }
