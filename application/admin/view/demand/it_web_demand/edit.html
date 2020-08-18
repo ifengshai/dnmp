@@ -175,13 +175,14 @@
             {if $type == 'view'}
                 {if $pm_status || $admin_id == $row['entry_user_id']}
                     {if $row['test_status'] == 1}
-                        <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                        <!--<button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>-->
                     {else}
-                        <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                        <!--<button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>-->
                     {/if}
                 {else}
-                <button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+                <!--<button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>-->
                 {/if}
+            <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
 
                 {if $row['pm_audit_status'] == 3}
                 <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;' disabled>{:__('已提交')}</button>
