@@ -4,6 +4,7 @@ namespace app\admin\controller\warehouse;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
+use think\Collection;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -121,9 +122,12 @@ class TransferOrder extends Backend
                     $this->error('此sku'.$v.'暂未同步到调入仓，请先同步再进行操作');
                 }
                 $in_item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_out_site']])->find();
+
                 if ($in_item_platform_sku['stock'] < $num[$k]){
                     $this->error('调出数量不能大于当前站点虚拟仓库存');
                 }
+                // dump($num[$k]);
+                // dump($in_item_platform_sku['stock']);die;
             }
 
             if ($params) {
@@ -223,6 +227,7 @@ class TransferOrder extends Backend
                     if (false !== $result) {
                         $sku = $this->request->post("sku/a");
                         $num = $this->request->post("num/a");
+                        // dump($num);die;
                         $item_id = $this->request->post("item_id/a");
                         $sku_stock = $this->request->post("sku_stock/a");
                         foreach($sku as $k=>$v){
@@ -241,7 +246,8 @@ class TransferOrder extends Backend
                             if (empty($item_platform_sku)){
                                 $this->error('此sku'.$v.'暂未同步到调出仓，请先同步再进行操作');
                             }
-                            if ($item_platform_sku['stock'] < $num[$k]){
+                            $in_item_platform_sku = $item_platform->where(['sku'=>$v,'platform_type'=>$params['call_out_site']])->find();
+                            if ($in_item_platform_sku['stock'] < $num[$k]){
                                 $this->error('调出数量不能大于当前站点虚拟仓库存');
                             }
                         }
