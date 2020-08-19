@@ -180,9 +180,11 @@ class Test4 extends Backend
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
             if ($v['status'] == 1) {
-               $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
-               echo $v['sku'] . '||' . $v['site'] . "\n";
-               file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', $v['sku'] . '||' . $v['site'] . "\r\n", FILE_APPEND);
+                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
+                if (!$res) {
+                    echo $v['sku'] . '||' . $v['site'] . "\n";
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', $v['sku'] . '||' . $v['site'] . "\r\n", FILE_APPEND);
+                }
             }
             usleep(50000);
         }
@@ -1132,14 +1134,14 @@ class Test4 extends Backend
             $finish_time = max(array($v['web_designer_finish_time'], $v['phper_finish_time'], $v['app_finish_time']));
             $data[$k]['develop_finish_time'] = $finish_time;
             $data[$k]['all_finish_time'] = $v['all_finish_time'];
-           
+
             $data[$k]['is_small_probability'] = $v['is_small_probability'];
             if ($v['type'] == 3) {
                 $data[$k]['is_difficult'] = 1;
             } else {
                 $data[$k]['is_difficult'] = 0;
             }
-            
+
             $data[$k]['is_del'] = $v['is_del'];
         }
         db('it_web_demand')->insertAll($data);
