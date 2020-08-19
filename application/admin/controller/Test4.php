@@ -155,7 +155,7 @@ class Test4 extends Backend
                 $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 5])->update(['stock' => $wesee_stock]);
             }
             echo $k . "\n";
-            usleep(200000);
+            usleep(50000);
         }
         echo 'ok';
     }
@@ -181,7 +181,7 @@ class Test4 extends Backend
             }
 
             echo $k . "\n";
-            usleep(200000);
+            usleep(50000);
         }
         echo 'ok';
     }
