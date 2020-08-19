@@ -182,6 +182,7 @@ class Test4 extends Backend
             if ($v['status'] == 1) {
                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
                echo $v['sku'] . '||' . $v['site'] . "\n";
+               file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', $v['sku'] . '||' . $v['site'] . "\r\n", FILE_APPEND);
             }
             usleep(50000);
         }
