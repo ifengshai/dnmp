@@ -113,6 +113,11 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzz_temp')->column('*', 'sku');
         foreach ($list as $k => $v) {
+            $zeelool_stock = 0;
+            $voogueme_stock = 0;
+            $nihao_stock = 0;
+            $meeloog_stock = 0;
+            $wesee_stock = 0;
             //如果存在比例
             if ($data[$v['sku']]) {
                 $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
