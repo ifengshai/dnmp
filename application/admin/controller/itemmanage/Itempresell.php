@@ -43,6 +43,8 @@ class Itempresell extends Backend
      */
     public function index()
     {
+        //执行预售结束脚本
+        $this->updateItemPresellStatus();
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -233,11 +235,11 @@ class Itempresell extends Backend
      * 每10分钟执行一次
      * 更新商品预售状态
      */
-    public function updateItemPresellStatus()
+    protected function updateItemPresellStatus()
     {
         $now_time =  date("Y-m-d H:i:s", time());
         //更新到已结束
-        $sql = "update fa_item_platform_sku set presell_status=2 where presell_end_time < '{$now_time}'  and presell_status=1 and is_del=1";
+        $sql = "update fa_item_platform_sku set presell_status=2 where presell_end_time < '{$now_time}'  and presell_status=1";
         DB::connect('database.db_stock')->query($sql);
     }
 }
