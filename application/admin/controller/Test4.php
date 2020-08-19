@@ -180,11 +180,11 @@ class Test4 extends Backend
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
             if ($v['status'] == 1) {
-                $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => 1, 'is_upload' => 1]);
-            } else {
-                $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => 0, 'is_upload' => 1]);
-            }
-
+               $res =  $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
+               if (!$res) {
+                   echo $v['sku'] . "\n";
+               }
+            } 
             echo $k . "\n";
             usleep(50000);
         }
