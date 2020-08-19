@@ -986,6 +986,7 @@ class ItWebDemand extends Backend
                 if ($params['type'] == 'tongguo') {
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
+
                     if ($params['status'] == 1) {
                         //通过
                         if ($params['test_group'] == 1 || $params['test_group'] == 2) {
@@ -995,8 +996,8 @@ class ItWebDemand extends Backend
                         $update['test_status'] = 4;
 
                         $time = date('Y-m-d H:i', time());
-                        $update['all_finish_time'] = $time;
-                        if ($update['all_finish_time'] > $row_arr['end_time']) {
+
+                        if ($time > $row_arr['end_time']) {
                             $update['status'] = 5;
                         } else {
                             $update['status'] = 4;
@@ -1027,6 +1028,9 @@ class ItWebDemand extends Backend
                 if ($params['type'] == 'shangxian') {
                     /*$row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();*/
+
+                    $time = date('Y-m-d H:i', time());
+                    $update['all_finish_time'] = $time;
 
                     $update['test_status'] = 5;
 
