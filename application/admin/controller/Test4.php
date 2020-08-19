@@ -185,7 +185,6 @@ class Test4 extends Backend
                    echo $v['sku'] . "\n";
                }
             } 
-            echo $k . "\n";
             usleep(50000);
         }
         echo 'ok';
