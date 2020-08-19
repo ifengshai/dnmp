@@ -1,13 +1,14 @@
 <?php
 
 namespace app\admin\controller\itemmanage;
+
 use think\Db;
-use think\Request;
 use app\common\controller\Backend;
-use app\admin\model\platformmanage\MagentoPlatform;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\admin\model\itemmanage\Item_presell_log;
+
 
 /**
  * 平台SKU预售管理
@@ -27,11 +28,11 @@ class Itempresell extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\itemmanage\Itempresell;
-        
-
+        $this->model = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $this->item = new \app\admin\model\itemmanage\Item();
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -42,244 +43,192 @@ class Itempresell extends Backend
      */
     public function index()
     {
-                //设置过滤方法
-                $this->request->filter(['strip_tags']);
-                if ($this->request->isAjax()) {
-                    //如果发送的来源是Selectpage，则转发到Selectpage
-                    if ($this->request->request('keyField')) {
-                        return $this->selectpage();
-                    }
-                    list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-                    $total = $this->model
-                        ->where($where)
-                        ->order($sort, $order)
-                        ->count();
-        
-                    $list = $this->model
-                        ->where($where)
-                        ->order($sort, $order)
-                        ->limit($offset, $limit)
-                        ->select();
-        
-                    $list = collection($list)->toArray();
-                    if(!empty($list) && is_array($list)){
-                        $platform = (new MagentoPlatform())->getOrderPlatformList();
-                        foreach ($list as $k =>$v){
-                            if($v['platform_type']){
-                                $list[$k]['platform_type'] = $platform[$v['platform_type']];
-                            }
-                        }
-                    }
-                    $result = array("total" => $total, "rows" => $list);
-        
-                    return json($result);
-                }
-                return $this->view->fetch();
-    }
-        /***
-     * 添加平台商品预售
-     */
-    public function add()
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                if($params['presell_start_time'] > $params['presell_end_time']){
-                    $this->error(__('预售开始时间大于结束时间,不能添加'));
-                }
-                $params = $this->preExcludeFields($params);
-                if(empty($params['platform_sku'])){
-                    $this->error(__('Platform sku cannot be empty'));
-                }
-                $whereData['platform_sku'] = $params['platform_sku'];
-                $whereData['is_del'] = 1;
-                $row = $this->model->where($whereData)->field('id,platform_sku')->find();
-                if($row){
-                    $this->error(__('This platform SKU has added presale, you can go to edit'));
-                }
-                $this->platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                $platformSku = $this->platformSku->where(['platform_sku'=>$params['platform_sku']])->field('sku,platform_sku,name,platform_type')->find();
-                if(!$platformSku){
-                    $this->error(__('Platform sku does not exist, please check if it is correct'));
-                }
-                if($params['presell_num']<=0){
-                    $this->error(__('The number of pre-sale skus cannot be less than or equal to 0'));
-                }
-                if($params['presell_start_time'] == $params['presell_end_time']){
-                    $this->error('预售开始时间和结束时间不能相等');
-                }
-                $params['sku'] = $platformSku['sku'];
-                $params['platform_sku'] = $platformSku['platform_sku'];
-                $params['name'] = $platformSku['name'] ? $platformSku['name'] :'';
-                $params['platform_type'] = $platformSku['platform_type'];
-                $params['presell_residue_num'] = $params['presell_num'];
-//                echo $params['presell_start_time'];
-//                echo '<br>';
-//                echo $params['presell_end_time'];
-//                echo '<br>';
-//                echo date("Y-m-d H:i:s", time());
-//                exit;
-                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-                    $params[$this->dataLimitField] = $this->auth->id;
-                }
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
-                        $this->model->validateFailException(true)->validate($validate);
-                    }
-                    $params['create_person'] = session('admin.nickname');
-                    $params['create_time'] = $now_time =  date("Y-m-d H:i:s", time());
-                    if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
-                        $params['presell_status'] = 2;
-                    }
-                    $result = $this->model->allowField(true)->save($params);
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                }
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
-                }
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
             }
-            $this->error(__('Parameter %s can not be empty', ''));
+
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['platform_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['platform_type']) {
+                unset($map['platform_type']);
+            }
+            //默认显示 开启过预售的SKU
+            if (!isset($filter['presell_status']) && !isset($filter['sku']) && !isset($filter['platform_sku'])) {
+                $map['presell_status'] = ['in', [1, 2]];
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+
+            $sku_stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock', 'sku');
+            //查询可用库存
+            foreach ($list as &$v) {
+                $v['available_stock'] = $sku_stock[$v['sku']];
+            }
+            unset($v);
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
         }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        //取第一个key为默认站点
+        $site = input('site', $magentoplatformarr[0]['id']);
+
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
-    
-       /***
-     * 编辑商品预售
-     */
-    public function edit($ids=null)
-    {
-        $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
-        }
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $params = $this->preExcludeFields($params);
-                if(empty($params['platform_sku'])){
-                    $this->error(__('Platform sku cannot be empty'));
-                }
-                if(empty($params['presell_num'])){
-                    $this->error(__('SKU pre-order quantity cannot be empty'));
-                }
-                //变化的数量
-                $num = $params['presell_num'];
-                unset($params['presell_num']);
-                if($params['presell_start_time'] == $params['presell_end_time']){
-                    $this->error('Pre-sale start time and end time cannot be equal');
-                }
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
-                    }
-                    $now_time =  date("Y-m-d H:i:s", time());
-                    if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
-                        $params['presell_status'] = 2;
-                    }
-                    $result = $row->allowField(true)->save($params,['platform_sku'=>$params['platform_sku']]);
-                    $info   = $row->allowField(true)->where(['platform_sku'=>$params['platform_sku']])->inc('presell_num', $num)->inc('presell_residue_num', $num)->update();
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                }
-                if (($result !== false) && ($info !==false)) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were updated'));
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-        $this->view->assign("row", $row);
-        return $this->view->fetch();
-    }
+
     /***
      * 开启预售
      */
     public function openStart($ids = null)
     {
-        if($this->request->isAjax()){
-            $row = $this->model->get($ids);
-            if($row['presell_status'] == 2){
-                $this->error(__('Pre-sale on, do not repeat on'));
-            }
-            $now_time = date('Y-m-d H:i:s',time());
-            if($row['presell_end_time']<$now_time){
-                $this->error(__('The closing time has expired, please select again'));
-            }
-            $map['id'] = $ids;
-            $data['presell_status'] = 2;
-            $data['presell_open_time'] =  date('Y-m-d H:i:s',time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res) {
-                $this->success('预售开启成功');
-            } else {
-                $this->error('预售开启失败');
-            }
-        }else{
-            $this->error('404 Not found');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
         }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $params = $this->preExcludeFields($params);
+            if ($params['presell_start_time'] >= $params['presell_end_time']) {
+                $this->error('预售开始时间必须小于结束时间');
+            }
+            $result = false;
+            Db::startTrans();
+            try {
+                $params['presell_residue_num'] = $row['presell_residue_num'] + $params['presell_change_num'];
+                $params['presell_num'] = $row['presell_num'] + $params['presell_change_num'];
+                $now_time =  date("Y-m-d H:i:s", time());
+                if ($now_time >= $params['presell_end_time']) { //如果当前时间大于结束时间
+                    $params['presell_status'] = 2;
+                } else {
+                    $params['presell_status'] = 1;
+                }
+                $params['presell_create_time'] = date("Y-m-d H:i:s", time());
+                $result = $row->allowField(true)->save($params);
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            if ($result !== false) {
+                //添加日志
+                $data['platform_id'] = $row->id;
+                $data['sku'] = $row->sku;
+                $data['site'] = $row->platform_type;
+                $data['presell_change_num'] = $params['presell_change_num'];
+                $data['old_presell_num'] = $row->presell_num;
+                $data['old_presell_residue_num'] = $row->presell_residue_num;
+                $data['presell_start_time'] = $params['presell_start_time'];
+                $data['presell_end_time'] = $params['presell_end_time'];
+                $data['type'] = 1; //操作类型 添加
+                (new Item_presell_log())->setData($data);
+
+                $this->success();
+            } else {
+                $this->error();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign('row', $row);
+        return $this->view->fetch();
     }
+
     /***
-     * 关闭预售
-     */
-        /***
-     * 关闭预售
+     * 结束预售
      */
     public function openEnd($ids = null)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
-            if($row['presell_status'] == 3){
+            if ($row['presell_status'] == 3) {
                 $this->error(__('Pre-sale closure, do not repeat the closure'));
             }
             $map['id'] = $ids;
-            $data['presell_status'] = 3;
-            $data['presell_open_time'] =  date('Y-m-d H:i:s',time());
+            $data['presell_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
-                $this->success('关闭预售成功');
+                $this->success('操作成功');
             } else {
-                $this->error('关闭预售失败');
+                $this->error('操作失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
+
+    /***
+     * 预售历史记录
+     */
+    public function presell_history($ids = null)
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $ids = input('ids');
+            if ($ids) {
+                $map['platform_id'] = $ids;
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = (new Item_presell_log())
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = (new Item_presell_log())
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        $this->assignconfig('ids', $ids);
+        return $this->view->fetch();
+    }
+
     /**
      * 每10分钟执行一次
      * 更新商品预售状态
@@ -287,15 +236,8 @@ class Itempresell extends Backend
     public function updateItemPresellStatus()
     {
         $now_time =  date("Y-m-d H:i:s", time());
-        //1.更新当前时间段处在预售中的字段(预售中)
-        $sql1 = "update fa_item_presell set presell_status=2 where presell_start_time <= '{$now_time}'  and presell_end_time>= '{$now_time}' and presell_status!=3 and is_del=1";
-        //2.更新到未开始
-        $sql2 = "update fa_item_presell set presell_status=1 where presell_start_time > '{$now_time}'  and presell_status!=3 and is_del=1";
-        //3.更新到已结束
-        $sql3 = "update fa_item_presell set presell_status=3 where presell_end_time < '{$now_time}'  and presell_status!=3 and is_del=1";
-        DB::connect('database.db_stock')->name('item_presell')->query($sql1);
-        DB::connect('database.db_stock')->name('item_presell')->query($sql2);
-        DB::connect('database.db_stock')->name('item_presell')->query($sql3);
-
+        //更新到已结束
+        $sql = "update fa_item_platform_sku set presell_status=2 where presell_end_time < '{$now_time}'  and presell_status=1 and is_del=1";
+        DB::connect('database.db_stock')->query($sql);
     }
 }

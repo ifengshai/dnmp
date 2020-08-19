@@ -113,31 +113,32 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzz_temp')->column('*', 'sku');
         foreach ($list as $k => $v) {
+            $zeelool_stock = 0;
+            $voogueme_stock = 0;
+            $nihao_stock = 0;
+            $meeloog_stock = 0;
+            $wesee_stock = 0;
             //如果存在比例
             if ($data[$v['sku']]) {
                 $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
                 if (($v['available_stock'] - $zeelool_stock) > 0) {
-                    $voogueme_stock = $data[$v['sku']]['voogueme']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : 0;
+                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : ($v['available_stock'] - $zeelool_stock);
                 }
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
-                    $nihao_stock = $data[$v['sku']]['nihao']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : 0;
+                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
                 }
 
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > 0) {
-                    $meeloog_stock = $data[$v['sku']]['meeloog']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) : 0;
+                    $meeloog_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock);
                 }
 
                 $stock = $v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock - $meeloog_stock;
                 $wesee_stock = $stock > 0 ? $stock : 0;
             } else {
-                continue;
+                $zeelool_stock = $v['available_stock'];
             }
-
-            // else {
-            //     $zeelool_stock = $v['available_stock'];
-            // }
 
             if ($zeelool_stock > 0) {
                 $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 1])->update(['stock' => $zeelool_stock]);
@@ -158,13 +159,36 @@ class Test4 extends Backend
             if ($wesee_stock > 0) {
                 $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 5])->update(['stock' => $wesee_stock]);
             }
+            echo $k . "\n";
+            usleep(50000);
         }
-
         echo 'ok';
     }
 
-
-
+    /**
+     * 修改sku 上下架
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/19 10:30:16 
+     * @return void
+     */
+    public function proccess_sku_status()
+    {
+        $itemPlatformSKU = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //查询临时表比例数据
+        $data = Db::name('zzzzaaa_temp')->select();
+        foreach ($data as $k => $v) {
+            if ($v['status'] == 1) {
+               $res =  $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
+               if (!$res) {
+                   echo $v['sku'] . "\n";
+               }
+            } 
+            usleep(50000);
+        }
+        echo 'ok';
+    }
 
 
 
@@ -247,6 +271,7 @@ class Test4 extends Backend
     }
 
 
+    /************************跑库存数据用END**********************************/
 
     /**
      * 订单占用 第三步

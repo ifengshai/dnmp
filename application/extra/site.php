@@ -1,10 +1,9 @@
 <?php
 
 return array (
-  'name' => '魔晶',
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.1',
+  'version' => '1.0.22',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 
