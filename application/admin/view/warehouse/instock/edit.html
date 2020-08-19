@@ -62,17 +62,17 @@
                     value="{$row.in_stock_number}" readonly type="text">
             </div>
         </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">入库分类:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[type_id]" class="form-control type" data-rule='required'>
-                    <option value="">请选择</option>
-                    {foreach $type as $k => $v}
-                    <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
-                    {/foreach}
-                </select>
-            </div>
-        </div>
+        <!--<div class="form-group">-->
+            <!--<label class="control-label col-xs-12 col-sm-2">入库分类:</label>-->
+            <!--<div class="col-xs-12 col-sm-8">-->
+                <!--<select name="row[type_id]" class="form-control type" data-rule='required'>-->
+                    <!--<option value="">请选择</option>-->
+                    <!--{foreach $type as $k => $v}-->
+                    <!--<option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>-->
+                    <!--{/foreach}-->
+                <!--</select>-->
+            <!--</div>-->
+        <!--</div>-->
         <!-- <div class="form-group {:$row['type_id'] == 1 ? 'hidden' : ''} order_number">
             <label class="control-label col-xs-12 col-sm-2">关联订单:</label>
             <div class="col-xs-12 col-sm-8">
@@ -80,6 +80,16 @@
                     value="{$row.order_number}"  type="text">
             </div>
         </div> -->
+
+        {if condition="$types eq 1"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">入库分类:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[type_id]" class="form-control type" data-rule='required' disabled>
+                    <option value="1">采购入库</option>
+                </select>
+            </div>
+        </div>
         <div class="form-group purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">质检单:</label>
             <div class="col-xs-12 col-sm-8">
@@ -91,7 +101,33 @@
                 </select>
             </div>
         </div>
-       
+        {/if}
+        {if condition="$types eq 2"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">入库分类:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[type_id]" class="form-control type" data-rule='required'>
+                    <option value="">请选择</option>
+                    {foreach $type as $k => $v}
+                    <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">平台:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[platform_id]" class="form-control selectpicker" data-live-search='true'>
+                    <option value="">请选择</option>
+                    <option value="1" {:$row['platform_id'] == 1 ? 'selected' : ''}>zeelool</option>
+                    <option value="2" {:$row['platform_id'] == 2 ? 'selected' : ''}>voogueme</option>
+                    <option value="3" {:$row['platform_id'] == 3 ? 'selected' : ''}>nihao</option>
+                    <option value="4" {:$row['platform_id'] == 4 ? 'selected' : ''}>meeloog</option>
+                    <option value="5" {:$row['platform_id'] == 5 ? 'selected' : ''}>wesee</option>
+                </select>
+            </div>
+        </div>
+        {/if}
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
@@ -111,9 +147,11 @@
     <div class='caigou' style="margin-left:20px;width:98%;">
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
+            {if condition="$types eq 2"}
             <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
             </div>
+            {/if}
             <table id="caigou-table">
                 <tr>
                     <th>SKU</th>

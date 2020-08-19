@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined, Fast) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
 
     var Controller = {
         index: function () {
@@ -11,7 +11,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     index_url: 'new_product/index' + location.search,
                     add_url: 'new_product/add',
                     edit_url: 'new_product/edit',
-                    // del_url: 'new_product/del',
+                    detail_url: 'new_product/detail',
                     multi_url: 'new_product/multi',
                     table: 'new_product',
                 }
@@ -19,16 +19,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
             var table = $("#table");
 
+            Template.helper("Moment", Moment);
+
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'create_time',
                 sortOrder: 'desc',
-                escape: false,
+                // escape: false,
+                templateView: true,
+                //分页大小
+                pageSize: 12,
+                search: false,
+                showExport: false,
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -37,25 +44,69 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'link', title: __('产品链接'),cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear},
-                        { field: 'price', title: __('单价'), operate: false },
-                        { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
-                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
-                        { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {field: 'sku', title: __('Sku'), operate: 'like'},
+                        {field: 'category_name', title: __('分类名称'), operate: false},
                         {
-                            field: 'item_status', title: __('选品状态'),
-                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status, visible: false
+                        },
+                        {field: 'price', title: __('单价'), operate: false},
+                        {field: 'sales_num', title: __('90天总销量'), operate: false},
+                        {field: 'available_stock', title: __('可用库存'), operate: false},
+                        // {
+                        //     field: 'platform_plat', title: __('平台'), searchList: function (column) {
+                        //         return Template('receptperson1tpl', {});
+                        //     }, visible: false
+                        // },
+                        {
+                            field: 'platform_type',
+                            title: __('平台'),
+                            custom: {10: 'success',1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            searchList: {10:'无',1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'newproductattribute.frame_remark', title: __('选品备注'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {
+                            field: 'name',
+                            title: __('Name'),
+                            operate: 'like',
+                            cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getClear
+                        },
+                        // { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
+                        // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
+                        {
+                            field: 'item_status', title: __('选品状态'),
+                            custom: {1: 'success', 2: 'blue', 3: 'danger', 4: 'gray', 0: 'red'},
+                            searchList: {0: '新建', 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'newproductattribute.frame_remark',
+                            title: __('选品备注'),
+                            cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getClear,
+                            operate: false
+                        },
+                        {field: 'newproductattribute.frame_images', operate: false},
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {
+                            field: 'available_stock',
+                            title: __('可用库存'),
+                            sortable: true,
+                            operate: 'between',
+                            formatter: Controller.api.formatter.int_format
+                        },
+
 
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
 
                                 {
                                     name: 'detail',
@@ -66,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     icon: 'fa fa-list',
                                     url: Config.moduleurl + '/new_product/detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -82,7 +133,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     url: Config.moduleurl + '/new_product/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -95,34 +146,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     }
                                 },
 
-                                {
-                                    name: 'auditRefused',
-                                    text: '取消',
-                                    title: __('取消'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    icon: 'fa fa-remove',
-                                    url: Config.moduleurl + '/new_product/cancel',
-                                    confirm: '确认取消吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.item_status == 1) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                }
-                            ], formatter: Table.api.formatter.operate
+                            ],
+                            formatter: Table.api.formatter.operate
                         }
                     ]
                 ]
@@ -162,15 +187,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             // 为表格绑定事件
             Table.api.bindevent(table);
 
+            //点击详情
+            $(document).on("click", ".btn-detail[data-id]", function () {
+                Backend.api.open('new_product/detail/ids/' + $(this).data('id'), __('Detail'), {area: ['100%', '100%']});
+            });
+
+
             //商品审核通过
             $(document).on('click', '.btn-passAudit', function () {
                 var ids = Table.api.selectedids(table);
+
+                Backend.api.open('new_product/passAudit/ids/' + $(this).data('id') + '/sku/' + $(this).data('sku'), __('同步商品'), {area: ['35%', '35%']});
+
+                // Layer.confirm(
+                //     __('确定要审核通过吗'),
+                //     function (index) {
+                //         Backend.api.ajax({
+                //             url: "new_product/passAudit",
+                //             data: { ids: ids }
+                //         }, function (data, ret) {
+                //             table.bootstrapTable('refresh');
+                //             Layer.close(index);
+                //         });
+                //     }
+                // );
+            });
+
+            //商品审核拒绝
+            $(document).on('click', '.btn-auditRefused', function () {
+                var ids = Table.api.selectedids(table);
+                var idd = $(this).data('id');
                 Layer.confirm(
-                    __('确定要审核通过吗'),
+                    __('确定要审核拒绝吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "new_product/passAudit",
-                            data: { ids: ids }
+                            url: "new_product/auditRefused",
+                            data: {ids: ids, idd: idd}
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -178,15 +230,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                 );
             });
-            //商品审核拒绝
-            $(document).on('click', '.btn-auditRefused', function () {
-                var ids = Table.api.selectedids(table);
+
+            //商品审核取消
+            $(document).on('click', '.btn-cancel', function () {
+                var ids = $(this).data('id');
                 Layer.confirm(
-                    __('确定要审核拒绝吗'),
+                    __('确定要取消吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "new_product/auditRefused",
-                            data: { ids: ids }
+                            url: "new_product/cancel",
+                            data: {ids: ids}
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -217,7 +270,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         add: function () {
             Controller.api.bindevent();
-
+            $(document).on('click', '.btn-ok', function () {
+                $('#status').val(0);
+            })
+            Form.api.bindevent($("form[role=form]"));
 
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
@@ -237,7 +293,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 Layer.load();
                 Backend.api.ajax({
                     url: 'new_product/ajaxCollectionGoodsDetail',
-                    data: { link: link, categoryId: categoryId }
+                    data: {link: link, categoryId: categoryId}
                 }, function (data, ret) {
 
                     Layer.closeAll();
@@ -284,9 +340,257 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-ok', function () {
+                console.log($('#status').val())
+                $('#status').val(0);
+            });
+            $(document).on('click', '.btn-submit', function () {
+                console.log($('#status').val())
+                $('#status').val(1);
+            })
 
+            Form.api.bindevent($("form[role=form]"));
         },
         detail: function () {
+            Controller.api.bindevent();
+        },
+        passaudit: function () {
+            Controller.api.bindevent();
+        },
+        replenishescalationlist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/replenishescalationlist' + location.search + '&label=' + Config.label,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {checkbox: true},
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'sku', title: __('Sku'), operate: 'like'},
+                        {field: 'category_name', title: __('商品分类'), operate: false},
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status, visible: false
+                        },
+                        {
+                            field: 'available_stock',
+                            title: __('可用库存'),
+                            sortable: true,
+                            operate: 'between',
+                            formatter: Controller.api.formatter.int_format
+                        },
+                        {field: 'grade', title: __('销量等级'), operate: false,},
+                        {field: 'product_cycle', title: '生产周期', operate: false},
+                        {field: 'available_stock', title: '可用库存', operate: false, visible: false},
+                        {field: 'stock', title: '虚拟仓库存', operate: false},
+                        {field: 'on_way_stock', title: '在途库存', operate: false},
+                        {field: 'wait_in_num', title: '待入库数量', operate: false},
+                        {field: 'sales_num_15days', title: '过去15天日均销量', operate: false},
+                        {field: 'sales_num_90days', title: '90天总销量', operate: false},
+                        {field: 'sales_days', title: '预估售卖天数', operate: false},
+                        // {field: 'replenish_num', title: '建议补货量', operate: false},
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+
+                                {
+                                    name: 'detail',
+                                    text: '加入计划补货清单',
+                                    title: __('加入计划补货清单'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder/type/1',
+                                    extend: 'data-area = \'["40%","40%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
+                                {
+                                    name: 'detail',
+                                    text: '加入紧急补货清单',
+                                    title: __('加入紧急补货清单'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder/type/2',
+                                    extend: 'data-area = \'["40%","40%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
+                            ],
+                            formatter: Table.api.formatter.operate
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    filter[field] = value;
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+
+        },
+        productmappinglist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/productmappinglist' + location.search + '&label=' + Config.label,
+                    edit_url: 'new_product/mappingedit',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        // { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        {field: 'sku', title: __('Sku'), operate: 'like'},
+                        {field: 'category_name', title: __('商品分类'), operate: false},
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status, visible: false
+                        },
+                        {
+                            field: 'type', title: __('类型'), custom: {1: 'success', 2: 'danger'},
+                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            formatter: Table.api.formatter.status
+                        },
+
+                        {
+                            field: 'replenish_num', title: __('补货需求数量'), operate: false, editable: {
+                                emptytext: "__", validate: function (value) { //字段验证
+                                    // if (!/[1-9]+\d*/.test(value)) {
+                                    if (!/^[1-9]\d*$/.test(value)) {
+                                        return '请输入正整数';
+                                    }
+                                }
+                            }
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            table.bootstrapTable('getOptions').onEditableSave = function (field, row, oldValue, $el) {
+                var data = {};
+                data["row[" + field + "]"] = row[field];
+                Fast.api.ajax({
+                    url: this.extend.edit_url + "/ids/" + row[this.pk],
+                    data: data
+                }, function (data) {
+
+                    table.bootstrapTable('refresh');
+                })
+            }
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    filter[field] = value;
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+            $(document).on('click', '.btn-replenish_add', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要创建紧急补货需求单吗？'),
+                    function (index) {
+                        Layer.closeAll();
+                        var options = {
+                            shadeClose: false,
+                            shade: [0.3, '#393D49'],
+                            area: ['100%', '100%'], //弹出层宽高
+                            callback: function (value) {
+
+                            }
+                        };
+                        // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
+                        Fast.api.open('new_product/emergency_replenishment', '创建紧急补货需求单', options);
+
+                    }
+                );
+            });
+
+        },
+        addreplenishorder: function () {
             Controller.api.bindevent();
         },
         api: {
@@ -304,6 +608,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     } else {
                         return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
                     }
+                },
+                int_format: function (value, row, index) {
+                    return parseInt(value);
                 },
 
             },
@@ -329,10 +636,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                     Backend.api.ajax({
                         url: 'new_product/ajaxCategoryInfo',
-                        data: { categoryId: categoryId }
+                        data: {categoryId: categoryId}
                     }, function (data, ret) {
                         var resultData = ret.data;
                         $('.ajax-add').remove();
+                        $('.upload-photo').remove();
                         //console.log(resultData);
                         $('#item-stock').after(resultData);
                         Form.api.bindevent($("form[role=form]"));
@@ -380,6 +688,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                     source: function (request, response) {
                         var origin_sku = $('#c-origin_skus').val();
+                        console.log(origin_sku);
                         $.ajax({
                             type: "POST",
                             url: "new_product/ajaxGetLikeOriginSku",
@@ -391,6 +700,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             },
                             success: function (json) {
                                 var data = json.data;
+                                console.log(data);
                                 response($.map(data, function (item) {
                                     return {
                                         label: item,//下拉框显示值
@@ -419,66 +729,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                     Backend.api.ajax({
                         url: 'new_product/ajaxItemInfo',
-                        data: { categoryId: categoryId, sku: sku }
+                        data: {categoryId: categoryId, sku: sku}
                     }, function (data, ret) {
                         var resultData = ret.data;
                         if (resultData != false) {
                             $('.ajax-add').remove();
+                            $('.upload-photo').remove();
                             $('#item-stock').after(resultData);
                             Form.api.bindevent($("form[role=form]"));
                             $(".selectpicker").selectpicker('refresh');
 
                             return false;
 
-                            // $('.newAddition').remove();
-                            // if (resultData.procurement_type) {
-                            //     $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            // } else {
-                            //     $("#c-procurement_type").val("");
-                            // }
-                            // if (resultData.procurement_origin) {
-                            //     $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            // } else {
-                            //     $("#c-procurement_origin").val();
-                            // }
-                            // $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
-                            // $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
-                            // $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
-                            // $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
-                            // $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
-                            // $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
-                            // $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
-                            // $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
-                            // $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
-                            // $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
-                            // $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
-                            // $('#c-frame_bridge').val(resultData.frame_bridge);
-                            // $('#c-frame_height').val(resultData.frame_height);
-                            // $('#c-frame_width').val(resultData.frame_width);
-                            // $('#c-frame_length').val(resultData.frame_length);
-                            // $('#c-frame_temple_length').val(resultData.frame_temple_length);
-                            // $('#c-weight').val(resultData.frame_weight);
-                            // $('#c-mirror_width').val(resultData.mirror_width);
-                            // $('#c-problem_desc').html(resultData.frame_remark);
-                            // $('.note-editable').html(resultData.frame_remark);
-                            // $('#item-count').val(resultData.itemCount);
-                            // //$(".editor").textarea
-                            // if (resultData.origin_sku) {
-
-                            //     var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
-                            //     console.log(data);
-                            //     $('#caigou-table tbody').html('');
-                            //     for (var i in data.itemArr) {
-                            //         str += '<tr>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
-                            //         str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
-                            //         str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
-                            //     }
-                            //     $('#caigou-table tbody').html(str);
-
-                            // }
 
                         }
                         return false;
@@ -495,11 +757,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
         },
-        ajaxCategoryInfo: function () {
-            Controller.api.bindevent();
-            Form.api.bindevent($("form[role=form]"));
-            Form.events.datetimepicker($("form"));
-        },
+
     };
     return Controller;
 });

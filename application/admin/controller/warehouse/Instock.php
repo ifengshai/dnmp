@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -119,33 +120,67 @@ class Instock extends Backend
                         $this->error('sku不能为空！！');
                     }
 
-
-                    $params['create_person'] = session('admin.nickname');
-                    $params['createtime'] = date('Y-m-d H:i:s', time());
-                    $result = $this->model->allowField(true)->save($params);
-
-                    //添加入库信息
-                    if ($result !== false) {
-                        //更改质检单为已创建入库单
-                        $check = new \app\admin\model\warehouse\Check;
-                        $check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
-
-
-                        $in_stock_num = $this->request->post("in_stock_num/a");
-                        $sample_num = $this->request->post("sample_num/a");
-                        $purchase_id = $this->request->post("purchase_id/a");
-                        $data = [];
+                    //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
+                    if ($params['platform_id']) {
                         foreach (array_filter($sku) as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['in_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['sample_num'] = $sample_num[$k];
-                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['purchase_id']  = $purchase_id[$k];
-                            $data[$k]['in_stock_id'] = $this->model->id;
+                            $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+                            $sku_platform = $item_platform_sku->where(['sku' => $v, 'platform_type' => $params['platform_id']])->find();
+                            if (!$sku_platform) {
+                                $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
+                            }
                         }
-                        //批量添加
-                        $this->instockItem->allowField(true)->saveAll($data);
+                        $params['create_person'] = session('admin.nickname');
+                        $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $result = $this->model->allowField(true)->save($params);
+
+                        //添加入库信息
+                        if ($result !== false) {
+
+                            $in_stock_num = $this->request->post("in_stock_num/a");
+                            $sample_num = $this->request->post("sample_num/a");
+                            $purchase_id = $this->request->post("purchase_id/a");
+                            $data = [];
+                            foreach (array_filter($sku) as $k => $v) {
+                                $data[$k]['sku'] = $v;
+                                $data[$k]['in_stock_num'] = $in_stock_num[$k];
+                                $data[$k]['sample_num'] = $sample_num[$k];
+                                $data[$k]['no_stock_num'] = $in_stock_num[$k];
+                                $data[$k]['purchase_id'] = $purchase_id[$k];
+                                $data[$k]['in_stock_id'] = $this->model->id;
+                            }
+                            //批量添加
+                            $this->instockItem->allowField(true)->saveAll($data);
+                        }
+                    } else {
+                        $params['create_person'] = session('admin.nickname');
+                        $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $result = $this->model->allowField(true)->save($params);
+
+                        //添加入库信息
+                        if ($result !== false) {
+                            //更改质检单为已创建入库单
+                            $check = new \app\admin\model\warehouse\Check;
+                            $check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
+
+
+                            $in_stock_num = $this->request->post("in_stock_num/a");
+                            $sample_num = $this->request->post("sample_num/a");
+                            $purchase_id = $this->request->post("purchase_id/a");
+                            $data = [];
+                            foreach (array_filter($sku) as $k => $v) {
+                                $data[$k]['sku'] = $v;
+                                $data[$k]['in_stock_num'] = $in_stock_num[$k];
+                                $data[$k]['sample_num'] = $sample_num[$k];
+                                $data[$k]['no_stock_num'] = $in_stock_num[$k];
+                                $data[$k]['purchase_id'] = $purchase_id[$k];
+                                $data[$k]['in_stock_id'] = $this->model->id;
+                            }
+                            //批量添加
+                            $this->instockItem->allowField(true)->saveAll($data);
+                        }
                     }
+
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -169,6 +204,9 @@ class Instock extends Backend
 
         //质检单id
         $ids = input('ids');
+        //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
+        $types = input('type');
+        // dump($type);die;
         if ($ids) {
             $this->assign('ids', $ids);
             $this->assign('instocktype', 1);
@@ -187,6 +225,7 @@ class Instock extends Backend
 
         //质检单
         $instock_number = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $this->assign('types', $types);
         $this->assign('instock_number', $instock_number);
         return $this->view->fetch();
     }
@@ -205,7 +244,7 @@ class Instock extends Backend
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem')
             ->where($check_map)
-            ->field('Check.purchase_id,sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
+            ->field('Check.purchase_id,Check.replenish_id,sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
             ->group('CheckItem.id')
             ->select();
         $list = collection($list)->toArray();
@@ -216,7 +255,6 @@ class Instock extends Backend
             $this->error();
         }
     }
-
 
 
     /**
@@ -321,6 +359,12 @@ class Instock extends Backend
         $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
         $this->assign('item', $item);
+        if ($row['platform_id'] > 0){
+            $this->assign('types',2);
+        }
+        if ($row['check_id'] > 0){
+            $this->assign('types',1);
+        }
         $this->assign('check_data', $check_data);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -362,6 +406,13 @@ class Instock extends Backend
         $checkItem = new \app\admin\model\warehouse\CheckItem;
         $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
+        if ($row['platform_id'] > 0){
+            $this->assign('types',2);
+        }
+        if ($row['check_id'] > 0){
+            $this->assign('types',1);
+        }
+
         $this->assign('item', $item);
         $this->assign('check_data', $check_data);
         $this->view->assign("row", $row);
@@ -418,12 +469,15 @@ class Instock extends Backend
             }
         }
 
+        $new_product_mapp = new \app\admin\model\NewProductMapping();
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase->startTrans();
         $this->purchase->startTrans();
+
         try {
             $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -434,6 +488,152 @@ class Instock extends Backend
                  */
                 $error_num = [];
                 foreach ($list as $k => $v) {
+
+                    //审核通过对虚拟库存的操作
+                    //审核通过时按照补货需求比例 划分各站虚拟库存 如果未关联补货需求单则按照当前各站虚拟库存数量实时计算各站比例（弃用）
+                    //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
+                    if ($v['purchase_id']) {
+                        if ($v['replenish_id']) {
+                            //查询各站补货需求量占比
+                            $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                            // dump(collection($rate_arr)->toArray());die;
+                            //根据入库数量插入各站虚拟仓库存
+                            $all_num = count($rate_arr);
+                            $stock_num = $v['in_stock_num'];
+                            foreach ($rate_arr as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
+                                } else {
+                                    $num = round($v['in_stock_num'] * $val['rate']);
+                                    $stock_num -= $num;
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                                }
+                            }
+                        } else {
+                            $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
+                            //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
+                            if (empty($item_platform_sku)) {
+                                $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
+                            }
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
+                        }
+                    } //不是采购过来的 如果有站点id 说明是指定增加此平台sku
+                    elseif ($v['platform_id']) {
+                        $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
+                    } //没有采购单也没有站点id 说明是盘点过来的
+                    else {
+                        //根据当前sku 和当前 各站的虚拟库存进行分配
+                        $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+
+                        $stock_num = $v['in_stock_num'];
+                        //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
+                        $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                        if ($stock_all_num == 0) {
+                            $rate_rate = 1/$all_num;
+                            foreach ($item_platform_sku as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                } else {
+                                    $num = round($v['in_stock_num'] * $rate_rate);
+                                    $stock_num -= $num;
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                }
+                            }
+                        } else {
+                            //某個平台這個sku存在庫存 就按照當前各站的虛擬庫存進行分配
+                            $whole_num = $platform->where('sku', $v['sku'])->sum('stock');
+                            $stock_num = $v['in_stock_num'];
+                            foreach ($item_platform_sku as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                } else {
+                                    $num = round($v['in_stock_num'] * $val['stock'] / $whole_num);
+                                    $stock_num -= $num;
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                }
+                            }
+                        }
+                    }
+                    // if ($v['replenish_id']) {
+                    //     //查询各站补货需求量占比
+                    //     $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                    //     // dump(collection($rate_arr)->toArray());die;
+                    //     //根据入库数量插入各站虚拟仓库存
+                    //     $all_num = count($rate_arr);
+                    //     $stock_num = $v['in_stock_num'];
+                    //     foreach ($rate_arr as $key => $val) {
+                    //         //最后一个站点 剩余数量分给最后一个站
+                    //         if (($all_num - $key) == 1) {
+                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
+                    //         } else {
+                    //             $num = round($v['in_stock_num'] * $val['rate']);
+                    //             $stock_num -= $num;
+                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                    //         }
+                    //     }
+                    // }
+                    // else {
+                    //     //样品入库单独逻辑给现在库存最大的那个站
+                    //     if ($v['type_id'] == 6) {
+                    //         $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock desc')->field('platform_type,stock')->find();
+                    //         $stock_num = $v['in_stock_num'];
+                    //         $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $stock_num);
+                    //     }
+                    //     //现在先使用此规则 没有关联到采购需求比例的入库单，默认分配到杭州站点的虚拟仓（meeloog）
+                    //     else{
+                    //         $item_platform_sku = $platform->where(['sku'=>$v['sku'],'platform_type'=>4])->field('platform_type,stock')->find();
+                    //         //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
+                    //         if (empty($item_platform_sku)){
+                    //             $this->error('sku：'.$v['sku'].'没有同步meeloog站，请先同步');
+                    //         }
+                    //         $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
+                    //     }
+                    //     // else {
+                    //     //     //没有补货需求单的入库单 根据当前sku 和当前 各站的虚拟库存进行分配
+                    //     //     $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                    //     //     $all_num = count($item_platform_sku);
+                    //     //
+                    //     //     $stock_num = $v['in_stock_num'];
+                    //     //     //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照‘发牌’规则进行分库存
+                    //     //     $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                    //     //     if ($stock_all_num == 0) {
+                    //     //         //当前入库数量有几个就循环几次
+                    //     //         foreach ($item_platform_sku as $key => $val) {
+                    //     //
+                    //     //             //一直发直到$v['in_stock_num']为0
+                    //     //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock');
+                    //     //             $stock_num--;
+                    //     //             if ($stock_num == 0) {
+                    //     //                 break;
+                    //     //             } else {
+                    //     //                 if (($all_num - $key) == 1) {
+                    //     //                     $this->send_stock($item_platform_sku, $stock_num, $v['sku'], $all_num);
+                    //     //                 }
+                    //     //             }
+                    //     //         }
+                    //     //     } else {
+                    //     //         //某個平台這個sku存在庫存 就按照當前各站的虛擬庫存進行分配
+                    //     //         $whole_num = $platform->where('sku', $v['sku'])->sum('stock');
+                    //     //         //                                dump($whole_num);die;
+                    //     //         $stock_num = $v['in_stock_num'];
+                    //     //         foreach ($item_platform_sku as $key => $val) {
+                    //     //             //最后一个站点 剩余数量分给最后一个站
+                    //     //             if (($all_num - $key) == 1) {
+                    //     //                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                    //     //             } else {
+                    //     //                 $num = round($v['in_stock_num'] * $val['stock'] / $whole_num);
+                    //     //                 $stock_num -= $num;
+                    //     //                 $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                    //     //             }
+                    //     //         }
+                    //     //     }
+                    //     // }
+                    // }
+
                     //更新商品表商品总库存
                     //总库存
                     $item_map['sku'] = $v['sku'];
@@ -481,18 +681,19 @@ class Instock extends Backend
                         $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
 
+
                     //插入日志表
                     (new StockLog())->setData([
-                        'type'                      => 2,
-                        'two_type'                  => 3,
-                        'sku'                       => $v['sku'],
-                        'public_id'                 => $v['in_stock_id'],
-                        'stock_change'              => $v['in_stock_num'],
-                        'available_stock_change'    => $v['in_stock_num'],
-                        'sample_num_change'         => $v['sample_num'],
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '入库单增加总库存,可用库存,样品库存'
+                        'type' => 2,
+                        'two_type' => 3,
+                        'sku' => $v['sku'],
+                        'public_id' => $v['in_stock_id'],
+                        'stock_change' => $v['in_stock_num'],
+                        'available_stock_change' => $v['in_stock_num'],
+                        'sample_num_change' => $v['sample_num'],
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => date('Y-m-d H:i:s'),
+                        'remark' => '入库单增加总库存,可用库存,样品库存'
                     ]);
                 }
 
@@ -529,6 +730,34 @@ class Instock extends Backend
             $this->success();
         } else {
             $this->error();
+        }
+    }
+
+    /**
+     * @$item_platform_sku 平台映射关系列表
+     * @$stock_all_num 当前剩余未分配的数量
+     * @$sku 当前sku
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/8/3
+     * Time: 14:52
+     */
+    function send_stock($item_platform_sku, $stock_all_num, $sku, $all_num)
+    {
+        //        dump(collection($item_platform_sku)->toArray());dump($stock_all_num);dump($sku);
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($item_platform_sku as $key => $val) {
+            //一直发直到$v['in_stock_num']为0
+            $platform->where(['sku' => $sku, 'platform_type' => $val['platform_type']])->setInc('stock');
+            $stock_all_num--;
+            if ($stock_all_num == 0) {
+                break;
+            } else {
+                if (($all_num - $key) == 1) {
+                    $this->send_stock($item_platform_sku, $stock_all_num, $sku, $all_num);
+                }
+            }
         }
     }
 
@@ -600,6 +829,7 @@ class Instock extends Backend
             $this->error('404 Not found');
         }
     }
+
     //入库单成本核算 create@lsw
     public function account_in_stock_order()
     {
@@ -638,7 +868,7 @@ class Instock extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('instock.id');
-            $totalPriceInfo =  $this->instockItem->calculateMoneyAccordInStock($totalId);
+            $totalPriceInfo = $this->instockItem->calculateMoneyAccordInStock($totalId);
             $thisPagePriceInfo = $this->instockItem->calculateMoneyAccordInStockThisPageId($thisPageId);
             if (0 != $thisPagePriceInfo) {
                 foreach ($list as $keys => $vals) {
@@ -652,6 +882,7 @@ class Instock extends Backend
         }
         return $this->view->fetch();
     }
+
     //入库单成本核算详情 create@lsw
     public function account_in_stock_order_detail($ids = null)
     {
@@ -702,7 +933,7 @@ class Instock extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/02/28 14:45:39 
+     * @since 2020/02/28 14:45:39
      * @return void
      */
     public function batch_export_xls()
@@ -743,7 +974,7 @@ class Instock extends Backend
             ->setCellValue("C1", "入库数量");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人")
             ->setCellValue("E1", "创建时间");
-      
+
 
         foreach ($list as $key => $value) {
 
@@ -760,14 +991,14 @@ class Instock extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-       
+
 
         //设置边框
         $border = [
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];

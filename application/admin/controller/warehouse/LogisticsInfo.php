@@ -71,6 +71,9 @@ class LogisticsInfo extends Backend
                     $res = $purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product')->find();
                     $list[$k]['purchase_name'] = $res->purchase_name;
                     $list[$k]['is_new_product'] = $res->is_new_product;
+                } else {
+                    $list[$k]['purchase_name'] = '';
+                    $list[$k]['is_new_product'] = 0;
                 }
             }
             $result = array("total" => $total, "rows" => $list);

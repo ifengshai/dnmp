@@ -42,6 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter:Table.api.formatter.status,
                         },
                         {field: 'name', title: __('Name')},
+                        {field: 'prefix', title: __('前缀')},
                         {field:'item_attr_name',title:__('Item_attr_name')},
                         {field:'item_type',title:__('Item_type')},
                         {field:'magento_account',title:__('Magento_account')},

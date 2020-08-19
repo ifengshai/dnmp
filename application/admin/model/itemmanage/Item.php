@@ -269,7 +269,7 @@ class Item extends Model
         $map['is_del'] = 1;
         $map['is_open']  = 1;
         $map['sku'] = $sku;
-        $result = $this->where($map)->field('name,stock,occupy_stock,available_stock')->find();
+        $result = $this->where($map)->field('name,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->find();
         return $result;
     }
     /***

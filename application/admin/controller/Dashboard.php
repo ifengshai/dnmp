@@ -155,40 +155,9 @@ class Dashboard extends Backend
         return $this->view->fetch();
     }
 
-    
-
-    public function test()
-    {
-        $str = 'QC20200106171408398873
-        QC20200105151440582812
-        QC20200104120551758851
-        QC20200113095256903538
-        QC20200229141531940453
-        QC20200109163144596667
-        QC20200109173631920225
-        QC20200109170143124960
-        QC20200109164721434183
-        QC20200105115423269593
-        QC20200106092048362186
-        QC20200106091635738456
-        QC20200105154347548287
-        QC20200105093326273782';
-        $str = explode('
-        ', $str);
-
-        // if ($str) {
-        //     $map['purchase_number'] = ['in', $str];
-        //     $check = new \app\admin\model\purchase\PurchaseOrder();
-        //     $res = $check->save(['return_status' => 2], $map);
-        // }
-
-        if ($str) {
-            $map['check_order_number'] = ['in', $str];
-            $check = new \app\admin\model\warehouse\Check();
-            $res = $check->save(['is_return' => 0], $map);
-        }
-
-        echo $res;
-       
-    }
+    public function zeelool(){}
+    public function voogueme(){}
+    public function nihao(){}
+    public function meeloog(){}
+    public function wesee(){}
 }

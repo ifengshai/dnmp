@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -7,11 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'itemmanage/itempresell/index' + location.search,
-                    add_url: 'itemmanage/itempresell/add',
-                    edit_url: 'itemmanage/itempresell/edit',
-                    del_url: 'itemmanage/itempresell/del',
-                    multi_url: 'itemmanage/itempresell/multi',
+                    index_url: 'itemmanage/itempresell/index' + location.search + '&label=' + Config.label,
                     table: 'item_presell',
                 }
             });
@@ -24,86 +20,64 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id'),operate:false},
-                        {field: 'sku', title: __('Sku'),operate:'LIKE'},
-                        {field: 'platform_sku', title: __('Platform_sku'),operate:'LIKE'},
-                        {field: 'name', title: __('Name')},
+                        { checkbox: true },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'sku', title: __('商品SKU'), operate: 'LIKE' },
+                        { field: 'platform_sku', title: __('平台SKU'), operate: 'LIKE' },
+                        // { field: 'name', title: __('Name') },
                         {
-                            field: 'platform_type',
-                            title: __('Platform_type'),
-                            searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'),
-                            custom:{1:'blue',2:'yellow',3:'green',4:'red'},
-                            formatter:Table.api.formatter.status,
+                            field: 'outer_sku_status',
+                            title: __('平台上下架状态'),
+                            searchList: { 1: '上架', 2: '下架' },
+                            custom: { 1: 'green', 2: 'red' },
+                            formatter: Table.api.formatter.status,
+                            operate: false
                         },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'stock', title: __('虚拟仓库存'), operate: false },
+                        { field: 'presell_num', title: __('预售数量'), operate: false },
+                        { field: 'presell_residue_num', title: __('预售剩余数量'), operate: false },
+                        { field: 'presell_start_time', title: __('预售开始时间'), operate: false  },
+                        { field: 'presell_end_time', title: __('预售结束时间'), operate: false  },
                         {
-                            field: 'platform_sku_status',
-                            title: __('Platform_sku_status'),
-                            searchList: { 1:'上架', 2:'下架' },
-                            custom: { 1: 'blue', 2: 'red' },
+                            field: 'presell_status',
+                            title: __('Presell_status'),
+                            searchList: { 0: '未开启', 1: '预售中', 2: '已结束' },
+                            custom: { 0: 'blue', 1: 'green', 2: 'danger' },
                             formatter: Table.api.formatter.status,
                         },
-                        {
-                          field:'presell_num',
-                          title:__('Presell_num'),
-                        },
-                        {
-                          field:'presell_residue_num',
-                          title:__('Presell_residue_num'),
-                        },
-                        {
-                          field:'presell_start_time',
-                          title:__('Presell_start_time'),
-                        },
-                        {
-                          field:'presell_end_time',
-                          title:__('Presell_end_time'),
-                        },
-                        {
-                          field:'presell_status',
-                          title:__('Presell_status'),
-                          searchList:{1:'未开始',2:'预售中',3:'已结束'},
-                          custom:{1:'blue',2:'green',3:'yellow'},
-                          formatter:Table.api.formatter.status,
-                        },
-                        {field: 'create_person', title: __('Create_person')},
-                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
-                        //{field: 'presell_open_time', title: __('Presell_open_time'), operate:'RANGE', addclass:'datetimerange'},
+                        { field: 'presell_create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate',
                             title: __('Operate'),
                             table: table,
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
-                            buttons:[
+                            buttons: [
+
                                 {
                                     name: 'openStart',
                                     text: '开启预售',
                                     title: __('开启预售'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
                                     url: Config.moduleurl + '/itemmanage/itempresell/openStart',
-                                    confirm: '确定要开启预售吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
                                         $(".btn-refresh").trigger("click");
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
+                                    extend: 'data-area = \'["50%","50%"]\'',
                                     error: function (data, ret) {
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if(row.presell_status !=2){
-                                            return true
+                                        if (row.presell_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
                                         }
-                                        //返回true时按钮显示,返回false隐藏
-                                        return false;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
                                     },
                                 },
                                 {
@@ -124,17 +98,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if(row.presell_status !=3){
+                                        if (row.presell_status == 1) {
                                             return true;
-                                        }
-                                        //返回true时按钮显示,返回false隐藏
+                                        } else {
                                             return false;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
+                                        }
                                     },
+                                },
+                                {
+                                    name: 'edit_presell',
+                                    text: '编辑预售',
+                                    title: __('编辑预售'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: Config.moduleurl + '/itemmanage/itempresell/openStart',
+                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.presell_status != 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'history',
+                                    text: '历史记录',
+                                    title: __('历史记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: Config.moduleurl + '/itemmanage/itempresell/presell_history',
+                                    icon: 'fa fa-list',
+                                    extend: 'data-area = \'["80%","60%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        return true;
+                                    }
                                 },
                             ]
                         },
@@ -145,119 +147,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    filter[field] = value;
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
         },
-        add: function () {
+        openstart: function () {
             Controller.api.bindevent();
         },
         edit: function () {
             Controller.api.bindevent();
         },
+        presell_history: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: true,
+                extend: {
+                    index_url: 'itemmanage/itempresell/presell_history' + location.search + '&ids=' + Config.ids,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        // { checkbox: true },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'sku', title: 'SKU', operate: false },
+                        { field: 'type', title: '操作类型', operate: false },
+                        { field: 'presell_change_num', title: '预售变化数量', operate: false },
+                        { field: 'old_presell_num', title: '原预售数量', operate: false },
+                        { field: 'old_presell_residue_num', title: '原预售剩余数量', operate: false },
+                        { field: 'presell_start_time', title: '预售开始时间', operate: false },
+                        { field: 'presell_end_time', title: '预售结束时间', operate: false },
+                        { field: 'create_time', title: '创建时间', operate: false },
+                        { field: 'create_person', title: '创建人', operate: false }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-                $('#c-platform_sku').autocomplete({
-                    source: function (request, response) {
-                        var origin_sku = $('#c-platform_sku').val();
-                        $.ajax({
-                            type: "POST",
-                            url: "itemmanage/item_platform_sku/ajaxGetLikePlatformSku",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
-                            data: {
-                                origin_sku: origin_sku
-                            },
-                            success: function (json) {
-                                var data = json.data;
-                                response($.map(data, function (item) {
-                                    return {
-                                        label: item,//下拉框显示值
-                                        value: item,//选中后，填充到input框的值
-                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                    };
-                                }));
-                            }
-                        });
-                    },
-                    delay: 10,//延迟100ms便于输入
-                    select: function (event, ui) {
-                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
-                    },
-                    scroll: true,
-                    pagingMore: true,
-                    max: 5000
-                });
-                //检查填写的平台sku数据库有没有
-                $(document).on('change','#c-platform_sku',function () {
-                    var platform_sku = $(this).val();
-                    Backend.api.ajax({
-                        url: 'itemmanage/item_platform_sku/ajaxGetPlatformSkuInfo',
-                        data: { platform_sku: platform_sku }
-                    }, function (data, ret) {
-                        console.log(ret.data);
-                        $('.btn-success').removeClass('btn-disabled disabled');
-                        return false;
-                    }, function (data, ret) {
-                        //失败的回调
-                        $('.btn-success').addClass('btn-disabled disabled');
-                        Layer.alert(ret.msg);
-                        return false;
-                    });
-                });
-                //选中的开始时间和现在的时间比较
-                $(document).on('dp.change','#c-presell_start_time',function () {
-                    var time_value = $(this).val();
-                    //console.log(time_value);
-                    function getNow(s) {
-                        return s < 10 ? '0' + s: s;
-                    }
-
-                    var myDate = new Date();
-
-                    var year=myDate.getFullYear();        //获取当前年
-                    var month=myDate.getMonth()+1;   //获取当前月
-                    var date=myDate.getDate();            //获取当前日
-                    var h=myDate.getHours();              //获取当前小时数(0-23)
-                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                    var s=myDate.getSeconds();
-                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                    if(time_value>now){
-                        //console.log(1111);
-                    }else{
-                        Layer.alert('预售开始时间小于当前时间,如果添加则默认开始预售');
-                        //console.log(2222);
-                    }
-                    //console.log(now);
-                });
-                ////选中的结束时间和现在的时间比较
-                $(document).on('dp.change','#c-presell_end_time',function () {
-                    var time_start_value = $("#c-presell_start_time").val();
-                    var time_end_value = $(this).val();
-                    console.log(time_end_value);
-                    function getNow(s) {
-                        return s < 10 ? '0' + s: s;
-                    }
-                    var myDate = new Date();
-                    var year=myDate.getFullYear();        //获取当前年
-                    var month=myDate.getMonth()+1;   //获取当前月
-                    var date=myDate.getDate();            //获取当前日
-                    var h=myDate.getHours();              //获取当前小时数(0-23)
-                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                    var s=myDate.getSeconds();
-                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                    if(time_end_value <time_start_value){
-                        $('.btn-success').addClass('btn-disabled disabled');
-                        Layer.alert('预售开始时间不能大于预售结束时间,请重新选择');
-                        return false;
-                    }
-                    if(time_end_value>now){
-                        $('.btn-success').removeClass('btn-disabled disabled');
-                    }else{
-                        $('.btn-success').addClass('btn-disabled disabled');
-                        Layer.alert('当前时间大于预售结束时间无法添加,请重新选择');
-                        return false;
-                    }
-                });
+               
             }
         }
     };
