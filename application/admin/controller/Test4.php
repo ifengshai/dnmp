@@ -118,59 +118,80 @@ class Test4 extends Backend
         foreach ($list as $k => $v) {
             //如果存在比例
             if ($data[$v['sku']]) {
-                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool']/100) : 0;
+                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
                 if (($v['available_stock'] - $zeelool_stock) > 0) {
-                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme']/100) : ($v['available_stock'] - $zeelool_stock);
+                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : ($v['available_stock'] - $zeelool_stock);
                 }
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
-                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
+                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
                 }
-                
+
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > 0) {
-                    $meeloog_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog']/100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock);
-                } 
+                    $meeloog_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock) > ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['meeloog'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock);
+                }
 
                 $stock = $v['available_stock'] - $zeelool_stock - $voogueme_stock - $nihao_stock - $meeloog_stock;
                 $wesee_stock = $stock > 0 ? $stock : 0;
-                
-            }  else {
-                continue;
+            } else {
+                $zeelool_stock = $v['available_stock'];
             }
-            
-            // else {
-            //     $zeelool_stock = $v['available_stock'];
-            // }
 
             if ($zeelool_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 1])->update(['stock' => $zeelool_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 1])->update(['stock' => $zeelool_stock]);
             }
 
             if ($voogueme_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 2])->update(['stock' => $voogueme_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 2])->update(['stock' => $voogueme_stock]);
             }
 
             if ($nihao_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 3])->update(['stock' => $nihao_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 3])->update(['stock' => $nihao_stock]);
             }
 
             if ($meeloog_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 4])->update(['stock' => $meeloog_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 4])->update(['stock' => $meeloog_stock]);
             }
 
             if ($wesee_stock > 0) {
-                $itemPlatformSKU->where(['sku' => $v['sku'],'platform_type' => 5])->update(['stock' => $wesee_stock]);
+                $itemPlatformSKU->where(['sku' => $v['sku'], 'platform_type' => 5])->update(['stock' => $wesee_stock]);
             }
+            echo $k . "\n";
+            usleep(200000);
         }
+        echo 'ok';
+    }
 
+    /**
+     * 修改sku 上下架
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/19 10:30:16 
+     * @return void
+     */
+    public function proccess_sku_status()
+    {
+        $itemPlatformSKU = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //查询临时表比例数据
+        $data = Db::name('zzzzaaa_temp')->select();
+        foreach ($data as $k => $v) {
+            if ($v['status'] == 1) {
+                $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => $v['sku']])->update(['outer_sku_status' => 1, 'is_upload' => 1]);
+            } else {
+                $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => $v['sku']])->update(['outer_sku_status' => 0, 'is_upload' => 1]);
+            }
+
+            echo $k . "\n";
+            usleep(200000);
+        }
         echo 'ok';
     }
 
 
 
-
-     /************************跑库存数据用START**********************************/
+    /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
