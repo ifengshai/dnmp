@@ -660,7 +660,7 @@ class Index extends Backend
                     $result[$i]['sales_num'] = $v;
                     $result[$i]['sku'] = $skus[$k]['sku'];
                     $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
-                    $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['stock'];
+                    $result[$i]['available_stock'] = $skus[$k]['stock'];
                     $result[$i]['name'] = $productInfo[$skus[$k]['sku']]['name'];
                     $result[$i]['type_name'] = $productInfo[$skus[$k]['sku']]['type_name'];
                     $i++;
