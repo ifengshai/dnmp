@@ -29,10 +29,12 @@ class Item extends Backend
      */
     protected $model = null;
     protected $category = null;
+
     /**
-     * 不需要登陆
+     * 无需鉴权的方法,但需要登录
+     * @var array
      */
-    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName'];
 
     public function _initialize()
     {
@@ -892,40 +894,6 @@ class Item extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-    /**
-     * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
-     * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
-     * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
-     */
-    /***
-     * 异步获取商品分类的信息（原先）
-     */
-    //    public function ajaxCategoryInfo(Request $request)
-    //    {
-    //        if($this->request->isAjax()){
-    //            $categoryId = $this->request->post('categoryId');
-    //            if(!$categoryId){
-    //                $this->error('参数错误，请重新尝试');
-    //            }
-    //            //原先
-    //            $result = $this->category->categoryPropertyInfo($categoryId);
-    //            if(!$result){
-    //              return  $this->error('对应分类不存在,请从新尝试');
-    //            }elseif ($result == -1){
-    //              return $this->error('对应分类存在下级分类,请从新选择');
-    //            }
-    //            $num = count($result)-1;
-    //            $this->view->engine->layout(false);
-    //            $this->assign('result',$result);
-    //            //传递最后一个key值
-    //            $this->assign('num',$num);
-    //            $data = $this->fetch('attribute');
-    //            return  $this->success('ok','',$data);
-    //
-    //        }else{
-    //           return $this->error(__('404 Not Found'));
-    //        }
-    //    }
 
     /***
      * 异步获取商品分类的信息之后（更改之后）
@@ -1527,7 +1495,7 @@ class Item extends Backend
                     foreach ($platformArr as $k => $v) {
                         // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                         //审核通过把SKU同步到有映射关系的平台
-                      
+
                         $uploadItemArr['skus']  = [$v['platform_sku']];
                         $uploadItemArr['site']  = $v['platform_type'];
                         $soap_res = Soap::createProduct($uploadItemArr);
@@ -1672,11 +1640,11 @@ class Item extends Backend
         if ($this->request->isAjax()) {
             $sku = input('sku');
             $site = input('site');
-            if ($site == 0){
+            if ($site == 0) {
                 $this->error('请先选择平台！！');
             }
             $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $info = $itemplatform->where(['sku'=>$sku,'platform_type'=>$site])->field('stock')->find();
+            $info = $itemplatform->where(['sku' => $sku, 'platform_type' => $site])->field('stock')->find();
             $res = $this->model->getGoodsInfo($sku);
             $res['platform_stock'] = $info['stock'];
             $res['now_stock'] = $res['stock'] - $res['distribution_occupy_stock'];
