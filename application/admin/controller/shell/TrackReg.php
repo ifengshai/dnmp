@@ -323,6 +323,8 @@ class TrackReg extends Backend
             $params['sales_num_90days'] = $days90_data[0]->sales_num;
             //90天日均销量
             $sales_num_90days = $days90_data[0]->num > 0 ? round($days90_data[0]->sales_num / $days90_data[0]->num) : 0;
+            //90天日均销量
+            $params['average_90days_sales_num'] = $sales_num_90days;
             //计算等级 30天预估销量
             $num = round($sales_num_90days * 1 * 30);
             if ($num >= 300) {
@@ -384,61 +386,47 @@ class TrackReg extends Backend
         //根据sku对数组进行重新分配
         $sku_list = $this->array_group_by($sku_list, 'sku');
 
-        $result = false;
-        Db::startTrans();
-        try {
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 1;
-            $data['create_person'] = 'Admin';
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = $this->replenish->insertGetId($data);
+        //首先插入主表 获取主表id new_product_replenish
+        $data['type'] = 1;
+        $data['create_person'] = 'Admin';
+        $data['create_time'] = date('Y-m-d H:i:s');
+        $res = $this->replenish->insertGetId($data);
 
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
+        //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+        $int = 0;
+        foreach ($sku_list as $k => $v) {
+            //求出此sku在此补货单中的总数量
+            $sku_whole_num = array_sum(array_map(function ($val) {
+                return $val['replenish_num'];
+            }, $v));
+            //求出比例赋予新数组
+            foreach ($v as $ko => $vo) {
+                $date[$int]['id'] = $vo['id'];
+                $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                $date[$int]['replenish_id'] = $res;
+                $int += 1;
             }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
-
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = 'Admin';
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 1;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单子表 关联主表 new_product_replenish_order 关联字段replenish_id
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 1])
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            echo $e->getMessage();
-        } catch (PDOException $e) {
-            Db::rollback();
-            echo $e->getMessage();
-        } catch (Exception $e) {
-            Db::rollback();
-            echo $e->getMessage();
         }
+        //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+        $res1 = $this->model->allowField(true)->saveAll($date);
+
+        $number = 0;
+        foreach ($list as $k => $v) {
+            $arr[$number]['sku'] = $k;
+            $arr[$number]['replenishment_num'] = $v;
+            $arr[$number]['create_person'] = 'Admin';
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 1;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
+        }
+        //插入补货需求单子表 关联主表 new_product_replenish_order 关联字段replenish_id
+        $result = $this->order->allowField(true)->saveAll($arr);
+        //更新计划补货列表
+        $ids = $this->model
+            ->where(['is_show' => 1, 'type' => 1])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->setField('is_show', 0);
     }
 
     /**

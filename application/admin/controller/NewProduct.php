@@ -1336,8 +1336,8 @@ class NewProduct extends Backend
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
                 $v['product_cycle'] = $product_cycle_arr[$v['sku']] ?: 7;
                 $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
-                $v['sales_days'] = $v['sales_num_90days'] > 0 ? round($v['stock'] / $v['sales_num_90days']) : 0;
-                $num = $v['stock'] - ($v['sales_num_90days'] * 30);
+                $v['sales_days'] = $v['sales_num_15days'] > 0 ? round($v['stock'] / $v['sales_num_15days']) : 0;
+                $num = $v['stock'] - ($v['sales_num_15days'] * 30);
                 $v['replenish_num'] =  $num > 0 ? $num : 0;
             }
 
