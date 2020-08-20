@@ -530,6 +530,9 @@ class LogisticsStatistic extends Backend
 
                 $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
                 foreach ($delievered_order as $key => $val) {
+                    /**
+                     * 判断有签收时间，并且签收时间大于发货时间，并且签收时间大于发货时间两天 则计算正常发货数量  否则不计算在内
+                     */
                     if (!empty($val['signing_time']) && $val['signing_time'] > $val['delivery_time'] && ((strtotime($val['signing_time']) - strtotime($val['delivery_time'])) / 86400) > 2) {
                         $distance_time = strtotime($val['signing_time']) - strtotime($val['delivery_time']);
                         $wait_time += $distance_time;
