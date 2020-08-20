@@ -51,6 +51,9 @@ class ItemPlatformSku extends Model
         $arr['name'] = $row['name'];
         $arr['platform_type'] = $row['site'];
         $arr['outer_sku_status'] = 2;
+        if ($arr['platform_type'] == 8){
+            $arr['outer_sku_status'] = 1;
+        }
         $arr['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
         $arr['create_time'] = date("Y-m-d H:i:s", time());
         $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
