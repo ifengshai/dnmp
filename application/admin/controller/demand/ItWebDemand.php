@@ -987,9 +987,9 @@ class ItWebDemand extends Backend
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
 
-                    /*if(!$params['status']){
+                    if(!$params['status']){
                         $this->error('点太快啦，请等页面加载完成在点击。');
-                    }*/
+                    }
                     if ($params['status'] == 1) {
                         //通过
                         if ($params['test_group'] == 1 || $params['test_group'] == 2) {
