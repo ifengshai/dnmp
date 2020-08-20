@@ -146,10 +146,8 @@ class NewProduct extends Backend
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
-
-            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
-            $platformarr1 = collection($platformarr1)->toArray();
-            foreach ($platformarr1 as $ka => $va){
+            $arrs = [];
+            foreach ($platformarr as $ka => $va){
                 if ($arrs[$va['sku']]){
                     $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
                 }else{
