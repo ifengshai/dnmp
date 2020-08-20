@@ -659,8 +659,8 @@ class Ding extends Controller
             
             if (is_array($send_ids)) {
                 //排除谢梦飞账号
-                if (in_array(240, $send_ids)) {
-                    $key = array_search(240, $send_ids);
+                if (in_array(80, $send_ids)) {
+                    $key = array_search(80, $send_ids);
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
@@ -670,7 +670,7 @@ class Ding extends Controller
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
-                file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
+                // file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
             }
             
             return self::cc_ding(
