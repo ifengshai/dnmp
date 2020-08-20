@@ -57,6 +57,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'custom_order_prescription_type', title: __('处方类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
                         { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价' },addClass: 'selectpicker', data: 'multiple', operate: 'IN', formatter: Table.api.formatter.status },
                         { field: 'created_at', title: __('创建时间'), sortable: true, operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'custom_print_label_created_at_new', title: __('打印标签时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
+                        { field: 'custom_match_frame_created_at_new', title: __('配镜架时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
+                        { field: 'custom_match_lens_created_at_new', title: __('配镜片时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
+                        { field: 'custom_match_factory_created_at_new', title: __('加工时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
+                        { field: 'custom_match_delivery_created_at_new', title: __('提货时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
                         { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         {
                             field: 'category_id', title: __('任务分类'), searchList: function (column) {
