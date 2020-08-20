@@ -670,6 +670,7 @@ class Ding extends Controller
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
+                file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
             }
             
             return self::cc_ding(
