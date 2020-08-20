@@ -367,7 +367,7 @@ class Index extends Backend
 
         //总数
         $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
-		
+
         //A级数量即总占比
         $res['AA_num'] = $AA_num;
         $res['AA_percent'] = @round($AA_num / $all_num * 100, 2);
@@ -384,7 +384,7 @@ class Index extends Backend
         $res['E_num'] = $E_num;
         $res['E_percent'] = @round($E_num / $all_num * 100, 2);
         $res['F_num'] = $F_num;
-        $res['F_percent'] = @round($F_num / $all_num * 100, 2); 
+        $res['F_percent'] = @round($F_num / $all_num * 100, 2);
 
         $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
         $this->view->assign('res', $res);
@@ -560,7 +560,6 @@ class Index extends Backend
             $stime = date('Y-m-d 00:00:00');
             $etime = date('Y-m-d H:i:s', time());
             $where = "created_at between '" . $stime . "' and '" . $etime . "'";
-
         }
         $sql = "select SUM(IF((b.sph > - 3 AND b.sph < 0 ) AND b.cyl < 2, 1, 0 )) AS A,
         SUM(IF(( sph > - 3.00 AND sph < 0 AND cyl > 2.00 ) OR ( sph < - 3.00 AND sph > - 6.00 AND cyl < 2.00 ),1, 0 )) AS B,
@@ -605,7 +604,7 @@ class Index extends Backend
                     $res = $this->nihao->getOrderSalesNumTop30([], $map);
                 } elseif ($params['site'] == 4) {
                     $res = $this->meeloog->getOrderSalesNumTop30([], $map);
-                }elseif  ($params['site'] == 5){
+                } elseif ($params['site'] == 5) {
                     $res = $this->wesee->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
@@ -646,11 +645,11 @@ class Index extends Backend
                     $list = $this->meeloog->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(4);
-                }elseif ($params['site'] == 5){
+                } elseif ($params['site'] == 5) {
                     //查询对应平台销量
                     $list = $this->wesee->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(5);                    
+                    $skus = $itemPlatformSku->getWebSkuAll(5);
                 }
                 $productInfo = $this->item->getSkuInfo();
                 $list = $list ?? [];
@@ -660,22 +659,21 @@ class Index extends Backend
                     $result[$i]['sales_num'] = $v;
                     $result[$i]['sku'] = $skus[$k]['sku'];
                     $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
-                    $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['available_stock'];
+                    $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['stock'];
                     $result[$i]['name'] = $productInfo[$skus[$k]['sku']]['name'];
                     $result[$i]['type_name'] = $productInfo[$skus[$k]['sku']]['type_name'];
                     $i++;
                 }
             }
-            if(array_filter($result)>0){
-                $sortField = array_column($result,'available_stock');
+            if (array_filter($result) > 0) {
+                $sortField = array_column($result, 'available_stock');
                 //可用库存倒叙排列
-                if(($params['sort'] == 'available_stock') && ($params['order'] == 'desc')){
-                    array_multisort($sortField,SORT_DESC,$result);
-                //可用库存正序排列    
-                }elseif(($params['sort'] == 'available_stock') && ($params['order'] == 'asc')){
-                    array_multisort($sortField,SORT_ASC,$result);
-                }                
-
+                if (($params['sort'] == 'available_stock') && ($params['order'] == 'desc')) {
+                    array_multisort($sortField, SORT_DESC, $result);
+                    //可用库存正序排列    
+                } elseif (($params['sort'] == 'available_stock') && ($params['order'] == 'asc')) {
+                    array_multisort($sortField, SORT_ASC, $result);
+                }
             }
             return json(['code' => 1, 'data' => $json, 'rows' => $result]);
         }
@@ -906,7 +904,7 @@ class Index extends Backend
         $res['E_num'] = $E_num;
         $res['E_percent'] = @round($E_num / $all_num * 100, 2);
         $res['F_num'] = $F_num;
-        $res['F_percent'] = @round($F_num / $all_num * 100, 2); 
+        $res['F_percent'] = @round($F_num / $all_num * 100, 2);
 
         $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
         $this->view->assign('res', $res);
@@ -1157,7 +1155,7 @@ class Index extends Backend
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
-            $addWhere.= " AND id IN ({$ids})";
+            $addWhere .= " AND id IN ({$ids})";
         }
         //统计三个站销量
         //自定义时间搜索
@@ -1202,19 +1200,19 @@ class Index extends Backend
         $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
         $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
         $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-        $weese = $this->wesee->getOrderSalesNum($w_sku,$map);
+        $weese = $this->wesee->getOrderSalesNum($w_sku, $map);
         //重组数组
         foreach ($list as &$v) {
 
             $v['z_num'] = round($zeelool[$v['z_sku']]) ?? 0;
 
-           $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
+            $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
 
             $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
 
-           $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
-           $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
-           $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
+            $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
+            $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
+            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
         }
         unset($v);
 
@@ -1224,13 +1222,13 @@ class Index extends Backend
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
-             ->setCellValue("B1", "Z站销量")
-             ->setCellValue("C1", "V站销量")
+            ->setCellValue("B1", "Z站销量")
+            ->setCellValue("C1", "V站销量")
             ->setCellValue("D1", "N站销量");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "M站销量");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
-             ->setCellValue("G1", "总的销量")
-             ->setCellValue("H1", "可用库存");
+            ->setCellValue("G1", "总的销量")
+            ->setCellValue("H1", "可用库存");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "在途库存");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
 
@@ -1245,7 +1243,7 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['all_num']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['available_stock']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['on_way_stock']);
-        }    
+        }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
@@ -1273,7 +1271,7 @@ class Index extends Backend
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-       
+
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
@@ -1299,6 +1297,5 @@ class Index extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-     
     }
 }
