@@ -151,15 +151,17 @@ class Nihao extends Model
     {
         //查询所有镜架成本
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $start_time = $start_time.' 00:00:00';
+        $end_time   = $end_time.' 23:59:59';
         $where['is_visable'] = 1;
-        $sku_bid_price_list = Db::connect('database.db_nihao_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
+        $sku_bid_price_list = Db::connect('database.db_voogueme_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
         $all_frame_result = Db::connect('database.db_nihao')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
         ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
        //转换sku
         foreach ($all_frame_result as $key => $value) {
-            $all_frame_result[$key]['true_sku'] = $this->itemPlatform->getTrueSku($value['sku'],1);
+            $all_frame_result[$key]['true_sku'] = $this->itemPlatform->getTrueSku($value['sku'],3);
         }
         //镜架成本
         $all_frame_price=0;
@@ -171,7 +173,7 @@ class Nihao extends Model
             }
         }
         //求镜片成本价格
-        $all_lens_result = Db::connect('database.db_nihao_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
+        $all_lens_result = Db::connect('database.db_voogueme_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
         ->join('sales_lens sl', 'sl.lens_id=m.lens_id','left')->where($whereFrame)
         ->field('round(sum(m.qty_ordered*sl.left_lens_cost_price),2) left_lens_cost_price,round(sum(m.qty_ordered*sl.right_lens_cost_price),2) right_lens_cost_price')
         ->select();
@@ -185,10 +187,10 @@ class Nihao extends Model
         //运费
         $all_shipping_amount  = round($base_grand_total_result[0]['shipping_amount'],2);
         return [
-            'all_frame_price'       => $all_frame_price ?: 0,
-            'all_lens_price'        => $all_lens_price ?:0,
-            'all_base_grand_total'  => $all_base_grand_total ?:0,
-            'all_shipping_amount'   => $all_shipping_amount ?:0
+            'all_frame_price'       => $all_frame_price ? round($all_frame_price,2): 0,
+            'all_lens_price'        => $all_lens_price ? round($all_lens_price,2):0,
+            'all_base_grand_total'  => $all_base_grand_total ? round($all_base_grand_total,2):0,
+            'all_shipping_amount'   => $all_shipping_amount ? round($all_shipping_amount,2):0
         ];
     }
     /**
@@ -211,7 +213,7 @@ class Nihao extends Model
         //运费
         $all_shipping_amount        = $all_money['all_shipping_amount'];
         //镜架成本
-        $all_frame_price            = $all_money['all_frame_price'];
+        $all_frame_price            = round($all_money['all_frame_price']/$rate,2);
         //镜片成本
         $all_lens_price             = $all_money['all_lens_price'];
         //利润

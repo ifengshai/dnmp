@@ -4018,59 +4018,6 @@ order by sfoi.item_id asc limit 1000";
         die;
     }
 
-
-
-    /**
-     * 统计150天无销量SKU 移入回收站
-     * @todo 待定
-     * @Description
-     * @author wpl
-     * @since 2020/03/10 17:16:04
-     * @return void
-     */
-    public function getSkuSalesNum()
-    {
-        set_time_limit(0);
-        $item = new \app\admin\model\itemmanage\Item();
-        $map['is_open'] = 1;
-        $map['is_del'] = 1;
-        $map['item_status'] = 3;
-        $map['is_change'] = 0;
-        $map['is_new'] = 2;
-        $map['available_stock'] = ['<=', 0];
-        $list = $item->where($map)->limit(300)->select();
-        $skus = [];
-        foreach ($list as $k => $v) {
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
-            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
-            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $stime = date("Y-m-d 00:00:00", strtotime("-150 day"));
-            $etime = date("Y-m-d 23:59:59");
-            $where['a.created_at'] = ['between', [$stime, $etime]];
-            //Zeelool
-            $where['sku'] = $zeelool_sku;
-            $zeelool_num = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Voogueme
-            $where['sku'] = $voogueme_sku;
-            $voogueme_num = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Nihao
-            $where['sku'] = $nihao_sku;
-            $nihao_num = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-
-            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
-                $skus[] = $v['sku'];
-            }
-        }
-        $data['is_change'] = 1;
-        $data['is_open'] = 3;
-        $res = $item->save($data, ['sku' => ['in', $skus]]);
-        dump($res);
-        die;
-    }
-
-
     /**
      * 每天定时获取库存数据
      *

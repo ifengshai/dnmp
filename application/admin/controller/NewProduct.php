@@ -73,12 +73,8 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
-
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-// dump($filter);die;
-
             //可用库存搜索
             if ($filter['available_stock']) {
                 $item = new \app\admin\model\itemmanage\Item();
@@ -88,13 +84,13 @@ class NewProduct extends Backend
                 unset($filter['available_stock']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+
             //平台搜索 (单选)
             if ($filter['platform_type']) {
-                $new_product_mapping = new \app\admin\model\NewProductMapping();
                 if ($filter['platform_type'] == 10){
                     $map['item_status'] = ['=', 1];
                 }else{
-                    $skus = $new_product_mapping->where(['website_type' => $filter['platform_type']])->column('sku');
+                    $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
                     $map1['sku'] = ['in', $skus];
                 }
                 unset($filter['platform_type']);
@@ -150,10 +146,17 @@ class NewProduct extends Backend
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
+
             $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
             $platformarr1 = collection($platformarr1)->toArray();
-            // dump($platformarr);
-            // dump($platformarr1);
+            foreach ($platformarr1 as $ka => $va){
+                if ($arrs[$va['sku']]){
+                    $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
+                }else{
+                    $arrs[$va['sku']] = $va['sales_num_90days'];
+                }
+            }
+
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
 
@@ -161,8 +164,6 @@ class NewProduct extends Backend
             foreach ($platformarr as $v) {
                 $arr[$v['sku']] .= $magentoplatformarr[$v['platform_type']] . ',';
             }
-            // dump($list);
-            // dump($arr);
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 if ($v['item_status'] == 1) {
@@ -178,19 +179,24 @@ class NewProduct extends Backend
                 }
                 //90天总销量
                 $v['sales_num'] = $productarr[$v['sku']] ?: 0;
-                $v['sales_num_90days'] = $platformarr1[$v['sku']] ?: 0;
+                $v['sales_num_90days'] = $arrs[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
             }
-            // dump($list);die;
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
         return $this->view->fetch();
     }
 
-
-    //新增商品
+    /**
+     * 新增商品
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/20 10:58:37 
+     * @return void
+     */
     public function add()
     {
         if ($this->request->isPost()) {
@@ -442,254 +448,6 @@ class NewProduct extends Backend
         return $this->view->fetch();
     }
 
-    public function submit()
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $params = $this->preExcludeFields($params);
-                $itemName = $params['name'];
-                $itemColor = $params['color'];
-                $supplierSku = $params['supplier_sku'];
-                $price = $params['price'];
-                $skuId = $params['skuid'];
-                //区分是镜架还是配饰
-                $item_type = $params['item_type'];
-                $data = $itemAttribute = [];
-                if (3 == $item_type) { //配饰
-
-                    if (!$params['supplier_id']) {
-                        $this->error('供应商不能为空');
-                    }
-
-                    if (!array_filter($itemName)) {
-                        $this->error('商品名称不能为空！！');
-                    }
-
-                    //求出对应的sku编码规则
-                    $resultEncode = $this->category->getCategoryTexture($params['category_id']);
-                    $textureEncodeInfo = $resultEncode['typeResult'];
-                    if (false !== strpos($textureEncodeInfo, '-')) {
-                        $textureArr = explode('-', $textureEncodeInfo);
-                        $textureEncode = $textureArr[0];
-                    } else {
-                        $textureEncode = $textureEncodeInfo;
-                    }
-                    if (!$textureEncode) {
-                        $this->error(__('The corresponding encoding rule does not exist, please try again'));
-                    }
-
-                    //如果是后来添加的
-                    if (!empty($params['origin_skus']) && $params['item_count'] >= 1) { //正常情况
-                        $count = $params['item_count'];
-                        $row = Db::connect('database.db_stock')->name('item')->where(['sku' => $params['origin_skus']])->field('id,sku')->find();
-                        $attributeWhere = [];
-                        $attributeWhere['item_id'] = $row['id'];
-                        $attributeWhere['accessory_color'] = ['in', $itemColor];
-                        $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,accessory_color')->find();
-                        if ($attributeInfo) {
-                            $this->error('追加的商品SKU不能添加之前的颜色');
-                        }
-                        $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
-                    } elseif (empty($params['origin_skus']) && $params['item_count'] >= 1) { //去掉原始sku情况
-                        $this->error(__('Make sure the original sku code exists'));
-                    } elseif (!empty($params['origin_skus']) && $params['item_count'] < 1) { //原始sku失败情况
-                        $this->error(__('Make sure the original sku code is the correct sku code'));
-                    }
-
-                    if (!empty($params['origin_skus'])) {
-                        $data['origin_sku'] = $params['origin_sku'];
-                    } else {
-                        $data['origin_sku'] = $textureEncode . $params['origin_sku'];
-                    }
-
-                    Db::startTrans();
-                    try {
-                        foreach ($itemName as $k => $v) {
-                            $data['name'] = $v;
-                            $data['category_id'] = $params['category_id'];
-                            $data['item_status'] = $params['item_status'];
-                            $data['brand_id'] = $params['brand_id'];
-                            $data['price'] = $price[$k];
-                            $data['supplier_id'] = $params['supplier_id'];
-                            $data['supplier_sku'] = $supplierSku[$k];
-                            $data['create_person'] = session('admin.nickname');
-                            $data['create_time'] = date("Y-m-d H:i:s", time());
-                            $data['link'] = $params['link'];
-                            //后来添加的商品数据
-                            if (!empty($params['origin_skus'])) {
-                                $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
-                                ++$count;
-                            } else {
-                                $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
-                            }
-
-                            $lastInsertId = Db::name('new_product')->insertGetId($data);
-
-                            if ($lastInsertId !== false) {
-                                $itemAttribute['item_id'] = $lastInsertId;
-                                $itemAttribute['attribute_type'] = 3;
-                                $itemAttribute['accessory_texture'] = $params['frame_texture'];
-                                $itemAttribute['accessory_color'] = $itemColor[$k];
-                                $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                $itemAttribute['frame_images'] = $params['frame_images'];
-
-                                $res = Db::name('new_product_attribute')->insert($itemAttribute);
-                                if (!$res) {
-                                    throw new Exception('添加失败！！');
-                                }
-                                //绑定供应商SKU关系
-                                $supplier_data['sku'] = $data['sku'];
-                                $supplier_data['supplier_sku'] = $supplierSku[$k];
-                                $supplier_data['supplier_id'] = $data['supplier_id'];
-                                $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
-                                $supplier_data['create_person'] = session('admin.nickname');
-                                $supplier_data['link'] = $data['link'];
-                                $supplier_data['is_matching'] = 1;
-                                $supplier_data['skuid'] = $skuId[$k];
-                                Db::name('supplier_sku')->insert($supplier_data);
-                            }
-                        }
-                        Db::commit();
-                    } catch (ValidateException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (PDOException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (Exception $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    }
-                    if ($lastInsertId !== false) {
-                        $this->success();
-                    } else {
-                        $this->error(__('No rows were inserted'));
-                    }
-                } else {
-
-                    //求出材质对应的编码
-                    if ($params['frame_texture']) {
-                        $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
-                    } else {
-                        $textureEncode = 'O';
-                    }
-
-                    //如果是后来添加的
-                    if (!empty($params['origin_skus']) && $params['item_count'] >= 1) { //正常情况
-                        $count = $params['item_count'];
-                        $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
-                    } elseif (empty($params['origin_skus']) && $params['item_count'] >= 1) { //去掉原始sku情况
-                        $this->error(__('Make sure the original sku code exists'));
-                    } elseif (!empty($params['origin_skus']) && $params['item_count'] < 1) { //原始sku失败情况
-                        $this->error(__('Make sure the original sku code is the correct sku code'));
-                    }
-
-                    if (!$params['supplier_id']) {
-                        $this->error('供应商不能为空');
-                    }
-
-                    Db::startTrans();
-                    try {
-
-                        if (!array_filter($itemName)) {
-                            throw new Exception('商品名称不能为空！！');
-                        }
-
-
-                        foreach (array_filter($itemName) as $k => $v) {
-                            $data['name'] = $v;
-                            $data['category_id'] = $params['category_id'];
-                            $data['item_status'] = $params['item_status'];
-                            $data['brand_id'] = $params['brand_id'];
-                            $data['supplier_id'] = $params['supplier_id'];
-                            $data['supplier_sku'] = $supplierSku[$k];
-                            $data['link'] = $params['link'];
-                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
-                            $data['price'] = $price[$k];
-                            $data['create_person'] = session('admin.nickname');
-                            $data['create_time'] = date("Y-m-d H:i:s", time());
-                            //后来添加的商品数据
-                            if (!empty($params['origin_skus'])) {
-                                $data['origin_sku'] = $params['origin_sku'];
-                                $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
-                                ++$count;
-                            } else {
-                                $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                                $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
-                            }
-                            $lastInsertId = Db::name('new_product')->insertGetId($data);
-                            if ($lastInsertId !== false) {
-
-                                //添加商品属性
-                                $itemAttribute['item_id'] = $lastInsertId;
-                                $itemAttribute['attribute_type'] = $params['attribute_type'];
-                                $itemAttribute['glasses_type'] = $params['glasses_type'];
-                                $itemAttribute['frame_height'] = $params['frame_height'];
-                                $itemAttribute['frame_width'] = $params['frame_width'];
-                                $itemAttribute['frame_color'] = $itemColor[$k];
-                                $itemAttribute['frame_weight'] = $params['weight'];
-                                $itemAttribute['procurement_type'] = $params['procurement_type'];
-                                $itemAttribute['procurement_origin'] = $params['procurement_origin'];
-                                $itemAttribute['frame_length'] = $params['frame_length'];
-                                $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
-                                $itemAttribute['shape'] = $params['shape'];
-                                $itemAttribute['frame_bridge'] = $params['frame_bridge'];
-                                $itemAttribute['mirror_width'] = $params['mirror_width'];
-                                $itemAttribute['frame_type'] = $params['frame_type'];
-                                $itemAttribute['frame_texture'] = $params['frame_texture'];
-                                $itemAttribute['frame_shape'] = $params['frame_shape'];
-                                $itemAttribute['frame_gender'] = $params['frame_gender'];
-                                $itemAttribute['frame_size'] = $params['frame_size'];
-                                $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
-                                $itemAttribute['frame_piece'] = $params['frame_piece'];
-                                $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
-                                $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
-                                $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
-                                $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                $itemAttribute['frame_images'] = $params['frame_images'];
-                                $res = Db::name('new_product_attribute')->insert($itemAttribute);
-                                if (!$res) {
-                                    throw new Exception('添加失败！！');
-                                }
-                                //绑定供应商SKU关系
-                                $supplier_data['sku'] = $data['sku'];
-                                $supplier_data['supplier_sku'] = $supplierSku[$k];
-                                $supplier_data['skuid'] = $skuId[$k];
-                                $supplier_data['supplier_id'] = $data['supplier_id'];
-                                $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
-                                $supplier_data['create_person'] = session('admin.nickname');
-                                $supplier_data['link'] = $data['link'];
-                                $supplier_data['is_matching'] = 1;
-                                Db::name('supplier_sku')->insert($supplier_data);
-                            } else {
-                                throw new Exception('添加失败！！');
-                            }
-                        }
-                        Db::commit();
-                    } catch (ValidateException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (PDOException $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    } catch (Exception $e) {
-                        Db::rollback();
-                        $this->error($e->getMessage());
-                    }
-                }
-
-                if ($res !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-        return $this->view->fetch();
-    }
-
     /**
      * 编辑
      */
@@ -710,9 +468,6 @@ class NewProduct extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-//                        dump($params);die;
-            //编辑保存的选品状态改为待选品
-//            $params['item_status'] = 1;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -1262,8 +1017,7 @@ class NewProduct extends Backend
      */
     public function replenishEscalationList()
     {
-//        $this->relationSearch = true;
-
+        //        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1287,7 +1041,6 @@ class NewProduct extends Backend
 
             $this->request->get(['filter' => json_encode($filter)]);
             $params = $this->request->get();
-
             if ($filter['sku']) {
                 $where['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }
@@ -1338,8 +1091,8 @@ class NewProduct extends Backend
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
                 $v['product_cycle'] = $product_cycle_arr[$v['sku']] ?: 7;
                 $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
-                $v['sales_days'] = $v['sales_num_90days'] > 0 ? round($v['stock'] / $v['sales_num_90days']) : 0;
-                $num = $v['stock'] - ($v['sales_num_90days'] * 30);
+                $v['sales_days'] = $v['average_90days_sales_num'] > 0 ? round($v['stock'] / $v['average_90days_sales_num']) : 0;
+                $num = $v['stock'] - ($v['average_90days_sales_num'] * 30);
                 $v['replenish_num'] =  $num > 0 ? $num : 0;
             }
 

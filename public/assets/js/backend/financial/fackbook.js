@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'financial/fackbook/index' + location.search,
                     add_url: 'financial/fackbook/add',
                     edit_url: 'financial/fackbook/edit',
-                    del_url: 'financial/fackbook/del',
+                    //del_url: 'financial/fackbook/del',
                     multi_url: 'financial/fackbook/multi',
                     table: 'facebook_api',
                 }
@@ -25,11 +25,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'platform', title: __('Platform')},
+                        {field: 'platform', title: __('Platform'),custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We' }, formatter: Table.api.formatter.status},
                         {field: 'app_id', title: __('App_id')},
                         {field: 'app_secret', title: __('App_secret')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

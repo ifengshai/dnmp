@@ -63,7 +63,7 @@ class Outstock extends Backend
                 $map['outstock.id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -302,9 +302,9 @@ class Outstock extends Backend
             //虚拟仓库存
             $item[$k]['platform_stock'] = $info['stock'];
         }
-//
-//         dump(collection($row)->toArray());
-// dump(collection($item)->toArray());die;
+        //
+        //         dump(collection($row)->toArray());
+        // dump(collection($item)->toArray());die;
         $this->assign('item', $item);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -386,7 +386,7 @@ class Outstock extends Backend
                     $arr[$v['sku']]['num'] = $v['out_stock_num'];
                     $arr[$v['sku']]['platform_type'] = $v['platform_id'];
                 } else {
-                    $arr[$v['sku']]['num'] = $v['out_stock_num'] + $arr[$v['sku']];
+                    $arr[$v['sku']]['num'] = $v['out_stock_num'] + $arr[$v['sku']]['num'];
                 }
             }
             // dump(collection($list)->toArray());
@@ -402,11 +402,11 @@ class Outstock extends Backend
 
         if ($res != false) {
             /**
-             * @todo 审核通过扣减库存逻辑 
+             * @todo 审核通过扣减库存逻辑
              */
 
             if ($data['status'] == 2) {
-//                dump(collection($list)->toArray());die;
+                //                dump(collection($list)->toArray());die;
 
                 //出库扣减库存
                 foreach ($list as $v) {
@@ -558,30 +558,30 @@ class Outstock extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select();    
+                ->select();
             $list = collection($list)->toArray();
             //总共的
             $totalId = $this->model
-            ->with(['outstocktype'])
-            ->where(['status'=>2])
-            ->where($where)
-            ->column('outstock.id');
+                ->with(['outstocktype'])
+                ->where(['status'=>2])
+                ->where($where)
+                ->column('outstock.id');
             $totalPriceInfo = (new OutStockLog())->calculateMoneyAccordOutStock($totalId);
             // echo '<pre>';
             // var_dump($totalPriceInfo);
             //本页的
             $thisPageId = $this->model
-            ->with(['outstocktype'])
-            ->where(['status'=>2])
-            ->where($where)
-            ->order($sort, $order)
-            ->limit($offset, $limit)
-            ->column('outstock.id');
+                ->with(['outstocktype'])
+                ->where(['status'=>2])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->column('outstock.id');
             $thisPagePriceInfo = (new OutStockLog())->calculateMoneyAccordThisPageId($thisPageId);
             if(0 != $thisPagePriceInfo){
                 foreach($list as $keys => $vals){
                     if(array_key_exists($vals['id'],$thisPagePriceInfo)){
-                         $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']],2);
+                        $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']],2);
                     }
                 }
             }
@@ -610,11 +610,11 @@ class Outstock extends Backend
         $item = (new OutStockLog())->getPurchaseItemInfo($ids);
         //查询入库分类
         $type = $this->type->select();
-            $this->assign('type', $type);
+        $this->assign('type', $type);
         if($item){
             $this->assign('item', $item);
         }
-            $this->assign("row", $row);
+        $this->assign("row", $row);
         return $this->view->fetch();
     }
 }

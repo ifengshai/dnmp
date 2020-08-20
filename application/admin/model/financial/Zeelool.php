@@ -13,6 +13,12 @@ class Zeelool extends Model
     // protected $app_id = "438689069966204";
     // protected $app_secret = "1480382aa32283c6c13692908f7738a7";
     // protected $access_token = "EAAGOZCEIuo3wBAMkIOgCGaUjUmgvY4CqtvXWQ2Jf8o2GkuyOls67R1kk04CDWD7BKSqwzQLTMBeaaeTJaRNyqHI5tihJVFoc6qsNvgJZCpf4mgxCHjZC99iZCu63fmPctNRpAyWyAJcdBq4x4eva0IU6Q7N8lk6vgq1yOLOF4hEqNWt8E5ie";
+        //数据库
+    protected $connection = 'database.db_zeelool';
+
+
+        // 表名
+    protected $table = 'sales_flat_order';
     protected $app_id = '';
     protected $app_secret = '';
     protected $access_token = '';
@@ -151,11 +157,15 @@ class Zeelool extends Model
     public function all_cost($start_time,$end_time)
     {
         //查询所有镜架成本
+
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $start_time = $start_time.' 00:00:00';
+        $end_time   = $end_time.' 23:59:59';
         $where['is_visable'] = 1;
-        $sku_bid_price_list = Db::connect('database.db_zeelool_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
+        $sku_bid_price_list = Db::connect('database.db_voogueme_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
+        //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
         ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
        //转换sku
@@ -186,10 +196,10 @@ class Zeelool extends Model
         //运费
         $all_shipping_amount  = round($base_grand_total_result[0]['shipping_amount'],2);
         return [
-            'all_frame_price'       => $all_frame_price ?: 0,
-            'all_lens_price'        => $all_lens_price ?:0,
-            'all_base_grand_total'  => $all_base_grand_total ?:0,
-            'all_shipping_amount'   => $all_shipping_amount ?:0
+            'all_frame_price'       => $all_frame_price ? round($all_frame_price,2): 0,
+            'all_lens_price'        => $all_lens_price ? round($all_lens_price,2):0,
+            'all_base_grand_total'  => $all_base_grand_total ? round($all_base_grand_total,2):0,
+            'all_shipping_amount'   => $all_shipping_amount ? round($all_shipping_amount,2):0
         ];
     }
     /**
@@ -212,7 +222,7 @@ class Zeelool extends Model
         //运费
         $all_shipping_amount        = $all_money['all_shipping_amount'];
         //镜架成本
-        $all_frame_price            = $all_money['all_frame_price'];
+        $all_frame_price            = round($all_money['all_frame_price']/$rate,2);
         //镜片成本
         $all_lens_price             = $all_money['all_lens_price'];
         //利润

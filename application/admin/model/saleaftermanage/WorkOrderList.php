@@ -771,7 +771,9 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
+                if(24558 == $work_id){
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
+                }
                 if($isNewVersion == 0){
                     $url = 'magic/order/createOrder';
                 }elseif($isNewVersion == 1){
