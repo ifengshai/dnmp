@@ -282,8 +282,8 @@ class Ding extends Controller
     {
         //获取指定用户的钉钉信息，添加到魔晶系统中
         $user = $this->app->user->get('163104154526225658');
-        dump($user);exit;
         Admin::userAdd($user);
+        echo 'ok';exit;
         //        $this->setDepartment();
         //        exit;
         //        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
