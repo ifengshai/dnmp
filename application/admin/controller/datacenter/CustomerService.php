@@ -338,21 +338,22 @@ class CustomerService extends Backend
             $group_id = $params['group_id'];
             $admin_id = $params['admin_id'];
             if($platform){
-                $where['type'] = $platform;
+                $where['c.platform'] = $platform;
             }
             if($group_id){
                 //查询客服类型
                 $group_admin_id = Db::name('admin')->where(['group_id' => $group_id, 'status' => 'normal'])->column('id');
-                $where['admin_id'] = array('in', $group_admin_id);
+                $where['c.due_id'] = array('in', $group_admin_id);
             }
             if($admin_id){
-                $where['admin_id'] = $admin_id;
+                $where['c.due_id'] = $admin_id;
             }
+            $where['z.channel'] = ['neq','voice'];
             if($time_str){
                 $createat = explode(' ', $time_str);
-                $where['create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                $where['c.create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => $this->zendeskTasks->where($where)->sum('reply_count')
+                    $createat[0] => $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
                 );
                 if ($createat[0] != $createat[3]) {
                     for ($i = 0; $i <= 100; $i++) {
@@ -360,8 +361,8 @@ class CustomerService extends Backend
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date, date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date, "Y-m-d");
-                        $where['create_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
+                        $where['c.create_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                         if ($next_day == $createat[3]) {
                             break;
                         }
@@ -373,8 +374,8 @@ class CustomerService extends Backend
                     $j = $i-1;
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $next_next_day = date("Y-m-d", strtotime("-$j day"));
-                    $where['create_time'] = ['between', [$next_day, $next_next_day]];
-                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
+                    $where['c.create_time'] = ['between', [$next_day, $next_next_day]];
+                    $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                 }
             }
 

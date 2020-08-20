@@ -49,7 +49,7 @@ class NewProduct extends Backend
         $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->magentoplatformarr = $this->magentoplatform->column('name', 'id');
-        $this->assign('platform_plat',$this->magentoplatform->field('id,name')->select());
+        $this->assign('platform_plat', $this->magentoplatform->field('id,name')->select());
     }
 
     /**
@@ -87,9 +87,9 @@ class NewProduct extends Backend
 
             //平台搜索 (单选)
             if ($filter['platform_type']) {
-                if ($filter['platform_type'] == 10){
+                if ($filter['platform_type'] == 10) {
                     $map['item_status'] = ['=', 1];
-                }else{
+                } else {
                     $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
                     $map1['sku'] = ['in', $skus];
                 }
@@ -136,27 +136,21 @@ class NewProduct extends Backend
             $skus = array_column($list, 'sku');
             //查询商品分类
             $category = $this->category->where('is_del', 1)->column('name', 'id');
-            //查询90天总销量
-            $productgrade = new \app\admin\model\ProductGrade();
-            $productarr = $productgrade->where(['true_sku' => ['in', $skus]])->column('counter', 'true_sku');
             //查询可用库存
-            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock', 'sku');
+            $stock = $this->item->where(['sku' => ['in', $skus], 'is_del' => 1, 'is_open' => 1])->column('available_stock', 'sku');
 
             //查询平台
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
             $arrs = [];
-            foreach ($platformarr as $k => $v){
-                if ($arrs[$v['sku']]){
-                    $arrs[$v['sku']] = $arrs[$v['sku']] + $v['sales_num_90days'];
-                }else{
-                    $arrs[$v['sku']] = $v['sales_num_90days'];
+            foreach ($platformarr as $ka => $va) {
+                if ($arrs[$va['sku']]) {
+                    $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
+                } else {
+                    $arrs[$va['sku']] = $va['sales_num_90days'];
                 }
             }
-            // dump($platformarr);
-            // dump($arrs);
-            // dump($platformarr1);
 
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
@@ -179,7 +173,6 @@ class NewProduct extends Backend
                     $v['item_status_text'] = '新建';
                 }
                 //90天总销量
-                $v['sales_num'] = $productarr[$v['sku']] ?: 0;
                 $v['sales_num_90days'] = $arrs[$v['sku']] ?: 0;
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
@@ -348,7 +341,7 @@ class NewProduct extends Backend
 
                     Db::startTrans();
                     try {
-                        if (empty($itemName)){
+                        if (empty($itemName)) {
                             throw new Exception('商品不能为空！！');
                         }
                         if (!array_filter($itemName)) {
@@ -895,7 +888,7 @@ class NewProduct extends Backend
 
         //查询对应平台
         $magentoplatformarr = $this->magentoplatformarr;
-        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name','id');
+        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
 
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
@@ -1288,98 +1281,6 @@ class NewProduct extends Backend
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
-        }
-    }
-
-    /**
-     * 计划任务 计划补货 每月7号执行一次 汇总各个平台原始sku相同的品的补货需求数量 加入补货需求单以供采购分配处理 汇总过后更新字段 is_show 的值 列表不显示
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/7/16
-     * Time: 15:46
-     */
-    public function plan_replenishment()
-    {
-        //补货需求清单表
-        $this->model = new \app\admin\model\NewProductMapping();
-        //补货需求单子表
-        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
-        //补货需求单主表
-        $this->replenish = new \app\admin\model\purchase\NewProductReplenish();
-        //统计计划补货数据
-        $list = $this->model
-            ->where(['is_show' => 1, 'type' => 1])
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->group('sku')
-            ->column("sku,sum(replenish_num) as sum");
-        if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');
-            die;
-        }
-        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
-        $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 1])
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->field('id,sku,website_type,replenish_num')
-            ->select();
-        //根据sku对数组进行重新分配
-        $sku_list = $this->array_group_by($sku_list, 'sku');
-
-        $result = false;
-        Db::startTrans();
-        try {
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 1;
-            $data['create_person'] = 'Admin';
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = $this->replenish->insertGetId($data);
-
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
-            }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
-
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = 'Admin';
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 1;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单子表 关联主表 new_product_replenish_order 关联字段replenish_id
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 1])
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            echo $e->getMessage();
-        } catch (PDOException $e) {
-            Db::rollback();
-            echo $e->getMessage();
-        } catch (Exception $e) {
-            Db::rollback();
-            echo $e->getMessage();
         }
     }
 
