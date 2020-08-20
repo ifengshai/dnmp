@@ -44,9 +44,10 @@ class Ding extends Controller
      */
     public function test2()
     {
-        /* $userId = '045127074321643707';
+        $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
-        Admin::userAdd($user); */
+        dump($user);die;
+        Admin::userAdd($user); 
         // $user=$this->app->attendance->schedules('2020-06-07');
         $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
         $time = 1592150400;
