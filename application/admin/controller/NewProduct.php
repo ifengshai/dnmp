@@ -146,16 +146,17 @@ class NewProduct extends Backend
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             $platformarr = $platform->where(['sku' => ['in', $skus]])->select();
             $platformarr = collection($platformarr)->toArray();
-
-            $platformarr1 = $platform->where(['sku' => ['in', $skus]])->column('sku,sales_num_90days');
-            $platformarr1 = collection($platformarr1)->toArray();
-            foreach ($platformarr1 as $ka => $va){
-                if ($arrs[$va['sku']]){
-                    $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
+            $arrs = [];
+            foreach ($platformarr as $k => $v){
+                if ($arrs[$v['sku']]){
+                    $arrs[$v['sku']] = $arrs[$v['sku']] + $v['sales_num_90days'];
                 }else{
-                    $arrs[$va['sku']] = $va['sales_num_90days'];
+                    $arrs[$v['sku']] = $v['sales_num_90days'];
                 }
             }
+            // dump($platformarr);
+            // dump($arrs);
+            // dump($platformarr1);
 
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
