@@ -47,7 +47,7 @@
         <% var label = labelarr[item.id % 5]; %>
         <div class="thumbnail example">
             <!-- <span class="btn btn-<%=label%>">ID:<%=item.id%></span> -->
-            <img src="<%=item.newproductattribute.frame_images?item.newproductattribute.frame_images:'https://cdn.fastadmin.net/uploads/addons/blog.png'%>" style="width:100%;height:200px;" alt="<%=item.name%>">
+            <img src="<%=item.newproductattribute.frame_images?item.newproductattribute.frame_images:'/assets/img/blog.png'%>" style="width:100%;height:200px;" alt="<%=item.name%>">
             <div class="caption">
                 <h4><%=item.name?item.name:'无'%></h4>
                 <p class="text-muted"><span style="width:150px;display:inline-block;">商品分类: <%=item.category_name%></span>  <span style="margin-left:80px;">SKU: <%=item.sku%></span></p>
