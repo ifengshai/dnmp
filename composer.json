@@ -32,7 +32,8 @@
         "mingyoung/dingtalk": "2.3.0",
         "league/html-to-markdown": "^4.9",
         "sch-group/17track": "^1.7",
-        "google/apiclient": "^2.0"
+        "google/apiclient": "^2.0",
+        "facebook/php-business-sdk": "5.0.5"
     },
     "config": {
         "preferred-install": "dist"

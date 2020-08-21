@@ -104,6 +104,7 @@ class Zeelool extends Backend
                 $swhere['problem_type_id'] = $filter['category_id'];
                 $swhere['work_type'] = $filter['p_id'];
                 $swhere['work_platform'] = 1;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['category_id']);
@@ -408,6 +409,7 @@ class Zeelool extends Backend
             if ($status == 1) {
                 //查询出质检通过的订单
                 $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = collection($list)->toArray();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -416,13 +418,14 @@ class Zeelool extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 1, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 1, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $sku = [];
                 if ($infoRes) {
@@ -462,9 +465,31 @@ class Zeelool extends Backend
                         ]);
                     }
                 }
+
+                //查询是否有取消订单
+                $skus = array_column($list, 'sku');
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 1,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
+
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
+
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
@@ -477,6 +502,11 @@ class Zeelool extends Backend
                         $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
+                    }
+
+                    //如果SKU 存在取消订单 则判断取消的数量
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
                     }
 
                     if ($qty == 0) {
@@ -534,15 +564,17 @@ class Zeelool extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'increment_id' => ['in', $arr],
-                        'change_type' => 1,    //更改类型 1更改镜架
-                        'platform_type' => 1, //平台类型
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 1,    //更改类型 1更改镜架
+                        'a.platform_type' => 1, //平台类型
+                        'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
-                    ->group('change_sku')
+                    ->group('original_sku,increment_id')
                     ->select();
                 $infoRes = collection($infoRes)->toArray();
+
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -577,6 +609,27 @@ class Zeelool extends Backend
                         ]);
                     }
                 }
+
+                //查询是否有取消订单
+                $skus = array_column($list, 'sku');
+                $cancel_data = $infotask->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.increment_id' => ['in', $arr],
+                        'a.change_type' => 3,
+                        'a.platform_type' => 1,
+                        'a.original_sku' => ['in', $skus],
+                        'b.work_status' => ['in', [5, 6]]
+                    ])
+                    ->field('sum(a.original_number) as num,a.original_sku,a.increment_id')
+                    ->group('original_sku,increment_id')
+                    ->select();
+                $cancel_data = collection($cancel_data)->toArray();
+                $cancel_list = [];
+                foreach($cancel_data as $v) {
+                    $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
+                }
+
                 $number = 0; //记录更新次数
                 foreach ($list as &$v) {
                     //查出订单SKU映射表对应的仓库SKU
@@ -591,6 +644,12 @@ class Zeelool extends Backend
                     } else {
                         $qty = $v['qty_ordered'];
                     }
+
+                    //如果SKU 存在取消订单 则判断取消的数量
+                    if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
+                        $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
+                    }
+
                     if ($qty == 0) {
                         continue;
                     }
@@ -1269,107 +1328,11 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         ini_set('memory_limit', '512M');
 
         $str = [
-            400303475,
-            400302697,
-            400302989,
-            400302959,
-            400304649,
-            400302940,
-            500007412,
-            500007417,
-            400302964,
-            400302894,
-            400303050,
-            400302708,
-            400302839,
-            400302902,
-            400303398,
-            400289655,
-            400303016,
-            400304579,
-            400302702,
-            400302840,
-            400303734,
-            400302900,
-            400302991,
-            100137394,
-            400303588,
-            400303638,
-            400302781,
-            400303002,
-            400302551,
-            400302920,
-            400302829,
-            400303680,
-            400303041,
-            500007430,
-            400303602,
-            100137089,
-            400302932,
-            400303559,
-            400302845,
-            400303657,
-            400302811,
-            400304592,
-            100137097,
-            400303046,
-            400302795,
-            500007482,
-            100137383,
-            400303786,
-            500007428,
-            400303706,
-            400305086,
-            400304501,
-            400303027,
-            400302698,
-            400304610,
-            400304618,
-            400303777,
-            400303773,
-            400303480,
-            400303485,
-            400302836,
-            400302834,
-            400304550,
-            400304505,
-            400304593,
-            500007422,
-            400302965,
-            100137389,
-            400302565,
-            400302685,
-            500007465,
-            400302922,
-            400303020,
-            400304646,
-            100137172,
-            400304514,
-            500007395,
-            400304625,
-            400304445,
-            400303770,
-            400303781,
-            400304524,
-            400302710,
-            400303731,
-            400304464,
-            400303269,
-            100137390,
-            100137367,
-            400303687,
-            400303583,
-            400305084,
-            400303369,
-            400303537,
-            400303738,
-            400288529,
-            400303614,
-            100137402,
-            100137411,
-            100137520,
-            400303608
+           
         ];
+
+        //查询临时表订单号
+        $str = Db::table('fa_zzzz_order_temp')->column('order_number');
 
         $map['sfo.increment_id'] = ['in', $str];
 
@@ -1508,10 +1471,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
+            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
                 $value['od_axis'] =  $value['od_axis'];
             } else {
@@ -1542,16 +1505,19 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['os_add'] && $value['od_add'] && $value['os_add'] * 1 != 0 && $value['od_add'] * 1 != 0) {
+            $value['os_add'] = urldecode($value['os_add']);
+            $value['od_add'] = urldecode($value['od_add']);
+
+            if ($value['os_add'] && $value['os_add'] && (float) ($value['os_add']) * 1 != 0 && (float) ($value['od_add']) * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
@@ -1563,7 +1529,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             } else {
 
-                if ($value['os_add'] && $value['os_add'] * 1 != 0) {
+                if ($value['os_add'] && (float) $value['os_add'] * 1 != 0) {
                     //数值在上一行合并有效，数值在下一行合并后为空
                     $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                     $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));

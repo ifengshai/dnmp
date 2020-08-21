@@ -1,6 +1,54 @@
 # Changelog
 
-### 7.3.0 (2020-03-23)
+### 7.8.2 (2020-07-28)
+
+- use more Generators v2
+- auto-generate the README
+
+### 7.8.1 (2020-07-15)
+
+- use more Generators
+- auto-generate the README
+
+### 7.8.0 (2020-07-11)
+
+- search for PhpDoc @property in parent classes
+  -> this is working for "Arrayy" classes and "ArrayyMeta" classes
+
+### 7.7.0 (2020-07-05)
+
+- add "prependImmutable()"
+- add "appendImmutable()"
+- add prefix for "implode()"
+- use more Generators
+- add more tests
+
+### 7.6.0 (2020-06-19)
+
+- fix "offsetGet()" usage
+  -> now e.g. $a['foo'] will return a reference instead of a new variable,
+  so that we can overwrite the key of an array like this $a['foo']['counter'] += 1 
+
+### 7.5.0 (2020-04-06)
+
+- add support for "A->get('*.key)"
+
+### 7.4.0 (2020-03-22)
+
+- add support for JSON-Mappings
+
+### 7.3.2 (2020-03-10)
+
+- add "JsonSerializable"-Collection
+
+### 7.3.1 (2020-03-01)
+
+- add "Callable"-Collections
+- add "Object"-Collections
+- add "Resource"-Collections
+- add "Scalar"-Collections
+
+### 7.3.0 (2020-02-23)
 
 - add & use "Arrayy->getGeneratorByReference()"
 - update "phpdocumentor/reflection-docblock"

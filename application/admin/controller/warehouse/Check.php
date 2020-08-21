@@ -118,7 +118,6 @@ class Check extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -144,6 +143,7 @@ class Check extends Backend
 
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['type'] = 1;
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加质检产品
@@ -497,7 +497,7 @@ class Check extends Backend
             $id = input('id');
             $batch = new \app\admin\model\purchase\PurchaseBatch();
             $item = $batch->alias('a')->where('a.id', $id)
-                ->field('b.sku,b.arrival_num,c.supplier_sku,c.purchase_num,a.purchase_id,d.supplier_id')
+                ->field('b.sku,b.arrival_num,c.supplier_sku,c.purchase_num,a.purchase_id,d.supplier_id,d.replenish_id')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
                 ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=a.purchase_id and b.sku=c.sku')
                 ->join(['fa_purchase_order' => 'd'], 'd.id=a.purchase_id')

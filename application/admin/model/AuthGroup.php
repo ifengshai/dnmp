@@ -78,4 +78,21 @@ class AuthGroup extends Model
         return $arr;
     }
 
+    /*
+     * 根据指定组id获取角色组下面所有的子角色组
+     * */
+    public static function getChildrenIds($ids)
+    {
+        static $output = [];
+        if (!is_array($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $child_ids = self::whereIn('pid', $ids)->column('id');
+        if (!empty($child_ids)){
+            $output = array_merge($output, $child_ids);
+            static::getChildrenIds($child_ids);
+        }
+        return $output;
+    }
+
 }

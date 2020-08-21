@@ -79,6 +79,25 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">是否为选品采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[is_new_product]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1" {:$row['is_new_product']==1 ? 'selected' : '' }>是</option>
+                <option value="0" {:$row['is_new_product']==0 ? 'selected' : '' }>否</option>
+            </select>
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[is_sample]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1" {:$row['is_sample']==1 ? 'selected' : '' }>是</option>
+                <option value="0" {:$row['is_sample']==0 ? 'selected' : '' }>否</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"

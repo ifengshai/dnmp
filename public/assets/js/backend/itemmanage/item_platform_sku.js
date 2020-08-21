@@ -42,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                         {field: 'name', title: __('Name')},
                         {
                             field: 'platform_type',
-                            title: __('Platform_type'),
+                            title: __('站点'),
                             searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'),
                             custom:{1:'blue',2:'yellow',3:'green',4:'red'},
                             formatter:Table.api.formatter.status,
@@ -69,13 +69,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             custom:{1:'blue',2:'green'},
                             formatter:Table.api.formatter.status,
                         },
-                        {
-                            field:'is_upload_images',
-                            title:__('Is_upload_images'),
-                            searchList:{1:'已上传',2:'未上传'},
-                            custom:{1:'blue',2:'green'},
-                            formatter:Table.api.formatter.status,
-                        },
+                        // {
+                        //     field:'is_upload_images',
+                        //     title:__('Is_upload_images'),
+                        //     searchList:{1:'已上传',2:'未上传'},
+                        //     custom:{1:'blue',2:'green'},
+                        //     formatter:Table.api.formatter.status,
+                        // },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {
@@ -102,6 +102,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                         return false;
                                     },
                                     visible: function (row) {
+                                        if (row.is_upload == 1) {
+                                            return false;
+                                        }
                                         return true;
                                     },
                                 },
@@ -121,7 +124,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        return false;
                                     },
                                 },
                             ]

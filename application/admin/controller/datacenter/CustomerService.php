@@ -206,7 +206,7 @@ class CustomerService extends Backend
         ini_set('memory_limit', '1024M');
         $this->zendeskTasks  = new \app\admin\model\zendesk\ZendeskTasks;
         //处理量
-        $deal_num = $this->zendeskTasks->dealnum_statistical(1);
+        $deal_num = $this->zendeskComments->dealnum_statistical(1);
         //未达标天数
         $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
         //人效
@@ -259,7 +259,7 @@ class CustomerService extends Backend
             //时间
             $data[$i]['one']['time'] = $one_time;
             //处理量
-            $data[$i]['one']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
+            $data[$i]['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
             //未达标天数
             $data[$i]['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str1, $admin['group_id'], $value);
             if ($time_str2) {
@@ -268,7 +268,7 @@ class CustomerService extends Backend
                 //对比时间
                 $data[$i]['two']['time'] = $two_time;
                 //对比处理量
-                $data[$i]['two']['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
+                $data[$i]['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
                 //对比未达标天数
                 $data[$i]['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str2, $admin['group_id'], $value);
             }
@@ -300,7 +300,7 @@ class CustomerService extends Backend
             $contrast_time_str = $params['contrast_time_str'];
             $group_id = $params['group_id'];
             //处理量
-            $arr['deal_num'] = $this->zendeskTasks->dealnum_statistical($platform, $time_str, $group_id);
+            $arr['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str, $group_id);
             //未达标天数
             $arr['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str, $group_id);
             //人效
@@ -338,21 +338,22 @@ class CustomerService extends Backend
             $group_id = $params['group_id'];
             $admin_id = $params['admin_id'];
             if($platform){
-                $where['type'] = $platform;
+                $where['c.platform'] = $platform;
             }
             if($group_id){
                 //查询客服类型
                 $group_admin_id = Db::name('admin')->where(['group_id' => $group_id, 'status' => 'normal'])->column('id');
-                $where['admin_id'] = array('in', $group_admin_id);
+                $where['c.due_id'] = array('in', $group_admin_id);
             }
             if($admin_id){
-                $where['admin_id'] = $admin_id;
+                $where['c.due_id'] = $admin_id;
             }
+            $where['z.channel'] = ['neq','voice'];
             if($time_str){
                 $createat = explode(' ', $time_str);
-                $where['create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                $where['c.create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                 $date_arr = array(
-                    $createat[0] => $this->zendeskTasks->where($where)->sum('reply_count')
+                    $createat[0] => $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
                 );
                 if ($createat[0] != $createat[3]) {
                     for ($i = 0; $i <= 100; $i++) {
@@ -360,8 +361,8 @@ class CustomerService extends Backend
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date, date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date, "Y-m-d");
-                        $where['create_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
-                        $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
+                        $where['c.create_time'] = ['between', [$next_day, $next_day  . ' 23:59:59']];
+                        $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                         if ($next_day == $createat[3]) {
                             break;
                         }
@@ -373,8 +374,8 @@ class CustomerService extends Backend
                     $j = $i-1;
                     $next_day = date("Y-m-d", strtotime("-$i day"));
                     $next_next_day = date("Y-m-d", strtotime("-$j day"));
-                    $where['create_time'] = ['between', [$next_day, $next_next_day]];
-                    $date_arr[$next_day] = $this->zendeskTasks->where($where)->sum('reply_count');
+                    $where['c.create_time'] = ['between', [$next_day, $next_next_day]];
+                    $date_arr[$next_day] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
                 }
             }
 
@@ -760,7 +761,7 @@ class CustomerService extends Backend
                     //审批时间存在证明已经审批
                     if ($v['check_time']) {
                         //如果两个时间差小于指定超时时间说明未超时
-                        if ($time_out > (strtotime($v['check_time']) - strtotime($v['submit_time']))) {
+                        if ($time_out >= (strtotime($v['check_time']) - strtotime($v['submit_time']))) {
                             //未超时已审批
                             $arr[$v['assign_user_id']]['no_time_out_checked']++;
                         } else {
@@ -770,7 +771,7 @@ class CustomerService extends Backend
                     } else {
                         //审批时间不存在证明没有审批,判断提交时间和现在的时间比较是否超时
                         //如果两个时间差小于指定超时时间说明未超时
-                        if ($time_out > (strtotime("now") - strtotime($v['submit_time']))) {
+                        if ($time_out >= (strtotime("now") - strtotime($v['submit_time']))) {
                             //未超时未审批
                             $arr[$v['assign_user_id']]['no_time_out_check']++;
                         } else {
@@ -818,7 +819,7 @@ class CustomerService extends Backend
                         //如果存在超时时间
                         if ($time_out[$v['measure_choose_id']]) {
                             //如果两个时间差小于指定超时时间说明未超时
-                            if ($time_out[$v['measure_choose_id']] > (strtotime($v['operation_time']) - strtotime($v['check_time']))) {
+                            if ($time_out[$v['measure_choose_id']] >= (strtotime($v['operation_time']) - strtotime($v['check_time']))) {
                                 //未超时已处理
                                 $arr[$v['measure_choose_id']]['no_time_out_handled']++;
                             } else {
@@ -834,11 +835,11 @@ class CustomerService extends Backend
                         //如果存在超时时间
                         if ($time_out[$v['measure_choose_id']]) {
                             //如果两个时间差小于指定超时时间说明未超时
-                            if ($time_out[$v['measure_choose_id']] > (strtotime("now") - strtotime($v['check_time']))) {
-                                //未超时已处理
+                            if ($time_out[$v['measure_choose_id']] >= (strtotime("now") - strtotime($v['check_time']))) {
+                                //未超时未处理
                                 $arr[$v['measure_choose_id']]['no_time_out_handle']++;
                             } else {
-                                //超时已处理
+                                //超时未处理
                                 $arr[$v['measure_choose_id']]['time_out_handle']++;
                             }
                         } else { //如果不存在超时时间
@@ -1027,8 +1028,6 @@ class CustomerService extends Backend
                     'worklistTwo'  => $worklistTwo,
                     'startOne'     => $startOne,
                     'endOne'       => $endOne,
-                    'startTwo'     => $startTwo,
-                    'endTwo'       => $endTwo,
                     'startTwo'     => $startTwo,
                     'endTwo'       => $endTwo,
                     'platform'     => $platform,

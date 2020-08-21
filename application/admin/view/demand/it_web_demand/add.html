@@ -1,107 +1,159 @@
 <style>
-    #st_sel{
+    /*左边div -- start*/
+    .left_input{
         float: left;
+        width: 45%;
+        height: 100%;
     }
-    #add_entry_user{
+    .left_input .input_item{
         float: left;
-        width: 6%;
-        height: 31px;
-        line-height: 31px;
-        border:1px solid #000;
-        text-align: center;
-        border-radius: 30px;
-        cursor: pointer;
+        width: 84%;
+        height: 50px;
+        line-height: 50px;
+        margin-left: 10%;
     }
-    .user_list{
-        margin-right: 8px;
-        margin-top: 6px;
-        float: left;
-        height: 20px;
-        line-height: 20px;
-        border:1px solid #000;
-        text-align: center;
-        border-radius: 30px;
-        padding-left: 6px;
-        padding-right: 4px;
+    .left_input .input_tiem_label{
+        width: 20%;
+        text-align: right;
+        margin-right: 10px;
     }
-    .user_list span{
-        float: left;
+    .left_input .select_input{
+        width: 62%!important;
     }
-    .user_list a{
-        width: 20px;
-        text-align: center;
-        margin-left: 6px;
-        float: left;
-        height: 19px;
-        border-left: 1px solid #000;
+    .left_input .input_tiem_label2{
+        width: 100%;
+        text-align: right;
+        padding-right: 15%;
 
     }
+    .left_input .input_tiem_label2 span{
+        margin-left: 16px;
+    }
+    /*左边div -- end*/
+
+    /*右边div -- start*/
+    .right_input{
+        float: left;
+        width: 55%;
+        height: 100%;
+    }
+    .right_input .input_item{
+         float: left;
+         width: 84%;
+         height: 50px;
+         line-height: 50px;
+    }
+    .right_input .input_tiem_label{
+        width: 12%;
+        text-align: right;
+    }
+    .right_input .input_tiem_p{
+        float: right;
+        width: 84%;
+        height: 90%;
+    }
+    .input_tiem_p input{
+        height: 100%;
+        width: 100%;
+    }
+
+    .right_input .input_item2{
+        float: left;
+        width: 84%;
+        height: 180px;
+        margin-top: 10px;
+    }
+    .right_input .input_tiem_label2{
+        width: 12%;
+        text-align: right;
+    }
+    .right_input .input_tiem_p2{
+        float: right;
+        width: 84%;
+        height: 90%;
+    }
+
+    .input_tiem_p2 textarea{
+        height: 100%;
+        width: 100%;
+        resize: none;
+    }
+    .ke-container{
+        height: 280px;
+    }
+    /*右边div -- end*/
 </style>
 
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <input name="row[type]" type="hidden" value="{$demand_type}">
-    <input name="row[status]" type="hidden" value="1">
-    <input name="row[create_time]" type="hidden" value="{:date('Y-m-d H:i:s')}">
-    <input name="row[entry_user_id]" type="hidden" value="">
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}：</label>
-        <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[site_type]', config('demand.siteType'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'site_type'])}
+<form role="form" method="POST" data-toggle="validator"  action="">
+    <div class="left_input">
+        <div class="input_item">
+            <label class="input_tiem_label">项目：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[site]', config('demand.site'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+            </span>
         </div>
+        <div class="input_item">
+            <label class="input_tiem_label">设备端：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[site_type][]', config('demand.siteType'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label">抄送：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), null, ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label">类型：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[type]', config('demand.type'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label2">
+                <input name="row[is_emergency]" type="checkbox" value="1"><span>紧急需求</span>
+            </label>
+        </div>
+
+        {if $demand_type == 2}
+        <div class="input_item">
+            <label class="input_tiem_label ">任务周期：</label>
+            <span class="input_tiem_span">
+                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="" style="height: 31px;" placeholder="输入整数(单位：天)">
+            </span>
+        </div>
+        {/if}
     </div>
 
-    {if $demand_type == 2}
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('Copy_to_user_id')}：</label>
-            <div class="col-xs-12 col-sm-8" id="st_sel">
-                {:Form::select('', config('demand.copyToUserId'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Copy_to_user_id'])}
-                <div id="user_list"></div>
-            </div>
-            <div id="add_entry_user" ><span>add</span></div>
+    <div class="right_input">
+        <div class="input_item">
+            <label class="input_tiem_label ">标题：</label>
+            <p class="input_tiem_p">
+                <input name="row[title]" data-rule="required" type="text">
+            </p>
         </div>
 
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('All_complexity')}</label>
-            <div class="col-xs-12 col-sm-8">
-                {:Form::select('row[all_complexity]', config('demand.allComplexity'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'all_complexity'])}
-            </div>
+        <div class="input_item2">
+            <label class="input_tiem_label2">内容：</label>
+            <p class="input_tiem_p2">
+                <textarea name="row[content]"></textarea>
+            </p>
         </div>
 
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{:__('Hope_time')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-hope_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[hope_time]" type="text" value="">
-            </div>
-        </div>
-    {/if}
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Title')}</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-title" class="form-control" data-rule="required" name="row[title]" type="text">
+        <div class="input_item2">
+            <label class="input_tiem_label2">附件：</label>
+            <p class="input_tiem_p2">
+                <textarea class="editor_nkeditor input_tiem_p2_text form-control" name="row[accessory]" ></textarea>
+            </p>
         </div>
     </div>
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Content')}</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-content" class="form-control editor" rows="5" name="row[content]" cols="50"></textarea>
-        </div>
-    </div>
-
-    <!--<div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Test_group')}</label>
-        <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[test_group]', config('demand.testGroup'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'Test_group'])}
-        </div>
-    </div>-->
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        <div class="col-xs-12 col-sm-8" style="width: 100%;text-align: right;">
+            <button type="submit" class="btn btn-success btn-embossed disabled" style="width: 80px;">{:__('OK')}</button>
         </div>
     </div>
 </form>

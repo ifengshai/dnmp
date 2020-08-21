@@ -521,9 +521,9 @@ class Zendesk extends Model
         $where['z.channel'] = array('neq','voice');
         $new_create_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
         //已回复
-        $already_reply_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1])->count();
+        $already_reply_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>1,'c.is_public'=>['neq',2]])->count();
         //待分配
-        $map[] = ['exp', Db::raw("assign_id = 0 or assign_id is null")];
+        $map['is_hide'] = 1;
         $wait_allot_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
         //人效
         if($platform){

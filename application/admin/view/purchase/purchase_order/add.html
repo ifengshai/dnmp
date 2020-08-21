@@ -78,6 +78,27 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">是否为新品采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[is_new_product]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[is_sample]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+     
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
@@ -160,7 +181,7 @@
                 <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required' data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
-                    <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
+                    <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' } {:$list[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
                     {/foreach}
                 </select>
 
@@ -194,19 +215,21 @@
                     <th>总价（元）</td>
                     <th>操作</td>
                 </tr>
-                {if $row}
-                {foreach $row as $v}
+                {if $list}
+                {foreach $list as $v}
+                <input  class="form-control"  name="row[replenish_id]" type="hidden" value="{$v.replenish_id}">
                 <tr>
+                    <input  class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden" value="{$v.id}">
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text"
                             value="{$v.sku}">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                            type="text" value="{$v.name}"></td>
+                            type="text" value="{$v.product_name}"></td>
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
                             type="text" value="{$v.supplier_sku}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
-                            type="text"></td>
+                            type="text" value="{$v.distribute_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
                             type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
@@ -215,6 +238,7 @@
                             删除</a></td>
                 </tr>
                 {/foreach}
+                
                 {else/}
                 <tr>
                     <td>
@@ -323,7 +347,6 @@
                     </tr>
 
                 </table>
-
 
             </div> -->
 

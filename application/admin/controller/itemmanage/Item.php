@@ -13,6 +13,7 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item_presell_log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use fast\Soap;
 
 /**
  * 商品管理
@@ -28,10 +29,12 @@ class Item extends Backend
      */
     protected $model = null;
     protected $category = null;
+
     /**
-     * 不需要登陆
+     * 无需鉴权的方法,但需要登录
+     * @var array
      */
-    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName'];
 
     public function _initialize()
     {
@@ -891,40 +894,6 @@ class Item extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-    /**
-     * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
-     * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
-     * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
-     */
-    /***
-     * 异步获取商品分类的信息（原先）
-     */
-    //    public function ajaxCategoryInfo(Request $request)
-    //    {
-    //        if($this->request->isAjax()){
-    //            $categoryId = $this->request->post('categoryId');
-    //            if(!$categoryId){
-    //                $this->error('参数错误，请重新尝试');
-    //            }
-    //            //原先
-    //            $result = $this->category->categoryPropertyInfo($categoryId);
-    //            if(!$result){
-    //              return  $this->error('对应分类不存在,请从新尝试');
-    //            }elseif ($result == -1){
-    //              return $this->error('对应分类存在下级分类,请从新选择');
-    //            }
-    //            $num = count($result)-1;
-    //            $this->view->engine->layout(false);
-    //            $this->assign('result',$result);
-    //            //传递最后一个key值
-    //            $this->assign('num',$num);
-    //            $data = $this->fetch('attribute');
-    //            return  $this->success('ok','',$data);
-    //
-    //        }else{
-    //           return $this->error(__('404 Not Found'));
-    //        }
-    //    }
 
     /***
      * 异步获取商品分类的信息之后（更改之后）
@@ -1088,7 +1057,18 @@ class Item extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+            $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //查询各站SKU虚拟库存
+            foreach ($list as &$v) {
+                $v['zeelool_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
+                $v['voogueme_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
+                $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
+                $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
+                $v['wesee_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
+            }
             unset($v);
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -1347,19 +1327,52 @@ class Item extends Backend
             if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核通过');
             }
-            $map['id'] = $id;
-            $data['item_status'] = 3;
-            $data['check_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res) {
-                //添加到商品平台sku
-                (new ItemPlatformSku())->addPlatformSku($row);
-                $this->success('审核通过成功');
-            } else {
-                $this->error('审核通过失败');
+
+            Db::startTrans();
+            try {
+                $map['id'] = $id;
+                $data['item_status'] = 3;
+                $data['check_time']  = date("Y-m-d H:i:s", time());
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                if ($res === false) {
+                    throw new Exception('审核失败！！');
+                }
+
+                //查询同步的平台
+                $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
+                $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
+                $error_num = [];
+                $uploadItemArr = [];
+                foreach ($platformArr as $k => $v) {
+                    // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                    //审核通过把SKU同步到有映射关系的平台
+                    $uploadItemArr['skus']  = [$v['platform_sku']];
+                    $uploadItemArr['site']  = $v['platform_type'];
+                    $soap_res = Soap::createProduct($uploadItemArr);
+                    if (!$soap_res) {
+                        $error_num[] = $v['platform_type'];
+                    } else {
+                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                    }
+                }
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
             }
-        } else {
-            $this->error('404 Not found');
+
+            if ($error_num) {
+                $this->error('站点同步失败:' . implode(',', $error_num));
+            }
+
+            $this->success('审核成功！！');
         }
     }
     /***
@@ -1463,7 +1476,7 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $row = $this->model->where($map)->field('id,item_status')->select();
+            $row = $this->model->where($map)->field('id,item_status,sku')->select();
             foreach ($row as $v) {
                 if ($v['item_status'] != 2) {
                     $this->error('只有待审核状态才能操作！！');
@@ -1472,11 +1485,23 @@ class Item extends Backend
             $data['item_status'] = 3;
             $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res != false) {
-                $row = $this->model->where('id', 'in', $ids)->field('sku,name,frame_is_rimless')->select();
-                if ($row) {
-                    foreach ($row as $val) {
-                        (new ItemPlatformSku())->addPlatformSku($val);
+            if ($res !== false) {
+                foreach ($row as $val) {
+                    //查询同步的平台
+                    $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
+                    $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
+                    $uploadItemArr = [];
+                    foreach ($platformArr as $k => $v) {
+                        // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                        //审核通过把SKU同步到有映射关系的平台
+
+                        $uploadItemArr['skus']  = [$v['platform_sku']];
+                        $uploadItemArr['site']  = $v['platform_type'];
+                        $soap_res = Soap::createProduct($uploadItemArr);
+                        if ($soap_res) {
+                            $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                        }
                     }
                 }
                 $this->success('审核成功');
@@ -1614,9 +1639,22 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $sku = input('sku');
+            $site = input('site');
+            if ($site == 0) {
+                $this->error('请先选择平台！！');
+            }
+            $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $info = $itemplatform->where(['sku' => $sku, 'platform_type' => $site])->field('stock')->find();
             $res = $this->model->getGoodsInfo($sku);
+            $res['platform_stock'] = $info['stock'];
+            $res['now_stock'] = $res['stock'] - $res['distribution_occupy_stock'];
+            // dump($res);die;
             if ($res) {
-                $this->success('', '', $res);
+                if ($info) {
+                    $this->success('', '', $res);
+                } else {
+                    $this->error('当前平台未同步sku！！');
+                }
             } else {
                 $this->error('未找到数据！！');
             }
@@ -1647,21 +1685,7 @@ class Item extends Backend
             $this->error('404 Not Found');
         }
     }
-    // /***
-    //  * 原先的crm平台商品的sku和库存变更到最新平台的库存表里面
-    //  */
-    // public function changeSku()
-    // {
-    //     $where['magento_sku'] = ['NEQ', ''];
-    //     $where['is_visable'] = 1;
-    //     $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('name,magento_sku as sku,true_qty as stock,true_qty as available_stock,3 as item_status, remark')->select();
-    //     if (!$result) {
-    //         return false;
-    //     } else {
 
-    //         $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
-    //     }
-    // }
     /***
      * 第一步
      * 获取magento平台的商品信息
@@ -1746,20 +1770,9 @@ class Item extends Backend
             $serializeResult = serialize($storeArr);
             $where['information'] = $serializeResult;
             Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($where);
-            // echo '<pre>';
-            // var_dump($storeArr);
-            // $productInfo[] = $result;
         }
-        // echo '<pre>';
-        // var_dump($productInfo);
     }
-    // public function ceshi2()
-    // {
-    //     //$str = 's:4:"lens";s:5:"35.00";s:5:"total";s:5:"46.95";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3131";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"3827";s:11:"custom_view";b:0;}}}';
-    //     $str2 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3200";s:8:"form_key";s:16:"JS2J2VXHOIsmkySi";s:3:"qty";s:1:"1";s:7:"options";a:1:{i:3131;s:4:"3827";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:16:{s:19:"frame_regural_price";s:5:"35.95";s:11:"frame_price";s:5:"11.95";s:12:"prescription";s:278:"customer_rx=0&prescription_type=SingleVision&od_sph=-1.50&od_cyl=-0.50&od_axis=70&os_sph=-1.00&os_cyl=-0.50&os_axis=150&pdcheck=on&pd_r=30.5&pd_l=32.5&prismcheck=&od_pv=0.00&os_pv=0.00&od_bd=0.00&os_bd=0.00&od_pv_r=0.00&os_pv_r=0.00&od_bd_r=0.00&os_bd_r=0.00&year=1983&save=&pd=";s:16:"is_special_price";s:1:"0";s:10:"index_type";s:35:"1.57 Mid-Index Lens with Color Tint";s:11:"index_price";s:5:"25.00";s:10:"index_name";s:17:"Color Tint Lenses";s:8:"index_id";s:7:"color_1";s:8:"color_id";s:2:"11";s:10:"color_name";s:9:"Dark Blue";s:10:"coating_id";s:9:"coating_3";s:13:"coatiing_name";s:74:"Oleophobic (premium oil and fingerprint resistant) Anti-Reflective Coating";s:14:"coatiing_price";s:5:"10.00";s:3:"rid";s:1:"0";s:4:"lens";s:5:"35.00";s:5:"total";s:5:"46.95";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3131";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"3827";s:11:"custom_view";b:0;}}}';
-    //     $unsiar = unserialize($str2);
-    //     dump($unsiar);
-    // }
+
     /***
      * 第二步
      * 解析magento字段获取字段的值
@@ -1999,150 +2012,9 @@ class Item extends Backend
             }
         }
     }
-    // /***
-    //  * 优化完善nihao站的sku
-    //  */
-    // public function optimizeSku()
-    // {
-    //     $where['nihao_sku'] = ['NEQ', ''];
-    //     $where['status'] = 3;
-    //     $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,nihao_sku')->order('id desc')->limit(10)->select();
-    //     if (!$result) {
-    //         return false;
-    //     }
-    //     foreach ($result as $k => $v) {
-    //         $colorArr = explode('-', $v['sku']);
-    //         $data['status'] = 4;
-    //         $data['nihao_sku'] = $v['nihao_sku'] . '-' . $colorArr[1];
-    //         Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($data);
-    //     }
-    // }
-    /***
-     *商品sku转化到平台sku库里面
-     */
-    // public function changeSkuToPlatformSku()
-    // {
-    //     $sql = "select name,sku,frame_is_rimless from fa_item where is_update_platform = 0 limit 100 ";
-    //     $result = Db::connect('database.db_stock')->query($sql);
-    //     if (!$result) {
-    //         return false;
-    //     }
-    //     foreach ($result as $v) {
-    //         if (!empty($v['sku'])) {
-    //             $info = (new ItemPlatformSku())->addPlatformSku($v);
-    //             if ($info) {
-    //                 Db::connect('database.db_stock')->name('item')->where(['sku' => $v['sku']])->update(['is_update_platform' => 1]);
-    //             }
-    //         }
-    //     }
-    // }
-    /**
-     * 查找对比fa_item中sku是否全部更新到fa_item_platform_sku当中
-     */
-    // public function findSku()
-    // {
-    //     $result = Db::connect('database.db_stock')->name('item')->field('sku')->select();
-    //     if (!$result) {
-    //         return false;
-    //     }
-    //     $arr =  $newArr = [];
-    //     foreach ($result as $v) {
-    //         $arr[] = $v['sku'];
-    //     }
-    //     $info = Db::connect('database.db_stock')->name('item_platform_sku')->where('sku', 'in', $arr)->distinct(true)->field('sku')->select();
-    //     foreach ($info as $vs) {
-    //         $newArr[] = $vs['sku'];
-    //     }
-    //     echo '<pre>';
-    //     echo count(array_filter($arr)) . '<br/>';
-    //     //var_dump($arr);
-    //     echo count($newArr) . '<br/>';
-    //     $finalArr = array_diff($newArr, $arr);
-    //     var_dump($finalArr);
-    // }
-    /***
-     * 清除空的sku映射
-     */
-    // public function skuMapOne()
-    // {
-    //     $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=1 limit 50";
-    //     $result = Db::connect('database.db_stock')->query($sql);
-    //     if (!$result) {
-    //         return false;
-    //     }
-    //     foreach ($result as $v) {
-    //         if (($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')) {
-    //             Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 3]);
-    //         } else {
-    //             Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 2]);
-    //         }
-    //     }
-    // }
-    /***
-     * 找出平台映射关系表(sku_map)中的对应关系映射变更到fa_item_platform_sku当中
-     */
-    // public function skuMap()
-    // {
-    //     $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
-    //     $result = Db::connect('database.db_stock')->query($sql);
-    //     if (!$result) {
-    //         return false;
-    //     }
-    //     $i = 0;
-    //     foreach ($result as $k => $v) {
-    //         if (!empty($v['zeelool_sku'])) {
-    //             $zeeloolWhere['sku'] = $v['sku'];
-    //             $zeeloolWhere['platform_type'] = 1;
-    //             $zeeloolData['platform_sku'] = $v['zeelool_sku'];
-    //             $zeeloolData['update_platform'] = 2;
-    //             Db::connect('database.db_stock')->name('item_platform_sku')->where($zeeloolWhere)->update($zeeloolData);
-    //             $i++;
-    //         }
-    //         if (!empty($v['voogueme_sku'])) {
-    //             $vooguemeWhere['sku'] = $v['sku'];
-    //             $vooguemeWhere['platform_type'] = 2;
-    //             $vooguemeData['platform_sku'] = $v['voogueme_sku'];
-    //             $vooguemeData['update_platform'] = 2;
-    //             Db::connect('database.db_stock')->name('item_platform_sku')->where($vooguemeWhere)->update($vooguemeData);
-    //             $i++;
-    //         }
-    //         if (!empty($v['nihao_sku'])) {
-    //             $nihaoWhere['sku'] = $v['sku'];
-    //             $nihaoWhere['platform_type'] = 3;
-    //             $nihaoData['platform_sku'] = $v['nihao_sku'];
-    //             $nihaoData['update_platform'] = 2;
-    //             Db::connect('database.db_stock')->name('item_platform_sku')->where($nihaoWhere)->update($nihaoData);
-    //             $i++;
-    //         }
-    //         Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 1]);
-    //     }
-    //     echo $i;
-    //     Db::connect('database.db_stock')->name('num')->where(['id' => 1])->setInc('num', $i);
-    //     // echo '<pre>';
-    //     // var_dump($result);
 
-    // }
-    /**
-     * 从仓库sku找到zeelool的sku并且更新到sku_map数据库当中
-     */
-    // public function add_map_sku()
-    // {
-    //     $where['magento_sku'] = ['NEQ',''];
-    //     $where['is_visable'] = 1;
-    //     $result = M('product')->where($where)->field('magento_sku as sku')->select();
-    // 	if(!$result){
-    // 		echo 123;
-    // 		return 123;
-    // 	}	
-    //     $map = M('map','sku_')->addAll($result);
-    // }
-    // public function ceshi(){
-
-    // }
     /***
-     * 定时任务
-     */
-    /***
+     * @todo 弃用
      * 商品预售管理
      */
     public function presell()
@@ -2187,6 +2059,7 @@ class Item extends Backend
     }
 
     /***
+     * @todo 弃用
      * 添加商品预售
      */
     public function add_presell()
@@ -2258,6 +2131,7 @@ class Item extends Backend
         return $this->view->fetch();
     }
     /***
+     * @todo 弃用
      * 检测商品sku是否存在
      * 
      */
@@ -2276,6 +2150,7 @@ class Item extends Backend
         }
     }
     /***
+     * @todo 弃用
      * 开启预售
      */
     public function openStart($ids = null)
@@ -2303,6 +2178,7 @@ class Item extends Backend
     }
     /***
      * 关闭预售
+     * @todo 弃用
      */
     public function openEnd($ids = null)
     {
@@ -2325,6 +2201,7 @@ class Item extends Backend
     }
     /***
      * 编辑预售
+     * @todo 弃用
      */
     public function edit_presell($ids = null)
     {
@@ -2384,6 +2261,7 @@ class Item extends Backend
     }
     /***
      * 预售历史记录
+     * @todo 弃用
      */
     public function presell_history($ids = null)
     {
@@ -2524,5 +2402,4 @@ class Item extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
-
 }
