@@ -316,10 +316,9 @@ class TrackReg extends Backend
         
         foreach ($list as $k => $v) {
             //15天日均销量
-            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select(false);
-            echo $days15_data;die;
-            dump($days15_data[0]->sales_num);
-            dump($days15_data[0]->num);
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
+            $days15_data = collection($days15_data)->toArray();
+            dump($days15_data);
             $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
             //90天总销量
