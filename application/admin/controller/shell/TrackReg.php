@@ -292,6 +292,7 @@ class TrackReg extends Backend
             if ($params) {
                 $skuSalesNum->saveAll($params);
             }
+           
         }
 
         echo "ok";
@@ -310,23 +311,18 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1, 'id' => 24614])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-
+        
         foreach ($list as $k => $v) {
             //15天日均销量
-            $days15_sales = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->limit(15)->order('createtime desc')->sum('sales_num');
-            $days15_num = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->limit(15)->order('createtime desc')->count();
-            $params['sales_num_15days'] = $days15_num > 0 ? round($days15_sales / $days15_num) : 0;
-
-            //15天日均销量
-            $days90_sales = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->limit(90)->order('createtime desc')->sum('sales_num');
-            $days90_num = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->limit(90)->order('createtime desc')->count();
-
+            $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
+            $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
+            $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
             //90天总销量
-            $params['sales_num_90days'] = $days90_sales;
+            $params['sales_num_90days'] = $days90_data[0]->sales_num;
             //90天日均销量
-            $sales_num_90days = $days90_num > 0 ? round($days90_sales / $days90_num) : 0;
+            $sales_num_90days = $days90_data[0]->num > 0 ? round($days90_data[0]->sales_num / $days90_data[0]->num) : 0;
             //90天日均销量
             $params['average_90days_sales_num'] = $sales_num_90days;
             //计算等级 30天预估销量
@@ -348,12 +344,9 @@ class TrackReg extends Backend
             } else {
                 $params['grade'] = 'F';
             }
-
-            dump($params);
-            die;
             $itemPlatformSku->where('id', $v['id'])->update($params);
         }
-
+       
         echo "ok";
     }
 
@@ -460,4 +453,5 @@ class TrackReg extends Backend
         }
         return $grouped;
     }
+
 }
