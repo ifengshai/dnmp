@@ -2,10 +2,7 @@
 
 namespace app\admin\controller;
 
-use app\admin\model\NewProductMapping;
-use app\admin\model\purchase\NewProductReplenishOrder;
 use app\common\controller\Backend;
-use function fast\array_except;
 use think\Request;
 use think\Db;
 use think\Exception;
@@ -13,10 +10,10 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\purchase\Supplier;
-use app\admin\model\itemmanage\ItemPlatformSku;
 use think\Loader;
 use fast\Alibaba;
 use app\admin\model\NewProductMappingLog;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * 商品管理
@@ -25,12 +22,17 @@ use app\admin\model\NewProductMappingLog;
  */
 class NewProduct extends Backend
 {
-
     /**
      * NewProduct模型对象
      * @var \app\admin\model\NewProduct
      */
     protected $model = null;
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls'];
 
     public function _initialize()
     {
@@ -1402,5 +1404,135 @@ class NewProduct extends Backend
         } else {
             $this->error(__('No rows were updated'));
         }
+    }
+
+
+    /**
+     * 选品批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        if ($ids) {
+            $map['a.id'] = ['in', $ids];
+        }
+
+        //如果切换站点清除默认值
+        $filter = json_decode($this->request->get('filter'), true);
+        //可用库存搜索
+        if ($filter['available_stock']) {
+            $item = new \app\admin\model\itemmanage\Item();
+            $item_where['available_stock'] = ['between', explode(',', $filter['available_stock'])];
+            $skus = $item->where($item_where)->where(['is_del' => 1, 'is_open' => 1])->column('sku');
+            $map['sku'] = ['in', $skus];
+            unset($filter['available_stock']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        //平台搜索 (单选)
+        if ($filter['platform_type']) {
+            if ($filter['platform_type'] == 10) {
+                $map['item_status'] = ['=', 1];
+            } else {
+                $skus = $this->platformsku->where(['platform_type' => $filter['platform_type']])->column('sku');
+                $map1['sku'] = ['in', $skus];
+            }
+            unset($filter['platform_type']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+
+        list($where) = $this->buildparams();
+
+        $list = $this->model->alias('a')
+            ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
+            ->where($where)
+            ->where($map)
+            ->where($map1)
+            ->select();
+        $list = collection($list)->toArray();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "SKU")
+            ->setCellValue("B1", "供应商SKU")
+            ->setCellValue("C1", "供应商名称");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "单价")
+            ->setCellValue("E1", "选品状态");
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['price']);
+            if ($value == 1) {
+                $status = '待选品';
+            } elseif ($value == 2) {
+                $status = '选品通过';
+            } elseif ($value == 3) {
+                $status = '选品拒绝';
+            } elseif ($value == 4) {
+                $status = '取消';
+            } else {
+                $status = '新建';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
+           
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '选品数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }

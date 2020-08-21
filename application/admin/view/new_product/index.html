@@ -9,6 +9,10 @@
 
                         {:build_toolbar('refresh')}
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('new_product/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('新增')}</a>
+
+                        <a href="javascript:;"
+                                class="btn btn-danger btn-batch-export-xls"
+                                title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                         <!-- <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('new_product/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->
                         <!-- <a class="btn btn-info btn-disabled disabled btn-selected" href="javascript:;"><i class="fa fa-leaf"></i> 获取选中项</a>
                         <a class="btn btn-success btn-toggle-view" href="javascript:;"><i class="fa fa-leaf"></i> 切换视图</a> -->
@@ -81,7 +85,7 @@
 
                     <span class="pull-right" style="margin-top:10px;">
                         <!--如果需要多选操作，请确保有下面的checkbox元素存在,可移除-->
-                        <!-- <input name="checkbox" data-id="<%=item.id%>" type="checkbox" /> -->
+                        <input name="checkbox" data-id="<%=item.id%>" type="checkbox" />
                     </span>
                 </p>
             </div>
