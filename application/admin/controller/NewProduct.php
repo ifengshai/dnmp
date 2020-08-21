@@ -1038,7 +1038,7 @@ class NewProduct extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             $params = $this->request->get();
             if ($filter['sku']) {
-                $where['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $where['a.sku'] = ['like', '%' . trim($filter['sku']) . '%'];
             }
             if ($filter['category_id']) {
                 $where['a.category_id'] = ['=', $filter['category_id']];
