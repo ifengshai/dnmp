@@ -116,13 +116,13 @@ class Index extends Backend
             //重组数组
             foreach ($list as &$v) {
 
-                $v['z_num'] = round($zeelool[$v['z_sku']]) ?? 0;
+                $v['z_num'] = round($zeelool[trim($v['z_sku'])]) ?? 0;
 
-                $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
+                $v['v_num'] = round($voogueme[trim($v['v_sku'])]) ?? 0;
 
-                $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
+                $v['n_num'] = round($nihao[trim($v['n_sku'])]) ?? 0;
 
-                $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
+                $v['m_num'] = round($meeloog[trim($v['m_sku'])]) ?? 0;
 
                 $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'];
             }
