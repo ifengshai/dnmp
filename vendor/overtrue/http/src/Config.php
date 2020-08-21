@@ -24,10 +24,10 @@ class Config
      * @var array
      */
     protected $options = [
-        'base_uri' => null,
-        'timeout' => 3000,
+        'base_uri'        => null,
+        'timeout'         => 3000,
         'connect_timeout' => 3000,
-        'proxy' => [],
+        'proxy'           => [],
     ];
 
     /**
@@ -187,5 +187,23 @@ class Config
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    /**
+     * @return bool
+     */
+    public function needAutoTrimEndpointSlash(): bool
+    {
+        return $this->autoTrimEndpointSlash;
+    }
+
+    /**
+     * @return $this
+     */
+    public function disableAutoTrimEndpointSlash(): self
+    {
+        $this->autoTrimEndpointSlash = false;
+
+        return $this;
     }
 }
