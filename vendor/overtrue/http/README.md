@@ -45,11 +45,7 @@ use Overtrue\Http\Client;
 $config = [
     'base_uri' => 'https://www.easyhttp.com/apiV2/',
     'timeout' => 3000,
-    'headers' => [
-        'User-Agent' => 'MyClient/1.0',
-        'Content-Type' => 'application/json'
-    ]
-    //...
+    //'connect_timeout' => 3000,
 ];
 
 $client = Client::create($config); // or new Client($config);

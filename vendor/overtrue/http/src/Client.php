@@ -11,21 +11,19 @@
 
 namespace Overtrue\Http;
 
-use GuzzleHttp\ClientInterface;
-use Overtrue\Http\Traits\CreatesDefaultHttpClient;
+use GuzzleHttp\Client as GuzzleClient;
 use Overtrue\Http\Traits\HasHttpRequests;
-use Overtrue\Http\Traits\ResponseCastable;
 
 /**
  * Class BaseClient.
+ *
+ * @author overtrue <i@overtrue.me>
  */
 class Client
 {
     use HasHttpRequests {
         request as performRequest;
     }
-    use CreatesDefaultHttpClient;
-    use ResponseCastable;
 
     /**
      * @var \Overtrue\Http\Config
@@ -46,6 +44,8 @@ class Client
     }
 
     /**
+     * Client constructor.
+     *
      * @param \Overtrue\Http\Config|array $config
      */
     public function __construct($config = [])
@@ -54,40 +54,35 @@ class Client
     }
 
     /**
-     * @param string $uri
-     * @param array  $options
-     * @param bool   $async
+     * GET request.
+     *
+     * @param string $url
+     * @param array  $query
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
      */
-    public function get(string $uri, array $options = [], $async = false)
+    public function get(string $url, array $query = [])
     {
-        return $this->request($uri, 'GET', $options, $async);
+        return $this->request($url, 'GET', ['query' => $query]);
     }
 
     /**
-     * @param string $uri
-     * @param array  $options
+     * POST request.
      *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function getAsync(string $uri, array $options = [])
-    {
-        return $this->get($uri, $options, true);
-    }
-
-    /**
-     * @param string $uri
+     * @param string $url
      * @param array  $data
-     * @param array  $options
-     * @param bool   $async
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
      */
-    public function post(string $uri, array $data = [], array $options = [], $async = false)
+    public function post(string $url, array $data = [])
     {
-        return $this->request($uri, 'POST', \array_merge($options, ['form_params' => $data]), $async);
+        return $this->request($url, 'POST', ['form_params' => $data]);
     }
+
     /**
      * JSON request.
      *
@@ -105,146 +100,18 @@ class Client
     }
 
     /**
-     * @param string $uri
-     * @param array  $data
-     * @param array  $options
+     * Upload file.
      *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function postAsync(string $uri, array $data = [], array $options = [])
-    {
-        return $this->post($uri, $data, $options, true);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $data
-     * @param array  $options
-     * @param bool   $async
-     *
-     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function patch(string $uri, array $data = [], array $options = [], $async = false)
-    {
-        return $this->request($uri, 'PATCH', \array_merge($options, ['form_params' => $data]), $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $data
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function patchAsync(string $uri, array $data = [], array $options = [])
-    {
-        return $this->patch($uri, $data, $options, true);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $data
-     * @param array  $options
-     * @param bool   $async
-     *
-     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function put(string $uri, array $data = [], array $options = [], $async = false)
-    {
-        return $this->request($uri, 'PUT', \array_merge($options, ['form_params' => $data]), $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $data
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function putAsync(string $uri, array $data = [], array $options = [])
-    {
-        return $this->put($uri, $data, $options, true);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     * @param bool   $async
-     *
-     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function options(string $uri, array $options = [], $async = false)
-    {
-        return $this->request($uri, 'OPTIONS', $options, $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function optionsAsync(string $uri, array $options = [])
-    {
-        return $this->options($uri, $options, true);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     * @param bool   $async
-     *
-     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function head(string $uri, array $options = [], $async = false)
-    {
-        return $this->request($uri, 'HEAD', $options, $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function headAsync(string $uri, array $options = [])
-    {
-        return $this->head($uri, $options, true);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     * @param bool   $async
-     *
-     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function delete(string $uri, array $options = [], $async = false)
-    {
-        return $this->request($uri, 'DELETE', $options, $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function deleteAsync(string $uri, array $options = [])
-    {
-        return $this->delete($uri, $options, true);
-    }
-
-    /**
-     * @param string $uri
+     * @param string $url
      * @param array  $files
      * @param array  $form
-     * @param array  $options
-     * @param bool   $async
+     * @param array  $query
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
      */
-    public function upload(string $uri, array $files = [], array $form = [], array $options = [], $async = false)
+    public function upload(string $url, array $files = [], array $form = [], array $query = [])
     {
         $multipart = [];
 
@@ -257,65 +124,60 @@ class Client
             $multipart = array_merge($multipart, $this->normalizeMultipartField($name, $contents));
         }
 
-        return $this->request($uri, 'POST', \array_merge($options, ['multipart' => $multipart]), $async);
-    }
-
-    /**
-     * @param string $uri
-     * @param array  $files
-     * @param array  $form
-     * @param array  $options
-     *
-     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
-     */
-    public function uploadAsync(string $uri, array $files = [], array $form = [], array $options = [])
-    {
-        return $this->upload($uri, $files, $form, $options, true);
+        return $this->request($url, 'POST', ['query' => $query, 'multipart' => $multipart]);
     }
 
     /**
      * @param string $uri
      * @param string $method
      * @param array  $options
-     * @param bool   $async
+     * @param bool   $returnRaw
      *
-     * @return \Psr\Http\Message\ResponseInterface|\GuzzleHttp\Promise\PromiseInterface|\Overtrue\Http\Support\Collection|array|object|string
-     */
-    public function request(string $uri, string $method = 'GET', array $options = [], bool $async = false)
-    {
-        $result = $this->requestRaw($uri, $method, $options, $async);
-
-        $transformer = function ($response) {
-            return $this->castResponseToType($response, $this->config->getOption('response_type'));
-        };
-
-        return $async ? $result->then($transformer) : $transformer($result);
-    }
-
-    /**
-     * @param string $uri
-     * @param string $method
-     * @param array  $options
-     * @param bool   $async
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
-     * @return \Psr\Http\Message\ResponseInterface|\GuzzleHttp\Promise\PromiseInterface|\Overtrue\Http\Support\Collection|array|object|string
+     * @return \Psr\Http\Message\ResponseInterface|\Overtrue\Http\Support\Collection|array|object|string
      */
-    public function requestRaw(string $uri, string $method = 'GET', array $options = [], bool $async = false)
+    public function request(string $uri, string $method = 'GET', array $options = [], $returnRaw = false)
     {
         if (property_exists($this, 'baseUri') && !is_null($this->baseUri)) {
             $options['base_uri'] = $this->baseUri;
         }
 
-        return $this->performRequest($uri, $method, $options, $async);
+        if ((!empty($options['base_uri']) || $this->config->getBaseUri()) && $this->config->needAutoTrimEndpointSlash()) {
+            $uri = ltrim($uri, '/');
+        }
+
+        $response = $this->performRequest($uri, $method, $options);
+
+        return $this->castResponseToType(
+            $response,
+            $returnRaw ? 'raw' : $this->config->getOption('response_type')
+        );
     }
 
     /**
+     * @param string $url
+     * @param string $method
+     * @param array  $options
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return array|object|\Overtrue\Http\Support\Collection|\Psr\Http\Message\ResponseInterface|string
+     */
+    public function requestRaw(string $url, string $method = 'GET', array $options = [])
+    {
+        return $this->request($url, $method, $options, true);
+    }
+
+    /**
+     * Return GuzzleHttp\Client instance.
+     *
      * @return \GuzzleHttp\ClientInterface
      */
-    public function getHttpClient(): ClientInterface
+    public function getHttpClient(): \GuzzleHttp\ClientInterface
     {
         if (!$this->httpClient) {
-            $this->httpClient = $this->createDefaultHttClient($this->config->toArray());
+            $this->httpClient = new GuzzleClient($this->config->toArray());
         }
 
         return $this->httpClient;
@@ -354,7 +216,6 @@ class Client
         if (!is_array($contents)) {
             return [compact('name', 'contents')];
         }
-
         foreach ($contents as $key => $value) {
             $key = sprintf('%s[%s]', $name, $key);
             $field = array_merge($field, is_array($value) ? $this->normalizeMultipartField($key, $value) : [['name' => $key, 'contents' => $value]]);
