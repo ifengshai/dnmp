@@ -57,7 +57,8 @@ class ZendeskTasks extends Model
             $all_positive_num = round($all_already_num/$people_day,2);
         }
         //获取该范围内的人员id
-        $customer_ids = $this->where($where)->column('admin_id');
+        $customer_ids = Db::name('zendesk_agents')->column('admin_id');
+        $customer_ids = array_unique($customer_ids);
         $work_ids = array();
         $nowork_ids = array();
         foreach($customer_ids as $id){
@@ -75,26 +76,32 @@ class ZendeskTasks extends Model
             }
         }
         //转正人员统计
-        $where['admin_id'] = array('in',$work_ids);
+        $map['c.due_id'] = $where['admin_id'] = array('in',$work_ids);
         if($platform){
             $where['type'] = $platform;
             $work_already_num = $this->where($where)->sum('reply_count');
             $work_people_day = $this->where($where)->count();
         }else{
-            $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
-            $people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->column('c.due_id');
-            $people_day = count(array_unique($people_day));
+            $work_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
+            $work_people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->column('c.due_id');
+            $work_people_day = count(array_unique($work_people_day));
         }
-
         if($work_people_day == 0){
             $work_positive_num = 0;
         }else{
             $work_positive_num = round($work_already_num/$work_people_day,2);
         }
         //非转正人员统计
-        $where['admin_id'] = array('in',$nowork_ids);
-        $nowork_already_num = $this->where($where)->sum('reply_count');
-        $nowork_people_day = $this->where($where)->count();
+        $map['c.due_id'] = $where['admin_id'] = array('in',$nowork_ids);
+        if($platform){
+            $where['type'] = $platform;
+            $nowork_already_num = $this->where($where)->sum('reply_count');
+            $nowork_people_day = $this->where($where)->count();
+        }else{
+            $nowork_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
+            $nowork_people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->column('c.due_id');
+            $nowork_people_day = count(array_unique($nowork_people_day));
+        }
         if($nowork_people_day == 0){
             $nowork_positive_num = 0;
         }else{
