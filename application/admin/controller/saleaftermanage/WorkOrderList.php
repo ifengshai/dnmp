@@ -779,7 +779,9 @@ class WorkOrderList extends Backend
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
-
+                    if (!$params['address']['shipping_type']) {
+                        throw new Exception("请先选择shipping method");
+                    }
                     $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
