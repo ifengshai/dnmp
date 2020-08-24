@@ -1426,6 +1426,12 @@ class NewProduct extends Backend
 
         //如果切换站点清除默认值
         $filter = json_decode($this->request->get('filter'), true);
+        if($filter['create_person']){
+            $map['a.create_person'] = $filter['create_person'];
+            unset($filter['create_person']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         //可用库存搜索
         if ($filter['available_stock']) {
             $item = new \app\admin\model\itemmanage\Item();
@@ -1473,13 +1479,13 @@ class NewProduct extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['supplier_sku']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['price']);
-            if ($value == 1) {
+            if ($value['item_status'] == 1) {
                 $status = '待选品';
-            } elseif ($value == 2) {
+            } elseif ($value['item_status'] == 2) {
                 $status = '选品通过';
-            } elseif ($value == 3) {
+            } elseif ($value['item_status'] == 3) {
                 $status = '选品拒绝';
-            } elseif ($value == 4) {
+            } elseif ($value['item_status'] == 4) {
                 $status = '取消';
             } else {
                 $status = '新建';
