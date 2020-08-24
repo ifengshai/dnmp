@@ -38,6 +38,7 @@ class ZendeskTasks extends Model
             $where['admin_id'] = array('in',$group_admin_id);
             $map['c.due_id'] = array('in',$group_admin_id);
         }
+        $map['c.due_id'] = ['neq',0];
         $map['c.is_admin'] = 1;
         $map['c.is_public'] = ['neq',2];
         $map['z.channel'] = ['neq','voice'];
