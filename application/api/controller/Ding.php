@@ -44,9 +44,10 @@ class Ding extends Controller
      */
     public function test2()
     {
-        /* $userId = '045127074321643707';
+        $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
-        Admin::userAdd($user); */
+        dump($user);die;
+        Admin::userAdd($user); 
         // $user=$this->app->attendance->schedules('2020-06-07');
         $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
         $time = 1592150400;
@@ -280,6 +281,11 @@ class Ding extends Controller
 
     public function test($url = '')
     {
+        //获取指定用户的钉钉信息，添加到魔晶系统中
+        $userId = '163104154526225658';
+        $user = $this->app->user->get($userId);
+        Admin::userAdd($user);
+        echo 'ok';exit;
         //        $this->setDepartment();
         //        exit;
         //        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
@@ -653,8 +659,8 @@ class Ding extends Controller
             
             if (is_array($send_ids)) {
                 //排除谢梦飞账号
-                if (in_array(240, $send_ids)) {
-                    $key = array_search(240, $send_ids);
+                if (in_array(80, $send_ids)) {
+                    $key = array_search(80, $send_ids);
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
@@ -664,6 +670,7 @@ class Ding extends Controller
                     unset($send_ids[$key]);
                     $send_ids = array_values($send_ids);
                 }
+                // file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
             }
             
             return self::cc_ding(

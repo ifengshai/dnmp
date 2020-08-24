@@ -581,8 +581,10 @@ class SelfApi extends Api
                 //如果只有一个补差价，就更改主表的状态
                 $workorder->where('id', $list['id'])->update(['work_status' => 6]);
             }
-            Db::name('work_order_measure')->where('work_id', $list['id'])->update(['operation_type' => 1]);
-            Db::name('work_order_recept')->where('work_id', $list['id'])->update(['recept_status' => 1]);
+            $date = date('Y-m-d H:i:s');
+            Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->update(['operation_type' => 1,'operation_time'=>$date]);
+            $measure_id = Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->value('id');
+            Db::name('work_order_recept')->where(['work_id'=>$list['id'],'measure_id'=>$measure_id])->update(['recept_status' => 1,'finish_time'=>$date,'note'=>'补差价支付成功']);
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }

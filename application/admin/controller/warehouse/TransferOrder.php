@@ -104,6 +104,9 @@ class TransferOrder extends Backend
             if ($params['call_out_site'] == $params['call_in_site']){
                 $this->error('调入仓和调出仓不能为同一个站');
             }
+            if (count($sku) != count(array_unique($sku))) {
+                $this->error('当前调拨单中存在相同的sku，请检查后重试');
+            }
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach($sku as $k=>$v){
 
@@ -226,6 +229,9 @@ class TransferOrder extends Backend
                     $result = $row->allowField(true)->save($params);
                     if (false !== $result) {
                         $sku = $this->request->post("sku/a");
+                        if (count($sku) != count(array_unique($sku))) {
+                            $this->error('当前调拨单中存在相同的sku，请检查后重试');
+                        }
                         $num = $this->request->post("num/a");
                         // dump($num);die;
                         $item_id = $this->request->post("item_id/a");
