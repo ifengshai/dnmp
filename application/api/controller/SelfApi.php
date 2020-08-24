@@ -584,6 +584,18 @@ class SelfApi extends Api
             $date = date('Y-m-d H:i:s');
             Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->update(['operation_type' => 1,'operation_time'=>$date]);
             $measure_id = Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->value('id');
+            //判断该工单中是否有其他措施，判断其他措施的状态去改主工单的状态
+            $status_arr = Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>['neq',8]])->column('operation_type');
+            if(!$status_arr){
+                $data['work_status'] = 6;
+                $data['complete_time'] = date('Y-m-d H:i:s');
+            }elseif(in_array(2,$status_arr) || in_array(0,$status_arr)){
+                $data['work_status'] = 5;
+            }else{
+                $data['work_status'] = 6;
+                $data['complete_time'] = date('Y-m-d H:i:s');
+            }
+            $workorder->where('id', $list['id'])->update($data);
             Db::name('work_order_recept')->where(['work_id'=>$list['id'],'measure_id'=>$measure_id])->update(['recept_status' => 1,'finish_time'=>$date,'note'=>'补差价支付成功']);
         } else {
             $this->error(__('未查询到数据'), [], 400);
