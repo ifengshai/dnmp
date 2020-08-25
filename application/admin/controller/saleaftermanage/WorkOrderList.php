@@ -3909,9 +3909,9 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
         //设置边框
         $border = [
             'borders' => [
