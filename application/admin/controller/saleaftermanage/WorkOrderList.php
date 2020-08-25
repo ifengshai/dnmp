@@ -3958,7 +3958,7 @@ EOF;
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
     }
 
