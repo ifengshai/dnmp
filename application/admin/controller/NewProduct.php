@@ -1542,47 +1542,48 @@ class NewProduct extends Backend
         $writer->save('php://output');
     }
 
-    public function amazon_sku()
-    {
-        $item = new \app\admin\model\itemmanage\Item();
-        $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $skus = Db::name('zzzzzzz_temp')->field('sku')->select();
-        $a = 0;
-        $b = 0;
-        foreach ($skus as $k => $v) {
-            if (!empty($v['sku'])) {
-                $b += 1;
-                $item_detail = $item->where('sku', $v['sku'])->find();
-                $params['sku'] = $v['sku'];
-                $params['platform_sku'] = $v['sku'];
-                if (empty($item_detail['name'])) {
-                    $params['name'] = '';
-                } else {
-                    $params['name'] = $item_detail['name'];
-                }
-                $params['platform_type'] = 8;
-                $params['create_person'] = 'Admin';
-                $params['create_time'] = date("Y-m-d H:i:s");
-                if (empty($item_detail['frame_is_rimless'])) {
-                    $params['platform_frame_is_rimless'] = '';
-                } else {
-                    $params['platform_frame_is_rimless'] = $item_detail['frame_is_rimless'];
-                }
-                if (empty($item_detail['category_id'])) {
-                    $params['category_id'] = '';
-                } else {
-                    $params['category_id'] = $item_detail['category_id'];
-                }
-
-                $params['stock'] = 0;
-                $params['presell_status'] = 0;
-                $res = $item_platform_sku->insert($params);
-                if ($res) {
-                    $a += 1;
-                }
-            }
-        }
-        dump($a);
-        dump($b);
-    }
+    //数据已跑完 2020 08.25 14:47
+    // public function amazon_sku()
+    // {
+    //     $item = new \app\admin\model\itemmanage\Item();
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzz_temp')->field('sku')->select();
+    //     $a = 0;
+    //     $b = 0;
+    //     foreach ($skus as $k => $v) {
+    //         if (!empty($v['sku'])) {
+    //             $b += 1;
+    //             $item_detail = $item->where('sku', $v['sku'])->find();
+    //             $params['sku'] = $v['sku'];
+    //             $params['platform_sku'] = $v['sku'];
+    //             if (empty($item_detail['name'])) {
+    //                 $params['name'] = '';
+    //             } else {
+    //                 $params['name'] = $item_detail['name'];
+    //             }
+    //             $params['platform_type'] = 8;
+    //             $params['create_person'] = 'Admin';
+    //             $params['create_time'] = date("Y-m-d H:i:s");
+    //             if (empty($item_detail['frame_is_rimless'])) {
+    //                 $params['platform_frame_is_rimless'] = '';
+    //             } else {
+    //                 $params['platform_frame_is_rimless'] = $item_detail['frame_is_rimless'];
+    //             }
+    //             if (empty($item_detail['category_id'])) {
+    //                 $params['category_id'] = '';
+    //             } else {
+    //                 $params['category_id'] = $item_detail['category_id'];
+    //             }
+    //
+    //             $params['stock'] = 0;
+    //             $params['presell_status'] = 0;
+    //             $res = $item_platform_sku->insert($params);
+    //             if ($res) {
+    //                 $a += 1;
+    //             }
+    //         }
+    //     }
+    //     dump($a);
+    //     dump($b);
+    // }
 }
