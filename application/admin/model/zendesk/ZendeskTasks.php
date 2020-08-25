@@ -51,6 +51,8 @@ class ZendeskTasks extends Model
             //全部转正人员统计
             $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
             $people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->group($group)->count();
+            dump($all_already_num);
+            dump($people_day);exit;
         }
         if($people_day == 0){
             $all_positive_num = 0;
