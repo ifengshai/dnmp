@@ -3933,7 +3933,7 @@ EOF;
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
+        $format = 'csv';
         $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
@@ -3946,7 +3946,12 @@ EOF;
             //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        } elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
         }
+
 
         //输出名称
         header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
