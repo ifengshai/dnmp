@@ -142,6 +142,6 @@ class ZendeskTasks extends Model
         }
 
         $count = $this->where($where)->count();
-        return $count;
+        return $count ? $count : 0;
     }
 }
