@@ -144,9 +144,9 @@ class Backend extends Controller
                     $this->redirect('index/login', [], 302, ['referer' => $url]);
                     exit;
                 }
-                // echo $url;
-                // exit;
-                $this->error(__('Please login first'), url('index/login', ['url' => $url]));
+                $this->redirect('index/login', [], 302, ['referer' => $url]);
+                exit;
+                // $this->error(__('Please login first'), url('index/login', ['url' => $url]));
             }
             // 判断是否需要验证权限
             if (!$this->auth->match($this->noNeedRight)) {
