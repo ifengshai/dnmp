@@ -100,30 +100,31 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            //SKU搜索
-            if ($filter['country_id']) {
-                $smap = [];
-                $smap['country_id'] = $filter['country_id'];
-                $smap['address_type'] = 'shipping';
-                $parent_id = Db::connect($db)
-                ->table('sales_flat_order_address')
-                ->where($smap)
-                ->column('parent_id');
-                $map['entity_id'] = ['in', $parent_id];
-                unset($filter['country_id']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
+            // //SKU搜索
+            // if ($filter['country_id']) {
+            //     $smap = [];
+            //     $smap['country_id'] = $filter['country_id'];
+            //     $smap['address_type'] = 'shipping';
+            //     $parent_id = Db::connect($db)
+            //     ->table('sales_flat_order_address')
+            //     ->where($smap)
+            //     ->column('parent_id');
+            //     $map['entity_id'] = ['in', $parent_id];
+            //     unset($filter['country_id']);
+            //     $this->request->get(['filter' => json_encode($filter)]);
+            // }
 
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
-            $total = $model
+            $map['b.address_type'] = 'shipping';
+            $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $model
+            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at')
+                ->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -153,14 +154,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 } else {
                     $v['label'] = 0;
                 }
-                $smap = [];
-                $smap['parent_id'] = $v['entity_id'];
-                $smap['address_type'] = 'shipping';
-                $country_id = Db::connect($db)
-                    ->table('sales_flat_order_address')
-                    ->where($smap)
-                    ->value('country_id');
-                $v['country_id'] = $country_id;
             }
             unset($v);
 
