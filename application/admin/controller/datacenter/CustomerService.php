@@ -1084,11 +1084,12 @@ class CustomerService extends Backend
                     $couponArr[$rv['create_user_id']] = $rv['coupon'];
                 }
             }
+
             //客服分组
             //$kefumanage = config('workorder.kefumanage');
             //整个客服部门人员
             $allCustomers = $this->newCustomers();
-            $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+            $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;$kefu_create_num = 0;
             foreach ($allCustomers as $k => $v) {
                 if (is_array($replacementArr)) {
                     //客服的补发订单数
@@ -1111,6 +1112,7 @@ class CustomerService extends Backend
                 if (0 < $allCustomers[$k]['total_refund_money']) {
                     $refundMoney += $allCustomers[$k]['total_refund_money'];
                 }
+
                 if (!empty($workList)) {
                     foreach ($workList as $wk => $wv) {
                         if ($v['id'] == $wv['create_user_id']) {
@@ -1118,6 +1120,7 @@ class CustomerService extends Backend
                             $allCustomers[$k]['create_counter'] = $wv['create_counter'];
                             $allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
                             $allCustomers[$k]['refund_num'] = $wv['refund_num'];
+                            $kefu_create_num = $kefu_create_num + $wv['create_counter'];
                             //累计工单完成量
                             $workOrderNum += $wv['counter'];
                             //累计订单总金额
@@ -1128,6 +1131,60 @@ class CustomerService extends Backend
                     }
                 }
             }
+
+            $this->assign('customer_type111',0);
+            // dump($kefu_create_num);dump($allCustomers);
+            //统计仓库工单 工单类型work_type = 2 完成时间跟非仓库工单保持一致 counter仓库工单数 base_grand_total仓库工单订单总金额 replacement_counter补发单数 refund_num退款单数
+            $where2 = $where;
+            $where2['work_type'] = 2;
+            $where5 = $where2;
+            $where5['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
+            $map5['create_time'] = $map['complete_time'];
+            $warehouseWorkList = $this->model->where($where2)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
+            $warehouseWorkList = collection($warehouseWorkList)->toArray();
+            $warehouseWorkList1['conuter'] = $warehouseWorkList[0]['counter'];
+            $warehouseWorkList1['base_grand_total'] = round($warehouseWorkList[0]['base_grand_total'],2);
+            $warehouseWorkList1['replacement_counter'] = $warehouseWorkList[0]['replacement_counter'];
+            $warehouseWorkList1['refund_num'] = $warehouseWorkList[0]['refund_num'];
+            $warehouseWorkList1['refund_money'] = $warehouseWorkList[0]['refund_money'];
+            $warehouseWorkList1['create_counter'] = $this->model->where($where5)->where($map5)->count();
+            $this->assign('warehouseWorkList1',$warehouseWorkList1);
+
+            //统计所有工单
+            $whereall['work_platform'] = 1;
+            $whereall['work_status'] = 6;
+            $where6 = $whereall;
+            $where6['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
+            $allWorkList = $this->model->where($whereall)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
+            $allWorkList[0]['create_counter'] = $this->model->where($where6)->where($map5)->count();
+            $allWorkList = collection($allWorkList)->toArray();
+            //所有工单完成量
+            $this->assign('all_work_list_num',$allWorkList[0]['counter']);
+            //所有工单总金额
+            $this->assign('all_work_list_base_grand_total',$allWorkList[0]['base_grand_total']);
+            //所有工单中的补发单数
+            $this->assign('all_work_list_replacement_counter',$allWorkList[0]['replacement_counter']);
+            //所有工单中的退款单数
+            $this->assign('all_work_list_refund_num',$allWorkList[0]['refund_num']);
+            //所有工单的退款订单比
+            $this->assign('all_work_list_refund_rate',round($allWorkList[0]['refund_num']/$allWorkList[0]['counter']*100,2).'%');
+            //所有工单退款总金额
+            $this->assign('all_work_list_refund_money',round($allWorkList[0]['refund_money'],2));
+            //所有工单退款金额比
+            $this->assign('all_work_list_refund_money_rate',round($allWorkList[0]['refund_money']/$allWorkList[0]['base_grand_total']*100,2).'%');
+
+            //非客服的数据 总的减去客服的 再减去仓库的
+            $notCustomer['conuter'] = $allWorkList[0]['counter'] - $workOrderNum - $warehouseWorkList[0]['counter'];
+            $notCustomer['base_grand_total'] = $allWorkList[0]['base_grand_total'] - $totalOrderMoney - $warehouseWorkList[0]['base_grand_total'];
+            $notCustomer['replacement_counter'] = $allWorkList[0]['replacement_counter'] - $replacementNum - $warehouseWorkList[0]['replacement_counter'];
+            $notCustomer['refund_num'] = $allWorkList[0]['refund_num'] - $refundMoneyNum - $warehouseWorkList[0]['refund_num'];
+            $notCustomer['refund_money'] = round($allWorkList[0]['refund_money'] - $refundMoney - $warehouseWorkList[0]['refund_money'],2);
+            $notCustomer['create_counter'] = $allWorkList[0]['create_counter'] - $warehouseWorkList1['create_counter'] - $kefu_create_num;
+            $this->assign('notCustomer',$notCustomer);
+
+
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
@@ -1536,6 +1593,7 @@ class CustomerService extends Backend
      */
     public function works_info($where, $map, $customer_type = 0, $customer_category = 0)
     {
+        // dump($where);
         if (!empty($where['work_platform']) && ($where['work_platform'] != 10)) {
             //站点
             $site  = $where['work_platform'];
@@ -1595,21 +1653,17 @@ class CustomerService extends Backend
         }
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
         sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
-        //    dump(collection($workList)->toArray());
-        //$where['replacement_order'] = ['neq',''];
+
         $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
 
         //计算工单创建总量 2020.07.28 18:45 jhh 取所有状态下的工单包括新建取消待审核审核成功审核拒绝部分处理已处理取消的
         $where['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
         $map1['create_time'] = $map['complete_time'];
         $workListAllcounter = $this->model->where($where)->where($map1)->field('count(*) as create_counter,create_user_id,create_user_name')->group('create_user_id')->select();
-        //  dump(collection($workListAllcounter)->toArray());
 
         $workList = collection($workList)->toArray();
 
         $workListAllcounter = array_column(collection($workListAllcounter)->toArray(), NULL, 'create_user_id');
-        // $workList = array_merge_recursive(array_column($workList,NULL,'create_user_id'),$workListAllcounter);
-        //  dump($workList);
 
         $replacementOrder = collection($replacementOrder)->toArray();
         foreach ($workList as $kk => $vv) {
@@ -1624,7 +1678,7 @@ class CustomerService extends Backend
             }
         }
 
-        $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+        $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = $kefu_create_num = 0;
         foreach ($allCustomers as $k => $v) {
             if (isset($replacementArr) && is_array($replacementArr)) {
                 //客服的补发订单数
@@ -1652,6 +1706,7 @@ class CustomerService extends Backend
                     if ($v['id'] == $wv['create_user_id']) {
                         $allCustomers[$k]['counter'] = $wv['counter'];
                         $allCustomers[$k]['create_counter'] = $wv['create_counter'];
+                        $kefu_create_num = $kefu_create_num + $wv['create_counter'];
                         $allCustomers[$k]['base_grand_total'] = $wv['base_grand_total'];
                         $allCustomers[$k]['refund_num'] = $wv['refund_num'];
                         //累计工单完成量
@@ -1664,6 +1719,62 @@ class CustomerService extends Backend
                 }
             }
         }
+        // dump($where);
+        $this->assign('customer_type111',$customer_type);
+        //统计仓库工单 工单类型work_type = 2 完成时间跟非仓库工单保持一致 counter仓库工单数 base_grand_total仓库工单订单总金额 replacement_counter补发单数 refund_num退款单数
+        $where2 = $where;
+        $where2['work_type'] = 2;
+        unset($where2['work_status']);
+        // dump($where2);
+        $where5 = $where2;
+        $where5['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
+        $map5['create_time'] = $map['complete_time'];
+        $warehouseWorkList = $this->model->where($where2)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
+        $warehouseWorkList = collection($warehouseWorkList)->toArray();
+        $warehouseWorkList1['conuter'] = $warehouseWorkList[0]['counter'];
+        $warehouseWorkList1['base_grand_total'] = round($warehouseWorkList[0]['base_grand_total'],2);
+        $warehouseWorkList1['replacement_counter'] = $warehouseWorkList[0]['replacement_counter'];
+        $warehouseWorkList1['refund_num'] = $warehouseWorkList[0]['refund_num'];
+        $warehouseWorkList1['refund_money'] = $warehouseWorkList[0]['refund_money'];
+        //仓库工单创建量
+        $warehouseWorkList1['create_counter'] = $this->model->where($where5)->where($map5)->count();
+        $this->assign('warehouseWorkList1',$warehouseWorkList1);
+
+        //统计所有工单
+        $whereall['work_platform'] = $where['work_platform'];
+        $whereall['work_status'] = 6;
+        // dump($whereall);
+        $where6 = $whereall;
+        $where6['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
+        $allWorkList = $this->model->where($whereall)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
+        $allWorkList[0]['create_counter'] = $this->model->where($where6)->where($map5)->count();
+        $allWorkList = collection($allWorkList)->toArray();
+        //所有工单完成量
+        $this->assign('all_work_list_num',$allWorkList[0]['counter']);
+        //所有工单总金额
+        $this->assign('all_work_list_base_grand_total',$allWorkList[0]['base_grand_total']);
+        //所有工单中的补发单数
+        $this->assign('all_work_list_replacement_counter',$allWorkList[0]['replacement_counter']);
+        //所有工单中的退款单数
+        $this->assign('all_work_list_refund_num',$allWorkList[0]['refund_num']);
+        //所有工单的退款订单比
+        $this->assign('all_work_list_refund_rate',$allWorkList[0]['counter']==0 ? 0:round($allWorkList[0]['refund_num']/$allWorkList[0]['counter']*100,2).'%');
+        //所有工单退款总金额
+        $this->assign('all_work_list_refund_money',round($allWorkList[0]['refund_money'],2));
+        //所有工单退款金额比
+        $this->assign('all_work_list_refund_money_rate',round($allWorkList[0]['refund_money']/$allWorkList[0]['base_grand_total']*100,2).'%');
+
+        //非客服的数据 总的减去客服的 再减去仓库的
+        $notCustomer['conuter'] = $allWorkList[0]['counter'] - $workOrderNum - $warehouseWorkList[0]['counter'];
+        $notCustomer['base_grand_total'] = $allWorkList[0]['base_grand_total'] - $totalOrderMoney - $warehouseWorkList[0]['base_grand_total'];
+        $notCustomer['replacement_counter'] = $allWorkList[0]['replacement_counter'] - $replacementNum - $warehouseWorkList[0]['replacement_counter'];
+        $notCustomer['refund_num'] = $allWorkList[0]['refund_num'] - $refundMoneyNum - $warehouseWorkList[0]['refund_num'];
+        $notCustomer['refund_money'] = round($allWorkList[0]['refund_money'] - $refundMoney - $warehouseWorkList[0]['refund_money'],2);
+        $notCustomer['create_counter'] = $allWorkList[0]['create_counter'] - $warehouseWorkList1['create_counter'] - $kefu_create_num;
+        $this->assign('notCustomer',$notCustomer);
+
         $allCustomers['workOrderNum']    = $workOrderNum;
         $allCustomers['totalOrderMoney'] = $totalOrderMoney;
         $allCustomers['replacementNum']  = $replacementNum;
