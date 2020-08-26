@@ -100,6 +100,20 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            //SKU搜索
+            if ($filter['country_id']) {
+                $smap = [];
+                $smap['country_id'] = $filter['country_id'];
+                $smap['address_type'] = 'shipping';
+                $parent_id = Db::connect($db)
+                ->table('sales_flat_order_address')
+                ->where($smap)
+                ->column('parent_id');
+                $map['entity_id'] = ['in', $parent_id];
+                unset($filter['country_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
