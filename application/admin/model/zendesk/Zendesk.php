@@ -518,6 +518,7 @@ class Zendesk extends Model
             $map['zendesk_update_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $task_where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
+        $where['c.due_id'] = ['neq',0];
         $where['z.channel'] = array('neq','voice');
         $new_create_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->where(['c.is_admin'=>0])->count();
         //已回复
