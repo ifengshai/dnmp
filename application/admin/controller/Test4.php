@@ -180,18 +180,13 @@ class Test4 extends Backend
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
             if ($v['status'] == 1) {
-                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
-                if (!$res) {
-                    echo $v['sku'] . '||' . $v['site'] . "\n";
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', $v['sku'] . '||' . $v['site'] . "\r\n", FILE_APPEND);
-                }
+                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => 1]);
             }
+            echo $k . "\n";
             usleep(50000);
         }
         echo 'ok';
     }
-
-
 
     /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
