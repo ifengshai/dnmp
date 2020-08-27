@@ -286,8 +286,10 @@ class TrackReg extends Backend
         if ($data) {
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
-                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
-                $params[$k]['id'] = $v['id'];
+                if ($v['platform_sku']) {
+                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
