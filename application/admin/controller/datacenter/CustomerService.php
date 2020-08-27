@@ -226,20 +226,22 @@ class CustomerService extends Backend
         if ($time_str1) {
             $createat1 = explode(' ', $time_str1);
             $one_time = $createat1[0].' - '.$createat1[3];
-            $where['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
+            $map['create_time'] = $where['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
             $time_time = $time_str1;
         }else{
             $seven_startdate = date("Y-m-d", strtotime("-6 day"));
             $seven_enddate = date("Y-m-d");
             $one_time = $seven_startdate.' - '.$seven_enddate;
-            $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['create_time'] = $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
             $time_time = '';
         }
         if($platform){
-            $where['type'] = $platform;
+            $map['platform'] = $where['type'] = $platform;
         }
         //查询所有客服人员
-        $all_service_ids = $this->zendeskTasks->where($where)->column('admin_id');
+        $map['due_id'] = ['neq',0];
+        $map['is_admin'] = 1;
+        $all_service_ids = $this->zendeskComments->where($map)->column('due_id');
         $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();

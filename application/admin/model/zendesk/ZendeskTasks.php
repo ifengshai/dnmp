@@ -22,33 +22,44 @@ class ZendeskTasks extends Model
      * 人效统计
      * */
     public function positive_effect_num($platform = 0,$time_str = '',$group_id = 0){
-        if($platform){
-            $where['type'] = $platform;
-        }
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
         if($time_str){
             $createat = explode(' ', $time_str);
-            $where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['c.create_time'] = $where['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             //默认显示一周的数据
             $seven_startdate = date("Y-m-d", strtotime("-6 day"));
             $seven_enddate = date("Y-m-d 23:59:59");
-            $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
+            $map['c.create_time'] = $where['create_time'] = ['between', [$seven_startdate, $seven_enddate]];
         }
         if($group_id){
             //查询客服类型
             $group_admin_id = Db::name('admin')->where('group_id',$group_id)->column('id');
             $where['admin_id'] = array('in',$group_admin_id);
+            $map['c.due_id'] = array('in',$group_admin_id);
         }
-        //全部转正人员统计
-        $all_already_num = $this->where($where)->sum('reply_count');
-        $people_day = $this->where($where)->count();
+        $map['c.due_id'] = ['neq',0];
+        $map['c.is_admin'] = 1;
+        $map['c.is_public'] = ['neq',2];
+        $map['z.channel'] = ['neq','voice'];
+        $group = "c.due_id,DATE_FORMAT(c.create_time,'%Y-%m-%d')";
+        if($platform){
+            $where['type'] = $platform;
+            $all_already_num = $this->where($where)->sum('reply_count');
+            $people_day = $this->where($where)->count();
+        }else{
+            //全部转正人员统计
+            $all_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
+            $people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->group($group)->count();
+        }
         if($people_day == 0){
             $all_positive_num = 0;
         }else{
             $all_positive_num = round($all_already_num/$people_day,2);
         }
         //获取该范围内的人员id
-        $customer_ids = $this->where($where)->column('admin_id');
+        $customer_ids = Db::name('zendesk_agents')->column('admin_id');
+        $customer_ids = array_unique($customer_ids);
         $work_ids = array();
         $nowork_ids = array();
         foreach($customer_ids as $id){
@@ -66,18 +77,30 @@ class ZendeskTasks extends Model
             }
         }
         //转正人员统计
-        $where['admin_id'] = array('in',$work_ids);
-        $work_already_num = $this->where($where)->sum('reply_count');
-        $work_people_day = $this->where($where)->count();
+        $map['c.due_id'] = $where['admin_id'] = array('in',$work_ids);
+        if($platform){
+            $where['type'] = $platform;
+            $work_already_num = $this->where($where)->sum('reply_count');
+            $work_people_day = $this->where($where)->count();
+        }else{
+            $work_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
+            $work_people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->group($group)->count();
+        }
         if($work_people_day == 0){
             $work_positive_num = 0;
         }else{
             $work_positive_num = round($work_already_num/$work_people_day,2);
         }
         //非转正人员统计
-        $where['admin_id'] = array('in',$nowork_ids);
-        $nowork_already_num = $this->where($where)->sum('reply_count');
-        $nowork_people_day = $this->where($where)->count();
+        $map['c.due_id'] = $where['admin_id'] = array('in',$nowork_ids);
+        if($platform){
+            $where['type'] = $platform;
+            $nowork_already_num = $this->where($where)->sum('reply_count');
+            $nowork_people_day = $this->where($where)->count();
+        }else{
+            $nowork_already_num = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->count();
+            $nowork_people_day = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($map)->group($group)->count();
+        }
         if($nowork_people_day == 0){
             $nowork_positive_num = 0;
         }else{
@@ -119,6 +142,6 @@ class ZendeskTasks extends Model
         }
 
         $count = $this->where($where)->count();
-        return $count;
+        return $count ? $count : 0;
     }
 }

@@ -1118,9 +1118,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template','echartsob
                             }, operate: false
                         },
                         { field: 'type', title: __('类型'), operate: false },
-                        { field: 'money_us', title: __('金额（$）'), operate: false },
-                        { field: 'money_cn', title: __('金额（￥）'), operate: false },
-                        { field: 'percent', title: __('百分比'), operate: false },
+                        { field: 'money_us', title: __('金额（$）'), operate: false,    formatter: function(value,row,index){ 
+                            return '$'+value;
+                        } },
+                        { field: 'money_cn', title: __('金额（￥）'), operate: false,    formatter: function(value,row,index){ 
+                            return '￥'+value;
+                        } },
+                        { field: 'percent', title: __('百分比'), operate: false,    formatter: function(value,row,index){ 
+                            if(value){
+                                return value+'%';
+                            } 
+                        } },
                     ]
                 ]
             });

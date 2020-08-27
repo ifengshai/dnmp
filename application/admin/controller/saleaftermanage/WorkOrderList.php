@@ -779,7 +779,9 @@ class WorkOrderList extends Backend
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
-
+                    if (!$params['address']['shipping_type'] && in_array(7,$params['measure_choose_id'])) {
+                        throw new Exception("请先选择shipping method");
+                    }
                     $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
@@ -3907,9 +3909,9 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
         //设置边框
         $border = [
             'borders' => [
@@ -3931,7 +3933,7 @@ EOF;
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
+        $format = 'csv';
         $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
@@ -3944,14 +3946,19 @@ EOF;
             //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        } elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
         }
+
 
         //输出名称
         header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
     }
 

@@ -183,12 +183,12 @@
                     <span class="input_tiem_span">
                         {if $row['test_status'] < 5}
                             {if $test_status || $distribution_status}
-                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker web_group_status','id'=>'web_designer_user_id','title'=>'前端责任人(多选)','multiple'=>true])}
                             {else}
-                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker web_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
                             {/if}
                         {else}
-                            {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
+                            {:Form::select('row[web_designer_user_id]', $web_users, $row['web_designer_user_id'], ['class'=>'selectpicker web_group_status','disabled'=>'true','title'=>'前端责任人(多选)','multiple'=>true])}
                         {/if}
                     </span>
                 </div>
@@ -211,12 +211,12 @@
                     <span class="input_tiem_span">
                         {if $row['test_status'] < 5}
                             {if $test_status || $distribution_status}
-                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker app_group_status','id'=>'app_user_id','title'=>'APP责任人(多选)','multiple'=>true])}
                             {else}
-                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker app_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
                             {/if}
                         {else}
-                            {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
+                            {:Form::select('row[app_user_id]', $app_users, $row['app_user_id'], ['class'=>'selectpicker app_group_status','disabled'=>'true','title'=>'APP责任人(多选)','multiple'=>true])}
                         {/if}
                     </span>
                 </div>
@@ -225,12 +225,12 @@
                     <span class="input_tiem_span">
                         {if $row['test_status'] < 5}
                             {if $test_status || $distribution_status}
-                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker test_group_status','id'=>'test_user_id','title'=>'测试责任人(多选)','multiple'=>true])}
                             {else}
-                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
+                                {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker test_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
                             {/if}
                         {else}
-                            {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker php_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
+                            {:Form::select('row[test_user_id]', $test_users, $row['test_user_id'], ['class'=>'selectpicker test_group_status','disabled'=>'true','title'=>'测试责任人(多选)','multiple'=>true])}
                         {/if}
                     </span>
                 </div>
