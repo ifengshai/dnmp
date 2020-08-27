@@ -179,9 +179,7 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
-            if ($v['status'] == 1) {
-                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => 1]);
-            }
+            $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
             echo $k . "\n";
             usleep(50000);
         }
