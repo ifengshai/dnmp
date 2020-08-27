@@ -1463,9 +1463,11 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-
+             
             //判断库存是否足够
             if ($stock < $num[$k]) {
+                $params = ['stock'=>$stock,'num'=>$num[$k]];
+                file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 throw new Exception($sku . '库存不足！！');
             }
         }
