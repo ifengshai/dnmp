@@ -1324,9 +1324,11 @@ class NewProduct extends Backend
     {
         $this->model = new \app\admin\model\NewProductMapping();
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //紧急补货分站点
+        $platform_type = input('label');
         //统计计划补货数据
         $list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
+            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
@@ -1337,7 +1339,7 @@ class NewProduct extends Backend
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
+            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -1385,7 +1387,7 @@ class NewProduct extends Backend
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2])
+                ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
             Db::commit();

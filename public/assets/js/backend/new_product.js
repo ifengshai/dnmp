@@ -585,6 +585,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             });
             $(document).on('click', '.btn-replenish_add', function () {
                 var ids = Table.api.selectedids(table);
+                var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
                 Layer.confirm(
                     __('确定要创建紧急补货需求单吗？'),
                     function (index) {
@@ -598,7 +599,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }
                         };
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('new_product/emergency_replenishment', '创建紧急补货需求单', options);
+                        Fast.api.open('new_product/emergency_replenishment?label=' +label,'创建紧急补货需求单', options);
 
                     }
                 );
