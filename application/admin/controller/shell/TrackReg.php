@@ -313,7 +313,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1,'sku' => 'FX0160-01'])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['sku' => 'FX0160-01'])->select();
         $list = collection($list)->toArray();
         
         foreach ($list as $k => $v) {
