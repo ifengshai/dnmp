@@ -312,7 +312,7 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['sales_num_15days' => ['>', 100]])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['sales_num_15days' => ['>', 50]])->select();
         $list = collection($list)->toArray();
 
         foreach ($list as $k => $v) {
