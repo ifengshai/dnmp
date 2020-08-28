@@ -121,7 +121,7 @@ class Test4 extends Backend
         if ($data) {
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime($v['created_at'])), date("Y-m-d 23:59:59", strtotime($v['created_at']))]];
-                $platform_sku = $itemPlatformSku->where(['sku' => $v['sku'],'site' => $v['site']])->value('platform_sku');
+                $platform_sku = $itemPlatformSku->where(['sku' => $v['sku'],'platform_type' => $v['site']])->value('platform_sku');
                 $params[$k]['sales_num'] = $order->getSkuSalesNum($platform_sku, $where, $v['site']);
                 $params[$k]['id'] = $v['id'];
                 $params[$k]['platform_sku'] = $platform_sku;
