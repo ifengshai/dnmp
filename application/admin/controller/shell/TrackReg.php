@@ -294,7 +294,6 @@ class TrackReg extends Backend
             if ($params) {
                 $skuSalesNum->saveAll($params);
             }
-           
         }
 
         echo "ok";
@@ -313,9 +312,9 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['sales_num_15days' => ['>', 100]])->select();
         $list = collection($list)->toArray();
-        
+
         foreach ($list as $k => $v) {
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
@@ -349,7 +348,7 @@ class TrackReg extends Backend
             }
             $itemPlatformSku->where('id', $v['id'])->update($params);
         }
-       
+
         echo "ok";
     }
 
@@ -456,5 +455,4 @@ class TrackReg extends Backend
         }
         return $grouped;
     }
-
 }
