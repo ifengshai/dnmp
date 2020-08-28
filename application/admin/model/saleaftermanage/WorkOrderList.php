@@ -976,6 +976,8 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
+                                } elseif(7 == $measure_choose_id){
+                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                                 }
                                 $key++;
                             }
@@ -1001,7 +1003,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        //$this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();
@@ -1104,6 +1106,8 @@ class WorkOrderList extends Model
                 $this->presentCoupon($work->id);
             } elseif ($measure_choose_id == 10) {
                 $this->presentIntegral($work->id);
+            } elseif($measure_choose_id == 7){
+                $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
         }
         Db::commit();
