@@ -97,6 +97,45 @@ class Test4 extends Backend
     }
 
     /**
+     * 获取前一天有效SKU销量
+     * 记录当天有效SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/31 16:52:46 
+     * @return void
+     */
+    public function get_sku_sales_num()
+    {
+        //记录当天上架的SKU 
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $order = new \app\admin\model\order\order\Order();
+
+
+        //查询昨天上架SKU 并统计当天销量
+        $map[] = ['exp', Db::raw("platform_sku is null  
+            or platform_sku = ''")];
+        $data = $skuSalesNum->where($map)->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime($v['created_at'])), date("Y-m-d 23:59:59", strtotime($v['created_at']))]];
+                $platform_sku = $itemPlatformSku->where(['sku' => $v['sku'],'site' => $v['site']])->value('platform_sku');
+                $params[$k]['sales_num'] = $order->getSkuSalesNum($platform_sku, $where, $v['site']);
+                $params[$k]['id'] = $v['id'];
+                $params[$k]['platform_sku'] = $platform_sku;
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+        }
+
+        echo "ok";
+    }
+
+
+    /**
      * 处理各站虚拟仓库存
      *
      * @Description
