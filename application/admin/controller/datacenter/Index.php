@@ -100,6 +100,8 @@ class Index extends Backend
                 $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
 
                 $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+
+                $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
             }
             unset($v);
 
@@ -107,12 +109,14 @@ class Index extends Backend
             $v_sku = array_column($list, 'v_sku');
             $n_sku = array_column($list, 'n_sku');
             $m_sku = array_column($list, 'm_sku');
+            $w_sku = array_column($list, 'w_sku');
 
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
             $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
             $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
             $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
+            $wesee = $this->meeloog->getOrderSalesNum($w_sku, $map);
             //重组数组
             foreach ($list as &$v) {
 
@@ -124,7 +128,9 @@ class Index extends Backend
 
                 $v['m_num'] = round($meeloog[trim($v['m_sku'])]) ?? 0;
 
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'];
+                $v['w_num'] = round($wesee[trim($v['w_sku'])]) ?? 0;
+
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
             }
             unset($v);
 
