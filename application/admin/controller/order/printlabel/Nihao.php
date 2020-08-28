@@ -487,6 +487,7 @@ class Nihao extends Backend
                     //如果SKU 存在取消订单 则判断取消的数量
                     if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
                         $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     }
 
                     if ($qty == 0) {
@@ -626,6 +627,7 @@ class Nihao extends Backend
                     //如果SKU 存在取消订单 则判断取消的数量
                     if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
                         $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     }
 
                     if ($qty == 0) {
