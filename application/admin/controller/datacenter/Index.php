@@ -116,7 +116,7 @@ class Index extends Backend
             $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
             $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
             $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-            $wesee = $this->meeloog->getOrderSalesNum($w_sku, $map);
+            $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
             //重组数组
             foreach ($list as &$v) {
 
