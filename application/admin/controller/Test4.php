@@ -125,6 +125,8 @@ class Test4 extends Backend
                 $params[$k]['sales_num'] = $order->getSkuSalesNum($platform_sku, $where, $v['site']);
                 $params[$k]['id'] = $v['id'];
                 $params[$k]['platform_sku'] = $platform_sku;
+                echo $k . "\n";
+                usleep(200000);
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
