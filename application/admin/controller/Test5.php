@@ -14,18 +14,14 @@ class Test5 extends Backend
 {
     protected $app_id = "623060648636265";
     protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
-    protected $access_token = "623060648636265|XisXdmdWzNJnVOVRbvpepbWQojE";
+    protected $access_token = "EAAI2q5yir2kBAOc60z7RALfZB5x4xuykqvVMqlxQAoANz8WZA4FIWcNT12NbI46auyIbzuCGSjBJe8ixyUPOAVZBhSURp7QUwsE2iI6oIaxJFZAKWZBiUcUuAYj64O0EbDQcQK9GqQUCYbjKcpcAmg6qNj5raLziVVTdDmxDI9RFdnhK4gs0ok0teZAH09tGAgz3QMyZB9EQ19mKqXYaYHZAaspTrHIXiidGDoLjiguKiwZDZD";
     public function test()
     {
         Api::init($this->app_id, $this->app_secret, $this->access_token);
         $all_facebook_spend = 0;
-        $accounts = array(
-            'act_262835201038048'
-        );
+       
 
-
-
-        $campaign = new Campaign('act_262835201038048');
+        $campaign = new Campaign('act_439802446536567');
         $params = array(
             'time_range' => array('since' => '2020-08-14', 'until' => '2020-08-14'),
         );
