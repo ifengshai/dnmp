@@ -35,12 +35,9 @@ use FacebookAds\Object\Values\CommentLiveFilterValues;
 use FacebookAds\Object\Values\CommentOrderValues;
 use FacebookAds\Object\Values\InsightsResultDatePresetValues;
 use FacebookAds\Object\Values\InsightsResultPeriodValues;
-use FacebookAds\Object\Values\PhotoBackdatedTimeGranularityValues;
-use FacebookAds\Object\Values\PhotoUnpublishedContentTypeValues;
 use FacebookAds\Object\Values\PostBackdatedTimeGranularityValues;
 use FacebookAds\Object\Values\PostFeedStoryVisibilityValues;
 use FacebookAds\Object\Values\PostTimelineVisibilityValues;
-use FacebookAds\Object\Values\PostWithValues;
 use FacebookAds\Object\Values\ProfileTypeValues;
 
 /**
@@ -66,7 +63,6 @@ class Post extends AbstractCrudObject {
     $ref_enums['BackdatedTimeGranularity'] = PostBackdatedTimeGranularityValues::getInstance()->getValues();
     $ref_enums['FeedStoryVisibility'] = PostFeedStoryVisibilityValues::getInstance()->getValues();
     $ref_enums['TimelineVisibility'] = PostTimelineVisibilityValues::getInstance()->getValues();
-    $ref_enums['With'] = PostWithValues::getInstance()->getValues();
     return $ref_enums;
   }
 
@@ -182,29 +178,6 @@ class Post extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getEditActions(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/edit_actions',
-      new AbstractCrudObject(),
-      'EDGE',
-      array(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function getInsights(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -260,29 +233,6 @@ class Post extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getLikes(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/likes',
-      new Profile(),
-      'EDGE',
-      Profile::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function createLike(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -302,83 +252,6 @@ class Post extends AbstractCrudObject {
       new Post(),
       'EDGE',
       Post::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createPhoto(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'aid' => 'string',
-      'allow_spherical_photo' => 'bool',
-      'alt_text_custom' => 'string',
-      'android_key_hash' => 'string',
-      'application_id' => 'string',
-      'attempt' => 'unsigned int',
-      'audience_exp' => 'bool',
-      'backdated_time' => 'datetime',
-      'backdated_time_granularity' => 'backdated_time_granularity_enum',
-      'caption' => 'string',
-      'composer_session_id' => 'string',
-      'direct_share_status' => 'unsigned int',
-      'feed_targeting' => 'Object',
-      'filter_type' => 'unsigned int',
-      'full_res_is_coming_later' => 'bool',
-      'initial_view_heading_override_degrees' => 'unsigned int',
-      'initial_view_pitch_override_degrees' => 'unsigned int',
-      'initial_view_vertical_fov_override_degrees' => 'unsigned int',
-      'ios_bundle_id' => 'string',
-      'is_explicit_location' => 'bool',
-      'is_explicit_place' => 'bool',
-      'is_visual_search' => 'bool',
-      'manual_privacy' => 'bool',
-      'message' => 'string',
-      'name' => 'string',
-      'no_story' => 'bool',
-      'offline_id' => 'unsigned int',
-      'og_action_type_id' => 'string',
-      'og_icon_id' => 'string',
-      'og_object_id' => 'string',
-      'og_phrase' => 'string',
-      'og_set_profile_badge' => 'bool',
-      'og_suggestion_mechanism' => 'string',
-      'place' => 'Object',
-      'privacy' => 'string',
-      'profile_id' => 'int',
-      'proxied_app_id' => 'string',
-      'published' => 'bool',
-      'qn' => 'string',
-      'scheduled_publish_time' => 'unsigned int',
-      'spherical_metadata' => 'map',
-      'sponsor_id' => 'string',
-      'sponsor_relationship' => 'unsigned int',
-      'tags' => 'list<Object>',
-      'target_id' => 'int',
-      'targeting' => 'Object',
-      'time_since_original_post' => 'unsigned int',
-      'uid' => 'int',
-      'unpublished_content_type' => 'unpublished_content_type_enum',
-      'url' => 'string',
-      'user_selected_tags' => 'bool',
-      'vault_image_id' => 'string',
-    );
-    $enums = array(
-      'backdated_time_granularity_enum' => PhotoBackdatedTimeGranularityValues::getInstance()->getValues(),
-      'unpublished_content_type_enum' => PhotoUnpublishedContentTypeValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/photos',
-      new Photo(),
-      'EDGE',
-      Photo::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -409,6 +282,7 @@ class Post extends AbstractCrudObject {
         'AUTO_LOOKALIKE',
         'AUTO_PAGE_LOOKALIKE',
         'AUTO_TARGETING',
+        'COUNTRY_AND_INTEREST',
         'CREATE_NEW',
         'CUSTOM_AUDIENCE',
         'DISTRICT',
@@ -420,6 +294,7 @@ class Post extends AbstractCrudObject {
         'IG_PROMOTED_POST_AUTO',
         'LOCAL',
         'LOOKALIKE',
+        'MARKETPLACE_DEFAULT',
         'MULT_CUSTOM_AUDIENCES',
         'NCPP',
         'SAVED_AUDIENCE',
@@ -443,6 +318,8 @@ class Post extends AbstractCrudObject {
         'FIND_A_GROUP',
         'FIND_YOUR_GROUPS',
         'FOLLOW_NEWS_STORYLINE',
+        'FOLLOW_PAGE',
+        'FOLLOW_USER',
         'GET_DIRECTIONS',
         'GET_OFFER',
         'GET_OFFER_VIEW',
@@ -460,11 +337,15 @@ class Post extends AbstractCrudObject {
         'NO_BUTTON',
         'OPEN_LINK',
         'ORDER_NOW',
+        'PAY_TO_ACCESS',
         'PLAY_GAME',
+        'PURCHASE_GIFT_CARDS',
         'RECORD_NOW',
+        'REQUEST_TIME',
         'SAY_THANKS',
         'SEE_MORE',
         'SELL_NOW',
+        'SEND_A_GIFT',
         'SHARE',
         'SHOP_NOW',
         'SIGN_UP',
@@ -568,52 +449,6 @@ class Post extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function deleteSubscribed(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_DELETE,
-      '/subscribed',
-      new AbstractCrudObject(),
-      'EDGE',
-      array(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createSubscribed(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/subscribed',
-      new Post(),
-      'EDGE',
-      Post::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function getTo(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -627,29 +462,6 @@ class Post extends AbstractCrudObject {
       $this->data['id'],
       RequestInterface::METHOD_GET,
       '/to',
-      new Profile(),
-      'EDGE',
-      Profile::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function getWithTags(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/with_tags',
       new Profile(),
       'EDGE',
       Profile::getFieldsEnum()->getValues(),

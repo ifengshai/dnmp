@@ -84,8 +84,9 @@ class URL extends AbstractCrudObject {
 
     $param_types = array(
       'blacklist' => 'bool',
+      'denylist' => 'bool',
       'hmac' => 'string',
-      'locale' => 'list',
+      'locale' => 'list<Object>',
       'scopes' => 'list<scopes_enum>',
       'ts' => 'datetime',
     );

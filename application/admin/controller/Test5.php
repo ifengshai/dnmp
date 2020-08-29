@@ -7,12 +7,15 @@ use FacebookAds\Object\AdCampaign;
 use FacebookAds\Object\AdsInsights;
 use FacebookAds\Object\AdAccount;
 use think\Db;
-class Test5 extends Backend{
-    protected $app_id = "438689069966204";
-    protected $app_secret = "1480382aa32283c6c13692908f7738a7";
-    protected $access_token = "EAAGOZCEIuo3wBAMkIOgCGaUjUmgvY4CqtvXWQ2Jf8o2GkuyOls67R1kk04CDWD7BKSqwzQLTMBeaaeTJaRNyqHI5tihJVFoc6qsNvgJZCpf4mgxCHjZC99iZCu63fmPctNRpAyWyAJcdBq4x4eva0IU6Q7N8lk6vgq1yOLOF4hEqNWt8E5ie";
-    public function test(){
-        Api::init($this->app_id,$this->app_secret,$this->access_token);
+
+class Test5 extends Backend
+{
+    protected $app_id = "623060648636265";
+    protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
+    protected $access_token = "EAAI2q5yir2kBAG9rzV6IEHQXWdinl28NHuXactNphDhupdrDPJY0YeDVF5usXyC0zKBVKZAX8v6nSZCiHPPyiZC69dn2jtYZA51Ox4ZA7WIKpc7oVqPkeUwmRYLBH57qZANcKA8UAK0lFnWEJEBBZB22ZAiCKHu1mfxj8n3sw6uynMNEgcZB3h6tR8u6BypNc9mIzSyPYiUU4PQZDZD";
+    public function test()
+    {
+        Api::init($this->app_id, $this->app_secret, $this->access_token);
         $all_facebook_spend = 0;
         $accounts = array(
             'act_262835201038048','act_736073500078882',

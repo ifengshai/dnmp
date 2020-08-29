@@ -38,9 +38,13 @@ use FacebookAds\Enum\AbstractEnum;
 class PageCallToActionIphoneDestinationTypeValues extends AbstractEnum {
 
   const APP_DEEPLINK = 'APP_DEEPLINK';
+  const BECOME_A_VOLUNTEER = 'BECOME_A_VOLUNTEER';
   const EMAIL = 'EMAIL';
   const FACEBOOK_APP = 'FACEBOOK_APP';
+  const FOLLOW = 'FOLLOW';
+  const MARKETPLACE_INVENTORY_PAGE = 'MARKETPLACE_INVENTORY_PAGE';
   const MESSENGER = 'MESSENGER';
+  const MINI_SHOP = 'MINI_SHOP';
   const NONE = 'NONE';
   const PHONE_CALL = 'PHONE_CALL';
   const SHOP_ON_FACEBOOK = 'SHOP_ON_FACEBOOK';

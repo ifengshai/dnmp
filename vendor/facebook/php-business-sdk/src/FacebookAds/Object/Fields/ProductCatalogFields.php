@@ -38,34 +38,44 @@ use FacebookAds\Enum\AbstractEnum;
 class ProductCatalogFields extends AbstractEnum {
 
   const BUSINESS = 'business';
-  const CPAS_PARENT_CATALOG_SETTINGS = 'cpas_parent_catalog_settings';
+  const COMMERCE_MERCHANT_SETTINGS = 'commerce_merchant_settings';
   const DA_DISPLAY_SETTINGS = 'da_display_settings';
   const DEFAULT_IMAGE_URL = 'default_image_url';
   const FALLBACK_IMAGE_URL = 'fallback_image_url';
   const FEED_COUNT = 'feed_count';
-  const FLIGHT_CATALOG_SETTINGS = 'flight_catalog_settings';
   const ID = 'id';
+  const IS_CATALOG_SEGMENT = 'is_catalog_segment';
   const NAME = 'name';
   const PRODUCT_COUNT = 'product_count';
   const STORE_CATALOG_SETTINGS = 'store_catalog_settings';
   const VERTICAL = 'vertical';
+  const CATALOG_SEGMENT_FILTER = 'catalog_segment_filter';
+  const CATALOG_SEGMENT_PRODUCT_SET_ID = 'catalog_segment_product_set_id';
   const DESTINATION_CATALOG_SETTINGS = 'destination_catalog_settings';
+  const FLIGHT_CATALOG_SETTINGS = 'flight_catalog_settings';
+  const ONSITE_COMMERCE_MERCHANT = 'onsite_commerce_merchant';
+  const PARENT_CATALOG_ID = 'parent_catalog_id';
 
   public function getFieldTypes() {
     return array(
       'business' => 'Business',
-      'cpas_parent_catalog_settings' => 'CPASParentCatalogSettings',
+      'commerce_merchant_settings' => 'CommerceMerchantSettings',
       'da_display_settings' => 'ProductCatalogImageSettings',
       'default_image_url' => 'string',
       'fallback_image_url' => 'list<string>',
       'feed_count' => 'int',
-      'flight_catalog_settings' => 'FlightCatalogSettings',
       'id' => 'string',
+      'is_catalog_segment' => 'bool',
       'name' => 'string',
       'product_count' => 'int',
       'store_catalog_settings' => 'StoreCatalogSettings',
       'vertical' => 'string',
+      'catalog_segment_filter' => 'Object',
+      'catalog_segment_product_set_id' => 'string',
       'destination_catalog_settings' => 'map',
+      'flight_catalog_settings' => 'map',
+      'onsite_commerce_merchant' => 'Object',
+      'parent_catalog_id' => 'string',
     );
   }
 }

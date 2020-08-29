@@ -30,6 +30,7 @@ use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\WhatsAppBusinessAccountFields;
 use FacebookAds\Object\Values\WhatsAppBusinessAccountCategoryValues;
+use FacebookAds\Object\Values\WhatsAppBusinessAccountTasksValues;
 
 /**
  * This class is auto-generated.
@@ -51,16 +52,17 @@ class WhatsAppBusinessAccount extends AbstractCrudObject {
 
   protected static function getReferencedEnums() {
     $ref_enums = array();
+    $ref_enums['Tasks'] = WhatsAppBusinessAccountTasksValues::getInstance()->getValues();
     $ref_enums['Category'] = WhatsAppBusinessAccountCategoryValues::getInstance()->getValues();
     return $ref_enums;
   }
 
 
-  public function getAssignedUsers(array $fields = array(), array $params = array(), $pending = false) {
+  public function deleteAssignedUsers(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
     $param_types = array(
-      'business' => 'string',
+      'user' => 'int',
     );
     $enums = array(
     );
@@ -68,11 +70,37 @@ class WhatsAppBusinessAccount extends AbstractCrudObject {
     $request = new ApiRequest(
       $this->api,
       $this->data['id'],
-      RequestInterface::METHOD_GET,
+      RequestInterface::METHOD_DELETE,
       '/assigned_users',
-      new AssignedUser(),
+      new AbstractCrudObject(),
       'EDGE',
-      AssignedUser::getFieldsEnum()->getValues(),
+      array(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function createAssignedUser(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+      'tasks' => 'list<tasks_enum>',
+      'user' => 'int',
+    );
+    $enums = array(
+      'tasks_enum' => WhatsAppBusinessAccountTasksValues::getInstance()->getValues(),
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_POST,
+      '/assigned_users',
+      new WhatsAppBusinessAccount(),
+      'EDGE',
+      WhatsAppBusinessAccount::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -121,6 +149,7 @@ class WhatsAppBusinessAccount extends AbstractCrudObject {
         'APPROVED',
         'DELETED',
         'DISABLED',
+        'IN_APPEAL',
         'PENDING',
         'PENDING_DELETION',
         'REJECTED',
@@ -186,6 +215,29 @@ class WhatsAppBusinessAccount extends AbstractCrudObject {
       new AbstractCrudObject(),
       'EDGE',
       array(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function createSubscribedApp(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+    );
+    $enums = array(
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_POST,
+      '/subscribed_apps',
+      new WhatsAppBusinessAccount(),
+      'EDGE',
+      WhatsAppBusinessAccount::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
