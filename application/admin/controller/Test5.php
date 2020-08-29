@@ -12,9 +12,9 @@ use think\Db;
 
 class Test5 extends Backend
 {
-    protected $app_id = "438689069966204";
-    protected $app_secret = "1480382aa32283c6c13692908f7738a7";
-    protected $access_token = "EAAGOZCEIuo3wBAMkIOgCGaUjUmgvY4CqtvXWQ2Jf8o2GkuyOls67R1kk04CDWD7BKSqwzQLTMBeaaeTJaRNyqHI5tihJVFoc6qsNvgJZCpf4mgxCHjZC99iZCu63fmPctNRpAyWyAJcdBq4x4eva0IU6Q7N8lk6vgq1yOLOF4hEqNWt8E5ie";
+    protected $app_id = "623060648636265";
+    protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
+    protected $access_token = "EAAI2q5yir2kBAKzt7dTzOrbGpNkT8wIxrQwzCSgtU3NtJp2MYZB6HTZAUtwq1s78VPPZCrlU7y04InPTBhZAgwUBgPf9J9LqzZAYGIlhG2pomAIeI59o6DSMFBp3ECvaWk4ic3LljoxaxJBwUdgQkggUBCxFG8wVW1E3oXAMtIOEYKAY25ybDeG7gHz5zFWgnFNfjatl2bptWj5Y3ZAJBP4qwx6coYXibTeOnAi0ua2Ttkl9QxiHJ2sop4ZAHgYIjMZD";
     public function test()
     {
         Api::init($this->app_id, $this->app_secret, $this->access_token);
