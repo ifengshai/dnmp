@@ -404,7 +404,7 @@ class Meeloog extends Backend
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,sum(b.qty_ordered) as qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->group('b.sku,a.increment_id')->select();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -522,7 +522,7 @@ class Meeloog extends Backend
             //质检通过扣减库存
             if ($status == 4) {
                 //查询出质检通过的订单
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,sum(b.qty_ordered) as qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->group('b.sku,a.increment_id')->select();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -582,6 +582,7 @@ class Meeloog extends Backend
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
                         $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     } else {
                         $qty = $v['qty_ordered'];
                     }

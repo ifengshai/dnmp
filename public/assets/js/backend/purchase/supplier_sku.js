@@ -32,7 +32,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'supplier_sku', title: __('Supplier_sku'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like', },
-                        { field: 'link', title: '1688商品购买页链接', operate: false, formatter: Table.api.formatter.url },
+                        {
+                            field: 'link', title: '1688商品购买页链接', operate: false, cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getClear
+                        },
                         { field: 'is_matching', title: '是否匹配', operate: false, custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_big_goods', title: '是否为大货', operate: false, custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'label', title: '是否为主供应商', operate: false, custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
@@ -67,6 +70,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //td宽度以及内容超过宽度隐藏
+            function formatTableUnit(value, row, index) {
+                return {
+                    css: {
+                        "white-space": "nowrap",
+                        "text-overflow": "ellipsis",
+                        "overflow": "hidden",
+                        "max-width": "200px"
+                    }
+                }
+            }
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('data');
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: decodeURIComponent(problem_desc)
+                });
+                return false;
+            });
 
             //启用
             $(document).on('click', '.btn-open', function () {
@@ -201,7 +227,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             Table.api.bindevent(table);
         },
         api: {
+            
             formatter: {
+                getClear: function (value) {
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
+                    }
+                },
                 status: function (value, row, index) {
                     var custom = { hidden: 'gray', normal: 'success', deleted: 'danger', locked: 'info' };
                     if (typeof this.custom !== 'undefined') {

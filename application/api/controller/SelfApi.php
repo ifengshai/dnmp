@@ -642,6 +642,7 @@ class SelfApi extends Api
                     //如果不存在则插入此sku
                     if ($count < 1) {
                         $data['sku'] = $list['sku'];
+                        $data['platform_sku'] = $list['platform_sku'];
                         $data['site'] = $site;
                         Db::name('sku_sales_num')->insert($data);
                     }

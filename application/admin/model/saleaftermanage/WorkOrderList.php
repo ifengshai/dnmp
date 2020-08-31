@@ -282,6 +282,9 @@ class WorkOrderList extends Model
             case 3:
                 $url = config('url.nihao_url');
                 break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
             case 5:
                 $url = config('url.wesee_url');
                 break;
@@ -976,6 +979,8 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
+                                } elseif(7 == $measure_choose_id){
+                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                                 }
                                 $key++;
                             }
@@ -1001,7 +1006,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        //$this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();
@@ -1094,9 +1099,6 @@ class WorkOrderList extends Model
             $dataWorkOrder['work_status'] = 5;
         }
         WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
-        if ($resultInfo  && (1 == $data['recept_status'])) {
-            $this->deductionStock($work_id, $measure_id);
-        }
         //不是自动处理完成
         if($is_auto_complete != 1){
             $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
@@ -1104,7 +1106,13 @@ class WorkOrderList extends Model
                 $this->presentCoupon($work->id);
             } elseif ($measure_choose_id == 10) {
                 $this->presentIntegral($work->id);
+            } elseif($measure_choose_id == 7){
+                $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
+        }
+        //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
+        if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
+            $this->deductionStock($work_id, $measure_id);
         }
         Db::commit();
         return true;
@@ -1120,13 +1128,18 @@ class WorkOrderList extends Model
         if ($measuerInfo < 1) {
             return false;
         }
+        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order,replacement_order')->find();
+        //如果措施是补发但是没有生成补发单的话不扣减库存
+        if(($measuerInfo == 5) && (empty($workOrderList->replacement_order))){
+            return false;
+        }
         $whereMeasure['work_id'] = $work_id;
         $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
         if (!$result) {
             return false;
         }
-        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
+        
         $result = collection($result)->toArray();
         if (1 == $measuerInfo) { //更改镜片
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);

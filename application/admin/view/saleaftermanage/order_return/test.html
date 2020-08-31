@@ -147,7 +147,7 @@
                                     <tr>
                                         <th>OD</th>
                                         <td>{$itemInfoList.od_sph}</td>
-                                        <td>{$itemInfoList.od_cyl}</td>
+                                        <td>{:urldecode($itemInfoList.od_cyl)}</td>
                                         <td>{$itemInfoList.od_axis}</td>
                                         {if $itemInfoList.total_add}
                                         <td rowspan="2">{$itemInfoList.total_add}</td>
@@ -158,7 +158,7 @@
                                     <tr>
                                         <th>OS</th>
                                         <td>{$itemInfoList.os_sph}</td>
-                                        <td>{$itemInfoList.os_cyl}</td>
+                                        <td>{:urldecode($itemInfoList.os_cyl)}</td>
                                         <td>{$itemInfoList.os_axis}</td>
                                         {if !$itemInfoList.total_add}
                                         <td>{$itemInfoList.od_add}</td>

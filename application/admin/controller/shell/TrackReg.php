@@ -286,8 +286,10 @@ class TrackReg extends Backend
         if ($data) {
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
-                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
-                $params[$k]['id'] = $v['id'];
+                if ($v['platform_sku']) {
+                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
@@ -317,6 +319,7 @@ class TrackReg extends Backend
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
             $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
+
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
             //90天总销量
             $params['sales_num_90days'] = $days90_data[0]->sales_num;
