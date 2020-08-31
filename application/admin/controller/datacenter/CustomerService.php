@@ -103,6 +103,8 @@ class CustomerService extends Backend
                 $where['c.is_admin'] = 0;
             } else {
                 $where['c.is_admin'] = 1;
+                $where['c.due_id'] = ['neq',0];
+                $where['c.is_public'] = ['neq',2];
             }
             $where['z.channel'] = array('neq', 'voice');
             if ($workload_time) {
