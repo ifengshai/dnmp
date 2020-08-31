@@ -282,6 +282,9 @@ class WorkOrderList extends Model
             case 3:
                 $url = config('url.nihao_url');
                 break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
             case 5:
                 $url = config('url.wesee_url');
                 break;
