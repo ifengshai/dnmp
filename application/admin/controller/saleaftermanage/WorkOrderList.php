@@ -1463,9 +1463,11 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-
+             
             //判断库存是否足够
             if ($stock < $num[$k]) {
+                $params = ['stock'=>$stock,'num'=>$num[$k]];
+                file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 throw new Exception($sku . '库存不足！！');
             }
         }
@@ -3909,9 +3911,9 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
         //设置边框
         $border = [
             'borders' => [
@@ -3933,7 +3935,7 @@ EOF;
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
+        $format = 'csv';
         $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
@@ -3946,14 +3948,19 @@ EOF;
             //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        } elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
         }
+
 
         //输出名称
         header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
     }
 

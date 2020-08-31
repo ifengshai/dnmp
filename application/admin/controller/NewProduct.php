@@ -148,7 +148,7 @@ class NewProduct extends Backend
             $arrs = [];
             foreach ($platformarr as $ka => $va) {
                 if ($arrs[$va['sku']]) {
-                    $arrs[$va['sku']] =  $arrs[$va['sku']] + $va['sales_num_90days'];
+                    $arrs[$va['sku']] = $arrs[$va['sku']] + $va['sales_num_90days'];
                 } else {
                     $arrs[$va['sku']] = $va['sales_num_90days'];
                 }
@@ -1089,7 +1089,7 @@ class NewProduct extends Backend
                 $v['wait_in_num'] = $wait_in_arr[$v['sku']] ?: 0;
                 $v['sales_days'] = $v['average_90days_sales_num'] > 0 ? round($v['stock'] / $v['average_90days_sales_num']) : 0;
                 $num = $v['stock'] - ($v['average_90days_sales_num'] * 30);
-                $v['replenish_num'] =  $num > 0 ? $num : 0;
+                $v['replenish_num'] = $num > 0 ? $num : 0;
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1324,9 +1324,11 @@ class NewProduct extends Backend
     {
         $this->model = new \app\admin\model\NewProductMapping();
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //紧急补货分站点
+        $platform_type = input('label');
         //统计计划补货数据
         $list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
+            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
@@ -1337,7 +1339,7 @@ class NewProduct extends Backend
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
+            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -1385,7 +1387,7 @@ class NewProduct extends Backend
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2])
+                ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
             Db::commit();
@@ -1411,9 +1413,9 @@ class NewProduct extends Backend
      * 选品批量导出xls
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/28 14:45:39 
      * @return void
+     * @since 2020/02/28 14:45:39
+     * @author wpl
      */
     public function batch_export_xls()
     {
@@ -1426,7 +1428,7 @@ class NewProduct extends Backend
 
         //如果切换站点清除默认值
         $filter = json_decode($this->request->get('filter'), true);
-        if($filter['create_person']){
+        if ($filter['create_person']) {
             $map['a.create_person'] = $filter['create_person'];
             unset($filter['create_person']);
             $this->request->get(['filter' => json_encode($filter)]);
@@ -1491,7 +1493,7 @@ class NewProduct extends Backend
                 $status = '新建';
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
-           
+
         }
 
         //设置宽度
@@ -1506,7 +1508,7 @@ class NewProduct extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -1541,4 +1543,89 @@ class NewProduct extends Backend
 
         $writer->save('php://output');
     }
+
+    //数据已跑完 2020 08.25 14:47
+    // public function amazon_sku()
+    // {
+    //     $item = new \app\admin\model\itemmanage\Item();
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzz_temp')->field('sku')->select();
+    //     $a = 0;
+    //     $b = 0;
+    //     foreach ($skus as $k => $v) {
+    //         if (!empty($v['sku'])) {
+    //             $b += 1;
+    //             $item_detail = $item->where('sku', $v['sku'])->find();
+    //             $params['sku'] = $v['sku'];
+    //             $params['platform_sku'] = $v['sku'];
+    //             if (empty($item_detail['name'])) {
+    //                 $params['name'] = '';
+    //             } else {
+    //                 $params['name'] = $item_detail['name'];
+    //             }
+    //             $params['platform_type'] = 8;
+    //             $params['create_person'] = 'Admin';
+    //             $params['create_time'] = date("Y-m-d H:i:s");
+    //             if (empty($item_detail['frame_is_rimless'])) {
+    //                 $params['platform_frame_is_rimless'] = '';
+    //             } else {
+    //                 $params['platform_frame_is_rimless'] = $item_detail['frame_is_rimless'];
+    //             }
+    //             if (empty($item_detail['category_id'])) {
+    //                 $params['category_id'] = '';
+    //             } else {
+    //                 $params['category_id'] = $item_detail['category_id'];
+    //             }
+    //
+    //             $params['stock'] = 0;
+    //             $params['presell_status'] = 0;
+    //             $res = $item_platform_sku->insert($params);
+    //             if ($res) {
+    //                 $a += 1;
+    //             }
+    //         }
+    //     }
+    //     dump($a);
+    //     dump($b);
+    // }
+
+
+    //已跑完
+    // public function transfer_wesee_amazon()
+    // {
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzzzzzz_amazonsku')->field('sku')->select();
+    //     //50个sku一组
+    //     $skus = array_chunk($skus, 50);
+    //     foreach ($skus as $k => $v) {
+    //         //生成调拨单号 插入主表
+    //         $params['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+    //         $params['call_out_site'] = 5;
+    //         $params['call_in_site'] = 8;
+    //         $params['status'] = 0;
+    //         $params['create_time'] = date("Y-m-d H:i:s");
+    //         $params['create_person'] = '陈鹏';
+    //
+    //         $transfer_order_number = Db::name('transfer_order')->insertGetId($params);
+    //
+    //         foreach ($v as $kk => $vv){
+    //             $sku_detail = $item_platform_sku->where(['sku'=>$vv['sku'],'platform_type'=>5])->value('stock');
+    //             if ($sku_detail == 0){
+    //                 echo 'sku'.$vv['sku'].'在批发站的库存为0';
+    //             }else{
+    //                 $data['transfer_order_id'] = $transfer_order_number;
+    //                 $data['sku'] = $vv['sku'];
+    //                 //调出数量
+    //                 $data['num'] = $sku_detail;
+    //                 //调出的虚拟仓库存
+    //                 $data['stock'] = $sku_detail;
+    //
+    //                 $res = Db::name('transfer_order_item')->insert($data);
+    //             }
+    //         }
+    //     }
+    //
+    //
+    //
+    // }
 }

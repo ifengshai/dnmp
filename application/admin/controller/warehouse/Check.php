@@ -822,10 +822,10 @@ class Check extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
-            ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_purchase_order' => 'purchaseorder'], 'check.purchase_id=purchaseorder.id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
+            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark')
             ->where($where)
             ->where($map)
             ->order('check.id desc')

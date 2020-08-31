@@ -31,6 +31,7 @@ class ZendeskComments extends Model
         if($platform){
             $where['c.platform'] = $platform;
         }
+        $where['c.due_id'] = ['neq',0];
         if($time_str){
             $createat = explode(' ', $time_str);
             $where['c.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];

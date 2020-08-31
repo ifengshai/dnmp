@@ -466,6 +466,8 @@ class Nihao extends Model
     public function undeliveredOrder($map = [])
     {
         $map['custom_is_delivery_new'] = 0;
+        //过滤补差价单
+        $map['order_type'] = ['<>', 5];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         return $this->alias('a')->where($map)->count(1);
     }
@@ -482,6 +484,8 @@ class Nihao extends Model
     {
         if ($map) {
             $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
         }
@@ -499,6 +503,8 @@ class Nihao extends Model
     {
         if ($map) {
             $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = 1;
             return $this->alias('a')->where($map)->count(1);
@@ -517,6 +523,8 @@ class Nihao extends Model
     {
         if ($map) {
             $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
             $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
@@ -542,6 +550,8 @@ class Nihao extends Model
     {
         if ($map) {
             $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
             $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
@@ -568,6 +578,8 @@ class Nihao extends Model
     {
         if ($map) {
             $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
             $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
@@ -593,6 +605,8 @@ class Nihao extends Model
     public function getPendingOrderNum()
     {
         $where['custom_print_label_new'] = 0;
+        //过滤补差价单
+        $where['order_type'] = ['<>', 5];
         $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         return $this->where($where)->count(1);
     }
