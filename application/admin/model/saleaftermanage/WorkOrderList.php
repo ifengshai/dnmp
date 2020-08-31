@@ -11,6 +11,7 @@ use think\Model;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
