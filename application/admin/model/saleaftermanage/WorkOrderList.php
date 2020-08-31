@@ -325,7 +325,6 @@ class WorkOrderList extends Model
     public function changeAddress($params, $work_id, $measure_choose_id, $measure_id)
     {
         $work = $this->find($work_id);
-        dump($work);exit;
         $siteType = $params['work_platform'];
         //修改地址
         if (($work->work_type == 1 && $measure_choose_id == 13) || ($work->work_type == 2 && $measure_choose_id == 13)) {
