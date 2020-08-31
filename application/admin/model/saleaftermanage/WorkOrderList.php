@@ -306,14 +306,13 @@ class WorkOrderList extends Model
             } else {
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
-            dump($response);exit;
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
-                exception('网络异常');
+                exception('网络异常11');
             }
             if ($res['status'] == 200) {
                 return $res['data'];
