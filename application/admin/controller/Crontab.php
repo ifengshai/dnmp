@@ -3247,19 +3247,6 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'skuNum')->update($data);
 
-        //查询待处理事件 售后未处理 + 协同未处理
-        //售后事件个数
-        $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
-        $salesNum = $saleTask->getTaskNum();
-
-        //查询协同任务待处理事件
-        $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
-        $infoNum = $infoTask->getTaskNum();
-        $taskAllNum = $salesNum + $infoNum;
-        $data['value'] = $taskAllNum;
-        $data['updatetime'] = date('Y-m-d H:i:s', time());
-        $dataConfig->where('key', 'taskAllNum')->update($data);
-
         //三个站待处理订单
         $zeeloolNum = $this->zeelool->getPendingOrderNum();
         $vooguemeNum = $this->voogueme->getPendingOrderNum();
@@ -3284,8 +3271,6 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $allSalesNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'allSalesNum')->update($data);
-
-
 
         //期初总库存
         $productAllStockLog = new \app\admin\model\ProductAllStock();
@@ -3637,25 +3622,9 @@ order by sfoi.item_id asc limit 1000";
     protected function onway_all_stock()
     {
         //计算SKU总采购数量
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->sum('purchase_num');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_num = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->sum('arrivals_num');
-        return $purchase_num - $arrivals_num;
+        $item = new \app\admin\model\itemmanage\Item();
+        $on_way_stock = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3668,27 +3637,10 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_all_stock_price()
     {
-        //计算SKU总采购金额
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->sum('purchase_num*purchase_price');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_price = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-            ->sum('arrivals_num*purchase_price');
-        return $purchase_price - $arrivals_price;
+        //计算SKU总采购数量
+        $item = new \app\admin\model\itemmanage\Item();
+        $on_way_stock_price = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
     /**
@@ -3701,32 +3653,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_frame_all_stock()
     {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock = $item->where($where)->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3739,35 +3677,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_frame_all_stock_price()
     {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num*purchase_price');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
     /**
@@ -3780,32 +3701,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_ornament_all_stock()
     {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock = $item->where($where)->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3818,35 +3725,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_ornament_all_stock_price()
     {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num*purchase_price');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
 
