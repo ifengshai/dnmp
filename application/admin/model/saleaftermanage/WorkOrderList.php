@@ -692,6 +692,9 @@ class WorkOrderList extends Model
         if ($changeSkus) {
             $postData = $postDataCommon = [];
             foreach ($changeSkus as $key => $changeSku) {
+                if(!empty($changeSku['replacement_order'])){
+                    continue;
+                }
                 $address = unserialize($changeSku['userinfo_option']);
                 $prescriptions = unserialize($changeSku['prescription_option']);
                 $postDataCommon = [
@@ -769,25 +772,27 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            try {
-                if(24558 == $work_id){
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
+            if(!empty($postData)){
+                try {
+                    if(24558 == $work_id){
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
+                    }
+                    if($isNewVersion == 0){
+                        $url = 'magic/order/createOrder';
+                    }elseif($isNewVersion == 1){
+                        $url = 'magic/order/newCreateOrder';
+                    }
+                    $res = $this->httpRequest($siteType, $url, $postData, 'POST');
+                    $increment_id = $res['increment_id'];
+                    //replacement_order添加补发的订单号
+                    WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+                    self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+    
+                    //补发扣库存
+                    $this->deductionStock($work_id, $measure_id);
+                } catch (Exception $e) {
+                    exception($e->getMessage());
                 }
-                if($isNewVersion == 0){
-                    $url = 'magic/order/createOrder';
-                }elseif($isNewVersion == 1){
-                    $url = 'magic/order/newCreateOrder';
-                }
-                $res = $this->httpRequest($siteType, $url, $postData, 'POST');
-                $increment_id = $res['increment_id'];
-                //replacement_order添加补发的订单号
-                WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
-
-                //补发扣库存
-                $this->deductionStock($work_id, $measure_id);
-            } catch (Exception $e) {
-                exception($e->getMessage());
             }
         }
     }
