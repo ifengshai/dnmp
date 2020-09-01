@@ -34,6 +34,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_name', title: __('提出人'), operate:'like'},
+                        {field: 'task_user_name', title: __('任务人'), operate:'like'},
+
                         {
                             field: 'type',
                             title: __('任务类型'),
@@ -61,6 +63,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             searchList: { 1: '待审', 2: 'Pending', 3: '通过'},
                             formatter: Controller.api.formatter.ge_pm_status,
                         },
+                        {
+                            field: 'develop_finish_status1',
+                            title: __('开发进度'),
+                            searchList: { 1: '未响应', 2: '开发中', 3: '开发完成'},
+                            visible: false
+                        },
+                        {
+                            field: 'test_status1',
+                            title: __('测试进度'),
+                            searchList: { 1: '未确认', 2: '已确认', 3: '待通过' , 4: '待上线', 5: '已上线'},
+                            visible: false
+                        },
+                        { field: 'end_time', title: __('完成时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+
                         {
                             field: 'priority',
                             title: __('优先级'),
@@ -207,7 +223,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                                 return all_user_name ? all_user_name : '-';
                             },
                         },
-                   
+
 
                     ]
                 ]
@@ -298,6 +314,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             searchList: { 1: '待通过', 3: '通过'},
                             formatter: Controller.api.formatter.ge_rdcpm_status,
                         },
+                        {
+                            field: 'develop_finish_status1',
+                            title: __('开发进度'),
+                            searchList: { 1: '未响应', 2: '开发中', 3: '开发完成'},
+                            visible: false
+                        },
+                        {
+                            field: 'test_status1',
+                            title: __('测试进度'),
+                            searchList: { 1: '未确认', 2: '已确认', 3: '待通过' , 4: '待上线', 5: '已上线'},
+                            visible: false
+                        },
+                        { field: 'end_time', title: __('完成时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         {field: 'node_time', title: __('任务周期'),operate:false},
                         {
                             field: 'status',
@@ -460,7 +489,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                     themeType: typeof Config.nkeditor != 'undefined' ? Config.nkeditor.theme : 'black', //编辑器皮肤,这个值从后台获取
                     fileManagerJson: Fast.api.fixurl("/addons/nkeditor/index/attachment/module/" + Config.modulename),
                     items: [
-                         'image', 'multiimage','insertfile',
+                        'image', 'multiimage','insertfile',
                     ],
                     afterCreate: function () {
                         var self = this;
@@ -998,7 +1027,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                         Backend.api.open('demand/it_web_demand/detail/ids/' +row.id, __('详情记录'), { area: ['70%', '60%'] });
                     }
                 },
-            }            
+            }
         }
     };
     return Controller;
