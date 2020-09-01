@@ -789,6 +789,8 @@ class WorkOrderList extends Model
                     }elseif($isNewVersion == 1){
                         $url = 'magic/order/newCreateOrder';
                     }
+                    dump($siteType);
+                    dump($postData);exit;
                     $res = $this->httpRequest($siteType, $url, $postData, 'POST');
                     $increment_id = $res['increment_id'];
                     //replacement_order添加补发的订单号
