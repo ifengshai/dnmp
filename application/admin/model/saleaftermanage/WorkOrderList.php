@@ -300,7 +300,6 @@ class WorkOrderList extends Model
 
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
-        dump($params);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
@@ -308,7 +307,6 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
-            dump($body);exit;
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
