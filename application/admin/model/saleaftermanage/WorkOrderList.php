@@ -297,7 +297,6 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
-
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
@@ -322,7 +321,7 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
-    
+
     /**
      * 更改地址
      * @param $params
