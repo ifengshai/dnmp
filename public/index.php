@@ -22,3 +22,8 @@ if (!is_file(APP_PATH . 'admin/command/Install/install.lock'))
 
 // 加载框架引导文件
 require __DIR__ . '/../thinkphp/start.php';
+
+
+echo 1;
+
+
