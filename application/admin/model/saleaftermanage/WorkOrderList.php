@@ -297,7 +297,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
-
+dump($params);exit;
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
