@@ -4,6 +4,7 @@ namespace app\admin\controller\purchase;
 
 use app\admin\model\NewProduct;
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 
 /**
@@ -57,11 +58,11 @@ class NewProductReplenishOrder extends Backend
 
             //如果筛选条件有sku的话 查询这个补货需求单中有这个sku的单子
             if ($filter['sku']) {
-                $ids = $this->model->where('sku','like','%'.$filter['sku'].'%')->group('replenish_id')->field('id')->column('replenish_id');
-//                dump(collection($ids)->toArray());die;
-                $map['id'] = ['in',$ids];
+                $ids = $this->model->where('sku', 'like', '%' . $filter['sku'] . '%')->group('replenish_id')->field('id')->column('replenish_id');
+                //                dump(collection($ids)->toArray());die;
+                $map['id'] = ['in', $ids];
                 unset($filter['sku']);
-            }else{
+            } else {
                 $map = array();
             }
             $this->request->get(['filter' => json_encode($filter)]);
@@ -99,7 +100,7 @@ class NewProductReplenishOrder extends Backend
     public function index($ids = null)
     {
         $replenish_id = input('replenish_id');
-        $this->assignConfig('id',$ids);
+        $this->assignConfig('id', $ids);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -109,13 +110,13 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where('replenish_id',$replenish_id)
+                ->where('replenish_id', $replenish_id)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where('replenish_id',$replenish_id)
+                ->where('replenish_id', $replenish_id)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -123,7 +124,7 @@ class NewProductReplenishOrder extends Backend
 
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
-                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id', $v['id'])->field('supplier_name,distribute_num')->select();
                 $list[$k]['supplier'] = $new_product_replenish_list;
             }
 
@@ -145,7 +146,7 @@ class NewProductReplenishOrder extends Backend
     public function distribution($ids = null)
     {
         $replenish_id = input('replenish_id');
-        $this->assignConfig('id',$ids);
+        $this->assignConfig('id', $ids);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -155,13 +156,13 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['is_del' => 1, 'is_verify' => 1,'replenish_id'=>$replenish_id])
+                ->where(['is_del' => 1, 'is_verify' => 1, 'replenish_id' => $replenish_id])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['is_del' => 1, 'is_verify' => 1,'replenish_id'=>$replenish_id])
+                ->where(['is_del' => 1, 'is_verify' => 1, 'replenish_id' => $replenish_id])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -170,7 +171,7 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
-                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id',$v['id'])->field('supplier_name,distribute_num')->select();
+                $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id', $v['id'])->field('supplier_name,distribute_num')->select();
                 $list[$k]['supplier'] = $new_product_replenish_list;
             }
             $result = array("total" => $total, "rows" => $list);
@@ -206,18 +207,18 @@ class NewProductReplenishOrder extends Backend
                 $whole_num = 0;
                 //判断各个供应商分配数量之和是否等于总需求数量 相等的话 写入处理表
                 foreach ($params['supplier_num'] as $k => $v) {
-                    if(preg_match("/^[1-9][0-9]*$/" ,(int)$v)){
+                    if (preg_match("/^[1-9][0-9]*$/", (int)$v)) {
                         $whole_num += (int)$v;
-                    }else{
+                    } else {
                         $this->error('供应商分配数量必须大于0');
                     }
                 }
                 if ($num['replenishment_num'] > $whole_num) {
                     $this->error('已分配数量小于总需求量，请核对已分配数量');
-                }elseif ($num['replenishment_num'] < $whole_num){
+                } elseif ($num['replenishment_num'] < $whole_num) {
                     $this->error('已分配数量大于总需求量，请核对已分配数量');
                 }
-                if ($params['supplier_id'] != array_unique($params['supplier_id'])){
+                if ($params['supplier_id'] != array_unique($params['supplier_id'])) {
                     $this->error('请不要选择两个相同的供应商');
                 }
                 Db::startTrans();
@@ -236,12 +237,12 @@ class NewProductReplenishOrder extends Backend
                         $data['purchase_person'] = $supplier['purchase_person'];
                         //插入补货单处理表 同时更新补货单分配表状态为待处理
                         $result = Db::name('new_product_replenish_list')->insert($data);
-                        $update = $this->model->where('id',$id)->setField('status',2);
+                        $update = $this->model->where('id', $id)->setField('status', 2);
                     }
                     //每次对补货需求单进行分配的时候 查询这个补货需求单是否还有未分配的sku 如果没有就更新补货需求单状态为待处理
-                    $replenish_order = $this->model->where(['replenish_id'=>$num['replenish_id'],'status'=>1])->find();
-                    if (empty($replenish_order)){
-                        $res = $this->replenish->where('id',$num['replenish_id'])->setField('status',2);
+                    $replenish_order = $this->model->where(['replenish_id' => $num['replenish_id'], 'status' => 1])->find();
+                    if (empty($replenish_order)) {
+                        $res = $this->replenish->where('id', $num['replenish_id'])->setField('status', 2);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -279,20 +280,20 @@ class NewProductReplenishOrder extends Backend
     public function handle($ids = null)
     {
 
-        $this->assignConfig('id',$ids);
+        $this->assignConfig('id', $ids);
         $replenish_id = input('replenish_id');
-        if (!$ids){
+        if (!$ids) {
             $id = $replenish_id;
-        }else{
+        } else {
             $id = $ids;
         }
-//        if (!$replenish_id){
-//            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
-//        }else{
-//            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
-//        }
-//        $map['replenish_id'] = ['in', $order_ids];
-        $map['replenish_id'] = ['=',$id];
+        //        if (!$replenish_id){
+        //            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+        //        }else{
+        //            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+        //        }
+        //        $map['replenish_id'] = ['in', $order_ids];
+        $map['replenish_id'] = ['=', $id];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -317,7 +318,7 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
-                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_order_id'])->value('replenishment_num');
+                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 $list[$k]['num'] = $new_product_replenish_order;
             }
             $result = array("total" => $total, "rows" => $list);
@@ -338,29 +339,37 @@ class NewProductReplenishOrder extends Backend
     public function handle_detail($ids = null)
     {
 
-        $this->assignConfig('id',$ids);
+        $this->assignConfig('id', $ids);
         $replenish_id = input('replenish_id');
-        if (!$ids){
+        if (!$ids) {
             $id = $replenish_id;
-        }else{
+        } else {
             $id = $ids;
         }
-        $replenish = $this->replenish->where('id',$id)->find();
-        switch ($replenish['status']){
-            case 1:$replenish['name']='待分配';break;
-            case 2:$replenish['name']='待处理';break;
-            case 3:$replenish['name']='部分处理';break;
-            case 4:$replenish['name']='已处理';break;
+        $replenish = $this->replenish->where('id', $id)->find();
+        switch ($replenish['status']) {
+            case 1:
+                $replenish['name'] = '待分配';
+                break;
+            case 2:
+                $replenish['name'] = '待处理';
+                break;
+            case 3:
+                $replenish['name'] = '部分处理';
+                break;
+            case 4:
+                $replenish['name'] = '已处理';
+                break;
         }
         $this->assign('replenish', $replenish);
-//        dump(collection($replenish)->toArray());die;
-//        if (!$replenish_id){
-//            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
-//        }else{
-//            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
-//        }
-//        $map['replenish_id'] = ['in', $order_ids];
-        $map['replenish_id'] = ['=',$id];
+        //        dump(collection($replenish)->toArray());die;
+        //        if (!$replenish_id){
+        //            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
+        //        }else{
+        //            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
+        //        }
+        //        $map['replenish_id'] = ['in', $order_ids];
+        $map['replenish_id'] = ['=', $id];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -385,7 +394,7 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
-                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id',$v['replenish_order_id'])->value('replenishment_num');
+                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 $list[$k]['num'] = $new_product_replenish_order;
             }
             $result = array("total" => $total, "rows" => $list);
@@ -517,7 +526,7 @@ class NewProductReplenishOrder extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success('添加成功！！',  url('PurchaseOrder/index'));
+                    $this->success('添加成功！！', url('PurchaseOrder/index'));
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
@@ -532,7 +541,8 @@ class NewProductReplenishOrder extends Backend
             $where['new_product.id'] = ['in', $new_product_ids];
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-            dump($row);die;
+            dump($row);
+            die;
             foreach ($row as $v) {
                 if ($v['item_status'] != 1) {
                     $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
@@ -547,13 +557,12 @@ class NewProductReplenishOrder extends Backend
             $this->assign('row', $row);
             $this->assign('is_new_product', 1);
         }
-//
-//
-//        //查询供应商
-//        $supplier = new \app\admin\model\purchase\Supplier;
-//        $data = $supplier->getSupplierData();
-//        $this->assign('supplier', $data);
-
+        //
+        //
+        //        //查询供应商
+        //        $supplier = new \app\admin\model\purchase\Supplier;
+        //        $data = $supplier->getSupplierData();
+        //        $this->assign('supplier', $data);
 
 
         //查询新品数据
@@ -572,20 +581,20 @@ class NewProductReplenishOrder extends Backend
             if (count($supplier) > 1) {
                 $this->error(__('必须选择相同的供应商！！'), url('purchase/new_product_replenish_order/handle'));
             }
-            $supplier_info = $this->supplier->where('id',$supplier[0])->field('supplier_name,address,id,purchase_person')->find();
-//            dump($supplier_info);die;
+            $supplier_info = $this->supplier->where('id', $supplier[0])->field('supplier_name,address,id,purchase_person')->find();
+            //            dump($supplier_info);die;
 
             $this->assign('row', $row);
             $this->assign('supplier', $supplier_info);
             $this->assign('is_new_product', 1);
-        }else{
+        } else {
             //查询补货需求单处理表 单条生成采购单
             $new_product_ids = $this->request->get('ids');
             $new_product_ids = input('ids');
-            $detail = $this->list->where('id',$new_product_ids)->find();
+            $detail = $this->list->where('id', $new_product_ids)->find();
 
             //当前信息对应的供应商信息
-            $supplier = $this->supplier->where('id',$detail['supplier_id'])->field('supplier_name,address,id,purchase_person')->find();
+            $supplier = $this->supplier->where('id', $detail['supplier_id'])->field('supplier_name,address,id,purchase_person')->find();
             $this->assign('supplier', $supplier);
         }
 
@@ -689,6 +698,108 @@ class NewProductReplenishOrder extends Backend
             $this->error('缺少参数！！');
         }
 
+    }
+
+    public function export_replenish_order()
+    {
+        $list = Db::name('new_product_mapping')
+            ->where('create_time','>','2020-08-28 00:00:00')
+            ->select();
+        $arr = [];
+        foreach ($list as $k =>$v){
+            if ($v['website_type'] == 1){
+                $v['site_name'] = 'zeelool';
+                $arr['zeelool'][$k] = $v;
+            }
+            if ($v['website_type'] == 2){
+                $v['site_name'] = 'voogueme';
+                $arr['voogueme'][$k] = $v;
+            }
+            if ($v['website_type'] == 3){
+                $v['site_name'] = 'nihao';
+                $arr['nihao'][$k] = $v;
+            }
+            if ($v['website_type'] == 4){
+                $v['site_name'] = 'meeloog';
+                $arr['meeloog'][$k] = $v;
+            }
+            if ($v['website_type'] == 5){
+                $v['site_name'] = 'wesee';
+                $arr['wesee'][$k] = $v;
+            }
+            if ($v['website_type'] == 8){
+                $v['site_name'] = 'amazon';
+                $arr['amazon'][$k] = $v;
+            }
+
+        }
+        // dump($arr);die;
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "站点")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "补货提报数量");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人");
+            // ->setCellValue("E1", "时间")
+
+
+        $num = 0;
+        foreach ($arr as $key => $value) {
+            foreach ($value as $kk =>$vv){
+                $spreadsheet->getActiveSheet()->setCellValue("A" . ($num * 1 + 2), $vv['site_name']);
+                $spreadsheet->getActiveSheet()->setCellValue("B" . ($num * 1 + 2), $vv['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue("C" . ($num * 1 + 2), $vv['replenish_num']);
+                $spreadsheet->getActiveSheet()->setCellValue("D" . ($num * 1 + 2), $vv['create_person']);
+                $num += 1;
+            }
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '8.28号之后补货需求单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 
 
