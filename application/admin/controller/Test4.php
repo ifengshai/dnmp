@@ -356,23 +356,6 @@ class Test4 extends Backend
     /************************跑库存数据用END**********************************/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function new_track_test()
     {
 

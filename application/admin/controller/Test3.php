@@ -222,7 +222,6 @@ class Test3 extends Backend
                 }
             }
         }
-        dump($i);exit;
     }
     //每天的回复量
     public function zendesk_data(){
