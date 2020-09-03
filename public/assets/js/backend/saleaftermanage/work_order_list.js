@@ -396,6 +396,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(1);
                     }else if(site =='V'){
                         $("#work_platform").val(2);
+                    }else if(site =='M'){
+                        $("#work_platform").val(4);
                     }
                     $('#order_type').val(100);
                     $('#c-order_type').val(100);
@@ -819,6 +821,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(1);
                     }else if(site == 'V'){
                         $("#work_platform").val(2);
+                    }else if(site == 'M'){
+                        $("#work_platform").val(4);
                     }
                     $('#order_type').val(100);
                     $('#c-order_type').val(100);
