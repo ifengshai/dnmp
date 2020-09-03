@@ -291,14 +291,6 @@ class Test3 extends Backend
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
-
-
-
-
-
-
-        
-
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
