@@ -287,18 +287,17 @@ class Test3 extends Backend
         dump($result[0]['ga:adCost']);die;
 
 
-        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-        //     // Set the access token on the client.
-        //     $client->setAccessToken($_SESSION['access_token']);
-
-            
-        // } else {
-        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
-        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-        // }
+        
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
+
+
+
+
+
+
+        
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
