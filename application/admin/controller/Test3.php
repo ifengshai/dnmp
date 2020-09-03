@@ -194,11 +194,6 @@ class Test3 extends Backend
             echo $k . "\n";
         }
 
-
-
-
-
-        
         echo 'is ok';
     }
     //排查邮件中所有不匹配站点的邮件
