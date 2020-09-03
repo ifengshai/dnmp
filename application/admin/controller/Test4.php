@@ -188,9 +188,6 @@ class Test4 extends Backend
 
     }
 
-
-
-
     /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
