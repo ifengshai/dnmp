@@ -180,12 +180,15 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
-            $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
+            $itemPlatformSKU->where(['platform_type' => 1, 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
             echo $k . "\n";
             usleep(50000);
         }
         echo 'ok';
     }
+
+
+
 
     /************************跑库存数据用START**********************************/
     //导入实时库存 第一步

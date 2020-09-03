@@ -103,6 +103,8 @@ class CustomerService extends Backend
                 $where['c.is_admin'] = 0;
             } else {
                 $where['c.is_admin'] = 1;
+                $where['c.due_id'] = ['neq',0];
+                $where['c.is_public'] = ['neq',2];
             }
             $where['z.channel'] = array('neq', 'voice');
             if ($workload_time) {
@@ -339,6 +341,7 @@ class CustomerService extends Backend
             $time_str = $params['time_str'];
             $group_id = $params['group_id'];
             $admin_id = $params['admin_id'];
+            $where['c.due_id'] = ['neq',0];
             if($platform){
                 $where['c.platform'] = $platform;
             }
@@ -350,6 +353,7 @@ class CustomerService extends Backend
             if($admin_id){
                 $where['c.due_id'] = $admin_id;
             }
+            $where['c.is_admin'] = 1;
             $where['z.channel'] = ['neq','voice'];
             if($time_str){
                 $createat = explode(' ', $time_str);

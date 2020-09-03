@@ -34,8 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','nkeditor', 'upload'],
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_name', title: __('提出人'), operate:'like'},
-                        {field: 'task_user_name', title: __('任务人'), operate:'like'},
-
+                        {field: 'task_user_name', title: __('任务人'), operate:'like',visible: false},
                         {
                             field: 'type',
                             title: __('任务类型'),

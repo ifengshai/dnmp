@@ -9,6 +9,7 @@ use FacebookAds\Object\AdCampaign;
 use FacebookAds\Object\AdsInsights;
 use FacebookAds\Object\AdAccount;
 use think\Db;
+use fast\Http;
 
 class Test5 extends Backend
 {
@@ -41,6 +42,13 @@ class Test5 extends Backend
         }
         dump($all_facebook_spend);
         exit;
+    }
+
+    public function test01()
+    {
+        $url = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={623060648636265}&client_secret={ad00911ec3120286be008c02bdd66a92}&fb_exchange_token={EAAI2q5yir2kBAMPlwaNqRmZCHPdBGLadq6FUAaIxz7BFbuS7uaNDUShEMhCVG7KZBHwQ8VivZBxChNEdTC14MnapJwPi4V9uJYnxriK5WggdbUUx4QlBELggA9QO1YHPCZCPGPJC6B6OPy9xUUceGT2qIMQ7JwM0F2rE8V4LbWstn84Rytnkizn5u7mQyXwxqZCYELcXH8HHsQUdZCS0wj}";
+        $res = Http::get($url);
+        dump($res);die;
     }
 
 }
