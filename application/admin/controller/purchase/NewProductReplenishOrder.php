@@ -709,39 +709,73 @@ class NewProductReplenishOrder extends Backend
         foreach ($list as $k =>$v){
             if ($v['website_type'] == 1){
                 $v['site_name'] = 'zeelool';
-                $arr['zeelool'][$k] = $v;
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['zeelool'][$k] = $v;
+                }
             }
             if ($v['website_type'] == 2){
                 $v['site_name'] = 'voogueme';
-                $arr['voogueme'][$k] = $v;
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['voogueme'][$k] = $v;
+                }
             }
             if ($v['website_type'] == 3){
                 $v['site_name'] = 'nihao';
-                $arr['nihao'][$k] = $v;
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['nihao'][$k] = $v;
+                }
             }
             if ($v['website_type'] == 4){
                 $v['site_name'] = 'meeloog';
-                $arr['meeloog'][$k] = $v;
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['meeloog'][$k] = $v;
+                }
             }
             if ($v['website_type'] == 5){
                 $v['site_name'] = 'wesee';
-                $arr['wesee'][$k] = $v;
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['wesee'][$k] = $v;
+                }
             }
             if ($v['website_type'] == 8){
                 $v['site_name'] = 'amazon';
-                $arr['amazon'][$k] = $v;
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['amazon'][$k] = $v;
+                }
             }
 
         }
-        // dump($arr);die;
         $spreadsheet = new Spreadsheet();
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "站点")
             ->setCellValue("B1", "SKU")
             ->setCellValue("C1", "补货提报数量");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人");
-            // ->setCellValue("E1", "时间")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人")
+            ->setCellValue("E1", "创建时间");
 
 
         $num = 0;
@@ -751,6 +785,8 @@ class NewProductReplenishOrder extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("B" . ($num * 1 + 2), $vv['sku']);
                 $spreadsheet->getActiveSheet()->setCellValue("C" . ($num * 1 + 2), $vv['replenish_num']);
                 $spreadsheet->getActiveSheet()->setCellValue("D" . ($num * 1 + 2), $vv['create_person']);
+                $spreadsheet->getActiveSheet()->setCellValue("E" . ($num * 1 + 2), $vv['create_time']);
+
                 $num += 1;
             }
         }
@@ -760,6 +796,8 @@ class NewProductReplenishOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(40);
+
 
         //设置边框
         $border = [
