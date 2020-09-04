@@ -1567,24 +1567,24 @@ class NewProduct extends Backend
         $this->model = new \app\admin\model\NewProductMapping();
         $this->product = new \app\admin\model\itemmanage\Item;
 
+        //校验参数空值
         $file = $this->request->request('file');
         !$file && $this->error(__('Parameter %s can not be empty', 'file'));
-
         $label = $this->request->request('label');
         !$label && $this->error(__('Parameter %s can not be empty', 'label'));
 
         //查询对应平台权限
-        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
-        !isset($magentoplatformarr[$label]) && $this->error(__('站点类型错误'));
+        $plat_form = array_column($this->magentoplatform->getAuthSite(), 'id');
+        !in_array($label,$plat_form) && $this->error(__('站点类型错误'));
 
+        //校验文件路径
         $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         !is_file($filePath) && $this->error(__('No results were found'));
 
         //实例化reader
         $ext = pathinfo($filePath, PATHINFO_EXTENSION);
         !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
-
-        if ($ext === 'csv') {
+        if ('csv' === $ext) {
             $file = fopen($filePath, 'r');
             $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
             $fp = fopen($filePath, "w");
@@ -1595,7 +1595,7 @@ class NewProduct extends Backend
                 if ($encoding != 'utf-8') {
                     $line = mb_convert_encoding($line, 'utf-8', $encoding);
                 }
-                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                if (0 == $n || preg_match('/^".*"$/', $line)) {
                     fwrite($fp, $line . "\n");
                 } else {
                     fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
@@ -1605,15 +1605,13 @@ class NewProduct extends Backend
             fclose($file) || fclose($fp);
 
             $reader = new Csv();
-        } elseif ($ext === 'xls') {
+        } elseif ('xls' === $ext) {
             $reader = new Xls();
         } else {
             $reader = new Xlsx();
         }
 
         //模板文件列名
-        $listName = ['商品SKU', '类型', '补货需求数量'];
-        $data = [];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -1633,61 +1631,53 @@ class NewProduct extends Backend
                 }
             }
 
-            //模板文件不正确
-            $listName !== $fields && $this->error(__('模板文件不正确！'));
+            //校验模板文件格式
+            $listName = ['商品SKU', '类型', '补货需求数量'];
+            $listName !== $fields && $this->error(__('模板文件格式错误！'));
 
+            $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
                     $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
                 }
             }
-        } catch (Exception $exception) {
-            $this->error($exception->getMessage());
-        }
-        if (empty($data)) {
-            $this->error('未导入任何数据！');
-        }
+            empty($data) && $this->error('表格数据为空！');
 
-        //批量导入
-        $params = [];
-        foreach ($data as $k => $v) {
-            $sku = trim($v[0]);
-            empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
+            //批量导入
+            $params = [];
+            foreach ($data as $k => $v) {
+                //获取sku && 根据sku获取分类
+                $sku = trim($v[0]);
+                empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
+                $product_info = $this->product->getItemInfo($sku);
+                $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
 
-            //根据sku获取分类
-            $product_info = $this->product->getItemInfo($sku);
-            $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
+                //获取类型
+                $type_name = trim($v[1]);
+                $type_arr = ['计划补货'=>1,'紧急补货'=>2];
+                !isset($type_arr[$type_name]) && $this->error('导入失败,类型错误！');
 
-            $type_name = trim($v[1]);
-            switch ($type_name) {
-                case '计划补货':
-                    $type = 1;
-                    break;
-                case '紧急补货':
-                    $type = 2;
-                    break;
-                default:
-                    $this->error('导入失败,类型错误！');
-                    break;
+                //获取补货量
+                $replenish_num = (int)$v[2];
+                empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
+
+                $params[] = [
+                    'website_type' => $label,
+                    'sku' => $sku,
+                    'create_time' => date('Y-m-d H:i:s'),
+                    'create_person' => session('admin.nickname'),
+                    'replenish_num' => $replenish_num,
+                    'type' => $type_arr[$type_name],
+                    'category_id' => $category_id,
+                ];
             }
 
-            $replenish_num = (int)$v[2];
-            empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
-
-            $params[] = [
-                'website_type' => $label,
-                'sku' => $sku,
-                'create_time' => date('Y-m-d H:i:s'),
-                'create_person' => session('admin.nickname'),
-                'replenish_num' => $replenish_num,
-                'type' => $type,
-                'category_id' => $category_id,
-            ];
+            $result = $this->model->allowField(true)->saveAll($params);
+            $result ? $this->success('导入成功！') : $this->error('导入失败！');
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
         }
-
-        $result = $this->model->allowField(true)->saveAll($params);
-        $result ? $this->success('导入成功！') : $this->error('导入失败！');
     }
 
     //数据已跑完 2020 08.25 14:47
