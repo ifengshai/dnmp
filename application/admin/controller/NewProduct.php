@@ -1087,7 +1087,7 @@ class NewProduct extends Backend
             $suppliersku = new \app\admin\model\purchase\SupplierSku();
             $product_cycle_arr = $suppliersku->where(['label' => 1, 'status' => 1, 'sku' => ['in', $skus]])->column('product_cycle', 'sku');
             //查询可用库存
-            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock,purchase_price', 'sku');
             //查询待入库数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             $wait_in_arr = $purchase->getWaitInStockNum($skus);
@@ -1100,6 +1100,7 @@ class NewProduct extends Backend
                 $v['sales_days'] = $v['average_90days_sales_num'] > 0 ? round($v['stock'] / $v['average_90days_sales_num']) : 0;
                 $num = $v['stock'] - ($v['average_90days_sales_num'] * 30);
                 $v['replenish_num'] = $num > 0 ? $num : 0;
+                $v['purchase_price'] = $stock[$v['sku']]['purchase_price'];
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1340,6 +1341,7 @@ class NewProduct extends Backend
         $list = $this->model
             ->where(['is_show' => 1, 'type' => 2])
             // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
+
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
@@ -1351,6 +1353,7 @@ class NewProduct extends Backend
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
             ->where(['is_show' => 1, 'type' => 2])
+
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -1399,6 +1402,7 @@ class NewProduct extends Backend
             //更新计划补货列表
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 2])
+
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
             Db::commit();
@@ -1504,7 +1508,6 @@ class NewProduct extends Backend
                 $status = '新建';
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
-
         }
 
         //设置宽度
@@ -1579,6 +1582,80 @@ class NewProduct extends Backend
     }
 
     /**
+     * 提报历史
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/13 13:56:00 
+     * @return void
+     */
+    public function productMappingListHistory()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\NewProductMapping();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['website_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['website_type']) {
+                unset($map['website_type']);
+            }
+
+            $check_order = new \app\admin\model\warehouse\Check();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model->alias('a')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
+                ->where($where)
+                ->where('is_show', 0)
+                ->where('a.replenish_id<>0')
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model->alias('a')
+                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
+                ->where($where)
+                ->where('is_show', 0)
+                ->where('a.replenish_id<>0')
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                $v['arrivals_num'] = 
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        //取第一个key为默认站点
+        $site = input('site', $magentoplatformarr[0]['id']);
+
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
+    }
+    
+    /*
      * 选品批量导入xls
      *
      * @Description
