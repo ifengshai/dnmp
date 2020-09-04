@@ -13,6 +13,10 @@ use app\admin\model\purchase\Supplier;
 use think\Loader;
 use fast\Alibaba;
 use app\admin\model\NewProductMappingLog;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
@@ -27,6 +31,12 @@ class NewProduct extends Backend
      * @var \app\admin\model\NewProduct
      */
     protected $model = null;
+
+    /**
+     * Item模型对象
+     * @var \app\admin\model\itemmanage\Item
+     */
+    protected $product = null;
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -1542,6 +1552,142 @@ class NewProduct extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+
+    /**
+     * 选品批量导入xls
+     *
+     * @Description
+     * @return void
+     * @since 2020/09/04 09:38:39
+     * @author lzh
+     */
+    public function import()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->product = new \app\admin\model\itemmanage\Item;
+
+        $file = $this->request->request('file');
+        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
+
+        $label = $this->request->request('label');
+        !$label && $this->error(__('Parameter %s can not be empty', 'label'));
+
+        //查询对应平台权限
+        $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
+        !isset($magentoplatformarr[$label]) && $this->error(__('站点类型错误'));
+
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        !is_file($filePath) && $this->error(__('No results were found'));
+
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
+
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //模板文件列名
+        $listName = ['商品SKU', '类型', '补货需求数量'];
+        $data = [];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if(!empty($val)){
+                        $fields[] = $val;
+                    }
+                }
+            }
+
+            //模板文件不正确
+            $listName !== $fields && $this->error(__('模板文件不正确！'));
+
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+        if (empty($data)) {
+            $this->error('未导入任何数据！');
+        }
+
+        //批量导入
+        $params = [];
+        foreach ($data as $k => $v) {
+            $sku = trim($v[0]);
+            empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
+
+            //根据sku获取分类
+            $product_info = $this->product->getItemInfo($sku);
+            $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
+
+            $type_name = trim($v[1]);
+            switch ($type_name) {
+                case '计划补货':
+                    $type = 1;
+                    break;
+                case '紧急补货':
+                    $type = 2;
+                    break;
+                default:
+                    $this->error('导入失败,类型错误！');
+                    break;
+            }
+
+            $replenish_num = (int)$v[2];
+            empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
+
+            $params[] = [
+                'website_type' => $label,
+                'sku' => $sku,
+                'create_time' => date('Y-m-d H:i:s'),
+                'create_person' => session('admin.nickname'),
+                'replenish_num' => $replenish_num,
+                'type' => $type,
+                'category_id' => $category_id,
+            ];
+        }
+
+        $result = $this->model->allowField(true)->saveAll($params);
+        $result ? $this->success('导入成功！') : $this->error('导入失败！');
     }
 
     //数据已跑完 2020 08.25 14:47
