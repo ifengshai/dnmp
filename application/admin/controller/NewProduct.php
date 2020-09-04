@@ -13,6 +13,10 @@ use app\admin\model\purchase\Supplier;
 use think\Loader;
 use fast\Alibaba;
 use app\admin\model\NewProductMappingLog;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
@@ -27,6 +31,12 @@ class NewProduct extends Backend
      * @var \app\admin\model\NewProduct
      */
     protected $model = null;
+
+    /**
+     * Item模型对象
+     * @var \app\admin\model\itemmanage\Item
+     */
+    protected $product = null;
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -1617,4 +1627,215 @@ class NewProduct extends Backend
         $this->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
+    
+    /*
+     * 选品批量导入xls
+     *
+     * @Description
+     * @return void
+     * @since 2020/09/04 09:38:39
+     * @author lzh
+     */
+    public function import()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->product = new \app\admin\model\itemmanage\Item;
+
+        //校验参数空值
+        $file = $this->request->request('file');
+        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
+        $label = $this->request->request('label');
+        !$label && $this->error(__('Parameter %s can not be empty', 'label'));
+
+        //查询对应平台权限
+        $plat_form = array_column($this->magentoplatform->getAuthSite(), 'id');
+        !in_array($label,$plat_form) && $this->error(__('站点类型错误'));
+
+        //校验文件路径
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        !is_file($filePath) && $this->error(__('No results were found'));
+
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
+        if ('csv' === $ext) {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if (0 == $n || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ('xls' === $ext) {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if(!empty($val)){
+                        $fields[] = $val;
+                    }
+                }
+            }
+
+            //校验模板文件格式
+            $listName = ['商品SKU', '类型', '补货需求数量'];
+            $listName !== $fields && $this->error(__('模板文件格式错误！'));
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+            empty($data) && $this->error('表格数据为空！');
+
+            //批量导入
+            $params = [];
+            foreach ($data as $k => $v) {
+                //获取sku && 根据sku获取分类
+                $sku = trim($v[0]);
+                empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
+                $product_info = $this->product->getItemInfo($sku);
+                $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
+
+                //获取类型
+                $type_name = trim($v[1]);
+                $type_arr = ['计划补货'=>1,'紧急补货'=>2];
+                !isset($type_arr[$type_name]) && $this->error('导入失败,类型错误！');
+
+                //获取补货量
+                $replenish_num = (int)$v[2];
+                empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
+
+                $params[] = [
+                    'website_type' => $label,
+                    'sku' => $sku,
+                    'create_time' => date('Y-m-d H:i:s'),
+                    'create_person' => session('admin.nickname'),
+                    'replenish_num' => $replenish_num,
+                    'type' => $type_arr[$type_name],
+                    'category_id' => $category_id,
+                ];
+            }
+
+            $result = $this->model->allowField(true)->saveAll($params);
+            $result ? $this->success('导入成功！') : $this->error('导入失败！');
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
+    //数据已跑完 2020 08.25 14:47
+    // public function amazon_sku()
+    // {
+    //     $item = new \app\admin\model\itemmanage\Item();
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzz_temp')->field('sku')->select();
+    //     $a = 0;
+    //     $b = 0;
+    //     foreach ($skus as $k => $v) {
+    //         if (!empty($v['sku'])) {
+    //             $b += 1;
+    //             $item_detail = $item->where('sku', $v['sku'])->find();
+    //             $params['sku'] = $v['sku'];
+    //             $params['platform_sku'] = $v['sku'];
+    //             if (empty($item_detail['name'])) {
+    //                 $params['name'] = '';
+    //             } else {
+    //                 $params['name'] = $item_detail['name'];
+    //             }
+    //             $params['platform_type'] = 8;
+    //             $params['create_person'] = 'Admin';
+    //             $params['create_time'] = date("Y-m-d H:i:s");
+    //             if (empty($item_detail['frame_is_rimless'])) {
+    //                 $params['platform_frame_is_rimless'] = '';
+    //             } else {
+    //                 $params['platform_frame_is_rimless'] = $item_detail['frame_is_rimless'];
+    //             }
+    //             if (empty($item_detail['category_id'])) {
+    //                 $params['category_id'] = '';
+    //             } else {
+    //                 $params['category_id'] = $item_detail['category_id'];
+    //             }
+    //
+    //             $params['stock'] = 0;
+    //             $params['presell_status'] = 0;
+    //             $res = $item_platform_sku->insert($params);
+    //             if ($res) {
+    //                 $a += 1;
+    //             }
+    //         }
+    //     }
+    //     dump($a);
+    //     dump($b);
+    // }
+
+
+    //已跑完
+    // public function transfer_wesee_amazon()
+    // {
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzzzzzz_amazonsku')->field('sku')->select();
+    //     //50个sku一组
+    //     $skus = array_chunk($skus, 50);
+    //     foreach ($skus as $k => $v) {
+    //         //生成调拨单号 插入主表
+    //         $params['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+    //         $params['call_out_site'] = 5;
+    //         $params['call_in_site'] = 8;
+    //         $params['status'] = 0;
+    //         $params['create_time'] = date("Y-m-d H:i:s");
+    //         $params['create_person'] = '陈鹏';
+    //
+    //         $transfer_order_number = Db::name('transfer_order')->insertGetId($params);
+    //
+    //         foreach ($v as $kk => $vv){
+    //             $sku_detail = $item_platform_sku->where(['sku'=>$vv['sku'],'platform_type'=>5])->value('stock');
+    //             if ($sku_detail == 0){
+    //                 echo 'sku'.$vv['sku'].'在批发站的库存为0';
+    //             }else{
+    //                 $data['transfer_order_id'] = $transfer_order_number;
+    //                 $data['sku'] = $vv['sku'];
+    //                 //调出数量
+    //                 $data['num'] = $sku_detail;
+    //                 //调出的虚拟仓库存
+    //                 $data['stock'] = $sku_detail;
+    //
+    //                 $res = Db::name('transfer_order_item')->insert($data);
+    //             }
+    //         }
+    //     }
+    //
+    //
+    //
+    // }
 }

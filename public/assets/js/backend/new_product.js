@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template,undefined,Upload) {
 
     var Controller = {
         index: function () {
@@ -752,6 +752,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                     }
                 );
+            });
+
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
+                Fast.api.ajax({
+                    url: 'new_product/import',
+                    data: { file: data.url,label: label },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+                });
             });
 
         },
