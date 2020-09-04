@@ -517,8 +517,6 @@ class Outstock extends Backend
                     $this->error('此sku:' . $v['sku'] . '不存在！！');
                 }
             }
-
-
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

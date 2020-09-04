@@ -17,10 +17,6 @@ class Test4 extends Backend
     protected $str2 = 'Delivered to Air Transport.';
     protected $str3 = 'In Transit to Next Facility.';
     protected $str4 = 'Arrived in the Final Destination Country.';
-    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.'; //到达待取
-    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
-    protected $str40 = 'Delivered successfully.'; //投递成功
-    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
 
 
     public function _initialize()
@@ -180,11 +176,12 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
-            $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
+            $itemPlatformSKU->where(['platform_type' => 1, 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
             echo $k . "\n";
             usleep(50000);
         }
         echo 'ok';
+
     }
 
     /************************跑库存数据用START**********************************/
@@ -353,23 +350,6 @@ class Test4 extends Backend
     }
 
     /************************跑库存数据用END**********************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public function new_track_test()

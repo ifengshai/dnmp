@@ -360,10 +360,12 @@ class SelfApi extends Api
             ->where('order_number', $order_number)
             ->where('site', $site)
             ->where('node_type', '<=', 7)
+            ->order('create_time desc')
             ->select();
         $order_node2 = Db::name('order_node_courier')
             ->where('order_number', $order_number)
             ->where('site', $site)
+            ->order('create_time desc')
             ->select();
         $order_data['order_data'] = array_merge($order_node1, $order_node2);
         if ($other_order_number) {
@@ -374,10 +376,12 @@ class SelfApi extends Api
                     ->where('order_number', $val)
                     ->where('site', $site)
                     ->where('node_type', '<=', 7)
+                    ->order('create_time desc')
                     ->select();
                 $other_order_node2 = Db::name('order_node_courier')
                     ->where('order_number', $val)
                     ->where('site', $site)
+                    ->order('create_time desc')
                     ->select();
                 $order_data['other_order_data'][$val] = array_merge($other_order_node1, $other_order_node2);
             }
@@ -401,6 +405,7 @@ class SelfApi extends Api
         $order_data['order_data'] = Db::name('order_node_courier')
             ->where('order_number', $order_number)
             ->where('site', $site)
+            ->order('create_time desc')
             ->select();
         if ($other_order_number) {
 
@@ -408,6 +413,7 @@ class SelfApi extends Api
                 $order_data['other_order_data'][$val] = Db::name('order_node_courier')
                     ->where('order_number', $val)
                     ->where('site', $site)
+                    ->order('create_time desc')
                     ->select();
             }
         }
@@ -431,6 +437,7 @@ class SelfApi extends Api
             ->where('order_number', $order_number)
             ->where('site', $site)
             ->where('node_type', '<=', 7)
+            ->order('create_time desc')
             ->select();
         if ($other_order_number) {
 
@@ -440,6 +447,7 @@ class SelfApi extends Api
                     ->where('order_number', $val)
                     ->where('site', $site)
                     ->where('node_type', '<=', 7)
+                    ->order('create_time desc')
                     ->select();
             }
         }
@@ -541,7 +549,7 @@ class SelfApi extends Api
 
         $where['site'] = $site;
 
-        $order_track_data = (new OrderNodeCourier())->where($where)->select();
+        $order_track_data = (new OrderNodeCourier())->where($where)->order('create_time desc')->select();
         $order_track_data = collection($order_track_data)->toArray();
 
         $this->success('成功', $order_track_data, 200);
