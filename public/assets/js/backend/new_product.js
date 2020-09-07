@@ -806,13 +806,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'status', title: __('质检状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
-                            formatter: Table.api.formatter.status
+                            formatter: Controller.api.formatter.status
                         },
                         { field: 'quantity_num', title: __('质检合格数量'), operate: false },
                         {
                             field: 'instock_status', title: __('入库状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
-                            formatter: Table.api.formatter.status
+                            formatter: Controller.api.formatter.status
                         },
                         { field: 'in_stock_num', title: __('入库数量'), operate: false }
                     ]
