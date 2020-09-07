@@ -1610,14 +1610,36 @@ class NewProduct extends Backend
             if ($filter['website_type']) {
                 unset($map['website_type']);
             }
-         
+
+            //sku 
+            if ($filter['sku']) {
+                $map['a.sku'] = $filter['sku'];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //补货类型 
+            if ($filter['type']) {
+                $map['a.type'] = $filter['type'];
+                unset($filter['type']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //提报时间 
+            if ($filter['create_time']) {
+                $arr = explode(' ', $filter['create_time']);
+                $map['a.create_time'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
+                unset($filter['create_time']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id','left')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
@@ -1629,7 +1651,7 @@ class NewProduct extends Backend
                 ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id','left')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
