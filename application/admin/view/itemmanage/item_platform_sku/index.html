@@ -7,6 +7,7 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
+                        <a href="javascript:;" class="btn btn-danger btn-batch-export-xls" title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                         <!-- {present name="PlatformList"}
                         {foreach name="PlatformList" item="vo"}
                         <a href="javascript:;" id="{$vo.id}" class="btn btn-success btn-upload btn-disabled disabled {:$auth->check('itemmanage/item_category/edit')?'':'hide'}" title="{:__('SyncMangeto')}" >上传至:{$vo.name}</a>
