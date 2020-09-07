@@ -1743,6 +1743,8 @@ class NewProduct extends Backend
                 ->select();
             $list = collection($list)->toArray();
             foreach ($list as &$v) {
+                $check_list = [];
+                $in_stock_list = [];
                 if ($v['check_id']) {
                     //查询质检合格数量
                     $check_list = $check_order_item->where(['check_id' => $v['check_id'], 'sku' => $v['sku']])->find();
