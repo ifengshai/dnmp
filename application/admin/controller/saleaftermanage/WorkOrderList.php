@@ -3100,7 +3100,6 @@ class WorkOrderList extends Backend
                 if(empty($receptInfo)){
                     $this->error(__('您无权限处理此工单'));
                 }
-                dump(888);exit;
                 if (is_array($receptInfoArr)) {
                     if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
@@ -3113,7 +3112,7 @@ class WorkOrderList extends Backend
                             //vip订单,请求网站接口
                             $this->model->vipOrderRefund($row['work_platform'], $row['platform_order']);
                         }else{
-                            dump(111);
+                            dump(111);exit;
                             //其他订单
                             $checkSku = $this->checkMeasure($receptInfo['measure_id']);
                             if ($checkSku) {
