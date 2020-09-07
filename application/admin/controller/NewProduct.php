@@ -1324,104 +1324,104 @@ class NewProduct extends Backend
 
 
     /**
-     * 紧急补货
+     * 紧急补货  2020.09.07改为计划任务周计划执行时间为每周三的24点，汇总各站提报的SKU及数量
      *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/17
      * Time: 9:22
      */
-    public function emergency_replenishment()
-    {
-        $this->model = new \app\admin\model\NewProductMapping();
-        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
-        //紧急补货分站点
-        $platform_type = input('label');
-        //统计计划补货数据
-        $list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
-            // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
-
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->group('sku')
-            ->column("sku,sum(replenish_num) as sum");
-
-        if (empty($list)) {
-            $this->error('暂时没有紧急补货单需要处理');
-        }
-
-        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
-        $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 2])
-
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->field('id,sku,website_type,replenish_num')
-            ->select();
-        //根据sku对数组进行重新分配
-        $sku_list = $this->array_group_by($sku_list, 'sku');
-
-        $result = false;
-        Db::startTrans();
-        try {
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 2;
-            $data['create_person'] = session('admin.nickname');
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = Db::name('new_product_replenish')->insertGetId($data);
-
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
-            }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
-
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = session('admin.nickname');
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 2;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单表
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2])
-
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        }
-        if ($result !== false) {
-            $this->success('操作成功！！');
-        } else {
-            $this->error(__('No rows were updated'));
-        }
-    }
+    // public function emergency_replenishment()
+    // {
+    //     $this->model = new \app\admin\model\NewProductMapping();
+    //     $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+    //     //紧急补货分站点
+    //     $platform_type = input('label');
+    //     //统计计划补货数据
+    //     $list = $this->model
+    //         ->where(['is_show' => 1, 'type' => 2])
+    //         // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
+    //
+    //         ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //         ->group('sku')
+    //         ->column("sku,sum(replenish_num) as sum");
+    //
+    //     if (empty($list)) {
+    //         $this->error('暂时没有紧急补货单需要处理');
+    //     }
+    //
+    //     //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+    //     $sku_list = $this->model
+    //         ->where(['is_show' => 1, 'type' => 2])
+    //
+    //         ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //         ->field('id,sku,website_type,replenish_num')
+    //         ->select();
+    //     //根据sku对数组进行重新分配
+    //     $sku_list = $this->array_group_by($sku_list, 'sku');
+    //
+    //     $result = false;
+    //     Db::startTrans();
+    //     try {
+    //         //首先插入主表 获取主表id new_product_replenish
+    //         $data['type'] = 2;
+    //         $data['create_person'] = session('admin.nickname');
+    //         $data['create_time'] = date('Y-m-d H:i:s');
+    //         $res = Db::name('new_product_replenish')->insertGetId($data);
+    //
+    //         //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+    //         $int = 0;
+    //         foreach ($sku_list as $k => $v) {
+    //             //求出此sku在此补货单中的总数量
+    //             $sku_whole_num = array_sum(array_map(function ($val) {
+    //                 return $val['replenish_num'];
+    //             }, $v));
+    //             //求出比例赋予新数组
+    //             foreach ($v as $ko => $vo) {
+    //                 $date[$int]['id'] = $vo['id'];
+    //                 $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+    //                 $date[$int]['replenish_id'] = $res;
+    //                 $int += 1;
+    //             }
+    //         }
+    //         //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+    //         $res1 = $this->model->allowField(true)->saveAll($date);
+    //
+    //         $number = 0;
+    //         foreach ($list as $k => $v) {
+    //             $arr[$number]['sku'] = $k;
+    //             $arr[$number]['replenishment_num'] = $v;
+    //             $arr[$number]['create_person'] = session('admin.nickname');
+    //             $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+    //             $arr[$number]['type'] = 2;
+    //             $arr[$number]['replenish_id'] = $res;
+    //             $number += 1;
+    //         }
+    //         //插入补货需求单表
+    //         $result = $this->order->allowField(true)->saveAll($arr);
+    //         //更新计划补货列表
+    //         $ids = $this->model
+    //             ->where(['is_show' => 1, 'type' => 2])
+    //
+    //             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //             ->setField('is_show', 0);
+    //         Db::commit();
+    //     } catch (ValidateException $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     } catch (PDOException $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     } catch (Exception $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     }
+    //     if ($result !== false) {
+    //         $this->success('操作成功！！');
+    //     } else {
+    //         $this->error(__('No rows were updated'));
+    //     }
+    // }
 
 
     /**

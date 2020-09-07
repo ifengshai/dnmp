@@ -213,12 +213,16 @@ class NewProductReplenishOrder extends Backend
             if ($row['status'] != 1) {
                 $this->error('此状态不能提交审核');
             }
+            $replenish_list = $this->list->where('replenish_id',$id)->select();
+            if (empty($replenish_list)){
+                $this->error('当前补货需求单还未分配，请先点击分配按钮');
+            }
 
             $res = $this->replenish->where('id', $ids)->setField('status', 2);
             if ($res) {
-                $this->success('提交审核成功');
+                $this->success('提交成功');
             } else {
-                $this->error('提交审核失败');
+                $this->error('提交失败');
             }
         } else {
             $this->error('404 Not found');
@@ -311,7 +315,8 @@ class NewProductReplenishOrder extends Backend
                             $data['purchase_person'] = $supplier['purchase_person'];
                             //插入补货单处理表 同时更新补货单分配表状态为待处理
                             $result = Db::name('new_product_replenish_list')->insert($data);
-                            $update = $this->model->where('id', $id)->setField('status', 2);
+                            //不更新子表的分配状态 可以一直确认分配
+                            // $update = $this->model->where('id', $id)->setField('status', 2);
 
                     }
                     //每次对补货需求单进行分配的时候 查询这个补货需求单是否还有未分配的sku 如果没有就更新补货需求单状态为待处理 （弃用）现在改为手动提交 -> public function submit

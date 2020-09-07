@@ -269,6 +269,9 @@ class PurchaseOrder extends Backend
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
             foreach ($list as &$v) {
+                if ($v['status'] == 3){
+                    $this->error('存在已经拒绝的补货需求，请重新选择！！');
+                }
                 //查询sku 商品名称
                 $data = $item->getGoodsInfo($v['sku']);
                 $v['product_name'] = $data->name;
