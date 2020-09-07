@@ -1118,7 +1118,6 @@ class WorkOrderList extends Model
                 $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
         }
-        dump(454554654656);exit;
         //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
         if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
             $this->deductionStock($work_id, $measure_id);
