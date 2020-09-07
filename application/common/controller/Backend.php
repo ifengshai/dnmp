@@ -160,6 +160,9 @@ class Backend extends Controller
 
         //校验后台操作权限是否开启
         $operation_authority = model('Config')->get(['name'=>'operation_authority']);
+        print_r($controllername);
+        print_r('------------');
+        print_r($operation_authority['value']);
         if(!in_array($controllername,['general.config','shell.track_reg','crontab','index','dashboard']) && 1 != $operation_authority['value']){
             $url = Session::get('referer');
             $url = $url ? $url : $this->request->url();
