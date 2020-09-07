@@ -158,6 +158,15 @@ class Backend extends Controller
             }
         }
 
+        //校验后台操作权限是否开启
+        $operation_authority = model('Config')->get(['name'=>'operation_authority']);
+        if(!in_array($controllername,['general.config','shell.track_reg','crontab','index','dashboard']) && 1 != $operation_authority['value']){
+            $url = Session::get('referer');
+            $url = $url ? $url : $this->request->url();
+            $this->redirect('general/config/jurisdiction', [], 302, ['referer' => $url]);
+            exit;
+        }
+
         // 非选项卡时重定向
         if (!$this->request->isPost() && !IS_AJAX && !IS_ADDTABS && !IS_DIALOG && input("ref") == 'addtabs') {
             $url = preg_replace_callback("/([\?|&]+)ref=addtabs(&?)/i", function ($matches) {

@@ -3,7 +3,7 @@
 return array (
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.22',
+  'version' => '1.0.25',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 
@@ -34,4 +34,5 @@ return array (
   'mail_smtp_pass' => 'password',
   'mail_verify_type' => '2',
   'mail_from' => '10000@qq.com',
+  'operation_authority' => '0',
 );
