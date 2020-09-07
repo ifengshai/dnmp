@@ -1610,14 +1610,13 @@ class NewProduct extends Backend
             if ($filter['website_type']) {
                 unset($map['website_type']);
             }
-         
+
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
@@ -1629,7 +1628,7 @@ class NewProduct extends Backend
                 ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
