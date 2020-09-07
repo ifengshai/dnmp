@@ -13,6 +13,7 @@ use think\exception\ValidateException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -2698,6 +2699,8 @@ class WorkOrderList extends Backend
                 $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 3) {
                 $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 4) {
+                $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif (5 == $ordertype) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
