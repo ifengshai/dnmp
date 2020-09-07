@@ -1339,7 +1339,9 @@ class NewProduct extends Backend
         $platform_type = input('label');
         //统计计划补货数据
         $list = $this->model
-            ->where(['is_show' => 1, 'type' => 2, 'website_type' => $platform_type])
+            ->where(['is_show' => 1, 'type' => 2])
+            // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
+
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
@@ -1350,7 +1352,8 @@ class NewProduct extends Backend
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 2, 'website_type' => $platform_type])
+            ->where(['is_show' => 1, 'type' => 2])
+
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -1398,7 +1401,8 @@ class NewProduct extends Backend
             $result = $this->order->allowField(true)->saveAll($arr);
             //更新计划补货列表
             $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2, 'website_type' => $platform_type])
+                ->where(['is_show' => 1, 'type' => 2])
+
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
             Db::commit();
@@ -1552,6 +1556,29 @@ class NewProduct extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+    
+    //运营补货需求购物车删除（真删除）
+    public function replenish_cart_del($ids = "")
+    {
+
+        Db::startTrans();
+        try {
+            $res = Db::name('new_product_mapping')->where('id',$ids)->delete();
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error(__('No rows were deleted'));
+        }
+        $this->error(__('Parameter %s can not be empty', 'ids'));
     }
 
     /**

@@ -63,8 +63,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'platform_type',
                             title: __('平台'),
-                            custom: { 10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 10: '无', 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 8: 'amazon' },
+                            custom: {10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            searchList: {
+                                10: '无',
+                                1: 'zeelool',
+                                2: 'voogueme',
+                                3: 'nihao',
+                                4: 'meeloog',
+                                5: 'wesee',
+                                8: 'amazon'
+                            },
+
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -500,6 +509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'new_product/productmappinglist' + location.search + '&label=' + Config.label,
+                    del_url: 'new_product/replenish_cart_del',
                     edit_url: 'new_product/mappingedit',
                 }
             });
@@ -544,6 +554,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     }
                                 }
                             }
+                        },
+                        // {
+                        //     field: 'operate',
+                        //     title: __('Operate'),
+                        //     table: table,
+                        //     events: Table.api.events.operate,
+                        //     formatter: Table.api.formatter.operate
+                        // },
+                        {
+                            field: 'operate', title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            formatter: function (value, row, index) {
+                                var that = $.extend({}, this);
+                                $(table).data("operate-edit", null); // 列表页面隐藏 .编辑operate-edit - 删除按钮operate-del
+                                that.table = table;
+                                return Table.api.formatter.operate.call(that, value, row, index);
+                            }
                         }
 
                     ]
@@ -565,6 +593,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 })
             }
 
+            $('.btn-edit').hide();
             //选项卡切换
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
@@ -601,6 +630,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         };
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
                         Fast.api.open('new_product/emergency_replenishment?label=' + label, '创建紧急补货需求单', options);
+
 
                     }
                 );

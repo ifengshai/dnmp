@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\purchase;
 
+use app\admin\model\itemmanage\Item;
 use app\admin\model\NewProduct;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -147,6 +148,26 @@ class NewProductReplenishOrder extends Backend
     {
         $replenish_id = input('replenish_id');
         $this->assignConfig('id', $ids);
+        //根据补货需求单id查出子表数据 同时需要去添加子子表数据为系统默认带出SKU的主供货商和补货需求数量
+        $replenish_order = $this->model->where('replenish_id',$ids)->select();
+        // dump(collection($replenish_order)->toArray());
+        foreach ($replenish_order as $k => $v){
+            $replenish_order_list = $this->list->where(['replenish_order_id'=>$v['id'],'replenish_id'=>$v['replenish_id']])->find();
+            if (!$replenish_order_list){
+                $big_supplier =  Db::name('supplier_sku')->where(['sku'=>$v['sku'],'label'=>1])->find();
+                $arrr['replenish_id'] = $v['replenish_id'];
+                $arrr['replenish_order_id'] = $v['id'];
+                $arrr['sku'] = $v['sku'];
+                $arrr['supplier_id'] = $big_supplier['supplier_id'];
+                $arrr['supplier_name'] = Db::name('supplier')->where('id',$big_supplier['supplier_id'])->value('supplier_name');
+                $arrr['distribute_num'] = $v['replenishment_num'];
+                $arrr['create_time'] = date("Y-m-d H:i:s", time());
+                $arrr['purchase_person'] = Db::name('supplier')->where('id',$big_supplier['supplier_id'])->value('purchase_person');
+                $arrr['type'] = $v['type'];
+                $result = Db::name('new_product_replenish_list')->insert($arrr);
+            }
+        }
+        $item = new Item();
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -171,9 +192,11 @@ class NewProductReplenishOrder extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
+                $list[$k]['new_old'] =$item->where('sku',$list[$k]['sku'])->value('is_new');
                 $new_product_replenish_list = Db::name('new_product_replenish_list')->where('replenish_order_id', $v['id'])->field('supplier_name,distribute_num')->select();
                 $list[$k]['supplier'] = $new_product_replenish_list;
             }
+            // dump($list);die;
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -181,6 +204,52 @@ class NewProductReplenishOrder extends Backend
         return $this->view->fetch('distribution');
     }
 
+    //补货需求单-分配，增加提交功能，提交后补货需求单状态变为待处理
+    public function submit($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->replenish->get($id);
+            if ($row['status'] != 1) {
+                $this->error('此状态不能提交审核');
+            }
+
+            $res = $this->replenish->where('id', $ids)->setField('status', 2);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+
+    }
+
+    //补货需求单-处理，增加备注字段和SKU拒绝功能；SKU拒绝时以下拉列表的方式（厂家缺货/断货、厂家不处理售后问题）添加拒绝原因；拒绝原因回写到备注字段
+    public function refused($ids = null)
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a", [], 'strip_tags');
+            $res = $this->list->where('id',$ids)->setField(['status'=>3,'remarks'=>$params['type']]);
+            Db::startTrans();
+            try {
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            $this->success();
+        }
+
+        return $this->view->fetch();
+    }
     /**
      * 补货需求单确认分配弹出框
      *
@@ -194,6 +263,8 @@ class NewProductReplenishOrder extends Backend
 
         $id = input('ids');
         $num = $this->model->where('id', $id)->field('id,replenishment_num,sku,replenish_id,type')->find();
+        $replenish_order_list = $this->list->where('replenish_order_id',$id)->select();
+        // dump(collection($replenish_order_list)->toArray());
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $params = $this->request->post();
@@ -221,29 +292,33 @@ class NewProductReplenishOrder extends Backend
                 if ($params['supplier_id'] != array_unique($params['supplier_id'])) {
                     $this->error('请不要选择两个相同的供应商');
                 }
+                //编辑的话先删掉之前的分配数据 然后重新生成数据
+                $replenish_order_list_arr = $this->list->where(['replenish_id'=>$num['replenish_id'],'replenish_order_id'=>$num['id']])->delete();
                 Db::startTrans();
                 try {
                     //根据这条补货需求单的某一个sku进行分配 分配根据选择的供应商以及供应商对应的数量插入处理表 进入创建采购单步骤
                     foreach ($params['supplier_id'] as $k => $v) {
-                        $supplier = $this->supplier->where('id', $v)->field('id,purchase_person,supplier_name')->find();
-                        //关联补货单id
-                        $data['replenish_id'] = $num['replenish_id'];
-                        $data['replenish_order_id'] = $num['id'];
-                        $data['type'] = $num['type'];
-                        $data['sku'] = $num['sku'];
-                        $data['supplier_id'] = $supplier['id'];
-                        $data['supplier_name'] = $supplier['supplier_name'];
-                        $data['distribute_num'] = $params['supplier_num'][$k];
-                        $data['purchase_person'] = $supplier['purchase_person'];
-                        //插入补货单处理表 同时更新补货单分配表状态为待处理
-                        $result = Db::name('new_product_replenish_list')->insert($data);
-                        $update = $this->model->where('id', $id)->setField('status', 2);
+
+                            $supplier = $this->supplier->where('id', $v)->field('id,purchase_person,supplier_name')->find();
+                            //关联补货单id
+                            $data['replenish_id'] = $num['replenish_id'];
+                            $data['replenish_order_id'] = $num['id'];
+                            $data['type'] = $num['type'];
+                            $data['sku'] = $num['sku'];
+                            $data['supplier_id'] = $supplier['id'];
+                            $data['supplier_name'] = $supplier['supplier_name'];
+                            $data['distribute_num'] = $params['supplier_num'][$k];
+                            $data['purchase_person'] = $supplier['purchase_person'];
+                            //插入补货单处理表 同时更新补货单分配表状态为待处理
+                            $result = Db::name('new_product_replenish_list')->insert($data);
+                            $update = $this->model->where('id', $id)->setField('status', 2);
+
                     }
-                    //每次对补货需求单进行分配的时候 查询这个补货需求单是否还有未分配的sku 如果没有就更新补货需求单状态为待处理
-                    $replenish_order = $this->model->where(['replenish_id' => $num['replenish_id'], 'status' => 1])->find();
-                    if (empty($replenish_order)) {
-                        $res = $this->replenish->where('id', $num['replenish_id'])->setField('status', 2);
-                    }
+                    //每次对补货需求单进行分配的时候 查询这个补货需求单是否还有未分配的sku 如果没有就更新补货需求单状态为待处理 （弃用）现在改为手动提交 -> public function submit
+                    // $replenish_order = $this->model->where(['replenish_id' => $num['replenish_id'], 'status' => 1])->find();
+                    // if (empty($replenish_order)) {
+                    //     $res = $this->replenish->where('id', $num['replenish_id'])->setField('status', 2);
+                    // }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -266,6 +341,7 @@ class NewProductReplenishOrder extends Backend
         $supplier = $this->supplier->getSupplierData();
         $this->assign('supplier', $supplier);
         $this->assign('num', $num);
+        $this->assign('replenish_order_list', $replenish_order_list);
         return $this->view->fetch();
     }
 
