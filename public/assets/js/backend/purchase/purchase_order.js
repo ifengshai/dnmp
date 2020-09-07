@@ -196,7 +196,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        var arr = [0, 1, 2, 5];
+                                        var arr = [0, 1];
                                         if (arr.includes(row.purchase_status) || row.purchase_type == 2) {
                                             return true;
                                         } else {

@@ -13,6 +13,10 @@ use app\admin\model\purchase\Supplier;
 use think\Loader;
 use fast\Alibaba;
 use app\admin\model\NewProductMappingLog;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
@@ -27,6 +31,12 @@ class NewProduct extends Backend
      * @var \app\admin\model\NewProduct
      */
     protected $model = null;
+
+    /**
+     * Item模型对象
+     * @var \app\admin\model\itemmanage\Item
+     */
+    protected $product = null;
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -1077,7 +1087,7 @@ class NewProduct extends Backend
             $suppliersku = new \app\admin\model\purchase\SupplierSku();
             $product_cycle_arr = $suppliersku->where(['label' => 1, 'status' => 1, 'sku' => ['in', $skus]])->column('product_cycle', 'sku');
             //查询可用库存
-            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock', 'sku');
+            $stock = $this->item->where(['sku' => ['in', $skus]])->column('available_stock,on_way_stock,purchase_price', 'sku');
             //查询待入库数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             $wait_in_arr = $purchase->getWaitInStockNum($skus);
@@ -1090,6 +1100,7 @@ class NewProduct extends Backend
                 $v['sales_days'] = $v['average_90days_sales_num'] > 0 ? round($v['stock'] / $v['average_90days_sales_num']) : 0;
                 $num = $v['stock'] - ($v['average_90days_sales_num'] * 30);
                 $v['replenish_num'] = $num > 0 ? $num : 0;
+                $v['purchase_price'] = $stock[$v['sku']]['purchase_price'];
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1313,100 +1324,104 @@ class NewProduct extends Backend
 
 
     /**
-     * 紧急补货
+     * 紧急补货  2020.09.07改为计划任务周计划执行时间为每周三的24点，汇总各站提报的SKU及数量
      *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/7/17
      * Time: 9:22
      */
-    public function emergency_replenishment()
-    {
-        $this->model = new \app\admin\model\NewProductMapping();
-        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
-        //紧急补货分站点
-        $platform_type = input('label');
-        //统计计划补货数据
-        $list = $this->model
-            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->group('sku')
-            ->column("sku,sum(replenish_num) as sum");
-
-        if (empty($list)) {
-            $this->error('暂时没有紧急补货单需要处理');
-        }
-
-        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
-        $sku_list = $this->model
-            ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
-            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-            ->field('id,sku,website_type,replenish_num')
-            ->select();
-        //根据sku对数组进行重新分配
-        $sku_list = $this->array_group_by($sku_list, 'sku');
-
-        $result = false;
-        Db::startTrans();
-        try {
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 2;
-            $data['create_person'] = session('admin.nickname');
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = Db::name('new_product_replenish')->insertGetId($data);
-
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
-            }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
-
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = session('admin.nickname');
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 2;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单表
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type])
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        }
-        if ($result !== false) {
-            $this->success('操作成功！！');
-        } else {
-            $this->error(__('No rows were updated'));
-        }
-    }
+    // public function emergency_replenishment()
+    // {
+    //     $this->model = new \app\admin\model\NewProductMapping();
+    //     $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+    //     //紧急补货分站点
+    //     $platform_type = input('label');
+    //     //统计计划补货数据
+    //     $list = $this->model
+    //         ->where(['is_show' => 1, 'type' => 2])
+    //         // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
+    //
+    //         ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //         ->group('sku')
+    //         ->column("sku,sum(replenish_num) as sum");
+    //
+    //     if (empty($list)) {
+    //         $this->error('暂时没有紧急补货单需要处理');
+    //     }
+    //
+    //     //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+    //     $sku_list = $this->model
+    //         ->where(['is_show' => 1, 'type' => 2])
+    //
+    //         ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //         ->field('id,sku,website_type,replenish_num')
+    //         ->select();
+    //     //根据sku对数组进行重新分配
+    //     $sku_list = $this->array_group_by($sku_list, 'sku');
+    //
+    //     $result = false;
+    //     Db::startTrans();
+    //     try {
+    //         //首先插入主表 获取主表id new_product_replenish
+    //         $data['type'] = 2;
+    //         $data['create_person'] = session('admin.nickname');
+    //         $data['create_time'] = date('Y-m-d H:i:s');
+    //         $res = Db::name('new_product_replenish')->insertGetId($data);
+    //
+    //         //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+    //         $int = 0;
+    //         foreach ($sku_list as $k => $v) {
+    //             //求出此sku在此补货单中的总数量
+    //             $sku_whole_num = array_sum(array_map(function ($val) {
+    //                 return $val['replenish_num'];
+    //             }, $v));
+    //             //求出比例赋予新数组
+    //             foreach ($v as $ko => $vo) {
+    //                 $date[$int]['id'] = $vo['id'];
+    //                 $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+    //                 $date[$int]['replenish_id'] = $res;
+    //                 $int += 1;
+    //             }
+    //         }
+    //         //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+    //         $res1 = $this->model->allowField(true)->saveAll($date);
+    //
+    //         $number = 0;
+    //         foreach ($list as $k => $v) {
+    //             $arr[$number]['sku'] = $k;
+    //             $arr[$number]['replenishment_num'] = $v;
+    //             $arr[$number]['create_person'] = session('admin.nickname');
+    //             $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+    //             $arr[$number]['type'] = 2;
+    //             $arr[$number]['replenish_id'] = $res;
+    //             $number += 1;
+    //         }
+    //         //插入补货需求单表
+    //         $result = $this->order->allowField(true)->saveAll($arr);
+    //         //更新计划补货列表
+    //         $ids = $this->model
+    //             ->where(['is_show' => 1, 'type' => 2])
+    //
+    //             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+    //             ->setField('is_show', 0);
+    //         Db::commit();
+    //     } catch (ValidateException $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     } catch (PDOException $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     } catch (Exception $e) {
+    //         Db::rollback();
+    //         $this->error($e->getMessage());
+    //     }
+    //     if ($result !== false) {
+    //         $this->success('操作成功！！');
+    //     } else {
+    //         $this->error(__('No rows were updated'));
+    //     }
+    // }
 
 
     /**
@@ -1493,7 +1508,6 @@ class NewProduct extends Backend
                 $status = '新建';
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
-
         }
 
         //设置宽度
@@ -1544,5 +1558,396 @@ class NewProduct extends Backend
         $writer->save('php://output');
     }
 
-    
+    //运营补货需求购物车删除（真删除）
+    public function replenish_cart_del($ids = "")
+    {
+
+        Db::startTrans();
+        try {
+            $res = Db::name('new_product_mapping')->where('id', $ids)->delete();
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error(__('No rows were deleted'));
+        }
+        $this->error(__('Parameter %s can not be empty', 'ids'));
+    }
+
+    /**
+     * 提报历史
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/13 13:56:00 
+     * @return void
+     */
+    public function productMappingListHistory()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\NewProductMapping();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['website_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['website_type']) {
+                unset($map['website_type']);
+            }
+
+            $check_order_item = new \app\admin\model\warehouse\CheckItem();
+            $in_stock_item = new \app\admin\model\warehouse\InstockItem();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model->alias('a')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
+                ->where($where)
+                ->where('is_show', 0)
+                ->where('a.replenish_id<>0')
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model->alias('a')
+                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
+                ->where($where)
+                ->where('is_show', 0)
+                ->where('a.replenish_id<>0')
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            //根据采购单id 查询质检单
+            $purchase_id = array_column($list, 'purchase_id');
+            $rows = $check_order_item->field("sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $rows = collection($rows)->toArray();
+            //重组数组
+            $check_list = [];
+            foreach ($rows as $k => $v) {
+                $check_list[$v['purchase_id']][$v['sku']] = $v;
+            }
+
+            //查询入库数量
+            $in_stock_rows = $in_stock_item->field("sum(in_stock_num) as in_stock_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $in_stock_rows = collection($in_stock_rows)->toArray();
+            //重组数组
+            $in_stock_list = [];
+            foreach ($in_stock_rows as $k => $v) {
+                $in_stock_list[$v['purchase_id']][$v['sku']] = $v;
+            }
+
+            foreach ($list as &$v) {
+                $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
+                $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
+                $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
+            }
+            unset($v);
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        //取第一个key为默认站点
+        $site = input('site', $magentoplatformarr[0]['id']);
+
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 详情
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/09/07 10:48:34 
+     * @return void
+     */
+    public function productMappingDetail()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\purchase\PurchaseBatch();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $purchase_id = input('purchase_id');
+            $check_order_item = new \app\admin\model\warehouse\CheckItem();
+            $in_stock = new \app\admin\model\warehouse\Instock();
+            $in_stock_item = new \app\admin\model\warehouse\InstockItem();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['a.purchase_id'] = $purchase_id;
+            $total = $this->model->alias('a')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            //查询分批到货
+            $list = $this->model->alias('a')
+                ->field('a.purchase_id,a.id,a.arrival_time,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                //查询质检合格数量
+                $check_list = $check_order_item->where(['check_id' => $v['check_id'], 'sku' => $v['sku']])->find();
+                $v['quantity_num'] = $check_list['quantity_num'];
+                $v['arrivals_num'] = $check_list['arrivals_num'];
+
+                //查询入库状态及入库数量
+                $in_stock_list = $in_stock->where(['check_id' => $v['check_id']])->find();
+                $v['instock_status'] = $in_stock_list['status'];
+                $v['instock_num'] = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+            }
+            unset($v);
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        $this->assignconfig('purchase_id', input('purchase_id'));
+        return $this->view->fetch();
+    }
+
+    /*
+     * 选品批量导入xls
+     *
+     * @Description
+     * @return void
+     * @since 2020/09/04 09:38:39
+     * @author lzh
+     */
+    public function import()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->product = new \app\admin\model\itemmanage\Item;
+
+        //校验参数空值
+        $file = $this->request->request('file');
+        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
+        $label = $this->request->request('label');
+        !$label && $this->error(__('Parameter %s can not be empty', 'label'));
+
+        //查询对应平台权限
+        $plat_form = array_column($this->magentoplatform->getAuthSite(), 'id');
+        !in_array($label, $plat_form) && $this->error(__('站点类型错误'));
+
+        //校验文件路径
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        !is_file($filePath) && $this->error(__('No results were found'));
+
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
+        if ('csv' === $ext) {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if (0 == $n || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ('xls' === $ext) {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if (!empty($val)) {
+                        $fields[] = $val;
+                    }
+                }
+            }
+
+            //校验模板文件格式
+            $listName = ['商品SKU', '类型', '补货需求数量'];
+            $listName !== $fields && $this->error(__('模板文件格式错误！'));
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+            empty($data) && $this->error('表格数据为空！');
+
+            //批量导入
+            $params = [];
+            foreach ($data as $k => $v) {
+                //获取sku && 根据sku获取分类
+                $sku = trim($v[0]);
+                empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
+                $product_info = $this->product->getItemInfo($sku);
+                $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
+
+                //获取类型
+                $type_name = trim($v[1]);
+                $type_arr = ['计划补货' => 1, '紧急补货' => 2];
+                !isset($type_arr[$type_name]) && $this->error('导入失败,类型错误！');
+
+                //获取补货量
+                $replenish_num = (int)$v[2];
+                empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
+
+                $params[] = [
+                    'website_type' => $label,
+                    'sku' => $sku,
+                    'create_time' => date('Y-m-d H:i:s'),
+                    'create_person' => session('admin.nickname'),
+                    'replenish_num' => $replenish_num,
+                    'type' => $type_arr[$type_name],
+                    'category_id' => $category_id,
+                ];
+            }
+
+            $result = $this->model->allowField(true)->saveAll($params);
+            $result ? $this->success('导入成功！') : $this->error('导入失败！');
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
+    //数据已跑完 2020 08.25 14:47
+    // public function amazon_sku()
+    // {
+    //     $item = new \app\admin\model\itemmanage\Item();
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzz_temp')->field('sku')->select();
+    //     $a = 0;
+    //     $b = 0;
+    //     foreach ($skus as $k => $v) {
+    //         if (!empty($v['sku'])) {
+    //             $b += 1;
+    //             $item_detail = $item->where('sku', $v['sku'])->find();
+    //             $params['sku'] = $v['sku'];
+    //             $params['platform_sku'] = $v['sku'];
+    //             if (empty($item_detail['name'])) {
+    //                 $params['name'] = '';
+    //             } else {
+    //                 $params['name'] = $item_detail['name'];
+    //             }
+    //             $params['platform_type'] = 8;
+    //             $params['create_person'] = 'Admin';
+    //             $params['create_time'] = date("Y-m-d H:i:s");
+    //             if (empty($item_detail['frame_is_rimless'])) {
+    //                 $params['platform_frame_is_rimless'] = '';
+    //             } else {
+    //                 $params['platform_frame_is_rimless'] = $item_detail['frame_is_rimless'];
+    //             }
+    //             if (empty($item_detail['category_id'])) {
+    //                 $params['category_id'] = '';
+    //             } else {
+    //                 $params['category_id'] = $item_detail['category_id'];
+    //             }
+    //
+    //             $params['stock'] = 0;
+    //             $params['presell_status'] = 0;
+    //             $res = $item_platform_sku->insert($params);
+    //             if ($res) {
+    //                 $a += 1;
+    //             }
+    //         }
+    //     }
+    //     dump($a);
+    //     dump($b);
+    // }
+
+
+    //已跑完
+    // public function transfer_wesee_amazon()
+    // {
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzzzzzzzzz_amazonsku')->field('sku')->select();
+    //     //50个sku一组
+    //     $skus = array_chunk($skus, 50);
+    //     foreach ($skus as $k => $v) {
+    //         //生成调拨单号 插入主表
+    //         $params['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+    //         $params['call_out_site'] = 5;
+    //         $params['call_in_site'] = 8;
+    //         $params['status'] = 0;
+    //         $params['create_time'] = date("Y-m-d H:i:s");
+    //         $params['create_person'] = '陈鹏';
+    //
+    //         $transfer_order_number = Db::name('transfer_order')->insertGetId($params);
+    //
+    //         foreach ($v as $kk => $vv){
+    //             $sku_detail = $item_platform_sku->where(['sku'=>$vv['sku'],'platform_type'=>5])->value('stock');
+    //             if ($sku_detail == 0){
+    //                 echo 'sku'.$vv['sku'].'在批发站的库存为0';
+    //             }else{
+    //                 $data['transfer_order_id'] = $transfer_order_number;
+    //                 $data['sku'] = $vv['sku'];
+    //                 //调出数量
+    //                 $data['num'] = $sku_detail;
+    //                 //调出的虚拟仓库存
+    //                 $data['stock'] = $sku_detail;
+    //
+    //                 $res = Db::name('transfer_order_item')->insert($data);
+    //             }
+    //         }
+    //     }
+    //
+    //
+    //
+    // }
 }
