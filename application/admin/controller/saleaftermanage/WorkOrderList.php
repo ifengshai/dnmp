@@ -3119,9 +3119,7 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-                    dump(322);exit;
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'],$receptInfo['is_auto_complete']);
-                    dump(444);exit;
                 }
                 if ($result !== false) {
                     $this->success();

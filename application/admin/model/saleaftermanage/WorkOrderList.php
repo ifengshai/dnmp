@@ -1122,6 +1122,7 @@ class WorkOrderList extends Model
         if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
             $this->deductionStock($work_id, $measure_id);
         }
+        dump(46545);exit;
         Db::commit();
         return true;
     } catch (Exception $e) {
