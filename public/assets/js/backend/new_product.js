@@ -713,7 +713,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 10: '已完成'
                             },
                             operate: false,
-                            formatter: Table.api.formatter.status
+                            formatter: Controller.api.formatter.status
                         },
                         { field: 'real_dis_num', title: __('预计到货数量'), operate: false },
                         { field: 'arrivals_num', title: __('到货数量'), operate: false },
@@ -829,6 +829,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         api: {
 
             formatter: {
+                status: function (value, row, index) {
+                    var custom = {normal: 'success', hidden: 'gray', deleted: 'danger', locked: 'info'};
+                    if (typeof this.custom !== 'undefined') {
+                        custom = $.extend(custom, this.custom);
+                    }
+                    this.custom = custom;
+                    this.icon = 'fa '; //更改这里图标css
+                    if (value) {
+                        return Table.api.formatter.normal.call(this, value, row, index);
+                    } else {
+                        return '-';
+                    }
+                    
+                },
                 strip_tags: function (msg) {
                     var msg = msg.replace(/<\/?[^>]*>/g, ''); //去除HTML Tag
                     msg = msg.replace(/[|]*\n/, '') //去除行尾空格
