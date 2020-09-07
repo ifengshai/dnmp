@@ -3112,6 +3112,7 @@ class WorkOrderList extends Backend
                             //vip订单,请求网站接口
                             $this->model->vipOrderRefund($row['work_platform'], $row['platform_order']);
                         }else{
+                            dump(111);
                             //其他订单
                             $checkSku = $this->checkMeasure($receptInfo['measure_id']);
                             if ($checkSku) {
@@ -3119,8 +3120,9 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
+                    dump(322);
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'],$receptInfo['is_auto_complete']);
-                    
+                    dump(444);exit;
                 }
                 if ($result !== false) {
                     $this->success();
