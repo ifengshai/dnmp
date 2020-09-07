@@ -3091,7 +3091,6 @@ class WorkOrderList extends Backend
                 if (6 == $row['work_status']) {
                     $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
-                dump(999);exit;
                 $recept_id = $params['recept_id'];
                 //获取所有可以处理的人
                 $receptInfoArr =  (new WorkOrderRecept())->getAllRecept($recept_id);
@@ -3101,6 +3100,7 @@ class WorkOrderList extends Backend
                 if(empty($receptInfo)){
                     $this->error(__('您无权限处理此工单'));
                 }
+                dump(888);exit;
                 if (is_array($receptInfoArr)) {
                     if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
