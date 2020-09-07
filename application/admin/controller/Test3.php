@@ -207,22 +207,10 @@ class Test3 extends Backend
                 if($admin_type != $item['type']){
                     echo $item['id']."\n";
                     $i++;
-                    /*//查询该评论的最后一条记录
-                    $due_id = Db::name('zendesk_comments')->alias('z')->join('zendesk_agents a','z.due_id=a.admin_id')->where(['z.zid'=>$item['id'],'z.is_admin'=>1,'z.due_id'=>['neq',0],'a.type'=>$item['type']])->order('z.id','desc')->value('z.due_id');
-                    if($due_id){
-                        if($due_id == 75 || $due_id == 105){
-                            $other_due_id = Db::name('zendesk_agents')->where(['type'=>$item['type'],'admin_id'=>['not in','75,105']])->value('admin_id');
-                            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$other_due_id]);
-                        }else{
-                            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$due_id]);
-                        }
-                        echo $item['id']."\n";
-                        $i++;
-                    }*/
+                  
                 }
             }
         }
-        dump($i);exit;
     }
     //每天的回复量
     public function zendesk_data(){
@@ -297,21 +285,9 @@ class Test3 extends Backend
         $result = $this->printResults($response);
         dump($result);
         dump($result[0]['ga:adCost']);die;
-
-
-        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-        //     // Set the access token on the client.
-        //     $client->setAccessToken($_SESSION['access_token']);
-
-            
-        // } else {
-        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
-        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-        // }
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
-
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
