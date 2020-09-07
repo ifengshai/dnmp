@@ -1610,7 +1610,7 @@ class NewProduct extends Backend
             if ($filter['website_type']) {
                 unset($map['website_type']);
             }
-
+         
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
