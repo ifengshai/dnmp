@@ -814,7 +814,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
                             formatter: Controller.api.formatter.status
                         },
-                        { field: 'in_stock_num', title: __('入库数量'), operate: false }
+                        { field: 'instock_num', title: __('入库数量'), operate: false }
                     ]
                 ]
             });
