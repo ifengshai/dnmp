@@ -480,7 +480,8 @@ class TrackReg extends Backend
             ->column("sku,sum(replenish_num) as sum");
 
         if (empty($list)) {
-            $this->error('暂时没有紧急补货单需要处理');
+            echo ('暂时没有紧急补货单需要处理');
+            die;
         }
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
@@ -494,8 +495,6 @@ class TrackReg extends Backend
         $sku_list = $this->array_group_by($sku_list, 'sku');
 
         $result = false;
-        Db::startTrans();
-        try {
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 2;
             $data['create_person'] = session('admin.nickname');
@@ -535,25 +534,9 @@ class TrackReg extends Backend
             //更新计划补货列表
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 2])
-
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
                 ->setField('is_show', 0);
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        }
-        if ($result !== false) {
-            $this->success('操作成功！！');
-        } else {
-            $this->error(__('No rows were updated'));
-        }
+
     }
 
 }
