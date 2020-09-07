@@ -836,7 +836,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                     this.custom = custom;
                     this.icon = 'fa '; //更改这里图标css
-                    if (value) {
+                    if (value || value == 0) {
                         return Table.api.formatter.normal.call(this, value, row, index);
                     } else {
                         return '-';
