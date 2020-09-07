@@ -28,12 +28,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                     [
                         {checkbox: true},
                         {field: '', title: __('序号'), formatter: function (value, row, index) {
-                            var options = table.bootstrapTable('getOptions');
-                            var pageNumber = options.pageNumber;
-                            var pageSize = options.pageSize;
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
 
-                            //return (pageNumber - 1) * pageSize + 1 + index;
-                            return 1+index;
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1+index;
                             }, operate: false
                         },
                         {field: 'id', title: __('Id'),operate:false},
@@ -61,7 +61,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             custom:{1:'blue',2:'red'},
                             formatter:Table.api.formatter.status,
                         },
-                    
+
                         {
                             field:'is_upload',
                             title:__('Is_upload_item'),
@@ -85,7 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons:[
-                               
+
                                 {
                                     name: 'uploadToPlatform',
                                     text: '上传至对应平台',
@@ -151,6 +151,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                         });
                     }
                 );
+            });
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/itemmanage/item_platform_sku/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/itemmanage/item_platform_sku/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+
             });
         },
         add: function () {
@@ -310,31 +324,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             formatter: Table.api.formatter.status,
                         },
                         {
-                          field:'presell_num',
-                          title:__('Presell_num'),
+                            field:'presell_num',
+                            title:__('Presell_num'),
                         },
                         {
-                          field:'presell_residue_num',
-                          title:__('Presell_residue_num'),
+                            field:'presell_residue_num',
+                            title:__('Presell_residue_num'),
                         },
                         {
-                          field:'presell_start_time',
-                          title:__('Presell_start_time'),
+                            field:'presell_start_time',
+                            title:__('Presell_start_time'),
                         },
                         {
-                          field:'presell_end_time',
-                          title:__('Presell_end_time'),
+                            field:'presell_end_time',
+                            title:__('Presell_end_time'),
                         },
                         {
-                          field:'presell_status',
-                          title:__('Presell_status'),
-                          searchList:{1:'未开始',2:'预售中',3:'已结束'},
-                          custom:{1:'blue',2:'green',3:'yellow'},
-                          formatter:Table.api.formatter.status,
+                            field:'presell_status',
+                            title:__('Presell_status'),
+                            searchList:{1:'未开始',2:'预售中',3:'已结束'},
+                            custom:{1:'blue',2:'green',3:'yellow'},
+                            formatter:Table.api.formatter.status,
                         },
                         {
-                          field:'presell_create_person',
-                          title:__('Presell_create_person'),
+                            field:'presell_create_person',
+                            title:__('Presell_create_person'),
                         },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'presell_create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
