@@ -1753,7 +1753,7 @@ class NewProduct extends Backend
                 }
                 $v['quantity_num'] = $check_list['quantity_num'] ?: 0;
                 $v['arrivals_num'] = $check_list['arrivals_num'] ?: 0;
-                $v['instock_status'] = $in_stock_list['status'] ?: '';
+                $v['instock_status'] = $in_stock_list['status'];
                 $v['instock_num'] = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
             }
             unset($v);
