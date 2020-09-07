@@ -35,6 +35,11 @@ class Test extends Backend
         $this->user = new \app\admin\model\Admin();
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
+
+
+
+
+        
     }
 
     /**

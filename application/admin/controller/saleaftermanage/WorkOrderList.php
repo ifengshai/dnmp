@@ -2910,6 +2910,8 @@ class WorkOrderList extends Backend
             $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . $row->id;
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
             $url = config('url.new_nihao_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 4 && $row['replenish_money']) {
+            $url = config('url.meeloog_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);

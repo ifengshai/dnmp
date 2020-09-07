@@ -285,9 +285,6 @@ class Test3 extends Backend
         $result = $this->printResults($response);
         dump($result);
         dump($result[0]['ga:adCost']);die;
-
-
-        
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
