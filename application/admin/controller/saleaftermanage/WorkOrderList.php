@@ -2746,6 +2746,8 @@ class WorkOrderList extends Backend
                     $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 3) {
                     $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 4) {
+                    $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif (5 == $ordertype) {
                     $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
