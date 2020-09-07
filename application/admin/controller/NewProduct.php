@@ -1735,7 +1735,7 @@ class NewProduct extends Backend
             $list = $this->model->alias('a')
                 ->field('a.purchase_id,a.id,a.arrival_time,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
-                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id')
+                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id', 'left')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
