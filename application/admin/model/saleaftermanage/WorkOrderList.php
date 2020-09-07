@@ -44,7 +44,7 @@ class WorkOrderList extends Model
      */
     public function getWorkPlatFormFormatAttr($value, $data)
     {
-        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao'];
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog'];
         return $status[$data['work_platform']];
     }
 
@@ -1216,6 +1216,9 @@ class WorkOrderList extends Model
                     break;
                 case 3:
                     $db = 'database.db_nihao';
+                    break;
+                case 4:
+                    $db = 'database.db_meeloog';
                     break;
                 default:
                     return false;
