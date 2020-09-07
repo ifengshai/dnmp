@@ -3,9 +3,24 @@
     <head>
         <!-- 加载样式及META信息 -->
         {include file="common/meta" /}
+
+        <style type="text/css">
+            .maintain{
+                left:27%;
+                width: 50%;
+                position: absolute;
+                z-index:9999;
+            }
+        </style>
     </head>
     <body class="hold-transition skin-green sidebar-mini fixed {if $config.fastadmin.multiplenav}multiplenav{/if}" id="tabs">
         <div class="wrapper">
+
+            {if $site.authority_content}
+            <div class="maintain">
+                <marquee direction=left align=middle>{$site.authority_content}</marquee>
+            </div>
+            {/if}
 
             <!-- 头部区域 -->
             <header id="header" class="main-header">
