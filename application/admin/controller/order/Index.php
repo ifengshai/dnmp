@@ -95,7 +95,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $smap['status'] = ['in', $filter['status']];
                 }
                 $ids = $model->getOrderId($smap);
-                $map['entity_id'] = ['in', $ids];
+                $map['a.entity_id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
