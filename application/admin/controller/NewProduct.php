@@ -1557,14 +1557,14 @@ class NewProduct extends Backend
 
         $writer->save('php://output');
     }
-    
+
     //运营补货需求购物车删除（真删除）
     public function replenish_cart_del($ids = "")
     {
 
         Db::startTrans();
         try {
-            $res = Db::name('new_product_mapping')->where('id',$ids)->delete();
+            $res = Db::name('new_product_mapping')->where('id', $ids)->delete();
             Db::commit();
         } catch (PDOException $e) {
             Db::rollback();
@@ -1611,7 +1611,8 @@ class NewProduct extends Backend
                 unset($map['website_type']);
             }
 
-            $check_order = new \app\admin\model\warehouse\Check();
+            $check_order_item = new \app\admin\model\warehouse\CheckItem();
+            $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
@@ -1639,14 +1640,29 @@ class NewProduct extends Backend
             $list = collection($list)->toArray();
             //根据采购单id 查询质检单
             $purchase_id = array_column($list, 'purchase_id');
-            $rows = $check_order->alias('a')->where(['purchase_id' => ['in', $purchase_id]])->join(['fa_check_order_item' => 'b'],'a.id=b.check_id')->select();
+            $rows = $check_order_item->field("sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $rows = collection($rows)->toArray();
             //重组数组
             $check_list = [];
-            foreach($rows as $k => $v) {
+            foreach ($rows as $k => $v) {
                 $check_list[$v['purchase_id']][$v['sku']] = $v;
             }
-            foreach ($list as &$v) {
+
+            //查询入库数量
+            $in_stock_rows = $in_stock_item->field("sum(in_stock_num) as in_stock_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $in_stock_rows = collection($in_stock_rows)->toArray();
+            //重组数组
+            $in_stock_list = [];
+            foreach ($in_stock_rows as $k => $v) {
+                $in_stock_list[$v['purchase_id']][$v['sku']] = $v;
             }
+
+            foreach ($list as &$v) {
+                $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
+                $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
+                $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
+            }
+            unset($v);
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -1659,6 +1675,68 @@ class NewProduct extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 详情
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/09/07 10:48:34 
+     * @return void
+     */
+    public function productMappingDetail()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\purchase\PurchaseBatch();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $purchase_id = input('purchase_id');
+            $check_order_item = new \app\admin\model\warehouse\CheckItem();
+            $in_stock = new \app\admin\model\warehouse\Instock();
+            $in_stock_item = new \app\admin\model\warehouse\InstockItem();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['a.purchase_id'] = $purchase_id;
+            $total = $this->model->alias('a')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            //查询分批到货
+            $list = $this->model->alias('a')
+                ->field('a.purchase_id,a.id,a.arrival_time,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                //查询质检合格数量
+                $check_list = $check_order_item->where(['check_id' => $v['check_id'], 'sku' => $v['sku']])->find();
+                $v['quantity_num'] = $check_list['quantity_num'];
+                $v['arrivals_num'] = $check_list['arrivals_num'];
+
+                //查询入库状态及入库数量
+                $in_stock_list = $in_stock->where(['check_id' => $v['check_id']])->find();
+                $v['instock_status'] = $in_stock_list['status'];
+                $v['instock_num'] = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+            }
+            unset($v);
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+
+        $this->assignconfig('purchase_id', input('purchase_id'));
         return $this->view->fetch();
     }
 

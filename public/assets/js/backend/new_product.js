@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template,undefined,Upload) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template, undefined, Upload) {
 
     var Controller = {
         index: function () {
@@ -63,7 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'platform_type',
                             title: __('平台'),
-                            custom: {10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            custom: { 10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: {
                                 10: '无',
                                 1: 'zeelool',
@@ -645,7 +645,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'new_product/productmappinglisthistory' + location.search + '&label=' + Config.label,
-                    edit_url: 'new_product/mappingedit',
                 }
             });
 
@@ -717,12 +716,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             formatter: Table.api.formatter.status
                         },
                         { field: 'real_dis_num', title: __('预计到货数量'), operate: false },
-                        { field: 'replenish_num', title: __('到货数量'), operate: false },
-                        { field: 'replenish_num', title: __('质检状态'), operate: false },
-                        { field: 'replenish_num', title: __('质检合格数量'), operate: false },
-                        { field: 'replenish_num', title: __('入库状态'), operate: false },
-                        { field: 'replenish_num', title: __('入库数量'), operate: false },
-                        { field: 'replenish_num', title: __('操作'), operate: false },
+                        { field: 'arrivals_num', title: __('到货数量'), operate: false },
+                        { field: 'quantity_num', title: __('质检合格数量'), operate: false },
+                        { field: 'in_stock_num', title: __('入库数量'), operate: false },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'new_product/productmappingdetail/purchase_id/{purchase_id}',
+                                    extend: 'data-area = \'["60%","60%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
+                            ],
+                            formatter: Table.api.formatter.operate
+                        }
 
                     ]
                 ]
@@ -731,71 +754,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            table.bootstrapTable('getOptions').onEditableSave = function (field, row, oldValue, $el) {
-                var data = {};
-                data["row[" + field + "]"] = row[field];
-                Fast.api.ajax({
-                    url: this.extend.edit_url + "/ids/" + row[this.pk],
-                    data: data
-                }, function (data) {
-
-                    table.bootstrapTable('refresh');
-                })
-            }
-
-            //选项卡切换
-            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var field = $(this).data("field");
-                var value = $(this).data("value");
-                var options = table.bootstrapTable('getOptions');
-                options.pageNumber = 1;
-                var queryParams = options.queryParams;
-                options.queryParams = function (params) {
-                    var params = queryParams(params);
-                    var filter = params.filter ? JSON.parse(params.filter) : {};
-                    var op = params.op ? JSON.parse(params.op) : {};
-                    filter[field] = value;
-                    params.filter = JSON.stringify(filter);
-                    params.op = JSON.stringify(op);
-                    return params;
-                };
-                table.bootstrapTable('refresh', {});
-                return false;
-            });
-            $(document).on('click', '.btn-replenish_add', function () {
-                var ids = Table.api.selectedids(table);
-                var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
-                Layer.confirm(
-                    __('确定要创建紧急补货需求单吗？'),
-                    function (index) {
-                        Layer.closeAll();
-                        var options = {
-                            shadeClose: false,
-                            shade: [0.3, '#393D49'],
-                            area: ['100%', '100%'], //弹出层宽高
-                            callback: function (value) {
-
-                            }
-                        };
-                        // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('new_product/emergency_replenishment?label=' + label, '创建紧急补货需求单', options);
-
-                    }
-                );
+        },
+        productmappingdetail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/productmappingdetail' + location.search + '&purchase_id=' + Config.purchase_id,
+                }
             });
 
-            // 导入按钮事件
-            Upload.api.plupload($('.btn-import'), function (data, ret) {
-                var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
-                Fast.api.ajax({
-                    url: 'new_product/import',
-                    data: { file: data.url,label: label },
-                }, function (data, ret) {
-                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
-                        location.reload();
-                    });
-                });
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'a.id',
+                columns: [
+                    [
+                        { field: 'id', title: __('批次'), operate: false },
+                        { field: 'arrival_time', title: __('预计到货时间'), operate: false },
+                        { field: 'wait_arrival_num', title: __('预计到货数量'), operate: false },
+                        { field: 'arrival_num', title: __('到货数量'), operate: false },
+                        {
+                            field: 'status', title: __('质检状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'quantity_num', title: __('质检合格数量'), operate: false },
+                        {
+                            field: 'instock_status', title: __('入库状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'in_stock_num', title: __('入库数量'), operate: false }
+                    ]
+                ]
             });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
 
         },
         addreplenishorder: function () {
