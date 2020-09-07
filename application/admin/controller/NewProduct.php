@@ -1638,7 +1638,7 @@ class NewProduct extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
-                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
@@ -1650,7 +1650,7 @@ class NewProduct extends Backend
             $list = $this->model->alias('a')
                 ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
-                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
+                ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
