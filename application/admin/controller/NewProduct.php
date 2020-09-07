@@ -1598,7 +1598,7 @@ class NewProduct extends Backend
                 ->count();
 
             $list = $this->model->alias('a')
-                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status')
+                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id')
@@ -1610,8 +1610,15 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            //根据采购单id 查询质检单
+            $purchase_id = array_column($list, 'purchase_id');
+            $rows = $check_order->alias('a')->where(['purchase_id' => ['in', $purchase_id]])->join(['fa_check_order_item' => 'b'],'a.id=b.check_id')->select();
+            //重组数组
+            $check_list = [];
+            foreach($rows as $k => $v) {
+                $check_list[$v['purchase_id']][$v['sku']] = $v;
+            }
             foreach ($list as &$v) {
-                $v['arrivals_num'] = 
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -1627,7 +1634,7 @@ class NewProduct extends Backend
         $this->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
-    
+
     /*
      * 选品批量导入xls
      *
@@ -1649,7 +1656,7 @@ class NewProduct extends Backend
 
         //查询对应平台权限
         $plat_form = array_column($this->magentoplatform->getAuthSite(), 'id');
-        !in_array($label,$plat_form) && $this->error(__('站点类型错误'));
+        !in_array($label, $plat_form) && $this->error(__('站点类型错误'));
 
         //校验文件路径
         $filePath = ROOT_PATH . DS . 'public' . DS . $file;
@@ -1699,7 +1706,7 @@ class NewProduct extends Backend
             for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    if(!empty($val)){
+                    if (!empty($val)) {
                         $fields[] = $val;
                     }
                 }
@@ -1729,7 +1736,7 @@ class NewProduct extends Backend
 
                 //获取类型
                 $type_name = trim($v[1]);
-                $type_arr = ['计划补货'=>1,'紧急补货'=>2];
+                $type_arr = ['计划补货' => 1, '紧急补货' => 2];
                 !isset($type_arr[$type_name]) && $this->error('导入失败,类型错误！');
 
                 //获取补货量
