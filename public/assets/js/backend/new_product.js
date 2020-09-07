@@ -804,13 +804,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'wait_arrival_num', title: __('预计到货数量'), operate: false },
                         { field: 'arrivals_num', title: __('到货数量'), operate: false },
                         {
-                            field: 'status', title: __('质检状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
+                            field: 'status', title: __('质检状态'), custom: { 0: 'success', 1: 'danger', 2: 'success', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
                             formatter: Controller.api.formatter.status
                         },
                         { field: 'quantity_num', title: __('质检合格数量'), operate: false },
                         {
-                            field: 'instock_status', title: __('入库状态'), custom: { 0: 'success', 1: '待审核', 2: 'success', 3: 'danger', 4: 'gray' },
+                            field: 'instock_status', title: __('入库状态'), custom: { 0: 'success', 1: 'danger', 2: 'success', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
                             formatter: Controller.api.formatter.status
                         },
