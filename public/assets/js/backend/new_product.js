@@ -636,6 +636,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 );
             });
 
+
+
+
+
+
+
+
             // 导入按钮事件
             Upload.api.plupload($('.btn-import'), function (data, ret) {
                 var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
@@ -649,6 +656,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 });
             });
 
+
+
+            
         },
         productmappinglisthistory: function () {
             // 初始化表格参数配置
