@@ -578,13 +578,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 ]
             });
 
-
-
-
-
-
-            
-
             // 为表格绑定事件
             Table.api.bindevent(table);
 
