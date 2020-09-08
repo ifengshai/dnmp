@@ -90,7 +90,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $filter = json_decode($this->request->get('filter'), true);
             //SKU搜索
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['sku'] = ['like', $filter['sku'] . '%'];
                 if ($filter['status']) {
                     $smap['status'] = ['in', $filter['status']];
                 }
@@ -778,7 +778,7 @@ EOF;
         $filter = json_decode($this->request->get('filter'), true);
         //SKU搜索
         if ($filter['sku']) {
-            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $smap['sku'] = ['like', $filter['sku'] . '%'];
             if ($filter['status']) {
                 $smap['status'] = ['in', $filter['status']];
             }
