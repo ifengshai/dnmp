@@ -67,15 +67,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             searchList: {10:'无',1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',8:'amazon'},
                             formatter: Table.api.formatter.status
                         },
-                        {
-                            field: 'name',
-                            title: __('Name'),
-                            operate: 'like',
-                            cellStyle: formatTableUnit,
-                            formatter: Controller.api.formatter.getClear
-                        },
-                        // { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
-                        // { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
+                        // {
+                        //     field: 'name',
+                        //     title: __('Name'),
+                        //     operate: 'like',
+                        //     cellStyle: formatTableUnit,
+                        //     formatter: Controller.api.formatter.getClear
+                        // },
+                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
                             custom: {1: 'success', 2: 'blue', 3: 'danger', 4: 'gray', 0: 'red'},
