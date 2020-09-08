@@ -1847,19 +1847,19 @@ class NewProduct extends Backend
         return $this->view->fetch();
     }
 
-    /*
-     * 选品批量导入xls
+    /**
+     * 选品批量导入
      *
      * @Description
+     * @author lzh
+     * @since 2020/09/04 09:38:39
      * @return void
-     * @since 2020/09/04 09:38:39
-     * @author lzh
      */
     public function import()
     {
         $this->model = new \app\admin\model\NewProductMapping();
-        $_item = new \app\admin\model\itemmanage\Item;
-        $_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $_item = new \app\admin\model\itemmanage\Item();
+        $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
         //校验参数空值
         $file = $this->request->request('file');
@@ -1938,32 +1938,68 @@ class NewProduct extends Backend
             }
             empty($data) && $this->error('表格数据为空！');
 
+            //获取表格中sku集合
+            $sku_arr = [];
+            foreach ($data as $k=>$v) {
+                //获取sku
+                $sku = trim($v[0]);
+                empty($sku) && $this->error(__('导入失败,第 '.($k+1).' 行SKU为空！'));
+                $sku_arr[] = $sku;
+            }
+
+            //获取池子中现有数据
+            $list = $this->model
+                ->where('website_type', $label)
+                ->where('is_show', 1)
+                ->field('type,sku')
+                ->select();
+            $mapping_arr = array_column(collection($list)->toArray(), 'type', 'sku');
+
+            //获取站点sku列表
+            $list = $_platform
+                ->where('platform_type', $label)
+                ->where(['sku' => ['in', $sku_arr]])
+                ->field('sku')
+                ->select();
+            $platform_arr = array_column(collection($list)->toArray(), 'sku');
+
+            //获取sku所属分类列表
+            $list = $_item
+                ->where(['sku' => ['in', $sku_arr]])
+                ->where('is_del',1)
+                ->where('is_open',1)
+                ->field('sku,category_id')
+                ->select();
+            $category_arr = array_column(collection($list)->toArray(), 'category_id', 'sku');
+
+            //类型
+            $type_arr = ['计划补货' => 1, '紧急补货' => 2];
+
             //批量导入
             $params = [];
-            foreach ($data as $k => $v) {
-                //获取sku && 根据sku获取分类
+            foreach ($data as $v) {
+                //获取sku
                 $sku = trim($v[0]);
-                empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
 
                 //校验sku是否重复
                 isset($params[$sku]) && $this->error(__('导入失败,商品 '.$sku.' 重复！'));
 
-                //校验商品是否存在
-                $product = $_platform->where(['platform_type' => $label, 'sku' => $sku])->find();
-                empty($product) && $this->error(__('导入失败,商品SKU不存在！'));
-
-                //获取商品分类
-                $item_info = $_item->getItemInfo($sku);
-                $category_id = isset($item_info['category_id']) ? $item_info['category_id'] : 0;
-
                 //获取类型
                 $type_name = trim($v[1]);
-                $type_arr = ['计划补货' => 1, '紧急补货' => 2];
-                !isset($type_arr[$type_name]) && $this->error('导入失败,类型错误！');
+                !isset($type_arr[$type_name]) && $this->error('导入失败,商品 '.$sku.' 类型错误！');
+
+                //校验池子中商品是否有相同sku
+                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
+
+                //校验商品是否存在
+                !in_array($sku,$platform_arr) && $this->error(__('导入失败,商品 '.$sku.' 不存在！'));
+
+                //获取商品分类
+                $category_id = isset($category_arr[$sku]) ? $category_arr[$sku] : 0;
 
                 //获取补货量
                 $replenish_num = (int)$v[2];
-                empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
+                empty($replenish_num) && $this->error(__('导入失败,商品 '.$sku.' 补货数量不能为空！'));
 
                 $params[$sku] = [
                     'website_type' => $label,
@@ -1976,8 +2012,7 @@ class NewProduct extends Backend
                 ];
             }
 
-            $result = $this->model->allowField(true)->saveAll($params);
-            $result ? $this->success('导入成功！') : $this->error('导入失败！');
+            $this->model->allowField(true)->saveAll($params) ? $this->success('导入成功！') : $this->error('导入失败！');
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
