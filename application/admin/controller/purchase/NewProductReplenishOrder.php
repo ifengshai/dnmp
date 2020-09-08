@@ -271,6 +271,11 @@ class NewProductReplenishOrder extends Backend
         $id = input('ids');
         $num = $this->model->where('id', $id)->field('id,replenishment_num,sku,replenish_id,type')->find();
         $replenish_order_list = $this->list->where('replenish_order_id',$id)->select();
+        if (empty($replenish_order_list)){
+            $this->assign('status',1);
+        }else{
+            $this->assign('status',2);
+        }
         // dump(collection($replenish_order_list)->toArray());
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
