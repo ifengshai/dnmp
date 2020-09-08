@@ -1419,6 +1419,94 @@ class NewProduct extends Backend
 
 
     /**
+     * 不满足起订量列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/09/08 09:43:46 
+     * @return void
+     */
+    public function notSatisfiedOrderQuantityList()
+    {
+        //统计不满足起订量数据
+        $this->notSatisfiedOrderQuantity();
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $this->model = new \app\admin\model\NewProductNotSatisfied();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 不满足起订量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/09/08 09:43:46 
+     * @return void
+     */
+    protected function notSatisfiedOrderQuantity()
+    {
+        $this->mapping = new \app\admin\model\NewProductMapping();
+        $list = $this->mapping->where('is_show', 1)->field('type,sku,sum(replenish_num) as replenish_num')->group('sku,type')->select();
+
+        //查询板材类sku
+        $this->item = new \app\admin\model\itemmanage\Item();
+        $skus = $this->item->getTextureSku();
+
+        //统计同款补货量
+        $rows = $this->mapping->where('is_show', 1)->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku')->select();
+        $rows = collection($rows)->toArray();
+        $spus = [];
+        foreach ($rows as $k => $v) {
+            $spus[$v['origin_sku']] = $v['replenish_num'];
+        }
+
+        $data = [];
+        foreach ($list as $k => $v) {
+            //判断sku材质是否为板材
+            if (in_array($v['sku'], $skus)) {
+                //判断板材补货量小于50 为不满足起订量
+                if ($v['replenish_num'] < 50) {
+                    $data[$k]['sku'] = $v['sku'];
+                    $data[$k]['type'] = $v['type'];
+                    $data[$k]['replenish_num'] = $v['replenish_num'];
+                }
+            } else {
+                $spu = substr($v['sku'], 0, strrpos($v['sku'], '-'));
+                if ($spus[$spu] < 300) {
+                    $data[$k]['sku'] = $v['sku'];
+                    $data[$k]['type'] = $v['type'];
+                    $data[$k]['replenish_num'] = $v['replenish_num'];
+                }
+            }
+        }
+        //清空表
+        Db::execute("truncate table fa_new_product_not_satisfied;");
+        Db::table('fa_new_product_not_satisfied')->insertAll($data);
+    }
+
+    /**
      * 选品批量导出xls
      *
      * @Description

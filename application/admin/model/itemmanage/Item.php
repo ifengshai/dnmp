@@ -764,4 +764,17 @@ class Item extends Model
         $where['sku']  = $sku;
         return $this->where($where)->sum('stock-distribution_occupy_stock');
     }
+
+    /**
+     * 获取板材材质SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/09/08 10:10:39 
+     * @return void
+     */
+    public function getTextureSku()
+    {
+        return $this->alias('a')->where('b.frame_texture', 2)->join(['fa_item_attribute' => 'b'], 'a.id=b.item_id')->column('sku');
+    }
 }
