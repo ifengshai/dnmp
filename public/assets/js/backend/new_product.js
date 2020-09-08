@@ -679,6 +679,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         // {field: 'create_person', title: __('Create_person')},
                         { field: 'create_time', title: __('需求提报时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'replenish_num', title: __('补货需求数量'), operate: false },
+                        { field: 'distribute_num', title: __('分配数量'), operate: false },
                         {
                             field: 'status', title: __('需求分配状态'), custom: { 1: 'success', 2: 'danger', 3: 'success', 4: 'success' },
                             searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' }, operate: false,

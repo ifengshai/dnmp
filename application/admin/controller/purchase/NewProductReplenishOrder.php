@@ -148,6 +148,7 @@ class NewProductReplenishOrder extends Backend
     {
         $replenish_id = input('replenish_id');
         $this->assignConfig('id', $ids);
+        $this->assign('idid', $ids);
         //根据补货需求单id查出子表数据 同时需要去添加子子表数据为系统默认带出SKU的主供货商和补货需求数量
         $replenish_order = $this->model->where('replenish_id',$ids)->select();
         // dump(collection($replenish_order)->toArray());
@@ -214,29 +215,30 @@ class NewProductReplenishOrder extends Backend
             $id = $this->request->param('ids');
             $row = $this->replenish->get($id);
             if ($row['status'] != 1) {
-                $this->error('此状态不能提交审核');
+                $result = array('code'=>2,'msg' => '此状态不能提交审核');
             }
             //补货需求单分配给供应商列表
             $replenish_list = $this->list->where('replenish_id',$id)->count();
             if ($replenish_list == 0){
-                $this->error('当前补货需求单还未分配，请先点击分配按钮');
+                $result = array('code'=>2,'msg'=> '当前补货需求单还未分配，请先点击分配按钮');
             }
             //补货需求单sku列表
             $replenish_order = $this->model->where('replenish_id',$id)->count();
             //分配完的数量不能小于sku列表的数量
             if ($replenish_list < $replenish_order){
-                $this->error('补货需求单中存在未分配的sku，请先分配完毕再提交');
+                $result = array('code'=>2,'msg' => '补货需求单中存在未分配供应商的sku，请先分配完毕再提交');
             }
 
-            $res = $this->replenish->where('id', $ids)->setField('status', 2);
-            if ($res) {
-                $this->success('提交成功');
-            } else {
-                $this->error('提交失败');
+            if ($result['code'] != 2) {
+                $result = array('code'=>1,'msg' => '提交成功');
+                $res = $this->replenish->where('id', $ids)->setField('status', 2);
             }
         } else {
-            $this->error('404 Not found');
+            $result = array('code'=>2,'msg' => '提交失败');
         }
+
+
+        return json($result);
 
     }
 
