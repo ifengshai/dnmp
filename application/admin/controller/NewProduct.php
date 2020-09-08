@@ -33,12 +33,6 @@ class NewProduct extends Backend
     protected $model = null;
 
     /**
-     * Item模型对象
-     * @var \app\admin\model\itemmanage\Item
-     */
-    protected $product = null;
-
-    /**
      * 无需鉴权的方法,但需要登录
      * @var array
      */
@@ -1776,7 +1770,8 @@ class NewProduct extends Backend
     public function import()
     {
         $this->model = new \app\admin\model\NewProductMapping();
-        $this->product = new \app\admin\model\itemmanage\Item;
+        $_item = new \app\admin\model\itemmanage\Item;
+        $_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
 
         //校验参数空值
         $file = $this->request->request('file');
@@ -1861,8 +1856,17 @@ class NewProduct extends Backend
                 //获取sku && 根据sku获取分类
                 $sku = trim($v[0]);
                 empty($sku) && $this->error(__('导入失败,商品SKU不能为空！'));
-                $product_info = $this->product->getItemInfo($sku);
-                $category_id = isset($product_info['category_id']) ? $product_info['category_id'] : 0;
+
+                //校验sku是否重复
+                isset($params[$sku]) && $this->error(__('导入失败,商品 '.$sku.' 重复！'));
+
+                //校验商品是否存在
+                $product = $_platform->where(['platform_type' => $label, 'sku' => $sku])->find();
+                empty($product) && $this->error(__('导入失败,商品SKU不存在！'));
+
+                //获取商品分类
+                $item_info = $_item->getItemInfo($sku);
+                $category_id = isset($item_info['category_id']) ? $item_info['category_id'] : 0;
 
                 //获取类型
                 $type_name = trim($v[1]);
@@ -1873,7 +1877,7 @@ class NewProduct extends Backend
                 $replenish_num = (int)$v[2];
                 empty($replenish_num) && $this->error(__('导入失败,补货需求数量不能为空！'));
 
-                $params[] = [
+                $params[$sku] = [
                     'website_type' => $label,
                     'sku' => $sku,
                     'create_time' => date('Y-m-d H:i:s'),
