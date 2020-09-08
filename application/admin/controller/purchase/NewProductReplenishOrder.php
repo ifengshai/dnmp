@@ -164,7 +164,10 @@ class NewProductReplenishOrder extends Backend
                 $arrr['create_time'] = date("Y-m-d H:i:s", time());
                 $arrr['purchase_person'] = Db::name('supplier')->where('id',$big_supplier['supplier_id'])->value('purchase_person');
                 $arrr['type'] = $v['type'];
-                $result = Db::name('new_product_replenish_list')->insert($arrr);
+                //有主供应商的情况 插入list表 没有的话就不插入 让他自己去分配
+                if (!empty($big_supplier)){
+                    $result = Db::name('new_product_replenish_list')->insert($arrr);
+                }
             }
         }
         $item = new Item();
