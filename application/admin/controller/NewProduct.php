@@ -1475,7 +1475,7 @@ class NewProduct extends Backend
         $skus = $this->item->getTextureSku();
 
         //统计同款补货量
-        $rows = $this->mapping->where('is_show', 1)->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku')->select();
+        $rows = $this->mapping->where('is_show', 1)->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku,type')->select();
         $rows = collection($rows)->toArray();
         $spus = [];
         foreach ($rows as $k => $v) {
