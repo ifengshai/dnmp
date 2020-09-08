@@ -64,6 +64,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             field: 'platform_type',
                             title: __('平台'),
                             custom: { 10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
+<<<<<<< Updated upstream
                             searchList: {
                                 10: '无',
                                 1: 'zeelool',
@@ -74,6 +75,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 8: 'amazon'
                             },
 
+=======
+                            searchList: { 10: '无', 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 8: 'amazon' },
+>>>>>>> Stashed changes
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -631,7 +635,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
                         Fast.api.open('new_product/emergency_replenishment?label=' + label, '创建紧急补货需求单', options);
 
-
                     }
                 );
             });
@@ -838,6 +841,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         },
         addreplenishorder: function () {
             Controller.api.bindevent();
+        },
+        notsatisfiedorderquantitylist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/notsatisfiedorderquantitylist' + location.search,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            formatter: Table.api.formatter.status
+                        },
+
+                        {
+                            field: 'replenish_num', title: __('补货需求数量'), operate: false
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         api: {
 
