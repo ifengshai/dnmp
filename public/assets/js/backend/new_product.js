@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to', 'template', 'editable', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Fast, undefined, Template, undefined, Upload) {
 
     var Controller = {
         index: function () {
@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 showExport: false,
                 columns: [
                     [
-                        {checkbox: true},
+                        { checkbox: true },
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -44,17 +44,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        {field: 'id', title: __('Id'), operate: false, visible: false},
-                        {field: 'sku', title: __('Sku'), operate: 'like'},
-                        {field: 'category_name', title: __('分类名称'), operate: false},
+                        { field: 'id', title: __('Id'), operate: false, visible: false },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'category_name', title: __('分类名称'), operate: false },
                         {
                             field: 'category_id', title: __('Category_id'),
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
                             formatter: Table.api.formatter.status, visible: false
                         },
-                        {field: 'price', title: __('单价'), operate: false},
-                        {field: 'sales_num', title: __('90天总销量'), operate: false},
-                        {field: 'available_stock', title: __('可用库存'), operate: false},
+                        { field: 'price', title: __('单价'), operate: false },
+                        { field: 'sales_num', title: __('90天总销量'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
                         // {
                         //     field: 'platform_plat', title: __('平台'), searchList: function (column) {
                         //         return Template('receptperson1tpl', {});
@@ -63,8 +63,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         {
                             field: 'platform_type',
                             title: __('平台'),
-                            custom: {10: 'success',1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
-                            searchList: {10:'无',1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',8:'amazon'},
+                            custom: { 10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 10: '无', 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 8: 'amazon' },
                             formatter: Table.api.formatter.status
                         },
                         // {
@@ -78,8 +78,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger', 4: 'gray', 0: 'red'},
-                            searchList: {0: '新建', 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消'},
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray', 0: 'red' },
+                            searchList: { 0: '新建', 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -89,9 +89,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             formatter: Controller.api.formatter.getClear,
                             operate: false
                         },
-                        {field: 'newproductattribute.frame_images', operate: false},
-                        {field: 'create_person', title: __('Create_person')},
-                        {field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange'},
+                        { field: 'newproductattribute.frame_images', operate: false },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'available_stock',
                             title: __('可用库存'),
@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     icon: 'fa fa-list',
                                     url: Config.moduleurl + '/new_product/detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -133,7 +133,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     url: Config.moduleurl + '/new_product/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -189,7 +189,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
             //点击详情
             $(document).on("click", ".btn-detail[data-id]", function () {
-                Backend.api.open('new_product/detail/ids/' + $(this).data('id'), __('Detail'), {area: ['100%', '100%']});
+                Backend.api.open('new_product/detail/ids/' + $(this).data('id'), __('Detail'), { area: ['100%', '100%'] });
             });
 
 
@@ -197,7 +197,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             $(document).on('click', '.btn-passAudit', function () {
                 var ids = Table.api.selectedids(table);
 
-                Backend.api.open('new_product/passAudit/ids/' + $(this).data('id') + '/sku/' + $(this).data('sku'), __('同步商品'), {area: ['35%', '35%']});
+                Backend.api.open('new_product/passAudit/ids/' + $(this).data('id') + '/sku/' + $(this).data('sku'), __('同步商品'), { area: ['35%', '35%'] });
 
                 // Layer.confirm(
                 //     __('确定要审核通过吗'),
@@ -222,7 +222,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     function (index) {
                         Backend.api.ajax({
                             url: "new_product/auditRefused",
-                            data: {ids: ids, idd: idd}
+                            data: { ids: ids, idd: idd }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -239,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     function (index) {
                         Backend.api.ajax({
                             url: "new_product/cancel",
-                            data: {ids: ids}
+                            data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -308,7 +308,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 Layer.load();
                 Backend.api.ajax({
                     url: 'new_product/ajaxCollectionGoodsDetail',
-                    data: {link: link, categoryId: categoryId}
+                    data: { link: link, categoryId: categoryId }
                 }, function (data, ret) {
 
                     Layer.closeAll();
@@ -392,10 +392,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id'), operate: false},
-                        {field: 'sku', title: __('Sku'), operate: 'like'},
-                        {field: 'category_name', title: __('商品分类'), operate: false},
+                        { checkbox: true },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'purchase_price', title: __('采购成本'), operate: false },
+                        { field: 'category_name', title: __('商品分类'), operate: false },
                         {
                             field: 'category_id', title: __('Category_id'),
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
@@ -408,15 +409,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             operate: 'between',
                             formatter: Controller.api.formatter.int_format
                         },
-                        {field: 'grade', title: __('销量等级'), operate: false,},
-                        {field: 'product_cycle', title: '生产周期', operate: false},
-                        {field: 'available_stock', title: '可用库存', operate: false, visible: false},
-                        {field: 'stock', title: '虚拟仓库存', operate: false},
-                        {field: 'on_way_stock', title: '在途库存', operate: false},
-                        {field: 'wait_in_num', title: '待入库数量', operate: false},
-                        {field: 'sales_num_15days', title: '过去15天日均销量', operate: false},
-                        {field: 'sales_num_90days', title: '90天总销量', operate: false},
-                        {field: 'sales_days', title: '预估售卖天数', operate: false},
+                        { field: 'grade', title: __('销量等级'), operate: false, },
+                        { field: 'product_cycle', title: '生产周期', operate: false },
+                        { field: 'available_stock', title: '可用库存', operate: false, visible: false },
+                        { field: 'stock', title: '虚拟仓库存', operate: false },
+                        { field: 'on_way_stock', title: '在途库存', operate: false },
+                        { field: 'wait_in_num', title: '待入库数量', operate: false },
+                        { field: 'sales_num_15days', title: '过去15天日均销量', operate: false },
+                        { field: 'sales_num_90days', title: '90天总销量', operate: false },
+                        { field: 'sales_days', title: '预估售卖天数', operate: false },
                         // {field: 'replenish_num', title: '建议补货量', operate: false},
                         {
                             field: 'operate',
@@ -434,7 +435,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     url: Config.moduleurl + '/new_product/addReplenishOrder/type/1',
                                     extend: 'data-area = \'["40%","40%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -451,7 +452,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     url: Config.moduleurl + '/new_product/addReplenishOrder/type/2',
                                     extend: 'data-area = \'["40%","40%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -499,6 +500,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'new_product/productmappinglist' + location.search + '&label=' + Config.label,
+                    del_url: 'new_product/replenish_cart_del',
                     edit_url: 'new_product/mappingedit',
                 }
             });
@@ -521,16 +523,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        {field: 'sku', title: __('Sku'), operate: 'like'},
-                        {field: 'category_name', title: __('商品分类'), operate: false},
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'category_name', title: __('商品分类'), operate: false },
                         {
                             field: 'category_id', title: __('Category_id'),
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
                             formatter: Table.api.formatter.status, visible: false
                         },
                         {
-                            field: 'type', title: __('类型'), custom: {1: 'success', 2: 'danger'},
-                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '计划补货', 2: '紧急补货' },
                             formatter: Table.api.formatter.status
                         },
 
@@ -542,6 +544,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                         return '请输入正整数';
                                     }
                                 }
+                            }
+                        },
+                        // {
+                        //     field: 'operate',
+                        //     title: __('Operate'),
+                        //     table: table,
+                        //     events: Table.api.events.operate,
+                        //     formatter: Table.api.formatter.operate
+                        // },
+                        {
+                            field: 'operate', title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            formatter: function (value, row, index) {
+                                var that = $.extend({}, this);
+                                $(table).data("operate-edit", null); // 列表页面隐藏 .编辑operate-edit - 删除按钮operate-del
+                                that.table = table;
+                                return Table.api.formatter.operate.call(that, value, row, index);
                             }
                         }
 
@@ -564,6 +584,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 })
             }
 
+            $('.btn-edit').hide();
             //选项卡切换
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
@@ -599,19 +620,279 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }
                         };
                         // Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
-                        Fast.api.open('new_product/emergency_replenishment?label=' +label,'创建紧急补货需求单', options);
+                        Fast.api.open('new_product/emergency_replenishment?label=' + label, '创建紧急补货需求单', options);
 
                     }
                 );
             });
 
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                var label = $('.panel-heading li.active a[data-toggle="tab"]').data("value");
+                Fast.api.ajax({
+                    url: 'new_product/import',
+                    data: { file: data.url,label: label },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+                });
+            });
+
+        },
+        productmappinglisthistory: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/productmappinglisthistory' + location.search + '&label=' + Config.label,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'a.id',
+                columns: [
+                    [
+                        // { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+
+                        {
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            formatter: Table.api.formatter.status
+                        },
+                        // {field: 'create_person', title: __('Create_person')},
+                        { field: 'create_time', title: __('需求提报时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'replenish_num', title: __('补货需求数量'), operate: false },
+                        { field: 'distribute_num', title: __('分配数量'), operate: false },
+                        {
+                            field: 'status', title: __('需求分配状态'), custom: { 1: 'success', 2: 'danger', 3: 'success', 4: 'success' },
+                            searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' }, operate: false,
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
+                        { field: 'arrival_time', title: __('预计到货时间'), operate: false },
+                        { field: 'purchase_number', title: __('采购单号'), operate: false },
+                        {
+                            field: 'purchase_status', title: __('采购状态'),
+                            custom: {
+                                0: 'success',
+                                1: 'yellow',
+                                2: 'blue',
+                                3: 'danger',
+                                4: 'gray',
+                                5: 'yellow',
+                                6: 'yellow',
+                                7: 'success',
+                                8: 'success',
+                                9: 'success',
+                                10: 'success'
+                            },
+                            searchList: {
+                                0: '新建',
+                                1: '待审核',
+                                2: '已审核',
+                                3: '已拒绝',
+                                4: '已取消',
+                                5: '待发货',
+                                6: '待收货',
+                                7: '已收货',
+                                8: '已退款',
+                                9: '部分签收',
+                                10: '已完成'
+                            },
+                            operate: false,
+                            formatter: Controller.api.formatter.status
+                        },
+                        { field: 'real_dis_num', title: __('预计到货数量'), operate: false },
+                        { field: 'arrivals_num', title: __('到货数量'), operate: false },
+                        { field: 'quantity_num', title: __('质检合格数量'), operate: false },
+                        { field: 'in_stock_num', title: __('入库数量'), operate: false },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'new_product/productmappingdetail/purchase_id/{purchase_id}',
+                                    extend: 'data-area = \'["60%","60%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+
+                            ],
+                            formatter: Table.api.formatter.operate
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    filter[field] = value;
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+
+        },
+        productmappingdetail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/productmappingdetail' + location.search + '&purchase_id=' + Config.purchase_id,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'a.id',
+                columns: [
+                    [
+                        { field: 'id', title: __('批次'), operate: false },
+                        { field: 'arrival_time', title: __('预计到货时间'), operate: false },
+                        { field: 'wait_arrival_num', title: __('预计到货数量'), operate: false },
+                        { field: 'arrivals_num', title: __('到货数量'), operate: false },
+                        {
+                            field: 'status', title: __('质检状态'), custom: { 0: 'success', 1: 'danger', 2: 'success', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
+                            formatter: Controller.api.formatter.status
+                        },
+                        { field: 'quantity_num', title: __('质检合格数量'), operate: false },
+                        {
+                            field: 'instock_status', title: __('入库状态'), custom: { 0: 'success', 1: 'danger', 2: 'success', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' }, operate: false,
+                            formatter: Controller.api.formatter.status
+                        },
+                        { field: 'instock_num', title: __('入库数量'), operate: false }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
         },
         addreplenishorder: function () {
             Controller.api.bindevent();
         },
+        notsatisfiedorderquantitylist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'new_product/notsatisfiedorderquantitylist' + location.search,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            formatter: Table.api.formatter.status
+                        },
+
+                        {
+                            field: 'replenish_num', title: __('补货需求数量'), operate: false
+                        }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         api: {
 
             formatter: {
+                status: function (value, row, index) {
+                    var custom = {normal: 'success', hidden: 'gray', deleted: 'danger', locked: 'info'};
+                    if (typeof this.custom !== 'undefined') {
+                        custom = $.extend(custom, this.custom);
+                    }
+                    this.custom = custom;
+                    this.icon = 'fa '; //更改这里图标css
+                    if (value || value == 0) {
+                        return Table.api.formatter.normal.call(this, value, row, index);
+                    } else {
+                        return '-';
+                    }
+                    
+                },
                 strip_tags: function (msg) {
                     var msg = msg.replace(/<\/?[^>]*>/g, ''); //去除HTML Tag
                     msg = msg.replace(/[|]*\n/, '') //去除行尾空格
@@ -652,7 +933,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                     Backend.api.ajax({
                         url: 'new_product/ajaxCategoryInfo',
-                        data: {categoryId: categoryId}
+                        data: { categoryId: categoryId }
                     }, function (data, ret) {
                         var resultData = ret.data;
                         $('.ajax-add').remove();
@@ -745,7 +1026,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
                     Backend.api.ajax({
                         url: 'new_product/ajaxItemInfo',
-                        data: {categoryId: categoryId, sku: sku}
+                        data: { categoryId: categoryId, sku: sku }
                     }, function (data, ret) {
                         var resultData = ret.data;
                         if (resultData != false) {
