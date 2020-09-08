@@ -248,6 +248,12 @@ class NewProductReplenishOrder extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a", [], 'strip_tags');
             $res = $this->list->where('id',$ids)->setField(['status'=>3,'remarks'=>$params['type']]);
+            $replenish = $this->list->where('id',$ids)->find();
+            //拒绝的时候去查replenish_list表 看是否还有未采购的数据 没有的话更新补货需求单状态为已处理
+            $is_have_replenish = $this->list->where(['replenish_id'=>$replenish['replenish_id'],'status'=>1])->find();
+            if (empty($is_have_replenish)){
+                $res = $this->replenish->where('id', $replenish['replenish_id'])->setField('status', 4);
+            }
             Db::startTrans();
             try {
                 Db::commit();
