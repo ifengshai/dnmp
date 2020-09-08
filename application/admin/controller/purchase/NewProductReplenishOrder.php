@@ -222,7 +222,7 @@ class NewProductReplenishOrder extends Backend
                 $this->error('当前补货需求单还未分配，请先点击分配按钮');
             }
             //补货需求单sku列表
-            $replenish_order = $this->model->where('replenish_id',$id)->count();.
+            $replenish_order = $this->model->where('replenish_id',$id)->count();
             //分配完的数量不能小于sku列表的数量
             if ($replenish_list < $replenish_order){
                 $this->error('补货需求单中存在未分配的sku，请先分配完毕再提交');
