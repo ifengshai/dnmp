@@ -714,8 +714,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'status',
                             title: __('状态'),
                             operate: false,
-                            custom: {1: 'green', 2: 'danger'},
-                            searchList: {1: '未采购', 2: '已采购'},
+                            custom: {1: 'green', 2: 'blue',3:'danger'},
+                            searchList: {1: '未采购', 2: '已采购',3:'已拒绝'},
                             formatter: Table.api.formatter.status
                         },
                     ]
