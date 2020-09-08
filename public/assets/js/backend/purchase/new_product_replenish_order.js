@@ -258,33 +258,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
-                                {
-                                    name: 'submitAudit',
-                                    text: '提交',
-                                    title: __('提交'),
-                                    classname: 'btn btn-xs btn-info btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: 'purchase/new_product_replenish_order/submit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 1) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                },
+                                // {
+                                //     name: 'submitAudit',
+                                //     text: '提交',
+                                //     title: __('提交'),
+                                //     classname: 'btn btn-xs btn-info btn-ajax',
+                                //     icon: 'fa fa-leaf',
+                                //     url: 'purchase/new_product_replenish_order/submit',
+                                //     confirm: '确认提交审核吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         if (row.status == 1) {
+                                //             return true;
+                                //         } else {
+                                //             return false;
+                                //         }
+                                //     },
+                                // },
                                 {
                                     name: 'distribution',
                                     text: __('分配'),
@@ -465,7 +465,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 parent.$("a.btn-refresh").trigger("click");
             });
 
-
+            $(document).on('click', '.btn-fenpeitijiao', function () {
+                var ids = $("#fenpeitijiaoid").val();
+                $.ajax({
+                    type: "GET",
+                    url: "purchase/new_product_replenish_order/submit",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        ids: ids,
+                        dialog: 1,
+                    },
+                    success: function (data, ret) {
+                        if (data.code == 1){
+                            $(".btn-refresh").trigger("click");//刷新当前页面的数据
+                            Fast.api.close(data);
+                            Form.api.bindevent($("form[role=form]"));
+                            parent.location.reload();
+                        }else{
+                            Layer.alert(data.msg);
+                        }
+                    }
+                });
+            });
             //需求单确认分配
             // $(document).on('click', '.btn-confirmdis', function () {
             //     var ids = Table.api.selectedids(table);
