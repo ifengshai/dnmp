@@ -73,7 +73,7 @@
             <li>{$orderInfoList.status}</li>
             <li style="width: 45px;">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>
             <li>{$orderInfoList.order_currency_code}</li>
-            <li>{:round($orderInfoList.grand_total,3)}</li>
+            <li>{:round($orderInfoList.grand_total,2)}</li>
             <li>{:round($orderInfoList.base_grand_total,2)}</li>
             <li>{$orderInfoList.coupon_code}</li>
             <li>{$orderInfoList.coupon_rule_name}</li>
