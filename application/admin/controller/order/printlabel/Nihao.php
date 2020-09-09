@@ -113,7 +113,7 @@ class Nihao extends Backend
 
             //SKU搜索
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['sku'] = ['like', $filter['sku'] . '%'];
                 $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
                 $ids = $this->model->getOrderId($smap);
                 $map['entity_id'] = ['in', $ids];
@@ -995,7 +995,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         }
         //SKU搜索
         if ($filter['sku']) {
-            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $map['sku'] = ['like', $filter['sku'] . '%'];
             unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
         }

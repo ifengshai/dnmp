@@ -663,16 +663,12 @@ class Index extends Backend
                 foreach ($list as $k => $v) {
                     $result[$i]['platformsku'] = $k;
                     $result[$i]['sales_num'] = $v;
-                    $result[$i]['sku'] = $skus[$k]['sku'];
-                    $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
+                    $result[$i]['sku'] = $skus[trim($k)]['sku'];
+                    $result[$i]['is_up'] = $skus[trim($k)]['outer_sku_status'];
+                    $result[$i]['available_stock'] = $skus[trim($k)]['stock'];
+                    $result[$i]['name'] = $productInfo[$skus[trim($k)]['sku']]['name'];
+                    $result[$i]['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
 
-                    // $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['stock'];
-
-                    //master分支是下面的
-                    $result[$i]['available_stock'] = $skus[$k]['stock'];
-
-                    $result[$i]['name'] = $productInfo[$skus[$k]['sku']]['name'];
-                    $result[$i]['type_name'] = $productInfo[$skus[$k]['sku']]['type_name'];
                     $i++;
                 }
             }
