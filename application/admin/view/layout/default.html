@@ -2,9 +2,32 @@
 <html lang="{$config.language}">
     <head>
         {include file="common/meta" /}
+
+        <style type="text/css">
+            .maintain{
+                left: 0;
+                width: 100%;
+                position: absolute;
+                z-index: 9999;
+                background-color: #222D32;
+                opacity: 0.8;
+                font-size: 20px;
+                font-weight: bold;
+                color: #fff;
+                height: 42px;
+                line-height: 42px;
+            }
+        </style>
     </head>
 
     <body class="inside-header inside-aside {:defined('IS_DIALOG') && IS_DIALOG ? 'is-dialog' : ''}">
+
+        {if $site.authority_content}
+        <div class="maintain">
+            <marquee direction=left align=middle>{$site.authority_content}</marquee>
+        </div>
+        {/if}
+
         <div id="main" role="main">
             <div class="tab-content tab-addtabs">
                 <div id="content">
