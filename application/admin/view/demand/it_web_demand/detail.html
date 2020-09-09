@@ -163,7 +163,7 @@
                     <label class="input_tiem_label2">
                         {if $row['test_status'] < 5}
                             {if $test_status || $distribution_status}
-                                <input name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" id='is_difficult'><span>疑难</span>
+                                <input name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
                             {else}
                                 <input disabled name="row[is_difficult]" {if $row['is_difficult'] == 1}checked{/if} type="checkbox" value="1" class='check_value' id='is_difficult'><span>疑难</span>
                             {/if}
