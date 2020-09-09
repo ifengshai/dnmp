@@ -371,15 +371,15 @@ table.altrowstable tr:nth-child(even){
                         <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.conuter}</td>
                         <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($notCustomer.base_grand_total,2)}</td>
                         <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$notCustomer.replacement_counter}</td>
-                        {if $notCustomer.counter gt 0}
-                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.replacement_counter/$notCustomer.counter*100,2)}</td>
+                        {if $notCustomer.conuter gt 0}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.replacement_counter/$notCustomer.conuter*100,2)}</td>
                         {else/}
                         <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}
                         <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">-</td>
                         <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$notCustomer.refund_num}</td>
-                        {if $notCustomer.counter gt 0}
-                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_num/$notCustomer.counter*100,2)}</td>
+                        {if $notCustomer.conuter gt 0}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_num/$notCustomer.conuter*100,2)}</td>
                         {else/}
                         <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}
