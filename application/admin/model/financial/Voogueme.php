@@ -164,7 +164,7 @@ class Voogueme extends Model
        //镜架成本
         $all_frame_price = 0;
         foreach ($all_frame_result as $key => $value) {
-            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 3);
+            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 2);
             $all_frame_price += $value['counter'] * $sku_list[trim($true_sku)];
         }
 

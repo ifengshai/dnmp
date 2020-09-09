@@ -171,7 +171,7 @@ class Meeloog extends Model
        //镜架成本
         $all_frame_price = 0;
         foreach ($all_frame_result as $key => $value) {
-            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 3);
+            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 4);
             $all_frame_price += $value['counter'] * $sku_list[trim($true_sku)];
         }
         //求镜片成本价格
@@ -183,7 +183,7 @@ class Meeloog extends Model
         // $all_lens_price = round($all_lens_result[0]['left_lens_cost_price'] + $all_lens_result[0]['right_lens_cost_price'], 2);
 
         $all_lens_price = 0;
-        
+
         //求销售额、运费、毛利润
         $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
         ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
