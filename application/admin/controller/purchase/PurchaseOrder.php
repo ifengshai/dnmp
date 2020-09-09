@@ -269,6 +269,9 @@ class PurchaseOrder extends Backend
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
             foreach ($list as &$v) {
+                if ($v['status'] == 3){
+                    $this->error('存在已经拒绝的补货需求，请重新选择！！');
+                }
                 //查询sku 商品名称
                 $data = $item->getGoodsInfo($v['sku']);
                 $v['product_name'] = $data->name;
@@ -854,12 +857,20 @@ class PurchaseOrder extends Backend
             //在途库存新逻辑
             if ($status == 2) {
                 //审核通过添加在途库存
-                $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
+                $list = $this->purchase_order_item->alias('a')
+                    ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+                    ->field('supplier_id,sku,replenish_list_id,purchase_num')
+                    ->where(['purchase_id' => ['in', $ids]])->select();
+                $skus = array_column($list, 'sku');
+
+                //查询供应商
+                $supplier = new \app\admin\model\purchase\Supplier();
+                $supplier_list = $supplier->column('supplier_name','id');
                 foreach ($list as $v) {
                     $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
-                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态
+                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
                     if ($v['replenish_list_id']) {
-                        $this->list->where('id', $v['replenish_list_id'])->update(['real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        $this->list->where('id', $v['replenish_list_id'])->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']],'real_dis_num' => $v['purchase_num'], 'status' => 2]);
                         //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
                         $replenish_id = $this->list->where('id', $v['replenish_list_id'])->field('replenish_id,status')->find();
                         $replenish_order = $this->list->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])->find();
@@ -872,6 +883,8 @@ class PurchaseOrder extends Backend
                         }
                     }
                 }
+                //采购单审核通过 sku 改为老品
+                $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
             }
 
             $this->success();

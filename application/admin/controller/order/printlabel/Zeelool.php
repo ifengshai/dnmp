@@ -115,7 +115,7 @@ class Zeelool extends Backend
 
             //SKU搜索
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['sku'] = ['like', $filter['sku'] . '%'];
                 $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
                 $ids = $this->model->getOrderId($smap);
                 $map['entity_id'] = ['in', $ids];
@@ -983,7 +983,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         //SKU搜索
         if ($filter['sku']) {
-            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $map['sku'] = ['like',  $filter['sku'] . '%'];
             unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
