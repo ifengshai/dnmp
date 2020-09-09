@@ -183,7 +183,7 @@ class Zeelool extends Model
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->group('sku')
             ->order('num desc')
-            ->column('round(sum(b.qty_ordered)) as num', 'sku');
+            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
         return $res;
     }
 
