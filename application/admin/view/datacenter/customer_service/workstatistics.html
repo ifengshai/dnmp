@@ -356,7 +356,7 @@ table.altrowstable tr:nth-child(even){
                         {/if}
                         <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.refund_money}</td>
                         {if $warehouseWorkList1.base_grand_total gt 0}
-                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($warehouseWorkList1.total_refund_money/$warehouseWorkList1.base_grand_total*100,2)}</td>
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($warehouseWorkList1.refund_money/$warehouseWorkList1.base_grand_total*100,2)}</td>
                         {else/}
                         <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}
