@@ -1124,4 +1124,20 @@ class Test4 extends Backend
         }
         db('it_web_demand')->insertAll($data);
     }
+    /*
+     * 同步工单支付时间
+     * */
+    public function work_list_time(){
+        $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $list = $this->model->whereNull('payment_time')->field('id,work_platform,platform_order')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k=>$value){
+            $info = $this->model->getSkuList($value['work_platform'], $value['platform_order']);
+            $payment_time = $info['payment_time'];
+            $this->model->where('id',$value['id'])->update(['payment_time'=>$payment_time]);
+            echo $value['id'].' is ok'."\n";
+        }
+
+
+    }
 }
