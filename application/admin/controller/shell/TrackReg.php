@@ -524,7 +524,8 @@ class TrackReg extends Backend
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = session('admin.nickname');
+                $arr[$number]['create_person'] = 'Admin';
+                // $arr[$number]['create_person'] = session('admin.nickname');
                 $arr[$number]['create_time'] = date('Y-m-d H:i:s');
                 $arr[$number]['type'] = 2;
                 $arr[$number]['replenish_id'] = $res;
