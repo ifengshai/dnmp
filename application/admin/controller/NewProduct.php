@@ -1085,6 +1085,9 @@ class NewProduct extends Backend
             //查询待入库数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder();
             $wait_in_arr = $purchase->getWaitInStockNum($skus);
+            //查询板材类sku
+            $this->item = new \app\admin\model\itemmanage\Item();
+            $skus = $this->item->getTextureSku();
             foreach ($list as &$v) {
                 $v['category_name'] = $category[$v['category_id']];
                 $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
@@ -1095,6 +1098,11 @@ class NewProduct extends Backend
                 $num = $v['stock'] - ($v['average_90days_sales_num'] * 30);
                 $v['replenish_num'] = $num > 0 ? $num : 0;
                 $v['purchase_price'] = $stock[$v['sku']]['purchase_price'];
+                if (in_array($v['sku'], $skus)) {
+                    $v['start_replenish_num'] = 50;
+                }else{
+                    $v['start_replenish_num'] = 300;
+                }
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1470,14 +1478,14 @@ class NewProduct extends Backend
     protected function notSatisfiedOrderQuantity()
     {
         $this->mapping = new \app\admin\model\NewProductMapping();
-        $list = $this->mapping->where('is_show', 1)->field('type,sku,sum(replenish_num) as replenish_num')->group('sku,type')->select();
+        $list = $this->mapping->where(['is_show'=>1,'type'=>1])->field('type,sku,sum(replenish_num) as replenish_num,website_type')->group('sku,type')->select();
 
         //查询板材类sku
         $this->item = new \app\admin\model\itemmanage\Item();
         $skus = $this->item->getTextureSku();
 
         //统计同款补货量
-        $rows = $this->mapping->where('is_show', 1)->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku,type')->select();
+        $rows = $this->mapping->where(['is_show'=>1,'type'=>1])->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku,type')->select();
         $rows = collection($rows)->toArray();
         $spus = [];
         foreach ($rows as $k => $v) {
@@ -1491,6 +1499,13 @@ class NewProduct extends Backend
                 //判断板材补货量小于50 为不满足起订量
                 if ($v['replenish_num'] < 50) {
                     $data[$k]['sku'] = $v['sku'];
+                    //各个站的sku统计的数量
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num');
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num');
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num');
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1498,6 +1513,12 @@ class NewProduct extends Backend
                 $spu = substr($v['sku'], 0, strrpos($v['sku'], '-'));
                 if ($spus[$spu] < 300) {
                     $data[$k]['sku'] = $v['sku'];
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num');
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num');
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num');
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1975,7 +1996,7 @@ class NewProduct extends Backend
             $category_arr = array_column(collection($list)->toArray(), 'category_id', 'sku');
 
             //类型
-            $type_arr = ['计划补货' => 1, '紧急补货' => 2];
+            $type_arr = ['月度计划' => 1, '周度计划' => 2];
 
             //批量导入
             $params = [];
@@ -1991,7 +2012,9 @@ class NewProduct extends Backend
                 !isset($type_arr[$type_name]) && $this->error('导入失败,商品 '.$sku.' 类型错误！');
 
                 //校验池子中商品是否有相同sku
-                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
+                // isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
+                //有重复数据的时候以导入的数据为准，覆盖掉系统中重复的数据，没有重复的数据还留在系统中
+                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->model->where(['website_type'=>$label,'sku'=>$sku,'type'=>$type_arr[$type_name]])->delete();
 
                 //校验商品是否存在
                 !in_array($sku,$platform_arr) && $this->error(__('导入失败,商品 '.$sku.' 不存在！'));
