@@ -498,7 +498,7 @@ class TrackReg extends Backend
         $result = false;
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 2;
-            $data['create_person'] = session('admin.nickname');
+            $data['create_person'] = 'Admin';
             $data['create_time'] = date('Y-m-d H:i:s');
             $res = Db::name('new_product_replenish')->insertGetId($data);
 
