@@ -1177,6 +1177,7 @@ class WorkOrderList extends Backend
                             $params['base_grand_total'] = $params['refund_money'];
                             $params['grand_total'] = $params['refund_money'];
                         }
+                        dump($params);exit;
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
