@@ -448,7 +448,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     name: 'detail',
                                     text: '加入周度补货计划',
                                     title: __('加入周度补货计划'),
-                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    classname: 'btn btn-xs btn-danger btn-dialog',
                                     icon: 'fa fa-pencil',
                                     url: Config.moduleurl + '/new_product/addReplenishOrder/type/2',
                                     extend: 'data-area = \'["40%","40%"]\'',
