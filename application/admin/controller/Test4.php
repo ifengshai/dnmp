@@ -1129,7 +1129,7 @@ class Test4 extends Backend
      * */
     public function work_list_time(){
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
-        $list = $this->model->whereNull('payment_time')->field('id,work_platform,platform_order')->select();
+        $list = $this->model->where('payment_time','0000-00-00 00:00:00')->field('id,work_platform,platform_order')->select();
         $list = collection($list)->toArray();
         foreach ($list as $k=>$value){
             $info = $this->model->getSkuList($value['work_platform'], $value['platform_order']);
