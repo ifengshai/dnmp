@@ -418,6 +418,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'sales_num_15days', title: '过去15天日均销量', operate: false },
                         { field: 'sales_num_90days', title: '90天总销量', operate: false },
                         { field: 'sales_days', title: '预估售卖天数', operate: false },
+                        { field: 'start_replenish_num', title: '起订量', operate: false },
                         // {field: 'replenish_num', title: '建议补货量', operate: false},
                         {
                             field: 'operate',
@@ -428,8 +429,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                                 {
                                     name: 'detail',
-                                    text: '加入计划补货清单',
-                                    title: __('加入计划补货清单'),
+                                    text: '加入月度补货计划',
+                                    title: __('加入月度补货计划'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
                                     url: Config.moduleurl + '/new_product/addReplenishOrder/type/1',
@@ -445,8 +446,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                                 {
                                     name: 'detail',
-                                    text: '加入紧急补货清单',
-                                    title: __('加入紧急补货清单'),
+                                    text: '加入周度补货计划',
+                                    title: __('加入周度补货计划'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
                                     url: Config.moduleurl + '/new_product/addReplenishOrder/type/2',
@@ -864,7 +865,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             searchList: { 1: '月度计划'}, operate: false,
                             formatter: Table.api.formatter.status
                         },
-
+                        {
+                            field: 'z_sku_num', title: __('zeelool'), operate: false
+                        },{
+                            field: 'v_sku_num', title: __('voogueme'), operate: false
+                        },{
+                            field: 'nihao_sku_num', title: __('nihao'), operate: false
+                        },{
+                            field: 'm_sku_num', title: __('meeloog'), operate: false
+                        },{
+                            field: 'w_sku_num', title: __('wesee'), operate: false
+                        },{
+                            field: 'a_sku_num', title: __('amazon'), operate: false
+                        },
                         {
                             field: 'replenish_num', title: __('补货需求数量'), operate: false
                         }
