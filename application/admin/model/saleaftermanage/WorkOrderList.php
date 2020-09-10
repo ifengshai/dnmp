@@ -157,7 +157,8 @@ class WorkOrderList extends Model
         $result['customer_email'] = $register_email ?: $orderInfo['customer_email'];
         $result['order_type']     = $orderInfo['order_type'];
         $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
-        $result['payment_time'] = $this->model->where('increment_id', $increment_id)->value('created_at');
+        $created_at = $this->model->where('increment_id', $increment_id)->value('created_at');
+        $result['payment_time'] = date('Y-m-d H:i:s',strtotime($created_at)-8*3600);
         return $result ? $result : [];
     }
 
