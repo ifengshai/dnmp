@@ -1212,6 +1212,8 @@ class Sample extends Backend
                 }elseif($value['status'] == 5){
                     $list[$key]['status'] = '已取消';
                 }
+                $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
+                $list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
             }
             $result = array("total" => $total, "rows" => $list);
 
