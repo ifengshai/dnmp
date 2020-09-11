@@ -388,6 +388,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'sku', title: __('SKU'),operate:'LIKE'},
                         {field: 'lend_num', title: __('借出数量')},
                         {field: 'create_user', title: __('申请人')},
+                        {field: 'location', title: __('库位'),operate:false},
                         {field: 'createtime', title: __('申请时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'buttons',
