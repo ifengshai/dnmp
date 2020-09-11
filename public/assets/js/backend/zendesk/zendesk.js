@@ -184,9 +184,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             }, function (data, ret) {
                 Toastr.success("失败");
             });
-            $(document).keyup(function(event){
+            $(document).keypress(function(event){
                 if(event.keyCode == 13){
-                    return false;
+                    event.preventDefault();
                 }
             });
             $(document).on('change','.macro-apply',function(){
