@@ -185,6 +185,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             }, function (data, ret) {
                 Toastr.success("失败");
             });
+            $(document).keypress(function(event){
+                if(event.keyCode == 13){
+                    event.preventDefault();
+                }
+            });
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var email = $('.email').val();
