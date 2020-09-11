@@ -1373,26 +1373,26 @@ class Sample extends Backend
         }
         if($is_update == 1){
             if($status == 2){
+                $skus = Db::name('purchase_sample_lendlog')->field('sum(lend_num) lend_num,sku')->where('id','in',$ids)->group('sku')->select();
                 //批量审核通过
-                $is_check = 0;
+                $is_check = array();
                 $lend_arr = array();
-                foreach($ids as $id){
-                    $lendlog_items = Db::name('purchase_sample_lendlog')->where('id',$id)->find();
-                    $sample = $this->sample->where('sku',$lendlog_items['sku'])->find();
+                foreach($skus as $sku){
+                    $sample = $this->sample->where('sku',$sku['sku'])->find();
                     $rest_stock = $sample->stock - $sample->lend_num;
-                    if($rest_stock>=$lendlog_items['lend_num']){
+                    if($rest_stock>=$sku['lend_num']){
                         //借出商品并更新状态
                         $lend_arr[] = array(
-                            'sku'=>$lendlog_items['sku'],
-                            'lend_num'=>$lendlog_items['lend_num']
+                            'sku'=>$sku['sku'],
+                            'lend_num'=>$sku['lend_num']
                         );
                     }else{
                         //借出单中存在商品数量不足，无法借出
-                        $is_check++;
+                        $is_check[] = $sku['sku'];
                         break;
                     }
                 }
-                if($is_check == 0){
+                if(count($is_check) == 0){
                     //审核通过
                     foreach($lend_arr as $value){
                         $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(); 
@@ -1400,7 +1400,8 @@ class Sample extends Backend
                     }
                     $this->samplelendlog->where($where)->update(['status'=>$status]);
                 }else{
-                    $this->error('存在商品数量不足，无法借出');
+                    $sku_str = implode(',',$is_check);
+                    $this->error('sku：'.$sku_str.'商品数量不足，无法借出');
                 }
             }else{
                 //批量审核拒绝
