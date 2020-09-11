@@ -169,6 +169,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (rows.cancel_time) {
                                     all_user_name += '<br><div class="step_recept"><b class="step">取消时间：</b><b class="recept">' + rows.cancel_time + '</b></div>';
                                 }
+                                if (rows.payment_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">支付时间：</b><b class="recept">' + rows.payment_time + '</b></div>';
+                                }
 
                                 return all_user_name;
                             },
@@ -177,6 +180,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                        { field: 'payment_time', title: __('订单支付时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         {
                             field: 'buttons',
                             width: "120px",
@@ -855,6 +859,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }, function (data, ret) {
                         Layer.closeAll();
+                        $('#payment_time').val(data.payment_time);
                         $('#order_pay_currency').val(data.base_currency_code);
                         $('#step2_pay_currency').val(data.base_currency_code);
                         $('#c-rewardpoint_discount_money').val(data.mw_rewardpoint_discount);

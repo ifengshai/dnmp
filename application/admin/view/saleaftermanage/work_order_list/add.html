@@ -400,6 +400,7 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <!--站点类型-->
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
+    <input type="hidden" name="row[payment_time]" id="payment_time" value="" />
     <!--工单类型，1 客服工单，2 仓库工单-->
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <input type="hidden" name="row[order_type]" id='order_type' value="{$row.order_type}" />

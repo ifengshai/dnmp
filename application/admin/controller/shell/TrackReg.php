@@ -497,7 +497,7 @@ class TrackReg extends Backend
         $result = false;
             //首先插入主表 获取主表id new_product_replenish
             $data['type'] = 2;
-            $data['create_person'] = session('admin.nickname');
+            $data['create_person'] = 'Admin';
             $data['create_time'] = date('Y-m-d H:i:s');
             $res = Db::name('new_product_replenish')->insertGetId($data);
 
@@ -523,7 +523,8 @@ class TrackReg extends Backend
             foreach ($list as $k => $v) {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = session('admin.nickname');
+                $arr[$number]['create_person'] = 'Admin';
+                // $arr[$number]['create_person'] = session('admin.nickname');
                 $arr[$number]['create_time'] = date('Y-m-d H:i:s');
                 $arr[$number]['type'] = 2;
                 $arr[$number]['replenish_id'] = $res;

@@ -2,6 +2,8 @@
 
 namespace app\admin\controller;
 
+use app\admin\controller\purchase\NewProductReplenishOrder;
+use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
@@ -50,6 +52,12 @@ class Test5 extends Backend
         $url = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={623060648636265}&client_secret={ad00911ec3120286be008c02bdd66a92}&fb_exchange_token={EAAI2q5yir2kBAMPlwaNqRmZCHPdBGLadq6FUAaIxz7BFbuS7uaNDUShEMhCVG7KZBHwQ8VivZBxChNEdTC14MnapJwPi4V9uJYnxriK5WggdbUUx4QlBELggA9QO1YHPCZCPGPJC6B6OPy9xUUceGT2qIMQ7JwM0F2rE8V4LbWstn84Rytnkizn5u7mQyXwxqZCYELcXH8HHsQUdZCS0wj}";
         $res = Http::get($url);
     
+    }
+
+    public function delete_num_eq_1()
+    {
+        $res  = Db::name('new_product_replenish_order')->where(['replenish_id'=>129,'replenishment_num'=>1])->delete();
+        $res1 = Db::name('new_product_replenish_list')->where(['replenish_id'=>129,'distribute_num'=>1])->delete();
     }
 
 }

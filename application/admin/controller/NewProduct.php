@@ -1449,11 +1449,13 @@ class NewProduct extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where('type',1)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where('type',1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

@@ -180,6 +180,11 @@ class WorkOrderList extends Backend
                 }
                 unset($filter['measure_choose_id']);
             }
+            if($filter['payment_time']){
+                $createat = explode(' ', $filter['payment_time']);
+                $map['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+                unset($filter['payment_time']);
+            }
 
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
