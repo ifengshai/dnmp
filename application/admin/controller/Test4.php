@@ -1140,4 +1140,18 @@ class Test4 extends Backend
 
 
     }
+    /*
+     * 同步借出数量
+     * */
+    public function lendlog_info(){
+        $list = Db::name('purchase_sample_lendlog_item')->select();
+        foreach ($list as $k=>$v){
+            $lendinfo = Db::name('purchase_sample_lendlog')->where('id',$v['log_id'])->find();
+            $data['status'] = $lendinfo['status'];
+            $data['create_user'] = $lendinfo['create_user'];
+            $data['createtime'] = $lendinfo['createtime'];
+            Db::name('purchase_sample_lendlog_item')->where('id',$v['id'])->update($data);
+            echo $v['id']."\n";
+        }
+    }
 }
