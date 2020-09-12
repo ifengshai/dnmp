@@ -199,6 +199,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -3704,6 +3705,12 @@ EOF;
         } else {
             $noteInfo = [];
         }
+        //根据平台sku求出商品sku
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //求出配置里面信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
+        //求出配置里面的大分类信息
+        $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
@@ -3747,7 +3754,9 @@ EOF;
             ->setCellValue("AL1", "措施")
             ->setCellValue("AM1", "措施详情")
             ->setCellValue("AN1", "承接详情")
-            ->setCellValue("AO1", "工单回复备注");
+            ->setCellValue("AO1", "工单回复备注")
+            ->setCellValue("AP1", "对应商品sku")
+            ->setCellValue("AQ1", "问题大分类");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -3761,22 +3770,22 @@ EOF;
             }
             switch ($value['work_platform']) {
                 case 2:
-                    $value['work_platform'] = 'voogueme';
+                    $work_platform = 'voogueme';
                     break;
                 case 3:
-                    $value['work_platform'] = 'nihao';
+                    $work_platform = 'nihao';
                     break;
                 case 4:
-                    $value['work_platform'] = 'meeloog';
+                    $work_platform = 'meeloog';
                     break;
                 case 5:
-                    $value['work_platform'] = 'wesee';
+                    $work_platform = 'wesee';
                     break;
                 default:
-                    $value['work_platform'] = 'zeelool';
+                    $work_platform = 'zeelool';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['work_platform']);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $work_platform);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['work_type'] == 1 ? '客服工单' : '仓库工单');
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['platform_order']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['order_pay_currency']);
@@ -3874,6 +3883,31 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }
+            //对应商品的sku
+            if($value['order_sku']){
+                $order_arr_sku = explode(',',$value['order_sku']);
+                if(is_array($order_arr_sku)){
+                    $true_sku = [];
+                    foreach($order_arr_sku as $t_sku){
+                        $true_sku[] = $aa = $itemPlatFormSku->getTrueSku($t_sku,$value['work_platform']);
+                    }
+                    $true_sku_string = implode(',',$true_sku);
+                    $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $true_sku_string);
+                }else{
+                    $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), '');
+                }
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), '');
+            }
+            //对应的问题类型大的分类
+            $one_category = '';
+            foreach($customer_problem_classify as $problem  => $classify){
+                if(in_array($value['problem_type_id'],$classify)){
+                    $one_category = $problem;
+                    break;
+                }
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $one_category);
         }
 
         //设置宽度
@@ -3919,6 +3953,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(40);
         //设置边框
         $border = [
             'borders' => [
