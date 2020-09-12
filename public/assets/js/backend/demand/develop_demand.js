@@ -376,7 +376,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
+                                        // if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0) {
                                             return true;
                                         } else {
                                             return false;
