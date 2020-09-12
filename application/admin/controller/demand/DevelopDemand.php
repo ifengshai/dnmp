@@ -683,7 +683,7 @@ class DevelopDemand extends Backend
                     $params['review_manager_time'] = date('Y-m-d H:i:s');
                     if($params['review_status_manager'] == '2')
                     {
-                        $params['status']='6';
+                        $params['status']='0';
                     }
 
                     $result = $row->allowField(true)->save($params);
@@ -830,7 +830,7 @@ class DevelopDemand extends Backend
                 $params['review_devel_time'] = date('Y-m-d H:i:s');
                 //开发主管审核拒绝后进入已删除
                 if ($params['review_status_develop'] == 2) {
-                    $params['status'] ='6';
+                    $params['status'] ='0';
                 }
                 $result = $row->allowField(true)->save($params);
                 Db::commit();
@@ -921,7 +921,6 @@ class DevelopDemand extends Backend
                 try {
                     $test_person = $this->request->post("test_person/a");
                     $params['test_person'] = implode(',', $test_person);
-                    $params['status']='3';
                     $result = $this->model->allowField(true)->save($params, ['id' => input('id')]);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -959,16 +958,15 @@ class DevelopDemand extends Backend
     {
         $data['is_finish'] = 1;
          //需要测试,进入测试中,状态3   不需要  状态4
-        // $is_passed= $this->model->where('id='.$ids)->select();
-        // $is_passed=collection($is_passed)->toArray();
-        // $is_passed=$is_passed[0]['is_test'];
-        // $is_passed=$is_passed[0]['is_finish'];
-        // if($is_passed == 1 && )
-        // {
-        //   $data['status'] = 3;
-        // }else{
+        $is_passed= $this->model->where('id='.$ids)->select();
+        $is_passed=collection($is_passed)->toArray();
+        $is_passed=$is_passed[0]['is_test'];
+        if($is_passed == 1)
+        {
+          $data['status'] = 3;
+        }else{
           $data['status'] = 4;
-        // }
+        }
 
         $data['finish_time'] = date('Y-m-d H:i:s', time());
         $data['finish_person'] = session('admin.nickname');
@@ -1133,6 +1131,8 @@ class DevelopDemand extends Backend
     public function test_is_passed($ids = null)
     {
         $data['test_is_passed'] = 1;
+        //通过测试,修改status状态为准备发布
+        $data['status'] = 4;
         $data['test_finish_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {

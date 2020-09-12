@@ -209,7 +209,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
-                                        if (row.status == '0') {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
                                             return true;
                                         } else {
                                             return false;
@@ -262,7 +262,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
-                                        if (row.status == '0') {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
                                             return true;
                                         } else {
                                             return false;
@@ -352,13 +352,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person && row.status=='2') {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.status=='2') {
                                                 return true;
                                             } else {
                                                 return false;
@@ -427,7 +427,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1 && row.is_test_record_hidden == 1 && row.status=='3') {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1  && row.status=='3') {
                                             return true;
                                         } else {
                                             return false;
@@ -452,11 +452,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            // if (row.test_is_passed == 1 && Config.is_finish_task == 1 && row.is_finish_task == 0) {
+                                            if (row.test_is_passed == 1 && Config.is_finish_task == 1 && row.is_finish_task == 0) {
                                                 return true;
-                                            // } else {
-                                            //     return false;
-                                            // }
+                                            } else {
+                                                return false;
+                                            }
                                         } else {
                                             if (row.is_finish == 1 && Config.is_finish_task == 1 && row.is_finish_task == 0) {
                                                 return true;
@@ -872,13 +872,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.test_person && row.status=='4') {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.test_person) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.status=='3') {//  当前开发人可点击开发完成//
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;
