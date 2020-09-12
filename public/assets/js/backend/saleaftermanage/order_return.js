@@ -720,6 +720,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 pagingMore: true,
                 max: 5000
             });
+
+            //模糊匹配交易号
+            $('#transaction_id').autocomplete({
+                source: function (request, response) {
+                    var transaction_id = $('#transaction_id').val();
+                    var orderType = $('#order_platform').val();
+                    if (transaction_id.length > 2) {
+                        $.ajax({
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikeTransaction",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, transaction_id: transaction_id
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
+                },
+                delay: 10,//延迟100ms便于输入
+                select: function (event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll: true,
+                pagingMore: true,
+                max: 5000
+            });
+
             //点击查看物流信息
             $(document).on('click', '.track-number', function () {
                 var entity_id = $(this).data('id');
