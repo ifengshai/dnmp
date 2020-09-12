@@ -1719,6 +1719,7 @@ class NewProduct extends Backend
             //sku 
             if ($filter['sku']) {
                 $map['a.sku'] = $filter['sku'];
+                $map['d.purchase_name'] = ['like',$filter['sku']];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -1763,8 +1764,10 @@ class NewProduct extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
+                // ->getLastSql();
                 ->select();
             $list = collection($list)->toArray();
+            // dump($list);die;
             //根据采购单id 查询质检单
             $purchase_id = array_column($list, 'purchase_id');
             $rows = $check_order_item->field("sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
