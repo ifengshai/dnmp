@@ -421,7 +421,9 @@ class NewProductReplenishOrder extends Backend
 
             $list = collection($list)->toArray();
 
+            $item = new Item();
             foreach ($list as $k => $v) {
+                $list[$k]['new_old'] =$item->where('sku',$list[$k]['sku'])->value('is_new');
                 $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 $list[$k]['num'] = $new_product_replenish_order;
             }
