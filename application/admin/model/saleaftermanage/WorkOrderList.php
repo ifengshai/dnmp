@@ -300,7 +300,7 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
-        try {
+        //try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
             } else {
@@ -318,9 +318,9 @@ class WorkOrderList extends Model
                 return $res['data'];
             }
             exception($res['msg'] . '   error_code:' . $res['status']);
-        } catch (Exception $e) {
-            exception($e->getMessage());
-        }
+        // } catch (Exception $e) {
+        //     exception($e->getMessage());
+        // }
     }
 
     /**
@@ -790,6 +790,7 @@ class WorkOrderList extends Model
                         $url = 'magic/order/newCreateOrder';
                     }
                     $res = $this->httpRequest($siteType, $url, $postData, 'POST');
+                    var_dump(12345);
                     var_dump($res);
                     exit;
                     $increment_id = $res['increment_id'];
