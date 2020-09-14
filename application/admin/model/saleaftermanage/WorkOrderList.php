@@ -306,6 +306,8 @@ class WorkOrderList extends Model
             } else {
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
+            var_dump($response);
+            exit;
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
