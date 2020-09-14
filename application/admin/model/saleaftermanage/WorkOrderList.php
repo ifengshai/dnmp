@@ -909,8 +909,8 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
         //判断是否已审核
         if ($work->check_time) return true;
-        Db::startTrans();
-        try {
+        // Db::startTrans();
+        // try {
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
@@ -1037,11 +1037,11 @@ class WorkOrderList extends Model
                 }
             }
 
-            Db::commit();
-        } catch (Exception $e) {
-            Db::rollback();
-            exception($e->getMessage());
-        }
+        //     Db::commit();
+        // } catch (Exception $e) {
+        //     Db::rollback();
+        //     exception($e->getMessage());
+        // }
     }
 
     /**
