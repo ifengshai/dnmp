@@ -1790,7 +1790,7 @@ class NewProduct extends Backend
             }
 
             foreach ($list as &$v) {
-                $purchase_detail = Db::name('purchase_order')->where(['purchase_name'=>$v['sku'],'purchase_id'=>$v['purchase_id']])->find();
+                $purchase_detail = Db::name('purchase_order')->where(['purchase_name'=>$v['sku']])->find();
                 if (!$purchase_detail){
                     unset($v);
                 }else{
