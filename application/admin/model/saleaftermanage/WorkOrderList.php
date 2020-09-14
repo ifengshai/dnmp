@@ -790,6 +790,8 @@ class WorkOrderList extends Model
                         $url = 'magic/order/newCreateOrder';
                     }
                     $res = $this->httpRequest($siteType, $url, $postData, 'POST');
+                    var_dump($res);
+                    exit;
                     $increment_id = $res['increment_id'];
                     //replacement_order添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
