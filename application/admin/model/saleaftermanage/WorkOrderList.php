@@ -780,7 +780,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
-                try {
+                // try {
                     if(24558 == $work_id){
                         file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
                     }
@@ -799,9 +799,9 @@ class WorkOrderList extends Model
     
                     //补发扣库存
                     $this->deductionStock($work_id, $measure_id);
-                } catch (Exception $e) {
-                    exception($e->getMessage());
-                }
+                // } catch (Exception $e) {
+                //     exception($e->getMessage());
+                // }
             }
         }
     }
