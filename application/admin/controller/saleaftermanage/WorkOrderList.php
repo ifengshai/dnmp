@@ -216,7 +216,9 @@ class WorkOrderList extends Backend
                 if($v['all_after_user_id'] !=0){
                     $all_after_user_arr = explode(',',$v['all_after_user_id']);
                     foreach($all_after_user_arr as $aa){
-                        $list[$k]['all_after_user_name'][] = $user_list[$aa]; 
+                        if($user_list[$aa] != NULL){
+                            $list[$k]['all_after_user_name'][] = $user_list[$aa];
+                        }
                     }
                     $list[$k]['all_after_user_arr'] = $all_after_user_arr;
                 }else{
