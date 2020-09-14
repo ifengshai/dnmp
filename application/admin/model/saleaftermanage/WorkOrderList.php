@@ -300,15 +300,12 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
-        //try {
-            // if ($method == 'GET') {
-            //     $response = $client->request('GET', $url, array('query' => $params));
-            // } else {
-            //     $response = $client->request('POST', $url, array('form_params' => $params));
-            // }
-            $response = $this->curl_post($url, array('query' => $params));
-            var_dump($response);
-            exit;
+        try {
+            if ($method == 'GET') {
+                $response = $client->request('GET', $url, array('query' => $params));
+            } else {
+                $response = $client->request('POST', $url, array('form_params' => $params));
+            }
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
@@ -321,9 +318,9 @@ class WorkOrderList extends Model
                 return $res['data'];
             }
             exception($res['msg'] . '   error_code:' . $res['status']);
-        // } catch (Exception $e) {
-        //     exception($e->getMessage());
-        // }
+        } catch (Exception $e) {
+            exception($e->getMessage());
+        }
     }
 
     /**
@@ -783,19 +780,14 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
-                // try {
-                    if(24558 == $work_id){
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
-                    }
+                try {
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/bufa_new.txt',json_encode($postData),FILE_APPEND);
                     if($isNewVersion == 0){
                         $url = 'magic/order/createOrder';
                     }elseif($isNewVersion == 1){
                         $url = 'magic/order/newCreateOrder';
                     }
                     $res = $this->httpRequest($siteType, $url, $postData, 'POST');
-                    var_dump(12345);
-                    var_dump($res);
-                    exit;
                     $increment_id = $res['increment_id'];
                     //replacement_order添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
@@ -803,9 +795,9 @@ class WorkOrderList extends Model
     
                     //补发扣库存
                     $this->deductionStock($work_id, $measure_id);
-                // } catch (Exception $e) {
-                //     exception($e->getMessage());
-                // }
+                } catch (Exception $e) {
+                    exception($e->getMessage());
+                }
             }
         }
     }
@@ -913,8 +905,8 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
         //判断是否已审核
         if ($work->check_time) return true;
-        // Db::startTrans();
-        // try {
+        Db::startTrans();
+        try {
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
@@ -1041,11 +1033,11 @@ class WorkOrderList extends Model
                 }
             }
 
-        //     Db::commit();
-        // } catch (Exception $e) {
-        //     Db::rollback();
-        //     exception($e->getMessage());
-        // }
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            exception($e->getMessage());
+        }
     }
 
     /**
@@ -1577,42 +1569,5 @@ class WorkOrderList extends Model
         }
 
         return $arr;
-    }
-    // $postdata 是传输的数据，数组格式
-    function curl_post( $url, $postdata ) {
-    
-        //初始化
-        $curl = curl_init();
-        //设置抓取的url
-        curl_setopt($curl, CURLOPT_URL, $url);
-        //设置头文件的信息作为数据流输出
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        //设置获取的信息以文件流的形式返回，而不是直接输出。
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        // 超时设置
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-    
-        // 超时设置，以毫秒为单位
-        // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
-    
-        // 设置请求头
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE );
-    
-        //设置post方式提交
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
-        //执行命令
-        $data = curl_exec($curl);
-        var_dump($data);
-        exit;
-        // 显示错误信息
-        if (curl_error($curl)) {
-            print "Error: " . curl_error($curl);
-        } else {
-            // 打印返回的内容
-            var_dump($data);
-            curl_close($curl);
-        }
     }
 }
