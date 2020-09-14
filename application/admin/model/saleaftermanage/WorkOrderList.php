@@ -781,7 +781,7 @@ class WorkOrderList extends Model
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/bufa_new.txt',json_encode($postData),FILE_APPEND);
+                    //file_put_contents('/www/wwwroot/mojing/runtime/log/bufa_new.txt',json_encode($postData),FILE_APPEND);
                     if($isNewVersion == 0){
                         $url = 'magic/order/createOrder';
                     }elseif($isNewVersion == 1){
