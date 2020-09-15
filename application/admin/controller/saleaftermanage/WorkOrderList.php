@@ -871,7 +871,6 @@ class WorkOrderList extends Backend
 
                         
                     }
-                    dump(111);exit;
                     //判断是否选择退款措施
                     if (!array_intersect([2,15], array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
@@ -1155,6 +1154,7 @@ class WorkOrderList extends Backend
                         $params['create_user_id'] = session('admin.id');
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = implode(',', $params['order_sku']);
+                        dump(333);exit;
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
