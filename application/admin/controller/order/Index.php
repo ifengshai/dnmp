@@ -9,6 +9,8 @@ use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
+use Util\ZeeloolEsPrescriptionDetailHelper;
+use Util\ZeeloolDePrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -36,6 +38,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->rufoo = new \app\admin\model\order\order\Rufoo;
+        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs;
+        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
@@ -82,6 +86,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $db = 'database.db_meeloog';
                     $model = $this->meeloog;
                     break;
+                case 9:
+                    $db = 'database.db_zeelool_es';
+                    $model = $this->zeelool_es;
+                    break;
+                case 10:
+                    $db = 'database.db_meeloog';
+                    $model = $this->zeelool_de;
+                    break;
                 default:
                     return false;
                     break;
@@ -100,31 +112,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            // //SKU搜索
-            // if ($filter['country_id']) {
-            //     $smap = [];
-            //     $smap['country_id'] = $filter['country_id'];
-            //     $smap['address_type'] = 'shipping';
-            //     $parent_id = Db::connect($db)
-            //     ->table('sales_flat_order_address')
-            //     ->where($smap)
-            //     ->column('parent_id');
-            //     $map['entity_id'] = ['in', $parent_id];
-            //     unset($filter['country_id']);
-            //     $this->request->get(['filter' => json_encode($filter)]);
-            // }
-
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $map['b.address_type'] = 'shipping';
-            $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
+            $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at')
-                ->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
+                ->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -184,6 +181,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $model = $this->weseeoptical;
         } elseif ($label == 5) {
             $model = $this->meeloog;
+        } elseif ($label == 9) {
+            $model = $this->zeelool_es;
+        } elseif ($label == 10) {
+            $model = $this->zeelool_de;
         }
 
         //查询订单详情
@@ -212,6 +213,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 5) {
             $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 9) {
+            $goods = ZeeloolEsPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 10) {
+            $goods = ZeeloolDePrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
 
         //获取支付信息
@@ -263,6 +268,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $model = $this->weseeoptical;
         } elseif ($label == 5) {
             $model = $this->meeloog;
+        } elseif ($label == 9) {
+            $model = $this->zeelool_es;
+        } elseif ($label == 10) {
+            $model = $this->zeelool_de;
         }
 
         //查询订单详情
@@ -643,6 +652,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             case 5:
                 $db = 'database.db_meeloog';
                 $model = $this->meeloog;
+                break;
+            case 9:
+                $db = 'database.db_zeelool_es';
+                $model = $this->zeelool_es;
+                break;
+            case 10:
+                $db = 'database.db_zeelool_de';
+                $model = $this->zeelool_de;
                 break;
             default:
                 return false;
@@ -1086,5 +1103,4 @@ EOF;
 
         $writer->save('php://output');
     }
-
 }

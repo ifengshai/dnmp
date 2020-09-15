@@ -9,10 +9,9 @@ use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Exception;
 use think\exception\PDOException;
-use Util\VooguemePrescriptionDetailHelper;
+use Util\ZeeloolDePrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-use app\admin\model\WorkChangeSkuLog;
 use app\admin\model\StockLog;
 
 /**
@@ -67,54 +66,6 @@ class ZeeloolDe extends Backend
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
 
-            //是否有工单
-            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-                $swhere = [];
-                $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['not in', [0,4,6]];
-                $order_arr = $workorder->where($swhere)->column('platform_order');
-                if ($filter['is_task'] == 1) {
-                    $map['increment_id'] = ['in', $order_arr];
-                } elseif ($filter['is_task'] == '0') {
-                    $map['increment_id'] = ['not in', $order_arr];
-                }
-                unset($filter['is_task']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-
-            //是否有协同任务
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-                $swhere = [];
-                $swhere['is_del'] = 1;
-                $swhere['order_platform'] = 2;
-                $swhere['synergy_order_id'] = 2;
-                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-                if ($filter['task_label'] == 1) {
-                    $map['increment_id'] = ['in', $order_arr];
-                } elseif ($filter['task_label'] == '0') {
-                    $map['increment_id'] = ['not in', $order_arr];
-                }
-                unset($filter['task_label']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-
-            //任务分类id搜索
-            if ($filter['category_id']) {
-                $swhere = [];
-                $swhere['problem_type_id'] = $filter['category_id'];
-                $swhere['work_type'] = $filter['p_id'];
-                $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['not in', [0, 4, 6]];
-                $order_arr = $workorder->where($swhere)->column('platform_order');
-                $map['increment_id'] = ['in', $order_arr];
-                unset($filter['category_id']);
-                unset($filter['p_id']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            
-
             //SKU搜索
             if ($filter['sku']) {
                 $smap['sku'] = ['like',  $filter['sku'] . '%'];
@@ -143,33 +94,7 @@ class ZeeloolDe extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            //查询订单是否存在工单
-            $swhere = [];
-            $increment_ids = array_column($list, 'increment_id');
-            $swhere['platform_order'] = ['in', $increment_ids];
-            $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['not in', [0,4,6]];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-
-
-            //查询是否存在协同任务
-            $swhere = [];
-            $swhere['synergy_order_number'] = ['in', $increment_ids];
-            $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 2;
-            $swhere['synergy_order_id'] = 2;
-            $synergy_order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
-
-            foreach ($list as $k => $v) {
-                if (in_array($v['increment_id'], $order_arr)) {
-                    $list[$k]['task_info'] = 1;
-                }
-
-                if (in_array($v['increment_id'], $synergy_order_arr)) {
-                    $list[$k]['is_task_info'] = 1;
-                }
-            }
-
+            
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -196,31 +121,6 @@ class ZeeloolDe extends Backend
                     ->field($field)
                     ->where($map)
                     ->find();
-
-                if ($list) {
-                    //查询订单是否存在协同任务
-                    $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-                    $swhere['platform_order'] = $increment_id;
-                    $swhere['work_platform'] = 2;
-                    $swhere['work_status'] = ['not in', [0,4,6]];
-                    $count = $workorder->where($swhere)->count();
-                    //查询是否存在协同任务
-                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-                    $swhere = [];
-                    $swhere['synergy_order_number'] = $increment_id;
-                    $swhere['is_del'] = 1;
-                    $swhere['order_platform'] = 2;
-                    $swhere['synergy_order_id'] = 2;
-                    $info_count = $infoSynergyTask->where($swhere)->count();
-                    if ($count > 0) {
-                        $list['task_info'] = 1;
-                    }
-
-                    if ($info_count > 0) {
-                        $list['is_task_info'] = 1;
-                    }
-                }
-
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
@@ -238,7 +138,7 @@ class ZeeloolDe extends Backend
             $this->error(__('No Results were found'));
         }
         //查询订单详情
-        $result = VooguemePrescriptionDetailHelper::get_one_by_entity_id($ids);
+        $result = ZeeloolDePrescriptionDetailHelper::get_one_by_entity_id($ids);
 
         $this->assign('result', $result);
         return $this->view->fetch();
@@ -306,7 +206,7 @@ class ZeeloolDe extends Backend
             $data['custom_print_label_new'] = 1;
             $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
             $data['custom_print_label_person_new'] =  session('admin.nickname');
-            $connect = Db::connect('database.db_voogueme')->table('sales_flat_order');
+            $connect = $this->model;
             $connect->startTrans();
             try {
                 $result = $connect->where($map)->update($data);
@@ -322,7 +222,7 @@ class ZeeloolDe extends Backend
                 $params['type'] = 1;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 2;
+                $params['site'] = 10;
                 (new OrderLog())->setOrderLog($params);
 
                 $map['entity_id'] = ['in', $entity_ids];
@@ -337,7 +237,7 @@ class ZeeloolDe extends Backend
                     $list[$k]['node_type'] = 2; //配镜架
                     $list[$k]['content'] = 'Order is under processing';
                     $list[$k]['create_time'] = date('Y-m-d H:i:s');
-                    $list[$k]['site'] = 2;
+                    $list[$k]['site'] = 10;
                     $list[$k]['order_id'] = $v['entity_id'];
                     $list[$k]['order_number'] = $v['increment_id'];
                     $list[$k]['handle_user_id'] = session('admin.id');
@@ -345,7 +245,7 @@ class ZeeloolDe extends Backend
 
                     $data['order_node'] = 1;
                     $data['node_type'] = 2;
-                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 10])->update($data);
                 }
                 if ($list) {
                     $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -407,7 +307,7 @@ class ZeeloolDe extends Backend
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
             'work_status' => ['in', [1, 2, 3, 5]],
-            'work_platform' => 2 //平台
+            'work_platform' => 10 //平台
         ])->count();
         if ($count > 0) {
             $this->error('存在未处理的工单');
@@ -469,7 +369,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 2, //平台类型
+                        'a.platform_type' => 10, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
@@ -478,15 +378,11 @@ class ZeeloolDe extends Backend
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
                         //sku转换
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 10);
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
-                        // //判断是否有实时库存
-                        // $realStock = $item->getRealStock($trueSku);
-                        // if ($v['qty'] > $realStock) {
-                        //     throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
-                        // }
+                     
                         //增加配货占用
                         $map = [];
                         $map['sku'] = $trueSku;
@@ -500,7 +396,7 @@ class ZeeloolDe extends Backend
                         //插入日志表
                         (new StockLog())->setData([
                             'type'                      => 2,
-                            'site'                      => 2,
+                            'site'                      => 10,
                             'two_type'                  => 1,
                             'sku'                       => $trueSku,
                             'order_number'              => $v['increment_id'],
@@ -520,7 +416,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 3,
-                        'a.platform_type' => 2,
+                        'a.platform_type' => 10,
                         'a.original_sku' => ['in', $skus],
                         'b.work_status' => ['in', [5, 6]]
                     ])
@@ -538,7 +434,7 @@ class ZeeloolDe extends Backend
                 foreach ($list as $k => &$v) {
 
                     //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 10);
                     if (!$trueSku) {
                         throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
@@ -561,12 +457,6 @@ class ZeeloolDe extends Backend
                         continue;
                     }
 
-                    // //判断是否有实时库存
-                    // $realStock = $item->getRealStock($trueSku);
-                    // if ($qty > $realStock) {
-                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
-                    // }
-
                     $map = [];
                     $map['sku'] = $trueSku;
                     $map['is_del'] = 1;
@@ -586,7 +476,7 @@ class ZeeloolDe extends Backend
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
-                        'site'                      => 2,
+                        'site'                      => 10,
                         'two_type'                  => 1,
                         'sku'                       => $trueSku,
                         'order_number'              => $v['increment_id'],
@@ -616,7 +506,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 2, //平台类型
+                        'a.platform_type' => 10, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
@@ -624,7 +514,7 @@ class ZeeloolDe extends Backend
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 10);
                         if (!$trueSku) {
                             throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
@@ -641,7 +531,7 @@ class ZeeloolDe extends Backend
                         //插入日志表
                         (new StockLog())->setData([
                             'type'                      => 2,
-                            'site'                      => 2,
+                            'site'                      => 10,
                             'two_type'                  => 2,
                             'sku'                       => $trueSku,
                             'order_number'              => $v['increment_id'],
@@ -663,7 +553,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 3,
-                        'a.platform_type' => 2,
+                        'a.platform_type' => 10,
                         'a.original_sku' => ['in', $skus],
                         'b.work_status' => ['in', [5, 6]]
                     ])
@@ -680,7 +570,7 @@ class ZeeloolDe extends Backend
                 foreach ($list as &$v) {
 
                     //查出订单SKU映射表对应的仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 10);
                     if (!$trueSku) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
@@ -719,7 +609,7 @@ class ZeeloolDe extends Backend
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
-                        'site'                      => 2,
+                        'site'                      => 10,
                         'two_type'                  => 2,
                         'sku'                       => $trueSku,
                         'order_number'              => $v['increment_id'],
@@ -759,7 +649,7 @@ class ZeeloolDe extends Backend
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
-                $list[$k]['site'] = 2;
+                $list[$k]['site'] = 10;
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
@@ -805,7 +695,7 @@ class ZeeloolDe extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 10])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -886,7 +776,7 @@ class ZeeloolDe extends Backend
 from catalog_product_entity_varchar cpev
 LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
 where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
-            $resultList = Db::connect('database.db_voogueme')->query($querySql);
+            $resultList = Db::connect('database.db_zeelool_de')->query($querySql);
             if ($resultList) {
                 $result = array();
                 foreach ($resultList as $key => $value) {
@@ -927,37 +817,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status'] && !$ids) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-        }
-
-        //是否有工单
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-            $swhere = [];
-            $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            if ($filter['is_task'] == 1) {
-                $map['increment_id'] = ['in', $order_arr];
-            } elseif ($filter['is_task'] == '0') {
-                $map['increment_id'] = ['not in', $order_arr];
-            }
-            unset($filter['is_task']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-
-        //是否有协同任务
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-            $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['<>', 0];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            if ($filter['task_label'] == 1) {
-                $map['increment_id'] = ['in', $order_arr];
-            } elseif ($filter['task_label'] == '0') {
-                $map['increment_id'] = ['not in', $order_arr];
-            }
-            unset($filter['task_label']);
-            $this->request->get(['filter' => json_encode($filter)]);
         }
 
         if ($ids) {
@@ -1090,7 +949,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         foreach ($finalResult as $key => $value) {
 
             //网站SKU转换仓库SKU
-            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 10);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
@@ -1268,318 +1127,19 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $writer->save('php://output');
     }
 
-    //批量导出xls
-    public function batch_export_xls_test()
-    {
-
-        /*************修改为筛选导出****************/
-        set_time_limit(0);
-        ini_set('memory_limit', '512M');
-
-        //查询临时表订单号
-        $str = Db::table('fa_zzzz_order_temp')->column('order_number');
-
-        $map['sfo.increment_id'] = ['in', $str];
-
-        list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
-        $resultList = $this->model->alias('sfo')
-            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
-            ->field($field)
-            ->where($map)
-            ->where($where)
-            ->order('sfoi.order_id desc')
-            ->select();
-
-        $resultList = collection($resultList)->toArray();
-
-        $resultList = $this->qty_order_check($resultList);
-
-        $finalResult = array();
-
-        foreach ($resultList as $key => $value) {
-            $finalResult[$key]['increment_id'] = $value['increment_id'];
-            $finalResult[$key]['sku'] = $value['sku'];
-            $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
-
-            $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
-            $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
-            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
-
-            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
-            if (isset($tmp_prescription_params)) {
-                $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                $tmp_lens_params = array();
-                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    // dump($value);
-                    $arr_value = explode("=", $tmp_value);
-                    if (isset($arr_value[1])) {
-                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                    }
-                }
-            }
-
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
-            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
-            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
-            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-
-            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
-            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
-            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
-            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-
-            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
-            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
-            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
-            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
-
-            //斜视值
-            if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
-                $finalResult[$key]['od_bd'] = $tmp_lens_params['od_bd'];
-                $finalResult[$key]['od_pv'] = $tmp_lens_params['od_pv'];
-                $finalResult[$key]['os_pv'] = $tmp_lens_params['os_pv'];
-                $finalResult[$key]['os_bd'] = $tmp_lens_params['os_bd'];
-
-                $finalResult[$key]['od_pv_r'] = $tmp_lens_params['od_pv_r'];
-                $finalResult[$key]['od_bd_r'] = $tmp_lens_params['od_bd_r'];
-                $finalResult[$key]['os_pv_r'] = $tmp_lens_params['os_pv_r'];
-                $finalResult[$key]['os_bd_r'] = $tmp_lens_params['os_bd_r'];
-            }
-
-            //用户留言
-            $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
-
-            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
-            $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
-            $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
-            $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
-        }
-    
-        $spreadsheet = new Spreadsheet();
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
-            ->setCellValue("B1", "订单号")
-            ->setCellValue("C1", "SKUID")
-            ->setCellValue("D1", "SKU");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "眼球")
-            ->setCellValue("F1", "SPH");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "CYL")
-            ->setCellValue("H1", "AXI");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "ADD")
-            ->setCellValue("J1", "单PD")
-            ->setCellValue("K1", "PD");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "镜片")
-            ->setCellValue("M1", "镜框宽度")
-            ->setCellValue("N1", "镜框高度")
-            ->setCellValue("O1", "bridge")
-            ->setCellValue("P1", "处方类型")
-            ->setCellValue("Q1", "顾客留言");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "Prism\n(out/in)")
-            ->setCellValue("S1", "Direct\n(out/in)")
-            ->setCellValue("T1", "Prism\n(up/down)")
-            ->setCellValue("U1", "Direct\n(up/down)");
-        // Rename worksheet
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
-
-        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-
-        //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
-
-        foreach ($finalResult as $key => $value) {
-
-            //网站SKU转换仓库SKU
-            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
-            $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
-
-            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
-            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
-            if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
-                $value['od_axis'] =  $value['od_axis'];
-            } else {
-                $value['od_axis'] = '';
-            }
-
-            if (isset($value['os_axis']) && $value['os_axis'] !== 'None') {
-                $value['os_axis'] =  $value['os_axis'];
-            } else {
-                $value['os_axis'] = '';
-            }
-
-            $value['od_add'] = isset($value['od_add']) ? urldecode($value['od_add']) : '';
-            $value['os_add'] = isset($value['os_add']) ? urldecode($value['os_add']) : '';
-
-            $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
-            $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
-            $value['pd_l'] = isset($value['pd_l']) ? $value['pd_l'] : '';
-            $value['pd'] = isset($value['pd']) ? $value['pd'] : '';
-
-            $value['prismcheck'] = isset($value['prismcheck']) ? $value['prismcheck'] : '';
-
-
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
-
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
-
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
-
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
-
-            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
-                // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
-            } else {
-                //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
-            }
-
-            if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd_r']);
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 3), $value['pd_l']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
-                $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
-            }
-
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['index_type']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['prescription_type']);
-
-            if (isset($value['information'])) {
-                $value['information'] = urldecode($value['information']);
-                $value['information'] = urldecode($value['information']);
-                $value['information'] = urldecode($value['information']);
-
-                $value['information'] = str_replace('+', ' ', $value['information']);
-                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['information']);
-                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
-            }
-
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
-
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
-
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
-
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
-
-            //合并单元格
-            $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("D" . ($key * 2 + 2) . ":D" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
-
-            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
-        }
-
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(32);
-        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(12);
-
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(18);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
-
-        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
-
-
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-
-        //自动换行
-        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
-
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
-        ];
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $spreadsheet->setActiveSheetIndex(0);
-        // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
-        $savename = '订单打印处方' . date("YmdHis", time());;
-        // dump($spreadsheet);
-
-        // if (!$spreadsheet) return false;
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-        $writer->save('php://output');
-    }
 
     //批量打印标签
     public function batch_print_label()
     {
         ob_start();
-        // echo 'batch_print_label';
         $entity_ids = rtrim(input('id_params'), ',');
-        // dump($entity_ids);
         if ($entity_ids) {
             $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by NUM asc;";
-            $processing_order_list = Db::connect('database.db_voogueme')->query($processing_order_querySql);
-            // dump($processing_order_list);
+            $processing_order_list = Db::connect('database.db_zeelool_de')->query($processing_order_querySql);
             $processing_order_list = $this->qty_order_check($processing_order_list);
 
             $file_header = <<<EOF
@@ -1601,7 +1161,7 @@ EOF;
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->cache(3600)->column('sku', 'platform_sku');
+            $item_res = $item->where(['platform_type' => 9])->cache(3600)->column('sku', 'platform_sku');
 
             $file_content = '';
             $temp_increment_id = 0;
@@ -1610,19 +1170,18 @@ EOF;
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_de" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_de" . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/voogueme/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/zeelool_de/$date/$temp_increment_id.png";
                     //生成条形码
                     $this->generate_barcode($temp_increment_id, $fileName);
-                    // echo '<br>需要打印'.$temp_increment_id;
                     $file_content .= "<div  class = 'single_box'>
                 <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
                 <tr><td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . str_replace(" ", "<br>", $processing_value['created_at']) . "</td>
@@ -1632,9 +1191,7 @@ EOF;
 
                 $final_print = array();
                 $product_options = unserialize($processing_value['product_options']);
-                // dump($product_options);
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
-                // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
@@ -1642,15 +1199,11 @@ EOF;
                     $prescription_params = explode("&", $prescription_params);
                     $lens_params = array();
                     foreach ($prescription_params as $key => $value) {
-                        // dump($value);
                         $arr_value = explode("=", $value);
                         $lens_params[$arr_value[0]] = $arr_value[1];
                     }
-                    // dump($lens_params);
                     $final_print = array_merge($lens_params, $final_print);
                 }
-
-                // dump($final_print);
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
@@ -1693,9 +1246,6 @@ EOF;
                     $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
                     $os_pd = "";
                 }
-
-                // dump($os_add);
-                // dump($od_add);
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {

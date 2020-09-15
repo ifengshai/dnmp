@@ -36,7 +36,7 @@ class ZeeloolDe extends Model
     public function getOrderId($map)
     {
         if ($map) {
-            $result = Db::connect('database.db_voogueme')
+            $result = Db::connect('database.db_zeelool_de')
                 ->table('sales_flat_order_item')
                 ->alias('a')
                 ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
