@@ -48,17 +48,18 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs">
-            <li class="active"><a href="{:url('/admin/order/printlabel/zeelool/index')}">Zeelool</a></li>
-            <li><a href="{:url('/admin/order/printlabel/voogueme/index')}">Voogueme</a></li>
-            <li><a href="{:url('/admin/order/printlabel/nihao/index')}">Nihao</a></li>
-            <li><a href="{:url('/admin/order/printlabel/weseeoptical/index')}">Weseeoptical</a></li>
-            <li><a href="{:url('/admin/order/printlabel/meeloog/index')}">Meeloog</a></li>
-            <li><a href="{:url('/admin/order/printlabel/rufoo/index')}">Rufoo</a></li>
-            <li><a href="{:url('/admin/order/printlabel/zeelool_es/index')}">ZeeloolEs</a></li>
-            <li><a href="{:url('/admin/order/printlabel/zeelool_de/index')}">ZeeloolDe</a></li>
+            <ul class="nav nav-tabs">
+                <li><a href="{:url('/admin/order/printlabel/zeelool/index')}">Zeelool</a></li>
+                <li><a href="{:url('/admin/order/printlabel/voogueme/index')}">Voogueme</a></li>
+                <li><a href="{:url('/admin/order/printlabel/nihao/index')}">Nihao</a></li>
+                <li><a href="{:url('/admin/order/printlabel/weseeoptical/index')}">Weseeoptical</a></li>
+                <li><a href="{:url('/admin/order/printlabel/meeloog/index')}">Meeloog</a></li>
+                <li><a href="{:url('/admin/order/printlabel/rufoo/index')}">Rufoo</a></li>
+                <li class="active"><a href="{:url('/admin/order/printlabel/zeelool_es/index')}">ZeeloolEs</a></li>
+                <li><a href="{:url('/admin/order/printlabel/zeelool_de/index')}">ZeeloolDe</a></li>
+            </ul>
         </ul>
     </div>
-
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
@@ -69,35 +70,35 @@
 
 
                         <a href="javascript:;"
-                            class="btn btn-danger btn-batch-export-xls  {:$auth->check('order/printlabel/zeelool/batch_export_xls')?'':'hide'}"
+                            class="btn btn-danger btn-batch-export-xls  {:$auth->check('order/printlabel/voogueme/batch_export_xls')?'':'hide'}"
                             title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                         <a href="javascript:;"
-                            class="btn btn-success btn-batch-printed btn-disabled disabled {:$auth->check('order/printlabel/zeelool/batch_print_label')?'':'hide'}"
+                            class="btn btn-success btn-batch-printed btn-disabled disabled {:$auth->check('order/printlabel/voogueme/batch_print_label')?'':'hide'}"
                             title="{:__('打印标签')}"> {:__('批量打印')}</a>
 
                         <a href="javascript:;"
-                            class="btn btn-success btn-tag-printed btn-disabled disabled {:$auth->check('order/printlabel/zeelool/tag_printed')?'':'hide'}"
+                            class="btn btn-success btn-tag-printed btn-disabled disabled {:$auth->check('order/printlabel/voogueme/tag_printed')?'':'hide'}"
                             title="{:__('标记(已打印)')}"> {:__('标记状态(已打印)')}</a>
 
                         <a href="javascript:;" data-status="1"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜架')}"> {:__('配镜架')}</a>
 
                         <a href="javascript:;" data-status="2"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜片')}"> {:__('配镜片')}</a>
 
                         <a href="javascript:;" data-status="3"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
                             title="{:__('加工')}"> {:__('加工')}</a>
 
                         <a href="javascript:;" data-status="4"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
                             title="{:__('质检通过')}"> {:__('质检通过')}</a>
-                        
+
                         <!-- <a href="javascript:;"
-                            class="btn btn-danger btn-set-status btn-disabled disabled {:$auth->check('sales_flat_order/tag_printed')?'':'hide'}"
-                            title="{:__('质检返工')}"> {:__('质检返工')}</a> -->
+                           class="btn btn-danger btn-set-status btn-disabled disabled {:$auth->check('sales_flat_order/tag_printed')?'':'hide'}"
+                           title="{:__('质检返工')}"> {:__('质检返工')}</a> -->
 
 
                     </div>
