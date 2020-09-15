@@ -756,9 +756,8 @@ class WorkOrderList extends Backend
          $workOrderConfigValue = $this->workOrderConfigValue;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            $change_lens = $this->request->post("row.change_lens/a");
             // dump($_POST);
-            dump($change_lens);
+            dump($params);
             die;
 
             if ($params) {
