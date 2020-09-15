@@ -1716,7 +1716,7 @@ class NewProduct extends Backend
                 unset($map['website_type']);
             }
 
-            //sku 
+            //sku
             if ($filter['sku']) {
                 $map['a.sku'] = $filter['sku'];
                 $map['d.purchase_name'] = ['like',$filter['sku']];
@@ -1745,7 +1745,7 @@ class NewProduct extends Backend
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
                 // ->where('d.purchase_name', 'like','a.sku')
                 ->where('is_show', 0)
@@ -1758,7 +1758,7 @@ class NewProduct extends Backend
                 ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,c.distribute_num')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id', 'left')
+                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
                 // ->where('d.purchase_name', 'like','a.sku')
                 ->where('is_show', 0)
@@ -1790,7 +1790,7 @@ class NewProduct extends Backend
             }
 
             foreach ($list as &$v) {
-                $purchase_detail = Db::name('purchase_order')->where('purchase_name',$v['sku'])->find();
+                $purchase_detail = Db::name('purchase_order')->where(['purchase_name'=>$v['sku']])->find();
                 if (!$purchase_detail){
                     unset($v);
                 }else{

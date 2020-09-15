@@ -108,9 +108,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     all_user_name += '<div class="step_recept">';
                                     for (i = 0, len = rows.all_after_user_name.length; i < 3; i++) {
                                         if((i == rows.all_after_user_name.length-1) || i == 2){
-                                            all_user_name += '<b class="recept">' + rows.all_after_user_name[i] + '</b>';
+                                            if(rows.all_after_user_name[i]) {
+                                                all_user_name += '<b class="recept">' + rows.all_after_user_name[i] + '</b>';
+                                            }
                                         }else{
-                                            all_user_name += '<b class="recept">' + rows.all_after_user_name[i] + ',</b>';
+                                            if(rows.all_after_user_name[i]){
+                                                all_user_name += '<b class="recept">' + rows.all_after_user_name[i] + ',</b>';
+                                            }
                                         }
                                     }
                                     if(rows.all_after_user_name.length>3){
