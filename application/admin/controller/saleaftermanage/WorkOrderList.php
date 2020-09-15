@@ -1153,7 +1153,6 @@ class WorkOrderList extends Backend
                         $params['create_user_name'] = session('admin.nickname');
                         $params['create_user_id'] = session('admin.id');
                         $params['create_time'] = date('Y-m-d H:i:s');
-                        dump($params['order_sku']);exit;
                         $params['order_sku'] = implode(',', $params['order_sku']);
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
