@@ -426,7 +426,6 @@ class WorkOrderList extends Model
                 //循环插入数据
                 $changeSkuIds = [];
                 $changeSkuData = [];
-                dump($changeLens['recipe_type']);exit;
                 foreach ($original_skus as $key => $val) {
                     if (!$val) {
                         exception('sku不能为空');
