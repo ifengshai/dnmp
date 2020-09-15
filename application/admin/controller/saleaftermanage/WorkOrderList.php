@@ -1132,7 +1132,9 @@ class WorkOrderList extends Backend
                     }
                     //判断审核人 end
                     //提交时间
-                    dump($params['work_status']);exit;
+                    if(!$params['work_status']){
+                        $params['work_status'] = 2;
+                    }
                     if ($params['work_status'] == 2) {
                         $params['submit_time'] = date('Y-m-d H:i:s');
                     }
