@@ -756,10 +756,6 @@ class WorkOrderList extends Backend
          $workOrderConfigValue = $this->workOrderConfigValue;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            // dump($_POST);
-            dump($params);
-            die;
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
