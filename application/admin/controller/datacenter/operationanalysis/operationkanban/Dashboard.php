@@ -434,18 +434,24 @@ class Dashboard extends Backend
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
         $app['store_id']   = 5;
+        $android['store_id']   = 6;
         //zeelool中pc销售额
         $zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //zeelool中wap销售额
         $zeelool_wap_sales_money 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
-        //zeelool中app销售额
+        //zeelool中IOS销售额
         $zeelool_app_sales_money 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool中Android销售额
+        $zeelool_android_sales_money 	= $zeelool_model->table('sales_flat_order')->where($android)->where($status)->where($map)->sum('base_grand_total');
+
         //zeelool中pc支付成功数
         $zeelool_pc_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
         //zeelool中wap支付成功数
         $zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
-        //zeelool中pc支付成功数
+        //zeelool中IOS支付成功数
         $zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->count('*');
+        //zeelool中Android支付成功数
+        $zeelool_android_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($android)->where($status)->where($map)->count('*');
 		
 		if($zeelool_pc_sales_num>0){
 			//zeelool pc端客单价
@@ -459,12 +465,18 @@ class Dashboard extends Backend
 		}else{
 			$zeelool_wap_unit_price     = 0;
 		}
-		//zeelool app端客单价
+		//zeelool IOS端客单价
 		if($zeelool_app_sales_num>0){
 			$zeelool_app_unit_price 	= round(($zeelool_app_sales_money/$zeelool_app_sales_num), 2);
 		}else{
 			$zeelool_app_unit_price		= 0;
 		}
+        //zeelool Android端客单价
+        if($zeelool_android_sales_num>0){
+            $zeelool_android_unit_price 	= round(($zeelool_android_sales_money/$zeelool_android_sales_num), 2);
+        }else{
+            $zeelool_android_unit_price		= 0;
+        }
         //voogueme中pc销售额
         $voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //voogueme中wap销售额
@@ -533,12 +545,15 @@ class Dashboard extends Backend
             'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money ?:0,
             'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money ?:0,
             'zeelool_app_sales_money' 	=> $zeelool_app_sales_money ?:0,
+            'zeelool_android_sales_money' 	=> $zeelool_android_sales_money ?:0,
             'zeelool_pc_sales_num' 		=> $zeelool_pc_sales_num ?:0,
             'zeelool_wap_sales_num'		=> $zeelool_wap_sales_num ?:0,
             'zeelool_app_sales_num' 	=> $zeelool_app_sales_num ?:0,
+            'zeelool_android_sales_num' 	=> $zeelool_android_sales_num ?:0,
             'zeelool_pc_unit_price' 	=> $zeelool_pc_unit_price ?:0,
             'zeelool_wap_unit_price' 	=> $zeelool_wap_unit_price ?:0,
             'zeelool_app_unit_price' 	=> $zeelool_app_unit_price ?:0,
+            'zeelool_android_unit_price' 	=> $zeelool_android_unit_price ?:0,
             'voogueme_pc_sales_money' 	=> $voogueme_pc_sales_money ?:0,
             'voogueme_wap_sales_money' 	=> $voogueme_wap_sales_money ?:0,
             'voogueme_pc_sales_num' 	=> $voogueme_pc_sales_num ?:0,

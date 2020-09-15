@@ -310,6 +310,8 @@ class OrderReturn extends Backend
             $customer_phone = trim($request->post('customer_phone'));
             //获取运单号
             $track_number   = trim($request->post('track_number'));
+            //获取交易号
+            $transaction_id   = trim($request->post('transaction_id'));
             if ($order_platform < 1) {
                 
                 return json(['code' => 0,'msg' => '请选择正确的订单平台']);
@@ -318,7 +320,7 @@ class OrderReturn extends Backend
                 $customer_name = explode(' ', $customer_name);
             }
             //求出用户的所有订单信息
-            $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
+            $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $transaction_id, $customer_email);
             if (!$customer) {
                 return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
                 // $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
@@ -497,6 +499,10 @@ class OrderReturn extends Backend
             if ($track_number) {
                 $this->view->assign('track_number', $track_number);
             }
+            //如果查询交易号
+            if ($transaction_id) {
+                $this->view->assign('transaction_id', $transaction_id);
+            }
             //上传订单平台
             $this->view->assign('order_platform', $order_platform);
             $this->view->engine->layout(false);
@@ -673,6 +679,26 @@ class OrderReturn extends Backend
             $this->error('404 not found');
         }
     }
+
+    /***
+     * 异步查询模糊交易号
+     * @param Request $request
+     */
+    public function ajaxGetLikeTransaction(Request $request)
+    {
+        if ($this->request->isAjax()) {
+            $orderType = $request->post('orderType');
+            $transaction_id = $request->post('transaction_id');
+            $result = (new SaleAfterTask())->getLikeTransaction($orderType, $transaction_id);
+            if (!$result) {
+                $this->error('交易号不存在，请重新尝试');
+            }
+            $this->success('', '', $result, 0);
+        } else {
+            $this->error('404 not found');
+        }
+    }
+
     /***
      * 改变退货订单状态,从新建变成收到退货
      */
