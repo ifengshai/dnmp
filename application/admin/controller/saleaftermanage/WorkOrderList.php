@@ -871,6 +871,7 @@ class WorkOrderList extends Backend
 
                         
                     }
+                    dump(111);exit;
                     //判断是否选择退款措施
                     if (!array_intersect([2,15], array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
