@@ -756,10 +756,10 @@ class WorkOrderList extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                /*$params = $this->preExcludeFields($params);
+                $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
-                }*/
+                }
                 $result = false;
                 Db::startTrans();
                 try {
