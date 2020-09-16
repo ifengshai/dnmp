@@ -400,6 +400,8 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <!--站点类型-->
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
+    <input type='hidden' name="row[work_status]" class="status" value="1">
+    <input type="hidden" name="row[payment_time]" id="payment_time" value="{$row.payment_time}" />
     <!--工单类型，1 客服工单，2 仓库工单-->
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <input type="hidden" name="row[order_type]" id='order_type' value="{$row.order_type}" />
@@ -704,7 +706,7 @@
     <div class="form-group-child3 measure step10" style="display:none;">
         <label class="control-label col-xs-12 col-sm-2">{:__('客户邮箱')}：</label>
         <div class="col-xs-12 col-sm-8">
-            <input class="form-control" id="customer_email" name="row[email]" type="text" value="">
+            <input class="form-control" id="customer_email" name="row[email]" type="text" value="{$row.email}">
         </div>
     </div>
     <div class="form-group-child3 measure step10" style="display:none;">
@@ -1021,7 +1023,6 @@
     <!--修改地址 end-->
     </div>
 
-    <input type='hidden' name="row[work_status]" class="status" value="1">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">

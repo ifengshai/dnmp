@@ -64,7 +64,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type',
                             title: __('补货需求单类型'),
                             custom: {1: 'green', 2: 'danger'},
-                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            searchList: {1: '月度计划', 2: '周度计划'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -206,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type',
                             title: __('补货需求单类型'),
                             custom: {1: 'blue', 2: 'danger'},
-                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            searchList: {1: '月度计划', 2: '周度计划'},
                             formatter: Table.api.formatter.status
                         }, {
                         field: 'status',
@@ -542,6 +542,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {
+                            field: 'new_old',
+                            title: __('新品/老品'),
+                            custom: {1: 'green', 2: 'orange'},
+                            searchList: {1: '新品', 2: '老品'},
+                            formatter: Table.api.formatter.status
+                        },
+
                         {field: 'num', title: __('总需求数量'), operate: false},
                         {field: 'supplier_name', title: __('供应商'), operate: 'LIKE'},
                         {field: 'distribute_num', title: __('分配数量'), operate: false},

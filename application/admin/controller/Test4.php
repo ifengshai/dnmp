@@ -1124,4 +1124,34 @@ class Test4 extends Backend
         }
         db('it_web_demand')->insertAll($data);
     }
+    /*
+     * 同步工单支付时间
+     * */
+    public function work_list_time(){
+        $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $list = $this->model->field('id,work_platform,platform_order')->where('payment_time','0000-00-00 00:00:00')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k=>$value){
+            $info = $this->model->getSkuList($value['work_platform'], $value['platform_order']);
+            $payment_time = $info['payment_time'];
+            $this->model->where('id',$value['id'])->update(['payment_time'=>$payment_time]);
+            echo $value['id'].' is ok'."\n";
+        }
+
+
+    }
+    /*
+     * 同步借出数量
+     * */
+    public function lendlog_info(){
+        $list = Db::name('purchase_sample_lendlog_item')->select();
+        foreach ($list as $k=>$v){
+            $lendinfo = Db::name('purchase_sample_lendlog')->where('id',$v['log_id'])->find();
+            $data['status'] = $lendinfo['status'];
+            $data['create_user'] = $lendinfo['create_user'];
+            $data['createtime'] = $lendinfo['createtime'];
+            Db::name('purchase_sample_lendlog_item')->where('id',$v['id'])->update($data);
+            echo $v['id']."\n";
+        }
+    }
 }

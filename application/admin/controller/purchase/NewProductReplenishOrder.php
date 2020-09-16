@@ -385,6 +385,7 @@ class NewProductReplenishOrder extends Backend
     {
 
         $this->assignConfig('id', $ids);
+        $item = new Item();
         $replenish_id = input('replenish_id');
         if (!$ids) {
             $id = $replenish_id;
@@ -398,8 +399,20 @@ class NewProductReplenishOrder extends Backend
         //        }
         //        $map['replenish_id'] = ['in', $order_ids];
         $map['replenish_id'] = ['=', $id];
+        $filter = json_decode($this->request->get('filter'), true);
+
+        //如果筛选条件有sku的话 查询这个补货需求单中有这个sku的单子
+        if ($filter['new_old']) {
+            $skus = $this->list->where('replenish_id',$id)->group('sku')->column('sku');
+
+            $item_skus = $item->where('sku', 'in', $skus)->where('is_new',$filter['new_old'])->group('sku')->column('sku');
+
+            $map['sku'] = ['in', $item_skus];
+            unset($filter['new_old']);
+        }
         //设置过滤方法
-        $this->request->filter(['strip_tags']);
+        $this->request->get(['filter' => json_encode($filter)]);
+        // $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
@@ -421,7 +434,9 @@ class NewProductReplenishOrder extends Backend
 
             $list = collection($list)->toArray();
 
+
             foreach ($list as $k => $v) {
+                $list[$k]['new_old'] =$item->where('sku',$list[$k]['sku'])->value('is_new');
                 $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 $list[$k]['num'] = $new_product_replenish_order;
             }

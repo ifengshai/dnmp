@@ -205,8 +205,7 @@ class Meeloog extends Model
     public function index_cost($rate, $start_time, $end_time)
     {
         //google金额
-        // $google_money   = $this->goole_cost($start_time, $end_time);
-        $google_money   = 0;
+        $google_money   = $this->goole_cost($start_time, $end_time);
         //facebook金额
         $facebook_money = $this->facebook_cost($start_time, $end_time);
         

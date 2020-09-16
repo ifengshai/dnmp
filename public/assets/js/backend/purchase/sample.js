@@ -385,8 +385,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {checkbox: true},
                         {field: 'id', title: __('借出ID'),operate:false},
                         {field: 'status', title: __('状态'),searchList: {"1": __('待审核'), "2": __('已借出'), "3": __('已拒绝'), "4": __('已归还'), "5": __('已取消')}},
-                        {field: 'sku', title: __('SKU'),visible:false,operate:'LIKE'},
+                        {field: 'sku', title: __('SKU'),operate:'LIKE'},
+                        {field: 'lend_num', title: __('借出数量')},
                         {field: 'create_user', title: __('申请人')},
+                        {field: 'location', title: __('库位'),operate:false},
                         {field: 'createtime', title: __('申请时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'buttons',
@@ -396,18 +398,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
-                                {
-                                    name: 'detail',
-                                    text: __('详情'),
-                                    title: __('详情'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'purchase/sample/sample_lendlog_detail',
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        return true;
-                                    }
-                                },
                                 {
                                     name: 'edit',
                                     text: __('编辑'),
@@ -563,16 +553,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         sample_lendlog_edit: function () {
             Controller.api.bindevent();
             $("body").on('change', ".sku_arr", function () {
-                $(this).parents('tr').find(".location").html($(this).find("option:selected").attr('data-id'))
-            });
-            $(document).on('click', "#add_entry_product", function () {
-                var number = $("#product_data > tr").length;
-                var sku_arr = $("#sku_info").html();
-                console.log(sku_arr);
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
-                $('#product_data').append(add_str);
-
-                Controller.api.bindevent();
+                $(".location").html($(this).find("option:selected").attr('data-id'))
             });
         },
         sample_workorder_detail: function () {
