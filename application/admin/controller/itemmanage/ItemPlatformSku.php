@@ -593,7 +593,7 @@ class ItemPlatformSku extends Backend
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
-
+           
             //审核通过把SKU同步到有映射关系的平台
             $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
