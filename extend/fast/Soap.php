@@ -89,6 +89,12 @@ class Soap
             case 5:
                 $url = config('url.api_wesee_url');
                 break;
+            case 9:
+                $url = config('url.api_zeelool_es_url');
+                break;
+            case 10:
+                $url = config('url.api_zeelool_de_url');
+                break;
             default:
                 return false;
                 break;
@@ -112,6 +118,4 @@ class Soap
             return false;
         }
     }
-
-   
 }
