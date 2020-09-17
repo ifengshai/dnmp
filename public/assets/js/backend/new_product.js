@@ -879,6 +879,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             field: 'a_sku_num', title: __('amazon'), operate: false
                         },
                         {
+                            field: 'z_es_sku_num', title: __('zeelool_es'), operate: false
+                        },
+                        {
+                            field: 'z_de_sku_num', title: __('zeelool_de'), operate: false
+                        },
+                        {
                             field: 'replenish_num', title: __('补货需求数量'), operate: false
                         }
 
