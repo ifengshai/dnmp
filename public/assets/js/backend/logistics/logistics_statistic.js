@@ -158,6 +158,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     str+='<th style="text-align: center; vertical-align: middle;">妥投订单数</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">总妥投率</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">7天妥投率</th>';
+                    str+='<th style="text-align: center; vertical-align: middle;">10天妥投率</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">14天妥投率</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">20天妥投率</th>';
                     str+='<th style="text-align: center; vertical-align: middle;">20天以上妥投率</th>';
@@ -171,6 +172,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].deliverd_order_num+'</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].total_deliverd_rate+'%</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].serven_deliverd_rate+'%</td>'+
+                        '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].ten_deliverd_rate+'%</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].fourteen_deliverd_rate+'%</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].twenty_deliverd_rate+'%</td>'+
                         '<td style="text-align: center; vertical-align: middle;">'+ret.data[i].gtTwenty_deliverd_rate+'%</td>'+

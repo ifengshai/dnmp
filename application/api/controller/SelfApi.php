@@ -367,7 +367,7 @@ class SelfApi extends Api
             ->where('site', $site)
             ->order('create_time desc')
             ->select();
-        $order_data['order_data'] = array_merge($order_node1, $order_node2);
+        $order_data['order_data'] = array_merge($order_node2, $order_node1);
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
@@ -383,7 +383,7 @@ class SelfApi extends Api
                     ->where('site', $site)
                     ->order('create_time desc')
                     ->select();
-                $order_data['other_order_data'][$val] = array_merge($other_order_node1, $other_order_node2);
+                $order_data['other_order_data'][$val] = array_merge($other_order_node2, $other_order_node1);
             }
         }
         $this->success('成功', $order_data, 200);
@@ -574,7 +574,7 @@ class SelfApi extends Api
     public function order_pay_ding()
     {
         //校验参数
-        $work_order_id = $this->request->request('work_order_id');//魔晶工单id
+        $work_order_id = $this->request->request('work_order_id'); //魔晶工单id
         if (!$work_order_id) {
             $this->error(__('缺少工单号参数'), [], 400);
         }
@@ -590,21 +590,21 @@ class SelfApi extends Api
                 $workorder->where('id', $list['id'])->update(['work_status' => 6]);
             }
             $date = date('Y-m-d H:i:s');
-            Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->update(['operation_type' => 1,'operation_time'=>$date]);
-            $measure_id = Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>8])->value('id');
+            Db::name('work_order_measure')->where(['work_id' => $list['id'], 'measure_choose_id' => 8])->update(['operation_type' => 1, 'operation_time' => $date]);
+            $measure_id = Db::name('work_order_measure')->where(['work_id' => $list['id'], 'measure_choose_id' => 8])->value('id');
             //判断该工单中是否有其他措施，判断其他措施的状态去改主工单的状态
-            $status_arr = Db::name('work_order_measure')->where(['work_id'=>$list['id'],'measure_choose_id'=>['neq',8]])->column('operation_type');
-            if(!$status_arr){
+            $status_arr = Db::name('work_order_measure')->where(['work_id' => $list['id'], 'measure_choose_id' => ['neq', 8]])->column('operation_type');
+            if (!$status_arr) {
                 $data['work_status'] = 6;
                 $data['complete_time'] = date('Y-m-d H:i:s');
-            }elseif(in_array(2,$status_arr) || in_array(0,$status_arr)){
+            } elseif (in_array(2, $status_arr) || in_array(0, $status_arr)) {
                 $data['work_status'] = 5;
-            }else{
+            } else {
                 $data['work_status'] = 6;
                 $data['complete_time'] = date('Y-m-d H:i:s');
             }
             $workorder->where('id', $list['id'])->update($data);
-            Db::name('work_order_recept')->where(['work_id'=>$list['id'],'measure_id'=>$measure_id])->update(['recept_status' => 1,'finish_time'=>$date,'note'=>'补差价支付成功']);
+            Db::name('work_order_recept')->where(['work_id' => $list['id'], 'measure_id' => $measure_id])->update(['recept_status' => 1, 'finish_time' => $date, 'note' => '补差价支付成功']);
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }
@@ -800,7 +800,7 @@ class SelfApi extends Api
                 if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
                     //如果开启预售并且库存小于0
-                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                } elseif ($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
@@ -850,7 +850,7 @@ class SelfApi extends Api
                 if ($v['stock'] >= 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['stock'] + $v['presell_residue_num'];
                     //如果开启预售并且库存小于0
-                } elseif($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
+                } elseif ($v['stock'] < 0 && $v['presell_status'] == 1 && strtotime($v['presell_create_time']) <= time() && strtotime($v['presell_end_time']) >= time()) {
                     $list[$k]['stock'] = $v['presell_residue_num'];
                 } else {
                     $list[$k]['stock'] = $v['stock'];
@@ -905,7 +905,7 @@ class SelfApi extends Api
             if (!$order_data) {
                 $this->error(__('缺少数据参数'), [], 400);
             }
-            
+
             foreach ($order_data as $k => $v) {
                 $true_sku = $v['sku'];
                 $qty = $v['qty'];
