@@ -387,6 +387,38 @@ class SaleAfterTask extends Model
         return $arr;
     }
 
+    /***
+     * 模糊查询交易号
+     * @param $order_platform
+     * @param $transaction_id
+     */
+    public function getLikeTransaction($order_platform, $transaction_id)
+    {
+        switch ($order_platform) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $result = Db::connect($db)->table('sales_flat_order_payment')->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
+        if (!$result) {
+            return false;
+        }
+        $arr = [];
+        foreach ($result as $k => $v) {
+            $arr[] = $v['last_trans_id'];
+        }
+        return $arr;
+    }
+
     /****
      * @param $order_platform  订单平台
      * @param string $increment_id  订单号
@@ -562,10 +594,11 @@ class SaleAfterTask extends Model
      * @param array $customer_name  用户名
      * @param string $customer_phone 用户电话
      * @param string $track_number  运单号
+     * @param string $transaction_id  交易号
      * @param $email
      * @return false|\PDOStatement|string|\think\Collection
      */
-    public function getCustomerEmail($order_platform, $increment_id = '', $customer_name = [], $customer_phone = '', $track_number = '', $email)
+    public function getCustomerEmail($order_platform, $increment_id = '', $customer_name = [], $customer_phone = '', $track_number = '', $transaction_id = '', $email)
     {
         switch ($order_platform) {
             case 1:
@@ -609,6 +642,12 @@ class SaleAfterTask extends Model
         if ($track_number) {
             $customer_email = Db::connect($db)->table('sales_flat_shipment_track s')->join('sales_flat_order o ', ' s.order_id = o.entity_id', 'left')
                 ->where('s.track_number', $track_number)->value('o.customer_email');
+        }
+
+        //根据交易号搜索
+        if ($transaction_id) {
+            $customer_email = Db::connect($db)->table('sales_flat_order_payment p')->join('sales_flat_order o ', ' p.parent_id = o.entity_id', 'left')
+                ->where('p.last_trans_id', $transaction_id)->value('o.customer_email');
         }
 
         //根据用户邮箱求出用户的所有订单

@@ -211,12 +211,13 @@ class WorkOrderList extends Backend
                 //取经手人
                 if ($v['after_user_id'] != 0) {
                     $list[$k]['after_user_name'] = $user_list[$v['after_user_id']];
-                }
-                //指定经手人
+                }                //指定经手人
                 if($v['all_after_user_id'] !=0){
                     $all_after_user_arr = explode(',',$v['all_after_user_id']);
                     foreach($all_after_user_arr as $aa){
-                        $list[$k]['all_after_user_name'][] = $user_list[$aa]; 
+                        if($user_list[$aa] != NULL){
+                            $list[$k]['all_after_user_name'][] = $user_list[$aa];
+                        }
                     }
                     $list[$k]['all_after_user_arr'] = $all_after_user_arr;
                 }else{
@@ -1151,7 +1152,7 @@ class WorkOrderList extends Backend
                         $params['create_user_name'] = session('admin.nickname');
                         $params['create_user_id'] = session('admin.id');
                         $params['create_time'] = date('Y-m-d H:i:s');
-                        $params['order_sku'] = implode(',', $params['order_sku']);
+                        $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
