@@ -1,6 +1,5 @@
 <style>
-    
-     .nav-tabs>li {
+    .nav-tabs>li {
         float: left;
         margin-bottom: -1px;
     }
@@ -36,14 +35,17 @@
     .m-nPanel-pd20 {
         padding: 20px;
     }
+
     .m-nPanel-white {
         background-color: #fff;
     }
+
     .m-nPanel {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
     }
+
     .m-nPanel .controlsWrap:first-child {
         margin-top: 0;
     }
@@ -53,7 +55,8 @@
         font-size: 0;
         vertical-align: top;
     }
-    .m-nPanel .controlsWrap > * {
+
+    .m-nPanel .controlsWrap>* {
         vertical-align: middle;
     }
 
@@ -81,6 +84,7 @@
         background: url(/assets/img/ic_search.png) no-repeat;
         background-size: 16px auto;
     }
+
     .m-search .input {
         width: 609px;
         box-sizing: border-box;
@@ -90,13 +94,16 @@
         border-right: none;
     }
 
-    .m-search .input, .m-search .btn {
+    .m-search .input,
+    .m-search .btn {
         vertical-align: middle;
     }
+
     .s-input-white2 {
         background-color: #fff;
         border: 1px solid #eee;
     }
+
     .u-btn.u-btn-main {
         color: #fff;
         background-color: #00ced8;
@@ -108,9 +115,12 @@
         width: 68px;
         height: 42px;
     }
-    .m-search .input, .m-search .btn {
+
+    .m-search .input,
+    .m-search .btn {
         vertical-align: middle;
     }
+
     .u-btn {
         display: block;
         border: none;
@@ -122,7 +132,8 @@
         box-sizing: border-box;
         cursor: pointer;
     }
-    .m-nPanel .controlsWrap > .tip {
+
+    .m-nPanel .controlsWrap>.tip {
         padding-left: 10px;
         display: inline-block;
         font-size: 14px;
@@ -130,10 +141,11 @@
         color: #666;
     }
 
-    .m-nPanel .controlsWrap > * {
+    .m-nPanel .controlsWrap>* {
         vertical-align: middle;
     }
-    .m-nPanel .controlsWrap > .label {
+
+    .m-nPanel .controlsWrap>.label {
         display: inline-block;
         width: 9em;
         font-weight: normal;
@@ -141,11 +153,11 @@
         font-size: 14px;
         line-height: 28px;
     }
+
     body {
         background: #f1f4f6;
         font-size: 16px;
     }
-       
 </style>
 
 
@@ -154,13 +166,13 @@
         {:build_heading()}
         <ul class="nav nav-tabs">
             <li><a href="{:url('/admin/order/printlabel/zeelool/_list')}">Zeelool</a></li>
-            <li><a href="{:url('/admin/order/printlabel/voogueme/_list')}">Voogueme</a></li>
+            <li class="active"><a href="{:url('/admin/order/printlabel/voogueme/_list')}">Voogueme</a></li>
             <li><a href="{:url('/admin/order/printlabel/nihao/_list')}">Nihao</a></li>
             <li><a href="{:url('/admin/order/printlabel/weseeoptical/_list')}">Weseeoptical</a></li>
-            <li  class="active"><a href="{:url('/admin/order/printlabel/meeloog/_list')}">Meeloog</a></li>
+            <li><a href="{:url('/admin/order/printlabel/meeloog/_list')}">Meeloog</a></li>
             <li><a href="{:url('/admin/order/printlabel/rufoo/_list')}">Rufoo</a></li>
             <li><a href="{:url('/admin/order/printlabel/zeelool_es/_list')}">ZeeloolEs</a></li>
-            <li><a href="{:url('/admin/order/printlabel/zeelool_de/_list')}">ZeeloolDe</a></li>
+            <li class="active"><a href="{:url('/admin/order/printlabel/zeelool_de/_list')}">ZeeloolDe</a></li>
         </ul>
     </div>
     <div class="form-horizontal">
@@ -168,12 +180,13 @@
             <div class="controlsWrap">
                 <div class="m-search ng-isolate-scope" q="q" placeholder="扫码枪扫码搜索">
                     <span class="icn icn-search"></span>
-                    <input placeholder="扫码枪扫码搜索" type="text"  id="search_val" class="input s-input-white2 ng-pristine ng-untouched ng-valid">
+                    <input placeholder="扫码枪扫码搜索" type="text" id="search_val"
+                        class="input s-input-white2 ng-pristine ng-untouched ng-valid">
                     <span class="close-btn" title="清空"></span>
                     <button type="button" class="btn u-btn u-btn-main search" ng-click="onSearchCb()">搜索</button>
                 </div>
                 <span class="tip">注意:此搜索仅适用于扫码枪扫码搜索</span>
-            </div>    
+            </div>
         </div>
     </div>
     <div class="panel-body">
@@ -186,8 +199,8 @@
 
 
                         <a href="javascript:;"
-                            class="btn btn-danger btn-batch-export-xls btn-disabled disabled {:$auth->check('order/printlabel/voogueme/batch_export_xls')?'':'hide'}"
-                            title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a> 
+                            class="btn btn-danger btn-batch-export-xls btn-disabled disabled {:$auth->check('order/printlabel/zeelool_de/batch_export_xls')?'':'hide'}"
+                            title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                         <!-- <a href="javascript:;"
                             class="btn btn-success btn-batch-printed btn-disabled disabled {:$auth->check('sales_flat_order/tag_printed')?'':'hide'}"
                             title="{:__('打印标签')}"> {:__('批量打印')}</a>
@@ -197,19 +210,19 @@
                             title="{:__('标记(已打印)')}"> {:__('标记状态(已打印)')}</a> -->
 
                         <a href="javascript:;" data-status="1"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool_de/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜架')}"> {:__('配镜架')}</a>
 
                         <a href="javascript:;" data-status="2"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool_de/setOrderStatus')?'':'hide'}"
                             title="{:__('配镜片')}"> {:__('配镜片')}</a>
 
                         <a href="javascript:;" data-status="3"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool_de/setOrderStatus')?'':'hide'}"
                             title="{:__('加工')}"> {:__('加工')}</a>
 
                         <a href="javascript:;" data-status="4"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/voogueme/setOrderStatus')?'':'hide'}"
+                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool_de/setOrderStatus')?'':'hide'}"
                             title="{:__('质检通过')}"> {:__('质检通过')}</a>
 
                         <!-- <a href="javascript:;"

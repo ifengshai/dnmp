@@ -35,5 +35,5 @@ return array (
   'mail_verify_type' => '2',
   'mail_from' => '10000@qq.com',
   'operation_authority' => '1',
-  'authority_content' => '系统升级维护中，请稍后再试',
+  'authority_content' => '',
 );
