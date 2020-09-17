@@ -367,7 +367,7 @@ class SelfApi extends Api
             ->where('site', $site)
             ->order('create_time desc')
             ->select();
-        $order_data['order_data'] = array_merge($order_node1, $order_node2);
+        $order_data['order_data'] = array_merge($order_node2, $order_node1);
         if ($other_order_number) {
 
             foreach ($other_order_number as $val) {
