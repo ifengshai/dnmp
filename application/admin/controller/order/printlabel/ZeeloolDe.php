@@ -28,6 +28,13 @@ class ZeeloolDe extends Backend
      */
     protected $model = null;
 
+     /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['detail', 'operational', 'tag_printed', 'setOrderStatus', 'batch_export_xls', 'batch_print_label'];
+
+
     protected $searchFields = 'entity_id';
 
     public function _initialize()

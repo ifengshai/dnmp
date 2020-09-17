@@ -28,6 +28,12 @@ class ZeeloolEs extends Backend
      */
     protected $model = null;
 
+    /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['detail', 'operational', 'tag_printed', 'setOrderStatus', 'batch_export_xls', 'batch_print_label'];
+
     protected $searchFields = 'entity_id';
 
     public function _initialize()
@@ -381,7 +387,7 @@ class ZeeloolEs extends Backend
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
-                     
+
                         //增加配货占用
                         $map = [];
                         $map['sku'] = $trueSku;
@@ -424,7 +430,7 @@ class ZeeloolEs extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -544,7 +550,7 @@ class ZeeloolEs extends Backend
                         ]);
                     }
                 }
-                
+
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
                 $cancel_data = $infotask->alias('a')
@@ -561,7 +567,7 @@ class ZeeloolEs extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -720,7 +726,7 @@ class ZeeloolEs extends Backend
     }
 
 
-    public function generate_barcode($text, $fileName)
+    protected function generate_barcode($text, $fileName)
     {
         // 引用barcode文件夹对应的类
         Loader::import('BCode.BCGFontFile', EXTEND_PATH);
@@ -912,7 +918,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-    
+
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
