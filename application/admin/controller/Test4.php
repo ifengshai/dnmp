@@ -55,7 +55,7 @@ class Test4 extends Backend
                 } else {
                     $params['name'] = $item_detail['name'];
                 }
-                $params['platform_type'] = 9;
+                $params['platform_type'] = 10;
                 $params['create_person'] = 'Admin';
                 $params['create_time'] = date("Y-m-d H:i:s");
                 $params['is_upload'] = 1;
