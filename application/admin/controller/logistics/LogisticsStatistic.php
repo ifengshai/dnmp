@@ -81,9 +81,10 @@ class LogisticsStatistic extends Backend
             } elseif ('echart3' == $params['key']) {
                 $column = [
                     0 => '7天妥投率',
-                    1 => '14天妥投率',
-                    2 => '20天妥投率',
-                    3 => '20天以上妥投率',
+                    1 => '10天妥投率',
+                    2 => '14天妥投率',
+                    3 => '20天妥投率',
+                    4 => '20天以上妥投率',
                 ];
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
