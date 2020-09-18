@@ -91,7 +91,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $model = $this->zeelool_es;
                     break;
                 case 10:
-                    $db = 'database.db_meeloog';
+                    $db = 'database.db_zeelool_de';
                     $model = $this->zeelool_de;
                     break;
                 default:
