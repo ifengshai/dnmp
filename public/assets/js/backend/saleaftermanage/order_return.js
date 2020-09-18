@@ -508,6 +508,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                         $('#order_platform').val(2);
                     } else if (site == 'Nihao') {
                         $('#order_platform').val(3);
+                    } else if (site == 'Meeloog') {
+                        $('#order_platform').val(4);
                     }
                 }
             })
