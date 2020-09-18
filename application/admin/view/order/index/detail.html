@@ -537,7 +537,7 @@
                                             <td>{:$sku['od_cyl'] ?? ''}</td>
                                             <td>{:$sku['od_axis'] ?? ''}</td>
 
-                                            {if $sku['os_add'] && $sku['od_add'] && (float) $sku['os_add'] * 1 != 0 && (float) $sku['od_add'] * 1 != 0}
+                                            {if !$sku['total_add'] }
                                             <td>{:$sku.od_add ?? ''}</td>
                                             {else/}
                                             <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
@@ -558,7 +558,7 @@
                                             <td>{:$sku['os_sph'] ?? ''}</td>
                                             <td>{:$sku['os_cyl'] ?? ''}</td>
                                             <td>{:$sku['os_axis'] ?? ''}</td>
-                                            {if $sku['os_add'] && $sku['od_add'] && (float) $sku['os_add'] * 1 != 0 && (float) $sku['od_add'] * 1 != 0}
+                                            {if !$sku['total_add'] }
                                             <td>{:$sku.os_add ?? ''}</td>
                                             {/if}
                                             {if @$sku['pdcheck'] == 'on'}
