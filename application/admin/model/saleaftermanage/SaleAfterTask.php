@@ -7,6 +7,7 @@ use think\Db;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
 
 class SaleAfterTask extends Model
@@ -684,6 +685,8 @@ class SaleAfterTask extends Model
                     $result[$k]['item'] = VooguemePrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 } elseif ($order_platform == 3) {
                     $result[$k]['item'] = NihaoPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
+                } elseif ($order_platform == 4) {
+                    $result[$k]['item'] = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 }
 
                 //订单地址表
