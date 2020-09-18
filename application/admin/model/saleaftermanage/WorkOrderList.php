@@ -11,6 +11,7 @@ use think\Model;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -43,7 +44,7 @@ class WorkOrderList extends Model
      */
     public function getWorkPlatFormFormatAttr($value, $data)
     {
-        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao'];
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog'];
         return $status[$data['work_platform']];
     }
 
@@ -185,7 +186,10 @@ class WorkOrderList extends Model
             case 3:
                 $this->model = new \app\admin\model\order\order\Nihao();
                 $prescriptions = NihaoPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
-
+                break;
+            case 4:
+                $this->model = new \app\admin\model\order\order\Meeloog();
+                $prescriptions = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
                 break;
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
@@ -282,6 +286,9 @@ class WorkOrderList extends Model
                 break;
             case 3:
                 $url = config('url.nihao_url');
+                break;
+            case 4:
+                $url = config('url.meeloog_url');
                 break;
             case 5:
                 $url = config('url.wesee_url');
@@ -1210,6 +1217,9 @@ class WorkOrderList extends Model
                     break;
                 case 3:
                     $db = 'database.db_nihao';
+                    break;
+                case 4:
+                    $db = 'database.db_meeloog';
                     break;
                 default:
                     return false;

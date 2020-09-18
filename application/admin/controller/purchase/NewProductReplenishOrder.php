@@ -172,6 +172,20 @@ class NewProductReplenishOrder extends Backend
             }
         }
         $item = new Item();
+        $filter = json_decode($this->request->get('filter'), true);
+
+        //如果筛选条件有新老品的话
+        if ($filter['new_old']) {
+            $skus = $this->list->where('replenish_id',$replenish_id)->group('sku')->column('sku');
+
+            $item_skus = $item->where('sku', 'in', $skus)->where('is_new',$filter['new_old'])->group('sku')->column('sku');
+
+            $map['sku'] = ['in', $item_skus];
+            unset($filter['new_old']);
+        }
+        //设置过滤方法
+        $this->request->get(['filter' => json_encode($filter)]);
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -183,12 +197,14 @@ class NewProductReplenishOrder extends Backend
             $total = $this->model
                 ->where(['is_del' => 1, 'is_verify' => 1, 'replenish_id' => $replenish_id])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['is_del' => 1, 'is_verify' => 1, 'replenish_id' => $replenish_id])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

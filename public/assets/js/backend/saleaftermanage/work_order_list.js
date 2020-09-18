@@ -414,6 +414,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(1);
                     }else if(site =='V'){
                         $("#work_platform").val(2);
+                    }else if(site =='M'){
+                        $("#work_platform").val(4);
                     }
                     $('#order_type').val(100);
                     $('#c-order_type').val(100);
@@ -837,6 +839,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $("#work_platform").val(1);
                     }else if(site == 'V'){
                         $("#work_platform").val(2);
+                    }else if(site == 'M'){
+                        $("#work_platform").val(4);
                     }
                     $('#order_type').val(100);
                     $('#c-order_type').val(100);
@@ -1855,7 +1859,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao',4:'Meeloog' }, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('订单号') },
                         { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
                         { field: 'coupon_str', title: __('优惠码'), operate: false },
@@ -1901,7 +1905,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao',4:'Meeloog'}, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('订单号') },
                         { field: 'integral', title: __('积分'), operate: 'between' },
                         { field: 'email', title: __('客户邮箱'), operate: 'like' },

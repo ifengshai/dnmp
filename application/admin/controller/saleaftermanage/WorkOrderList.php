@@ -13,6 +13,7 @@ use think\exception\ValidateException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -2705,6 +2706,8 @@ class WorkOrderList extends Backend
                 $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 3) {
                 $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 4) {
+                $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif (5 == $ordertype) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
@@ -2750,6 +2753,8 @@ class WorkOrderList extends Backend
                     $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 3) {
                     $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 4) {
+                    $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif (5 == $ordertype) {
                     $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
@@ -2917,6 +2922,8 @@ class WorkOrderList extends Backend
             $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . $row->id;
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
             $url = config('url.new_nihao_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 4 && $row['replenish_money']) {
+            $url = config('url.meeloog_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
