@@ -120,7 +120,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->order($sort, $order)
                 ->count();
 
-            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at')
+            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,b.shipping_description')
                 ->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
