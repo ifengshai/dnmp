@@ -613,6 +613,10 @@ class SaleAfterTask extends Model
                 $db = 'database.db_nihao';
                 $db_online = '';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                $db_online = '';
+                break;
             default:
                 return false;
                 break;
