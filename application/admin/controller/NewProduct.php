@@ -1506,6 +1506,8 @@ class NewProduct extends Backend
                     $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
                     $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
                     $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num');
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1519,6 +1521,8 @@ class NewProduct extends Backend
                     $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
                     $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
                     $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num');
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -2092,5 +2096,87 @@ class NewProduct extends Backend
     //
     //
     //
+    // }
+
+    // public function transfer_zeelool_es()
+    // {
+    //     //西语站
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $skus = Db::name('zzzz_es')->field('sku')->select();
+    //
+    //     //50个sku一组
+    //     $skus = array_chunk($skus, 200);
+    //     foreach ($skus as $k => $v) {
+    //         //生成调拨单号 插入主表
+    //         $params['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+    //         $params['call_out_site'] = 1;
+    //         $params['call_in_site'] = 9;
+    //         $params['status'] = 0;
+    //         $params['create_time'] = date("Y-m-d H:i:s");
+    //         $params['create_person'] = '张俊杰';
+    //
+    //         $transfer_order_number = Db::name('transfer_order')->insertGetId($params);
+    //
+    //         foreach ($v as $kk => $vv){
+    //             $sku_detail = $item_platform_sku->where(['sku'=>$vv['sku'],'platform_type'=>1])->value('stock');
+    //             if ($sku_detail == 0){
+    //                 echo 'sku'.$vv['sku'].'库存为0';
+    //             }else{
+    //                 $data['transfer_order_id'] = $transfer_order_number;
+    //                 $data['sku'] = $vv['sku'];
+    //                 //调出数量
+    //                 $data['num'] = '10';
+    //                 //调出的虚拟仓库存
+    //                 $data['stock'] = $sku_detail;
+    //
+    //                 $res = Db::name('transfer_order_item')->insert($data);
+    //                 if ($res){
+    //                     echo $vv['sku'].'插入成功';
+    //                 }
+    //             }
+    //         }
+    //     }
+    //
+    //
+    //
+    // }
+    //
+    // public function transfer_zeelool_de()
+    // {
+    //     //德语站
+    //     $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+    //     $de_skus = Db::name('zzzz_de')->field('sku')->select();
+    //     //50个sku一组
+    //     $de_skus = array_chunk($de_skus, 200);
+    //     foreach ($de_skus as $k => $v) {
+    //         //生成调拨单号 插入主表
+    //         $params['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+    //         $params['call_out_site'] = 1;
+    //         $params['call_in_site'] = 10;
+    //         $params['status'] = 0;
+    //         $params['create_time'] = date("Y-m-d H:i:s");
+    //         $params['create_person'] = '张俊杰';
+    //
+    //         $transfer_order_number = Db::name('transfer_order')->insertGetId($params);
+    //
+    //         foreach ($v as $kk => $vv){
+    //             $sku_detail = $item_platform_sku->where(['sku'=>$vv['sku'],'platform_type'=>1])->value('stock');
+    //             if ($sku_detail == 0){
+    //                 echo 'sku'.$vv['sku'].'库存为0';
+    //             }else{
+    //                 $data['transfer_order_id'] = $transfer_order_number;
+    //                 $data['sku'] = $vv['sku'];
+    //                 //调出数量
+    //                 $data['num'] = '10';
+    //                 //调出的虚拟仓库存
+    //                 $data['stock'] = $sku_detail;
+    //
+    //                 $res = Db::name('transfer_order_item')->insert($data);
+    //                 if ($res){
+    //                     echo $vv['sku'].'插入成功';
+    //                 }
+    //             }
+    //         }
+    //     }
     // }
 }

@@ -878,6 +878,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
                         { field: 'wesee_stock', title: __('虚拟仓库存Wesee'), operate: false },
                         { field: 'amazon_stock', title: __('虚拟仓库存Amazon'), operate: false },
+                        { field: 'zeelool_es_stock', title: __('虚拟仓库存Zeelool_es'), operate: false },
+                        { field: 'zeelool_de_stock', title: __('虚拟仓库存Zeelool_de'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
