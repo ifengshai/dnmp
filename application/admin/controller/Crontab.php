@@ -1792,11 +1792,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || stripos($v['index_type'], 'FRAME ONLY') !== false || stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') !== false) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SOLO MONTURA') !== false || stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1976,7 +1976,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Polarized') !== false) {
+            if (strpos($final_params['index_type'], 'Polarizadas') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
@@ -2141,11 +2141,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || stripos($v['index_type'], 'FRAME ONLY') !== false || stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') !== false) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Kunstsbisffgläser' || stripos($v['index_type'], 'Nur Rahmen') !== false || stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Kunstsbisffgläser' && stripos($v['index_type'], 'Nur Rahmen') === false && stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && stripos($v['index_type'], 'FRAME ONLY') === false && stripos($v['index_type'], 'FRAME ONLY (Plastic Lenses)') === false) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Kunstsbisffgläser' && stripos($v['index_type'], 'Nur Rahmen') === false && stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -2325,7 +2325,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Polarized') !== false) {
+            if (strpos($final_params['index_type'], 'Polarisierende') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 

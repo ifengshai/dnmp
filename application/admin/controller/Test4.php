@@ -67,6 +67,11 @@ class Test4 extends Backend
         echo "ok";die;
     }
 
+    public function test01()
+    {
+        $str = "%2B";
+        echo urldecode($str);
+    }
 
 
     public function zendesk_test()
