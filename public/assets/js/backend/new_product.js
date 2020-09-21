@@ -674,7 +674,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                         {
                             field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '计划补货', 2: '紧急补货' },
+                            searchList: { 1: '月度计划', 2: '周度计划' },
                             formatter: Table.api.formatter.status
                         },
                         // {field: 'create_person', title: __('Create_person')},

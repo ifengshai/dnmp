@@ -1722,8 +1722,8 @@ class NewProduct extends Backend
 
             //sku
             if ($filter['sku']) {
-                $map['a.sku'] = $filter['sku'];
-                $map['d.purchase_name'] = ['like',$filter['sku']];
+                $map['a.sku'] = ['=',trim($filter['sku'])];
+                // $map['d.purchase_name'] = ['=',trim($filter['sku'])];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -1742,7 +1742,7 @@ class NewProduct extends Backend
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            // dump($map);
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -1764,7 +1764,7 @@ class NewProduct extends Backend
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
-                // ->where('d.purchase_name', 'like','a.sku')
+                // ->where('d.purchase_name', '=','WA069535-02')
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
@@ -1772,6 +1772,8 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 // ->getLastSql();
                 ->select();
+            // dump($list);
+            // die;
             $list = collection($list)->toArray();
             // dump($list);die;
             //根据采购单id 查询质检单
