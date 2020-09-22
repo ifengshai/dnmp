@@ -66,7 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '简单', 2: '中等', 3: '复杂' },
                             formatter: Table.api.formatter.status
                         },
-                        // { field: 'status_str', title: __('状态'), operate: false },
+                        { field: 'status_str', title: __('状态'), operate: false },
                         {
                             field: 'review_status_manager',
                             title: __('Review_status_manager'),
