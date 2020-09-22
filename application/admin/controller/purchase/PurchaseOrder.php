@@ -1748,7 +1748,7 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->join(['fa_logistics_info' => 'd'], 'd.purchase_id=purchase_order.id', 'left')
@@ -1777,13 +1777,17 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "采购数量")
             ->setCellValue("G1", "采购单价");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "采购备注")
-            ->setCellValue("I1", "采购总价")
-            ->setCellValue("J1", "创建人");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "物流单号");
+            ->setCellValue("I1", "商品总额")
+            ->setCellValue("J1", "采购运费")
+            ->setCellValue("K1", "总计")
+            ->setCellValue("L1", "创建人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "生产周期");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "预计到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "实际到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "物流单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "是否选品采购");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "是否留样采购");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -1794,13 +1798,27 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_num']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_price']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['purchase_remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['purchase_total']);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("O" . ($key * 1 + 2), $value['logistics_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['product_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['purchase_freight']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['arrival_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['receiving_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['logistics_number']);
+            if ($value['is_new_product'] == 1){
+                $is_new_product = '是';
+            }else{
+                $is_new_product = '否';
+            }
+            if ($value['is_sample'] == 1){
+                $is_sample = '是';
+            }else{
+                $is_sample = '否';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $is_new_product);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("S" . ($key * 1 + 2), $is_sample, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         }
 
         //设置宽度
@@ -1821,6 +1839,10 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
 
         //设置边框
         $border = [
