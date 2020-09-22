@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, Fast) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, Fast) {
 
     var Controller = {
         index: function () {
@@ -14,7 +14,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-tab
                     edit_url: 'purchase/supplier/edit',
                     // del_url: 'purchase/supplier/del',
                     multi_url: 'purchase/supplier/multi',
-                    import_url:'purchase/supplier/import',
+                    import_url: 'purchase/supplier/import',
                     table: 'supplier',
                 }
             });
@@ -28,36 +28,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-tab
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('Id') },
-                        { field: 'supplier_name', title: __('Supplier_name'), operate: 'like' },
-                        { field: 'email', title: __('Email'), operate: false },
-                        { field: 'url', title: __('Url'), operate: false, formatter: Table.api.formatter.url },
-                        { field: 'telephone', title: __('Telephone'), operate: false },
-                        { field: 'purchase_person', title: __('采购负责人'), operate: 'like' },
-                        { field: 'address', title: __('Address'), operate: false },
-                        { field: 'linkname', title: __('Linkname'), operate: 'like' },
-                        { field: 'linkphone', title: __('Linkphone'), operate: 'like' },
-                        { field: 'supplier_type', title: __('Supplier_type'), searchList: { 1: '镜片', 2: '镜架', 3: '眼镜盒', 4: '镜布' }, formatter: Controller.api.formatter.supplier_type },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'status', title: __('Status'), searchList: { 1: '启用', 2: '禁用' }, formatter:  Table.api.formatter.status },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                            {
-                                name: 'detail',
-                                text: '详情',
-                                title: '详情',
-                                classname: 'btn btn-xs btn-primary btn-dialog',
-                                icon: 'fa fa-list',
-                                url: 'purchase/supplier/detail',
-                                callback: function (data) {
-                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                },
-                                visible: function (row) {
-                                    //返回true时按钮显示,返回false隐藏
-                                    return true;
-                                }
-                            }], formatter: Table.api.formatter.operate }
+                        {checkbox: true},
+                        {field: 'id', title: __('Id')},
+                        {field: 'supplier_name', title: __('Supplier_name'), operate: 'like'},
+                        {field: 'email', title: __('Email'), operate: false},
+                        {field: 'url', title: __('Url'), operate: false, formatter: Table.api.formatter.url},
+                        {field: 'telephone', title: __('Telephone'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: 'like'},
+                        {field: 'address', title: __('Address'), operate: false},
+                        {field: 'linkname', title: __('Linkname'), operate: 'like'},
+                        {field: 'linkphone', title: __('Linkphone'), operate: 'like'},
+                        {
+                            field: 'supplier_type',
+                            title: __('Supplier_type'),
+                            searchList: {1: '镜片', 2: '镜架', 3: '眼镜盒', 4: '镜布'},
+                            formatter: Controller.api.formatter.supplier_type
+                        },
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {
+                            field: 'status',
+                            title: __('Status'),
+                            searchList: {1: '启用', 2: '禁用'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: '详情',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/supplier/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }],
+                            formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
@@ -70,7 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-tab
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/supplier/setStatus',
-                    data: { ids: ids, status: 1 }
+                    data: {ids: ids, status: 1}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -81,12 +98,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-tab
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/supplier/setStatus',
-                    data: { ids: ids, status: 2 }
+                    data: {ids: ids, status: 2}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
             })
+            //批量修改采购负责人
+            $(document).on('click', '.btn-incharge', function () {
+                var ids = Table.api.selectedids(table);
+                var options = {
+                    shadeClose: false,
+                    shade: [0.3, '#393D49'],
+                    area: ['50%', '70%'], //弹出层宽高
+                    callback: function (value) {
+                        table.bootstrapTable('refresh');
+                    }
+                };
+                Fast.api.open('purchase/supplier/change_incharge?ids=' + ids.join(','), '批量修改-采购负责人', options);
 
+
+            });
 
         },
         add: function () {
