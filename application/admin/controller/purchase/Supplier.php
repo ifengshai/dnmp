@@ -4,6 +4,7 @@ namespace app\admin\controller\purchase;
 
 use app\common\controller\Backend;
 use think\Db;
+
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -408,5 +409,37 @@ class Supplier extends Backend
         }
         db('supplier_sku')->insertAll($list);
         echo 'ok';
+    }
+
+    public function change_incharge()
+    {
+        if ($this->request->isPost()) {
+            $ids = input('ids');
+            if (empty($ids)){
+                $this->error('请先选择需要更改的供应商',  url('purchase/supplier'));
+            }
+            $params = $this->request->post("incharge");
+            $result = Db::name('supplier')->where('id','in',$ids)->setField('purchase_person',trim($params));
+            Db::startTrans();
+            try {
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            if ($result !== false) {
+                $this->success('批量修改成功！！',  url('purchase/supplier'));
+            } else {
+                $this->error(__('No rows were inserted'));
+            }
+        }
+
+        return $this->view->fetch();
     }
 }
