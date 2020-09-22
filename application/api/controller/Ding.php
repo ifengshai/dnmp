@@ -282,7 +282,7 @@ class Ding extends Controller
     public function test($url = '')
     {
         //获取指定用户的钉钉信息，添加到魔晶系统中
-        $userId = '165829435336546371';
+        $userId = '224307144626331813';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user);
         echo 'ok';exit;

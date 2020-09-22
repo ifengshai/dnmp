@@ -191,7 +191,12 @@ class ZeeloolEsPrescriptionDetailHelper
 				$items[$item_key]['os_add'] = $final_params['os_add'];
 				$items[$item_key]['od_add'] = $final_params['od_add'];
 			} else {
-				$items[$item_key]['total_add'] = $final_params['os_add'];
+				if ((float) $final_params['os_add'] > 0) {
+					$items[$item_key]['total_add'] = $final_params['os_add'];
+				} else {
+					$items[$item_key]['total_add'] = $final_params['od_add'];
+				}
+
 			}
 
 			if ($final_params['pdcheck'] == 'on') {
