@@ -1318,8 +1318,6 @@ EOF;
             </tr>  
             </tbody></table></div>";
             }
-            dump($cargo_number_str.substr(SKUHelper::sku_filter($processing_value['sku']), -7));
-
             echo $file_header . $file_content;
         }
     }
