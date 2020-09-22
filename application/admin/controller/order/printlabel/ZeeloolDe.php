@@ -1168,7 +1168,7 @@ EOF;
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->where(['platform_type' => 9])->cache(3600)->column('sku', 'platform_sku');
+            $item_res = $item->where(['platform_type' => 10])->cache(3600)->column('sku', 'platform_sku');
 
             $file_content = '';
             $temp_increment_id = 0;
@@ -1318,6 +1318,8 @@ EOF;
             </tr>  
             </tbody></table></div>";
             }
+            dump($cargo_number_str.substr(SKUHelper::sku_filter($processing_value['sku']), -7));
+
             echo $file_header . $file_content;
         }
     }
