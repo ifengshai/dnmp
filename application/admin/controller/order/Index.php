@@ -11,6 +11,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
 use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolDePrescriptionDetailHelper;
+use Util\ZeeloolJpPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -40,6 +41,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->rufoo = new \app\admin\model\order\order\Rufoo;
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs;
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
+        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
     }
 
@@ -64,7 +66,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 return $this->selectpage();
             }
             //根据传的标签切换对应站点数据库
-            $label = $this->request->get('label', 1);
             switch ($label) {
                 case 1:
                     $db = 'database.db_zeelool';
@@ -93,6 +94,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 case 10:
                     $db = 'database.db_zeelool_de';
                     $model = $this->zeelool_de;
+                    break;
+                case 11:
+                    $db = 'database.db_zeelool_jp';
+                    $model = $this->zeelool_jp;
                     break;
                 default:
                     return false;
@@ -185,6 +190,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $model = $this->zeelool_es;
         } elseif ($label == 10) {
             $model = $this->zeelool_de;
+        } elseif ($label == 11) {
+            $model = $this->zeelool_jp;
         }
 
         //查询订单详情
@@ -217,6 +224,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $goods = ZeeloolEsPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 10) {
             $goods = ZeeloolDePrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 11) {
+            $goods = ZeeloolJpPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
 
         //获取支付信息
@@ -272,6 +281,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $model = $this->zeelool_es;
         } elseif ($label == 10) {
             $model = $this->zeelool_de;
+        } elseif ($label == 11) {
+            $model = $this->zeelool_jp;
         }
 
         //查询订单详情
@@ -660,6 +671,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             case 10:
                 $db = 'database.db_zeelool_de';
                 $model = $this->zeelool_de;
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                $model = $this->zeelool_jp;
                 break;
             default:
                 return false;
