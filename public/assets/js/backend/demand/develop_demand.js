@@ -1302,20 +1302,3 @@ function update_responsibility_user(val) {
     $('.responsibility_user_id').attr('name', '');
     $('#responsibility_user_id_' + is_val).attr('name', 'row[responsibility_user_id]');
 }
-
-
-function submit_button0922(result)
-{
-    if(result == 2)
-    {
-        alert(2);
-        $('.option2').attr('selected',true);
-        $('.option1').attr('selected',false);
-        // $('.aqian_tijiao').click();
-    }else{
-        alert(1);
-        $('.option1').attr('selected',true);
-        $('.option2').attr('selected',false);
-        // $('.aqian_tijiao').click();
-    }
-}
