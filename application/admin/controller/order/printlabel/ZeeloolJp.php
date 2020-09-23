@@ -9,7 +9,7 @@ use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Exception;
 use think\exception\PDOException;
-use Util\ZeeloolDePrescriptionDetailHelper;
+use Util\ZeeloolJpPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\StockLog;
@@ -19,7 +19,7 @@ use app\admin\model\StockLog;
  *
  * @icon fa fa-circle-o
  */
-class ZeeloolDe extends Backend
+class ZeeloolJp extends Backend
 {
 
     /**
@@ -40,7 +40,7 @@ class ZeeloolDe extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\order\printlabel\ZeeloolDe;
+        $this->model = new \app\admin\model\order\printlabel\ZeeloolJp;
     }
 
 
@@ -145,7 +145,7 @@ class ZeeloolDe extends Backend
             $this->error(__('No Results were found'));
         }
         //查询订单详情
-        $result = ZeeloolDePrescriptionDetailHelper::get_one_by_entity_id($ids);
+        $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_entity_id($ids);
 
         $this->assign('result', $result);
         return $this->view->fetch();
@@ -229,7 +229,7 @@ class ZeeloolDe extends Backend
                 $params['type'] = 1;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 10;
+                $params['site'] = 11;
                 (new OrderLog())->setOrderLog($params);
 
                 $map['entity_id'] = ['in', $entity_ids];
@@ -244,7 +244,7 @@ class ZeeloolDe extends Backend
                     $list[$k]['node_type'] = 2; //配镜架
                     $list[$k]['content'] = 'Order is under processing';
                     $list[$k]['create_time'] = date('Y-m-d H:i:s');
-                    $list[$k]['site'] = 10;
+                    $list[$k]['site'] = 11;
                     $list[$k]['order_id'] = $v['entity_id'];
                     $list[$k]['order_number'] = $v['increment_id'];
                     $list[$k]['handle_user_id'] = session('admin.id');
@@ -252,7 +252,7 @@ class ZeeloolDe extends Backend
 
                     $data['order_node'] = 1;
                     $data['node_type'] = 2;
-                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 10])->update($data);
+                    Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 11])->update($data);
                 }
                 if ($list) {
                     $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -314,7 +314,7 @@ class ZeeloolDe extends Backend
         $count = $workorder->where([
             'platform_order' => ['in', $arr],
             'work_status' => ['in', [1, 2, 3, 5]],
-            'work_platform' => 10 //平台
+            'work_platform' => 11 //平台
         ])->count();
         if ($count > 0) {
             $this->error('存在未处理的工单');
@@ -376,7 +376,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 10, //平台类型
+                        'a.platform_type' => 11, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
@@ -385,7 +385,7 @@ class ZeeloolDe extends Backend
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
                         //sku转换
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 10);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 11);
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
@@ -403,7 +403,7 @@ class ZeeloolDe extends Backend
                         //插入日志表
                         (new StockLog())->setData([
                             'type'                      => 2,
-                            'site'                      => 10,
+                            'site'                      => 11,
                             'two_type'                  => 1,
                             'sku'                       => $trueSku,
                             'order_number'              => $v['increment_id'],
@@ -423,7 +423,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 3,
-                        'a.platform_type' => 10,
+                        'a.platform_type' => 11,
                         'a.original_sku' => ['in', $skus],
                         'b.work_status' => ['in', [5, 6]]
                     ])
@@ -441,7 +441,7 @@ class ZeeloolDe extends Backend
                 foreach ($list as $k => &$v) {
 
                     //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 10);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 11);
                     if (!$trueSku) {
                         throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
@@ -483,7 +483,7 @@ class ZeeloolDe extends Backend
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
-                        'site'                      => 10,
+                        'site'                      => 11,
                         'two_type'                  => 1,
                         'sku'                       => $trueSku,
                         'order_number'              => $v['increment_id'],
@@ -513,7 +513,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 10, //平台类型
+                        'a.platform_type' => 11, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
                     ])
                     ->group('original_sku,increment_id')
@@ -521,7 +521,7 @@ class ZeeloolDe extends Backend
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 10);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 11);
                         if (!$trueSku) {
                             throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
@@ -538,7 +538,7 @@ class ZeeloolDe extends Backend
                         //插入日志表
                         (new StockLog())->setData([
                             'type'                      => 2,
-                            'site'                      => 10,
+                            'site'                      => 11,
                             'two_type'                  => 2,
                             'sku'                       => $trueSku,
                             'order_number'              => $v['increment_id'],
@@ -560,7 +560,7 @@ class ZeeloolDe extends Backend
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 3,
-                        'a.platform_type' => 10,
+                        'a.platform_type' => 11,
                         'a.original_sku' => ['in', $skus],
                         'b.work_status' => ['in', [5, 6]]
                     ])
@@ -577,7 +577,7 @@ class ZeeloolDe extends Backend
                 foreach ($list as &$v) {
 
                     //查出订单SKU映射表对应的仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 10);
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 11);
                     if (!$trueSku) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
@@ -616,7 +616,7 @@ class ZeeloolDe extends Backend
                     //插入日志表
                     (new StockLog())->setData([
                         'type'                      => 2,
-                        'site'                      => 10,
+                        'site'                      => 11,
                         'two_type'                  => 2,
                         'sku'                       => $trueSku,
                         'order_number'              => $v['increment_id'],
@@ -656,7 +656,7 @@ class ZeeloolDe extends Backend
                 $data['update_time'] = date('Y-m-d H:i:s');
 
                 $list[$k]['create_time'] = date('Y-m-d H:i:s');
-                $list[$k]['site'] = 10;
+                $list[$k]['site'] = 11;
                 $list[$k]['order_id'] = $v['entity_id'];
                 $list[$k]['order_number'] = $v['increment_id'];
                 $list[$k]['handle_user_id'] = session('admin.id');
@@ -702,7 +702,7 @@ class ZeeloolDe extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 10])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 11])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
@@ -783,7 +783,7 @@ class ZeeloolDe extends Backend
 from catalog_product_entity_varchar cpev
 LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
 where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
-            $resultList = Db::connect('database.db_zeelool_de')->query($querySql);
+            $resultList = Db::connect('database.db_zeelool_jp')->query($querySql);
             if ($resultList) {
                 $result = array();
                 foreach ($resultList as $key => $value) {
@@ -956,7 +956,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         foreach ($finalResult as $key => $value) {
 
             //网站SKU转换仓库SKU
-            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 10);
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 11);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
@@ -1146,7 +1146,7 @@ from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by NUM asc;";
-            $processing_order_list = Db::connect('database.db_zeelool_de')->query($processing_order_querySql);
+            $processing_order_list = Db::connect('database.db_zeelool_jp')->query($processing_order_querySql);
             $processing_order_list = $this->qty_order_check($processing_order_list);
 
             $file_header = <<<EOF
@@ -1168,7 +1168,7 @@ EOF;
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->where(['platform_type' => 10])->cache(3600)->column('sku', 'platform_sku');
+            $item_res = $item->where(['platform_type' => 11])->cache(3600)->column('sku', 'platform_sku');
 
             $file_content = '';
             $temp_increment_id = 0;
@@ -1177,16 +1177,16 @@ EOF;
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_de" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_jp" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_de" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool_jp" . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/zeelool_de/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/zeelool_jp/$date/$temp_increment_id.png";
                     //生成条形码
                     $this->generate_barcode($temp_increment_id, $fileName);
                     $file_content .= "<div  class = 'single_box'>

@@ -887,6 +887,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             field: 'z_de_sku_num', title: __('zeelool_de'), operate: false
                         },
                         {
+                            field: 'z_jp_sku_num', title: __('zeelool_jp'), operate: false
+                        },
+                        {
                             field: 'replenish_num', title: __('补货需求数量'), operate: false
                         }
 

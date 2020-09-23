@@ -6,13 +6,10 @@ use think\Model;
 use think\Db;
 
 
-class Zeelool extends Model
+class ZeeloolJp extends Model
 {
-
-
-
     //数据库
-    protected $connection = 'database.db_zeelool';
+    protected $connection = 'database.db_zeelool_jp';
 
 
     // 表名
@@ -29,312 +26,14 @@ class Zeelool extends Model
     // 追加属性
     protected $append = [];
 
-
     //名称获取器
     public function getCustomerFirstnameAttr($value, $data)
     {
         return $data['customer_firstname'] . ' ' . $data['customer_lastname'];
     }
 
-    /**
-     * 获取订单地址详情
-     * @param $ordertype 站点
-     * @param $entity_id 订单id
-     * @return array
-     */
-    public function getOrderDetail($ordertype, $entity_id)
-    {
-        switch ($ordertype) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                break;
-            default:
-                return false;
-                break;
-        }
-        $map['address_type'] = 'shipping';
-        $map['parent_id'] = $entity_id;
-        $result = Db::connect($db)
-            ->table('sales_flat_order_address')
-            ->where($map)
-            ->find();
-        if (!$result) {
-            return false;
-        }
-        return $result;
-    }
-
-
-    /**
-     * 获取订单商品详情 多站公用方法
-     * @param $ordertype 站点
-     * @param $entity_id 订单id
-     * @return array
-     */
-    public function getGoodsDetail($ordertype, $entity_id)
-    {
-        switch ($ordertype) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                break;
-            default:
-                return false;
-                break;
-        }
-        $map['order_id'] = $entity_id;
-        $result = Db::connect($db)
-            ->field('sku,name,qty_ordered,custom_prescription,original_price,price,discount_amount,product_options')
-            ->table('sales_flat_order_item')
-            ->where($map)
-            ->select();
-        foreach ($result as $k => &$v) {
-            $v['product_options'] = unserialize($v['product_options']);
-            $prescription_params = $v['product_options']['info_buyRequest']['tmplens']['prescription'];
-            $lens_params = array();
-            //处理处方参数
-            foreach (explode("&", $prescription_params) as $prescription_key => $prescription_value) {
-                $arr_value = explode("=", $prescription_value);
-                if ($arr_value[0]) {
-                    $lens_params[$arr_value[0]] = $arr_value[1];
-                }
-
-
-                //处理ADD转换    
-                if (@$lens_params['os_add'] && @$lens_params['od_add']) {
-                    $lens_params['total_add'] = '';
-                } else {
-                    $lens_params['total_add'] = @$lens_params['os_add'];
-                }
-                //处理PD转换  
-                if (@$lens_params['pdcheck'] == 'on') {
-                    $lens_params['pd'] = '';
-                }
-
-                if (@$lens_params['prismcheck'] != 'on') {
-                    $lens_params['od_pv'] = '';
-                    $lens_params['od_bd'] = '';
-                    $lens_params['od_pv_r'] = '';
-                    $lens_params['od_bd_r'] = '';
-
-                    $lens_params['os_pv'] = '';
-                    $lens_params['os_bd'] = '';
-                    $lens_params['os_pv_r'] = '';
-                    $lens_params['os_bd_r'] = '';
-                }
-            }
-            $v['product_options']['prescription'] = $lens_params;
-            $v['product_options']['tmplens'] = $v['product_options']['info_buyRequest']['tmplens'];
-        }
-        unset($v);
-
-        if (!$result) {
-            return false;
-        }
-        return $result;
-    }
-
-
-    /**
-     * 统计订单SKU销量
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/06 16:42:25 
-     * @param [type] $sku 筛选条件
-     * @return object
-     */
-    public function getOrderSalesNum($sku = [], $where)
-    {
-        if ($sku) {
-            $sku_str = implode(',', $sku);
-            $map[] = ['exp', Db::raw("trim(sku) IN ( '$sku_str') ")];
-        } else {
-            $map['sku'] = ['not like', '%Price%'];
-        }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $res = $this
-            ->where($map)
-            ->where($where)
-            ->alias('a')
-            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-            ->group('sku')
-            ->order('num desc')
-            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
-        return $res;
-    }
-
-    /**
-     * 统计订单SKU销量
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/06 16:42:25 
-     * @param [type] $sku 筛选条件
-     * @return object
-     */
-    public function getOrderSalesNumTop30($sku, $where)
-    {
-        if ($sku) {
-            $map['sku'] = ['in', $sku];
-        }
-        $map['sku'] = ['not like', '%Price%'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $res = $this
-            ->where($map)
-            ->where($where)
-            ->alias('a')
-            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-            ->group('sku')
-            ->order('num desc')
-            ->limit(15)
-            ->column('round(sum(b.qty_ordered)) as num', 'sku');
-        return $res;
-    }
-
-
-    /**
-     * 获取订单支付详情 多站公用方法
-     * @param $ordertype 站点
-     * @param $entity_id 订单id
-     * @return array
-     */
-    public function getPayDetail($ordertype, $entity_id)
-    {
-        switch ($ordertype) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                break;
-            default:
-                return false;
-                break;
-        }
-        $map['parent_id'] = $entity_id;
-        $result = Db::connect($db)
-            ->table('sales_flat_order_payment')
-            ->field('additional_information,base_amount_paid,base_amount_ordered,base_shipping_amount,method,last_trans_id')
-            ->where($map)
-            ->find();
-
-        $result['additional_information'] =  unserialize($result['additional_information']);
-
-        if (!$result) {
-            return false;
-        }
-        return $result;
-    }
-
-    /**
-     * 获取物流单号
-     */
-    public function getExpressData($ordertype, $entity_id)
-    {
-        switch ($ordertype) {
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                break;
-            default:
-                return false;
-                break;
-        }
-        $map['order_id'] = $entity_id;
-        $result = Db::connect($db)
-            ->table('sales_flat_shipment_track')
-            ->field('track_number,title')
-            ->where($map)
-            ->find();
-        if (!$result) {
-            return false;
-        }
-        return $result;
-    }
-
-
     /***
-     * 获取zeelool订单的成本信息  create@lsw
+     * 获取nihao订单的成本信息  create@lsw
      * @param totalId 所有的
      * @param thisPageId 当前页面的ID 
      */
@@ -346,7 +45,8 @@ class Zeelool extends Model
             return $arr;
         }
         //原先逻辑已经废弃(总付款金额)
-        //$totalMap['parent_id'] = ['in',$totalId];
+        // $totalMap['parent_id'] = ['in',$totalId];
+        // //总付款金额
         // $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
         // $arr['totalPayInfo'] = $payInfo;
         // $thisPageIdMap['parent_id'] = ['in',$thisPageId];
@@ -360,7 +60,7 @@ class Zeelool extends Model
         // }
         //求出总付款金额
         $totalMap['entity_id'] = ['in', $totalId];
-        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
         if ($payInfo) {
             foreach ($payInfo as $v) {
@@ -452,7 +152,7 @@ class Zeelool extends Model
         //去掉重复的补差价订单号
         //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
-        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $fullPostMap['increment_id'] = ['in', $fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($fullPostResult) {
@@ -466,7 +166,7 @@ class Zeelool extends Model
             }
         }
         //求出补差价订单(信息协同补差价订单)
-        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $synergyFullPostMap['increment_id'] = ['in', $fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($synergyPostResult) {
@@ -490,10 +190,10 @@ class Zeelool extends Model
                 //1.处方类型为渐进镜,或者镜架是无框的都是8 元
                 if (('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) || ((2 ==  $pv['frame_type_is_rimless']))) {
                     $process_price = 8;
-                    //2.处方类型为单光并且折射率比较高的话是8元
+                    //2.处方类型为单光并且折射率比较高的话是8元    
                 } elseif ((false !== strpos($pv['index_type'], '1.67')) || (false !== strpos($pv['index_type'], '1.71') || (false !== strpos($pv['index_type'], '1.74')))) {
                     $process_price = 8;
-                    //其他的不是Plastic Lens的类型 5元
+                    //其他的不是Plastic Lens的类型 5元   
                 } elseif ((!empty($pv['index_type']) && ('Plastic Lens' != $pv['index_type']))) {
                     $process_price = 5;
                 } else {
@@ -505,7 +205,6 @@ class Zeelool extends Model
                 }
             }
         }
-
         return $arr;
     }
 
@@ -528,7 +227,7 @@ class Zeelool extends Model
         }
         //求出总付款金额
         $totalMap['entity_id'] = ['in', $totalId];
-        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
         if ($payInfo) {
             foreach ($payInfo as $v) {
@@ -620,7 +319,7 @@ class Zeelool extends Model
         //去掉重复的补差价订单号
         //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
-        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $fullPostMap['increment_id'] = ['in', $fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($fullPostResult) {
@@ -634,7 +333,7 @@ class Zeelool extends Model
             }
         }
         //求出补差价订单(信息协同补差价订单)
-        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed']];
+        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $synergyFullPostMap['increment_id'] = ['in', $fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if ($synergyPostResult) {
@@ -673,37 +372,37 @@ class Zeelool extends Model
                 }
             }
         }
-
         return $arr;
     }
 
-    /***
-     * 求出退款金额和补差价订单金额  create@lsw
-     * 
+    /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $sku 筛选条件
+     * @return object
      */
-    public function getOrderRefundMoney()
+    public function getOrderSalesNum($sku, $where)
     {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        } else {
+            $map['sku'] = ['not like', '%Price%'];
+        }
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $this
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'sku');
+        return $res;
     }
 
-    /***
-     * 批量导入邮费  create@lsw
-     * @param increment_id 订单号
-     * @param postage_money 邮费 
-     */
-    public function updatePostageMoney($increment_id, $postage_money)
-    {
-        $where['increment_id'] = $increment_id;
-        $data['postage_money'] = $postage_money;
-        $data['postage_create_time'] = date("Y-m-d H:i:s", time());
-        $rs1 = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($where)->update($data);
-        $rs2 = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($where)->update($data);
-        $rs3 = Db::connect('database.db_nihao')->table('sales_flat_order')->where($where)->update($data);
-        if (($rs1 === false) && ($rs2 === false) && ($rs3 === false)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
 
     /**
      * 统计未发货订单
@@ -720,26 +419,6 @@ class Zeelool extends Model
         $map['order_type'] = ['<>', 5];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         return $this->alias('a')->where($map)->count(1);
-    }
-
-    /**
-     * 统计仅镜架订单
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/25 14:50:55 
-     * @return void
-     */
-    public function frameOrder($map)
-    {
-        if ($map) {
-            $map['custom_is_delivery_new'] = 0;
-            $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-            $map['custom_order_prescription_type'] = 1;
-            //过滤补差价单
-            $map['order_type'] = ['<>', 5];
-            return $this->alias('a')->where($map)->count(1);
-        }
     }
 
     /**
@@ -762,6 +441,26 @@ class Zeelool extends Model
     }
 
     /**
+     * 统计仅镜架订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function frameOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            //过滤补差价单
+            $map['order_type'] = ['<>', 5];
+            $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['custom_order_prescription_type'] = 1;
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
      * 统计处方镜副数
      *
      * @Description
@@ -777,7 +476,7 @@ class Zeelool extends Model
             $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only') 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
 
@@ -804,7 +503,7 @@ class Zeelool extends Model
             $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only' ) 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
             $map['is_custom_lens'] = 0;
@@ -832,7 +531,7 @@ class Zeelool extends Model
             $map['order_type'] = ['<>', 5];
             $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only' ) 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
             $map['is_custom_lens'] = 1;
@@ -871,8 +570,8 @@ class Zeelool extends Model
      */
     public function getOrderSkuNum()
     {
-        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         return $this->alias('a')
             ->where($where)
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
@@ -897,11 +596,10 @@ class Zeelool extends Model
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
             ->group('sku')
             ->select();
-        $data = collection($data)->toArray();
+
         //SKU实时进价
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
-
         $itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         //SKU参考进价
         $item = new \app\admin\model\itemmanage\Item();
@@ -909,16 +607,65 @@ class Zeelool extends Model
         $all_price = 0;
         foreach ($data as $k => $v) {
             //sku转换
-            $sku = $itemplatformsku->getWebSku($v['sku'], 1);
+            $sku = $itemplatformsku->getWebSku($v['sku'], 2);
             if ($arr[$sku]) {
                 $all_price += $arr[$sku] * $v['num'];
             } else {
                 $all_price += $item_price[$sku] * $v['num'];
             }
-            $data[$k]['true_sku'] = $sku;
         }
-
         return $all_price;
+    }
+
+    /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $sku 筛选条件
+     * @return object
+     */
+    public function getOrderSalesNumTop30($sku, $where)
+    {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        }
+        $map['sku'] = ['not like', '%Price%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $this
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->limit(15)
+            ->column('round(sum(b.qty_ordered)) as num', 'sku');
+
+        return $res;
+    }
+
+    /**
+     * 根据SKU查询订单号ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 14:51:20 
+     * @return void
+     */
+    public function getOrderId($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_voogueme')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
     }
 
     /**
@@ -1161,29 +908,6 @@ class Zeelool extends Model
         $checkOvertimeProcess02 = $this->where($map)->cache(10800)->count(1);
         $data['checkOvertimeProcess'] =  $checkOvertimeProcess01 +  $checkOvertimeProcess02;
         return $data;
-    }
-
-
-    /**
-     * 根据SKU查询订单号ID
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/24 14:51:20 
-     * @return void
-     */
-    public function getOrderId($map)
-    {
-        if ($map) {
-            $result = Db::connect('database.db_zeelool')
-                ->table('sales_flat_order_item')
-                ->alias('a')
-                ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
-                ->where($map)
-                ->column('order_id');
-            return $result;
-        }
-        return false;
     }
 
     /**

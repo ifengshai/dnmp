@@ -19,6 +19,9 @@ return [
         '6' => 'Rufoo',
         '7' => 'Toloog',
         '8' => 'Other',
+        '9' => 'ZeeloolEs',
+        '10' => 'ZeeloolDe',
+        
     ],
     //类型
     'siteType' => [

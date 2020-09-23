@@ -2917,7 +2917,7 @@ class WorkOrderList extends Backend
         $this->view->assign('recepts', $recepts);
         //判断站点
         if ($row['work_platform'] == 1 && $row['replenish_money']) {
-            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='. $row->id;
+            $url = config('url.new_zeelool_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='. $row->id;
         } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
             $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . $row->id;
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
