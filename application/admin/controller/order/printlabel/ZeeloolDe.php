@@ -1168,7 +1168,7 @@ EOF;
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->where(['platform_type' => 9])->cache(3600)->column('sku', 'platform_sku');
+            $item_res = $item->where(['platform_type' => 10])->cache(3600)->column('sku', 'platform_sku');
 
             $file_content = '';
             $temp_increment_id = 0;

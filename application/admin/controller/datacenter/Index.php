@@ -35,6 +35,8 @@ class Index extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->wesee = new \app\admin\model\order\order\Weseeoptical;
+        $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
+        $this->zeeloolEs = new \app\admin\model\order\order\ZeeloolEs;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
@@ -102,6 +104,10 @@ class Index extends Backend
                 $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
 
                 $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
+
+                $v['z_es_sku'] = $this->itemplatformsku->getWebSku($v['sku'],9);
+                
+                $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'],10);
             }
             unset($v);
 
@@ -110,6 +116,8 @@ class Index extends Backend
             $n_sku = array_column($list, 'n_sku');
             $m_sku = array_column($list, 'm_sku');
             $w_sku = array_column($list, 'w_sku');
+            $z_es_sku = array_column($list,'z_es_sku');
+            $z_de_sku = array_column($list,'z_de_sku');
 
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
@@ -117,6 +125,8 @@ class Index extends Backend
             $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
             $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
             $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
+            $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku,$map);
+            $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku,$map);
             //重组数组
             foreach ($list as &$v) {
 
@@ -130,7 +140,11 @@ class Index extends Backend
 
                 $v['w_num'] = round($wesee[trim($v['w_sku'])]) ?? 0;
 
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
+                $v['z_es_num'] = round($zeelool_es[trim($v['z_es_sku'])]) ?? 0;
+
+                $v['z_de_num'] = round($zeelool_de[trim($v['z_de_sku'])]) ?? 0;
+
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'];
             }
             unset($v);
 
@@ -613,6 +627,10 @@ class Index extends Backend
                     $res = $this->meeloog->getOrderSalesNumTop30([], $map);
                 }elseif  ($params['site'] == 5){
                     $res = $this->wesee->getOrderSalesNumTop30([], $map);
+                }elseif ($params['site'] == 9){ //zeelool西语站
+                    $res = $this->zeeloolEs->getOrderSalesNumTop30([], $map);
+                }elseif($params['site'] == 10){ //zeelool德语站
+                    $res = $this->zeeloolDe->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
             }
@@ -657,6 +675,15 @@ class Index extends Backend
                     $list = $this->wesee->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
                     $skus = $itemPlatformSku->getWebSkuAll(5);                    
+                }elseif($params['site'] == 9){ //zeelool的西语站
+                    //查询对应平台销量
+                    $list = $this->zeeloolEs->getOrderSalesNum([], $map);
+                    //查询对应平台商品sku
+                    $skus = $itemPlatformSku->getWebSkuAll(9);
+                }elseif($params['site'] == 10){ //zeelool德语站
+                    //查询对应平台销量
+                    $list = $this->zeeloolDe->getOrderSalesNum([], $map);
+                    $skus = $itemPlatformSku->getWebSkuAll(10);
                 }
                 $productInfo = $this->item->getSkuInfo();
                 $list = $list ?? [];
