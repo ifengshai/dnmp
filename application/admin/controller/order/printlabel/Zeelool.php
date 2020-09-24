@@ -418,15 +418,21 @@ class Zeelool extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
                         'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
+               
                 $sku = [];
                 if ($infoRes) {
                     foreach ($infoRes as $k => $v) {
@@ -482,7 +488,7 @@ class Zeelool extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -565,12 +571,17 @@ class Zeelool extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
                         'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
@@ -627,7 +638,7 @@ class Zeelool extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -1329,9 +1340,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = [
-           
-        ];
+        $str = [];
 
         //查询临时表订单号
         $str = Db::table('fa_zzzz_order_temp')->column('order_number');

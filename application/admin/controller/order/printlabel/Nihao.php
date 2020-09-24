@@ -398,12 +398,17 @@ class Nihao extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 3, //平台类型
+                        'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
@@ -545,12 +550,17 @@ class Nihao extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 3, //平台类型
+                        'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
