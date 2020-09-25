@@ -45,7 +45,13 @@ class OperationAnalysis extends Model
             break;
             case 4:
             $model = Db::connect('database.db_meeloog');
-            break;    
+            break;
+            case 9:
+            $model = Db::connect('database.db_zeelool_es');
+            break;
+            case 10:
+            $model = Db::connect('database.db_zeelool_de');
+            break;        
             default:
             $model = false;
             break;            
