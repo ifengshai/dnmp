@@ -103,12 +103,12 @@ class AuthGroupAccess extends Model
         $result = $this->alias('a')->where(['a.uid'=>$user_id])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
         if($result){
             $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 
-            $zeelool_es_privilege = $zeelool_de_privilege = $zeelool_jp_privilege = 0;
+            $zeelool_es_privilege = $zeelool_de_privilege = $zeelool_jp_privilege = $all_privilege = 0;
             $result = collection($result)->toArray();
             foreach($result as $v){
                 if($v['rules'] == '*'){
                     $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 
-                    $zeelool_es_privilege = $zeelool_de_privilege = $zeelool_jp_privilege = 1; 
+                    $zeelool_es_privilege = $zeelool_de_privilege = $zeelool_jp_privilege = $all_privilege = 1; 
                 }elseif(!empty($v['rules']) && ($v['rules']!='*')){
                     $rulesArr = explode(',',$v['rules']);
                      //zeelool权限
@@ -163,6 +163,9 @@ class AuthGroupAccess extends Model
             }
             if(1 == $zeelool_jp_privilege){
                 $arr[] = 11;
+            }
+            if(1 == $all_privilege){
+                $arr[] = 100;
             }
         }
         return $arr ?? 0;

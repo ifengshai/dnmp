@@ -380,21 +380,25 @@ class OperationAnalysis extends Model
         //求出nihao今天的总和
         $nihao_data    = $this->getList(3);
         //求出meeloog的总和
-        $meeloog_data  = $this->getList(4); 
+        $meeloog_data  = $this->getList(4);
+        //求出zeelool_es的总和
+        $zeelool_es_data = $this->getList(9);
+        //求出zeelool_de的总和
+        $zeelool_de_data = $this->getList(10);  
         //总和
-        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money'] + $meeloog_data['today_sales_money']),2);
-        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num'] + $meeloog_data['today_order_num']);
-        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success'] + $meeloog_data['today_order_success']);
+        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money'] + $meeloog_data['today_sales_money'] + $zeelool_es_data['today_sales_money'] + $zeelool_de_data['today_sales_money']),2);
+        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num'] + $meeloog_data['today_order_num'] + $zeelool_es_data['today_order_num'] + $zeelool_de_data['today_order_num']);
+        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success'] + $meeloog_data['today_order_success'] + $zeelool_es_data['today_order_success'] + $zeelool_de_data['today_order_success']);
         if($arr['today_order_success']>0){
             $arr['today_unit_price']                        = round($arr['today_sales_money'] /$arr['today_order_success'],2); 
         }else{
             $arr['today_unit_price']                        = 0;
         }
         //$arr['today_unit_price']                            = @round(($zeelool_data['today_unit_price'] + $voogueme_data['today_unit_price'] + $nihao_data['today_unit_price'] + $meeloog_data['today_unit_price'])/4,2);
-        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total'] + $meeloog_data['today_shoppingcart_total']);
-        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new']);
-        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer']);
-        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer']);
+        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total'] + $meeloog_data['today_shoppingcart_total'] + $zeelool_es_data['today_shoppingcart_total'] + $zeelool_de_data['today_shoppingcart_total']);
+        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new'] + $zeelool_es_data['today_shoppingcart_new'] + $zeelool_de_data['today_shoppingcart_new']);
+        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer'] + $zeelool_es_data['today_register_customer'] + $zeelool_de_data['today_register_customer']);
+        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer'] + $zeelool_es_data['today_sign_customer'] + $zeelool_de_data['today_sign_customer']);
        if($arr['today_shoppingcart_total']>0){
          $arr['today_shoppingcart_conversion']              = round($arr['today_order_success']/$arr['today_shoppingcart_total']*100,2);
          $arr['today_shoppingcart_newconversion']           = round($arr['today_order_success']/$arr['today_shoppingcart_new']*100,2);
