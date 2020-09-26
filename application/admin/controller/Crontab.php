@@ -4169,27 +4169,27 @@ class Crontab extends Backend
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNum')->update($data);
 
-        //当日配镜架总数
-        $orderFrameNum = $orderLog->getOrderFrameNum();
-        $data['value'] = $orderFrameNum;
+        //当日配镜架总数 弃用
+        // $orderFrameNum = $orderLog->getOrderFrameNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFrameNum')->update($data);
 
-        //当日配镜片总数
-        $orderLensNum = $orderLog->getOrderLensNum();
-        $data['value'] = $orderLensNum;
+        //当日配镜片总数 弃用
+        // $orderLensNum = $orderLog->getOrderLensNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderLensNum')->update($data);
 
-        //当日加工总数
-        $orderFactoryNum = $orderLog->getOrderFactoryNum();
-        $data['value'] = $orderFactoryNum;
+        //当日加工总数 弃用
+        // $orderFactoryNum = $orderLog->getOrderFactoryNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFactoryNum')->update($data);
 
-        //当日质检总数
-        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
-        $data['value'] = $orderCheckNewNum;
+        //当日质检总数 弃用
+        // $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNewNum')->update($data);
 
