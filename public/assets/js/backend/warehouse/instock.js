@@ -12,6 +12,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     add_url: 'warehouse/instock/add',
                     edit_url: 'warehouse/instock/edit',
                     // del_url: 'warehouse/instock/del',
+                    import_url: 'warehouse/instock/import',
+
                     multi_url: 'warehouse/instock/multi',
                     table: 'in_stock',
                 }
@@ -193,6 +195,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     window.open(Config.moduleurl + '/warehouse/instock/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
                 
+            });
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+
+                    url: 'warehouse/instock/import',
+                    data: {file: data.url},
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
+                        location.reload();
+                    });
+                });
             });
 
         },

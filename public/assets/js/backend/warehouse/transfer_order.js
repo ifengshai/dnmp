@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     edit_url: 'warehouse/transfer_order/edit',
                     // del_url: 'warehouse/transfer_order/del',
                     multi_url: 'warehouse/transfer_order/multi',
+                    import_url: 'warehouse/transfer_order/import',
                     table: 'transfer_order',
                 }
             });
@@ -26,23 +27,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'transfer_order_number', title: __('Transfer_order_number') },
+                        {checkbox: true},
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'transfer_order_number', title: __('Transfer_order_number')},
                         // {field: 'call_out_site', title: __('Call_out_site')},
                         // {field: 'call_in_site', title: __('Call_in_site')},
                         // {field: 'remark', title: __('Remark')},
                         {
-                            field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            field: 'status',
+                            title: __('Status'),
+                            custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            searchList: {0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'sku', title: ('SKU'), visible: false },
+                        {field: 'sku', title: ('SKU'), visible: false},
 
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'create_person', title: __('Create_person') },
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate, buttons: [
+                            field: 'create_time',
+                            title: __('Create_time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime
+                        },
+                        {field: 'create_person', title: __('Create_person')},
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            formatter: Table.api.formatter.operate,
+                            buttons: [
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -52,7 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     url: 'warehouse/transfer_order/detail',
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -68,7 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     url: 'warehouse/transfer_order/edit',
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -110,7 +124,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/warehouse/transfer_order/setStatus',
-                    data: { ids: ids, status: 2 }
+                    data: {ids: ids, status: 2}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
@@ -124,7 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     function (index) {
                         Backend.api.ajax({
                             url: "warehouse/transfer_order/cancel",
-                            data: { ids: ids }
+                            data: {ids: ids}
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);
@@ -137,11 +151,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: Config.moduleurl + '/warehouse/transfer_order/setStatus',
-                    data: { ids: ids, status: 3 }
+                    data: {ids: ids, status: 3}
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
             })
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+
+                    url: 'warehouse/transfer_order/import',
+                    data: {file: data.url},
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
+                        location.reload();
+                    });
+                });
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -180,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         _this.parent().parent().remove();
                         Backend.api.ajax({
                             url: Config.moduleurl + '/warehouse/transfer_order/deleteItem',
-                            data: { id: id }
+                            data: {id: id}
                         }, function () {
                             Layer.closeAll();
                         });
@@ -246,7 +272,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                     Backend.api.ajax({
                         url: 'warehouse/transfer_order/getSkuData',
-                        data: { sku: sku, platform_type: platform_type }
+                        data: {sku: sku, platform_type: platform_type}
                     }, function (data, ret) {
                         _this.parent().parent().find('.sku_stock').val(data);
                     }, function (data, ret) {

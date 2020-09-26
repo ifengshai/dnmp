@@ -13,6 +13,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     edit_url: 'warehouse/outstock/edit',
                     // del_url: 'warehouse/outstock/del',
                     multi_url: 'warehouse/outstock/multi',
+                    import_url: 'warehouse/outstock/import',
+
                     table: 'out_stock',
                 }
             });
@@ -178,6 +180,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     table.bootstrapTable('refresh');
                 });
             })
+
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+
+                    url: 'warehouse/outstock/import',
+                    data: {file: data.url},
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
+                        location.reload();
+                    });
+                });
+            });
 
             //审核取消
             $(document).on('click', '.btn-cancel', function (e) {
