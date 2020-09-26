@@ -1806,7 +1806,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['arrival_time']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['receiving_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['logistics_number']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("Q" . ($key * 1 + 2), $value['logistics_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             if ($value['is_new_product'] == 1){
                 $is_new_product = '是';
             }else{
