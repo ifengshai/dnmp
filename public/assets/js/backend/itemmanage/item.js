@@ -41,7 +41,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'name', title: __('Name') },
                         { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
                         { field: 'sku', title: __('Sku'), operate: 'LIKE' },
-                        { field: 'price', title: __('参考进价'), operate: false },
+                        { field: 'price', title: __('打样成本'), operate: false },
+                        { field: 'purchase_price', title: __('采购成本'), operate: false },
                         {
                             field: 'brand_id',
                             title: __('Brand_id'),
@@ -69,8 +70,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         },
                         {
                             field: 'is_new',
-                            title: __('Is_new'),
-                            searchList: { 1: '是', 2: '不是' },
+                            title: __('新/老品'),
+                            searchList: { 1: '新品', 2: '老品' },
                             custom: { 1: 'blue', 2: 'red' },
                             formatter: Table.api.formatter.status
                         },
@@ -876,6 +877,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'nihao_stock', title: __('虚拟仓库存Nihao'), operate: false },
                         { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
                         { field: 'wesee_stock', title: __('虚拟仓库存Wesee'), operate: false },
+                        { field: 'amazon_stock', title: __('虚拟仓库存Amazon'), operate: false },
+                        { field: 'zeelool_es_stock', title: __('虚拟仓库存Zeelool_es'), operate: false },
+                        { field: 'zeelool_de_stock', title: __('虚拟仓库存Zeelool_de'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {

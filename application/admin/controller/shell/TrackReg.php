@@ -286,8 +286,10 @@ class TrackReg extends Backend
         if ($data) {
             foreach ($data as $k => $v) {
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
-                $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
-                $params[$k]['id'] = $v['id'];
+                if ($v['platform_sku']) {
+                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
@@ -318,6 +320,7 @@ class TrackReg extends Backend
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
             $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
+
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
             //90天总销量
             $params['sales_num_90days'] = $days90_data[0]->sales_num;
@@ -353,6 +356,7 @@ class TrackReg extends Backend
 
     /**
      * 计划任务 计划补货 每月7号执行一次 汇总各个平台原始sku相同的品的补货需求数量 加入补货需求单以供采购分配处理 汇总过后更新字段 is_show 的值 列表不显示
+     * 2020.09.07 改为每月9号执行一次
      *
      * Created by Phpstorm.
      * User: jhh
@@ -452,6 +456,89 @@ class TrackReg extends Backend
             }
         }
         return $grouped;
+    }
+    /**
+     * 紧急补货  2020.09.07改为计划任务 周计划执行时间为每周三的24点，汇总各站提报的SKU及数量
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/17
+     * Time: 9:22
+     */
+    public function emergency_replenishment()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //紧急补货分站点
+        $platform_type = input('label');
+        //统计计划补货数据
+        $list = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+            // ->where(['is_show' => 1, 'type' => 2,'website_type'=>$platform_type]) //分站点统计补货需求 2020.9.4改为计划补货 不分站点
+
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->group('sku')
+            ->column("sku,sum(replenish_num) as sum");
+
+        if (empty($list)) {
+            echo ('暂时没有紧急补货单需要处理');
+            die;
+        }
+
+        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+        $sku_list = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->field('id,sku,website_type,replenish_num')
+            ->select();
+        //根据sku对数组进行重新分配
+        $sku_list = $this->array_group_by($sku_list, 'sku');
+
+        $result = false;
+            //首先插入主表 获取主表id new_product_replenish
+            $data['type'] = 2;
+            $data['create_person'] = 'Admin';
+            $data['create_time'] = date('Y-m-d H:i:s');
+            $res = Db::name('new_product_replenish')->insertGetId($data);
+
+            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+            $int = 0;
+            foreach ($sku_list as $k => $v) {
+                //求出此sku在此补货单中的总数量
+                $sku_whole_num = array_sum(array_map(function ($val) {
+                    return $val['replenish_num'];
+                }, $v));
+                //求出比例赋予新数组
+                foreach ($v as $ko => $vo) {
+                    $date[$int]['id'] = $vo['id'];
+                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                    $date[$int]['replenish_id'] = $res;
+                    $int += 1;
+                }
+            }
+            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+            $res1 = $this->model->allowField(true)->saveAll($date);
+
+            $number = 0;
+            foreach ($list as $k => $v) {
+                $arr[$number]['sku'] = $k;
+                $arr[$number]['replenishment_num'] = $v;
+                $arr[$number]['create_person'] = 'Admin';
+                // $arr[$number]['create_person'] = session('admin.nickname');
+                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+                $arr[$number]['type'] = 2;
+                $arr[$number]['replenish_id'] = $res;
+                $number += 1;
+            }
+            //插入补货需求单表
+            $result = $this->order->allowField(true)->saveAll($arr);
+            //更新计划补货列表
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 2])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
+
     }
 
 }

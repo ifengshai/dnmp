@@ -99,8 +99,8 @@ table.altrowstable tr:nth-child(even){
 												{foreach name="orderPlatformList" item="vo"}
                                                 <option value="{$key}">{$vo}</option>
                                                 {/foreach}
-                                                {if isset($result) && $result == 15}
-                                                <option value="10">全部</option>
+                                                {if isset($result) && in_array(100,$arr)}
+                                                <option value="100">全部</option>
                                                 {/if}
                                             </select>
                                         </div>
@@ -420,15 +420,23 @@ table.altrowstable tr:nth-child(even){
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">3</td>
                             <td style="text-align: center; vertical-align: middle;">zeelool</td>
-                            <td style="text-align: center; vertical-align: middle;">APP</td>
+                            <td style="text-align: center; vertical-align: middle;">IOS</td>
                             <td id='zeelool_app_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_money}</td>
                             <td id='zeelool_app_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_num}</td>
                             <td id='zeelool_app_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_unit_price}</td>
                         </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">4</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool</td>
+                            <td style="text-align: center; vertical-align: middle;">Android</td>
+                            <td id='zeelool_android_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_sales_money}</td>
+                            <td id='zeelool_android_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_sales_num}</td>
+                            <td id='zeelool_android_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_unit_price}</td>
+                        </tr>
                         {/if}
                         {if isset($arr) && in_array(2,$arr)} 
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">4</td>
+                            <td style="text-align: center; vertical-align: middle;">5</td>
                             <td style="text-align: center; vertical-align: middle;">voogueme</td>
                             <td style="text-align: center; vertical-align: middle;">网页端</td>
                             <td id='voogueme_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_pc_sales_money}</td>
@@ -436,7 +444,7 @@ table.altrowstable tr:nth-child(even){
                             <td id='voogueme_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_pc_unit_price}</td>
                         </tr>
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">5</td>
+                            <td style="text-align: center; vertical-align: middle;">6</td>
                             <td style="text-align: center; vertical-align: middle;">voogueme</td>
                             <td style="text-align: center; vertical-align: middle;">移动端</td>
                             <td id='voogueme_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_sales_money}</td>
@@ -446,7 +454,7 @@ table.altrowstable tr:nth-child(even){
                         {/if}
                         {if isset($arr) && in_array(3,$arr)} 
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">6</td>
+                            <td style="text-align: center; vertical-align: middle;">7</td>
                             <td style="text-align: center; vertical-align: middle;">nihao</td>
                             <td style="text-align: center; vertical-align: middle;">网页端</td>
                             <td id='nihao_pc_sales_money'       style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_pc_sales_money}</td>
@@ -454,7 +462,7 @@ table.altrowstable tr:nth-child(even){
                             <td id='nihao_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_pc_unit_price}</td>
                         </tr>
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">7</td>
+                            <td style="text-align: center; vertical-align: middle;">8</td>
                             <td style="text-align: center; vertical-align: middle;">nihao</td>
                             <td style="text-align: center; vertical-align: middle;">移动端</td>
                             <td id='nihao_wap_sales_money'     style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_sales_money}</td>
@@ -464,7 +472,7 @@ table.altrowstable tr:nth-child(even){
                         {/if}
                         {if isset($arr) && in_array(4,$arr)}
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">8</td>
+                            <td style="text-align: center; vertical-align: middle;">9</td>
                             <td style="text-align: center; vertical-align: middle;">meeloog</td>
                             <td style="text-align: center; vertical-align: middle;">网页端</td>
                             <td id='meeloog_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_pc_sales_money}</td>
@@ -472,14 +480,50 @@ table.altrowstable tr:nth-child(even){
                             <td id='meeloog_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_pc_unit_price}</td>
                         </tr>
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">9</td>
+                            <td style="text-align: center; vertical-align: middle;">10</td>
                             <td style="text-align: center; vertical-align: middle;">meeloog</td>
                             <td style="text-align: center; vertical-align: middle;">移动端</td>
                             <td id='meeloog_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_money}</td>
                             <td id='meeloog_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_num}</td>
                             <td id='meeloog_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_unit_price}</td>
                         </tr>
-                        {/if}                                                                                                                                                                            							 
+                        {/if}
+                        {if isset($arr) && in_array(9,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">11</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_es</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='zeelool_es_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_sales_money}</td>
+                            <td id='zeelool_es_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_sales_num}</td>
+                            <td id='zeelool_es_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">12</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_es</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='zeelool_es_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_sales_money}</td>
+                            <td id='zeelool_es_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_sales_num}</td>
+                            <td id='zeelool_es_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(10,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">13</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_de</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='zeelool_de_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_sales_money}</td>
+                            <td id='zeelool_de_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_sales_num}</td>
+                            <td id='zeelool_de_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">14</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_de</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='zeelool_de_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_sales_money}</td>
+                            <td id='zeelool_de_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_sales_num}</td>
+                            <td id='zeelool_de_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_unit_price}</td>
+                        </tr>
+                        {/if}                                                                                                                                                                                                                            							 
                 </table>
             </div>
         </div>        		
@@ -494,25 +538,37 @@ table.altrowstable tr:nth-child(even){
         vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
         nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
         meeloogSalesNumList: {:json_encode(array_values($meeloogSalesNumList))},
+        zeelool_esSalesNumList: {:json_encode(array_values($zeelool_esSalesNumList))},
+        zeelool_deSalesNumList: {:json_encode(array_values($zeelool_deSalesNumList))},
         zeeloolSalesMoneyList : {:json_encode(array_values($zeeloolSalesMoneyList))},
         vooguemeSalesMoneyList : {:json_encode(array_values($vooguemeSalesMoneyList))},
         nihaoSalesMoneyList :{:json_encode(array_values($nihaoSalesMoneyList))},
         meeloogSalesMoneyList :{:json_encode(array_values($meeloogSalesMoneyList))},
+        zeelool_esSalesMoneyList :{:json_encode(array_values($zeelool_esSalesMoneyList))},
+        zeelool_deSalesMoneyList :{:json_encode(array_values($zeelool_deSalesMoneyList))},
         zeeloolUnitPriceList :{:json_encode(array_values($zeeloolUnitPriceList))},
         vooguemeUnitPriceList :{:json_encode(array_values($vooguemeUnitPriceList))},
         nihaoUnitPriceList :{:json_encode(array_values($nihaoUnitPriceList))},
         meeloogUnitPriceList :{:json_encode(array_values($meeloogUnitPriceList))},
+        zeelool_esUnitPriceList :{:json_encode(array_values($zeelool_esUnitPriceList))},
+        zeelool_deUnitPriceList :{:json_encode(array_values($zeelool_deUnitPriceList))},
         zeeloolShoppingcartTotal :{:json_encode(array_values($zeeloolShoppingcartTotal))},
         vooguemeShoppingcartTotal :{:json_encode(array_values($vooguemeShoppingcartTotal))},
         nihaoShoppingcartTotal :{:json_encode(array_values($nihaoShoppingcartTotal))},
         meeloogShoppingcartTotal :{:json_encode(array_values($meeloogShoppingcartTotal))},
+        zeelool_esShoppingcartTotal :{:json_encode(array_values($zeelool_esShoppingcartTotal))},
+        zeelool_deShoppingcartTotal :{:json_encode(array_values($zeelool_deShoppingcartTotal))},
         zeeloolShoppingcartConversion :{:json_encode(array_values($zeeloolShoppingcartConversion))},
         vooguemeShoppingcartConversion :{:json_encode(array_values($vooguemeShoppingcartConversion))},
         nihaoShoppingcartConversion :{:json_encode(array_values($nihaoShoppingcartConversion))},
         meeloogShoppingcartConversion :{:json_encode(array_values($meeloogShoppingcartConversion))},
+        zeelool_esShoppingcartConversion :{:json_encode(array_values($zeelool_esShoppingcartConversion))},
+        zeelool_deShoppingcartConversion :{:json_encode(array_values($zeelool_deShoppingcartConversion))},
         zeeloolRegisterCustomer :{:json_encode(array_values($zeeloolRegisterCustomer))},
         vooguemeRegisterCustomer :{:json_encode(array_values($vooguemeRegisterCustomer))},
         nihaoRegisterCustomer :{:json_encode(array_values($nihaoRegisterCustomer))},
-        meeloogRegisterCustomer :{:json_encode(array_values($meeloogRegisterCustomer))}        
+        meeloogRegisterCustomer :{:json_encode(array_values($meeloogRegisterCustomer))},
+        zeelool_esRegisterCustomer :{:json_encode(array_values($zeelool_esRegisterCustomer))},
+        zeelool_deRegisterCustomer :{:json_encode(array_values($zeelool_deRegisterCustomer))},        
     };
 </script>

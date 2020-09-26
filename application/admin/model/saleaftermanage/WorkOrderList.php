@@ -11,6 +11,7 @@ use think\Model;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -43,7 +44,7 @@ class WorkOrderList extends Model
      */
     public function getWorkPlatFormFormatAttr($value, $data)
     {
-        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao'];
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog'];
         return $status[$data['work_platform']];
     }
 
@@ -157,6 +158,7 @@ class WorkOrderList extends Model
         $result['customer_email'] = $register_email ?: $orderInfo['customer_email'];
         $result['order_type']     = $orderInfo['order_type'];
         $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
+        $result['payment_time'] = $this->model->where('increment_id', $increment_id)->value('created_at');
         return $result ? $result : [];
     }
 
@@ -184,7 +186,10 @@ class WorkOrderList extends Model
             case 3:
                 $this->model = new \app\admin\model\order\order\Nihao();
                 $prescriptions = NihaoPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
-
+                break;
+            case 4:
+                $this->model = new \app\admin\model\order\order\Meeloog();
+                $prescriptions = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
                 break;
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
@@ -281,6 +286,9 @@ class WorkOrderList extends Model
                 break;
             case 3:
                 $url = config('url.nihao_url');
+                break;
+            case 4:
+                $url = config('url.meeloog_url');
                 break;
             case 5:
                 $url = config('url.wesee_url');
@@ -692,6 +700,9 @@ class WorkOrderList extends Model
         if ($changeSkus) {
             $postData = $postDataCommon = [];
             foreach ($changeSkus as $key => $changeSku) {
+                if(!empty($changeSku['replacement_order'])){
+                    continue;
+                }
                 $address = unserialize($changeSku['userinfo_option']);
                 $prescriptions = unserialize($changeSku['prescription_option']);
                 $postDataCommon = [
@@ -769,25 +780,27 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            try {
-                if(24558 == $work_id){
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
+            if(!empty($postData)){
+                try {
+                    if(24558 == $work_id){
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
+                    }
+                    if($isNewVersion == 0){
+                        $url = 'magic/order/createOrder';
+                    }elseif($isNewVersion == 1){
+                        $url = 'magic/order/newCreateOrder';
+                    }
+                    $res = $this->httpRequest($siteType, $url, $postData, 'POST');
+                    $increment_id = $res['increment_id'];
+                    //replacement_order添加补发的订单号
+                    WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+                    self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
+    
+                    //补发扣库存
+                    $this->deductionStock($work_id, $measure_id);
+                } catch (Exception $e) {
+                    exception($e->getMessage());
                 }
-                if($isNewVersion == 0){
-                    $url = 'magic/order/createOrder';
-                }elseif($isNewVersion == 1){
-                    $url = 'magic/order/newCreateOrder';
-                }
-                $res = $this->httpRequest($siteType, $url, $postData, 'POST');
-                $increment_id = $res['increment_id'];
-                //replacement_order添加补发的订单号
-                WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
-
-                //补发扣库存
-                $this->deductionStock($work_id, $measure_id);
-            } catch (Exception $e) {
-                exception($e->getMessage());
             }
         }
     }
@@ -976,6 +989,8 @@ class WorkOrderList extends Model
                                     $this->presentCoupon($work->id);
                                 } elseif ($measure_choose_id == 10) {
                                     $this->presentIntegral($work->id);
+                                } elseif(7 == $measure_choose_id){
+                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                                 }
                                 $key++;
                             }
@@ -1001,7 +1016,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        //$this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();
@@ -1094,9 +1109,6 @@ class WorkOrderList extends Model
             $dataWorkOrder['work_status'] = 5;
         }
         WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
-        if ($resultInfo  && (1 == $data['recept_status'])) {
-            $this->deductionStock($work_id, $measure_id);
-        }
         //不是自动处理完成
         if($is_auto_complete != 1){
             $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
@@ -1104,7 +1116,13 @@ class WorkOrderList extends Model
                 $this->presentCoupon($work->id);
             } elseif ($measure_choose_id == 10) {
                 $this->presentIntegral($work->id);
+            } elseif($measure_choose_id == 7){
+                $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
+        }
+        //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
+        if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
+            $this->deductionStock($work_id, $measure_id);
         }
         Db::commit();
         return true;
@@ -1120,13 +1138,18 @@ class WorkOrderList extends Model
         if ($measuerInfo < 1) {
             return false;
         }
+        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order,replacement_order')->find();
+        //如果措施是补发但是没有生成补发单的话不扣减库存
+        if(($measuerInfo == 5) && (empty($workOrderList->replacement_order))){
+            return false;
+        }
         $whereMeasure['work_id'] = $work_id;
         $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
         if (!$result) {
             return false;
         }
-        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
+        
         $result = collection($result)->toArray();
         if (1 == $measuerInfo) { //更改镜片
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
@@ -1194,6 +1217,9 @@ class WorkOrderList extends Model
                     break;
                 case 3:
                     $db = 'database.db_nihao';
+                    break;
+                case 4:
+                    $db = 'database.db_meeloog';
                     break;
                 default:
                     return false;

@@ -208,4 +208,34 @@ return [
         'charset'     => Env::get('db_rufoo.charset'),
         'prefix'      => Env::get('db_rufoo.prefix'),
     ],
+    'db_zeelool_es' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_es.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_es.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_es.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_es.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_es.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_es.charset'),
+        'prefix'      => Env::get('db_zeelool_es.prefix'),
+    ],
+    'db_zeelool_de' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_de.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_de.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_de.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_de.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_de.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_de.charset'),
+        'prefix'      => Env::get('db_zeelool_de.prefix'),
+    ],
 ];

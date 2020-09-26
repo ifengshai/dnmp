@@ -118,6 +118,18 @@ class ItWebDemand extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
 
+            //筛选开发进度
+            if ($filter['develop_finish_status1']) {
+                $map['develop_finish_status'] = $filter['develop_finish_status1'];
+                unset($filter['develop_finish_status1']);
+            }
+
+            //筛选测试进度
+            if ($filter['test_status1']) {
+                $map['test_status'] = $filter['test_status1'];
+                unset($filter['test_status1']);
+            }
+
             //筛选提出人
             if ($filter['entry_user_name']) {
                 $admin = new \app\admin\model\Admin();
@@ -125,6 +137,17 @@ class ItWebDemand extends Backend
                 $id = $admin->where($smap)->value('id');
                 $map['entry_user_id'] = $id;
                 unset($filter['entry_user_name']);
+                unset($smap['nickname']);
+            }
+
+            //筛选任务人
+            if ($filter['task_user_name']) {
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['task_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                //前端负责人id 后端负责人id 测试负责人id
+                $task_map = "FIND_IN_SET({$id},web_designer_user_id)  or FIND_IN_SET({$id},phper_user_id)  or FIND_IN_SET({$id}, test_user_id)";
+                unset($filter['task_user_name']);
                 unset($smap['nickname']);
             }
             $adminId = session('admin.id');
@@ -232,12 +255,14 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($meWhere)
                 ->where($map)
+                ->where($task_map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
                 ->where($meWhere)
                 ->where($map)
+                ->where($task_map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -345,7 +370,27 @@ class ItWebDemand extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+            //筛选开发进度
+            if ($filter['develop_finish_status1']) {
+                $map['develop_finish_status'] = $filter['develop_finish_status1'];
+                unset($filter['develop_finish_status1']);
+            }
 
+            //筛选测试进度
+            if ($filter['test_status1']) {
+                $map['test_status'] = $filter['test_status1'];
+                unset($filter['test_status1']);
+            }
+            //筛选任务人
+            if ($filter['task_user_name']) {
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['task_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                //前端负责人id 后端负责人id 测试负责人id
+                $task_map = "FIND_IN_SET({$id},web_designer_user_id)  or FIND_IN_SET({$id},phper_user_id)  or FIND_IN_SET({$id}, test_user_id)";
+                unset($filter['task_user_name']);
+                unset($smap['nickname']);
+            }
             //筛选提出人
             if ($filter['entry_user_name']) {
                 $admin = new \app\admin\model\Admin();
@@ -423,7 +468,7 @@ class ItWebDemand extends Backend
                 }
 
                 //不是主管
-                if ($meWhere !== '1=1') {
+                if ($meWhere === '1=1') {
                     $meWhere = "FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},app_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},entry_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
             } elseif ($filter['label'] == 2) { //未完成

@@ -64,7 +64,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type',
                             title: __('补货需求单类型'),
                             custom: {1: 'green', 2: 'danger'},
-                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            searchList: {1: '月度计划', 2: '周度计划'},
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -206,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type',
                             title: __('补货需求单类型'),
                             custom: {1: 'blue', 2: 'danger'},
-                            searchList: {1: '计划补货', 2: '紧急补货'},
+                            searchList: {1: '月度计划', 2: '周度计划'},
                             formatter: Table.api.formatter.status
                         }, {
                         field: 'status',
@@ -258,6 +258,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+                                // {
+                                //     name: 'submitAudit',
+                                //     text: '提交',
+                                //     title: __('提交'),
+                                //     classname: 'btn btn-xs btn-info btn-ajax',
+                                //     icon: 'fa fa-leaf',
+                                //     url: 'purchase/new_product_replenish_order/submit',
+                                //     confirm: '确认提交审核吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         if (row.status == 1) {
+                                //             return true;
+                                //         } else {
+                                //             return false;
+                                //         }
+                                //     },
+                                // },
                                 {
                                     name: 'distribution',
                                     text: __('分配'),
@@ -358,6 +385,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         //     searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' },
                         //     formatter: Table.api.formatter.status
                         // },
+                        {
+                            field: 'new_old',
+                            title: __('新品/老品'),
+                            custom: {1: 'green', 2: 'orange'},
+                            searchList: {1: '新品', 2: '老品'},
+                            formatter: Table.api.formatter.status
+                        },
+
                         {field: 'replenishment_num', title: __('Replenishment_num'), operate: false},
                         {
                             field: 'supplier',
@@ -430,7 +465,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 parent.$("a.btn-refresh").trigger("click");
             });
 
-
+            $(document).on('click', '.btn-fenpeitijiao', function () {
+                var ids = $("#fenpeitijiaoid").val();
+                $.ajax({
+                    type: "GET",
+                    url: "purchase/new_product_replenish_order/submit",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        ids: ids,
+                        dialog: 1,
+                    },
+                    success: function (data, ret) {
+                        if (data.code == 1){
+                            $(".btn-refresh").trigger("click");//刷新当前页面的数据
+                            Fast.api.close(data);
+                            Form.api.bindevent($("form[role=form]"));
+                            parent.location.reload();
+                        }else{
+                            Layer.alert(data.msg);
+                        }
+                    }
+                });
+            });
             //需求单确认分配
             // $(document).on('click', '.btn-confirmdis', function () {
             //     var ids = Table.api.selectedids(table);
@@ -484,18 +542,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {
+                            field: 'new_old',
+                            title: __('新品/老品'),
+                            custom: {1: 'green', 2: 'orange'},
+                            searchList: {1: '新品', 2: '老品'},
+                            formatter: Table.api.formatter.status
+                        },
+
                         {field: 'num', title: __('总需求数量'), operate: false},
-                        {field: 'supplier_name', title: __('供应商'), operate: false},
+                        {field: 'supplier_name', title: __('供应商'), operate: 'LIKE'},
                         {field: 'distribute_num', title: __('分配数量'), operate: false},
                         {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
                         {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
                         {
                             field: 'status',
                             title: __('状态'),
-                            custom: {1: 'green', 2: 'danger'},
-                            searchList: {1: '未采购', 2: '已采购'},
+                            custom: {1: 'green', 2: 'blue',3:'danger'},
+                            searchList: {1: '未采购', 2: '已采购',3:'已拒绝'},
                             formatter: Table.api.formatter.status
                         },
+                        {field: 'remarks', title: __('备注'), operate: false},
+
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
@@ -520,6 +588,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
 
+                                {
+                                    name: 'refused',
+                                    text: __('拒绝采购'),
+                                    title: __(''),
+                                    extend: 'data-area = \'["50%","40%"]\'',
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-danger btn-dialog',
+                                    url: 'purchase/new_product_replenish_order/refused',
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                    callback: function (data) {
+                                    }
+                                },
+
                             ],
                             formatter: Table.api.formatter.operate
                         }]
@@ -532,42 +620,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //创建采购单
             $(document).on('click', '.btn-createPurchaseOrder', function () {
                 var ids = Table.api.selectedids(table);
-                        $.ajax({
-                            type: "GET",
-                            url: "purchase/purchase_order/add",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
-                            data: {
-                                label: 'replenish',
-                                ids: ids,
-                                dialog: 1,
-                            },
-                            success: function (data, ret) {
-                                if (data.code == 0) {
-                                    Layer.alert(data.msg);
-                                    table.bootstrapTable('refresh');
-                                    return false;
-                                }
-                                var options = {
-                                    shadeClose: false,
-                                    shade: [0.3, '#393D49'],
-                                    area: ['100%', '100%'], //弹出层宽高
-                                    callback: function (value) {
-                                        table.bootstrapTable('refresh');
-                                    }
-                                };
-                                Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
+                $.ajax({
+                    type: "GET",
+                    url: "purchase/purchase_order/add",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        label: 'replenish',
+                        ids: ids,
+                        dialog: 1,
+                    },
+                    success: function (data, ret) {
+                        if (data.code == 0) {
+                            Layer.alert(data.msg);
+                            table.bootstrapTable('refresh');
+                            return false;
+                        }
+                        var options = {
+                            shadeClose: false,
+                            shade: [0.3, '#393D49'],
+                            area: ['100%', '100%'], //弹出层宽高
+                            callback: function (value) {
+                                table.bootstrapTable('refresh');
                             }
-                        });
-                        // Backend.api.ajax({
-                        //     url: "purchase/purchase_order/add?label=replenish&ids=" + ids.join(',') + "&dialog=1",
-                        //     data: {ids: ids},
-                        //     type: GET,
-                        // }, function (data, ret) {
-                        //     table.bootstrapTable('refresh');
-                        //     Layer.close(index);
-                        // });
+                        };
+                        Fast.api.open('purchase/purchase_order/add?label=replenish&ids=' + ids.join(','), '创建采购单', options);
+                    }
+                });
+                // Backend.api.ajax({
+                //     url: "purchase/purchase_order/add?label=replenish&ids=" + ids.join(',') + "&dialog=1",
+                //     data: {ids: ids},
+                //     type: GET,
+                // }, function (data, ret) {
+                //     table.bootstrapTable('refresh');
+                //     Layer.close(index);
+                // });
                 ;
                 // Layer.confirm(
                 //     __('确定要创建采购单吗'),
@@ -612,7 +700,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {
-
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
                                 var pageNumber = options.pageNumber;
@@ -623,28 +710,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'sku', title: __(' sku'), operate: false},
-                        // {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {field: 'sku', title: __('sku'), operate: 'LIKE'},
                         {field: 'num', title: __('总需求数量'), operate: false},
-                        {field: 'supplier_name', title: __('供应商'), operate: false},
-                        {field: 'distribute_num', title: __('分配数量'), operate: false},
-                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
-                        {field: 'purchase_person', title: __('采购负责人'), operate: false},
                         {
                             field: 'status',
                             title: __('状态'),
-                            operate: false,
-                            custom: {1: 'green', 2: 'danger'},
-                            searchList: {1: '未采购', 2: '已采购'},
+                            custom: {1: 'green', 2: 'blue',3:'danger'},
+                            searchList: {1: '未采购', 2: '已采购',3:'已拒绝'},
                             formatter: Table.api.formatter.status
                         },
+                        {field: 'supplier_name', title: __('供应商'), operate: false},
+                        {field: 'distribute_num', title: __('分配数量'), operate: false},
+                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
+                        {field: 'remarks', title: __('备注'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: false}
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-            $("#myTabContent .row").hide();
+
+            //将补货单信息追加到顶部
+            $(".replenish-box .form-group").each(function(){
+                $("#myTabContent .row").prepend($(this));
+            });
 
         },
 
@@ -660,6 +750,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(this).parent().parent().remove();
             })
 
+            Controller.api.bindevent();
+        },
+        refused: function () {
             Controller.api.bindevent();
         },
 

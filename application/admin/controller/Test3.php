@@ -7,6 +7,7 @@ use app\common\controller\Backend;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
+
 class Test3 extends Backend
 {
 
@@ -141,142 +142,124 @@ class Test3 extends Backend
     }
 
 
-
-    /**
-     * 测试
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/06/06 15:19:57 
-     * @return void
-     */
-    public function test()
+    
+    //修改zendesk表中的承接人id
+    public function zendesk_assign_modify()
     {
-        //session_start();
-        $client = new \Google_Client();
-        $client->setAuthConfig('./oauth-credentials.json');
-        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-        // Create an authorized analytics service object.
-        $analytics = new \Google_Service_AnalyticsReporting($client);
-        $startDate = '2020-08-12';
-        $endDate = '2020-08-12';
-        // Call the Analytics Reporting API V4.
-        $response = $this->getReport($analytics, $startDate, $endDate);
-        // Print the response.
-        $result = $this->printResults($response);
-
-        dump($result);die;
-
-
-        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-        //     // Set the access token on the client.
-        //     $client->setAccessToken($_SESSION['access_token']);
-
-            
-        // } else {
-        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
-        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-        // }
+        $list = Db::name('Sheet1')->where('id', 'not in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $item) {
+            Db::name('zendesk')->where('assignee_id', $item['id'])->update(['assign_id' => $item['admin_id'], 'due_id' => $item['admin_id'], 'recipient' => $item['admin_id']]);
+            echo $item['id'] . ' is ok' . "\n";
+        }
+    }
+    public function zendesk_tongyong()
+    {
+        $list = Db::name('zendesk')->where('assignee_id', 'in', ['383342686912', '381994479654'])->select();
+        foreach ($list as $k => $v) {
+            $due_id = Db::name('zendesk_comments')->where('zid', $v['id'])->where('is_admin', 1)->order('id desc')->value('due_id');
+            Db::name('zendesk')->where('id', $v['id'])->update(['assign_id' => $due_id, 'due_id' => $due_id, 'recipient' => $due_id]);
+            echo $k . "\n";
+        }
+        echo 'ok';
     }
 
-
-
-    /**
-     * Queries the Analytics Reporting API V4.
-     *
-     * @param service An authorized Analytics Reporting API V4 service object.
-     * @return The Analytics Reporting API V4 response.
-     */
-    // protected function getReport($analytics, $startDate, $endDate)
-    // {
-
-    //     // Replace with your view ID, for example XXXX.
-    //     $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
-
-    //     // Create the DateRange object.
-    //     $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
-    //     $dateRange->setStartDate($startDate);
-    //     $dateRange->setEndDate($endDate);
-
-    //     // Create the Metrics object.
-    //     $sessions = new \Google_Service_AnalyticsReporting_Metric();
-    //     $sessions->setExpression("ga:sessions");
-    //     $sessions->setAlias("sessions");
-
-    //     // Create the ReportRequest object.
-    //     $request = new \Google_Service_AnalyticsReporting_ReportRequest();
-    //     $request->setViewId($VIEW_ID);
-    //     $request->setDateRanges($dateRange);
-    //     $request->setMetrics(array($sessions));
-
-    //     $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-    //     $body->setReportRequests(array($request));
-    //     return $analytics->reports->batchGet($body);
-    // }
-
-    protected function getReport($analytics, $startDate, $endDate)
+    //修改zendesk表中zendesk的id
+    public function zendesk_id_modify()
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        $VIEW_ID = config('GOOGLE_ANALYTICS_VIEW_ID');
-
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
-
-        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
-        $dateRange->setStartDate($startDate);
-        $dateRange->setEndDate($endDate);   
-
-        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
-        $adCostMetric->setExpression("ga:adCost");
-        $adCostMetric->setAlias("ga:adCost");
-
-        // Create the ReportRequest object.
-        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
-        $request->setViewId($VIEW_ID);
-        $request->setDateRanges($dateRange);
-        $request->setMetrics(array($adCostMetric));
-        // $request->setDimensions(array($sessionDayDimension));
-
-        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-        $body->setReportRequests(array($request));
-        return $analytics->reports->batchGet($body);
-
+        $this->zendesk_id1(1);
+        $this->zendesk_id1(2);
     }
-    /**
-     * Parses and prints the Analytics Reporting API V4 response.
-     *
-     * @param An Analytics Reporting API V4 response.
-     */
-    protected function printResults($reports)
+    public function zendesk_id1($type)
     {
-        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
-            $report = $reports[$reportIndex];
-            $header = $report->getColumnHeader();
-            $dimensionHeaders = $header->getDimensions();
-            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
-            $rows = $report->getData()->getRows();
+        if ($type == 1) {
+            $zendesk_str = '383342686912';
+        } else {
+            $zendesk_str = '381994479654';
+        }
+        $zendesk_arr['type'] = $type;
+        Db::name('zendesk')->where($zendesk_arr)->update(['assignee_id' => $zendesk_str]);
 
-            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
-                $row = $rows[$rowIndex];
-                $dimensions = $row->getDimensions();
-                $metrics = $row->getMetrics();
-                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
-                    print($dimensionHeaders[$i] . ": " . $dimensions[$i] . "\n");
-                }
+        echo 'ok';
+    }
+    //修改comments表中的due_id
+    public function zendesk_test()
+    {
+        //查询zendesk_comments
+        $zendesk = Db::name('zendesk_comments')->field('a.id,a.author_id,b.assign_id')->alias('a')->join(['fa_zendesk' => 'b'], 'a.zid=b.id')->where('b.channel', 'email')->where('a.due_id', 0)->where('a.is_admin', 1)->where('a.author_id', 'not in', ['383342686912', '381994479654'])->select();
+        $assign_arr = Db::name('zendesk_agents')->column('admin_id', 'old_agent_id');
+        foreach ($zendesk as $k => $v) {
+            //如果是公用账户 查询zendesk表 获取承接人id 更新评论表due_id
+            Db::name('zendesk_comments')->where('id', $v['id'])->update(['due_id' => $assign_arr[$v['author_id']] ?: 0]);
 
-                for ($j = 0; $j < count($metrics); $j++) {
-                    $values = $metrics[$j]->getValues();
-                    for ($k = 0; $k < count($values); $k++) {
-                        $entry = $metricHeaders[$k];
-                        print($entry->getName() . ": " . $values[$k] . "\n");
-                    }
+            echo $k . "\n";
+        }
+
+        echo 'is ok';
+    }
+    //排查邮件中所有不匹配站点的邮件
+    public function zendesk_plat_modify(){
+        $zendesk = Db::name('zendesk')->field('assign_id,type,ticket_id,id')->where(['assign_id'=>['neq','0'],'status'=>['neq',5]])->select();
+        $i = 0;
+        foreach ($zendesk as $item){
+            //查询该邮件的负责人的站点
+            $admin_type = Db::name('zendesk_agents')->where('admin_id',$item['assign_id'])->value('type');
+            if($admin_type){
+                if($admin_type != $item['type']){
+                    echo $item['id']."\n";
+                    $i++;
+                  
                 }
             }
         }
+    }
+    //每天的回复量
+    public function zendesk_data(){
+        $this->zendeskTasks = new \app\admin\model\zendesk\ZendeskTasks;
+        $this->zendeskComments = new \app\admin\model\zendesk\ZendeskComments;
+        $customer = $this->zendeskTasks->where(['reply_count'=>0])->order('id','desc')->select();
+        $customer = collection($customer)->toArray();
+        foreach ($customer as $item){
+            //获取当前时间
+            $create = explode(' ',$item['create_time']);
+            $start = $create[0];
+            $end = date('Y-m-d 23:59:59',strtotime($start));
+            $where['is_admin'] = 1;
+            $where['due_id'] = $item['admin_id'];
+            $where['update_time'] = ['between', [$start, $end]];
+            $count = $this->zendeskComments->where($where)->count();
+            Db::name('zendesk_tasks')->where('id',$item['id'])->update(['reply_count'=>$count]);
+            echo $item['id'].'--'.$item['admin_id'].'--'.$count.' is ok'."\n";
+            sleep(1);
+        }
+    }
+    //没有承接人的数据
+    public function zendesk_no_assign(){
+        //查询没有承接人的数据
+        $where[] = ['exp',Db::raw("assign_id is null or assign_id = 0")];
+        $where['due_id'] = ['neq',0];
+        $zendesk = Db::name('zendesk')->where($where)->select();
+        foreach ($zendesk as $item){
+            //查询评论最多的人
+            $arr['is_admin'] = 1;
+            $arr['zid'] = $item['id'];
+            $arr['due_id'] = ['not in','75,105,95,117'];
+            $comments = Db::name('zendesk_comments')->where($arr)->group('due_id')->field('due_id,count(due_id) as count')->order('count','desc')->select();
+            $assign_id = 0;
+            foreach ($comments as $value){
+                //查询该用户的站点是否和当前站点一致
+                $types = Db::name('zendesk_agents')->where('admin_id',$value['due_id'])->column('type');
+                if($types && in_array($item['type'],$types)){
+                    $assign_id = $value['due_id'];
+                    break;
+                }
+            }
+            if($assign_id == 0){
+                $assign_id = $item['due_id'];
+            }
+            Db::name('zendesk')->where('id',$item['id'])->update(['assign_id'=>$assign_id]);
+            echo $item['id'].'--'.$item['assign_id'].'--'.$assign_id.' is ok'."\n";
+        }
+        echo "all is ok";
     }
     /**
      * 测试
@@ -302,21 +285,9 @@ class Test3 extends Backend
         $result = $this->printResults($response);
         dump($result);
         dump($result[0]['ga:adCost']);die;
-
-
-        // if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-        //     // Set the access token on the client.
-        //     $client->setAccessToken($_SESSION['access_token']);
-
-            
-        // } else {
-        //     $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
-        //     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-        // }
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
-
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";

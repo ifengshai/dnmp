@@ -1206,6 +1206,8 @@ class Inventory extends Backend
             $db = 'database.db_voogueme';
         } elseif (3 == $order_platform) {
             $db = 'database.db_nihao';
+        } elseif (4 == $order_platform) {
+            $db = 'database.db_meeloog';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1363,6 +1365,8 @@ class Inventory extends Backend
             $db = 'database.db_voogueme';
         } elseif (3 == $order_platform) {
             $db = 'database.db_nihao';
+        } elseif (4 == $order_platform) {
+            $db = 'database.db_meeloog';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1457,6 +1461,8 @@ class Inventory extends Backend
             $db = 'database.db_voogueme';
         } elseif (3 == $order_platform) {
             $db = 'database.db_nihao';
+        } elseif (4 == $order_platform) {
+            $db = 'database.db_meeloog';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1616,6 +1622,8 @@ class Inventory extends Backend
             $db = 'database.db_voogueme';
         } elseif (3 == $order_platform) {
             $db = 'database.db_nihao';
+        } elseif (4 == $order_platform) {
+            $db = 'database.db_meeloog';
         }
         foreach ($changeRow as $v) {
             //原先sku

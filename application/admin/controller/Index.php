@@ -32,9 +32,8 @@ class Index extends Backend
             }
             config('fastadmin.multiplenav', true);
         }
-       
+
         parent::_initialize();
-       
     }
 
     /**
@@ -70,20 +69,20 @@ class Index extends Backend
     {
         $url = $this->request->get('url', 'index/index');
         //修改跳转(开始)
-        if( false !== strpos($url,'?dialog=1')){
-            $arr = explode( '/',$url);
-            if(is_array($arr) && 1<=count($arr)){
-                $url = '/'.$arr[1];
-            }else{
+        if (false !== strpos($url, '?dialog=1')) {
+            $arr = explode('/', $url);
+            if (is_array($arr) && 1 <= count($arr)) {
+                $url = '/' . $arr[1];
+            } else {
                 $url = '/';
             }
         }
-        if( false  !== strpos($url,'?addtabs=1')){
-            $url = str_replace("?addtabs=1","?ref=addtabs",$url);
+        if (false  !== strpos($url, '?addtabs=1')) {
+            $url = str_replace("?addtabs=1", "?ref=addtabs", $url);
         }
         //修改跳转(结束)
         if ($this->auth->isLogin()) {
-            $this->success(__("You've logged in, do not login again"), $url);
+            $this->success(__("You've logged in, do not login again"), $url, [], 0);
         }
         if ($this->request->isPost()) {
             $username = $this->request->post('username');
@@ -111,10 +110,10 @@ class Index extends Backend
             }
             AdminLog::setTitle(__('Login'));
             $result = $this->auth->login($username, $password, $keeplogin ? 86400 : 14400);
-            
+
             if ($result === true) {
                 Hook::listen("admin_login_after", $this->request);
-                $this->success(__('Login successful'), $url, ['url' => $url, 'id' => $this->auth->id, 'username' => $username, 'avatar' => $this->auth->avatar]);
+                $this->success(__('Login successful'), $url, ['url' => $url, 'id' => $this->auth->id, 'username' => $username, 'avatar' => $this->auth->avatar], 0);
             } else {
                 $msg = $this->auth->getError();
                 $msg = $msg ? $msg : __('Username or password is incorrect');
@@ -141,6 +140,8 @@ class Index extends Backend
     {
         $this->auth->logout();
         Hook::listen("admin_logout_after", $this->request);
-        $this->success(__('Logout successful'), 'index/login');
+        // $this->success(__('Logout successful'), 'index/login');
+        $this->redirect('index/login');
+        exit;
     }
 }

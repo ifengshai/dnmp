@@ -1179,22 +1179,13 @@ class Sample extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['sku']) {
-                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
-                $ids = Db::name('purchase_sample_lendlog_item')->where($smap)->column('log_id');
-                $map['id'] = ['in', $ids];
-                unset($filter['sku']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             
             $total = $this->samplelendlog
                 ->where($where)
-                ->where($map)
                 ->count();
             $list = $this->samplelendlog
                 ->where($where)
-                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1212,6 +1203,8 @@ class Sample extends Backend
                 }elseif($value['status'] == 5){
                     $list[$key]['status'] = '已取消';
                 }
+                $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
+                $list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -1262,20 +1255,16 @@ class Sample extends Backend
                 }elseif(1 == $info){
                     $this->error("无法找到相关库存不足,请重新尝试");
                 }
-                //生成入库主表数据
-                $lendlog['status'] = 1;
-                $lendlog['create_user'] = session('admin.nickname');
-                $lendlog['createtime'] = date('Y-m-d H:i:s',time());
-                $this->samplelendlog->save($lendlog);
-                $log_id = $this->samplelendlog->id;
+                //生成入库数据
                 foreach ($params['goods'] as $value){
-                    $lendlog_item['log_id'] = $log_id;
-                    $lendlog_item['sku'] = $value['sku'];
-                    $lendlog_item['lend_num'] = $value['lend_num'];
-                    Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
+                    $lendlog['status'] = 1;
+                    $lendlog['create_user'] = session('admin.nickname');
+                    $lendlog['createtime'] = date('Y-m-d H:i:s',time());
+                    $lendlog['sku'] = $value['sku'];
+                    $lendlog['lend_num'] = $value['lend_num'];
+                    $this->samplelendlog->insert($lendlog);
                 }
                 $this->success();
-               
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }else{
@@ -1295,37 +1284,6 @@ class Sample extends Backend
         //获取样品间商品列表
         $sku_data = $this->sample->getlenddata();
         $this->assign('sku_data', $sku_data);
-
-        return $this->view->fetch();
-    }
-    /**
-     * 借出记录详情
-     *
-     * @Description
-     * @author mjj
-     * @since 2020/05/25 17:02:58 
-     * @return void
-     */
-    public function sample_lendlog_detail($ids = null){
-        $row = $this->samplelendlog->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
-        }
-        $this->view->assign("row", $row);
-
-        //获取样品借出商品信息
-        $product_list = Db::name('purchase_sample_lendlog_item')->field('sku,lend_num')->where('log_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
-            $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
-            $product_list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
-        }
-        $this->assign('product_list', $product_list);
 
         return $this->view->fetch();
     }
@@ -1352,58 +1310,29 @@ class Sample extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if(!$params['goods']){
-                    $this->error(__('提交信息不能为空', ''));
-                }
-                $sku_arr = array_column($params['goods'],'sku');
-                $lend_num_arr = array_column($params['goods'],'lend_num');
-                //判断是否有重复项
-                if (count($sku_arr) != count(array_unique($sku_arr))) { 
-                    $this->error(__('sku不能重复', ''));
-                }
                 //判断数据中是否有空值
-                if(in_array('',$sku_arr)){
-                    $this->error(__('商品信息不能为空', ''));
+                if (!$params['sku']) {
+                    $this->error(__('sku不能为空', ''));
                 }
-                if(in_array('',$lend_num_arr)){
+                if(!$params['lend_num']){
                     $this->error(__('借出数量不能为空', ''));
                 }
-                //获取该入库单下的商品sku，并将不在该列表的数据进行删除
-                $save_sku_arr = Db('purchase_sample_lendlog_item')->where(['log_id'=>$ids])->column('sku');
-                $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
-                Db('purchase_sample_lendlog_item')->where('sku','in',$diff_sku_arr)->where('log_id',$ids)->delete();
-                //处理商品
-                foreach ($params['goods'] as $key=>$value){
-                    $is_exist = Db::name('purchase_sample_lendlog_item')->where(['log_id'=>$ids,'sku'=>$value['sku']])->value('id');
-                    if($is_exist){
-                        //更新
-                        Db::name('purchase_sample_lendlog_item')->where(['log_id'=>$ids,'sku'=>$value['sku']])->update(['lend_num'=>$value['lend_num']]);
-                    }else{
-                        //插入
-                        $lendlog_item = array();
-                        $lendlog_item['log_id'] = $ids;
-                        $lendlog_item['sku'] = $value['sku'];
-                        $lendlog_item['lend_num'] = $value['lend_num'];
-                        Db::name('purchase_sample_lendlog_item')->insert($lendlog_item);
-                    }
-                }
+                //更新
+                Db::name('purchase_sample_lendlog')->where(['id'=>$ids])->update(['lend_num'=>$params['lend_num'],'sku'=>$params['sku']]);
+
                 $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->view->assign("row", $row);
 
         //获取样品间商品列表
         $sku_data = $this->sample->getlenddata();
         $this->assign('sku_data', $sku_data);
 
         //获取样品借出商品信息
-        $product_list = Db::name('purchase_sample_lendlog_item')->field('sku,lend_num')->where('log_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
-            $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
-            $product_list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
-        }
-        $this->assign('product_list', $product_list);
+        $location_id = $this->sample->where('sku',$row->sku)->value('location_id');
+        $row->location = $this->samplelocation->where('id',$location_id)->value('location');
+        $this->assign('row', $row);
 
         return $this->view->fetch();
     }
@@ -1437,28 +1366,26 @@ class Sample extends Backend
         }
         if($is_update == 1){
             if($status == 2){
+                $skus = Db::name('purchase_sample_lendlog')->field('sum(lend_num) lend_num,sku')->where('id','in',$ids)->group('sku')->select();
                 //批量审核通过
-                $is_check = 0;
+                $is_check = array();
                 $lend_arr = array();
-                foreach($ids as $id){
-                    $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$id)->select();
-                    foreach($lendlog_items as $item){
-                        $sample = $this->sample->where('sku',$item['sku'])->find();
-                        $rest_stock = $sample['stock'] - $sample['lend_num'];
-                        if($rest_stock>=$item['lend_num']){
-                            //借出商品并更新状态
-                            $lend_arr[] = array(
-                                'sku'=>$item['sku'],
-                                'lend_num'=>$item['lend_num']
-                            );
-                        }else{
-                            //借出单中存在商品数量不足，无法借出
-                            $is_check++;
-                            break;
-                        }
+                foreach($skus as $sku){
+                    $sample = $this->sample->where('sku',$sku['sku'])->find();
+                    $rest_stock = $sample->stock - $sample->lend_num;
+                    if($rest_stock>=$sku['lend_num']){
+                        //借出商品并更新状态
+                        $lend_arr[] = array(
+                            'sku'=>$sku['sku'],
+                            'lend_num'=>$sku['lend_num']
+                        );
+                    }else{
+                        //借出单中存在商品数量不足，无法借出
+                        $is_check[] = $sku['sku'];
+                        break;
                     }
                 }
-                if($is_check == 0){
+                if(count($is_check) == 0){
                     //审核通过
                     foreach($lend_arr as $value){
                         $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(); 
@@ -1466,7 +1393,8 @@ class Sample extends Backend
                     }
                     $this->samplelendlog->where($where)->update(['status'=>$status]);
                 }else{
-                    $this->error('借出单中存在商品数量不足，无法借出');
+                    $sku_str = implode(',',$is_check);
+                    $this->error('sku：'.$sku_str.'商品数量不足，无法借出');
                 }
             }else{
                 //批量审核拒绝
@@ -1494,14 +1422,12 @@ class Sample extends Backend
             //$admin_user = $this->samplelendlog->where($where)->value('create_user');
             //if($admin_user == session('admin.nickname')){
                 //归还
-                $lendlog_items = Db::name('purchase_sample_lendlog_item')->where('log_id',$ids)->select();
-                foreach($lendlog_items as $item){
-                    $sample = $this->sample->where('sku',$item['sku'])->dec('lend_num',$item['lend_num'])->update();
-                    //判断是否没有借出数量，如果没有修改样品间列表的状态
-                    $already_lend_num = $this->sample->where('sku',$item['sku'])->value('lend_num');
-                    if($already_lend_num == 0){
-                        $this->sample->where('sku',$item['sku'])->update(['is_lend'=>0]);
-                    }
+                $lendlog = Db::name('purchase_sample_lendlog')->where('id',$ids)->find();
+                $this->sample->where('sku',$lendlog['sku'])->dec('lend_num',$lendlog['lend_num'])->update();
+                //判断是否没有借出数量，如果没有修改样品间列表的状态
+                $already_lend_num = $this->sample->where('sku',$lendlog['sku'])->value('lend_num');
+                if($already_lend_num == 0){
+                    $this->sample->where('sku',$lendlog['sku'])->update(['is_lend'=>0]);
                 }
                 $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
                 $this->success();

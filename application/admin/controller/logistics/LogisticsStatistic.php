@@ -81,9 +81,10 @@ class LogisticsStatistic extends Backend
             } elseif ('echart3' == $params['key']) {
                 $column = [
                     0 => '7天妥投率',
-                    1 => '14天妥投率',
-                    2 => '20天妥投率',
-                    3 => '20天以上妥投率',
+                    1 => '10天妥投率',
+                    2 => '14天妥投率',
+                    3 => '20天妥投率',
+                    4 => '20天以上妥投率',
                 ];
                 foreach ($column as $ck => $cv) {
                     $columnData[$ck]['name'] = $cv;
@@ -491,6 +492,7 @@ class LogisticsStatistic extends Backend
         $where['node_type'] = 40;
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
+        $ten_time_out    = config('logistics.delievered_time_out')['ten'];
         //14天妥投时间
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
@@ -518,6 +520,7 @@ class LogisticsStatistic extends Backend
                     $arr['send_order_num'][$k] = 0;
                     $arr['deliverd_order_num'][$k] = 0;
                     $arr['serven_deliverd_rate'][$k] = 0;
+                    $arr['ten_deliverd_rate'][$k] = 0;
                     $arr['fourteen_deliverd_rate'][$k] = 0;
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
@@ -528,7 +531,7 @@ class LogisticsStatistic extends Backend
                 //发货数量
                 $send_order_num = count(array_column($delievered_order, 'order_number'));
 
-                $serven_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
+                $serven_num = $ten_num = $fourteen_num = $twenty_num = $gtTwenty_num = $wait_time = 0;
                 foreach ($delievered_order as $key => $val) {
                     /**
                      * 判断有签收时间，并且签收时间大于发货时间，并且签收时间大于发货时间两天 则计算正常发货数量  否则不计算在内
@@ -539,7 +542,9 @@ class LogisticsStatistic extends Backend
                         //时间小于7天的
                         if ($serven_time_out >= $distance_time) {
                             $serven_num++;
-                        } elseif (($serven_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)) {
+                        } elseif (($serven_time_out < $distance_time) && ($distance_time <= $ten_time_out)) {
+                            $ten_num++;
+                        } elseif(($ten_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)){
                             $fourteen_num++;
                         } elseif (($fourteen_time_out < $distance_time) && ($distance_time <= $twenty_time_out)) {
                             $twenty_num++;
@@ -554,9 +559,11 @@ class LogisticsStatistic extends Backend
                 $arr['send_order_num'][$k] = $rs[$v['shipment_data_type']] = $send_order_num;
 
                 //妥投单数
-                $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $fourteen_num + $twenty_num + $gtTwenty_num;
+                $arr['deliverd_order_num'][$k] = $deliverd_order_num = $serven_num + $ten_num + $fourteen_num + $twenty_num + $gtTwenty_num;
                 //7天妥投单数
                 $arr['serven_deliverd_order_num'][$k] = $serven_num;
+                //10天妥投单数
+                $arr['ten_deliverd_order_num'][$k] = $ten_num;
                 //14天妥投单数
                 $arr['fourteen_deliverd_order_num'][$k] = $fourteen_num;
                 //20天妥投单数
@@ -572,20 +579,23 @@ class LogisticsStatistic extends Backend
                 if ($deliverd_order_num > 0) {
                     //7天妥投率
                     $arr['serven_deliverd_rate'][$k] = round(($serven_num / $deliverd_order_num) * 100, 2);
+                    $arr['ten_deliverd_rate'][$k] = round(($ten_num / $deliverd_order_num) * 100, 2);
                     $arr['fourteen_deliverd_rate'][$k] = round(($fourteen_num / $deliverd_order_num) * 100, 2);
                     $arr['twenty_deliverd_rate'][$k] = round(($twenty_num / $deliverd_order_num) * 100, 2);
                     $arr['gtTwenty_deliverd_rate'][$k] = round(($gtTwenty_num / $deliverd_order_num) * 100, 2);
                 } else {
                     $arr['serven_deliverd_rate'][$k] = 0;
+                    $arr['ten_deliverd_rate'][$k] = 0;
                     $arr['fourteen_deliverd_rate'][$k] = 0;
                     $arr['twenty_deliverd_rate'][$k] = 0;
                     $arr['gtTwenty_deliverd_rate'][$k] = 0;
                 }
                 //总共妥投数量
                 $rate[0] += $serven_num;
-                $rate[1] += $fourteen_num;
-                $rate[2] += $twenty_num;
-                $rate[3] += $gtTwenty_num;
+                $rate[1] += $ten_num;
+                $rate[2] += $fourteen_num;
+                $rate[3] += $twenty_num;
+                $rate[4] += $gtTwenty_num;
                 $rate['total_num'] += $deliverd_order_num;
                 //平均妥投时效
                 if ($deliverd_order_num > 0) {
@@ -611,6 +621,7 @@ class LogisticsStatistic extends Backend
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
                 $info[$ak]['deliverd_order_num'] = $arr['deliverd_order_num'][$ak];
                 $info[$ak]['serven_deliverd_rate'] = $arr['serven_deliverd_rate'][$ak];
+                $info[$ak]['ten_deliverd_rate'] = $arr['ten_deliverd_rate'][$ak];
                 $info[$ak]['fourteen_deliverd_rate'] = $arr['fourteen_deliverd_rate'][$ak];
                 $info[$ak]['twenty_deliverd_rate'] = $arr['twenty_deliverd_rate'][$ak];
                 $info[$ak]['gtTwenty_deliverd_rate'] = $arr['gtTwenty_deliverd_rate'][$ak];
@@ -638,11 +649,13 @@ class LogisticsStatistic extends Backend
             //7天妥投率、14天妥投率、20天妥投率、21天妥投率总和
             if ($all_total_num > 0) {
                 $info[$ak + 1]['serven_deliverd_rate'] = round($rate[0] / $all_total_num * 100, 2);
-                $info[$ak + 1]['fourteen_deliverd_rate'] = round($rate[1] / $all_total_num * 100, 2);
-                $info[$ak + 1]['twenty_deliverd_rate'] = round($rate[2] / $all_total_num * 100, 2);
-                $info[$ak + 1]['gtTwenty_deliverd_rate'] = round($rate[3] / $all_total_num * 100, 2);
+                $info[$ak + 1]['ten_deliverd_rate'] = round($rate[1] / $all_total_num * 100, 2);
+                $info[$ak + 1]['fourteen_deliverd_rate'] = round($rate[2] / $all_total_num * 100, 2);
+                $info[$ak + 1]['twenty_deliverd_rate'] = round($rate[3] / $all_total_num * 100, 2);
+                $info[$ak + 1]['gtTwenty_deliverd_rate'] = round($rate[4] / $all_total_num * 100, 2);
             } else {
                 $info[$ak + 1]['serven_deliverd_rate'] = 0;
+                $info[$ak + 1]['ten_deliverd_rate'] = 0;
                 $info[$ak + 1]['fourteen_deliverd_rate'] = 0;
                 $info[$ak + 1]['twenty_deliverd_rate'] = 0;
                 $info[$ak + 1]['gtTwenty_deliverd_rate'] = 0;
@@ -661,6 +674,7 @@ class LogisticsStatistic extends Backend
             $info['send_order_num'] = 0;
             $info['deliverd_order_num'] = 0;
             $info['serven_deliverd_rate'] = 0;
+            $info['ten_deliverd_rate'] = 0;
             $info['avg_deliverd_rate'] = 0;
             $info['fourteen_deliverd_rate'] = 0;
             $info['twenty_deliverd_rate'] = 0;

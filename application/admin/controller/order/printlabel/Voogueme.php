@@ -117,7 +117,7 @@ class Voogueme extends Backend
 
             //SKU搜索
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['sku'] = ['like',  $filter['sku'] . '%'];
                 $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
                 $ids = $this->model->getOrderId($smap);
                 $map['entity_id'] = ['in', $ids];
@@ -456,7 +456,7 @@ class Voogueme extends Backend
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,sum(b.qty_ordered) as qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->group('b.sku,a.increment_id')->select();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -465,12 +465,17 @@ class Voogueme extends Backend
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 2, //平台类型
+                        'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
@@ -554,6 +559,7 @@ class Voogueme extends Backend
                     //如果SKU 存在取消订单 则判断取消的数量
                     if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
                         $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     }
 
                     if ($qty == 0) {
@@ -603,7 +609,7 @@ class Voogueme extends Backend
             //质检通过扣减库存
             if ($status == 4) {
                 //查询出质检通过的订单
-                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,sum(b.qty_ordered) as qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->group('b.sku,a.increment_id')->select();
                 if (!$list) {
                     throw new Exception("未查询到订单数据！！");
                 };
@@ -611,12 +617,17 @@ class Voogueme extends Backend
                 $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                 $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
                 //查询是否存在更换镜架的订单
-                $infoRes = $infotask->alias('a')->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                $infoRes = $infotask->alias('a')
+                    ->field('sum(a.change_number) as qty,a.change_sku,a.original_sku,a.increment_id')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->join(['fa_work_order_measure' => 'c'], 'a.work_id=c.work_id')
                     ->where([
                         'a.increment_id' => ['in', $arr],
                         'a.change_type' => 1,    //更改类型 1更改镜架
-                        'a.platform_type' => 2, //平台类型
+                        'a.platform_type' => 1, //平台类型
                         'b.work_status' => ['in', [5, 6]], //工单状态
+                        'c.measure_choose_id' => 1,
+                        'c.operation_type' => 1,
                     ])
                     ->group('original_sku,increment_id')
                     ->select();
@@ -694,6 +705,7 @@ class Voogueme extends Backend
                     //如果SKU 存在取消订单 则判断取消的数量
                     if ($cancel_list[$v['increment_id']][$v['sku']] > 0) {
                         $qty = $qty - $cancel_list[$v['increment_id']][$v['sku']];
+                        $qty = $qty > 0 ? $qty : 0;
                     }
 
                     if ($qty == 0) {
@@ -971,7 +983,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         //SKU搜索
         if ($filter['sku']) {
-            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $map['sku'] = ['like', $filter['sku'] . '%'];
             unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
         }

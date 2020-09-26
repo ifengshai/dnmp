@@ -119,7 +119,7 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                if ($params['product_total'] == 0){
+                if ($params['product_total'] == 0) {
                     $this->error('商品总额不能为0');
                 }
 
@@ -148,7 +148,6 @@ class PurchaseOrder extends Backend
 
                     $batch_sku = $this->request->post("batch_sku/a");
                     $arrival_num = $this->request->post("arrival_num/a");
-//                    dump($arrival_num);die;
                     if ($arrival_num) {
                         //现在分批到货数量必须等于采购数量
                         $arr = [];
@@ -163,8 +162,7 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
-//                    dump($arr);
-//                    dump($arrival_num);die;
+
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
@@ -195,9 +193,6 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $arrival_num = $this->request->post("arrival_num/a");
-//                       dump($batch_sku);
-//                       dump($arrival_num);
-//                        dump($batch_arrival_time);
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {
                             $i = 0;
@@ -211,9 +206,6 @@ class PurchaseOrder extends Backend
                                 $i++;
                                 $list = [];
                                 foreach ($batch_sku[$k] as $key => $val) {
-//                                    if (!$val || !$arrival_num[$k][$key]) {
-//                                        continue;
-//                                    }
                                     if (!$val) {
                                         continue;
                                     }
@@ -221,7 +213,6 @@ class PurchaseOrder extends Backend
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                     $list[$key]['purchase_batch_id'] = $batch_id;
                                 }
-//                        dump($list);die;
                                 $this->batch_item->saveAll($list);
                             }
                         }
@@ -274,10 +265,13 @@ class PurchaseOrder extends Backend
             $ids = $ids ? $ids : input('ids');
             $this->list = new \app\admin\model\purchase\NewProductReplenishList;
             $list = $this->list->where('id', 'in', $ids)->select();
-            
+
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
-            foreach($list as &$v) {
+            foreach ($list as &$v) {
+                if ($v['status'] == 3){
+                    $this->error('存在已经拒绝的补货需求，请重新选择！！');
+                }
                 //查询sku 商品名称
                 $data = $item->getGoodsInfo($v['sku']);
                 $v['product_name'] = $data->name;
@@ -285,9 +279,7 @@ class PurchaseOrder extends Backend
                 $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
             unset($v);
-            if (count(array_unique(array_column($list, 'supplier_id'))) > 1)$this->error('必须选择相同的供应商！！');
-
-//                $this->error(__('必须选择相同的供应商11！！'), url('purchase/new_product_replenish_order/handle'));
+            if (count(array_unique(array_column($list, 'supplier_id'))) > 1) $this->error('必须选择相同的供应商！！');
             $this->assign('list', $list);
         }
 
@@ -865,24 +857,34 @@ class PurchaseOrder extends Backend
             //在途库存新逻辑
             if ($status == 2) {
                 //审核通过添加在途库存
-                $list = $this->purchase_order_item->where(['purchase_id' => ['in', $ids]])->select();
+                $list = $this->purchase_order_item->alias('a')
+                    ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+                    ->field('supplier_id,sku,replenish_list_id,purchase_num')
+                    ->where(['purchase_id' => ['in', $ids]])->select();
+                $skus = array_column($list, 'sku');
+
+                //查询供应商
+                $supplier = new \app\admin\model\purchase\Supplier();
+                $supplier_list = $supplier->column('supplier_name','id');
                 foreach ($list as $v) {
                     $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
-                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态
+                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
                     if ($v['replenish_list_id']) {
-                        $this->list->where('id', $v['replenish_list_id'])->update(['real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        $this->list->where('id', $v['replenish_list_id'])->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']],'real_dis_num' => $v['purchase_num'], 'status' => 2]);
                         //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
-                        $replenish_id = $this->list->where('id',$v['replenish_list_id'])->field('replenish_id,status')->find();
-                        $replenish_order = $this->list->where(['replenish_id'=>$replenish_id['replenish_id'],'status'=>1])->find();
+                        $replenish_id = $this->list->where('id', $v['replenish_list_id'])->field('replenish_id,status')->find();
+                        $replenish_order = $this->list->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])->find();
                         //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
-                        if ($replenish_id['status'] == 2){
-                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',3);
+                        if ($replenish_id['status'] == 2) {
+                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 3);
                         }
-                        if (empty($replenish_order)){
-                            $res = $this->replenish->where('id',$replenish_id['replenish_id'])->setField('status',4);
+                        if (empty($replenish_order)) {
+                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
                         }
                     }
                 }
+                //采购单审核通过 sku 改为老品
+                $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
             }
 
             $this->success();
@@ -1091,23 +1093,8 @@ class PurchaseOrder extends Backend
         $this->success();
     }
 
-
-    public function test()
-    {
-        $map['b.createtime'] = ['between', ['2020-06-09 11:00:00', '2020-06-11 11:00:00']];
-        $map['b.purchase_type'] = 2;
-        $data = $this->purchase_order_item->alias('a')->field('sku,purchase_num')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->where($map)->select();
-        $data = collection($data)->toArray();
-        dump($data);
-        die;
-        $item = new \app\admin\model\itemmanage\Item();
-        foreach ($data as $k => $v) {
-            $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
-        }
-    }
-
     /**
-     * 定时获取1688采购单 每天9点更新一次
+     * 定时获取1688采购单 每天9点更新一次 已弃用1688
      */
     public function getAlibabaPurchaseOrder()
     {
@@ -1296,7 +1283,7 @@ class PurchaseOrder extends Backend
     }
 
     /**
-     * 快递100回调地址
+     * 快递100回调地址  已弃用
      */
     public function callback()
     {
@@ -1761,7 +1748,7 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,d.logistics_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->join(['fa_logistics_info' => 'd'], 'd.purchase_id=purchase_order.id', 'left')
@@ -1790,13 +1777,17 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "采购数量")
             ->setCellValue("G1", "采购单价");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "采购备注")
-            ->setCellValue("I1", "采购总价")
-            ->setCellValue("J1", "创建人");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "物流单号");
+            ->setCellValue("I1", "商品总额")
+            ->setCellValue("J1", "采购运费")
+            ->setCellValue("K1", "总计")
+            ->setCellValue("L1", "创建人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "生产周期");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "预计到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "实际到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "物流单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "是否新品采购");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "是否留样采购");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -1807,13 +1798,27 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_num']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_price']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['purchase_remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['purchase_total']);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("O" . ($key * 1 + 2), $value['logistics_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['product_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['purchase_freight']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['arrival_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['receiving_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['logistics_number']);
+            if ($value['is_new_product'] == 1){
+                $is_new_product = '是';
+            }else{
+                $is_new_product = '否';
+            }
+            if ($value['is_sample'] == 1){
+                $is_sample = '是';
+            }else{
+                $is_sample = '否';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $is_new_product);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("S" . ($key * 1 + 2), $is_sample, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         }
 
         //设置宽度
@@ -1834,6 +1839,10 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
 
         //设置边框
         $border = [
@@ -1911,7 +1920,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "入库数量")
             ->setCellValue("E1", "入库时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "备注");
-        
+
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
@@ -1920,7 +1929,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['check_time']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_remark']);
         }
-        
+
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
@@ -1928,7 +1937,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(10);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(35);
-       
+
 
         //设置边框
         $border = [

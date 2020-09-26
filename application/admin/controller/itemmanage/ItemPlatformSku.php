@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\itemmanage;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Request;
 use app\common\controller\Backend;
@@ -81,6 +82,172 @@ class ItemPlatformSku extends Backend
         $this->view->assign('PlatformList', $this->platform->magentoPlatformList());
         return $this->view->fetch();
     }
+
+    /**
+     * 批量导出功能 平台sku管理
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/9/7
+     * Time: 15:32:59
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        $this->relationSearch = true;
+        if ($ids) {
+            $map['item_platform_sku.id'] = ['in', $ids];
+        }
+
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+
+        list($where) = $this->buildparams();
+        $list = $this->model
+            ->with(['item' => ['item_status']])
+            ->where($where)
+            ->where($map)
+            ->select();
+        $list = collection($list)->toArray();
+        // dump($list);die;
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "商品sku编码")
+            ->setCellValue("B1", "平台sku")
+            ->setCellValue("C1", "商品名称");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
+            ->setCellValue("E1", "sku状态");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "对应平台SKU状态")
+            ->setCellValue("G1", "是否上传到对应平台");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "创建人")
+            ->setCellValue("I1", "创建时间");
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['platform_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['name']);
+            switch ($value['platform_type']){
+                case 1:
+                    $plat_name = 'zeelool';
+                    break;
+                case 2:
+                    $plat_name = 'voogueme';
+                    break;
+                case 3:
+                    $plat_name = 'nihao';
+                    break;
+                case 4:
+                    $plat_name = 'meeloog';
+                    break;
+                case 5:
+                    $plat_name = 'wesee';
+                    break;
+                case 8:
+                    $plat_name = 'amazon';
+                    break;
+            }
+            switch ($value['item']['item_status']){
+                case 1:
+                    $item_status = '新建';
+                    break;
+                case 2:
+                    $item_status = '提交审核';
+                    break;
+                case 3:
+                    $item_status = '审核通过';
+                    break;
+                case 4:
+                    $item_status = '审核拒绝';
+                    break;
+                case 5:
+                    $item_status = '取消';
+                    break;
+            }
+            switch ($value['outer_sku_status']){
+                case 1:
+                    $outer_sku_status = '上架';
+                    break;
+                case 2:
+                    $outer_sku_status = '下架';
+                    break;
+            }
+            switch ($value['is_upload']){
+                case 1:
+                    $is_upload = '已上传';
+                    break;
+                case 2:
+                    $is_upload = '未上传';
+                    break;
+            }
+
+
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $plat_name);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $item_status);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $outer_sku_status);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $is_upload);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['create_time']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:O' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '平台sku数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
     //商品预售首页
     public function presell()
     {
@@ -426,10 +593,7 @@ class ItemPlatformSku extends Backend
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
-            if (empty($itemPlatformRow['item_attr_name']) || empty($itemPlatformRow['item_type'])) { //平台商品类型和商品属性
-                $this->error(__('The product attributes or product types of the platform are not filled in'));
-            }
-
+           
             //审核通过把SKU同步到有映射关系的平台
             $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];

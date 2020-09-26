@@ -40,39 +40,45 @@
     .location{
         padding-top: 15px !important;
     }
+    .lend-log-list >li{
+        display: flex;
+        width: 100%;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .lend-log-list li >div{
+       display: flex;
+    }
+    .lend-log-list li label{
+        margin:0 10px 0 0;
+        min-width: 60px;
+        text-align: right;
+    }
 </style>
-
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div id="add_entry_product"><span>add</span></div>
-    <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
-        <thead>
-        <tr role="row">
-            <th style="width: 150px;">SKU</th>
-            <th style="width: 150px;">借出数量</th>
-            <th style="width: 150px;">库位</th>
-            <th style="width: 150px;">删除</th>
-        </thead>
-        <tbody id="product_data">
-            {foreach $product_list as $key=>$vo}
-            <tr role="row" class="odd del_{$key}">
-                <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$key}][sku]" value="{$vo.sku}"></td>
-                <td><input type="text" class="form-control" name="row[goods][{$key}][lend_num]" value="{$vo.lend_num}"></td>
-                <td class="location">{$vo.location}</td>
-                <td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_lend_tr({$key})> 删除 </a></td>
-            </tr>
-            {/foreach}
-        </tbody>
-    </table>
+    <ul class="lend-log-list">
+        <li>
+            <label>SKU:</label>
+            <select name="row[sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">
+                <option value="">请输入</option>
+                {foreach name="sku_data" item="vo"}
+                <option data-id="{$vo.location}" value="{$vo.sku}" {if $vo['sku'] == $row->sku}selected{/if}>{$vo.sku}</option>
+                {/foreach}
+            </select>
+        </li>
+        <li>
+            <label>借出数量: </label>
+            <input type="text" class="form-control" name="row[lend_num]" value="{$row->lend_num}">
+        </li>
+        <li>
+            <label>库位:</label><span>{$row->location}</span>
+        </li>
+    </ul>
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('保存')}</button>
         </div>
     </div>
-    <div id="sku_info" style="display: none;">
-        <option value="">请输入</option>
-        {foreach name="sku_data" item="vo"}
-        <option data-id="{$vo.location}" value="{$vo.sku}" >{$vo.sku}</option>
-        {/foreach}
-    </div>
 </form>
+

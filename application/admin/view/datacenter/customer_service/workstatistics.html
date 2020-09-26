@@ -168,6 +168,60 @@ table.altrowstable tr:nth-child(even){
                                     <input type="submit" class="btn btn-default reset btn-reset" value="重置" ></div>
                             </div>                                                            
                             </div>
+                            {if $customer_type111 eq 0 }
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    工单完成总量：<span style="color: red;" id="totalPayInfo">{$all_work_list_num}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div" style="width: 20%;">
+                                <span class="extend">
+                                    订单总金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_base_grand_total}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    补发单数：<span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款单数：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_num}</span>
+                                </span>
+                            </div>
+                            {if $workOrderNum gt 0 }
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款订单比：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_rate}</span>
+                                </span>
+                            </div>
+                            {else/}
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款订单比：<span style="color: red;" id="totalPayInfo">0</span>
+                                </span>
+                            </div>
+                            {/if}
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money}</span>
+                                </span>
+                            </div>
+                            {if $totalOrderMoney gt 0 }
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money_rate}</span>
+                                </span>
+                            </div>
+                            {else/}
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">0</span>
+                                </span>
+                            </div>
+                            {/if}
+                            {/if}
+                            {if $customer_type111 neq 0 }
                             <div class="btn btn-div">
                                 <span class="extend">
                                     工单完成量：<span style="color: red;" id="totalPayInfo">{$workOrderNum}</span>
@@ -199,8 +253,8 @@ table.altrowstable tr:nth-child(even){
                                 <span class="extend">
                                     退款订单比：<span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
-                            </div>                            
-                            {/if}                            
+                            </div>
+                            {/if}
                             <div class="btn btn-div">
                                 <span class="extend">
                                     退款金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$refundMoney}</span>
@@ -217,8 +271,9 @@ table.altrowstable tr:nth-child(even){
                                 <span class="extend">
                                     退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
-                            </div>                            
-                            {/if}                                                                                                                                                                         
+                            </div>
+                            {/if}
+                            {/if}
                         </div>
                     </form>
                 </div>
@@ -244,6 +299,7 @@ table.altrowstable tr:nth-child(even){
              </tr>
              </thead>
                     {if isset($allCustomers) && $type!=3 }
+
                     {foreach name="allCustomers" item="vo" key="k"}
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.nickname}</td>
@@ -275,6 +331,66 @@ table.altrowstable tr:nth-child(even){
                       {/if}
                   </tr>
                   {/foreach}
+                    {if $customer_type111 eq 0 }
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">仓库工单</td>
+                        <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">-</td>
+                        {if !empty($start) && !empty($end)}
+                        <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
+                        {/if}
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.create_counter}</td>
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.conuter}</td>
+                        <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.base_grand_total}</td>
+                        <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.replacement_counter}</td>
+                        {if $warehouseWorkList1.counter gt 0}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($warehouseWorkList1.replacement_counter/$warehouseWorkList1.counter*100,2)}</td>
+                        {else/}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">-</td>
+                        <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.refund_num}</td>
+                        {if $warehouseWorkList1.conuter gt 0}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($warehouseWorkList1.refund_num/$warehouseWorkList1.conuter*100,2)}</td>
+                        {else/}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                        <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$warehouseWorkList1.refund_money}</td>
+                        {if $warehouseWorkList1.base_grand_total gt 0}
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($warehouseWorkList1.refund_money/$warehouseWorkList1.base_grand_total*100,2)}</td>
+                        {else/}
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">非客服工单</td>
+                        <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">-</td>
+                        {if !empty($start) && !empty($end)}
+                        <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
+                        {/if}
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.create_counter}</td>
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.conuter}</td>
+                        <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($notCustomer.base_grand_total,2)}</td>
+                        <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$notCustomer.replacement_counter}</td>
+                        {if $notCustomer.conuter gt 0}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.replacement_counter/$notCustomer.conuter*100,2)}</td>
+                        {else/}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">-</td>
+                        <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$notCustomer.refund_num}</td>
+                        {if $notCustomer.conuter gt 0}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_num/$notCustomer.conuter*100,2)}</td>
+                        {else/}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                        <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$notCustomer.refund_money}</td>
+                        {if $notCustomer.base_grand_total gt 0}
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_money/$notCustomer.base_grand_total*100,2)}</td>
+                        {else/}
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
+                        {/if}
+                    </tr>
+                    {/if}
                   {elseif isset($worklistOne) && $type==3 /}
                   {foreach name="worklistOne" item="vo" key="k"}
                   <tr>

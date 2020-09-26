@@ -13,6 +13,7 @@ use think\exception\ValidateException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -150,7 +151,7 @@ class WorkOrderList extends Backend
                         $newWorkIds = implode(',',$newWorkIds);
                         if (strlen($newWorkIds) > 0) {
                             //数据查询的条件
-                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($newWorkIds)";
+                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         } else {
                             $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         }
@@ -179,6 +180,11 @@ class WorkOrderList extends Backend
                 }
                 unset($filter['measure_choose_id']);
             }
+            if($filter['payment_time']){
+                $createat = explode(' ', $filter['payment_time']);
+                $map['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+                unset($filter['payment_time']);
+            }
 
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -194,6 +200,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -205,12 +212,13 @@ class WorkOrderList extends Backend
                 //取经手人
                 if ($v['after_user_id'] != 0) {
                     $list[$k]['after_user_name'] = $user_list[$v['after_user_id']];
-                }
-                //指定经手人
+                }                //指定经手人
                 if($v['all_after_user_id'] !=0){
                     $all_after_user_arr = explode(',',$v['all_after_user_id']);
                     foreach($all_after_user_arr as $aa){
-                        $list[$k]['all_after_user_name'][] = $user_list[$aa]; 
+                        if($user_list[$aa] != NULL){
+                            $list[$k]['all_after_user_name'][] = $user_list[$aa];
+                        }
                     }
                     $list[$k]['all_after_user_arr'] = $all_after_user_arr;
                 }else{
@@ -779,7 +787,9 @@ class WorkOrderList extends Backend
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
-
+                    if (!$params['address']['shipping_type'] && in_array(7,$params['measure_choose_id'])) {
+                        throw new Exception("请先选择shipping method");
+                    }
                     $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
@@ -1143,7 +1153,7 @@ class WorkOrderList extends Backend
                         $params['create_user_name'] = session('admin.nickname');
                         $params['create_user_id'] = session('admin.id');
                         $params['create_time'] = date('Y-m-d H:i:s');
-                        $params['order_sku'] = implode(',', $params['order_sku']);
+                        $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
                         //如果不是客服人员则指定审核人为客服经理(只能是客服工单) start
@@ -1461,9 +1471,11 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-
+             
             //判断库存是否足够
             if ($stock < $num[$k]) {
+                $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
+                file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 throw new Exception($sku . '库存不足！！');
             }
         }
@@ -2694,6 +2706,8 @@ class WorkOrderList extends Backend
                 $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 3) {
                 $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 4) {
+                $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif (5 == $ordertype) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
@@ -2739,6 +2753,8 @@ class WorkOrderList extends Backend
                     $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 3) {
                     $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 4) {
+                    $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif (5 == $ordertype) {
                     $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
@@ -2901,11 +2917,13 @@ class WorkOrderList extends Backend
         $this->view->assign('recepts', $recepts);
         //判断站点
         if ($row['work_platform'] == 1 && $row['replenish_money']) {
-            $url = config('url.zeelool_url') . 'ios/activity/price_difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='. $row->id;
+            $url = config('url.new_zeelool_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='. $row->id;
         } elseif ($row['work_platform'] == 2 && $row['replenish_money']) {
             $url = config('url.new_voogueme_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign=' . $row->id;
         } elseif ($row['work_platform'] == 3 && $row['replenish_money']) {
             $url = config('url.new_nihao_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 4 && $row['replenish_money']) {
+            $url = config('url.meeloog_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
@@ -3625,12 +3643,12 @@ EOF;
     /**
      * 导出工单
      *
-     * @Description
-     * @author lsw
+     * @Description 修改排序之前
+     * @author lsw 
      * @since 2020/04/30 09:34:48 
      * @return void
      */
-    public function batch_export_xls()
+    public function batch_export_xls_yuan()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
@@ -3695,6 +3713,12 @@ EOF;
         } else {
             $noteInfo = [];
         }
+        //根据平台sku求出商品sku
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //求出配置里面信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
+        //求出配置里面的大分类信息
+        $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
@@ -3738,7 +3762,9 @@ EOF;
             ->setCellValue("AL1", "措施")
             ->setCellValue("AM1", "措施详情")
             ->setCellValue("AN1", "承接详情")
-            ->setCellValue("AO1", "工单回复备注");
+            ->setCellValue("AO1", "工单回复备注")
+            ->setCellValue("AP1", "对应商品sku")
+            ->setCellValue("AQ1", "问题大分类");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -3752,22 +3778,22 @@ EOF;
             }
             switch ($value['work_platform']) {
                 case 2:
-                    $value['work_platform'] = 'voogueme';
+                    $work_platform = 'voogueme';
                     break;
                 case 3:
-                    $value['work_platform'] = 'nihao';
+                    $work_platform = 'nihao';
                     break;
                 case 4:
-                    $value['work_platform'] = 'meeloog';
+                    $work_platform = 'meeloog';
                     break;
                 case 5:
-                    $value['work_platform'] = 'wesee';
+                    $work_platform = 'wesee';
                     break;
                 default:
-                    $value['work_platform'] = 'zeelool';
+                    $work_platform = 'zeelool';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['work_platform']);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $work_platform);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['work_type'] == 1 ? '客服工单' : '仓库工单');
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['platform_order']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['order_pay_currency']);
@@ -3865,6 +3891,31 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }
+            //对应商品的sku
+            if($value['order_sku']){
+                $order_arr_sku = explode(',',$value['order_sku']);
+                if(is_array($order_arr_sku)){
+                    $true_sku = [];
+                    foreach($order_arr_sku as $t_sku){
+                        $true_sku[] = $aa = $itemPlatFormSku->getTrueSku($t_sku,$value['work_platform']);
+                    }
+                    $true_sku_string = implode(',',$true_sku);
+                    $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $true_sku_string);
+                }else{
+                    $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), '');
+                }
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), '');
+            }
+            //对应的问题类型大的分类
+            $one_category = '';
+            foreach($customer_problem_classify as $problem  => $classify){
+                if(in_array($value['problem_type_id'],$classify)){
+                    $one_category = $problem;
+                    break;
+                }
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $one_category);
         }
 
         //设置宽度
@@ -3907,9 +3958,11 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(40);
         //设置边框
         $border = [
             'borders' => [
@@ -3931,7 +3984,7 @@ EOF;
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
+        $format = 'csv';
         $savename = '工单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
@@ -3944,14 +3997,371 @@ EOF;
             //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        } elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
         }
+
 
         //输出名称
         header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
+        $writer->save('php://output');
+    }
 
+    /**
+     * 修改排序之后 
+     *
+     * @Author lsw 1461069578@qq.com
+     * @DateTime 2020-09-26 10:51:10
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere .= " AND id IN ({$ids})";
+        }
+        $filter = json_decode($this->request->get('filter'), true);
+        $map = [];
+        if ($filter['recept_person']) {
+            $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
+            $map['id'] = ['in', $workIds];
+            unset($filter['recept_person']);
+        }
+        //筛选措施
+        if ($filter['measure_choose_id']) {
+            $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+            if (!empty($map['id'])) {
+                $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+                $map['id']  = ['in', $newWorkIds];
+            } else {
+                $map['id']  = ['in', $measuerWorkIds];
+            }
+            unset($filter['measure_choose_id']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
+        list($where) = $this->buildparams();
+        $list = $this->model
+            ->where($where)
+            ->where($map)
+            ->where($addWhere)
+            ->where($map)
+            ->select();
+        $list = collection($list)->toArray();
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $arr = [];
+        foreach ($list as $vals) {
+            $arr[] = $vals['id'];
+        }
+        //求出所有的措施
+        $info = $this->step->fetchMeasureRecord($arr);
+        if ($info) {
+            $info = collection($info)->toArray();
+        } else {
+            $info = [];
+        }
+        //求出所有的承接详情
+        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
+        $receptInfo = $this->recept->fetchReceptRecord($arr);
+        if ($receptInfo) {
+            $receptInfo = collection($receptInfo)->toArray();
+        } else {
+            $receptInfo = [];
+        }
+        //求出所有的回复
+        $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
+        if ($noteInfo) {
+            $noteInfo = collection($noteInfo)->toArray();
+        } else {
+            $noteInfo = [];
+        }
+        //根据平台sku求出商品sku
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //求出配置里面信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
+        //求出配置里面的大分类信息
+        $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台")
+            ->setCellValue("B1", "工单类型")
+            ->setCellValue("C1", "平台订单号");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "客户邮箱")
+            ->setCellValue("E1", "订单金额");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "订单支付的货币类型")
+            ->setCellValue("G1", "订单的支付方式");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "订单中的sku")
+            ->setCellValue("I1", "对应商品sku")
+            ->setCellValue("J1", "工单状态");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "问题大分类")
+            ->setCellValue("L1", "问题类型")
+            ->setCellValue("M1", "工单问题描述")
+            ->setCellValue("N1", "工单图片")
+            ->setCellValue("O1", "工单创建人")
+            ->setCellValue("P1", "工单是否需要审核")
+            ->setCellValue("Q1", "指派工单审核人")
+            ->setCellValue("R1", "实际审核人")
+            ->setCellValue("S1", "审核人备注")
+            ->setCellValue("T1", "新建状态时间")
+            ->setCellValue("U1", "开始走流程时间")
+            ->setCellValue("V1", "工单审核时间")
+            ->setCellValue("W1", "经手人处理时间")
+            ->setCellValue("X1", "工单完成时间")
+            ->setCellValue("Y1", "补差价的金额")
+            ->setCellValue("Z1", "补差价的订单号")
+            ->setCellValue("AA1", "优惠券类型")
+            ->setCellValue("AB1", "优惠券描述")
+            ->setCellValue("AC1", "优惠券")
+            ->setCellValue("AD1", "积分")
+            ->setCellValue("AE1", "退回物流单号")
+            ->setCellValue("AF1", "退款金额")
+            ->setCellValue("AG1", "退款百分比")
+            ->setCellValue("AH1", "措施")
+            ->setCellValue("AI1", "措施详情")
+            ->setCellValue("AJ1", "承接详情")
+            ->setCellValue("AK1", "工单回复备注");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
+        foreach ($list as $key => $value) {
+            if ($value['after_user_id']) {
+                $value['after_user_id'] = $users[$value['after_user_id']];
+            }
+            if ($value['assign_user_id']) {
+                $value['assign_user_id'] = $users[$value['assign_user_id']];
+            }
+            if ($value['operation_user_id']) {
+                $value['operation_user_id'] = $users[$value['operation_user_id']];
+            }
+            switch ($value['work_platform']) {
+                case 2:
+                    $work_platform = 'voogueme';
+                    break;
+                case 3:
+                    $work_platform = 'nihao';
+                    break;
+                case 4:
+                    $work_platform = 'meeloog';
+                    break;
+                case 5:
+                    $work_platform = 'wesee';
+                    break;
+                default:
+                    $work_platform = 'zeelool';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $work_platform);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['work_type'] == 1 ? '客服工单' : '仓库工单');
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['platform_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['email']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['base_grand_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['order_pay_currency']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['order_pay_method']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_sku']);
+            //求出对应商品的sku
+            if($value['order_sku']){
+                $order_arr_sku = explode(',',$value['order_sku']);
+                if(is_array($order_arr_sku)){
+                    $true_sku = [];
+                    foreach($order_arr_sku as $t_sku){
+                        $true_sku[] = $aa = $itemPlatFormSku->getTrueSku($t_sku,$value['work_platform']);
+                    }
+                    $true_sku_string = implode(',',$true_sku);
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $true_sku_string);
+                }else{
+                    $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '');
+                }
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '');
+            }
+            switch ($value['work_status']) {
+                case 1:
+                    $value['work_status'] = '新建';
+                    break;
+                case 2:
+                    $value['work_status'] = '待审核';
+                    break;
+                case 3:
+                    $value['work_status'] = '待处理';
+                    break;
+                case 4:
+                    $value['work_status'] = '审核拒绝';
+                    break;
+                case 5:
+                    $value['work_status'] = '部分处理';
+                    break;
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;
+                default:
+                    $value['work_status'] = '已处理';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['work_status']);
+            //对应的问题类型大的分类
+            $one_category = '';
+            foreach($customer_problem_classify as $problem  => $classify){
+                if(in_array($value['problem_type_id'],$classify)){
+                    $one_category = $problem;
+                    break;
+                }
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $one_category);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['problem_type_content']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['problem_description']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['work_picture']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['create_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['is_after_deal_with'] == 1 ? '是' : '否');
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['assign_user_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['operation_user_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['check_note']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['submit_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['check_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['after_deal_with_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $value['complete_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $value['replenish_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), $value['replenish_increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 1 + 2), $value['coupon_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($key * 1 + 2), $value['coupon_describe']);
+            $spreadsheet->getActiveSheet()->setCellValue("AC" . ($key * 1 + 2), $value['coupon_str']);
+            $spreadsheet->getActiveSheet()->setCellValue("AD" . ($key * 1 + 2), $value['integral']);
+            $spreadsheet->getActiveSheet()->setCellValue("AE" . ($key * 1 + 2), $value['refund_logistics_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("AF" . ($key * 1 + 2), $value['refund_money']);
+            //退款百分比
+            if(0<$value['base_grand_total']){
+                $spreadsheet->getActiveSheet()->setCellValue("AG" . ($key * 1 + 2), round($value['refund_money']/$value['base_grand_total'],2));  
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("AG" . ($key * 1 + 2), 0);
+            }
+            //措施
+            if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
+                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']]);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), '');
+            }
+            //措施详情
+            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
+                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $info['detail'][$value['id']]);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), '');
+            }
+            //承接
+            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+
+                $value['result'] = $receptInfo[$value['id']];
+                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['result']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
+            }
+            //回复
+            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
+                $value['note'] = $noteInfo[$value['id']];
+                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
+            }
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AC')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AG')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AH')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AI')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'csv';
+        $savename = '工单数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        } elseif ($format == 'csv') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Csv";
+        }
+
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
     }
 

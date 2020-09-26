@@ -113,72 +113,10 @@ class Dashboard extends Backend
     public function index()
     {
         $user_id = session('admin.id');
-        $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
-        if(0 == $result){
+        $arr = (new AuthGroupAccess)->getUserPrivilege($user_id);
+        if(0 == $arr){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
-        }
-            switch($result){
-                //只有zeelool权限
-                case 1:
-                    $arr = [1];
-                break;
-                //只有voogueme权限
-                case 2:
-                    $arr = [2];
-                break;
-                //只有nihao权限
-                case 3:
-                    $arr = [3];
-                break;
-                //只有meeloog权限
-                case 4:
-                    $arr = [4];
-                break;
-                //只有zeelool和voogueme权限    
-                case 5:
-                    $arr = [1,2];
-                break;
-                //只有zeelool和nihao权限
-                case 6:
-                    $arr = [1,3];
-                break;
-                //只有zeelool和meeloog权限
-                case 7:
-                    $arr = [1,4];
-                break;
-                //只有voogueme和nihao权限
-                case 8:
-                    $arr = [2,3];
-                break;
-                //只有voogueme和meeloog权限
-                case 9:
-                    $arr = [2,4];
-                break;
-                //只有nihao和meeloog权限
-                case 10:
-                    $arr = [3,4];
-                break;
-                //只有zeelool、voogueme、nihao的权限
-                case 11:
-                    $arr = [1,2,3];
-                break;
-                //只有zeelool、voogueme、meeloog权限
-                case 12:
-                    $arr = [1,2,4];
-                break;
-                //只有zeelool、nihao、meeloog权限
-                case 13:
-                    $arr = [1,3,4];
-                break;
-                //只有voogueme、nihao、meeloog权限
-                case 14:
-                    $arr = [2,3,4];
-                break;    
-                //所有
-                case 15:
-                    $arr = [1,2,3,4];
-                break;    
-            }            
+        }           
         //上边部分数据 默认zeelool站数据
         $platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
         $zeelool_data = $this->model->getList($arr[0]);
@@ -188,7 +126,7 @@ class Dashboard extends Backend
         //中间部分数据
         $orderStatistics = new OrderStatistics();
         $list = $orderStatistics->getAllData();
-        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = [];
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = $zeelool_esSalesNumList = $zeelool_deSalesNumList = [];
         foreach ($list as $v) {
             //如果有zeelool权限
             if(in_array(1,$arr)){
@@ -225,7 +163,25 @@ class Dashboard extends Backend
                 $meeloogShoppingcartTotal[$v['create_date']]		 = $v['meeloog_shoppingcart_total'];
                 $meeloogShoppingcartConversion[$v['create_date']]	 = $v['meeloog_shoppingcart_conversion'];
                 $meeloogRegisterCustomer[$v['create_date']]			 = $v['meeloog_register_customer'];
-            }	
+            }
+            //如果有zeelool_es权限
+            if(in_array(9,$arr)){
+                $zeelool_esSalesNumList[$v['create_date']]    	     = $v['zeelool_es_sales_num'];
+                $zeelool_esSalesMoneyList[$v['create_date']]	     = $v['zeelool_es_sales_money'];
+                $zeelool_esUnitPriceList[$v['create_date']]			 = $v['zeelool_es_unit_price'];
+                $zeelool_esShoppingcartTotal[$v['create_date']]		 = $v['zeelool_es_shoppingcart_total'];
+                $zeelool_esShoppingcartConversion[$v['create_date']] = $v['zeelool_es_shoppingcart_conversion'];
+                $zeelool_esRegisterCustomer[$v['create_date']]	     = $v['zeelool_es_register_customer'];
+            }
+            //如果有zeelool_de权限
+            if(in_array(10,$arr)){
+                $zeelool_deSalesNumList[$v['create_date']]    	     = $v['zeelool_de_sales_num'];
+                $zeelool_deSalesMoneyList[$v['create_date']]	     = $v['zeelool_de_sales_money'];
+                $zeelool_deUnitPriceList[$v['create_date']]			 = $v['zeelool_de_unit_price'];
+                $zeelool_deShoppingcartTotal[$v['create_date']]		 = $v['zeelool_de_shoppingcart_total'];
+                $zeelool_deShoppingcartConversion[$v['create_date']] = $v['zeelool_de_shoppingcart_conversion'];
+                $zeelool_deRegisterCustomer[$v['create_date']]	     = $v['zeelool_de_register_customer'];
+            }            	            	
         }
         //下边部分数据 默认30天数据
         $bottom_data = $this->get_platform_data(1);
@@ -236,29 +192,41 @@ class Dashboard extends Backend
             'zeeloolSalesNumList'       		=> $zeeloolSalesNumList ?:[], //折线图数据
             'vooguemeSalesNumList'      		=> $vooguemeSalesNumList ?:[],
 			'nihaoSalesNumList'         		=> $nihaoSalesNumList ?:[],
-			'meeloogSalesNumList'         		=> $meeloogSalesNumList ?:[],
+            'meeloogSalesNumList'         		=> $meeloogSalesNumList ?:[],
+            'zeelool_esSalesNumList'            => $zeelool_esSalesNumList ?:[],
+            'zeelool_deSalesNumList'            => $zeelool_deSalesNumList ?:[],
             'zeeloolSalesMoneyList'				=> $zeeloolSalesMoneyList ?:[],
             'vooguemeSalesMoneyList'			=> $vooguemeSalesMoneyList ?:[],
 			'nihaoSalesMoneyList'				=> $nihaoSalesMoneyList ?:[],
-			'meeloogSalesMoneyList'				=> $meeloogSalesMoneyList ?:[],
+            'meeloogSalesMoneyList'				=> $meeloogSalesMoneyList ?:[],
+            'zeelool_esSalesMoneyList'          => $zeelool_esSalesMoneyList ?:[],
+            'zeelool_deSalesMoneyList'          => $zeelool_deSalesMoneyList ?:[],
             'zeeloolUnitPriceList'				=> $zeeloolUnitPriceList ?:[],
             'vooguemeUnitPriceList'				=> $vooguemeUnitPriceList ?:[],
 			'nihaoUnitPriceList'				=> $nihaoUnitPriceList ?:[],
-			'meeloogUnitPriceList'				=> $meeloogUnitPriceList ?:[],
+            'meeloogUnitPriceList'				=> $meeloogUnitPriceList ?:[],
+            'zeelool_esUnitPriceList'		    => $zeelool_esUnitPriceList ?:[],
+            'zeelool_deUnitPriceList'		    => $zeelool_deUnitPriceList ?:[],
             'zeeloolShoppingcartTotal'			=> $zeeloolShoppingcartTotal ?:[],
             'vooguemeShoppingcartTotal' 		=> $vooguemeShoppingcartTotal ?:[],
 			'nihaoShoppingcartTotal'			=> $nihaoShoppingcartTotal ?:[],
-			'meeloogShoppingcartTotal'			=> $meeloogShoppingcartTotal ?:[],
+            'meeloogShoppingcartTotal'			=> $meeloogShoppingcartTotal ?:[],
+            'zeelool_esShoppingcartTotal'	    => $zeelool_esShoppingcartTotal ?:[],
+            'zeelool_deShoppingcartTotal'		=> $zeelool_deShoppingcartTotal ?:[],
             'zeeloolShoppingcartConversion'	 	=> $zeeloolShoppingcartConversion ?:[],
             'vooguemeShoppingcartConversion'	=> $vooguemeShoppingcartConversion ?:[],
 			'nihaoShoppingcartConversion'	 	=> $nihaoShoppingcartConversion ?:[],
-			'meeloogShoppingcartConversion'	 	=> $meeloogShoppingcartConversion ?:[],
+            'meeloogShoppingcartConversion'	 	=> $meeloogShoppingcartConversion ?:[],
+            'zeelool_esShoppingcartConversion'	=> $zeelool_esShoppingcartConversion ?:[],
+            'zeelool_deShoppingcartConversion'	=> $zeelool_deShoppingcartConversion ?:[],
             'zeeloolRegisterCustomer'			=> $zeeloolRegisterCustomer ?:[],
             'vooguemeRegisterCustomer'			=> $vooguemeRegisterCustomer ?:[],
 			'nihaoRegisterCustomer'				=> $nihaoRegisterCustomer ?:[],
-			'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
+            'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
+            'zeelool_esRegisterCustomer'		=> $zeelool_esRegisterCustomer ?:[],
+            'zeelool_deRegisterCustomer'		=> $zeelool_deRegisterCustomer ?:[],
             'bottom_data'						=> $bottom_data,
-            'result'                            => $result,
+            'result'                            => $arr,
             'arr'                               => $arr
         ]);
         // $this->view->assign("orderPlatformList", $platform);
@@ -275,7 +243,7 @@ class Dashboard extends Backend
             if (!$order_platform) {
                 return   $this->error('参数不存在，请重新尝试');
             }
-            if (10 != $order_platform) {
+            if (100 != $order_platform) {
                 $data = $this->model->getList($order_platform);
             } else {
                 $data = $this->model->getAllList();
@@ -426,26 +394,36 @@ class Dashboard extends Backend
         $voogueme_model = Db::connect('database.db_voogueme');
         $nihao_model	= Db::connect('database.db_nihao');
         $meeloog_model	= Db::connect('database.db_meeloog');
+        $zeelool_es_model = Db::connect('database.db_zeelool_es');
+        $zeelool_de_model = Db::connect('database.db_zeelool_de');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 		$nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-		$meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
         $app['store_id']   = 5;
+        $android['store_id']   = 6;
         //zeelool中pc销售额
         $zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //zeelool中wap销售额
         $zeelool_wap_sales_money 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
-        //zeelool中app销售额
+        //zeelool中IOS销售额
         $zeelool_app_sales_money 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool中Android销售额
+        $zeelool_android_sales_money 	= $zeelool_model->table('sales_flat_order')->where($android)->where($status)->where($map)->sum('base_grand_total');
+
         //zeelool中pc支付成功数
         $zeelool_pc_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
         //zeelool中wap支付成功数
         $zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
-        //zeelool中pc支付成功数
+        //zeelool中IOS支付成功数
         $zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->count('*');
+        //zeelool中Android支付成功数
+        $zeelool_android_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($android)->where($status)->where($map)->count('*');
 		
 		if($zeelool_pc_sales_num>0){
 			//zeelool pc端客单价
@@ -459,12 +437,18 @@ class Dashboard extends Backend
 		}else{
 			$zeelool_wap_unit_price     = 0;
 		}
-		//zeelool app端客单价
+		//zeelool IOS端客单价
 		if($zeelool_app_sales_num>0){
 			$zeelool_app_unit_price 	= round(($zeelool_app_sales_money/$zeelool_app_sales_num), 2);
 		}else{
 			$zeelool_app_unit_price		= 0;
 		}
+        //zeelool Android端客单价
+        if($zeelool_android_sales_num>0){
+            $zeelool_android_unit_price 	= round(($zeelool_android_sales_money/$zeelool_android_sales_num), 2);
+        }else{
+            $zeelool_android_unit_price		= 0;
+        }
         //voogueme中pc销售额
         $voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //voogueme中wap销售额
@@ -528,17 +512,61 @@ class Dashboard extends Backend
 		}else{
 			$meeloog_wap_unit_price = 0;
 		}
-        		
+
+        //zeelool_es中pc销售额
+        $zeelool_es_pc_sales_money 	= $zeelool_es_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool_es中wap销售额
+        $zeelool_es_wap_sales_money	= $zeelool_es_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool_es中pc支付成功数
+        $zeelool_es_pc_sales_num    = $zeelool_es_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
+        //zeelool_es中wap支付成功数
+        $zeelool_es_wap_sales_num	= $zeelool_es_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
+		//meeloog pc端客单价
+		if($zeelool_es_pc_sales_num>0){
+			$zeelool_es_pc_unit_price  = round(($zeelool_es_pc_sales_money/$zeelool_es_pc_sales_num), 2);
+		}else{
+			$zeelool_es_pc_unit_price  = 0;
+		}
+		//zeelool_es wap客单价
+		if($zeelool_es_wap_sales_num>0){
+			$zeelool_es_wap_unit_price = round(($zeelool_es_wap_sales_money/$zeelool_es_wap_sales_num), 2);
+		}else{
+			$zeelool_es_wap_unit_price = 0;
+        }
+        
+        //zeelool_de中pc销售额
+        $zeelool_de_pc_sales_money 	= $zeelool_de_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool_de中wap销售额
+        $zeelool_de_wap_sales_money	= $zeelool_de_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
+        //zeelool_de中pc支付成功数
+        $zeelool_de_pc_sales_num    = $zeelool_de_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
+        //zeelool_de中wap支付成功数
+        $zeelool_de_wap_sales_num	= $zeelool_de_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
+        //meeloog pc端客单价
+        if($zeelool_de_pc_sales_num>0){
+            $zeelool_de_pc_unit_price  = round(($zeelool_de_pc_sales_money/$zeelool_de_pc_sales_num), 2);
+        }else{
+            $zeelool_de_pc_unit_price  = 0;
+        }
+        //zeelool_de wap客单价
+        if($zeelool_de_wap_sales_num>0){
+            $zeelool_de_wap_unit_price = round(($zeelool_de_wap_sales_money/$zeelool_de_wap_sales_num), 2);
+        }else{
+            $zeelool_de_wap_unit_price = 0;
+        }
         $arr = [
             'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money ?:0,
             'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money ?:0,
             'zeelool_app_sales_money' 	=> $zeelool_app_sales_money ?:0,
+            'zeelool_android_sales_money' 	=> $zeelool_android_sales_money ?:0,
             'zeelool_pc_sales_num' 		=> $zeelool_pc_sales_num ?:0,
             'zeelool_wap_sales_num'		=> $zeelool_wap_sales_num ?:0,
             'zeelool_app_sales_num' 	=> $zeelool_app_sales_num ?:0,
+            'zeelool_android_sales_num' 	=> $zeelool_android_sales_num ?:0,
             'zeelool_pc_unit_price' 	=> $zeelool_pc_unit_price ?:0,
             'zeelool_wap_unit_price' 	=> $zeelool_wap_unit_price ?:0,
             'zeelool_app_unit_price' 	=> $zeelool_app_unit_price ?:0,
+            'zeelool_android_unit_price' 	=> $zeelool_android_unit_price ?:0,
             'voogueme_pc_sales_money' 	=> $voogueme_pc_sales_money ?:0,
             'voogueme_wap_sales_money' 	=> $voogueme_wap_sales_money ?:0,
             'voogueme_pc_sales_num' 	=> $voogueme_pc_sales_num ?:0,
@@ -556,7 +584,19 @@ class Dashboard extends Backend
             'meeloog_pc_sales_num' 		=> $meeloog_pc_sales_num ?:0,
             'meeloog_wap_sales_num' 	=> $meeloog_wap_sales_num ?:0,
             'meeloog_pc_unit_price' 	=> $meeloog_pc_unit_price ?:0,
-            'meeloog_wap_unit_price' 	=> $meeloog_wap_unit_price ?:0,			
+            'meeloog_wap_unit_price' 	=> $meeloog_wap_unit_price ?:0,	
+            'zeelool_es_pc_sales_money' => $zeelool_es_pc_sales_money ?:0,
+            'zeelool_es_wap_sales_money' =>$zeelool_es_wap_sales_money ?:0,
+            'zeelool_es_pc_sales_num' 	=> $zeelool_es_pc_sales_num ?:0,
+            'zeelool_es_wap_sales_num' 	=> $zeelool_es_wap_sales_num ?:0,
+            'zeelool_es_pc_unit_price' 	=> $zeelool_es_pc_unit_price ?:0,
+            'zeelool_es_wap_unit_price' => $zeelool_es_wap_unit_price ?:0,
+            'zeelool_de_pc_sales_money' => $zeelool_de_pc_sales_money ?:0,
+            'zeelool_de_wap_sales_money' =>$zeelool_de_wap_sales_money ?:0,
+            'zeelool_de_pc_sales_num' 	=> $zeelool_de_pc_sales_num ?:0,
+            'zeelool_de_wap_sales_num' 	=> $zeelool_de_wap_sales_num ?:0,
+            'zeelool_de_pc_unit_price' 	=> $zeelool_de_pc_unit_price ?:0,
+            'zeelool_de_wap_unit_price' => $zeelool_de_wap_unit_price ?:0,			
         ];
         Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)), $arr, 7200);
         return $arr;

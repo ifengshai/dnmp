@@ -175,6 +175,7 @@
                         <li class="{:$order_platform == 1 ? 'active' : ''} site">Zeelool</li>
                         <li class="site {:$order_platform == 2 ? 'active' : ''}">Voogueme</li>
                         <li class="site {:$order_platform == 3 ? 'active' : ''}">Nihao</li>
+                        <li class="site {:$order_platform == 4 ? 'active' : ''}">Meeloog</li>
                         <!-- <li class="site">Wesee</li> -->
                     </ul>
                     <form id="form1" role="form" action="{:url('/admin/saleaftermanage/order_return/search')}"
@@ -188,9 +189,14 @@
                                         name="increment_id" value="{$increment_id}" />
                                 </li>
                                 <li>
-                                    <span for="orderNum">快递单号</span>
+                                    <span>快递单号</span>
                                     <input type="text" id="track_number" class="form-control" name="track_number"
                                         value="{$track_number}" />
+                                </li>
+                                <li>
+                                    <span>交易号</span>
+                                    <input type="text" id="transaction_id" class="form-control" name="transaction_id"
+                                           value="{$transaction_id}" />
                                 </li>
                             </ul>
                             <ul class="order-list">

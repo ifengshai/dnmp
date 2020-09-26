@@ -80,7 +80,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     visible: function(row){
                                         //console.log(row.assign_id)
-                                        if( Config.admin_id == 1 || Config.admin_id == 75){
+                                        if( Config.admin_id == 1 || Config.admin_id == 75 ||Config.admin_id == 181){
                                             return true;
                                         }
                                         if(row.due_id != Config.admin_id){
@@ -183,6 +183,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 window.open("about:blank","_self").close();
             }, function (data, ret) {
                 Toastr.success("失败");
+            });
+            $(document).keypress(function(event){
+                if(event.keyCode == 13){
+                    event.preventDefault();
+                }
             });
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();

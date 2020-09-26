@@ -17,10 +17,10 @@ class Test4 extends Backend
     protected $str2 = 'Delivered to Air Transport.';
     protected $str3 = 'In Transit to Next Facility.';
     protected $str4 = 'Arrived in the Final Destination Country.';
-    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.'; //到达待取
-    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
-    protected $str40 = 'Delivered successfully.'; //投递成功
-    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
+
+
+
+
 
 
     public function _initialize()
@@ -36,6 +36,43 @@ class Test4 extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
     }
+
+
+    //数据已跑完 2020 08.25 14:47
+    public function amazon_sku()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skus = Db::name('zzzzzzz_temp')->select();
+        foreach ($skus as $k => $v) {
+            $params = [];
+            if (!empty($v['true_sku'])) {
+                $item_detail = $item->where('sku', $v['true_sku'])->find();
+                $params['sku'] = $v['true_sku'];
+                $params['platform_sku'] = $v['sku'];
+                if (empty($item_detail['name'])) {
+                    $params['name'] = '';
+                } else {
+                    $params['name'] = $item_detail['name'];
+                }
+                $params['platform_type'] = 10;
+                $params['create_person'] = 'Admin';
+                $params['create_time'] = date("Y-m-d H:i:s");
+                $params['is_upload'] = 1;
+                $params['outer_sku_status'] = $v['status'];
+                $res = $item_platform_sku->insert($params);
+            }
+            echo $k . "\n";
+        }
+        echo "ok";die;
+    }
+
+    public function test01()
+    {
+        $str = "%2B";
+        echo urldecode($str);
+    }
+
 
     public function zendesk_test()
     {
@@ -95,6 +132,7 @@ class Test4 extends Backend
         echo  $res;
         die;
     }
+
 
     /**
      * 处理各站虚拟仓库存
@@ -179,19 +217,12 @@ class Test4 extends Backend
         //查询临时表比例数据
         $data = Db::name('zzzzaaa_temp')->select();
         foreach ($data as $k => $v) {
-            if ($v['status'] == 1) {
-                $res = $itemPlatformSKU->where(['platform_type' => $v['site'], 'sku' => trim($v['sku'])])->find();
-                if (!$res) {
-                    echo $v['sku'] . '||' . $v['site'] . "\n";
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', $v['sku'] . '||' . $v['site'] . "\r\n", FILE_APPEND);
-                }
-            }
+            $itemPlatformSKU->where(['platform_type' => 1, 'sku' => trim($v['sku'])])->update(['outer_sku_status' => $v['status']]);
+            echo $k . "\n";
             usleep(50000);
         }
         echo 'ok';
     }
-
-
 
     /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
@@ -359,23 +390,6 @@ class Test4 extends Backend
     }
 
     /************************跑库存数据用END**********************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public function new_track_test()
@@ -1145,5 +1159,35 @@ class Test4 extends Backend
             $data[$k]['is_del'] = $v['is_del'];
         }
         db('it_web_demand')->insertAll($data);
+    }
+    /*
+     * 同步工单支付时间
+     * */
+    public function work_list_time()
+    {
+        $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $list = $this->model->field('id,work_platform,platform_order')->where('payment_time', '0000-00-00 00:00:00')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $value) {
+            $info = $this->model->getSkuList($value['work_platform'], $value['platform_order']);
+            $payment_time = $info['payment_time'];
+            $this->model->where('id', $value['id'])->update(['payment_time' => $payment_time]);
+            echo $value['id'] . ' is ok' . "\n";
+        }
+    }
+    /*
+     * 同步借出数量
+     * */
+    public function lendlog_info()
+    {
+        $list = Db::name('purchase_sample_lendlog_item')->select();
+        foreach ($list as $k => $v) {
+            $lendinfo = Db::name('purchase_sample_lendlog')->where('id', $v['log_id'])->find();
+            $data['status'] = $lendinfo['status'];
+            $data['create_user'] = $lendinfo['create_user'];
+            $data['createtime'] = $lendinfo['createtime'];
+            Db::name('purchase_sample_lendlog_item')->where('id', $v['id'])->update($data);
+            echo $v['id'] . "\n";
+        }
     }
 }

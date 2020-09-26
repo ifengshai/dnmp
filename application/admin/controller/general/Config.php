@@ -215,4 +215,13 @@ class Config extends Backend
         }
     }
 
+    /**
+     * 后台无操作权限页面
+     * @internal
+     */
+    public function jurisdiction()
+    {
+        return $this->view->fetch();
+    }
+
 }

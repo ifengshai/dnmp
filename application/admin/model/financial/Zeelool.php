@@ -161,33 +161,32 @@ class Zeelool extends Model
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $start_time = $start_time.' 00:00:00';
         $end_time   = $end_time.' 23:59:59';
-        $where['is_visable'] = 1;
-        $sku_bid_price_list = Db::connect('database.db_voogueme_online')->name('zeelool_product')->where($where)->field('magento_sku,bid_price')->select();
+        
+        $this->item = new \app\admin\model\itemmanage\Item();
+        //查询产品库镜框采购单价
+        $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
+
         $whereFrame['o.status'] = ['in',['complete','processing','creditcard_proccessing','free_proccessing']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
         //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
         ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
-       //转换sku
-        foreach ($all_frame_result as $key => $value) {
-            $all_frame_result[$key]['true_sku'] = $this->itemPlatform->getTrueSku($value['sku'],1);
-        }
+
         //镜架成本
-        $all_frame_price=0;
-        foreach ($all_frame_result as  $frame_value) {
-            foreach ($sku_bid_price_list as  $bid_price_value) {
-                if(trim($frame_value['true_sku']) == trim($bid_price_value['magento_sku'])){
-                    $all_frame_price += $frame_value['counter']*$bid_price_value['bid_price'];
-                }
-            }
+        $all_frame_price = 0;
+        foreach ($all_frame_result as $key => $value) {
+            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 1);
+            $all_frame_price += $value['counter'] * $sku_list[trim($true_sku)];
         }
+
         //求镜片成本价格
-        $all_lens_result = Db::connect('database.db_zeelool_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
-        ->join('sales_lens sl', 'sl.lens_id=m.lens_id','left')->where($whereFrame)
-        ->field('round(sum(m.qty_ordered*sl.left_lens_cost_price),2) left_lens_cost_price,round(sum(m.qty_ordered*sl.right_lens_cost_price),2) right_lens_cost_price')
-        ->select();
+        // $all_lens_result = Db::connect('database.db_zeelool_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id','left')
+        // ->join('sales_lens sl', 'sl.lens_id=m.lens_id','left')->where($whereFrame)
+        // ->field('round(sum(m.qty_ordered*sl.left_lens_cost_price),2) left_lens_cost_price,round(sum(m.qty_ordered*sl.right_lens_cost_price),2) right_lens_cost_price')
+        // ->select();
         //镜片成本
-        $all_lens_price = round($all_lens_result[0]['left_lens_cost_price'] + $all_lens_result[0]['right_lens_cost_price'], 2);
+        // $all_lens_price = round($all_lens_result[0]['left_lens_cost_price'] + $all_lens_result[0]['right_lens_cost_price'], 2);
+        $all_lens_price = 0;
         //求销售额、运费、毛利润
         $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
         ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();

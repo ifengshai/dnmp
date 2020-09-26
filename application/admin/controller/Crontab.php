@@ -165,9 +165,7 @@ class Crontab extends Backend
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
 
         $order_item_list = Db::connect('database.db_zeelool')->query($order_item_prescription_querySql);
 
@@ -569,9 +567,7 @@ order by sfoi.item_id asc limit 1000";
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_voogueme')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
@@ -939,9 +935,7 @@ order by sfoi.item_id asc limit 1000";
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
 
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_nihao')->query($order_item_prescription_querySql);
 
         $finalResult = array();
@@ -1304,9 +1298,7 @@ order by sfoi.item_id asc limit 1000";
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_meeloog')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
@@ -1671,9 +1663,7 @@ order by sfoi.item_id asc limit 1000";
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_weseeoptical')->query($order_item_prescription_querySql);
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
@@ -1759,6 +1749,705 @@ order by sfoi.item_id asc limit 1000";
     }
 
 
+
+    /**
+     * 西语站
+     * 定时处理 订单列表分类
+     * 1：仅镜架
+     * 2：仅现货处方镜
+     * 3：仅定制处方镜
+     * 4：镜架+现货
+     * 5：镜架+定制
+     * 6：现片+定制片
+     */
+    public function zeelool_es_order_custom_order_prescription()
+    {
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 0 order by entity_id desc limit 1000 ";
+        $order_entity_id_list = Db::connect('database.db_zeelool_es')->query($order_entity_id_querySql);
+        if (empty($order_entity_id_list)) {
+            echo '处理完毕！';
+            exit;
+        }
+
+        /**
+         * 1：仅镜架
+         * 2：仅现货处方镜
+         * 3：仅定制处方镜
+         * 4：镜架+现货
+         * 5：镜架+定制
+         * 6：现片+定制片
+         */
+        $type_1_entity_id = [];
+        $type_2_entity_id = [];
+        $type_3_entity_id = [];
+        $type_4_entity_id = [];
+        $type_5_entity_id = [];
+        $type_6_entity_id = [];
+        foreach ($order_entity_id_list as $key => $value) {
+            $items = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($items as $k => $v) {
+                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
+                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SOLO MONTURA') !== false || stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') !== false) {
+                    $label[] = 1; //仅镜架
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
+                    $label[] = 2; //现片含处方
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
+                    $label[] = 3; //定制含处方
+                }
+            }
+
+            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
+            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
+                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
+
+                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
+            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
+
+                //如果订单只有 仅镜架 类型则为 仅镜架
+            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+
+                //如果订单只有 现货 类型则为 现货处方镜
+            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
+                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
+
+                //如果订单只有 定制 类型则为 仅定制处方镜
+            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
+            } elseif (in_array(2, $label) && in_array(3, $label)) {
+                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
+            } else {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+            }
+        }
+
+        if ($type_1_entity_id) {
+            $map['entity_id'] = ['in', $type_1_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+        }
+
+        if ($type_2_entity_id) {
+            $map['entity_id'] = ['in', $type_2_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+        }
+
+        if ($type_3_entity_id) {
+            $map['entity_id'] = ['in', $type_3_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+        }
+
+
+        if ($type_4_entity_id) {
+            $map['entity_id'] = ['in', $type_4_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+        }
+
+
+        if ($type_5_entity_id) {
+            $map['entity_id'] = ['in', $type_5_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+        }
+
+
+        if ($type_6_entity_id) {
+            $map['entity_id'] = ['in', $type_6_entity_id];
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+        }
+
+        echo "执行成功！！";
+    }
+
+    /**
+     * 定时处理订单处方表序列化数据
+     */
+    public function zeelool_es_order_item_process()
+    {
+        $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
+        $max_item_id_list = Db::connect('database.db_zeelool_es')->query($max_item_id_querySql);
+        if ($max_item_id_list) {
+            $max_item_id = $max_item_id_list[0]['max_item_id'];
+        }
+
+        $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
+        $order_item_list = Db::connect('database.db_zeelool_es')->query($order_item_prescription_querySql);
+
+        foreach ($order_item_list as $order_item_key => $order_item_value) {
+            $product_options = unserialize($order_item_value['product_options']);
+
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+            $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+
+            $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+            $prescription_params = explode("&", $prescription_params);
+            $lens_params = array();
+            foreach ($prescription_params as $key => $value) {
+                $arr_value = explode("=", $value);
+                $lens_params[$arr_value[0]] = $arr_value[1];
+            }
+
+            $final_params = array_merge($lens_params, $final_params);
+
+            $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
+            $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
+            $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
+            $items[$order_item_key]['name'] = $order_item_value['name'];
+            $items[$order_item_key]['sku'] = $order_item_value['sku'];
+            $items[$order_item_key]['created_at'] = $order_item_value['created_at'];
+            $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
+            $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
+
+            $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
+            $items[$order_item_key]['index_type'] = $final_params['index_type'];
+            $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+
+            $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
+            $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
+            $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
+
+            $items[$order_item_key]['year'] = $final_params['year'] ? $final_params['year'] : '';
+            $items[$order_item_key]['month'] = $final_params['month'] ? $final_params['month'] : '';
+
+            $items[$order_item_key]['information'] = str_replace("+", " ", urldecode($final_params['information']));
+
+            $items[$order_item_key]['od_sph'] = $final_params['od_sph'];
+            $items[$order_item_key]['os_sph'] = $final_params['os_sph'];
+
+            $items[$order_item_key]['od_cyl'] = $final_params['od_cyl'];
+            $items[$order_item_key]['os_cyl'] = $final_params['os_cyl'];
+
+            $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
+            $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
+
+            if ($final_params['os_add'] && $final_params['od_add']) {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
+            } else {
+                $items[$order_item_key]['total_add'] = $final_params['os_add'];
+            }
+
+            if ($final_params['pdcheck'] == 'on') {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+            } else {
+                $items[$order_item_key]['pd'] = $final_params['pd'];
+            }
+
+            if ($final_params['prismcheck'] == 'on') {
+                $items[$order_item_key]['od_pv'] = $final_params['od_pv'];
+                $items[$order_item_key]['od_bd'] = $final_params['od_bd'];
+                $items[$order_item_key]['od_pv_r'] = $final_params['od_pv_r'];
+                $items[$order_item_key]['od_bd_r'] = $final_params['od_bd_r'];
+
+                $items[$order_item_key]['os_pv'] = $final_params['os_pv'];
+                $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
+                $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
+                $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            }
+
+            /**
+             * 判断定制现片逻辑
+             * 1、渐进镜 Progressive
+             * 2、偏光镜 镜片类型包含Polarized
+             * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、当cyl<=-4或cyl>=4
+             */
+            if ($final_params['prescription_type'] == 'Progressive') {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Polarizadas') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if ($final_params['od_cyl']) {
+                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
+                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_cyl']) {
+                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
+                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['od_sph']) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_sph']) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            unset($final_params);
+            unset($lens_params);
+            unset($prescription_params);
+            unset($product_options);
+        }
+
+
+        if ($items) {
+            $batch_order_item_prescription_values = "";
+            $batch_order_item_updateSql = "";
+            $batch_order_updateSql = "";
+            $frameArr = $orderArr = [];
+            foreach ($items as $key => $value) {
+                $frameArr[] = $value['sku'];
+                $orderArr[] = $value['item_id'];
+                $batch_order_item_prescription_values .= "("
+                    . $value['order_id'] . ","
+                    . $value['item_id'] . ","
+                    . $value['product_id'] . ","
+                    . $value['qty_ordered'] . ","
+                    . $value['quote_item_id'] . ","
+
+                    . "'" . $this->filter($value['name']) . "',"
+                    . "'" . $value['sku'] . "',"
+                    . "'" . $value['created_at'] . "',"
+
+                    . "'" . $value['index_type'] . "',"
+                    . "'" . $value['prescription_type'] . "',"
+                    . "'" . $value['coatiing_name'] . "',"
+
+                    . "'" . $value['year'] . "',"
+                    . "'" . $value['month'] . "',"
+
+                    . "'" . $value['frame_price'] . "',"
+                    . "'" . $value['index_price'] . "',"
+                    . "'" . $value['coatiing_price'] . "',"
+
+                    . "'" . $value['frame_regural_price'] . "',"
+                    . "'" . $value['is_special_price'] . "',"
+                    . "'" . $value['index_price_old'] . "',"
+                    . "'" . $value['index_name'] . "',"
+                    . "'" . $value['index_id'] . "',"
+                    . "'" . $value['lens'] . "',"
+                    . "'" . $value['lens_old'] . "',"
+                    . "'" . $value['total'] . "',"
+                    . "'" . $value['total_old'] . "',"
+                    . "'" . $this->filter($value['information']) . "',"
+
+                    . "'" . $value['od_sph'] . "',"
+                    . "'" . $value['os_sph'] . "',"
+                    . "'" . $value['od_cyl'] . "',"
+                    . "'" . $value['os_cyl'] . "',"
+                    . "'" . $value['od_axis'] . "',"
+                    . "'" . $value['os_axis'] . "',"
+                    . "'" . $value['pd_l'] . "',"
+                    . "'" . $value['pd_r'] . "',"
+                    . "'" . $value['pd'] . "',"
+                    . "'" . $value['os_add'] . "',"
+                    . "'" . $value['od_add'] . "',"
+                    . "'" . $value['total_add'] . "',"
+                    . "'" . $value['od_pv'] . "',"
+                    . "'" . $value['od_bd'] . "',"
+                    . "'" . $value['od_pv_r'] . "',"
+                    . "'" . $value['od_bd_r'] . "',"
+                    . "'" . $value['os_pv'] . "',"
+                    . "'" . $value['os_bd'] . "',"
+                    . "'" . $value['os_pv_r'] . "',"
+                    . "'" . $value['os_bd_r'] . "',"
+                    . "'" . $value['is_custom_lens'] . "'"
+                    . "),";
+            }
+
+            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
+                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
+            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
+
+            $result = Db::connect('database.db_zeelool_es')->execute($batch_order_item_prescription_insertSql);
+            if ($result) {
+                echo '<br>执行成功';
+            } else {
+                echo '<br>执行失败';
+            }
+           
+        } else {
+            echo '执行完毕！';
+        }
+    }
+
+
+    /**
+     * 德语站
+     * 定时处理 订单列表分类
+     * 1：仅镜架
+     * 2：仅现货处方镜
+     * 3：仅定制处方镜
+     * 4：镜架+现货
+     * 5：镜架+定制
+     * 6：现片+定制片
+     */
+    public function zeelool_de_order_custom_order_prescription()
+    {
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 0 order by entity_id desc limit 1000 ";
+        $order_entity_id_list = Db::connect('database.db_zeelool_de')->query($order_entity_id_querySql);
+        if (empty($order_entity_id_list)) {
+            echo '处理完毕！';
+            exit;
+        }
+
+        /**
+         * 1：仅镜架
+         * 2：仅现货处方镜
+         * 3：仅定制处方镜
+         * 4：镜架+现货
+         * 5：镜架+定制
+         * 6：现片+定制片
+         */
+        $type_1_entity_id = [];
+        $type_2_entity_id = [];
+        $type_3_entity_id = [];
+        $type_4_entity_id = [];
+        $type_5_entity_id = [];
+        $type_6_entity_id = [];
+        foreach ($order_entity_id_list as $key => $value) {
+            $items = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($items as $k => $v) {
+                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
+                if ($v['index_type'] == '' || $v['index_type'] == 'Kunstsbisffgläser' || stripos($v['index_type'], 'Nur Rahmen') !== false || stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') !== false) {
+                    $label[] = 1; //仅镜架
+                } elseif (($v['index_type'] && $v['index_type'] != 'Kunstsbisffgläser' && stripos($v['index_type'], 'Nur Rahmen') === false && stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') === false) && $v['is_custom_lens'] == 0) {
+                    $label[] = 2; //现片含处方
+                } elseif (($v['index_type'] && $v['index_type'] != 'Kunstsbisffgläser' && stripos($v['index_type'], 'Nur Rahmen') === false && stripos($v['index_type'], 'Nur Rahmen (Kunstsbisffgläser)') === false) && $v['is_custom_lens'] == 1) {
+                    $label[] = 3; //定制含处方
+                }
+            }
+
+            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
+            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
+                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
+
+                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
+            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
+
+                //如果订单只有 仅镜架 类型则为 仅镜架
+            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+
+                //如果订单只有 现货 类型则为 现货处方镜
+            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
+                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
+
+                //如果订单只有 定制 类型则为 仅定制处方镜
+            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
+            } elseif (in_array(2, $label) && in_array(3, $label)) {
+                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
+            } else {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+            }
+        }
+
+        if ($type_1_entity_id) {
+            $map['entity_id'] = ['in', $type_1_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+        }
+
+        if ($type_2_entity_id) {
+            $map['entity_id'] = ['in', $type_2_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+        }
+
+        if ($type_3_entity_id) {
+            $map['entity_id'] = ['in', $type_3_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+        }
+
+
+        if ($type_4_entity_id) {
+            $map['entity_id'] = ['in', $type_4_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+        }
+
+
+        if ($type_5_entity_id) {
+            $map['entity_id'] = ['in', $type_5_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+        }
+
+
+        if ($type_6_entity_id) {
+            $map['entity_id'] = ['in', $type_6_entity_id];
+            Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+        }
+
+        echo "执行成功！！";
+    }
+
+    /**
+     * 定时处理订单处方表序列化数据
+     */
+    public function zeelool_de_order_item_process()
+    {
+        $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
+        $max_item_id_list = Db::connect('database.db_zeelool_de')->query($max_item_id_querySql);
+        if ($max_item_id_list) {
+            $max_item_id = $max_item_id_list[0]['max_item_id'];
+        }
+
+        $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
+        $order_item_list = Db::connect('database.db_zeelool_de')->query($order_item_prescription_querySql);
+
+        foreach ($order_item_list as $order_item_key => $order_item_value) {
+            $product_options = unserialize($order_item_value['product_options']);
+
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+            $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+
+            $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+            $prescription_params = explode("&", $prescription_params);
+            $lens_params = array();
+            foreach ($prescription_params as $key => $value) {
+                $arr_value = explode("=", $value);
+                $lens_params[$arr_value[0]] = $arr_value[1];
+            }
+
+            $final_params = array_merge($lens_params, $final_params);
+
+            $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
+            $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
+            $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
+            $items[$order_item_key]['name'] = $order_item_value['name'];
+            $items[$order_item_key]['sku'] = $order_item_value['sku'];
+            $items[$order_item_key]['created_at'] = $order_item_value['created_at'];
+            $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
+            $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
+
+            $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
+            $items[$order_item_key]['index_type'] = $final_params['index_type'];
+            $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+
+            $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
+            $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
+            $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
+
+            $items[$order_item_key]['year'] = $final_params['year'] ? $final_params['year'] : '';
+            $items[$order_item_key]['month'] = $final_params['month'] ? $final_params['month'] : '';
+
+            $items[$order_item_key]['information'] = str_replace("+", " ", urldecode($final_params['information']));
+
+            $items[$order_item_key]['od_sph'] = $final_params['od_sph'];
+            $items[$order_item_key]['os_sph'] = $final_params['os_sph'];
+
+            $items[$order_item_key]['od_cyl'] = $final_params['od_cyl'];
+            $items[$order_item_key]['os_cyl'] = $final_params['os_cyl'];
+
+            $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
+            $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
+
+            if ($final_params['os_add'] && $final_params['od_add']) {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
+            } else {
+                $items[$order_item_key]['total_add'] = $final_params['os_add'];
+            }
+
+            if ($final_params['pdcheck'] == 'on') {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+            } else {
+                $items[$order_item_key]['pd'] = $final_params['pd'];
+            }
+
+            if ($final_params['prismcheck'] == 'on') {
+                $items[$order_item_key]['od_pv'] = $final_params['od_pv'];
+                $items[$order_item_key]['od_bd'] = $final_params['od_bd'];
+                $items[$order_item_key]['od_pv_r'] = $final_params['od_pv_r'];
+                $items[$order_item_key]['od_bd_r'] = $final_params['od_bd_r'];
+
+                $items[$order_item_key]['os_pv'] = $final_params['os_pv'];
+                $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
+                $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
+                $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            }
+
+            /**
+             * 判断定制现片逻辑
+             * 1、渐进镜 Progressive
+             * 2、偏光镜 镜片类型包含Polarized
+             * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、当cyl<=-4或cyl>=4
+             */
+            if ($final_params['prescription_type'] == 'Progressive') {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Polarisierende') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if ($final_params['od_cyl']) {
+                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
+                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_cyl']) {
+                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
+                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['od_sph']) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_sph']) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            unset($final_params);
+            unset($lens_params);
+            unset($prescription_params);
+            unset($product_options);
+        }
+
+
+        if ($items) {
+            $batch_order_item_prescription_values = "";
+            $batch_order_item_updateSql = "";
+            $batch_order_updateSql = "";
+            $frameArr = $orderArr = [];
+            foreach ($items as $key => $value) {
+                $frameArr[] = $value['sku'];
+                $orderArr[] = $value['item_id'];
+                $batch_order_item_prescription_values .= "("
+                    . $value['order_id'] . ","
+                    . $value['item_id'] . ","
+                    . $value['product_id'] . ","
+                    . $value['qty_ordered'] . ","
+                    . $value['quote_item_id'] . ","
+
+                    . "'" . $this->filter($value['name']) . "',"
+                    . "'" . $value['sku'] . "',"
+                    . "'" . $value['created_at'] . "',"
+
+                    . "'" . $value['index_type'] . "',"
+                    . "'" . $value['prescription_type'] . "',"
+                    . "'" . $value['coatiing_name'] . "',"
+
+                    . "'" . $value['year'] . "',"
+                    . "'" . $value['month'] . "',"
+
+                    . "'" . $value['frame_price'] . "',"
+                    . "'" . $value['index_price'] . "',"
+                    . "'" . $value['coatiing_price'] . "',"
+
+                    . "'" . $value['frame_regural_price'] . "',"
+                    . "'" . $value['is_special_price'] . "',"
+                    . "'" . $value['index_price_old'] . "',"
+                    . "'" . $value['index_name'] . "',"
+                    . "'" . $value['index_id'] . "',"
+                    . "'" . $value['lens'] . "',"
+                    . "'" . $value['lens_old'] . "',"
+                    . "'" . $value['total'] . "',"
+                    . "'" . $value['total_old'] . "',"
+                    . "'" . $this->filter($value['information']) . "',"
+
+                    . "'" . $value['od_sph'] . "',"
+                    . "'" . $value['os_sph'] . "',"
+                    . "'" . $value['od_cyl'] . "',"
+                    . "'" . $value['os_cyl'] . "',"
+                    . "'" . $value['od_axis'] . "',"
+                    . "'" . $value['os_axis'] . "',"
+                    . "'" . $value['pd_l'] . "',"
+                    . "'" . $value['pd_r'] . "',"
+                    . "'" . $value['pd'] . "',"
+                    . "'" . $value['os_add'] . "',"
+                    . "'" . $value['od_add'] . "',"
+                    . "'" . $value['total_add'] . "',"
+                    . "'" . $value['od_pv'] . "',"
+                    . "'" . $value['od_bd'] . "',"
+                    . "'" . $value['od_pv_r'] . "',"
+                    . "'" . $value['od_bd_r'] . "',"
+                    . "'" . $value['os_pv'] . "',"
+                    . "'" . $value['os_bd'] . "',"
+                    . "'" . $value['os_pv_r'] . "',"
+                    . "'" . $value['os_bd_r'] . "',"
+                    . "'" . $value['is_custom_lens'] . "'"
+                    . "),";
+            }
+
+            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
+                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
+            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
+
+            $result = Db::connect('database.db_zeelool_de')->execute($batch_order_item_prescription_insertSql);
+            if ($result) {
+                echo '<br>执行成功';
+            } else {
+                echo '<br>执行失败';
+            }
+           
+        } else {
+            echo '执行完毕！';
+        }
+    }
+
+
     /**
      * 定时统计每天的销量(弃用)
      */
@@ -1811,6 +2500,8 @@ order by sfoi.item_id asc limit 1000";
         $voogueme_model = Db::connect('database.db_voogueme');
         $nihao_model    = Db::connect('database.db_nihao');
         $meeloog_model  = Db::connect('database.db_meeloog');
+        $zeelool_es_model = Db::connect('database.db_zeelool_es');
+        $zeelool_de_model = Db::connect('database.db_zeelool_de');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -1823,6 +2514,15 @@ order by sfoi.item_id asc limit 1000";
         $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $meeloog_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");
+
+        $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_es_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_es_model->table('customer_entity')->query("set time_zone='+8:00'");
+
+        $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_de_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_de_model->table('customer_entity')->query("set time_zone='+8:00'");
+
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -1912,7 +2612,7 @@ order by sfoi.item_id asc limit 1000";
 
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
-        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
+
         $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //meeloog客单价
@@ -1939,50 +2639,128 @@ order by sfoi.item_id asc limit 1000";
         } else {
             $meeloog_shoppingcart_update_conversion = 0;
         }
-
-        //meeloog注册用户数
+        //nihao注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
+        
+        //zeelool es
+        $zeelool_es_count = $zeelool_es_model->table('sales_flat_order')->where($map)->count(1);
+        $zeelool_es_total = $zeelool_es_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //zeelool_es客单价
+        if ($zeelool_es_count > 0) {
+            $zeelool_es_unit_price = round(($zeelool_es_total / $zeelool_es_count), 2);
+        } else {
+            $zeelool_es_unit_price = 0;
+        }
+
+        //zeelool_es购物车数
+        $zeelool_es_shoppingcart_total = $zeelool_es_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_es购物车更新数
+        $zeelool_es_shoppingcart_update_total = $zeelool_es_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_es购物车转化率
+        if ($zeelool_es_shoppingcart_total > 0) {
+            $zeelool_es_shoppingcart_conversion = round(($zeelool_es_count / $zeelool_es_shoppingcart_total) * 100, 2);
+        } else {
+            $zeelool_es_shoppingcart_conversion = 0;
+        }
+
+        //zeelool_es购物车更新转化率
+        if ($zeelool_es_shoppingcart_update_total > 0) {
+            $zeelool_es_shoppingcart_update_conversion = round(($zeelool_es_count / $zeelool_es_shoppingcart_update_total) * 100, 2);
+        } else {
+            $zeelool_es_shoppingcart_update_conversion = 0;
+        }
+
+        //zeelool_es注册用户数
+        $zeelool_es_register_customer = $zeelool_es_model->table('customer_entity')->where($date)->count('*');
+
+        //zeelool de
+        $zeelool_de_count = $zeelool_de_model->table('sales_flat_order')->where($map)->count(1);
+        $zeelool_de_total = $zeelool_de_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //zeelool_de客单价
+        if ($zeelool_de_count > 0) {
+            $zeelool_de_unit_price = round(($zeelool_de_total / $zeelool_de_count), 2);
+        } else {
+            $zeelool_de_unit_price = 0;
+        }
+
+        //zeelool_de购物车数
+        $zeelool_de_shoppingcart_total = $zeelool_de_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_de购物车更新数
+        $zeelool_de_shoppingcart_update_total = $zeelool_de_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_de购物车转化率
+        if ($zeelool_de_shoppingcart_total > 0) {
+            $zeelool_de_shoppingcart_conversion = round(($zeelool_de_count / $zeelool_de_shoppingcart_total) * 100, 2);
+        } else {
+            $zeelool_de_shoppingcart_conversion = 0;
+        }
+
+        //zeelool_de购物车更新转化率
+        if ($zeelool_de_shoppingcart_update_total > 0) {
+            $zeelool_de_shoppingcart_update_conversion = round(($zeelool_de_count / $zeelool_de_shoppingcart_update_total) * 100, 2);
+        } else {
+            $zeelool_de_shoppingcart_update_conversion = 0;
+        }
+
+        //zeelool_de注册用户数
+        $zeelool_de_register_customer = $zeelool_de_model->table('customer_entity')->where($date)->count('*');
+        
 
         $data['zeelool_sales_num']                          = $zeelool_count;
         $data['voogueme_sales_num']                         = $voogueme_count;
         $data['nihao_sales_num']                            = $nihao_count;
         $data['meeloog_sales_num']                          = $meeloog_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
+        $data['zeelool_es_sales_num']                       = $zeelool_es_count;
+        $data['zeelool_de_sales_num']                       = $zeelool_de_count;
+        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count;
         $data['zeelool_sales_money']                        = $zeelool_total;
         $data['voogueme_sales_money']                       = $voogueme_total;
         $data['nihao_sales_money']                          = $nihao_total;
         $data['meeloog_sales_money']                        = $meeloog_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
+        $data['zeelool_es_sales_money']                     = $zeelool_es_total;
+        $data['zeelool_de_sales_money']                     = $zeelool_de_total;
+        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total;
         $data['zeelool_unit_price']                         = $zeelool_unit_price;
         $data['voogueme_unit_price']                        = $voogueme_unit_price;
         $data['nihao_unit_price']                           = $nihao_unit_price;
         $data['meeloog_unit_price']                         = $meeloog_unit_price;
-        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price + $meeloog_unit_price) / 4, 2);
+        $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
+        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;    
+        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price + $meeloog_unit_price + $zeelool_de_unit_price + $zeelool_es_unit_price) / 6, 2);
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
         $data['meeloog_shoppingcart_total']                 = $meeloog_shoppingcart_total;
-        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total;
+        $data['zeelool_es_shoppingcart_total']              = $zeelool_es_shoppingcart_total;
+        $data['zeelool_de_shoppingcart_total']              = $zeelool_de_shoppingcart_total;
+        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total + $zeelool_es_shoppingcart_total + $zeelool_de_shoppingcart_total;
         $data['zeelool_shoppingcart_conversion']            = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion']           = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
         $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion + $meeloog_shoppingcart_conversion) / 4, 2);
+        $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
+        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion; 
+        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion + $meeloog_shoppingcart_conversion + $zeelool_es_shoppingcart_conversion + $zeelool_de_shoppingcart_conversion) / 6, 2);
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
         $data['voogueme_register_customer']                 = $voogueme_register_customer;
         $data['nihao_register_customer']                    = $nihao_register_customer;
         $data['meeloog_register_customer']                  = $meeloog_register_customer;
-        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer;
+        $data['zeelool_es_register_customer']               = $zeelool_es_register_customer;
+        $data['zeelool_de_register_customer']               = $zeelool_de_register_customer;
+        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer + $zeelool_es_register_customer + $zeelool_de_register_customer;
         $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
         $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
         $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
         $data['meeloog_shoppingcart_update_total']          = $meeloog_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total;
+        $data['zeelool_es_shoppingcart_update_total']       = $zeelool_es_shoppingcart_update_total;
+        $data['zeelool_de_shoppingcart_update_total']       = $zeelool_de_shoppingcart_update_total;
+        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total + $zeelool_es_shoppingcart_update_total + $zeelool_de_shoppingcart_update_total;
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
         $data['meeloog_shoppingcart_update_conversion']     = $meeloog_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion) / 4, 2);
+        $data['zeelool_es_shoppingcart_update_conversion']  = $zeelool_es_shoppingcart_update_conversion;
+        $data['zeelool_de_shoppingcart_update_conversion']  = $zeelool_de_shoppingcart_update_conversion;
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion + $zeelool_es_shoppingcart_update_conversion + $zeelool_de_shoppingcart_update_conversion) / 6, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -2454,6 +3232,12 @@ order by sfoi.item_id asc limit 1000";
             case 4:
                 $model = Db::connect('database.db_meeloog');
                 break;
+            case 9:
+                $model = Db::connect('database.db_zeelool_es');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;    
             default:
                 $model = false;
                 break;
@@ -2818,6 +3602,12 @@ order by sfoi.item_id asc limit 1000";
             case 4:
                 $model = Db::connect('database.db_meeloog');
                 break;
+            case 9:
+                $model = Db::connect('database.db_zeelool_es');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;        
             default:
                 $model = false;
                 break;
@@ -3247,19 +4037,6 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'skuNum')->update($data);
 
-        //查询待处理事件 售后未处理 + 协同未处理
-        //售后事件个数
-        $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
-        $salesNum = $saleTask->getTaskNum();
-
-        //查询协同任务待处理事件
-        $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
-        $infoNum = $infoTask->getTaskNum();
-        $taskAllNum = $salesNum + $infoNum;
-        $data['value'] = $taskAllNum;
-        $data['updatetime'] = date('Y-m-d H:i:s', time());
-        $dataConfig->where('key', 'taskAllNum')->update($data);
-
         //三个站待处理订单
         $zeeloolNum = $this->zeelool->getPendingOrderNum();
         $vooguemeNum = $this->voogueme->getPendingOrderNum();
@@ -3284,8 +4061,6 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $allSalesNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'allSalesNum')->update($data);
-
-
 
         //期初总库存
         $productAllStockLog = new \app\admin\model\ProductAllStock();
@@ -3637,25 +4412,9 @@ order by sfoi.item_id asc limit 1000";
     protected function onway_all_stock()
     {
         //计算SKU总采购数量
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->sum('purchase_num');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_num = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->sum('arrivals_num');
-        return $purchase_num - $arrivals_num;
+        $item = new \app\admin\model\itemmanage\Item();
+        $on_way_stock = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3668,27 +4427,10 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_all_stock_price()
     {
-        //计算SKU总采购金额
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->sum('purchase_num*purchase_price');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_price = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-            ->sum('arrivals_num*purchase_price');
-        return $purchase_price - $arrivals_price;
+        //计算SKU总采购数量
+        $item = new \app\admin\model\itemmanage\Item();
+        $on_way_stock_price = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
     /**
@@ -3701,32 +4443,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_frame_all_stock()
     {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock = $item->where($where)->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3739,35 +4467,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_frame_all_stock_price()
     {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num*purchase_price');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
     /**
@@ -3780,32 +4491,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_ornament_all_stock()
     {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock = $item->where($where)->sum('on_way_stock');
+        return $on_way_stock;
     }
 
     /**
@@ -3818,35 +4515,18 @@ order by sfoi.item_id asc limit 1000";
      */
     protected function onway_ornament_all_stock_price()
     {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->sum('purchase_num*purchase_price');
+        $item = new \app\admin\model\itemmanage\Item();
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
 
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+        return $on_way_stock_price;
     }
 
 
