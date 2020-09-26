@@ -775,7 +775,7 @@ class Outstock extends Backend
 
                 //获取出库数量
                 $replenish_num = (int)$v[3];
-                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 入库数量不能为空！'));
+                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . '出库数量不能为空！'));
 
 
                 //校验出库数量是否大于当前虚拟仓库存量
