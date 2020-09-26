@@ -41,6 +41,8 @@ class ItemPlatformSku extends Model
         if (false == $prefix) {
             return false;
         }
+        dump($row);
+        dump($prefix . $row['sku']);
         //监测平台sku是否存在
         $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $row['site']);
         if ($platformSkuExists) {
