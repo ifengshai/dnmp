@@ -53,6 +53,7 @@ class Dashboard extends Backend
         $where['created_at'] = ['between', [$stime, $etime]];
         $zelool = new \app\admin\model\order\order\Zeelool;
         $where['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $where['order_type'] = ['not in',[4,5]];
         $zeelool_count = $zelool->where($where)->count(1);
         $zeelool_total = $zelool->where($where)->sum('base_grand_total');
 

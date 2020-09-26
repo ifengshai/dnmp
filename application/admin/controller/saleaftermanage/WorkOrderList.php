@@ -4238,7 +4238,7 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AE" . ($key * 1 + 2), $value['refund_logistics_num']);
             $spreadsheet->getActiveSheet()->setCellValue("AF" . ($key * 1 + 2), $value['refund_money']);
             //退款百分比
-            if(0<$value['base_grand_total']){
+            if((0<$value['base_grand_total']) && (is_numeric($value['refund_money']))){
                 $spreadsheet->getActiveSheet()->setCellValue("AG" . ($key * 1 + 2), round($value['refund_money']/$value['base_grand_total'],2));  
             }else{
                 $spreadsheet->getActiveSheet()->setCellValue("AG" . ($key * 1 + 2), 0);
