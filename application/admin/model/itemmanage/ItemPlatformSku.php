@@ -59,6 +59,7 @@ class ItemPlatformSku extends Model
         $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
         $arr['category_id'] = $row['category_id'];
         $result = $this->allowField(true)->save($arr);
+        echo $this->getLastSql();
         return $result ? $result : false;
     }
     /***
