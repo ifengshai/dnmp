@@ -33,8 +33,15 @@ class DevelopDemand extends Model
     public function getTabList()
     {
         return [
-            ['name' => '我的', 'field' => 'me_task', 'value' => 1],
-        ];
+            // ['name' => '我的', 'field' => 'me_task', 'value' => 1],
+            ['name' => '产品计划', 'field' => 'test', 'value' => 1],
+            ['name' => '产品设计', 'field' => 'test', 'value' => 2],
+            ['name' => '研发中', 'field' => 'test', 'value' => 3],
+            ['name' => '测试中', 'field' => 'test', 'value' => 4],
+            ['name' => '准备发布', 'field' => 'test', 'value' => 5],
+            ['name' => '发布成功', 'field' => 'test', 'value' => 6],
+            ['name' => '已删除', 'field' => 'test', 'value' => 7],
+      ];
     }
     
 

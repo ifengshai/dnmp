@@ -28,12 +28,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
-                            title: __('需求内容'),
-                            events: Controller.api.events.getcontent,
+                            title:__('Titel'),
+                            events:Controller.api.events.getcontent,
+                            // cellStyle: formatTableUnit, 
                             formatter: Controller.api.formatter.getcontent,
                         },
 
@@ -46,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '运营部', 2: '客服部', 3: '仓管部', 4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'duty_nickname', title: __('责任人'), operate: 'like' },
+                        { field: 'duty_nickname', title: __('提出人'), operate: 'like' },
 
 
                         { field: 'nickname', title: __('负责人'), operate: 'like', visible: false },
@@ -82,8 +83,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             visible: false,
                             formatter: Table.api.formatter.status
                         },
+
                         {
-                            field: 'solution', title: __('备注'), cellStyle: formatTableUnit, operate: false, formatter: function (value, rows) {
+                            field: 'solution', title: __('解决方案'), cellStyle: formatTableUnit, operate: false, formatter: function (value, rows) {
                                 if (rows.review_status_manager == 1) {
                                     return Controller.api.formatter.getClear(rows.solution);
                                 } else if (rows.review_status_manager == 2) {
@@ -109,7 +111,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         { field: 'test_person', title: __('Test_person_name'), operate: false },
-                        { field: 'develop_status_str', title: __('开发节点'), operate: false },
+                        // { field: 'develop_status_str', title: __('开发节点'), operate: false },
                         {
                             field: 'is_finish',
                             title: __('开发完成'),
@@ -189,12 +191,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'ajax',
                                     text: '审核通过',
-                                    title: __('产品审核通过'),
+                                    title: __('产品审核'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
-                                    url: 'demand/develop_demand/review',
+                                    // url: 'demand/develop_demand/review',
+                                    url: 'demand/develop_demand/newreview',
                                     success: function (data, ret) {
-                                        table.bootstrapTable('refresh', {});
+                                        // table.bootstrapTable('refresh', {});
+                                        Layer.alert(ret.msg);
+                                        return false;
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
@@ -203,7 +208,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                        // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    text: '设计',
+                                    title: __('产品设计'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-dialog',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/develop_demand/review',
+                                    // url: 'demand/develop_demand/newreview',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        // Layer.alert(ret.msg);
+                                        return false;
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                        if (row.status == '1') {
                                             return true;
                                         } else {
                                             return false;
@@ -227,7 +261,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                        // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
                                             return true;
                                         } else {
                                             return false;
@@ -252,7 +287,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1) {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status=='2') {
                                             return true;
                                         } else {
                                             return false;
@@ -276,7 +311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1) {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status=='2') {
                                             return true;
                                         } else {
                                             return false;
@@ -317,13 +352,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person && row.status=='2') {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.status=='2') {
                                                 return true;
                                             } else {
                                                 return false;
@@ -341,7 +376,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
+                                        // if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -392,7 +428,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1 && row.is_test_record_hidden == 1) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1  && row.status=='3') {
                                             return true;
                                         } else {
                                             return false;
@@ -503,7 +539,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
+                                        // if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
+                                        if (row.status == '0') {
                                             return true;
                                         } else {
                                             return false;
@@ -544,26 +581,49 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 ]
             });
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var field = $(this).data("field");
+                var field = '';
+                field = $(this).data("field");
                 var value = $(this).data("value");
+                    if (field == 'me_task') {
+                       var tablename = value;
+                    } else if (field == 'plan'){
+                       var tablename = value;
+                    } else if (field == 'design'){
+                       var tablename = value;
+                    } else if (field == 'development'){
+                       var tablename = value;
+                    } else if (field == 'test'){
+                       var tablename = value;
+                    } else if (field == 'soon'){
+                       var tablename = value;
+                    } else if (field == 'complete'){
+                       var tablename = value;
+                    }else{
+                       var tablename = false;
+                    }
                 // console.log(field);
                 // console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
+
                 options.queryParams = function (params) {
-                    var params = queryParams(params);
+                    params = newQueryParams(params);
+                    return params;
+                };
+
+                function newQueryParams(params)
+                {
+                    filter = null;
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
-                    if (field == 'me_task') {
-                        filter[field] = value;
-                    } else {
-                        delete filter.me_task;
-                    }
+
+                    if(tablename){filter[field] = tablename}else{ delete filter.me_task;}
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
                     return params;
-                };
+                }
+
                 table.bootstrapTable('refresh', {});
                 return false;
             });
@@ -1054,6 +1114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
                     if (field == 'me_task') {
+                        alert('...');
                         filter[field] = value;
                     } else {
                         delete filter.me_task;
@@ -1179,11 +1240,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"));
             },
             formatter: {
-                getcontent: function (value) {
+                getcontent: function (value,row) {
                     if (value == null || value == undefined) {
                         value = '';
                     }
-                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent check_demand_content">查 看</span></div>';
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent">'+row.title+'</span></div>';
                 },
                 getClear: function (value) {
 
