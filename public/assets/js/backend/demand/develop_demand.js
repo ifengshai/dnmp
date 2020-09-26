@@ -32,8 +32,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'desc',
                             operate: false,
-                            title:__('Titel'),
-                            events:Controller.api.events.getcontent,
+                            title: __('Titel'),
+                            events: Controller.api.events.getcontent,
                             // cellStyle: formatTableUnit, 
                             formatter: Controller.api.formatter.getcontent,
                         },
@@ -287,7 +287,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status=='2') {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status == '2') {
                                             return true;
                                         } else {
                                             return false;
@@ -311,7 +311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status=='2') {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status == '2') {
                                             return true;
                                         } else {
                                             return false;
@@ -352,13 +352,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person && row.status=='2') {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person && (row.status == 2 || row.status == 6)) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.status=='2') {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && (row.status == 2 || row.status == 6)) {
                                                 return true;
                                             } else {
                                                 return false;
@@ -428,7 +428,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1  && row.status=='3') {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1 && row.status == 3) {
                                             return true;
                                         } else {
                                             return false;
@@ -584,23 +584,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var field = '';
                 field = $(this).data("field");
                 var value = $(this).data("value");
-                    if (field == 'me_task') {
-                       var tablename = value;
-                    } else if (field == 'plan'){
-                       var tablename = value;
-                    } else if (field == 'design'){
-                       var tablename = value;
-                    } else if (field == 'development'){
-                       var tablename = value;
-                    } else if (field == 'test'){
-                       var tablename = value;
-                    } else if (field == 'soon'){
-                       var tablename = value;
-                    } else if (field == 'complete'){
-                       var tablename = value;
-                    }else{
-                       var tablename = false;
-                    }
+                if (field == 'me_task') {
+                    var tablename = value;
+                } else if (field == 'plan') {
+                    var tablename = value;
+                } else if (field == 'design') {
+                    var tablename = value;
+                } else if (field == 'development') {
+                    var tablename = value;
+                } else if (field == 'test') {
+                    var tablename = value;
+                } else if (field == 'soon') {
+                    var tablename = value;
+                } else if (field == 'complete') {
+                    var tablename = value;
+                } else {
+                    var tablename = false;
+                }
                 // console.log(field);
                 // console.log(value);
                 var options = table.bootstrapTable('getOptions');
@@ -612,13 +612,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     return params;
                 };
 
-                function newQueryParams(params)
-                {
+                function newQueryParams(params) {
                     filter = null;
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
 
-                    if(tablename){filter[field] = tablename}else{ delete filter.me_task;}
+                    if (tablename) { filter[field] = tablename } else { delete filter.me_task; }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
                     return params;
@@ -1240,11 +1239,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"));
             },
             formatter: {
-                getcontent: function (value,row) {
+                getcontent: function (value, row) {
                     if (value == null || value == undefined) {
                         value = '';
                     }
-                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent">'+row.title+'</span></div>';
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent">' + row.title + '</span></div>';
                 },
                 getClear: function (value) {
 
