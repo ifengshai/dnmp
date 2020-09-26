@@ -70,6 +70,22 @@ class OrderStatistics extends Model
             return $this->where($map)->field('nihao_sales_money as sales_money,nihao_unit_price as unit_price,
             nihao_sales_num as sales_num,nihao_shoppingcart_update_total as shoppingcart_update_total,
             nihao_shoppingcart_update_conversion as shoppingcart_update_conversion ,create_date')->select();
+        }elseif(4 == $id){
+            return $this->where($map)->field('meeloog_sales_money as sales_money,meeloog_unit_price as unit_price,
+            meeloog_sales_num as sales_num,meeloog_shoppingcart_update_total as shoppingcart_update_total,
+            meeloog_shoppingcart_update_conversion as shoppingcart_update_conversion ,create_date')->select();
+        }elseif(9 == $id){
+            return $this->where($map)->field('zeelool_es_sales_money as sales_money,zeelool_es_unit_price as unit_price,
+            zeelool_es_sales_num as sales_num,zeelool_es_shoppingcart_update_total as shoppingcart_update_total,
+            zeelool_es_shoppingcart_update_conversion as shoppingcart_update_conversion ,create_date')->select();
+        }elseif(10 == $id){
+            return $this->where($map)->field('zeelool_de_sales_money as sales_money,zeelool_de_unit_price as unit_price,
+            zeelool_de_sales_num as sales_num,zeelool_de_shoppingcart_update_total as shoppingcart_update_total,
+            zeelool_de_shoppingcart_update_conversion as shoppingcart_update_conversion ,create_date')->select();
+        }elseif(11 == $id){
+            return $this->where($map)->field('zeelool_jp_sales_money as sales_money,zeelool_jp_unit_price as unit_price,
+            zeelool_jp_sales_num as sales_num,zeelool_jp_shoppingcart_update_total as shoppingcart_update_total,
+            zeelool_jp_shoppingcart_update_conversion as shoppingcart_update_conversion ,create_date')->select();
         }
     }
 }
