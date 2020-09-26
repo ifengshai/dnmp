@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 name: 'print',
                                 text: __('打印'),
                                 title: __('打印'),
-                                classname: 'btn btn-xs print_label',
+                                classname: 'btn btn-xs',
                                 url: 'warehouse/product_bar_code/print_label',
                                 extend:'target="_blank"',
                                 visible: function (row) {
