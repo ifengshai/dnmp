@@ -884,7 +884,9 @@ class NewProduct extends Backend
                 $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
                 $skuParams['name'] = $row['name'];
                 $skuParams['category_id'] = $row['category_id'];
+                dump($skuParams);
                 (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                echo (new \app\admin\model\itemmanage\ItemPlatformSku())->getLastSql();
 
                 $this->success('审核成功');
             } else {
