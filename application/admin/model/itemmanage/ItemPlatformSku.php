@@ -41,8 +41,6 @@ class ItemPlatformSku extends Model
         if (false == $prefix) {
             return false;
         }
-        dump($row);
-        dump($prefix . $row['sku']);
         //监测平台sku是否存在
         $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $row['site']);
         if ($platformSkuExists) {
@@ -61,7 +59,6 @@ class ItemPlatformSku extends Model
         $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
         $arr['category_id'] = $row['category_id'];
         $result = $this->allowField(true)->save($arr);
-        echo $this->getLastSql();
         return $result ? $result : false;
     }
     /***

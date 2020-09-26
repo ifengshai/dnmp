@@ -886,8 +886,6 @@ class NewProduct extends Backend
                 $skuParams['category_id'] = $row['category_id'];
                
                 $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
-                dump($result);
-
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
