@@ -23,7 +23,7 @@ class DevelopDemand extends Backend
      * @var \app\admin\model\demand\DevelopDemand
      */
     protected $model = null;
-    protected $noNeedRight = ['del'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight = ['del', 'newreview'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -55,106 +55,107 @@ class DevelopDemand extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             $meWhere = '';
             //我的
-    //         if (isset($filter['me_task'])) {
+            //         if (isset($filter['me_task'])) {
 
-    //             $adminId = session('admin.id');
-    //             //经理
-    //             $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
-    //             //经理
-    //             if (in_array($adminId, $authUserIds)) {
-    //                 $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
-    //             }
-    //             /* old
-				// //开发主管
-    //             $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
-    //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
-    //                 $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))"; //主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
-    //             }
-				// */
-    //              //开发主管
-    //             $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
-    //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
-    //                 $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
-    //             }
-				
-				// //判断是否是普通的测试
-    //             $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
-    //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
-    //                 $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
-    //             }
-    //             //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
-    //             $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
-    //             if (in_array($adminId, $assignAuthUserIds)) {
-    //                 $meWhere = "1 = 1";
-    //             }
-    //             // 不是主管和经理的, 是否为开发人或测试认，或创建人
-    //             if (!$meWhere) {
-    //                 $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
-    //             }
-    //             unset($filter['me_task']);
-    //         }
+            //             $adminId = session('admin.id');
+            //             //经理
+            //             $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+            //             //经理
+            //             if (in_array($adminId, $authUserIds)) {
+            //                 $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+            //             }
+            //             /* old
+            // //开发主管
+            //             $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+            //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
+            //                 $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))"; //主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+            //             }
+            // */
+            //              //开发主管
+            //             $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+            //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
+            //                 $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
+            //             }
 
-           //产品计划
+            // //判断是否是普通的测试
+            //             $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+            //             if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
+            //                 $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+            //             }
+            //             //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+            //             $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+            //             if (in_array($adminId, $assignAuthUserIds)) {
+            //                 $meWhere = "1 = 1";
+            //             }
+            //             // 不是主管和经理的, 是否为开发人或测试认，或创建人
+            //             if (!$meWhere) {
+            //                 $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+            //             }
+            //             unset($filter['me_task']);
+            //         }
+
+            //产品计划
             if (isset($filter['test'])) {
 
-                $i=null;$i=$filter['test'];
-                if ($i==1){//产品计划
-                    $meWhere .="FIND_IN_SET('0',status)";
-                }elseif($i==2){//产品设计
-                    $meWhere .="FIND_IN_SET('1',status)";
-                }elseif($i==3){ // 研发中心
-                    $meWhere .="FIND_IN_SET('2',status)";
-                }elseif($i==4){ // 测试中
-                    $meWhere .="FIND_IN_SET('3',status)";
-                }elseif($i==5){// 准备发布
-                    $meWhere .="FIND_IN_SET('4',status)";
-                }elseif($i==6){ // 发布成功
-                    $meWhere .="FIND_IN_SET('5',status)";
-                }elseif($i==7){ // 发布成功
-                    $meWhere .="FIND_IN_SET('6',status)";
+                $i = null;
+                $i = $filter['test'];
+                if ($i == 1) { //产品计划
+                    $meWhere .= "FIND_IN_SET('0',status)";
+                } elseif ($i == 2) { //产品设计
+                    $meWhere .= "FIND_IN_SET('1',status)";
+                } elseif ($i == 3) { // 研发中心
+                    $meWhere .= "FIND_IN_SET('2',status)";
+                } elseif ($i == 4) { // 测试中
+                    $meWhere .= "FIND_IN_SET('3',status)";
+                } elseif ($i == 5) { // 准备发布
+                    $meWhere .= "FIND_IN_SET('4',status)";
+                } elseif ($i == 6) { // 发布成功
+                    $meWhere .= "FIND_IN_SET('5',status)";
+                } elseif ($i == 7) { // 发布成功
+                    $meWhere .= "FIND_IN_SET('6',status)";
                 }
 
                 unset($filter['test']);
-            }else{
-               $meWhere .="FIND_IN_SET('0',status)";
+            } else {
+                $meWhere .= "FIND_IN_SET('0',status)";
             }
 
-           // //产品设计
-           //  if (isset($filter['design'])) {
-           //      $meWhere .="FIND_IN_SET('1',status)";
-           //      unset($filter['design']);
-           //  }
+            // //产品设计
+            //  if (isset($filter['design'])) {
+            //      $meWhere .="FIND_IN_SET('1',status)";
+            //      unset($filter['design']);
+            //  }
 
-           //  // 研发中心
-           //  if (isset($filter['development'])) {
-           //      $meWhere .="FIND_IN_SET('2',status)";
-           //      unset($filter['development']);
-           //  }
+            //  // 研发中心
+            //  if (isset($filter['development'])) {
+            //      $meWhere .="FIND_IN_SET('2',status)";
+            //      unset($filter['development']);
+            //  }
 
-           //  // 测试中
-           //  if (isset($filter['test'])) {
-           //      $meWhere .="FIND_IN_SET('3',status)";
-           //      unset($filter['test']);
-           //  }
+            //  // 测试中
+            //  if (isset($filter['test'])) {
+            //      $meWhere .="FIND_IN_SET('3',status)";
+            //      unset($filter['test']);
+            //  }
 
-           //  // 准备发布
-           //  if (isset($filter['soon'])) {
-           //      $meWhere .="FIND_IN_SET('4',status)";
-           //      unset($filter['soon']);
-           //  }
+            //  // 准备发布
+            //  if (isset($filter['soon'])) {
+            //      $meWhere .="FIND_IN_SET('4',status)";
+            //      unset($filter['soon']);
+            //  }
 
-           //  // 发布成功
-           //  if (isset($filter['complete'])) {
-           //      $meWhere .="FIND_IN_SET('5',status)";
-           //      unset($filter['complete']);
-           //  }
+            //  // 发布成功
+            //  if (isset($filter['complete'])) {
+            //      $meWhere .="FIND_IN_SET('5',status)";
+            //      unset($filter['complete']);
+            //  }
 
 
             //搜索负责人
             if ($filter['nickname']) {
                 //查询用户表id
                 $admin = new \app\admin\model\Admin();
-                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['nickname'] )->value('id');
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['nickname'])->value('id');
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
             }
@@ -164,12 +165,12 @@ class DevelopDemand extends Backend
             if ($filter['duty_nickname']) {
                 //查询用户表id
                 $admin = new \app\admin\model\Admin();
-                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'])->value('id');
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
                 unset($filter['duty_nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
-          
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -346,12 +347,12 @@ class DevelopDemand extends Backend
                 }
                 unset($filter['me_task']);
             }
-           
+
             //搜索负责人
             if ($filter['nickname']) {
                 //查询用户表id
                 $admin = new \app\admin\model\Admin();
-                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['nickname'] )->value('id');
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['nickname'])->value('id');
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
             }
@@ -362,12 +363,12 @@ class DevelopDemand extends Backend
             if ($filter['duty_nickname']) {
                 //查询用户表id
                 $admin = new \app\admin\model\Admin();
-                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'] )->value('id');
+                $userIds = $admin->where('status', 'normal')->where('nickname', '=', $filter['duty_nickname'])->value('id');
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},duty_user_id)";
                 unset($filter['duty_nickname']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -547,7 +548,7 @@ class DevelopDemand extends Backend
         }
 
         $admin = new \app\admin\model\Admin();
-        $userlist = $admin->where('status', 'normal')->column('nickname','id');
+        $userlist = $admin->where('status', 'normal')->column('nickname', 'id');
         $userlist = collection($userlist)->toArray();
 
         $this->view->assign('userlist', $userlist);
@@ -662,11 +663,11 @@ class DevelopDemand extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             //仅保存
-            if($params['leixing'] == '1'){  //仅保存
-               unset($params['leixing']);
-            }else{//保存并发布
-               unset($params['leixing']);
-               $params['status']='2';
+            if ($params['leixing'] == '1') {  //仅保存
+                unset($params['leixing']);
+            } else { //保存并发布
+                unset($params['leixing']);
+                $params['status'] = '2';
             }
             //保存并提交
             if ($params) {
@@ -681,9 +682,8 @@ class DevelopDemand extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $params['review_manager_time'] = date('Y-m-d H:i:s');
-                    if($params['review_status_manager'] == '2')
-                    {
-                        $params['status']='0';
+                    if ($params['review_status_manager'] == '2') {
+                        $params['status'] = '0';
                     }
 
                     $result = $row->allowField(true)->save($params);
@@ -725,15 +725,15 @@ class DevelopDemand extends Backend
      * @since 2020/09/10 10:02:24 
      * @return void
      */
-    public function newreview($id=null)
+    public function newreview($id = null)
     {
-        $id = $ids ?: input('ids');
+        $id = $id ?: input('ids');
         $label = input('label');
-        if($id){
+        if ($id) {
             try {
                 Db::table('fa_develop_demand')
-                ->where('id',$id)
-                ->update(['status' => '1']);   //审核成功  进入产品设计列表
+                    ->where('id', $id)
+                    ->update(['status' => '1']);   //审核成功  进入产品设计列表
                 // $result = $row->allowField(true)->save($save);
                 // $result = $row->where($where)->save($save);
                 // Db::commit();
@@ -797,7 +797,6 @@ class DevelopDemand extends Backend
             // return $this->view->fetch();
             $this->success('成功');
         }
-      
     }
 
 
@@ -830,7 +829,7 @@ class DevelopDemand extends Backend
                 $params['review_devel_time'] = date('Y-m-d H:i:s');
                 //开发主管审核拒绝后进入已删除
                 if ($params['review_status_develop'] == 2) {
-                    $params['status'] ='0';
+                    $params['status'] = '0';
                 }
                 $result = $row->allowField(true)->save($params);
                 Db::commit();
@@ -957,15 +956,14 @@ class DevelopDemand extends Backend
     public function set_complete_status($ids = null)
     {
         $data['is_finish'] = 1;
-         //需要测试,进入测试中,状态3   不需要  状态4
-        $is_passed= $this->model->where('id='.$ids)->select();
-        $is_passed=collection($is_passed)->toArray();
-        $is_passed=$is_passed[0]['is_test'];
-        if($is_passed == 1)
-        {
-          $data['status'] = 3;
-        }else{
-          $data['status'] = 4;
+        //需要测试,进入测试中,状态3   不需要  状态4
+        $is_passed = $this->model->where('id=' . $ids)->select();
+        $is_passed = collection($is_passed)->toArray();
+        $is_passed = $is_passed[0]['is_test'];
+        if ($is_passed == 1) {
+            $data['status'] = 3;
+        } else {
+            $data['status'] = 4;
         }
 
         $data['finish_time'] = date('Y-m-d H:i:s', time());
