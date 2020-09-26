@@ -21,6 +21,7 @@ return [
         '8' => 'Other',
         '9' => 'ZeeloolEs',
         '10' => 'ZeeloolDe',
+        '11' => 'ZeeloolJp',
         
     ],
     //类型

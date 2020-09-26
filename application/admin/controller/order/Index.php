@@ -797,6 +797,12 @@ EOF;
             case 5:
                 $model = $this->meeloog;
                 break;
+            case 9:
+                $model = $this->zeelool_es;
+                break;
+            case 10:
+                $model = $this->zeelool_de;
+                break;
             default:
                 return false;
                 break;
@@ -962,6 +968,18 @@ EOF;
                 break;
             case 3:
                 $model = $this->nihao;
+                break;
+            case 4:
+                $model = $this->weseeoptical;
+                break;
+            case 5:
+                $model = $this->meeloog;
+                break;
+            case 9:
+                $model = $this->zeelool_es;
+                break;
+            case 10:
+                $model = $this->zeelool_de;
                 break;
             default:
                 return false;

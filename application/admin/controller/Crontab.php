@@ -2500,6 +2500,8 @@ class Crontab extends Backend
         $voogueme_model = Db::connect('database.db_voogueme');
         $nihao_model    = Db::connect('database.db_nihao');
         $meeloog_model  = Db::connect('database.db_meeloog');
+        $zeelool_es_model = Db::connect('database.db_zeelool_es');
+        $zeelool_de_model = Db::connect('database.db_zeelool_de');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -2512,6 +2514,15 @@ class Crontab extends Backend
         $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $meeloog_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");
+
+        $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_es_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_es_model->table('customer_entity')->query("set time_zone='+8:00'");
+
+        $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $zeelool_de_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_de_model->table('customer_entity')->query("set time_zone='+8:00'");
+
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -2601,7 +2612,7 @@ class Crontab extends Backend
 
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
-        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
+
         $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //meeloog客单价
@@ -2628,50 +2639,128 @@ class Crontab extends Backend
         } else {
             $meeloog_shoppingcart_update_conversion = 0;
         }
-
-        //meeloog注册用户数
+        //nihao注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
+        
+        //zeelool es
+        $zeelool_es_count = $zeelool_es_model->table('sales_flat_order')->where($map)->count(1);
+        $zeelool_es_total = $zeelool_es_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //zeelool_es客单价
+        if ($zeelool_es_count > 0) {
+            $zeelool_es_unit_price = round(($zeelool_es_total / $zeelool_es_count), 2);
+        } else {
+            $zeelool_es_unit_price = 0;
+        }
+
+        //zeelool_es购物车数
+        $zeelool_es_shoppingcart_total = $zeelool_es_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_es购物车更新数
+        $zeelool_es_shoppingcart_update_total = $zeelool_es_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_es购物车转化率
+        if ($zeelool_es_shoppingcart_total > 0) {
+            $zeelool_es_shoppingcart_conversion = round(($zeelool_es_count / $zeelool_es_shoppingcart_total) * 100, 2);
+        } else {
+            $zeelool_es_shoppingcart_conversion = 0;
+        }
+
+        //zeelool_es购物车更新转化率
+        if ($zeelool_es_shoppingcart_update_total > 0) {
+            $zeelool_es_shoppingcart_update_conversion = round(($zeelool_es_count / $zeelool_es_shoppingcart_update_total) * 100, 2);
+        } else {
+            $zeelool_es_shoppingcart_update_conversion = 0;
+        }
+
+        //zeelool_es注册用户数
+        $zeelool_es_register_customer = $zeelool_es_model->table('customer_entity')->where($date)->count('*');
+
+        //zeelool de
+        $zeelool_de_count = $zeelool_de_model->table('sales_flat_order')->where($map)->count(1);
+        $zeelool_de_total = $zeelool_de_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //zeelool_de客单价
+        if ($zeelool_de_count > 0) {
+            $zeelool_de_unit_price = round(($zeelool_de_total / $zeelool_de_count), 2);
+        } else {
+            $zeelool_de_unit_price = 0;
+        }
+
+        //zeelool_de购物车数
+        $zeelool_de_shoppingcart_total = $zeelool_de_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_de购物车更新数
+        $zeelool_de_shoppingcart_update_total = $zeelool_de_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool_de购物车转化率
+        if ($zeelool_de_shoppingcart_total > 0) {
+            $zeelool_de_shoppingcart_conversion = round(($zeelool_de_count / $zeelool_de_shoppingcart_total) * 100, 2);
+        } else {
+            $zeelool_de_shoppingcart_conversion = 0;
+        }
+
+        //zeelool_de购物车更新转化率
+        if ($zeelool_de_shoppingcart_update_total > 0) {
+            $zeelool_de_shoppingcart_update_conversion = round(($zeelool_de_count / $zeelool_de_shoppingcart_update_total) * 100, 2);
+        } else {
+            $zeelool_de_shoppingcart_update_conversion = 0;
+        }
+
+        //zeelool_de注册用户数
+        $zeelool_de_register_customer = $zeelool_de_model->table('customer_entity')->where($date)->count('*');
+        
 
         $data['zeelool_sales_num']                          = $zeelool_count;
         $data['voogueme_sales_num']                         = $voogueme_count;
         $data['nihao_sales_num']                            = $nihao_count;
         $data['meeloog_sales_num']                          = $meeloog_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
+        $data['zeelool_es_sales_num']                       = $zeelool_es_count;
+        $data['zeelool_de_sales_num']                       = $zeelool_de_count;
+        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count;
         $data['zeelool_sales_money']                        = $zeelool_total;
         $data['voogueme_sales_money']                       = $voogueme_total;
         $data['nihao_sales_money']                          = $nihao_total;
         $data['meeloog_sales_money']                        = $meeloog_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
+        $data['zeelool_es_sales_money']                     = $zeelool_es_total;
+        $data['zeelool_de_sales_money']                     = $zeelool_de_total;
+        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total;
         $data['zeelool_unit_price']                         = $zeelool_unit_price;
         $data['voogueme_unit_price']                        = $voogueme_unit_price;
         $data['nihao_unit_price']                           = $nihao_unit_price;
         $data['meeloog_unit_price']                         = $meeloog_unit_price;
-        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price + $meeloog_unit_price) / 4, 2);
+        $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
+        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;    
+        $data['all_unit_price']                             = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price + $meeloog_unit_price + $zeelool_de_unit_price + $zeelool_es_unit_price) / 6, 2);
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
         $data['meeloog_shoppingcart_total']                 = $meeloog_shoppingcart_total;
-        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total;
+        $data['zeelool_es_shoppingcart_total']              = $zeelool_es_shoppingcart_total;
+        $data['zeelool_de_shoppingcart_total']              = $zeelool_de_shoppingcart_total;
+        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total + $zeelool_es_shoppingcart_total + $zeelool_de_shoppingcart_total;
         $data['zeelool_shoppingcart_conversion']            = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion']           = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
         $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion + $meeloog_shoppingcart_conversion) / 4, 2);
+        $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
+        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion; 
+        $data['all_shoppingcart_conversion']                = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion + $meeloog_shoppingcart_conversion + $zeelool_es_shoppingcart_conversion + $zeelool_de_shoppingcart_conversion) / 6, 2);
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
         $data['voogueme_register_customer']                 = $voogueme_register_customer;
         $data['nihao_register_customer']                    = $nihao_register_customer;
         $data['meeloog_register_customer']                  = $meeloog_register_customer;
-        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer;
+        $data['zeelool_es_register_customer']               = $zeelool_es_register_customer;
+        $data['zeelool_de_register_customer']               = $zeelool_de_register_customer;
+        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer + $zeelool_es_register_customer + $zeelool_de_register_customer;
         $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
         $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
         $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
         $data['meeloog_shoppingcart_update_total']          = $meeloog_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total;
+        $data['zeelool_es_shoppingcart_update_total']       = $zeelool_es_shoppingcart_update_total;
+        $data['zeelool_de_shoppingcart_update_total']       = $zeelool_de_shoppingcart_update_total;
+        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total + $zeelool_es_shoppingcart_update_total + $zeelool_de_shoppingcart_update_total;
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
         $data['meeloog_shoppingcart_update_conversion']     = $meeloog_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion) / 4, 2);
+        $data['zeelool_es_shoppingcart_update_conversion']  = $zeelool_es_shoppingcart_update_conversion;
+        $data['zeelool_de_shoppingcart_update_conversion']  = $zeelool_de_shoppingcart_update_conversion;
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion + $meeloog_shoppingcart_update_conversion + $zeelool_es_shoppingcart_update_conversion + $zeelool_de_shoppingcart_update_conversion) / 6, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -3143,6 +3232,12 @@ class Crontab extends Backend
             case 4:
                 $model = Db::connect('database.db_meeloog');
                 break;
+            case 9:
+                $model = Db::connect('database.db_zeelool_es');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;    
             default:
                 $model = false;
                 break;
@@ -3507,6 +3602,12 @@ class Crontab extends Backend
             case 4:
                 $model = Db::connect('database.db_meeloog');
                 break;
+            case 9:
+                $model = Db::connect('database.db_zeelool_es');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;        
             default:
                 $model = false;
                 break;

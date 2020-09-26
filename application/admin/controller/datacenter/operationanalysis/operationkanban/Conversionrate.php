@@ -34,7 +34,7 @@ class Conversionrate extends Backend{
                 $map['create_date'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
-            if(4<=$order_platform){
+            if(100<=$order_platform){
                 //return json(['code' => 0, 'data' =>'该平台暂时没有数据']);
                 return $this->error('该平台暂时没有数据');
             }

@@ -38,7 +38,7 @@ class Operationalreport extends Backend{
                 $map['created_at'] = $itemMap['m.created_at'] =  ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
-            if(10<=$order_platform){
+            if(100<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
             //缓存图标数据
@@ -145,6 +145,15 @@ class Operationalreport extends Backend{
             case 4:
             $model = Db::connect('database.db_meeloog');
             break;
+            case 9:
+            $model = Db::connect('database.db_zeelool_es');
+            break;
+            case 10:
+            $model = Db::connect('database.db_zeelool_de');
+            break;
+            case 11:
+            $model = Db::connect('database.db_zeelool_jp');
+            break;    
             default:
             $model = false;
             break;            
@@ -519,4 +528,38 @@ class Operationalreport extends Backend{
         {
 
         }
+        /**
+         * zeelool_es 站点权限
+         *
+         * @Author lsw 1461069578@qq.com
+         * @DateTime 2020-09-23 15:57:04
+         * @return void
+         */
+        public function zeelool_es_privilege()
+        {
+
+        }
+        /**
+         * zeelool_de 站点权限
+         *
+         * @Author lsw 1461069578@qq.com
+         * @DateTime 2020-09-23 16:46:58
+         * @return void
+         */
+        public function zeelool_de_privilege()
+        {
+
+        }
+        /**
+         * zeelool_jp 站点权限
+         *
+         * @Author lsw 1461069578@qq.com
+         * @DateTime 2020-09-23 16:48:04
+         * @return void
+         */
+        public function zeelool_jp_privilege()
+        {
+
+        }
+
 }

@@ -81,7 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     visible: function(row){
                                         //console.log(row.assign_id)
-                                        if( Config.admin_id == 1 || Config.admin_id == 75){
+                                        if( Config.admin_id == 1 || Config.admin_id == 75 ||Config.admin_id == 181){
                                             return true;
                                         }
                                         if(row.due_id != Config.admin_id){
