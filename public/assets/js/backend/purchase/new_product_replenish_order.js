@@ -700,7 +700,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {
-
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
                                 var pageNumber = options.pageNumber;
@@ -711,28 +710,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
-                        {field: 'sku', title: __(' sku'), operate: false},
-                        // {field: 'sku', title: __(' sku'), operate: 'LIKE'},
+                        {field: 'sku', title: __('sku'), operate: 'LIKE'},
                         {field: 'num', title: __('总需求数量'), operate: false},
-                        {field: 'supplier_name', title: __('供应商'), operate: false},
-                        {field: 'distribute_num', title: __('分配数量'), operate: false},
-                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
-                        {field: 'purchase_person', title: __('采购负责人'), operate: false},
                         {
                             field: 'status',
                             title: __('状态'),
-                            operate: false,
                             custom: {1: 'green', 2: 'blue',3:'danger'},
                             searchList: {1: '未采购', 2: '已采购',3:'已拒绝'},
                             formatter: Table.api.formatter.status
                         },
+                        {field: 'supplier_name', title: __('供应商'), operate: false},
+                        {field: 'distribute_num', title: __('分配数量'), operate: false},
+                        {field: 'real_dis_num', title: __('实际采购数量'), operate: false},
+                        {field: 'remarks', title: __('备注'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: false}
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-            $("#myTabContent .row").hide();
+
+            //将补货单信息追加到顶部
+            $(".replenish-box .form-group").each(function(){
+                $("#myTabContent .row").prepend($(this));
+            });
 
         },
 

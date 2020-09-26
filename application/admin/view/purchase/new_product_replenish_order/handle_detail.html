@@ -1,35 +1,31 @@
 <!--<div class="panel panel-default panel-intro">-->
-    <div class="commonsearch-table ">
+    <div class="commonsearch-table replenish-box" style="display: none;">
         <form class="form-horizontal form-commonsearch nice-validator n-default n-bootstrap" novalidate="" method="post"
               action="">
             <fieldset>
-
                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                    <label for="sku" class="control-label col-xs-4">补货需求单号</label>
-                    <div class="col-xs-8">
-                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['id']}" data-index="3" disabled>
-                    </div>
-                </div>
-                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                    <label for="sku" class="control-label col-xs-4">补货需求单状态</label>
-                    <div class="col-xs-8">
-                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['name']}" data-index="3" disabled>
-                    </div>
-
-                </div>
-                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                    <label for="sku" class="control-label col-xs-4">创建时间</label>
-                    <div class="col-xs-8">
-                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['create_time']}" data-index="3" disabled>
-                    </div>
-
-                </div>
-                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                    <label for="sku" class="control-label col-xs-4">创建人</label>
+                    <label class="control-label col-xs-4">创建人</label>
                     <div class="col-xs-8">
                         <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['create_person']}" data-index="3" disabled>
                     </div>
-
+                </div>
+                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <label class="control-label col-xs-4">创建时间</label>
+                    <div class="col-xs-8">
+                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['create_time']}" data-index="3" disabled>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <label class="control-label col-xs-4">补货需求单状态</label>
+                    <div class="col-xs-8">
+                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['name']}" data-index="3" disabled>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <label class="control-label col-xs-4">补货需求单号</label>
+                    <div class="col-xs-8">
+                        <input type="text" autocomplete="off" class="form-control" value="" placeholder="{$replenish['id']}" data-index="3" disabled>
+                    </div>
                 </div>
             </fieldset>
         </form>
