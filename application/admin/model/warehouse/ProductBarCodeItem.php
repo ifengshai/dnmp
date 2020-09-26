@@ -4,13 +4,13 @@ namespace app\admin\model\warehouse;
 
 use think\Model;
 
-class ProductBarCode extends Model
+class ProductBarCodeItem extends Model
 {
     //数据库
     protected $connection = 'database';
 
     // 表名
-    protected $name = 'product_barcode';
+    protected $name = 'product_barcode_item';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
