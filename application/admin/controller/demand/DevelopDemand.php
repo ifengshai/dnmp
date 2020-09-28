@@ -483,6 +483,8 @@ class DevelopDemand extends Backend
         $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
         //bug列表页 是否有上线按钮权限
         $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
+
+        $this->view->assign('getTabList', $this->model->getBugTabList());
         return $this->view->fetch();
     }
 
