@@ -408,9 +408,7 @@ class DevelopDemand extends Backend
                 ->where('type', '1')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select(false);
-                echo $list;die;
-
+                ->select();
             $list = collection($list)->toArray();
             //查询用户表id
             $admin = new \app\admin\model\Admin();
