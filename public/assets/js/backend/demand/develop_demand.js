@@ -1125,13 +1125,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
-                console.log(queryParams);
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
                     if (field == 'test') {
-                        alert('...');
                         filter[field] = value;
                     } else {
                         delete filter.test;
