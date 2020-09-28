@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('创建人') },
-                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE' },
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
