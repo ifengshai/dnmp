@@ -161,4 +161,8 @@ class Dashboard extends Backend
     public function nihao(){}
     public function meeloog(){}
     public function wesee(){}
+    public function all(){}
+    public function zeelool_es(){}
+    public function zeelool_de(){}
+    public function zeelool_jp(){}
 }
