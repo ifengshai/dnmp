@@ -187,7 +187,6 @@ class DevelopDemand extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             //查询用户表id
             $admin = new \app\admin\model\Admin();
@@ -490,9 +489,6 @@ class DevelopDemand extends Backend
     }
 
 
-
-
-
     /**
      * 添加
      */
@@ -673,7 +669,7 @@ class DevelopDemand extends Backend
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
-                Db::startTrans();   
+                Db::startTrans();
                 try {
                     //是否采用模型验证
                     if ($this->modelValidate) {
@@ -729,79 +725,35 @@ class DevelopDemand extends Backend
     {
         $id = $id ?: input('ids');
         $label = input('label');
-        if ($id) {
-            try {
-                Db::table('fa_develop_demand')
-                    ->where('id', $id)
-                    ->update(['status' => '1']);   //审核成功  进入产品设计列表
-                // $result = $row->allowField(true)->save($save);
-                // $result = $row->where($where)->save($save);
-                // Db::commit();
-            } catch (ValidateException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            }
-        }
-        // if ($this->request->isPost()) {
-        //     $params = $this->request->post("row/a");
-        //     if ($params) {
-        //         $params = $this->preExcludeFields($params);
-        //         $result = false;
-        //         Db::startTrans();
-        //         try {
-        //             //是否采用模型验证
-        //             if ($this->modelValidate) {
-        //                 $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-        //                 $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-        //                 $row->validateFailException(true)->validate($validate);
-        //             }
-        //             // $params['review_manager_time'] = date('Y-m-d H:i:s');
-        //             // $result = $row->allowField(true)->save($params);
+        if ($this->request->isPost()) {
+            if ($id) {
+                try {
+                    $res = Db::table('fa_develop_demand')
+                        ->where('id', $id)
+                        ->update(['status' => '1']);   //审核成功  进入产品设计列表
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
 
-        //             // 审核通过
-        //             $save['status']='1';
-        //             // $result = $row->allowField(true)->save($save);
-        //             $result = $row->isUpdate(true)->save($save);
-        //             Db::commit();
-        //         } catch (ValidateException $e) {
-        //             Db::rollback();
-        //             $this->error($e->getMessage());
-        //         } catch (PDOException $e) {
-        //             Db::rollback();
-        //             $this->error($e->getMessage());
-        //         } catch (Exception $e) {
-        //             Db::rollback();
-        //             $this->error($e->getMessage());
-        //         }
-        //         if ($result !== false) {
-        //             $res = $this->model->get(input('ids'));
-        //             Ding::dingHookByDevelop('review', $res);
-        //             $this->success();
-        //         } else {
-        //             $this->error(__('No rows were updated'));
-        //         }
-        //     }
-        //     $this->error(__('Parameter %s can not be empty', ''));
-        // }else{
-        //     var_dump('???');die;
-        // }
+                if ($res !== false) {
+                    $this->success('审核成功');
+                }
+                $this->error('审核失败');
+            }
+            $this->error('审核失败');
+        }
+        //审核拒绝
         if ($label == 'refuse') {
             return $this->view->fetch('review_refuse');
-        } else {
-            // return $this->view->fetch();
-            $this->success('成功');
         }
     }
-
-
-
-
 
     /**
      * 开发主管审核

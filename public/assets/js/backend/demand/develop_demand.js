@@ -192,13 +192,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'ajax',
                                     text: '审核通过',
                                     title: __('产品审核'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     // url: 'demand/develop_demand/review',
                                     url: 'demand/develop_demand/newreview',
                                     success: function (data, ret) {
-                                        // table.bootstrapTable('refresh', {});
-                                        Layer.alert(ret.msg);
+                                        table.bootstrapTable('refresh', {});
                                         return false;
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
@@ -209,7 +208,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
-                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && (row.status == 0 || row.status == 6)) {
                                             return true;
                                         } else {
                                             return false;
@@ -223,7 +222,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-success btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review',
-                                    // url: 'demand/develop_demand/newreview',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         // Layer.alert(ret.msg);
@@ -236,8 +234,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
-                                        if (row.status == '1') {
+                                        if (row.status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -262,7 +259,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         // if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
-                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && row.status == '0') {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1 && (row.status == 0 || row.status == 6)) {
                                             return true;
                                         } else {
                                             return false;
@@ -287,7 +284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status == '2') {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && (row.status == 2 || row.status == 6)) {
                                             return true;
                                         } else {
                                             return false;
@@ -311,7 +308,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && row.status == '2') {
+                                        if (row.review_status_manager == 1 && row.review_status_develop == 0 && Config.review_status_btn == 1 && (row.status == 2 || row.status == 6)) {
                                             return true;
                                         } else {
                                             return false;
@@ -581,51 +578,73 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 ]
             });
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var field = '';
-                field = $(this).data("field");
+                var field = $(this).data("field");
                 var value = $(this).data("value");
-                if (field == 'me_task') {
-                    var tablename = value;
-                } else if (field == 'plan') {
-                    var tablename = value;
-                } else if (field == 'design') {
-                    var tablename = value;
-                } else if (field == 'development') {
-                    var tablename = value;
-                } else if (field == 'test') {
-                    var tablename = value;
-                } else if (field == 'soon') {
-                    var tablename = value;
-                } else if (field == 'complete') {
-                    var tablename = value;
-                } else {
-                    var tablename = false;
-                }
-                // console.log(field);
-                // console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
-
                 options.queryParams = function (params) {
-                    params = newQueryParams(params);
-                    return params;
-                };
-
-                function newQueryParams(params) {
-                    filter = null;
+                    var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
-
-                    if (tablename) { filter[field] = tablename } else { delete filter.me_task; }
+                    if (field == 'test') {
+                        filter[field] = value;
+                    } else {
+                        delete filter.test;
+                    }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
                     return params;
-                }
-
+                };
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+
+
+            // $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            //     var field = '';
+            //     field = $(this).data("field");
+            //     var value = $(this).data("value");
+            //     if (field == 'me_task') {
+            //         var tablename = value;
+            //     } else if (field == 'plan') {
+            //         var tablename = value;
+            //     } else if (field == 'design') {
+            //         var tablename = value;
+            //     } else if (field == 'development') {
+            //         var tablename = value;
+            //     } else if (field == 'test') {
+            //         var tablename = value;
+            //     } else if (field == 'soon') {
+            //         var tablename = value;
+            //     } else if (field == 'complete') {
+            //         var tablename = value;
+            //     } else {
+            //         var tablename = false;
+            //     }
+            //     var options = table.bootstrapTable('getOptions');
+            //     options.pageNumber = 1;
+            //     var queryParams = options.queryParams;
+
+            //     options.queryParams = function (params) {
+            //         params = newQueryParams(params);
+            //         return params;
+            //     };
+
+            //     function newQueryParams(params) {
+            //         filter = null;
+            //         var filter = params.filter ? JSON.parse(params.filter) : {};
+            //         var op = params.op ? JSON.parse(params.op) : {};
+
+            //         if (tablename) { filter[field] = tablename } else { delete filter.me_task; }
+            //         params.filter = JSON.stringify(filter);
+            //         params.op = JSON.stringify(op);
+            //         return params;
+            //     }
+
+            //     table.bootstrapTable('refresh', {});
+            //     return false;
+            // });
             // 为表格绑定事件
             Table.api.bindevent(table);
 
@@ -1103,20 +1122,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                // console.log(field);
-                // console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
+                console.log(queryParams);
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
-                    if (field == 'me_task') {
+                    if (field == 'test') {
                         alert('...');
                         filter[field] = value;
                     } else {
-                        delete filter.me_task;
+                        delete filter.test;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);

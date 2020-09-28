@@ -1,8 +1,9 @@
 <style>
-    p{
+    p {
         margin-bottom: 0px;
     }
-    .check_demand_content{
+
+    .check_demand_content {
         margin: auto;
         display: block;
         border: 1px solid #3498db;
@@ -14,10 +15,12 @@
         background-color: #3498db;
         content: "\e003";
     }
-    .check_demand_content:hover{
+
+    .check_demand_content:hover {
         background-color: #217dbb;
     }
-    .all_user_name{
+
+    .all_user_name {
         text-align: left;
         width: 100%;
         float: left;
@@ -27,12 +30,15 @@
 <div class="panel panel-default panel-intro">
     <div class="panel-heading">
         {:build_heading()}
-        <ul class="nav nav-tabs" >
+        <ul class="nav nav-tabs">
             <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li> -->
             {foreach name="getTabList" item="vo"}
-            <li>
-                <a class="updatetable" href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a>
-            </li>
+            {if $vo['value'] == 1}
+            <li class="active"><a class="updatetable" href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {else/}
+            <li><a class="updatetable" href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {/if}
+
             {/foreach}
         </ul>
     </div>
@@ -41,15 +47,15 @@
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
-                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
-                        <a href="javascript:;" data-area='["80%","70%"]' class="btn btn-success btn-add {:$auth->check('demand/develop_demand/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
-                        <!-- <a href="javascript:;" data-area='["80%","70%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('demand/develop_demand/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->
-                       
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+                        <a href="javascript:;" data-area='["80%","70%"]'
+                            class="btn btn-success btn-add {:$auth->check('demand/develop_demand/add')?'':'hide'}"
+                            title="{:__('Add')}"><i class="fa fa-plus"></i> {:__('Add')}</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
-                           data-operate-edit="{:$auth->check('demand/develop_demand/edit')}" 
-                           data-operate-del="{:$auth->check('demand/develop_demand/del')}" 
-                           width="100%">
+                        data-operate-edit="{:$auth->check('demand/develop_demand/edit')}"
+                        data-operate-del="{:$auth->check('demand/develop_demand/del')}" width="100%">
                     </table>
                 </div>
             </div>
