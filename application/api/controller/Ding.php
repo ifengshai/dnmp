@@ -556,7 +556,6 @@ class Ding extends Controller
      */
     public static function dingHookByDevelop(string $name, \app\admin\model\demand\DevelopDemand $demand)
     {
-        return true;
         if ($demand->type == 3) {
             return false;
         } // 疑难不作处理
