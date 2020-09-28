@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('创建人') },
-                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
@@ -43,9 +43,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 name: 'print',
                                 text: __('打印'),
                                 title: __('打印'),
-                                classname: 'btn btn-xs',
-                                url: 'warehouse/product_bar_code/print_label',
-                                extend:'target="_blank"',
+                                classname: 'btn btn-xs btn-click',
+                                // url: 'warehouse/product_bar_code/print_label',
+                                // extend:'target="_blank"',
+                                click:function(e, data){
+                                    var s_obj = $(this).parent().parent().find('.text-danger');
+                                    s_obj.html('<i class="fa fa-circle"></i> 已打印');
+                                    s_obj.removeClass('text-danger').addClass('text-success');
+                                    $(this).remove();
+                                    window.open(Config.moduleurl + '/warehouse/product_bar_code/print_label/ids/' + data.id, '_blank');
+                                },
                                 visible: function (row) {
                                     //返回true时按钮显示,返回false隐藏
                                     if (row.status == 0) {
