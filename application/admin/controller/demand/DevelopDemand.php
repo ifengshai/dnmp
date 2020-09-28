@@ -371,7 +371,7 @@ class DevelopDemand extends Backend
 
                 unset($filter['test']);
             } else {
-                $meWhere .= "FIND_IN_SET(3,status)";
+                $meWhere .= "FIND_IN_SET(2,status)";
             }
             //搜索负责人
             if ($filter['nickname']) {

@@ -774,8 +774,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
 
-                        { field: 'status_str', title: __('状态'), operate: false },
-
                         { field: 'nickname', title: __('开发负责人'), operate: 'like', visible: false },
 
                         // {
