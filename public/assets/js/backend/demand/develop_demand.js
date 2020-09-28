@@ -756,7 +756,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'create_person', title: __('创建人'), operate: 'like' },
 
                         {
                             field: 'department_group',
@@ -765,7 +765,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '运营部', 2: '客服部', 3: '仓管部', 4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'duty_nickname', title: __('责任人'), operate: 'like' },
+                        { field: 'duty_nickname', title: __('提出人'), operate: 'like' },
 
                         { field: 'nickname', title: __('开发负责人'), operate: 'like', visible: false },
                         /*{
