@@ -23,7 +23,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'name', title: __('名称'), operate: false },
                         { field: 'number', title: __('条码数量'), operate: false },
