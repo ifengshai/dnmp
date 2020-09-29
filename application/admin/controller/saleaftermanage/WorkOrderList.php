@@ -182,7 +182,7 @@ class WorkOrderList extends Backend
             }
             if($filter['payment_time']){
                 $createat = explode(' ', $filter['payment_time']);
-                $map['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+                $map1['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
                 unset($filter['payment_time']);
             }
 
@@ -191,11 +191,13 @@ class WorkOrderList extends Backend
             $total = $this->model
                 ->where($where)
                 ->where($map)
+                ->where($map1)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
                 ->where($map)
+                ->where($map1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
