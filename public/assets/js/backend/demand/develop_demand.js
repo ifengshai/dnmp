@@ -1103,7 +1103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_finish_task == 0) {
-                                            if (Config.is_del_btu == 1 || row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
+                                            if (row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
                                                 return true;
                                             } else {
                                                 return false;
