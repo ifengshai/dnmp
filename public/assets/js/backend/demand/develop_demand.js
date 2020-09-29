@@ -898,7 +898,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
+                                            if (row.is_finish == 0 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;
@@ -1103,7 +1103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_finish_task == 0) {
-                                            if (Config.is_del_btu == 1 || row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
+                                            if (row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
                                                 return true;
                                             } else {
                                                 return false;
