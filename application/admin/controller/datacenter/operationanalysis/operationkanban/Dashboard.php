@@ -112,17 +112,23 @@ class Dashboard extends Backend
 
     public function index()
     {
-        $user_id = session('admin.id');
-        $arr = (new AuthGroupAccess)->getUserPrivilege($user_id);
-        if(0 == $arr){
+        // $user_id = session('admin.id');
+        // $arr = (new AuthGroupAccess)->getUserPrivilege($user_id);
+        // if(0 == $arr){
+        //     $this->error('您没有权限访问','general/profile?ref=addtabs');
+        // }
+        $arr = (new MagentoPlatform())->getNewAuthSite();
+        if(empty($arr)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }           
         //上边部分数据 默认zeelool站数据
-        $platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
-        $zeelool_data = $this->model->getList($arr[0]);
+        //$platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
+        $zeelool_data = $this->model->getList(key($arr));
         //z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
         //z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
-        $zeelool_data = collection($zeelool_data)->toArray();
+        if(!empty($zeelool_data)){
+           $zeelool_data = collection($zeelool_data)->toArray();
+        }
         //中间部分数据
         $orderStatistics = new OrderStatistics();
         $list = $orderStatistics->getAllData();
@@ -186,7 +192,7 @@ class Dashboard extends Backend
         //下边部分数据 默认30天数据
         $bottom_data = $this->get_platform_data(1);
         $this->view->assign([
-            'orderPlatformList'					=> $platform,
+            'orderPlatformList'					=> $arr,
             'zeelool_data'						=> $zeelool_data,
             'date'								=> $this->date(),
             'zeeloolSalesNumList'       		=> $zeeloolSalesNumList ?:[], //折线图数据
@@ -649,10 +655,5 @@ class Dashboard extends Backend
     public function meeloog_index()
     {
 
-    }
-    public function ceshi(){
-        $user_id = session('admin.id');
-        $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
-        dump($result);
     }
 }
