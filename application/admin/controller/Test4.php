@@ -39,11 +39,26 @@ class Test4 extends Backend
 
     public function test006()
     {
-        $track = new Trackingmore();
-        $track = $track->getRealtimeTrackingResults('USPS', '92001902551561000101621623');
-        $express_data = $track['data']['items'][0];
-        dump($track);die;
+      
+        $carrier = $this->getCarrier('usps');
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $trackInfo = $trackingConnector->getTrackInfoMulti([[
+            'number' => '92001902551561000101621623',
+            'carrier' => $carrier['carrierId']
+            /*'number' => 'LO546092713CN',//E邮宝
+            'carrier' => '03011'*/
+            /* 'number' => '3616952791',//DHL
+            'carrier' => '100001' */
+            /* 'number' => '74890988318620573173', //Fedex
+            'carrier' => '100003' */
+            /* 'number' => '92001902551559000101352584', //usps郭伟峰
+            'carrier' => '21051' */
+        ]]);
+        dump($trackInfo['data']['accepted'][0]['track']['z1']);die;
+
     }
+
+
 
     //数据已跑完 2020 08.25 14:47
     public function amazon_sku()
