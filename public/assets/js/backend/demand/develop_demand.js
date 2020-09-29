@@ -765,7 +765,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
 
-                        { field: 'create_person', title: __('创建人'), operate: 'like' },
+                        { field: 'create_person', title: '创建人', operate: 'like' },
                         {
                             field: 'priority',
                             title: __('紧急程度'),
