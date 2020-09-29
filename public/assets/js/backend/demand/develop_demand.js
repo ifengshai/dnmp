@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Controller.api.formatter.getcontent,
                         },
 
-                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'create_person', title: __('创建人'), operate: 'like' },
 
                         {
                             field: 'department_group',
