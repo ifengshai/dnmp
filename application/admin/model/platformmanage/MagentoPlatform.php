@@ -150,8 +150,9 @@ class MagentoPlatform extends Model
         if($this->auth->check('dashboard/all')){
             foreach ($magentoplatformarr as $k => $v) {
                 $arr[$v['id']] = $v['name'];
-                $arr[100] ='全部';
+                
             }
+            $arr[100] ='全部';
 
         }else{
             foreach ($magentoplatformarr as $k => $v) {
