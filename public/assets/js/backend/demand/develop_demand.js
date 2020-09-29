@@ -898,7 +898,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
+                                            if (row.is_finish == 0 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;

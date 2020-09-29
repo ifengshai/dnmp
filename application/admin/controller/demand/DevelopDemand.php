@@ -23,7 +23,7 @@ class DevelopDemand extends Backend
      * @var \app\admin\model\demand\DevelopDemand
      */
     protected $model = null;
-    protected $noNeedRight = ['del', 'newreview'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight = ['del', 'newreview', 'set_complete_status'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -381,7 +381,7 @@ class DevelopDemand extends Backend
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
             }
-    
+
             //搜索责任人
             if ($filter['duty_nickname']) {
                 //查询用户表id
@@ -1157,6 +1157,7 @@ class DevelopDemand extends Backend
     public function is_finish_bug($ids = null)
     {
         $data['is_finish_task'] = 1;
+        $data['status'] = 5;
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
