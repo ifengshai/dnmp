@@ -544,6 +544,7 @@ class DevelopDemand extends Backend
                     if ($params['type'] == 1) { //如果为BUG类型,更新
                         $params['review_status_develop'] = 1;
                         $params['review_status_manager'] = 1;
+                        $params['status'] = 2;
                     }
 
                     $result = $this->model->allowField(true)->save($params);

@@ -95,6 +95,9 @@ class Soap
             case 10:
                 $url = config('url.api_zeelool_de_url');
                 break;
+            case 11:
+                $url = config('url.api_zeelool_jp_url');
+                break;
             default:
                 return false;
                 break;

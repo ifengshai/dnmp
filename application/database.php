@@ -238,4 +238,19 @@ return [
         'charset'     => Env::get('db_zeelool_de.charset'),
         'prefix'      => Env::get('db_zeelool_de.prefix'),
     ],
+    'db_zeelool_jp' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_jp.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_jp.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_jp.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_jp.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_jp.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_jp.charset'),
+        'prefix'      => Env::get('db_zeelool_jp.prefix'),
+    ],
 ];
