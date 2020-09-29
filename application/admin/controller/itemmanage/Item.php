@@ -1069,6 +1069,7 @@ class Item extends Backend
                 $v['amazon_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 8])->value('stock');
                 $v['zeelool_es_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 9])->value('stock');
                 $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
+                $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
             }
             unset($v);
 
