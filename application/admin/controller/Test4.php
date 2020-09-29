@@ -7,7 +7,7 @@ use app\Common\model\Auth;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
-
+use fast\Trackingmore;
 
 class Test4 extends Backend
 {
@@ -37,6 +37,13 @@ class Test4 extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    public function test006()
+    {
+        $track = new Trackingmore();
+        $track = $track->getRealtimeTrackingResults('USPS', '92001902551561000101621623');
+        $express_data = $track['data']['items'][0];
+        dump($track);die;
+    }
 
     //数据已跑完 2020 08.25 14:47
     public function amazon_sku()

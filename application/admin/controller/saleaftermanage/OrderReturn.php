@@ -883,13 +883,16 @@ class OrderReturn extends Backend
      */
     public function get_logistics_info($track_number = null, $entity_id = null, $order_platform = null)
     {
+        $track_number = input('track_number') ?: null;
+        $entity_id = input('entity_id') ?: null;
+        $order_platform = input('order_platform') ?: null;
         if (!empty($track_number) && !empty($entity_id) && !empty($order_platform)) {
             $this->zeelool = new \app\admin\model\order\order\Zeelool;
             $express = $this->zeelool->getExpressData($order_platform, $entity_id);
             if ($express) {
                 //缓存一个小时
                 // $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
-                $express_data = Cache::get('orderReturn_get_logistics_info_' . $express['track_number']);
+                $express_data = Cache::get('orderReturn_get_logistics_info_' . $track_number);
                 if (!$express_data) {
                     try {
                         //查询物流信息
@@ -912,10 +915,10 @@ class OrderReturn extends Backend
                                 break;
                         }
                         $track = new Trackingmore();
-                        $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
+                        $track = $track->getRealtimeTrackingResults($title, $track_number);
                         $express_data = $track['data']['items'][0];
                         //session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
-                        Cache::get('orderReturn_get_logistics_info_' . $express['track_number'], $express_data, 3600);
+                        Cache::get('orderReturn_get_logistics_info_' . $track_number, $express_data, 3600);
                     } catch (\Exception $e) {
                         $this->error($e->getMessage());
                     }
