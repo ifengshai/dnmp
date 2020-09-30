@@ -1284,7 +1284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-getcontent': function (e, value, row, index) {
-                        var str = '标题：' + row.title + '<br><hr>内容：' + value;
+                        var str = '标题：' + row.title + '<br><hr>内容：' + row.desc;
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",
