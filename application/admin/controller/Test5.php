@@ -59,5 +59,86 @@ class Test5 extends Backend
         $res  = Db::name('new_product_replenish_order')->where(['replenish_id'=>129,'replenishment_num'=>1])->delete();
         $res1 = Db::name('new_product_replenish_list')->where(['replenish_id'=>129,'distribute_num'=>1])->delete();
     }
+    public function goole_cost()
+    {
+        // dump();die;
+        $start_time = '2020-09-21';
+        $end_time = '2020-09-22';
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport($analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+dump($result);die;
+        return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0;
+    }
+    protected function getReport($analytics, $startDate, $endDate)
+    {
 
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:adCost");
+        $adCostMetric->setAlias("ga:adCost");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        // $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+
+    }
+    /**
+     * Parses and prints the Analytics Reporting API V4 response.
+     *
+     * @param An Analytics Reporting API V4 response.
+     */
+    protected function printResults($reports)
+    {
+        $finalResult = array();
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+            }
+            return $finalResult;
+        }
+    }
 }
