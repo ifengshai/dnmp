@@ -942,6 +942,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#zeelool_app_sales_money').text(ret.data.zeelool_app_sales_money);
                     $('#zeelool_app_sales_num').text(ret.data.zeelool_app_sales_num);
                     $('#zeelool_app_unit_price').text(ret.data.zeelool_app_unit_price);
+                    $('#zeelool_android_sales_money').text(ret.data.zeelool_android_sales_money);
+                    $('#zeelool_android_sales_num').text(ret.data.zeelool_android_sales_num);
+                    $('#zeelool_android_unit_price').text(ret.data.zeelool_android_unit_price);
                     $('#voogueme_pc_sales_money').text(ret.data.voogueme_pc_sales_money);
                     $('#voogueme_pc_sales_num').text(ret.data.voogueme_pc_sales_num);
                     $('#voogueme_pc_unit_price').text(ret.data.voogueme_pc_unit_price);
