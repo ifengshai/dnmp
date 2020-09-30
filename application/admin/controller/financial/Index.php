@@ -188,7 +188,7 @@ class Index extends Backend
             }
             $rate           = $params['rate'] ?: 6.8;
             $order_platform = $params['platform'] ?: 1;
-            if (5 <= $order_platform) {
+            if (20 <= $order_platform) {
                 return $this->error('该平台暂时没有数据');
             }
             if (1 == $order_platform) {
