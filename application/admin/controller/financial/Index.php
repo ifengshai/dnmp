@@ -199,6 +199,10 @@ class Index extends Backend
                 $platform_cost = new  \app\admin\model\financial\Nihao;
             } elseif (4 == $order_platform) {
                 $platform_cost = new  \app\admin\model\financial\Meeloog;
+            } elseif (9 == $order_platform) {
+                $platform_cost = new  \app\admin\model\financial\ZeeloolEs;
+            } elseif (10 == $order_platform) {
+                $platform_cost = new  \app\admin\model\financial\ZeeloolDe;
             }
             $list = $platform_cost->index_cost($rate, $time[0], $time[3]);
             if (!empty($list)) {
