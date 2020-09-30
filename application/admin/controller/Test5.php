@@ -59,6 +59,23 @@ class Test5 extends Backend
         $res  = Db::name('new_product_replenish_order')->where(['replenish_id'=>129,'replenishment_num'=>1])->delete();
         $res1 = Db::name('new_product_replenish_list')->where(['replenish_id'=>129,'distribute_num'=>1])->delete();
     }
+
+    protected function initializeAnalytics()
+    {
+        // Use the developers console and download your service account
+        // credentials in JSON format. Place them in this directory or
+        // change the key file location if necessary.
+        $KEY_FILE_LOCATION = __DIR__ . '/oauth-credentials.json';
+
+        // Create and configure a new client object.
+        $client = new \Google_Client();
+        $client->setApplicationName("Hello Analytics Reporting");
+        $client->setAuthConfig($KEY_FILE_LOCATION);
+        $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+
+        return $analytics;
+    }
     public function goole_cost()
     {
         // dump();die;
@@ -69,11 +86,12 @@ class Test5 extends Backend
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
         // Create an authorized analytics service object.
         $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
         $response = $this->getReport($analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
-dump($result);die;
+        dump($result);die;
         return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0;
     }
     protected function getReport($analytics, $startDate, $endDate)
@@ -93,8 +111,10 @@ dump($result);die;
         $dateRange->setEndDate($endDate);
 
         $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
-        $adCostMetric->setExpression("ga:adCost");
-        $adCostMetric->setAlias("ga:adCost");
+        $adCostMetric->setExpression("ga:pageviews");
+        $adCostMetric->setAlias("ga:pageviews");
+        // $adCostMetric->setExpression("ga:adCost");
+        // $adCostMetric->setAlias("ga:adCost");
 
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
