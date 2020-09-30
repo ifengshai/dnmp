@@ -85,7 +85,7 @@ class ZeeloolDe extends Model
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        $VIEW_ID = config('MEELOOG_GOOGLE_ANALYTICS_VIEW_ID');
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
