@@ -19,6 +19,7 @@ use fast\Trackingmore;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 
 /**
  * 退货列管理
@@ -39,6 +40,9 @@ class OrderReturn extends Backend
     protected $noNeedRight = [
         'machining'
     ];
+    //17track key
+    protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
+
     public function _initialize()
     {
         parent::_initialize();
@@ -914,22 +918,78 @@ class OrderReturn extends Backend
                                 $title = 'usps';
                                 break;
                         }
-                        $track = new Trackingmore();
-                        $track = $track->getRealtimeTrackingResults($title, $track_number);
-                        $express_data = $track['data']['items'][0];
-                        //session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
+
+                        $carrier = $this->getCarrier($title);
+                        $trackingConnector = new TrackingConnector($this->apiKey);
+                        $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                            'number' => $track_number,
+                            'carrier' => $carrier['carrierId']
+                        ]]);
+        
+                        $express_data = $trackInfo['data']['accepted'][0]['track']['z1'];
                         Cache::get('orderReturn_get_logistics_info_' . $track_number, $express_data, 3600);
                     } catch (\Exception $e) {
                         $this->error($e->getMessage());
                     }
                 }
                 $this->view->assign("express_data", $express_data);
+                $this->view->assign("title", $express['title']);
+                $this->view->assign("track_number", $track_number);
             }
             return $this->view->fetch();
         } else {
             $this->error('参数错误,请重新尝试');
         }
     }
+
+    /**
+     * 获取快递号
+     * @param $title
+     * @return mixed|string
+     */
+    protected function getCarrier($title)
+    {
+        $carrierId = '';
+        if (stripos($title, 'post') !== false) {
+            $carrierId = 'chinapost';
+            $title = 'China Post';
+        } elseif (stripos($title, 'ems') !== false) {
+            $carrierId = 'chinaems';
+            $title = 'China Ems';
+        } elseif (stripos($title, 'dhl') !== false) {
+            $carrierId = 'dhl';
+            $title = 'DHL';
+        } elseif (stripos($title, 'fede') !== false) {
+            $carrierId = 'fedex';
+            $title = 'Fedex';
+        } elseif (stripos($title, 'usps') !== false) {
+            $carrierId = 'usps';
+            $title = 'Usps';
+        } elseif (stripos($title, 'yanwen') !== false) {
+            $carrierId = 'yanwen';
+            $title = 'YANWEN';
+        } elseif (stripos($title, 'cpc') !== false) {
+            $carrierId = 'cpc';
+            $title = 'Canada Post';
+        }
+        $carrier = [
+            'dhl' => '100001',
+            'chinapost' => '03011',
+            'chinaems' => '03013',
+            'cpc' =>  '03041',
+            'fedex' => '100003',
+            'usps' => '21051',
+            'yanwen' => '190012'
+        ];
+        if ($carrierId) {
+            return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
+        }
+        return ['title' => $title, 'carrierId' => $carrierId];
+    }
+
+
+
+
     /***
      * 导入退件数据 zeelool
      */

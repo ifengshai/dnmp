@@ -105,21 +105,20 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-3">承运公司:</label>
             <label class="control-label col-xs-12 col-sm-5"
-                style="text-align: left;">{$express_data.carrier_code}</label>
+                style="text-align: left;">{$title}</label>
         </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-3">物流单号:</label>
             <label class="control-label col-xs-12 col-sm-5"
-                style="text-align: left;">{$express_data.tracking_number}</label>
+                style="text-align: left;">{$track_number}</label>
         </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-3">物流信息:</label>
             <label class="control-label col-xs-12 col-sm-3" style="width: 450px;text-align: left;">
-                {foreach name="express_data.origin_info.trackinfo" item="vi"}
-                <p>{$vi.Date} <br>{$vi.StatusDescription} <br>{$vi.checkpoint_status}</p>
+                {foreach name="express_data" item="vi"}
+                <p>{$vi.a}  <br>{$vi.z}</p>
                 {/foreach}
             </label>
-            
         </div>
     </div>
 </div>

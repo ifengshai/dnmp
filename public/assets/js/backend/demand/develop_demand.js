@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Controller.api.formatter.getcontent,
                         },
 
-                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'create_person', title: __('创建人'), operate: 'like' },
 
                         {
                             field: 'department_group',
@@ -765,7 +765,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
 
-                        { field: 'create_person', title: __('创建人'), operate: 'like' },
+                        { field: 'create_person', title: '创建人', operate: 'like' },
                         {
                             field: 'priority',
                             title: __('紧急程度'),
@@ -1284,7 +1284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-getcontent': function (e, value, row, index) {
-                        var str = '标题：' + row.title + '<br><hr>内容：' + value;
+                        var str = '标题：' + row.title + '<br><hr>内容：' + row.desc;
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",
