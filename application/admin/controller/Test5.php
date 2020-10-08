@@ -22,7 +22,7 @@ class Test5 extends Backend
     {
         Api::init($this->app_id, $this->app_secret, $this->access_token);
         $all_facebook_spend = 0;
-       
+
 
         $campaign = new Campaign('act_439802446536567');
         $params = array(
@@ -51,7 +51,7 @@ class Test5 extends Backend
     {
         $url = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={623060648636265}&client_secret={ad00911ec3120286be008c02bdd66a92}&fb_exchange_token={EAAI2q5yir2kBAMPlwaNqRmZCHPdBGLadq6FUAaIxz7BFbuS7uaNDUShEMhCVG7KZBHwQ8VivZBxChNEdTC14MnapJwPi4V9uJYnxriK5WggdbUUx4QlBELggA9QO1YHPCZCPGPJC6B6OPy9xUUceGT2qIMQ7JwM0F2rE8V4LbWstn84Rytnkizn5u7mQyXwxqZCYELcXH8HHsQUdZCS0wj}";
         $res = Http::get($url);
-    
+
     }
 
     public function delete_num_eq_1()
@@ -76,11 +76,11 @@ class Test5 extends Backend
 
         return $analytics;
     }
-    public function goole_cost()
+    //活跃用户数
+    public function google_active_user($start_time)
     {
         // dump();die;
-        $start_time = '2020-09-21';
-        $end_time = '2020-09-21';
+        $end_time = $start_time;
         $client = new \Google_Client();
         $client->setAuthConfig('./oauth/oauth-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
@@ -91,7 +91,6 @@ class Test5 extends Backend
         $response = $this->getReport($analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
-        dump($result);die;
         return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'],2): 0;
     }
     protected function getReport($analytics, $startDate, $endDate)
@@ -116,12 +115,16 @@ class Test5 extends Backend
         // $adCostMetric->setExpression("ga:adCost");
         // $adCostMetric->setAlias("ga:adCost");
 
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($VIEW_ID);
         $request->setDateRanges($dateRange);
         $request->setMetrics(array($adCostMetric));
-        // $request->setDimensions(array($sessionDayDimension));
+        $request->setDimensions(array($sessionDayDimension));
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
         $body->setReportRequests(array($request));
