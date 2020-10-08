@@ -154,7 +154,7 @@ class ProductBarCode extends Backend
 
         //检测打印状态
         $check_status = $this->model->where(['id' => $ids])->value('status');
-        $check_status == 1 && $this->error('请勿重复打印！');
+        // $check_status == 1 && $this->error('请勿重复打印！');
 
         ob_start();
         $file_header =
@@ -193,7 +193,7 @@ EOF;
 
             //拼接条形码
             $img_url = "/uploads/product/bar_code/{$value['code']}.png";
-            $file_content .= "<div style='display:list-item;margin: 0mm auto;padding-top:5mm;padding-right:2mm;text-align:center;'>
+            $file_content .= "<div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
             <img src='" . $img_url . "' style='width:36mm'></div>";
         }
         echo $file_header . $file_content;
