@@ -154,7 +154,7 @@ class ProductBarCode extends Backend
 
         //检测打印状态
         $check_status = $this->model->where(['id' => $ids])->value('status');
-        // $check_status == 1 && $this->error('请勿重复打印！');
+        $check_status == 1 && $this->error('请勿重复打印！');
 
         ob_start();
         $file_header =
