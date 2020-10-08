@@ -162,7 +162,7 @@ class ProductBarCode extends Backend
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
 body{ margin:0; padding:0}
-.single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
+.single_box{margin:0 auto;}
 table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
 table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
 table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
@@ -193,10 +193,8 @@ EOF;
 
             //拼接条形码
             $img_url = "/uploads/product/bar_code/{$value['code']}.png";
-            $file_content .= "<div  class = 'single_box'>
-            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
-            <tr><td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'></td></tr>                
-            </table></div>";
+            $file_content .= "<div style='display:list-item;margin: 0mm auto;padding-top:5mm;padding-right:2mm;text-align:center;'>
+            <img src='" . $img_url . "' style='width:36mm'></div>";
         }
         echo $file_header . $file_content;
     }
@@ -206,6 +204,7 @@ EOF;
      */
     protected function generate_barcode($text, $fileName)
     {
+        // $text = '1007000000030';
         // 引用barcode文件夹对应的类
         Loader::import('BCode.BCGFontFile', EXTEND_PATH);
         //Loader::import('BCode.BCGColor',EXTEND_PATH);
@@ -216,7 +215,7 @@ EOF;
 
         // $code = '';
         // 加载字体大小
-        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 18);
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 20);
         //颜色条形码
         $color_black = new \BCGColor(0, 0, 0);
         $color_white = new \BCGColor(255, 255, 255);
@@ -224,11 +223,12 @@ EOF;
         try {
             // $code = new \BCGcode39();
             $code = new \BCGcode128();
-            $code->setScale(3);
-            $code->setThickness(25); // 条形码的厚度
+            $code->setScale(2);
+            $code->setThickness(60); // 条形码的厚度
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
             $code->setFont($font); //设置字体
+            // $code->setOffsetX(10); //设置字体
             $code->parse($text); // 条形码需要的数据内容
         } catch (\Exception $exception) {
             $drawException = $exception;
