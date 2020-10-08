@@ -80,7 +80,7 @@ class Test5 extends Backend
     {
         // dump();die;
         $start_time = '2020-09-21';
-        $end_time = '2020-09-22';
+        $end_time = '2020-09-21';
         $client = new \Google_Client();
         $client->setAuthConfig('./oauth/oauth-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
@@ -92,7 +92,7 @@ class Test5 extends Backend
         // Print the response.
         $result = $this->printResults($response);
         dump($result);die;
-        return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0;
+        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'],2): 0;
     }
     protected function getReport($analytics, $startDate, $endDate)
     {
@@ -111,8 +111,8 @@ class Test5 extends Backend
         $dateRange->setEndDate($endDate);
 
         $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
-        $adCostMetric->setExpression("ga:pageviews");
-        $adCostMetric->setAlias("ga:pageviews");
+        $adCostMetric->setExpression("ga:1dayUsers");
+        $adCostMetric->setAlias("ga:1dayUsers");
         // $adCostMetric->setExpression("ga:adCost");
         // $adCostMetric->setAlias("ga:adCost");
 
