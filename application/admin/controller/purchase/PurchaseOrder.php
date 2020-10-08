@@ -1784,6 +1784,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否新品采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否留样采购");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "总计");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -1812,6 +1813,7 @@ class PurchaseOrder extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
         }
 
         //设置宽度
@@ -1831,6 +1833,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(30);
 
         //设置边框
         $border = [
