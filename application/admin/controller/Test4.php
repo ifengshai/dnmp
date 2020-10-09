@@ -225,13 +225,16 @@ class Test4 extends Backend
                 //活跃用户数
                 $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
                 //注册用户数
-                $register_where[] = ['exp', Db::raw("DATE_FORMAT(created, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['register_num'] = $connect->table('admin_user')->where($register_where)->count();
+                $register_where = [];
+                $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $arr['register_num'] = $connect->table('customer_entity')->where($register_where)->count();
                 //新增vip用户数
+                $vip_where = [];
                 $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '".$val['date_time']."'")];
                 $vip_where['order_status'] = 'Success';
                 $arr['vip_user_num'] = $connect->table('oc_vip_order')->where($vip_where)->count();
                 //订单数
+                $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed','payment_review', 'paypal_canceled_reversal']];
                 $arr['order_num'] = $this->zeelool->where($order_where)->count();
@@ -246,9 +249,11 @@ class Test4 extends Backend
                 //会话
                 $arr['sessions'] = $this->google_session(1,$val['date_time']);
                 //新建购物车数量
+                $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
                 $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
                 //更新购物车数量
+                $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$val['date_time']."'")];
                 $arr['update_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where2)->count();
                 //新增加购率
