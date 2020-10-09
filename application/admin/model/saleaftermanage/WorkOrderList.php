@@ -13,6 +13,8 @@ use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+use Util\ZeeloolEsPrescriptionDetailHelper;
+use Util\ZeeloolDePrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
@@ -44,7 +46,7 @@ class WorkOrderList extends Model
      */
     public function getWorkPlatFormFormatAttr($value, $data)
     {
-        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog'];
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog','9'=>'zeelool_es','10'=>'zeelool_de'];
         return $status[$data['work_platform']];
     }
 
@@ -133,6 +135,12 @@ class WorkOrderList extends Model
             case 5:
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
                 break;
+            case 9:
+                $this->model = new \app\admin\model\order\order\ZeeloolEs();
+                break;
+            case 10:
+                $this->model = new \app\admin\model\order\order\ZeeloolDe();
+                break;
             default:
                 return false;
                 break;
@@ -195,6 +203,15 @@ class WorkOrderList extends Model
                 $this->model = new \app\admin\model\order\order\Weseeoptical();
                 $prescriptions = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
                 break;
+            case 9:
+                $this->model = new \app\admin\model\order\order\ZeeloolEs();
+                $prescriptions = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($incrementId);
+                break;
+            case 10:
+                $this->model = new \app\admin\model\order\order\ZeeloolDe();
+                $prescriptions = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($incrementId);
+                break;
+
             default:
                 return false;
                 break;
@@ -292,6 +309,12 @@ class WorkOrderList extends Model
                 break;
             case 5:
                 $url = config('url.wesee_url');
+                break;
+            case 9:
+                $url = config('url.zeelooles_url');
+                break;
+            case 10:
+                $url = config('url.zeeloolde_url');
                 break;
             default:
                 return false;
@@ -1220,6 +1243,12 @@ class WorkOrderList extends Model
                     break;
                 case 4:
                     $db = 'database.db_meeloog';
+                    break;
+                case 9:
+                    $db = 'database.db_zeelool_es';
+                    break;
+                case 10:
+                    $db = 'database.db_zeelool_de';
                     break;
                 default:
                     return false;
