@@ -2,14 +2,7 @@
 
 namespace app\admin\controller;
 
-use app\admin\controller\purchase\NewProductReplenishOrder;
-use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
-use FacebookAds\Api;
-use FacebookAds\Object\Campaign;
-use FacebookAds\Object\AdCampaign;
-use FacebookAds\Object\AdsInsights;
-use FacebookAds\Object\AdAccount;
 use think\Db;
 use fast\Http;
 
@@ -18,13 +11,13 @@ class Test5 extends Backend
     protected $app_id = "623060648636265";
     protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
     protected $access_token = "EAAI2q5yir2kBAMPlwaNqRmZCHPdBGLadq6FUAaIxz7BFbuS7uaNDUShEMhCVG7KZBHwQ8VivZBxChNEdTC14MnapJwPi4V9uJYnxriK5WggdbUUx4QlBELggA9QO1YHPCZCPGPJC6B6OPy9xUUceGT2qIMQ7JwM0F2rE8V4LbWstn84Rytnkizn5u7mQyXwxqZCYELcXH8HHsQUdZCS0wj";
-    // public function _initialize()
-    // {
-    //     parent::_initialize();
-    //     $this->zeelool = new \app\admin\model\order\order\Zeelool();
-    //     $this->voogueme = new \app\admin\model\order\order\Voogueme();
-    //     $this->nihao = new \app\admin\model\order\order\Nihao();
-    // }
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+    }
     
     public function test()
     {
