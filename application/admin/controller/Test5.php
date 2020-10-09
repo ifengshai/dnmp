@@ -245,6 +245,7 @@ class Test5 extends Backend
         //查询时间
         $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2019-01-01' and '2019-12-20' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
+            $arr['site'] = 1;
             $arr['day_date'] = $val['date_time'];
             //活跃用户数
             $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
