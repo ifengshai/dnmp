@@ -260,6 +260,7 @@ class Test4 extends Backend
             //插入数据
             Db::name('datacenter_day')->insert($arr);
             echo $val['date_time']."\n";
+            usleep(1000);
         }
     }
 
