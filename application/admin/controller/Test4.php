@@ -214,7 +214,7 @@ class Test4 extends Backend
     //运营数据中心
     public function zeelool_operate_data_center(){
 
-        $connect = Db::connect('database.db_zeelool');
+        $connect = Db::connect('database.db_zeelool_online');
         //查询时间
         $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2018-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
