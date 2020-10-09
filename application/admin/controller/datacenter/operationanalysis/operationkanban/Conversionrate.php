@@ -3,7 +3,6 @@ namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
 use app\common\controller\Backend;
 use app\admin\model\OrderStatistics;
 use app\admin\model\platformmanage\MagentoPlatform;
-use app\admin\model\AuthGroupAccess;
 class Conversionrate extends Backend{
     /**
      * 转化率首页
@@ -15,14 +14,17 @@ class Conversionrate extends Backend{
      */
     public function index ()
     {
-        $user_id = session('admin.id');
-        $resultPrivilege = (new AuthGroupAccess)->getConversionratePrivilege($user_id);
-        if(1>count($resultPrivilege)){
+        // $user_id = session('admin.id');
+        // $resultPrivilege = (new AuthGroupAccess)->getConversionratePrivilege($user_id);
+        // if(1>count($resultPrivilege)){
+        //     $this->error('您没有权限访问','general/profile?ref=addtabs');
+        // }
+        $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        if(empty($orderPlatform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
-        $orderPlatform = (new MagentoPlatform())->getNewOrderPlatformList($resultPrivilege);
         $create_time = input('create_time');
-        $platform    = input('order_platform', $resultPrivilege[0]);	
+        $platform    = input('order_platform', current($orderPlatform));	
         //头部数据
         if($this->request->isAjax()){
             $params = $this->request->param();
@@ -40,8 +42,8 @@ class Conversionrate extends Backend{
             }
             $orderStatistics = new OrderStatistics();
             $list = $orderStatistics->getDataBySite($order_platform,$map);
-            $list = collection($list)->toArray();
             if(!empty($list)){
+                $list = collection($list)->toArray();
                 $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
                 $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
                 foreach ($list as $v) {
@@ -69,7 +71,6 @@ class Conversionrate extends Backend{
                 }else{
                     $list[$key]['shoppingcart_update_conversion'] = 0;
                 }
-
             }
             $json['xcolumnData'] = $create_date ? $create_date :[];
             $json['columnData'] = [

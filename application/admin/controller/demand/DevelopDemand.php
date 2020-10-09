@@ -23,7 +23,7 @@ class DevelopDemand extends Backend
      * @var \app\admin\model\demand\DevelopDemand
      */
     protected $model = null;
-    protected $noNeedRight = ['del'];  //解决创建人无删除权限问题 暂定
+    protected $noNeedRight = ['del', 'newreview', 'set_complete_status'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -314,39 +314,64 @@ class DevelopDemand extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $meWhere = '';
-            if (isset($filter['me_task'])) {
+            // if (isset($filter['me_task'])) {
 
-                $adminId = session('admin.id');
-                //经理
-                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
-                //经理
-                if (in_array($adminId, $authUserIds)) {
-                    $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
-                }
+            //     $adminId = session('admin.id');
+            //     //经理
+            //     $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+            //     //经理
+            //     if (in_array($adminId, $authUserIds)) {
+            //         $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+            //     }
 
-                //开发主管
-                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
-                if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
-                    $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
-                }
+            //     //开发主管
+            //     $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+            //     if (!in_array($adminId, $authUserIds) && in_array($adminId, $authDevelopUserIds)) {
+            //         $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))"; //
+            //     }
 
-                //判断是否是普通的测试
-                $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
-                if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
-                    $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+            //     //判断是否是普通的测试
+            //     $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+            //     if (!in_array($adminId, $authUserIds) && in_array($adminId, $testAuthUserIds)) {
+            //         $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+            //     }
+            //     //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+            //     $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+            //     if (in_array($adminId, $assignAuthUserIds)) {
+            //         $meWhere = "1 = 1";
+            //     }
+            //     // 不是主管和经理的, 是否为开发人或测试认，或创建人
+            //     if (!$meWhere) {
+            //         $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+            //     }
+            //     unset($filter['me_task']);
+            // }
+
+
+            //产品计划
+            if (isset($filter['test'])) {
+
+                $i = null;
+                $i = $filter['test'];
+                if ($i == 1) { //产品计划
+                    $meWhere .= "FIND_IN_SET('0',status)";
+                } elseif ($i == 2) { //产品设计
+                    $meWhere .= "FIND_IN_SET('1',status)";
+                } elseif ($i == 3) { // 研发中心
+                    $meWhere .= "FIND_IN_SET('2',status)";
+                } elseif ($i == 4) { // 测试中
+                    $meWhere .= "FIND_IN_SET('3',status)";
+                } elseif ($i == 5) { // 准备发布
+                    $meWhere .= "FIND_IN_SET('4',status)";
+                } elseif ($i == 6) { // 发布成功
+                    $meWhere .= "FIND_IN_SET('5',status)";
+                } elseif ($i == 7) { // 发布成功
+                    $meWhere .= "FIND_IN_SET('6',status)";
                 }
-                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
-                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
-                if (in_array($adminId, $assignAuthUserIds)) {
-                    $meWhere = "1 = 1";
-                }
-                // 不是主管和经理的, 是否为开发人或测试认，或创建人
-                if (!$meWhere) {
-                    $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
-                }
-                unset($filter['me_task']);
+                unset($filter['test']);
+            } else {
+                $meWhere .= "FIND_IN_SET(2,status)";
             }
-           
             //搜索负责人
             if ($filter['nickname']) {
                 //查询用户表id
@@ -355,8 +380,6 @@ class DevelopDemand extends Backend
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
             }
-            $this->request->get(['filter' => json_encode($filter)]);
-
 
             //搜索责任人
             if ($filter['duty_nickname']) {
@@ -385,7 +408,6 @@ class DevelopDemand extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             //查询用户表id
             $admin = new \app\admin\model\Admin();
@@ -485,6 +507,8 @@ class DevelopDemand extends Backend
         $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
         //bug列表页 是否有上线按钮权限
         $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
+
+        $this->view->assign('getTabList', $this->model->getBugTabList());
         return $this->view->fetch();
     }
 
@@ -522,6 +546,7 @@ class DevelopDemand extends Backend
                     if ($params['type'] == 1) { //如果为BUG类型,更新
                         $params['review_status_develop'] = 1;
                         $params['review_status_manager'] = 1;
+                        $params['status'] = 2;
                     }
 
                     $result = $this->model->allowField(true)->save($params);
@@ -1181,6 +1206,7 @@ class DevelopDemand extends Backend
     public function is_finish_bug($ids = null)
     {
         $data['is_finish_task'] = 1;
+        $data['status'] = 5;
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {

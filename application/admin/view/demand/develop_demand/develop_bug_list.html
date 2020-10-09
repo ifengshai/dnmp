@@ -28,9 +28,13 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs" >
-            <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li>
-            {foreach name="getTabList" item="vo"}
+            <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li> -->
+            {foreach name="getTabList" item="vo"} 
+            {if $vo['value'] == 3}
+            <li  class="active"><a href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {else/}
             <li><a href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {/if}
             {/foreach}
         </ul>
     </div>

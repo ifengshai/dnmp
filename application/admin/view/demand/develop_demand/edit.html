@@ -12,9 +12,8 @@
         <div class="col-xs-12 col-sm-8">
             <select name="row[priority]" class="form-control"  data-rule="required">
                 <option value=""  {:$row['priority'] == '' ? 'selected' : ''}>请选择</option>
-                <option value="1" {:$row['priority'] == 1 ? 'selected' : ''}>低</option>
-                <option value="2" {:$row['priority'] == 2 ? 'selected' : ''}>中</option>
-                <option value="3" {:$row['priority'] == 3 ? 'selected' : ''}>高</option>
+                <option value="1" {:$row['priority'] == 1 ? 'selected' : ''}>正常</option>
+                <option value="2" {:$row['priority'] == 2 ? 'selected' : ''}>紧急</option>
             </select>
         </div>
     </div>

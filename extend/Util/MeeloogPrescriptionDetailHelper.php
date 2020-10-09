@@ -178,6 +178,20 @@ class MeeloogPrescriptionDetailHelper{
 				$items[$item_key]['total_add'] = $final_params['os_add'];
 			}
 
+
+			//判断双ADD还是单ADD
+			if ($final_params['os_add'] && $final_params['od_add'] && (float) $final_params['os_add'] * 1 != 0 && (float) $final_params['od_add'] * 1 != 0) {
+				$items[$item_key]['os_add'] = $lens_params['os_add'];
+				$items[$item_key]['od_add'] = $lens_params['od_add'];
+			} else {
+				if ($final_params['od_add'] && (float) $final_params['od_add']*1 != 0) {
+					$items[$item_key]['total_add'] = $lens_params['od_add'];
+				} else {
+					$items[$item_key]['total_add'] = $lens_params['os_add'];
+				}
+			}
+
+
 			if($final_params['pdcheck'] =='on'){
 				$items[$item_key]['pd_l'] = $final_params['pd_l'];
 				$items[$item_key]['pd_r'] = $final_params['pd_r'];

@@ -99,9 +99,6 @@ table.altrowstable tr:nth-child(even){
 												{foreach name="orderPlatformList" item="vo"}
                                                 <option value="{$key}">{$vo}</option>
                                                 {/foreach}
-                                                {if isset($result) && in_array(100,$arr)}
-                                                <option value="100">全部</option>
-                                                {/if}
                                             </select>
                                         </div>
                                     </div>
