@@ -202,6 +202,7 @@ class Zeelool extends Model
             ->group('sku')
             ->order('num desc')
             ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
+        echo $this->getLastSql();
         return $res;
     }
 

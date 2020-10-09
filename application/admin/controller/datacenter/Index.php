@@ -110,9 +110,6 @@ class Index extends Backend
                 $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'],10);
             }
             unset($v);
-
-            dump($list);
-
             $z_sku = array_column($list, 'z_sku');
             $v_sku = array_column($list, 'v_sku');
             $n_sku = array_column($list, 'n_sku');
@@ -121,6 +118,7 @@ class Index extends Backend
             $z_es_sku = array_column($list,'z_es_sku');
             $z_de_sku = array_column($list,'z_de_sku');
 
+            dump($z_sku);
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
             $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
@@ -129,8 +127,6 @@ class Index extends Backend
             $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
             $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku,$map);
             $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku,$map);
-
-            dump($zeelool);
             //重组数组
             foreach ($list as &$v) {
 
