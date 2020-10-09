@@ -8,7 +8,7 @@ use FacebookAds\Object\Campaign;
 use think\Db;
 use fast\Http;
 
-class Test6 extends Backend
+class Lixiang extends Backend
 {
     protected $app_id = "623060648636265";
     protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
