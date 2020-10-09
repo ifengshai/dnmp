@@ -9,7 +9,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use fast\Trackingmore;
 
-class Ceshi1 extends Backend
+class Lixiang extends Backend
 {
     protected $noNeedLogin = ['*'];
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
