@@ -217,50 +217,52 @@ class Test4 extends Backend
         //查询时间
         $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-04-10' and '2018-05-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
-            $arr = [];
-            $arr['site'] = 1;
-            $arr['day_date'] = $val['date_time'];
-            //活跃用户数
-            $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
-            //注册用户数
-            $register_where[] = ['exp', Db::raw("DATE_FORMAT(created, '%Y-%m-%d') = '".$val['date_time']."'")];
-            $arr['register_num'] = $connect->table('admin_user')->where($register_where)->count();
-            //新增vip用户数
-            $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '".$val['date_time']."'")];
-            $vip_where['order_status'] = 'Success';
-            $arr['vip_user_num'] = $connect->table('oc_vip_order')->where($vip_where)->count();
-            //订单数
-            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed','payment_review', 'paypal_canceled_reversal']];
-            $arr['order_num'] = $this->zeelool->where($order_where)->count();
-            //销售额
-            $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
-            //邮费
-            $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-            //购买人数
-            $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
-            //客单价
-            $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
-            //会话
-            $arr['sessions'] = $this->google_session(1,$val['date_time']);
-            //新建购物车数量
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-            $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
-            //更新购物车数量
-            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-            $arr['update_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where2)->count();
-            //新增加购率
-            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num']/$arr['sessions'],2) : 0;
-            //更新加购率
-            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num']/$arr['sessions'],2) : 0;
-            //新增购物车转化率
-            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
-            //更新购物车转化率
-            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
-            //插入数据
-            Db::name('datacenter_day')->insert($arr);
-            echo $val['date_time']."\n";
-            usleep(1000);
+            $is_exist = Db::name('datacenter_day')->where('day_date',$val['date_time'])->value('id');
+            if(!$is_exist){
+                $arr = [];
+                $arr['site'] = 1;
+                $arr['day_date'] = $val['date_time'];
+                //活跃用户数
+                $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
+                //注册用户数
+                $register_where[] = ['exp', Db::raw("DATE_FORMAT(created, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $arr['register_num'] = $connect->table('admin_user')->where($register_where)->count();
+                //新增vip用户数
+                $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $vip_where['order_status'] = 'Success';
+                $arr['vip_user_num'] = $connect->table('oc_vip_order')->where($vip_where)->count();
+                //订单数
+                $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed','payment_review', 'paypal_canceled_reversal']];
+                $arr['order_num'] = $this->zeelool->where($order_where)->count();
+                //销售额
+                $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+                //邮费
+                $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
+                //购买人数
+                $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
+                //客单价
+                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
+                //会话
+                $arr['sessions'] = $this->google_session(1,$val['date_time']);
+                //新建购物车数量
+                $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
+                //更新购物车数量
+                $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$val['date_time']."'")];
+                $arr['update_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where2)->count();
+                //新增加购率
+                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num']/$arr['sessions'],2) : 0;
+                //更新加购率
+                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num']/$arr['sessions'],2) : 0;
+                //新增购物车转化率
+                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
+                //更新购物车转化率
+                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
+                //插入数据
+                Db::name('datacenter_day')->insert($arr);
+                echo $val['date_time']."\n";
+            }
         }
     }
 
