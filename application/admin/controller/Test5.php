@@ -243,7 +243,7 @@ class Test5 extends Backend
     public function zeelool_operate_data_center(){
         $connect = Db::connect('database.db_zeelool');
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2019-01-01' and '2019-12-20' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2018-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
             $arr['site'] = 1;
             $arr['day_date'] = $val['date_time'];
@@ -284,6 +284,7 @@ class Test5 extends Backend
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
             //更新购物车转化率
             $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
+            dump($arr);exit;
             //插入数据
             Db::name('datacenter_day')->insert($arr);
             echo $val['date_time']."\n";
