@@ -3663,7 +3663,7 @@ EOF;
      * @since 2020/04/30 09:34:48 
      * @return void
      */
-    public function batch_export_xls()
+    public function batch_export_xls_yuan()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
