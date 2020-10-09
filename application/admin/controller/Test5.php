@@ -156,8 +156,12 @@ class Test5 extends Backend
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
         $response = $this->getReport_session($site,$analytics, $start_time, $end_time);
+
+        // dump($response);die;
+
         // Print the response.
         $result = $this->printResults($response);
+
         return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'],2): 0;
     }
     protected function getReport_session($site,$analytics, $startDate, $endDate)
@@ -186,12 +190,16 @@ class Test5 extends Backend
         $adCostMetric->setAlias("ga:sessions");
         // $adCostMetric->setExpression("ga:adCost");
         // $adCostMetric->setAlias("ga:adCost");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
 
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($VIEW_ID);
         $request->setDateRanges($dateRange);
         $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
         $body->setReportRequests(array($request));
@@ -240,7 +248,6 @@ class Test5 extends Backend
             $arr['day_date'] = $val['date_time'];
             //活跃用户数
             $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
-            dump($arr);exit;
             //注册用户数
             $register_where[] = ['exp', Db::raw("DATE_FORMAT(created, '%Y-%m-%d') = '".$val['date_time']."'")];
             $arr['register_num'] = $connect->table('admin_user')->where($register_where)->count();
@@ -260,8 +267,10 @@ class Test5 extends Backend
             $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
             //客单价
             $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
+
             //会话
             $arr['sessions'] = $this->google_session(1,$val['date_time']);
+            dump($arr['sessions']);exit;
             //新建购物车数量
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
             $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
@@ -276,6 +285,7 @@ class Test5 extends Backend
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
             //更新购物车转化率
             $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
+
 
             //插入数据
             Db::name('datacenter_day')->insert($arr);
