@@ -286,6 +286,7 @@ class Test5 extends Backend
             $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
             //插入数据
             Db::name('datacenter_day')->insert($arr);
+            echo $val['date_time']."\n";
         }
     }
 }
