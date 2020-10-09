@@ -92,7 +92,7 @@ class Index extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+            $list = collection($list)->toArray();
             foreach ($list as &$v) {
                 //sku转换
                 $v['z_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 1);
@@ -111,6 +111,8 @@ class Index extends Backend
             }
             unset($v);
 
+            dump($list);
+
             $z_sku = array_column($list, 'z_sku');
             $v_sku = array_column($list, 'v_sku');
             $n_sku = array_column($list, 'n_sku');
@@ -127,6 +129,8 @@ class Index extends Backend
             $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
             $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku,$map);
             $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku,$map);
+
+            dump($zeelool);
             //重组数组
             foreach ($list as &$v) {
 
