@@ -118,7 +118,6 @@ class Index extends Backend
             $z_es_sku = array_column($list,'z_es_sku');
             $z_de_sku = array_column($list,'z_de_sku');
 
-            dump($z_sku);
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
             $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);

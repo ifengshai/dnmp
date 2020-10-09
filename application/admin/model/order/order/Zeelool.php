@@ -188,8 +188,9 @@ class Zeelool extends Model
     public function getOrderSalesNum($sku = [], $where)
     {
         if ($sku) {
-            $sku_str = implode(',', $sku);
-            $map[] = ['exp', Db::raw("trim(sku) IN ( $sku_str) ")];
+            // $sku_str = implode(',', $sku);
+            // $map[] = ['exp', Db::raw("trim() IN ( '$sku_str') ")];
+            $map['sku'] = ['in', $sku];
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
@@ -202,7 +203,6 @@ class Zeelool extends Model
             ->group('sku')
             ->order('num desc')
             ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
-        echo $this->getLastSql();
         return $res;
     }
 
