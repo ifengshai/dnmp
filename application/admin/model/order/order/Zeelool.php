@@ -189,7 +189,7 @@ class Zeelool extends Model
     {
         if ($sku) {
             $sku_str = implode(',', $sku);
-            $map[] = ['exp', Db::raw("trim(sku) IN ( '$sku_str') ")];
+            $map[] = ['exp', Db::raw("trim(sku) IN ( $sku_str) ")];
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
