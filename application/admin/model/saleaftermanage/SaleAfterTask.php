@@ -244,6 +244,9 @@ class SaleAfterTask extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             case 5:
                 $db = 'database.db_weseeoptical';
                 break;
@@ -278,6 +281,9 @@ class SaleAfterTask extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             default:
                 return false;
                 break;
@@ -307,6 +313,9 @@ class SaleAfterTask extends Model
                 break;
             case 3:
                 $db = 'database.db_nihao';
+                break;
+            case 4:
+                $db = 'database.db_meeloog';
                 break;
             default:
                 return false;
@@ -341,6 +350,9 @@ class SaleAfterTask extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             default:
                 return false;
                 break;
@@ -373,6 +385,9 @@ class SaleAfterTask extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_meeloog';
+                break;
             default:
                 return false;
                 break;
@@ -404,6 +419,9 @@ class SaleAfterTask extends Model
                 break;
             case 3:
                 $db = 'database.db_nihao';
+                break;
+            case 4:
+                $db = 'database.db_meeloog';
                 break;
             default:
                 return false;

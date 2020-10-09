@@ -919,7 +919,7 @@ class WorkOrderList extends Model
 
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
-                $work->submit_time = $time;
+                //$work->submit_time = $time;
                 $key = 0;
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
@@ -967,7 +967,7 @@ class WorkOrderList extends Model
                 if ($work->is_check == 1) {
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
-                    $work->submit_time = $time;
+                    //$work->submit_time = $time;
                     $work->check_time = $time;
                     $key = 0;
                     foreach ($orderRecepts as $orderRecept) {

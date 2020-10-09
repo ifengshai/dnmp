@@ -23,13 +23,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id')},
-                        {field: 'platform', title: __('Platform'),custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We' }, formatter: Table.api.formatter.status},
-                        {field: 'app_id', title: __('App_id')},
-                        {field: 'app_secret', title: __('App_secret')},
-                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'platform', title: __('Platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh', 4: 'Ml', 5: 'We', 9: 'ES', 10: 'DE' }, formatter: Table.api.formatter.status },
+                        { field: 'app_id', title: __('App_id') },
+                        { field: 'app_secret', title: __('App_secret') },
+                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
                     ]
                 ]
             });

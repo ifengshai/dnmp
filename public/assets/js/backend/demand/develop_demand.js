@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Controller.api.formatter.getcontent,
                         },
 
-                        { field: 'create_person', title: __('提出人'), operate: 'like' },
+                        { field: 'create_person', title: __('创建人'), operate: 'like' },
 
                         {
                             field: 'department_group',
@@ -730,16 +730,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'title', title: __('标题'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
-                            field: 'desc',
+                            field: 'title',
                             operate: false,
-                            title: __('详情'),
+                            title: __('标题'),
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        { field: 'create_person', title: __('提出人'), operate: 'like' },
 
+                        { field: 'duty_nickname', title: __('提出人'), operate: 'like' },
                         {
                             field: 'department_group',
                             title: __('所属部门'),
@@ -747,24 +746,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '运营部', 2: '客服部', 3: '仓管部', 4: '产品开发部', 5: '财务部', 6: '技术部', 7: 'IT产品部' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'duty_nickname', title: __('责任人'), operate: 'like' },
 
-                        { field: 'nickname', title: __('开发负责人'), operate: 'like', visible: false },
-                        /*{
-                            field: 'priority',
-                            title: __('Priority'),
-                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
-                            searchList: { 1: '低', 2: '中', 3: '高' },
-                            formatter: Table.api.formatter.status
-                        },*/
+                        { field: 'create_person', title: '创建人', operate: 'like' },
                         {
-                            field: 'complexity',
-                            title: __('Complexity'),
-                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
-                            searchList: { 1: '简单', 2: '中等', 3: '复杂' },
-                            operate: false,
+                            field: 'priority',
+                            title: __('紧急程度'),
+                            custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '正常', 2: '紧急' },
                             formatter: Table.api.formatter.status
                         },
+
+                        { field: 'nickname', title: __('开发负责人'), operate: 'like', visible: false },
+
+                        // {
+                        //     field: 'complexity',
+                        //     title: __('Complexity'),
+                        //     custom: { 1: 'success', 2: 'blue', 3: 'danger' },
+                        //     searchList: { 1: '简单', 2: '中等', 3: '复杂' },
+                        //     operate: false,
+                        //     formatter: Table.api.formatter.status
+                        // },
                         {
                             field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
                                 var group = '<span>' + value + '</span>';
@@ -784,7 +785,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         { field: 'test_person', title: __('Test_person_name'), operate: false },
-                        { field: 'develop_status_str', title: __('开发节点'), operate: false },
+                        // { field: 'develop_status_str', title: __('开发节点'), operate: false },
                         {
                             field: 'is_finish',
                             title: __('开发完成'),
@@ -879,7 +880,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
+                                            if (row.is_finish == 0 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;
@@ -1084,7 +1085,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_finish_task == 0) {
-                                            if (Config.is_del_btu == 1 || row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
+                                            if (row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
                                                 return true;
                                             } else {
                                                 return false;
@@ -1268,7 +1269,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-getcontent': function (e, value, row, index) {
-                        var str = '标题：' + row.title + '<br><hr>内容：' + value;
+                        var str = '标题：' + row.title + '<br><hr>内容：' + row.desc;
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",

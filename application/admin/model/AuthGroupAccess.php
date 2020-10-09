@@ -183,7 +183,7 @@ class AuthGroupAccess extends Model
     {
         $result = $this->alias('a')->where(['a.uid'=>$user_id])->join('fa_auth_group g','a.group_id=g.id')->field('g.id,g.rules')->select();
         if($result){
-            $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = 
+            $zeelool_privilege = $voogueme_privilege = $nihao_privilege = $meeloog_privilege = $wesee_privilege =
             $zeelool_es_privilege = $zeelool_de_privilege = $zeelool_jp_privilege = 0;
             $result = collection($result)->toArray();
             foreach($result as $v){
@@ -208,6 +208,7 @@ class AuthGroupAccess extends Model
                     if(in_array(853,$rulesArr)){
                         $meeloog_privilege = 1;
                     }
+                    
                     //zeelool_es权限
                     if(in_array(979,$rulesArr)){
                         $zeelool_es_privilege = 1;
