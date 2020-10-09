@@ -260,9 +260,8 @@ class Test4 extends Backend
                 //更新购物车转化率
                 $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
                 //插入数据
-                dump($arr);exit;
                 Db::name('datacenter_day')->insert($arr);
-                echo $val['date_time']."\n";
+                echo $val['date_time']."\n";exit;
                 usleep(100000);
             }
         }
