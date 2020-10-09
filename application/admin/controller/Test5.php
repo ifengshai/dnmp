@@ -267,10 +267,8 @@ class Test5 extends Backend
             $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
             //客单价
             $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
-
             //会话
             $arr['sessions'] = $this->google_session(1,$val['date_time']);
-            dump($arr['sessions']);exit;
             //新建购物车数量
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
             $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
@@ -285,8 +283,6 @@ class Test5 extends Backend
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
             //更新购物车转化率
             $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
-
-
             //插入数据
             Db::name('datacenter_day')->insert($arr);
         }
