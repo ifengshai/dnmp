@@ -2,7 +2,6 @@
 
 namespace app\admin\controller;
 
-use app\common\controller\Backend;
 use think\Controller;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
@@ -18,11 +17,6 @@ class Test4 extends Controller
     protected $str2 = 'Delivered to Air Transport.';
     protected $str3 = 'In Transit to Next Facility.';
     protected $str4 = 'Arrived in the Final Destination Country.';
-
-
-
-
-
 
     public function _initialize()
     {
@@ -286,6 +280,7 @@ class Test4 extends Controller
         //查询时间
         $date_time = $this->voogueme->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-10-11' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
+            echo 111;
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
                 $arr = [];
