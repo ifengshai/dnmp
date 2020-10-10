@@ -51,30 +51,52 @@ class LogisticsInfo extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['supplier_sku']) {
+                $smap['supplier_sku'] = ['like', $filter['supplier_sku'] . '%'];
+                $ids = $this->purchase_item->where($smap)->column('purchase_id');
+                $map['purchase_id'] = ['in', $ids];
+                unset($filter['supplier_sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
-
-            $purchase = new \app\admin\model\purchase\PurchaseOrder();
             foreach ($list as $k => $v) {
                 if ($v['purchase_id']) {
-                    $res = $purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product')->find();
+                    $res = $this->purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product')->find();
                     $list[$k]['purchase_name'] = $res->purchase_name;
                     $list[$k]['is_new_product'] = $res->is_new_product;
+                    //获取供应商SKU 采购数量字段
+                    $supplier_sku = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('supplier_sku');
+                    $purchase_num = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('purchase_num');
+                    $list[$k]['supplier_sku'] = implode(',', $supplier_sku);
+                    $list[$k]['purchase_num'] = implode(',', $purchase_num);
+                    
                 } else {
                     $list[$k]['purchase_name'] = '';
                     $list[$k]['is_new_product'] = 0;
+                    $list[$k]['supplier_sku'] = '';
+                    $list[$k]['purchase_num'] = 0;
                 }
+
+        
             }
             $result = array("total" => $total, "rows" => $list);
 

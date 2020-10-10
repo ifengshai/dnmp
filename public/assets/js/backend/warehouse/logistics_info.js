@@ -32,6 +32,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         { field: 'order_number', title: __('关联单号') },
+                        { field: 'supplier_sku', title: __('供应商SKU') },
+                        { field: 'purchase_num', title: __('采购数量'), operate: false },
                         { field: 'purchase_name', title: __('采购名称'), operate: false },
                         { field: 'batch_id', title: __('关联批次ID') },
                         {
