@@ -479,6 +479,7 @@ class Instock extends Backend
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
+        $allocated = new \app\admin\model\itemmanage\GoodsStockAllocated;
         $purchase->startTrans();
         $this->purchase->startTrans();
 
@@ -515,6 +516,9 @@ class Instock extends Backend
                                 }
                             }
                         } else {
+                            //记录没有采购比例直接入库的sku
+                            $allocated->allowField(true)->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
+
                             $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
