@@ -2,18 +2,13 @@
 
 namespace app\admin\controller;
 
-use app\admin\controller\purchase\NewProductReplenishOrder;
-use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
-use FacebookAds\Object\AdCampaign;
-use FacebookAds\Object\AdsInsights;
-use FacebookAds\Object\AdAccount;
 use think\Db;
 use fast\Http;
 
-class Test5 extends Backend
+class Test6 extends Backend
 {
     protected $app_id = "623060648636265";
     protected $app_secret = "ad00911ec3120286be008c02bdd66a92";
@@ -25,6 +20,7 @@ class Test5 extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
     }
+    
     public function test()
     {
         Api::init($this->app_id, $this->app_secret, $this->access_token);
@@ -241,10 +237,12 @@ class Test5 extends Backend
     }
     //运营数据中心
     public function zeelool_operate_data_center(){
+
         $connect = Db::connect('database.db_zeelool');
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2019-01-01' and '2019-12-20' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2018-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
+            $arr['site'] = 1;
             $arr['day_date'] = $val['date_time'];
             //活跃用户数
             $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
@@ -285,6 +283,12 @@ class Test5 extends Backend
             $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
             //插入数据
             Db::name('datacenter_day')->insert($arr);
+            echo $val['date_time']."\n";
         }
+    }
+
+    public function test001()
+    {
+        echo 111;
     }
 }

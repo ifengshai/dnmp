@@ -1500,14 +1500,14 @@ class NewProduct extends Backend
                 if ($v['replenish_num'] < 50) {
                     $data[$k]['sku'] = $v['sku'];
                     //各个站的sku统计的数量
-                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num');
-                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num');
-                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num');
-                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
-                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
-                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
-                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num');
-                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num') ?: 0;
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1515,14 +1515,14 @@ class NewProduct extends Backend
                 $spu = substr($v['sku'], 0, strrpos($v['sku'], '-'));
                 if ($spus[$spu] < 300) {
                     $data[$k]['sku'] = $v['sku'];
-                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num');
-                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num');
-                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num');
-                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num');
-                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num');
-                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num');
-                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num');
-                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num');
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num') ?: 0;
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
