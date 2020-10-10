@@ -215,7 +215,7 @@ class Test4 extends Backend
     public function zeelool_operate_data_center(){
         $connect = Db::connect('database.db_zeelool_online');
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-06-01' and '2018-09-01' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2018-09-01' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
             $is_exist = Db::name('datacenter_day')->where('day_date',$val['date_time'])->value('id');
             if(!$is_exist){
@@ -243,9 +243,9 @@ class Test4 extends Backend
                 //邮费
                 $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
                 //购买人数
-                $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
+                $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
                 //客单价
-                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
+                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money']/$order_user,2) : 0;
                 //会话
                 $arr['sessions'] = $this->google_session(1,$val['date_time']);
                 //新建购物车数量
