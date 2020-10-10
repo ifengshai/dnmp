@@ -507,11 +507,18 @@ class Instock extends Backend
                             foreach ($rate_arr as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
+                                    //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
+                                    //入库的时候减少待入库数量
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $stock_num);
+
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
                                     $stock_num -= $num;
+                                    //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                                    //入库的时候减少待入库数量
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $num);
                                 }
                             }
                         } else {
@@ -643,7 +650,10 @@ class Instock extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
+                        //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
+                        //减少待入库数量
+                        $stock_res1 = $item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
                     }
 
                     if ($stock_res === false) {
