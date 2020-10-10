@@ -711,6 +711,8 @@ class SelfApi extends Api
                     file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '扣减虚拟库存失败：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
                 }
 
+                
+
                 //如果虚拟仓库存不足 判断此sku 对应站点是否开启预售
                 if ($platform_data[$v['sku']]['stock'] < $qty) {
                     //判断是否开启预售 并且在有效时间内 并且预售剩余数量大于0

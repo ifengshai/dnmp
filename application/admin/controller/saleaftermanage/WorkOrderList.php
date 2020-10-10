@@ -872,8 +872,6 @@ class WorkOrderList extends Backend
                                 $this->error('找不到承接人,请重新选择');
                             }
                         }
-
-                        
                     }
                     //判断是否选择退款措施
                     if (!array_intersect([2,15], array_filter($params['measure_choose_id']))) {
@@ -1475,7 +1473,6 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-             
             //判断库存是否足够
             if ($stock < $num[$k]) {
                 $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
@@ -2937,9 +2934,9 @@ class WorkOrderList extends Backend
         } elseif ($row['work_platform'] == 4 && $row['replenish_money']) {
             $url = config('url.meeloog_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         } elseif ($row['work_platform'] == 9 && $row['replenish_money']) {
-            $url = config('url.zeelooles_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+            $url = config('url.new_zeelooles_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         } elseif ($row['work_platform'] == 10 && $row['replenish_money']) {
-            $url = config('url.zeeloolde_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+            $url = config('url.new_zeeloolde_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
