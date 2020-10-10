@@ -213,9 +213,13 @@ class Test4 extends Backend
     }
     //运营数据中心
     public function zeelool_operate_data_center(){
-        $connect = Db::connect('database.db_zeelool_online');
+        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-03-01' and '2018-06-01' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2019-09-01' and '2020-10-11' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val){
             $is_exist = Db::name('datacenter_day')->where('day_date',$val['date_time'])->value('id');
             if(!$is_exist){
@@ -227,12 +231,12 @@ class Test4 extends Backend
                 //注册用户数
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['register_num'] = $connect->table('customer_entity')->where($register_where)->count();
+                $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
                 //新增vip用户数
                 $vip_where = [];
                 $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '".$val['date_time']."'")];
                 $vip_where['order_status'] = 'Success';
-                $arr['vip_user_num'] = $connect->table('oc_vip_order')->where($vip_where)->count();
+                $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
                 //订单数
                 $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
@@ -243,19 +247,19 @@ class Test4 extends Backend
                 //邮费
                 $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
                 //购买人数
-                $order_user = $this->zeelool->where($order_where)->group('customer_id')->count();
+                $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
                 //客单价
-                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
+                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money']/$order_user,2) : 0;
                 //会话
                 $arr['sessions'] = $this->google_session(1,$val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['new_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where1)->count();
+                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
                 //更新购物车数量
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['update_cart_num'] = $connect->table('sales_flat_quote')->where($cart_where2)->count();
+                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
                 //新增加购率
                 $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num']/$arr['sessions'],2) : 0;
                 //更新加购率
