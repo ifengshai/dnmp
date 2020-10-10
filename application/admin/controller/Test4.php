@@ -3,13 +3,14 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use think\Controller;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use fast\Trackingmore;
 
-class Test4 extends Backend
+class Test4 extends Controller
 {
     protected $noNeedLogin = ['*'];
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
