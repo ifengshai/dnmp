@@ -196,6 +196,13 @@ class Test7 extends Backend
             return $finalResult;
         }
     }
+
+    public function test001()
+    {
+        echo 111;die;
+    }
+
+
     //运营数据中心
     public function zeelool_operate_data_center()
     {
@@ -262,7 +269,7 @@ class Test7 extends Backend
         }
     }
     //运营数据中心
-    public function voogueme_operate_data_center()
+    public function voogueme01()
     {
         $voogueme_model = Db::connect('database.db_voogueme_online');
         $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -327,7 +334,7 @@ class Test7 extends Backend
         }
     }
     //运营数据中心
-    public function nihao_operate_data_center()
+    public function nihao01()
     {
         $nihao_model = Db::connect('database.db_nihao_online');
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
