@@ -277,10 +277,6 @@ class Test4 extends Backend
     }
     //运营数据中心
     public function voogueme_operate_data_center(){
-
-        echo 111;die;
-
-
         $voogueme_model = Db::connect('database.db_voogueme_online');
         $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
         $voogueme_model->table('oc_vip_order')->query("set time_zone='+8:00'");
