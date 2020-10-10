@@ -1539,6 +1539,15 @@ class PurchaseOrder extends Backend
     }
 
 
+    /**
+     * 批量导入1688物流单号
+     */
+    public function logistics_info_import()
+    {
+        
+    }
+
+
     //批量导出xls
     public function process_export_xls()
     {
