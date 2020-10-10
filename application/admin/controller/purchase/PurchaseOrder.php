@@ -16,6 +16,10 @@ use think\Cache;
 use fast\Kuaidi100;
 use app\admin\model\purchase\Purchase_order_pay;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 
 /**
@@ -1544,9 +1548,123 @@ class PurchaseOrder extends Backend
      */
     public function logistics_info_import()
     {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['1688单号', '物流单号'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+            //模板文件不正确
+            if ($listName !== $fields) {
+                throw new Exception("模板文件不正确！！");
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+        if (!$data) {
+            $this->error('未导入任何数据！！');
+        }
         
+        //批量导入物流单号
+        foreach ($data as $k => $v) {
+
+            if (empty($v[0])) {
+                $this->error('导入失败！！,1688单号不能为空');
+            }
+            if (empty($v[1])) {
+                $this->error('导入失败！！,物流单号不能为空');
+            }
+            $params[$k]['email'] = trim($v[0]);
+            $params[$k]['customer_name'] = trim($v[1]);
+            $params[$k]['mobile'] = $v[2];
+            $params[$k]['country'] = $v[3];
+
+
+            $params[$k]['create_user_id'] = session('admin.id');
+            $params[$k]['update_user_id'] = session('admin.id');
+            $params[$k]['create_time'] = date('Y-m-d H:i:s', time());
+            $params[$k]['update_time'] = date('Y-m-d H:i:s', time());
+            $params[$k]['is_del'] = 1;
+        }
+
+        $result = $this->model->allowField(true)->saveAll($params);
+        if ($result) {
+            $this->success('导入成功！！');
+        } else {
+            $this->error('导入失败！！');
+        }
     }
 
+
+     /**
+     * 导入镜片库存
+     */
+    public function import()
+    {
+        
+    }
 
     //批量导出xls
     public function process_export_xls()
