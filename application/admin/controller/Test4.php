@@ -245,7 +245,7 @@ class Test4 extends Backend
                 //购买人数
                 $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
                 //客单价
-                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money']/$order_user,2) : 0;
+                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money']/$order_user,2) : 0;
                 //会话
                 $arr['sessions'] = $this->google_session(1,$val['date_time']);
                 //新建购物车数量
