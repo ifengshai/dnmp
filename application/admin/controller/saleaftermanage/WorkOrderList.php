@@ -2098,7 +2098,6 @@ class WorkOrderList extends Backend
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];
                     //先核算团队的，在核算个人的
-                    dump(11);
                     if(!empty($check_group_weight)){
                         foreach($check_group_weight as $gv){
                             //所有的
@@ -2120,10 +2119,9 @@ class WorkOrderList extends Backend
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
                             if($all_group){
-                                dump(322);exit;
                                 $true_all_person = array_unique($all_person);
                                 //如果符合创建组的话
-                                if(in_array(session('admin.id'),$true_all_person)){
+                                if(in_array(session('admin.id'),$true_all_person)){echo 888;exit;
                                     if(0 == $gv['step_id']){
                                         //不需要判断措施只需要判断创建人
                                         $params['is_check'] = 1;
