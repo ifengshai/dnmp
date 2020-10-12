@@ -2097,6 +2097,8 @@ class WorkOrderList extends Backend
                     //判断审核人表 lsw create start
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];
+                    dump($check_person_weight);
+                    dump($check_group_weight);exit;
                     //先核算团队的，在核算个人的
                     if(!empty($check_group_weight)){
                         foreach($check_group_weight as $gv){
