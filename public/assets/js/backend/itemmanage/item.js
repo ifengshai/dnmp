@@ -997,7 +997,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            var all_arr = ['zeelool_stock','voogueme_stock','nihao_stock','meeloog_stock','wesee_stock','amazon_stock','zeelool_es_stock','zeelool_de_stock','zeelool_jp_stock','on_way_stock'];
+            var all_arr = ['zeelool_stock','occupy_stock','distribution_occupy_stock','voogueme_stock','nihao_stock','meeloog_stock','wesee_stock','amazon_stock','zeelool_es_stock','zeelool_de_stock','zeelool_jp_stock','on_way_stock'];
             var site_arr = ['plat_stock','plat_on_way_stock'];
 
             viewTable(table,Config.label == 100 ? all_arr : site_arr,Config.label == 100 ? site_arr : all_arr);
