@@ -2242,9 +2242,11 @@ class WorkOrderList extends Backend
             
                         }   
                     }
+                    dump(1111);
                     if(!$params['assign_user_id']){
                         $params['is_check'] = 0;
                     }
+                    dump(333);exit;
                     //提交时间
                     if ($params['work_status'] == 2) {
                         $params['submit_time'] = date('Y-m-d H:i:s');
