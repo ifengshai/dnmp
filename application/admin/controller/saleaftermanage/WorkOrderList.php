@@ -2120,7 +2120,6 @@ class WorkOrderList extends Backend
                             }
                             if($all_group){
                                 $true_all_person = array_unique($all_person);
-                                dump($true_all_person);
                                 //如果符合创建组的话
                                 if(in_array(session('admin.id'),$true_all_person)){
                                     if(0 == $gv['step_id']){
@@ -2179,9 +2178,9 @@ class WorkOrderList extends Backend
                                 }
 
                             }
-                            dump(666);
+
                         }
-                        dump(777);exit;
+
         
                     }
                     if(!empty($check_person_weight)){
