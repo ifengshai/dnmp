@@ -1722,7 +1722,8 @@ class NewProduct extends Backend
 
             //sku
             if ($filter['sku']) {
-                $map['a.sku'] = ['=',trim($filter['sku'])];
+                //改为模糊搜索
+                $map['a.sku'] = ['LIKE','%'.trim($filter['sku'].'%')];
                 // $map['d.purchase_name'] = ['=',trim($filter['sku'])];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);

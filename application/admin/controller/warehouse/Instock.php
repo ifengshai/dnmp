@@ -500,7 +500,11 @@ class Instock extends Backend
                     if ($v['purchase_id']) {
                         if ($v['replenish_id']) {
                             //查询各站补货需求量占比
-                            $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                            $rate_arr = $new_product_mapp
+                                ->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])
+                                // ->order('rate asc')
+                                ->field('rate,website_type')
+                                ->select();
                             // dump(collection($rate_arr)->toArray());die;
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
