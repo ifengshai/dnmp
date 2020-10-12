@@ -4746,7 +4746,10 @@ EOF;
                         $documentary_all_person = $all_group[$dgv['create_id']];
                     }
                     if(count(array_filter($documentary_all_person))>=1){
+                        echo 55;
+                        dump($documentary_all_person);
                         $documentary_true_all_person = array_unique($documentary_all_person);
+                        dump($documentary_true_all_person);exit;
                         if(in_array(session('admin.id'),$documentary_true_all_person)){
                             if(is_array($all_group[$dgv['documentary_group_id']])){
                                 $all_after_user_id = $all_group[$dgv['documentary_group_id']];
