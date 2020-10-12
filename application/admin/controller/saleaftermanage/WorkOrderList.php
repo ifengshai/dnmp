@@ -2120,9 +2120,10 @@ class WorkOrderList extends Backend
                             }
                             if($all_group){
                                 $true_all_person = array_unique($all_person);
-                                dump($true_all_person);exit;
                                 //如果符合创建组的话
+                                dump(session('admin.id'));
                                 if(in_array(session('admin.id'),$true_all_person)){
+                                    echo 333;exit;
                                     if(0 == $gv['step_id']){
                                         //不需要判断措施只需要判断创建人
                                         $params['is_check'] = 1;
