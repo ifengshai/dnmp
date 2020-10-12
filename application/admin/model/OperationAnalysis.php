@@ -68,10 +68,10 @@ class OperationAnalysis extends Model
      */
     public function get_today_sales_money($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_sales_money_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_sales_money_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         $where['order_platform'] = $id;
@@ -81,7 +81,7 @@ class OperationAnalysis extends Model
         //今日销售额
         $today_sales_money_rs    = $model->query($today_sales_money_sql);
         $today_sales_money_data  = $today_sales_money_rs[0]['base_grand_total'];
-        Cache::set('operationAnalysis_get_today_sales_money_'.$id,$today_sales_money_data,3600);
+        // Cache::set('operationAnalysis_get_today_sales_money_'.$id,$today_sales_money_data,3600);
         return $today_sales_money_data;
     }
     /**
@@ -94,18 +94,18 @@ class OperationAnalysis extends Model
      */
     public function get_today_order_num($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_order_num_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_order_num_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $model = $this->get_model_by_id($id);
         //今日订单数sql
         $today_order_num_sql     = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW())";
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->query("set time_zone='+8:00'");
         //今日订单数
         $today_order_num_rs      = $model->query($today_order_num_sql);
         $today_order_num_data    = $today_order_num_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_order_num_'.$id,$today_order_num_data,3600);
+        // Cache::set('operationAnalysis_get_today_order_num_'.$id,$today_order_num_data,3600);
         return $today_order_num_data;
     }
     /**
@@ -119,19 +119,19 @@ class OperationAnalysis extends Model
      */
     public function get_today_order_success($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_order_success_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_order_success_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         //今日订单支付成功数sql
         $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->query("set time_zone='+8:00'");
         //今日订单支付成功数
         $today_order_success_rs       = $model->query($today_order_success_sql);
         $today_order_success_data     = $today_order_success_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
+        // Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
         return $today_order_success_data;
     }
      /**
