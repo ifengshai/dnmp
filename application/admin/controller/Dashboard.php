@@ -26,11 +26,15 @@ class Dashboard extends Backend
         //查询三个站数据
         $orderStatistics = new OrderStatistics();
         $list = $orderStatistics->getAllData();
-        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = $zeeloolEsSalesNumList = $zeeloolDeSalesNumList = $zeeloolJpSalesNumList =  [];
         foreach ($list as $k => $v) {
             $zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
             $vooguemeSalesNumList[$v['create_date']] = $v['voogueme_sales_num'];
             $nihaoSalesNumList[$v['create_date']] = $v['nihao_sales_num'];
+            $meeloogSalesNumList[$v['create_date']] = $v['meeloog_sales_num'];
+            $zeeloolEsSalesNumList[$v['create_date']] = $v['zeelool_es_sales_num'];
+            $zeeloolDeSalesNumList[$v['create_date']] = $v['zeelool_de_sales_num'];
+            $zeeloolJpSalesNumList[$v['create_date']] = $v['zeelool_jp_sales_num'];
         }
 
 
@@ -124,9 +128,6 @@ class Dashboard extends Backend
             Cache::set('dashboard_totalorderamount', $totalorderamount, 3600);
         }
 
-
-
-
         $this->view->assign([
             'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count, //实时订单总数
             'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total, //实时销售额
@@ -142,6 +143,10 @@ class Dashboard extends Backend
             'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
             'vooguemeSalesNumList'      => $vooguemeSalesNumList,
             'nihaoSalesNumList'         => $nihaoSalesNumList,
+            'meeloogSalesNumList'       => $meeloogSalesNumList, //折线图数据
+            'zeeloolEsSalesNumList'     => $zeeloolEsSalesNumList,
+            'zeeloolDeSalesNumList'     => $zeeloolDeSalesNumList,
+            'zeeloolJpSalesNumList'     => $zeeloolJpSalesNumList,
             'yestoday'                  => $yestoday, //昨天的销量
             'last7days'                 => $last7days, //最近7天
             'yestoday_date'             => date("Y-m-d", strtotime("-1 day")),

@@ -2530,7 +2530,6 @@ class Crontab extends Backend
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['order_type'] = ['not in',[4,5]];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
-        echo $zeelool_model->getLastSql();die;
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
         if ($zeelool_count > 0) {
