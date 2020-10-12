@@ -803,7 +803,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 var str = incrementId.substring(0, 2);
                 //判断站点
-                if (str == '10' || str == '40' || str == '50') {
+                if (str == '10' || str == '40' || str == '50' || str == '53') {
                     $("#work_platform").val(1);
                 } else if (str == '13' || str == '43') {
                     $('#work_platform').val(2);

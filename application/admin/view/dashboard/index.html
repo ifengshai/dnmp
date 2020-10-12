@@ -396,72 +396,148 @@
                     </div>
                     <table class="caigou-table" >
                         <tr>
-                            <th>日期</td>
-                            <th>Z站订单数</td>
-                            <th>V站订单数</td>
-                            <th>Nihao站订单数</td>
+                            <th>销量</td>
+                            <th>{$today_date}</td>
+                            <th>{$yestoday_date}</td>
                         </tr>
                         <tr>
-                            <td>{$today_date}</td>
+                            <td>Zeelool</td>
                             <td>{$zeelool_count}</td>
-                            <td>{$voogueme_count}</td>
-                            <td>{$nihao_count}</td>
+                            <td>{$yestoday.zeelool_sales_num}</td>
                            
                         </tr>
                         <tr>
-                            <td>{$yestoday_date}</td>
-                            <td>{$yestoday.zeelool_sales_num}</td>
+                            <td>Voogueme</td>
+                            <td>{$voogueme_count}</td>
                             <td>{$yestoday.voogueme_sales_num}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>Nihao</td>
+                            <td>{$nihao_count}</td>
                             <td>{$yestoday.nihao_sales_num}</td>
                            
                         </tr>
-                    </table>
-
-                    <table class="caigou-table" style="margin-left: 30px;">
                         <tr>
-                            <th>日期</td>
-                            <th>Z站销售额</td>
-                            <th>V站销售额</td>
-                            <th>Nihao站销售额</td>
+                            <td>Meeloog</td>
+                            <td>{$meeloog_count}</td>
+                            <td>{$yestoday.meeloog_sales_num}</td>
+    
                         </tr>
                         <tr>
-                            <td>{$today_date}</td>
-                            <td>{$zeelool_total}</td>
-                            <td>{$voogueme_total}</td>
-                            <td>{$nihao_total}</td>
+                            <td>ZeeloolEs</td>
+                            <td>{$zeelool_es_count}</td>
+                            <td>{$yestoday.zeelool_es_sales_num}</td>
+                        </tr>
+                        <tr>
+                            <td>ZeeloolDe</td>
+                            <td>{$zeelool_de_count}</td>
+                            <td>{$yestoday.zeelool_de_sales_num}</td>
                            
                         </tr>
                         <tr>
-                            <td>{$yestoday_date}</td>
+                            <td>ZeeloolJp</td>
+                            <td>{$zeelool_jp_count}</td>
+                            <td>{$yestoday.zeelool_jp_sales_num}</td>
+                        </tr>
+                    </table>
+
+
+                    <table class="caigou-table" style="margin-left: 30px;">
+                        <tr>
+                            <th>销售额</td>
+                            <th>{$today_date}</td>
+                            <th>{$yestoday_date}</td>
+                        </tr>
+                        <tr>
+                            <td>Zeelool</td>
+                            <td>{$zeelool_total}</td>
                             <td>{:round($yestoday.zeelool_sales_money,2)}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>Voogueme</td>
+                            <td>{$voogueme_total}</td>
                             <td>{:round($yestoday.voogueme_sales_money,2)}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>Nihao</td>
+                            <td>{$nihao_total}</td>
                             <td>{:round($yestoday.nihao_sales_money,2)}</td>
                            
                         </tr>
+                        <tr>
+                            <td>Meeloog</td>
+                            <td>{$meeloog_total}</td>
+                            <td>{:round($yestoday.meeloog_sales_money,2)}</td>
+    
+                        </tr>
+                        <tr>
+                            <td>ZeeloolEs</td>
+                            <td>{$zeelool_es_total}</td>
+                            <td>{:round($yestoday.zeelool_es_sales_money,2)}</td>
+                        </tr>
+                        <tr>
+                            <td>ZeeloolDe</td>
+                            <td>{$zeelool_de_total}</td>
+                            <td>{:round($yestoday.zeelool_de_sales_money,2)}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>ZeeloolJp</td>
+                            <td>{$zeelool_jp_total}</td>
+                            <td>{:round($yestoday.zeelool_jp_sales_money,2)}</td>
+                        </tr>
                     </table>
 
-                   
+                
 
                     <table class="caigou-table" style="margin-left: 30px;">
                         <tr>
-                            <th>日期</td>
-                            <th>Z站客单价</td>
-                            <th>V站客单价</td>
-                            <th>Nihao站客单价</td>
+                            <th>客单价</td>
+                            <th>{$today_date}</td>
+                            <th>{$yestoday_date}</td>
                         </tr>
                         <tr>
-                            <td>{$today_date}</td>
+                            <td>Zeelool</td>
                             <td>{:$zeelool_count ? round($zeelool_total/$zeelool_count,2) : 0}</td>
-                            <td>{:$voogueme_count ? round($voogueme_total/$voogueme_count,2) : 0}</td>
-                            <td>{:$nihao_count ? round($nihao_total/$nihao_count,2) : 0}</td>
+                            <td>{:$yestoday['zeelool_sales_num'] ? round($yestoday['zeelool_sales_money']/$yestoday['zeelool_sales_num'],2) : 0}</td>
                            
                         </tr>
                         <tr>
-                            <td>{$yestoday_date}</td>
-                            <td>{:$yestoday['zeelool_sales_num'] ? round($yestoday['zeelool_sales_money']/$yestoday['zeelool_sales_num'],2) : 0}</td>
+                            <td>Voogueme</td>
+                            <td>{:$voogueme_count ? round($voogueme_total/$voogueme_count,2) : 0}</td>
                             <td>{:$yestoday['voogueme_sales_num'] ? round($yestoday['voogueme_sales_money']/$yestoday['voogueme_sales_num'],2) : 0}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>Nihao</td>
+                            <td>{:$nihao_count ? round($nihao_total/$nihao_count,2) : 0}</td>
                             <td>{:$yestoday['nihao_sales_num'] ? round($yestoday['nihao_sales_money']/$yestoday['nihao_sales_num'],2) : 0}</td>
                            
+                        </tr>
+                        <tr>
+                            <td>Meeloog</td>
+                            <td>{:$meeloog_count ? round($meeloog_total/$meeloog_count,2) : 0}</td>
+                            <td>{:$yestoday['meeloog_sales_num'] ? round($yestoday['meeloog_sales_money']/$yestoday['meeloog_sales_num'],2) : 0}</td>
+    
+                        </tr>
+                        <tr>
+                            <td>ZeeloolEs</td>
+                            <td>{:$zeelool_es_count ? round($zeelool_es_total/$zeelool_es_count,2) : 0}</td>
+                            <td>{:$yestoday['zeelool_es_sales_num'] ? round($yestoday['zeelool_es_sales_money']/$yestoday['zeelool_es_sales_num'],2) : 0}</td>
+                        </tr>
+                        <tr>
+                            <td>ZeeloolDe</td>
+                            <td>{:$zeelool_de_count ? round($zeelool_de_total/$zeelool_de_count,2) : 0}</td>
+                            <td>{:$yestoday['zeelool_de_sales_num'] ? round($yestoday['zeelool_de_sales_money']/$yestoday['zeelool_de_sales_num'],2) : 0}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>ZeeloolJp</td>
+                            <td>{:$zeelool_jp_count ? round($zeelool_jp_total/$zeelool_jp_count,2) : 0}</td>
+                            <td>{:$yestoday['zeelool_jp_sales_num'] ? round($yestoday['zeelool_jp_sales_money']/$yestoday['zeelool_jp_sales_num'],2) : 0}</td>
                         </tr>
                     </table>
                 </div>
@@ -483,6 +559,10 @@
         column: {:json_encode(array_keys($zeeloolSalesNumList))},
         zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))},
         vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
-        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))}
+        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
+        meeloogSalesNumList: {:json_encode(array_values($meeloogSalesNumList))},
+        zeeloolEsSalesNumList: {:json_encode(array_values($zeeloolEsSalesNumList))},
+        zeeloolDeSalesNumList: {:json_encode(array_values($zeeloolDeSalesNumList))},
+        zeeloolJpSalesNumList: {:json_encode(array_values($zeeloolJpSalesNumList))}
     };
 </script>

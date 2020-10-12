@@ -8,14 +8,30 @@ use think\Request;
 
 class OrderDataView extends Backend
 {
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
+    }
+
     /**
-     * 显示资源列表
+     * 订单数据概况
      *
      * @return \think\Response
      */
     public function index()
     {
-        //
+
+        //订单数
+        $order_num = $this->zeeloolOperate->getOrderNum();
+        /*//未达标天数
+        $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
+        //人效
+        $positive_effect_num = $this->zendeskTasks->positive_effect_num(1);
+        //获取表格内容
+        $customer_data = $this->get_worknum_table(1);
+        $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));*/
+        return $this->view->fetch();
     }
 
 
