@@ -2249,7 +2249,7 @@ class WorkOrderList extends Backend
                     if ($params['work_status'] == 2) {
                         $params['submit_time'] = date('Y-m-d H:i:s');
                     }
-dump(111);
+
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     //更新之前的措施全部去掉
                     $updateData['replenish_money'] = '';
@@ -2295,7 +2295,7 @@ dump(111);
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
                         throw new Exception("编辑失败！！");
-                    }dump(333);
+                    }
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -2400,7 +2400,7 @@ dump(111);
                         }
                     }
 
-                    dump(333);exit;
+
                     //不需要审核时直接发送积分，赠送优惠券
                     if (!$params['is_check']  && $params['work_status'] != 1) {
                         // //赠送积分
