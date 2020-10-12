@@ -2073,6 +2073,7 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 0) {
                         $params['is_refund'] = 1;
                     }
+                    dump(777);exit;
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -2180,7 +2181,6 @@ class WorkOrderList extends Backend
                         }
         
                     }
-                    dump(99);exit;
                     if(!empty($check_person_weight)){
                         foreach($check_person_weight as $wkv){
                             if(session('admin.id') == $wkv['work_create_person_id']){
