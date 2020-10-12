@@ -2057,7 +2057,7 @@ class WorkOrderList extends Backend
                     if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
                         throw new Exception("优惠券不能为空");
                     }
-dump(888);exit;
+
                     //如果积分大于200需要审核
                     // if ($params['integral'] > 200) {
                     //     //需要审核
@@ -2180,6 +2180,7 @@ dump(888);exit;
                         }
         
                     }
+                    dump(888);exit;
                     if(!empty($check_person_weight)){
                         foreach($check_person_weight as $wkv){
                             if(session('admin.id') == $wkv['work_create_person_id']){
