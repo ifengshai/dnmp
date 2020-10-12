@@ -9,13 +9,13 @@ use think\Request;
 class OrderDataView extends Backend
 {
     /**
-     * 显示资源列表
+     * 订单数据概况
      *
      * @return \think\Response
      */
     public function index()
     {
-        //
+
     }
 
 
