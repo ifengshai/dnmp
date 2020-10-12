@@ -2177,9 +2177,11 @@ class WorkOrderList extends Backend
                                         break;
                                     }
                                 }
-                                dump(55);exit;
+
                             }
+                            dump(666);exit;
                         }
+                        dump(777);exit;
         
                     }
                     if(!empty($check_person_weight)){
