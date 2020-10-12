@@ -2073,7 +2073,6 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 0) {
                         $params['is_refund'] = 1;
                     }
-                    dump(777);exit;
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -2099,6 +2098,7 @@ class WorkOrderList extends Backend
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];
                     //先核算团队的，在核算个人的
+                    dump(11);
                     if(!empty($check_group_weight)){
                         foreach($check_group_weight as $gv){
                             //所有的
@@ -2120,6 +2120,7 @@ class WorkOrderList extends Backend
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
                             if($all_group){
+                                dump(322);exit;
                                 $true_all_person = array_unique($all_person);
                                 //如果符合创建组的话
                                 if(in_array(session('admin.id'),$true_all_person)){
