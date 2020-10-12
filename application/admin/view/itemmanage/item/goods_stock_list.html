@@ -1,6 +1,17 @@
 <div class="panel panel-default panel-intro">
-    {:build_heading()}
+<!--    {:build_heading()}-->
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs">
+            {foreach name="magentoplatformarr" item="vo"}
+            <li class="{:$site == $vo['id'] ? 'active' : ''}"><a href="#t-{$key}" data-value="{$vo.id}" data-field="platform_type" data-toggle="tab">{$vo.name}</a>
+            </li>
 
+            {/foreach}
+            <li class="{:$site == 100 ? 'active' : ''}"><a href="#t-{$key}" data-value="100" data-field="platform_type" data-toggle="tab">全部</a>
+            </li>
+        </ul>
+    </div>
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">

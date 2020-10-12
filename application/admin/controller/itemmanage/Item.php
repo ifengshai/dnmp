@@ -2,6 +2,8 @@
 
 namespace app\admin\controller\itemmanage;
 
+use app\admin\model\platformManage\MagentoPlatform;
+use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
 use think\Request;
 use think\Db;
@@ -41,6 +43,7 @@ class Item extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\Item;
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('categoryList', $this->category->categoryList());
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
@@ -1040,6 +1043,142 @@ class Item extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //默认站点
+            $platform_type = input('label');
+            if ($platform_type) {
+                $map['platform_type'] = $platform_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['platform_type']) {
+                unset($map['platform_type']);
+            }
+            $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            //如果选择的是全部
+            if ($platform_type == 100){
+                unset($filter['platform_type']);
+                unset($map['platform_type']);
+                $this->request->get(['filter' => json_encode($filter)]);
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+                $map['is_open'] = 1;
+                $map['is_del'] = 1;
+                $total = $this->model
+                    ->where($where)
+                    ->where($map)
+                    ->order($sort, $order)
+                    ->count();
+
+                $list = $this->model
+                    ->where($where)
+                    ->where($map)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+                $list = collection($list)->toArray();
+                //查询各站SKU虚拟库存
+                foreach ($list as &$v) {
+                    $v['zeelool_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
+                    $v['voogueme_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
+                    $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
+                    $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
+                    $v['wesee_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
+                    $v['amazon_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 8])->value('stock');
+                    $v['zeelool_es_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 9])->value('stock');
+                    $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
+                    $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
+                }
+                unset($v);
+
+            }else{
+                //如果选择的是站点 那么主表变为映射关系表
+                if ($filter['sku']) {
+                    $map['a.sku'] = ['LIKE','%'.$filter['sku'].'%'];
+                    unset($filter['sku']);
+                }
+                $this->request->get(['filter' => json_encode($filter)]);
+
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                // dump($where);
+                $map['is_open'] = 1;
+                $map['is_del'] = 1;
+                $total = $item_platform
+                    ->alias('a')
+                    ->join(['fa_item' => 'b'], 'a.sku=b.sku')
+                    ->field('b.*,a.stock as plat_stock,platform_type,plat_on_way_stock,a.wait_instock_num')
+                    ->where($where)
+                    ->where($map)
+                    // ->order($sort, $order)
+                    ->count();
+
+                $list = $item_platform
+                    ->alias('a')
+                    ->join(['fa_item' => 'b'], 'a.sku=b.sku')
+                    ->field('b.*,a.stock as plat_stock,platform_type,plat_on_way_stock,a.wait_instock_num')
+                    ->where($where)
+                    ->where($map)
+                    // ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+                $list = collection($list)->toArray();
+
+                // foreach ($list as $k=>$v){
+                //     $now_onway_stock = 0;
+                //     $replenish = new NewProductReplenishList();
+                //     $replenish_list = $replenish->where('sku',$v['sku'])->where('real_dis_num','>',0)->field('replenish_id,real_dis_num')->select();
+                //     $replenish_list = collection($replenish_list)->toArray();
+                //     foreach ($replenish_list as $kk=>$vv){
+                //         $rate = Db::name('new_product_mapping')->where(['website_type'=>$v['platform_type'],'sku'=>$v['sku'],'replenish_id'=>$vv['replenish_id']])->value('rate');
+                //         $now_onway_stock += ($v['on_way_stock']*$rate);
+                //     }
+                //     $list[$k]['on_way_stock'] = $now_onway_stock;
+                // }
+            }
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        // $magentoplatformarr[100] = ['name'=>'全部','id'=>100];
+        // dump(collection($magentoplatformarr)->toArray());die;
+
+        //取第一个key为默认站点
+        $site = input('site', $magentoplatformarr[0]['id']);
+
+        $this->assignconfig('label', $site);
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        return $this->view->fetch();
+    }
+
+    public function goods_stock_list1()
+    {
+        $platform = (new MagentoPlatform())->getNewAuthSite();
+        empty($platform) && $this->error('您没有权限访问','general/profile?ref=addtabs');
+
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            //默认站点
+            $website_type = input('label');
+            if ($website_type) {
+                $map['platform_type'] = $website_type;
+            }
+            //如果切换站点清除默认值
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['platform_type']) {
+                unset($map['platform_type']);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $map['is_open'] = 1;
             $map['is_del'] = 1;
@@ -1059,17 +1198,29 @@ class Item extends Backend
             $list = collection($list)->toArray();
 
             $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+            //获取各站点虚拟库存
+            $site_sku_arr = [];
+            foreach($platform as $k => $pv){
+                if($k == 100 || ($k != $website_type && $website_type != 100)){
+                    continue;
+                }
+                $site_sku = $item_platform->where(['platform_type' => $k])->column('stock','sku');
+                $site_sku_arr[$k] = $site_sku;
+            }
+
             //查询各站SKU虚拟库存
             foreach ($list as &$v) {
-                $v['zeelool_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
-                $v['voogueme_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
-                $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
-                $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
-                $v['wesee_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
-                $v['amazon_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 8])->value('stock');
-                $v['zeelool_es_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 9])->value('stock');
-                $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
-                $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
+                if($website_type == 100){
+                    foreach($platform as $k => $pv){
+                        if($k == 100){
+                            continue;
+                        }
+                        $v[$pv.'_stock'] = $site_sku_arr[$k][$v['sku']];
+                    }
+                }else{
+                    $v['fictitious_stock'] = $site_sku_arr[$website_type][$v['sku']];
+                }
             }
             unset($v);
 
@@ -1077,6 +1228,19 @@ class Item extends Backend
 
             return json($result);
         }
+
+        $magento_platform = [];
+        foreach($platform as $k => $pv){
+            $magento_platform[] = ['id'=>$k,'name'=>$pv];
+        }
+
+        //取第一个key为默认站点
+        $site = input('site', $magento_platform[0]['id']);
+        $this->assignconfig('label', $site);
+
+        $this->assign('site', $site);
+        $this->assign('magentoplatformarr', $magento_platform);
+
         return $this->view->fetch();
     }
 
