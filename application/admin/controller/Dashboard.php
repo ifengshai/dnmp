@@ -97,7 +97,7 @@ class Dashboard extends Backend
             $zeelool_es_quote_count = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where($swhere)->count(1);
             $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
             $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
-            $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count + $zeelool_es_quote_count + $zeelool_de_quote_count + $zeelool_jp_quote_count;
+            $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count;
             Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
         }
 
@@ -114,11 +114,10 @@ class Dashboard extends Backend
             $total_zeelool_es_customer_count = Db::connect('database.db_zeelool_es')->table('customer_entity')->where($swhere)->count(1);
             $total_zeelool_de_customer_count = Db::connect('database.db_zeelool_de')->table('customer_entity')->where($swhere)->count(1);
             $total_zeelool_jp_customer_count = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where($swhere)->count(1);
-            $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count + $total_meeloog_customer_count + $total_zeelool_es_customer_count + $total_zeelool_de_customer_count + $total_zeelool_jp_customer_count;
+            $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count + $total_meeloog_customer_count;
             Cache::set('dashboard_total_customer_count', $total_customer_count, 3600);
         }
 
-        
         $operation = new \app\admin\model\OperationAnalysis;
         //总会员数
         $totaluser = $operation->sum('total_sign_customer');
@@ -130,8 +129,8 @@ class Dashboard extends Backend
         $totalorderamount = $operation->sum('total_sales_money');
 
         $this->view->assign([
-            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count + $zeelool_jp_count, //实时订单总数
-            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total + $zeelool_jp_total, //实时销售额
+            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count, //实时订单总数
+            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total, //实时销售额
             'zeelool_count'             => $zeelool_count, //Z站实时订单数
             'voogueme_count'            => $voogueme_count, //V站实时订单数
             'nihao_count'               => $nihao_count, //nihao站实时订单数
