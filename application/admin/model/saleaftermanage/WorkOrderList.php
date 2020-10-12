@@ -148,7 +148,9 @@ class WorkOrderList extends Model
             return [];
         }
         $register_email = $this->model->alias('m')->where('m.increment_id',$increment_id)->join(['customer_entity' => 'r'], 'm.customer_id=r.entity_id')->value('email');
+        dump(111);
         $result['sku'] = array_unique($sku);
+        dump($result['sku']);exit;
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
         $result['is_new_version'] = $is_new_version;
