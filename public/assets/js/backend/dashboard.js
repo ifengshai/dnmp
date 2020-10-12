@@ -104,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                             width: 1.5
                         }
                     },
-                    data: Orderdata.$zeeloolEsSalesNumList
+                    data: Orderdata.zeeloolEsSalesNumList
                 }, {
                     name: __('ZeeloolDe站销量'),
                     type: 'line',
@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                             width: 1.5
                         }
                     },
-                    data: Orderdata.$zeeloolDeSalesNumList
+                    data: Orderdata.zeeloolDeSalesNumList
                 },
                 {
                     name: __('ZeeloolJp站销量'),
@@ -131,7 +131,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                             width: 1.5
                         }
                     },
-                    data: Orderdata.$zeeloolJpSalesNumList
+                    data: Orderdata.zeeloolJpSalesNumList
                 }
                 ]
             };

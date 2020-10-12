@@ -396,13 +396,12 @@
                     </div>
                     <table class="caigou-table" >
                         <tr>
-                            <th>日期</td>
-                            <th>Z站订单数</td>
-                            <th>V站订单数</td>
-                            <th>Nihao站订单数</td>
+                            <th>站点</td>
+                            <th>{$today_date}</td>
+                            <th>{$yestoday_date}</td>
                         </tr>
                         <tr>
-                            <td>{$today_date}</td>
+                            <td>{$today_date}</td> 
                             <td>{$zeelool_count}</td>
                             <td>{$voogueme_count}</td>
                             <td>{$nihao_count}</td>
@@ -483,6 +482,10 @@
         column: {:json_encode(array_keys($zeeloolSalesNumList))},
         zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))},
         vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
-        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))}
+        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
+        meeloogSalesNumList: {:json_encode(array_values($meeloogSalesNumList))},
+        zeeloolEsSalesNumList: {:json_encode(array_values($zeeloolEsSalesNumList))},
+        zeeloolDeSalesNumList: {:json_encode(array_values($zeeloolDeSalesNumList))},
+        zeeloolJpSalesNumList: {:json_encode(array_values($zeeloolJpSalesNumList))}
     };
 </script>
