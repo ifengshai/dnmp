@@ -2119,7 +2119,6 @@ class WorkOrderList extends Backend
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
                             if($all_group){
-                                dump($all_person);exit;
                                 $true_all_person = array_unique($all_person);
                                 //如果符合创建组的话
                                 if(in_array(session('admin.id'),$true_all_person)){
