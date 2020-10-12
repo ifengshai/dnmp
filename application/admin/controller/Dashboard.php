@@ -130,8 +130,8 @@ class Dashboard extends Backend
         $totalorderamount = $operation->sum('total_sales_money');
 
         $this->view->assign([
-            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count, //实时订单总数
-            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total, //实时销售额
+            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count + $zeelool_jp_count, //实时订单总数
+            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total + $zeelool_jp_total, //实时销售额
             'zeelool_count'             => $zeelool_count, //Z站实时订单数
             'voogueme_count'            => $voogueme_count, //V站实时订单数
             'nihao_count'               => $nihao_count, //nihao站实时订单数
