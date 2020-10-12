@@ -3247,8 +3247,9 @@ class Crontab extends Backend
             return false;
         }
         $order_status = $this->order_status;
+        $order_type = " and order_type not in (4,5)";
         //昨日销售额sql
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total   FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total   FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1  $order_status";
         //过去7天销售额sql
         $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //过去30天销售额sql
@@ -3264,21 +3265,21 @@ class Crontab extends Backend
         //总共的销售额sql
         $total_sales_money_sql         = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE 1 $order_status";
         //昨天订单数sql
-        $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 and order_type not in (4,5)";
+        $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1";
         //过去7天订单数sql
-        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() and order_type not in (4,5)";
+        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
         //过去30天订单数sql
-        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() and order_type not in (4,5)";
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() ";
         //当月订单数sql
-        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') and order_type not in (4,5)";
+        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月订单数sql
-        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 and order_type not in (4,5)";
+        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 ";
         //今年订单数sql
-        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) and order_type not in (4,5)";
+        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) ";
         //上一年的订单数sql
-        $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) and order_type not in (4,5)";
+        $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
         //总共的订单数sql
-        $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order where order_type not in (4,5)";
+        $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order";
         //昨天订单支付成功数sql
         $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
         //过去7天订单支付成功数sql

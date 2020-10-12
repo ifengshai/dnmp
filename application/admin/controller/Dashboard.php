@@ -26,13 +26,16 @@ class Dashboard extends Backend
         //查询三个站数据
         $orderStatistics = new OrderStatistics();
         $list = $orderStatistics->getAllData();
-        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = $zeeloolEsSalesNumList = $zeeloolDeSalesNumList = $zeeloolJpSalesNumList =  [];
         foreach ($list as $k => $v) {
             $zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
             $vooguemeSalesNumList[$v['create_date']] = $v['voogueme_sales_num'];
             $nihaoSalesNumList[$v['create_date']] = $v['nihao_sales_num'];
+            $meeloogSalesNumList[$v['create_date']] = $v['meeloog_sales_num'];
+            $zeeloolEsSalesNumList[$v['create_date']] = $v['zeelool_es_sales_num'];
+            $zeeloolDeSalesNumList[$v['create_date']] = $v['zeelool_de_sales_num'];
+            $zeeloolJpSalesNumList[$v['create_date']] = $v['zeelool_jp_sales_num'];
         }
-
 
         //查询昨日数据
         $time = date("Y-m-d", strtotime("-1 day"));
@@ -52,8 +55,8 @@ class Dashboard extends Backend
         $etime = date("Y-m-d H:i:s", time());
         $where['created_at'] = ['between', [$stime, $etime]];
         $zelool = new \app\admin\model\order\order\Zeelool;
-        $where['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
-        //$where['order_type'] = ['not in',[4,5]];
+        $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'creditcard_proccessing', 'complete']];
+        $where['order_type'] = ['not in', [4, 5]];
         $zeelool_count = $zelool->where($where)->count(1);
         $zeelool_total = $zelool->where($where)->sum('base_grand_total');
 
@@ -102,7 +105,7 @@ class Dashboard extends Backend
         }
 
         $where = [];
-        $where['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
 
         //总订单数
         $totalorder = Cache::get('dashboard_totalorder');
@@ -124,9 +127,6 @@ class Dashboard extends Backend
             Cache::set('dashboard_totalorderamount', $totalorderamount, 3600);
         }
 
-
-
-
         $this->view->assign([
             'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count, //实时订单总数
             'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total, //实时销售额
@@ -142,6 +142,10 @@ class Dashboard extends Backend
             'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
             'vooguemeSalesNumList'      => $vooguemeSalesNumList,
             'nihaoSalesNumList'         => $nihaoSalesNumList,
+            'meeloogSalesNumList'       => $meeloogSalesNumList, //折线图数据
+            'zeeloolEsSalesNumList'     => $zeeloolEsSalesNumList,
+            'zeeloolDeSalesNumList'     => $zeeloolDeSalesNumList,
+            'zeeloolJpSalesNumList'     => $zeeloolJpSalesNumList,
             'yestoday'                  => $yestoday, //昨天的销量
             'last7days'                 => $last7days, //最近7天
             'yestoday_date'             => date("Y-m-d", strtotime("-1 day")),
@@ -156,13 +160,31 @@ class Dashboard extends Backend
         return $this->view->fetch();
     }
 
-    public function zeelool(){}
-    public function voogueme(){}
-    public function nihao(){}
-    public function meeloog(){}
-    public function wesee(){}
-    public function all(){}
-    public function zeelool_es(){}
-    public function zeelool_de(){}
-    public function zeelool_jp(){}
+    public function zeelool()
+    {
+    }
+    public function voogueme()
+    {
+    }
+    public function nihao()
+    {
+    }
+    public function meeloog()
+    {
+    }
+    public function wesee()
+    {
+    }
+    public function all()
+    {
+    }
+    public function zeelool_es()
+    {
+    }
+    public function zeelool_de()
+    {
+    }
+    public function zeelool_jp()
+    {
+    }
 }
