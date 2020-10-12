@@ -2180,6 +2180,7 @@ class WorkOrderList extends Backend
                         }
         
                     }
+                    dump(99);exit;
                     if(!empty($check_person_weight)){
                         foreach($check_person_weight as $wkv){
                             if(session('admin.id') == $wkv['work_create_person_id']){
@@ -2242,7 +2243,6 @@ class WorkOrderList extends Backend
             
                         }   
                     }
-                    dump(888);exit;
                     if(!$params['assign_user_id']){
                         $params['is_check'] = 0;
                     }
