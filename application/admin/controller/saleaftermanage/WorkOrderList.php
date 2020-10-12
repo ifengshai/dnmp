@@ -2097,8 +2097,6 @@ class WorkOrderList extends Backend
                     //判断审核人表 lsw create start
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];
-                    dump($check_person_weight);
-                    dump($check_group_weight);exit;
                     //先核算团队的，在核算个人的
                     if(!empty($check_group_weight)){
                         foreach($check_group_weight as $gv){
@@ -2120,6 +2118,7 @@ class WorkOrderList extends Backend
                             }else{
                                 $all_person = $all_group[$gv['work_create_person_id']];
                             }
+                            dump($all_person);
                             if($all_group){
                                 $true_all_person = array_unique($all_person);
                                 //如果符合创建组的话
@@ -2182,7 +2181,7 @@ class WorkOrderList extends Backend
                             }
 
                         }
-
+exit;
         
                     }
                     if(!empty($check_person_weight)){
