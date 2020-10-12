@@ -545,11 +545,13 @@ class Workorderconfig extends Backend
                 } 
             }
         }
+        dump(111);
         //根据所有的承接组求出所有的承接人
         if(!empty($all_extend_group)){
             $all_extend_group = array_unique($all_extend_group);
             $all_extend_person = Db::name('auth_group_access')->where('group_id','in',$all_extend_group)->column('uid');
         }
+        dump(222);exit;
         //存在工单规则审核表
         if(!empty($all_check_rule)){
             $all_check_rule = collection($all_check_rule)->toArray();
