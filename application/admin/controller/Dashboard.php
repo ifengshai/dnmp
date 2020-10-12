@@ -72,17 +72,17 @@ class Dashboard extends Backend
         $meeloog_count = $meeloog->where($where)->count(1);
         $meeloog_total = $meeloog->where($where)->sum('base_grand_total');
 
-        $zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $zeelool_es_count = $zeelool_es->where($where)->count(1);
-        $zeelool_es_total = $zeelool_es->where($where)->sum('base_grand_total');
+        // $zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        // $zeelool_es_count = $zeelool_es->where($where)->count(1);
+        // $zeelool_es_total = $zeelool_es->where($where)->sum('base_grand_total');
 
-        $zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
-        $zeelool_de_count = $zeelool_de->where($where)->count(1);
-        $zeelool_de_total = $zeelool_de->where($where)->sum('base_grand_total');
+        // $zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
+        // $zeelool_de_count = $zeelool_de->where($where)->count(1);
+        // $zeelool_de_total = $zeelool_de->where($where)->sum('base_grand_total');
 
-        $zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
-        $zeelool_jp_count = $zeelool_jp->where($where)->count(1);
-        $zeelool_jp_total = $zeelool_jp->where($where)->sum('base_grand_total');
+        // $zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        // $zeelool_jp_count = $zeelool_jp->where($where)->count(1);
+        // $zeelool_jp_total = $zeelool_jp->where($where)->sum('base_grand_total');
 
         //实时查询当天购物车数量
         $total_quote_count = Cache::get('dashboard_total_quote_count');
@@ -94,9 +94,9 @@ class Dashboard extends Backend
             $voogueme_quote_count = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where($swhere)->count(1);
             $nihao_quote_count = Db::connect('database.db_nihao')->table('sales_flat_quote')->where($swhere)->count(1);
             $meeloog_quote_count = Db::connect('database.db_meeloog')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_es_quote_count = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
+            // $zeelool_es_quote_count = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where($swhere)->count(1);
+            // $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
+            // $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
             $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count;
             Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
         }
@@ -111,9 +111,9 @@ class Dashboard extends Backend
             $total_voogueme_customer_count = Db::connect('database.db_voogueme')->table('customer_entity')->where($swhere)->count(1);
             $total_nihao_customer_count = Db::connect('database.db_nihao')->table('customer_entity')->where($swhere)->count(1);
             $total_meeloog_customer_count = Db::connect('database.db_meeloog')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_es_customer_count = Db::connect('database.db_zeelool_es')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_de_customer_count = Db::connect('database.db_zeelool_de')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_jp_customer_count = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where($swhere)->count(1);
+            // $total_zeelool_es_customer_count = Db::connect('database.db_zeelool_es')->table('customer_entity')->where($swhere)->count(1);
+            // $total_zeelool_de_customer_count = Db::connect('database.db_zeelool_de')->table('customer_entity')->where($swhere)->count(1);
+            // $total_zeelool_jp_customer_count = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where($swhere)->count(1);
             $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count + $total_meeloog_customer_count;
             Cache::set('dashboard_total_customer_count', $total_customer_count, 3600);
         }
