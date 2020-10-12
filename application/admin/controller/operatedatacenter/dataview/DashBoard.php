@@ -7,14 +7,20 @@ use think\Request;
 
 class DashBoard extends Backend
 {
-    /**
-     * 显示资源列表
-     *
-     * @return \think\Response
-     */
+
+    public function _initialize()
+    {
+        parent::_initialize();
+
+        //每日的数据
+        $this->datacenterday = new \app\admin\model\DatacenterDay();
+    }
+
+
     public function index()
     {
-        //
+        $res = $this->datacenterday->where('id',1)->find();
+        return $this->view->fetch();
     }
 
 }
