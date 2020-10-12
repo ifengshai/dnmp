@@ -2177,8 +2177,8 @@ class WorkOrderList extends Backend
                                     }
                                 }
                             }
+
                         }
-        
                     }
                     if(!empty($check_person_weight)){
                         foreach($check_person_weight as $wkv){
