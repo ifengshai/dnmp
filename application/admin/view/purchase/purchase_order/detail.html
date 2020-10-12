@@ -278,8 +278,7 @@
                             ? 'readonly' : '' } name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" readonly {:$row['contract_id']
                             ? 'readonly' : '' } name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" readonly
-                            value="{$v.purchase_total}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="{$v.purchase_total}" type="text"></td>
                     <!-- <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> -->
                 </tr>
                 {/foreach}
