@@ -2987,7 +2987,7 @@ class WorkOrderList extends Backend
     public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '',$is_new_version = 0)
     {
         if ($this->request->isAjax()) {
-            if ($order_type < 1 || $order_type > 5) { //不在平台之内
+            if ($order_type < 1 || $order_type > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
