@@ -37,7 +37,6 @@ class Dashboard extends Backend
             $zeeloolJpSalesNumList[$v['create_date']] = $v['zeelool_jp_sales_num'];
         }
 
-
         //查询昨日数据
         $time = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = $time;

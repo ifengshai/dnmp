@@ -60,7 +60,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             field: 'pm_audit_status',
                             title: __('评审'),
                             events: Controller.api.events.ge_pm_status,
-                            searchList: { 1: '待审', 2: 'Pending', 3: '通过' },
+                            searchList: { 1: '待审', 2: 'Pending', 3: '通过', 4: '拒绝' },
                             formatter: Controller.api.formatter.ge_pm_status,
                         },
                         {
@@ -311,7 +311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             field: 'pm_audit_status',
                             title: __('评审'),
                             events: Controller.api.events.ge_rdcpm_status,
-                            searchList: { 1: '待通过', 3: '通过' },
+                            searchList: { 1: '待通过', 3: '通过', 4: '拒绝' },
                             formatter: Controller.api.formatter.ge_rdcpm_status,
                         },
                         {
@@ -650,11 +650,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     $('#pm_audit_status').val(2);
                     $("#demand_edit").attr('action', 'demand/it_web_demand/edit');
                 }
+                if (type == 'refuse') {
+                    $('#pm_audit_status').val(4);
+                    $("#demand_edit").attr('action', 'demand/it_web_demand/edit');
+                }
                 if (type == 'sub') {
                     $('#pm_audit_status').val(3);
                     $("#demand_edit").attr('action', 'demand/it_web_demand/edit');
                 }
                 $("#demand_edit").submit();
+            });
+
+        },
+        rdc_demand_pass: function () {
+            Controller.api.bindevent();
+
+            $(document).on('click', ".btn-sub", function () {
+                var type = $(this).val();
+                if (type == 'pass') {
+                    $('#pm_audit_status').val(3);
+                    $("#rdc_demand_pass").attr('action', 'demand/it_web_demand/rdc_demand_pass');
+                }
+                if (type == 'refuse') {
+                    $('#pm_audit_status').val(4);
+                    $("#rdc_demand_pass").attr('action', 'demand/it_web_demand/rdc_demand_pass');
+                }
+                $("#rdc_demand_pass").submit();
             });
 
         },
@@ -836,18 +857,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     if (row.pm_audit_status == 3) {
                         return '<div><span class="check_pm_status status3_color">通过</span></div>';
                     }
+                    if (row.pm_audit_status == 4) {
+                        return '<div><span class="check_pm_status status4_color">拒绝</span></div>';
+                    }
                 },
                 //rdc点击评审,直接通过
                 ge_rdcpm_status: function (value, row, index) {
                     if (row.pm_audit_status == 1) {
                         if (row.pm_status) {
-                            return '<div><span class="check_pm_status status1_color">待通过</span></div>';
+                            return '<div><span class="check_rdcpm_status status1_color">待通过</span></div>';
                         } else {
                             return '<div><span class="check_rdcpm_status status1_color disabled">待通过</span></div>';
                         }
                     }
                     if (row.pm_audit_status == 3) {
                         return '<div><span class="check_rdcpm_status status3_color disabled">通过</span></div>';
+                    }
+                    if (row.pm_audit_status == 4) {
+                        return '<div><span class="check_rdcpm_status status4_color disabled">拒绝</span></div>';
                     }
                 },
                 //开发进度点击弹窗
@@ -973,18 +1000,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         Backend.api.open('demand/it_web_demand/edit/type/pm_audit/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
                     }
                 },
-                //点击评审，弹出窗口
+                //RDC点击评审，弹出窗口
                 ge_rdcpm_status: {
-                    'click .check_pm_status': function (e, value, row, index) {
-
-                        Backend.api.ajax({
+                    'click .check_rdcpm_status': function (e, value, row, index) {
+                        if(row.pm_audit_status == 1){
+                            Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['40%', '40%'] });
+                        }
+                        /*Backend.api.ajax({
                             url: 'demand/it_web_demand/rdc_demand_pass/ids/' + row.id,
                         }, function (data, ret) {
                             $("#table").bootstrapTable('refresh');
                         }, function (data, ret) {
                             //失败的回调
                             $("#table").bootstrapTable('refresh');
-                        });
+                        });*/
                     }
                 },
                 //开发进度，弹出窗口
