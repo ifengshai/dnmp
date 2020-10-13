@@ -768,7 +768,6 @@ class WorkOrderList extends Backend
                         foreach ($params['measure_choose_id'] as $k => $v) {
                             $measureList['work_id'] = $work_id;
                             $measureList['measure_choose_id'] = $v;
-
                             //$measureList['measure_content'] = config('workorder.step')[$v];
                             $measureList['measure_content'] = $workOrderConfigValue['step'][$v];
                             $measureList['create_time'] = date('Y-m-d H:i:s');

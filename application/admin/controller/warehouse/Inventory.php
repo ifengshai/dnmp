@@ -1208,6 +1208,10 @@ class Inventory extends Backend
             $db = 'database.db_nihao';
         } elseif (4 == $order_platform) {
             $db = 'database.db_meeloog';
+        } elseif (9 == $order_platform) {
+            $db = 'database.db_zeelool_es';
+        } elseif (10 == $order_platform) {
+            $db = 'database.db_zeelool_de';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1367,6 +1371,10 @@ class Inventory extends Backend
             $db = 'database.db_nihao';
         } elseif (4 == $order_platform) {
             $db = 'database.db_meeloog';
+        } elseif (9 == $order_platform) {
+            $db = 'database.db_zeelool_es';
+        } elseif (10 == $order_platform) {
+            $db = 'database.db_zeelool_de';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1463,6 +1471,10 @@ class Inventory extends Backend
             $db = 'database.db_nihao';
         } elseif (4 == $order_platform) {
             $db = 'database.db_meeloog';
+        } elseif (9 == $order_platform) {
+            $db = 'database.db_zeelool_es';
+        } elseif (10 == $order_platform) {
+            $db = 'database.db_zeelool_de';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1624,6 +1636,10 @@ class Inventory extends Backend
             $db = 'database.db_nihao';
         } elseif (4 == $order_platform) {
             $db = 'database.db_meeloog';
+        } elseif (9 == $order_platform) {
+            $db = 'database.db_zeelool_es';
+        } elseif (10 == $order_platform) {
+            $db = 'database.db_zeelool_de';
         }
         foreach ($changeRow as $v) {
             //原先sku
