@@ -133,8 +133,9 @@ class MagentoPlatform extends Model
         }
         return array_values($magentoplatformarr);
     }
+    
     /**
-     * 获取站点权限(适合下拉框列表)
+     * 获取站点权限(适合下拉框列表)-公用站点方法-慎重修改
      *
      * @Author lsw 1461069578@qq.com
      * @DateTime 2020-09-29 09:37:20
