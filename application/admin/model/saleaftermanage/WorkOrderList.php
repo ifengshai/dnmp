@@ -1109,7 +1109,7 @@ class WorkOrderList extends Model
         $whereMeasure['work_id'] = $work_id;
         //$whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['recept_status'] = ['eq', 0];
-        $resultRecept = WorkOrderRecept::where($whereMeasure)->count();echo 999;exit;
+        $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
         if (0 == $resultRecept) { //表明整个措施已经完成
             //求出整个工单的措施状态
             $whereWork['work_id'] = $work_id;
@@ -1128,7 +1128,7 @@ class WorkOrderList extends Model
         }else{
             $dataWorkOrder['work_status'] = 5;
         }
-        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);echo 999;exit;
         //不是自动处理完成
         if($is_auto_complete != 1){
             $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
