@@ -1856,7 +1856,7 @@ class WorkOrderList extends Backend
     public function ajax_get_order($ordertype = null, $order_number = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -1902,7 +1902,7 @@ class WorkOrderList extends Backend
     public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null, $change_type = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
