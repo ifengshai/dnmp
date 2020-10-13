@@ -149,6 +149,32 @@ class MagentoPlatform extends Model
         //判断全部站点
         if($this->auth->check('dashboard/all')){
             foreach ($magentoplatformarr as $k => $v) {
+                $arr[$v['id']] = $v['name'];
+
+            }
+            $arr[100] ='全部';
+
+        }else{
+            foreach ($magentoplatformarr as $k => $v) {
+                //判断当前用户拥有的站点权限
+                if (!$this->auth->check('dashboard/' . $v['name'])) {
+                    unset($magentoplatformarr[$k]);
+                    continue;
+                }
+                $arr[$v['id']] = $v['name'];
+            }
+        }
+        return $arr ?? [];
+    }
+    public function getNewAuthSite1()
+    {
+        $this->auth = Auth::instance();
+        //查询对应平台
+        $magentoplatformarr = $this->field('name,id')->select();
+        $arr = [];
+        //判断全部站点
+        if($this->auth->check('dashboard/all')){
+            foreach ($magentoplatformarr as $k => $v) {
                 $arr[$v['id']]['name'] = $v['name'];
                 $arr[$v['id']]['id'] = $v['id'];
             }
