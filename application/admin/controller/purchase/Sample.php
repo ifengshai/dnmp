@@ -872,16 +872,24 @@ class Sample extends Backend
             $where_arr['type'] = 2;
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->sampleworkorder
+                ->alias('a')
+                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id','LEFT')
                 ->where($where)
                 ->where($where_arr)
-                ->order($sort, $order)
+                ->group('a.id')
+                ->order('a.'.$sort, $order)
                 ->count();
 
             $list = $this->sampleworkorder
+                ->alias('a')
+                ->field('a.id,a.location_number,a.status,a.create_user,a.createtime')
+                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id','LEFT')
                 ->where($where)
                 ->where($where_arr)
-                ->order($sort, $order)
+                ->group('a.id')
+                ->order('a.'.$sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
