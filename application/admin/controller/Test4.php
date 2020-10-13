@@ -418,7 +418,7 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where1)->sum('base_grand_total');
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
-            echo $val['date_time'] . "\n";
+            echo $val['day_date'] . "\n";
             usleep(100000);
         }
     }
@@ -446,7 +446,7 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where1)->sum('base_grand_total');
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
-            echo $val['date_time'] . "\n";
+            echo $val['day_date'] . "\n";
             usleep(100000);
         }
     }
@@ -474,7 +474,7 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
-            echo $val['date_time'] . "\n";
+            echo $val['day_date'] . "\n";
             usleep(100000);
         }
     }
