@@ -2285,7 +2285,7 @@ class WorkOrderList extends Backend
                     if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
                     }
-                    echo 999;exit;
+
                     //当要处理成功时需要判断库存是否存在
                     if (1 == $params['success']) {
                         //判断该订单是否是vip订单
@@ -2294,7 +2294,7 @@ class WorkOrderList extends Backend
                             $this->model->vipOrderRefund($row['work_platform'], $row['platform_order']);
                         }else{
                             //其他订单
-                            $checkSku = $this->checkMeasure($receptInfo['measure_id']);
+                            $checkSku = $this->checkMeasure($receptInfo['measure_id']);echo 999;exit;
                             if ($checkSku) {
                                 $this->error(__("以下sku库存不足{$checkSku},无法处理成功"));
                             }
