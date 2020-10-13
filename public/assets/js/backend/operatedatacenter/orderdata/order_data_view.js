@@ -27,8 +27,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.line_chart();
             });
             $(document).on('change', '#order_platform', function () {
-
-
+                order_data_view();
+                Controller.api.formatter.line_chart();
             });
 
             var table = $("#table");
@@ -137,49 +137,29 @@ function order_data_view(){
         data: { order_platform: order_platform, time_str: time_str}
     }, function (data, ret) {
         var order_num = ret.data.order_num;
-        var same_order_num = ret.data.same_order_num;
-        var huan_order_num = ret.data.huan_order_num;
         var order_unit_price = ret.data.order_unit_price;
-        var same_order_unit_price = ret.data.same_order_unit_price;
-        var huan_order_unit_price = ret.data.huan_order_unit_price;
         var sales_total_money = ret.data.sales_total_money;
-        var same_sales_total_money = ret.data.same_sales_total_money;
-        var huan_sales_total_money = ret.data.huan_sales_total_money;
         var shipping_total_money = ret.data.shipping_total_money;
-        var same_shipping_total_money = ret.data.same_shipping_total_money;
-        var huan_shipping_total_money = ret.data.huan_shipping_total_money;
-        $('#order_num').text(today.order_num);
-        $('#today_increment_num').text(today.increment_num);
-        $('#today_reply_num').text(today.reply_num);
-        $('#today_waiting_num').text(today.waiting_num);
-        $('#today_pending_num').text(today.pending_num);
-
-        $('#yesterday_wait_num').text(yesterday.wait_num);
-        $('#yesterday_increment_num').text(yesterday.increment_num);
-        $('#yesterday_reply_num').text(yesterday.reply_num);
-        $('#yesterday_waiting_num').text(yesterday.waiting_num);
-        $('#yesterday_pending_num').text(yesterday.pending_num);
-
-        $('#serven_wait_num').text(serven.wait_num);
-        $('#serven_increment_num').text(serven.increment_num);
-        $('#serven_reply_num').text(serven.reply_num);
-        $('#serven_waiting_num').text(serven.waiting_num);
-        $('#serven_pending_num').text(serven.pending_num);
-
-        $('#third_wait_num').text(third.wait_num);
-        $('#third_increment_num').text(third.increment_num);
-        $('#third_reply_num').text(third.reply_num);
-        $('#third_waiting_num').text(third.waiting_num);
-        $('#third_pending_num').text(third.pending_num);
-        var tr = '<tr id="new_tr">';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + starttime + ':' + endtime + '</td>';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + info.wait_num + '</td>';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + info.increment_num + '</td>';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + info.reply_num + '</td>';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + info.waiting_num + '</td>';
-        tr += '<td style="text-align: center; vertical-align: middle;">' + info.pending_num + '</td>';
-        tr += '</tr>';
-        $("#workload-info").append(tr);
+        var replacement_order_num = ret.data.replacement_order_num;
+        var replacement_order_total = ret.data.replacement_order_total;
+        var online_celebrity_order_num = ret.data.online_celebrity_order_num;
+        var online_celebrity_order_total = ret.data.online_celebrity_order_total;
+        $('#order_num').text(order_num.order_num);
+        $('#same_order_num').text(order_num.same_order_num);
+        $('#huan_order_num').text(order_num.huan_order_num);
+        $('#order_unit_price').text(order_unit_price.order_unit_price);
+        $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
+        $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
+        $('#sales_total_money').text(sales_total_money.sales_total_money);
+        $('#same_sales_total_money').text(sales_total_money.same_sales_total_money);
+        $('#huan_sales_total_money').text(sales_total_money.huan_sales_total_money);
+        $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
+        $('#same_shipping_total_money').text(shipping_total_money.same_shipping_total_money);
+        $('#huan_shipping_total_money').text(shipping_total_money.huan_shipping_total_money);
+        $('#replacement_order_num').text(replacement_order_num.replacement_order_num);
+        $('#replacement_order_total').text(replacement_order_total.replacement_order_total);
+        $('#online_celebrity_order_num').text(online_celebrity_order_num.online_celebrity_order_num);
+        $('#online_celebrity_order_total').text(online_celebrity_order_total.online_celebrity_order_total);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);

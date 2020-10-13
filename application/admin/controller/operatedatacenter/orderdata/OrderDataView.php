@@ -49,7 +49,8 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $time_str = $params['time_str'] ? $params['time_str'] : '';
+            $now_day = date('Y-m-d').' '.'00:00:00'.' - '.date('Y-m-d');
+            $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
             switch ($order_platform){
                 case 1:
                     $model = $this->zeeloolOperate;
@@ -70,7 +71,7 @@ class OrderDataView extends Backend
             $replacement_order_total = $model->getReplacementOrderTotal($time_str,1);//补发单销售额
             $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str,1);//网红单订单数
             $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str,1);  //网红单销售额
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total')
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total');
             $this->success('', '', $data);
         }
     }
@@ -98,7 +99,7 @@ class OrderDataView extends Backend
                 if($type == 1){
                     $first_sales_total = $this->zeeloolOperate->getOrderNum($createat[0]);
                     $date_arr = array(
-                        $createat[0] => $first_sales_total['sales_total_money']
+                        $createat[0] => $first_sales_total['order_num']
                     );
                     if ($createat[0] != $createat[3]) {
                         for ($i = 0; $i <= 100; $i++) {
@@ -107,7 +108,7 @@ class OrderDataView extends Backend
                             date_add($deal_date, date_interval_create_from_date_string("$m days"));
                             $next_day = date_format($deal_date, "Y-m-d");
                             $next_sales_total = $this->zeeloolOperate->getOrderNum($next_day);
-                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
+                            $date_arr[$next_day] = $next_sales_total['order_num'];
                             if ($next_day == $createat[3]) {
                                 break;
                             }
@@ -136,10 +137,12 @@ class OrderDataView extends Backend
                 $now_day = date('Y-m-d');
                 if($type == 1){
                     //今天的订单数
-                    $date_arr[$now_day] = $this->zeeloolOperate->getOrderNum();
+                    $today_order_num = $this->zeeloolOperate->getOrderNum();
+                    $date_arr[$now_day] = $today_order_num['order_num'];
                 }else{
                     //今天的销售额
-                    $date_arr[$now_day] = $this->zeeloolOperate->getSalesTotalMoney();
+                    $today_sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
+                    $date_arr[$now_day] = $today_sales_total_money['sales_total_money'];
                 }
             }
             if ($type == 1) {
