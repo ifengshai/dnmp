@@ -1,3 +1,10 @@
+<style>
+
+    .echart-style td{
+        width:60px;
+    }
+</style>
+
 <style type="text/css">
     table.altrowstable {
         margin: 0 auto;
@@ -27,18 +34,14 @@
         border-style: solid;
         border-color: #ddd;
     }
-
-    table.altrowstable tr:nth-child(odd) {
-        background: #E9F1F4;
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
         background: #F5F5F5;
     }
-
-    table.altrowstable tr:nth-child(even) {
+    table.altrowstable tr:nth-child(even){
         background: #fff;
         background: #eee;
     }
-
-
     .caigou-table tr {
 
         border-width: 1px;
@@ -65,51 +68,30 @@
         border-color: #a9c6c9;
         border-radius: 6px;
     }
-
-    .tab-content > .active {
-        display: block;
-        clear: both;
+    .margin-div{
+        margin-top: 30px;
     }
-
-    .work_title {
-        display: flex;
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 220px;
     }
-
-    .work_title li {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
-        list-style: none;
+    .title{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
     }
-
-    .work_title li span {
-        display: inline-block;
-        font-size: 14px;
+    .rate_class{
+        font-size: 12px;
     }
-
-    .work_title li b {
-        display: inline-block;
-        margin-top: 10px;
-        font-size: 28px;
-    }
-
-    .work_title li.active span, .work_title li.active b {
-        color: #396FFF;
-    }
-
-    .plat_form, .plat_form1 {
-        margin-right: 10px;
-    }
-
-    .plat_form.active, .plat_form1.active {
-        color: #396FFF;
-    }
-
-    .echart-style td {
-        width: 60px;
-    }
-
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -117,114 +99,90 @@
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-
-                <div class="tab-panes fade active in">
-                    <div id="form2" role="form8"
-                         style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
-                        <div style="font-size: 16px;"><b>数据概况</b></div>
-                        <br>
-                        <div class="col-xs-12 col-md-9">
-                            <div class="form-group" style="margin-top: 20px;">
-                                <label class="control-label col-xs-2">工单平台</label>
-                                <div class="col-xs-4">
-                                    <select id="plat_form2" data-rule="required" class="form-control" name="plat_form2">
-                                        <option value="1" selected>Zeelool</option>
-                                        <option value="2">Voogueme</option>
-                                        <option value="3">Nihao</option>
-                                        <option value="0">全部</option>
-                                    </select>
+                <div class="widget-body no-padding">
+                    <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                        <div class="row" style="margin-bottom: 30px">
+                            <div class="col-xs-12 col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4" style="line-height: 31px;margin-right: -60px">工单平台</label>
+                                    <div class="col-xs-8">
+                                        <select data-rule="required" class="form-control" id="order_platform">
+                                            <option value="1" selected="selected">Zeelool</option>
+                                            <option value="2">Voogueme</option>
+                                            <option value="2">Nihaooptical</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <label class="control-label col-xs-1 col-sm-2">时间:</label>
-                                <div class="col-xs-4">
-                                    <input type="hidden" class="form-control operate" name="create_time_one-operate"
-                                           data-name="create_time_one" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange"
-                                           name="create_time_one" placeholder="完成时间" id="workload_time" value=""
-                                           data-index="14">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-1 col-sm-1" style="line-height: 31px;margin-right: -100px">时间:</label>
+                                <div class="col-xs-2" id="timetime" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
                                 </div>
-                                <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
-                                    <input type="button" class="btn btn-success echart1-btn" id="question_type_submit"
-                                           value="提交">
-                                    <input type="reset" class="btn btn-default btn-create_time_one reset"
-                                           id="question_type_reset" value="重置"></div>
                             </div>
                         </div>
-                        <div class="form-group" style="margin-top: 20px;">
-                            <ul class="work_title">
-                                <li>
-                                    <span>待处理</span>
-                                    <b id="wait_deal_num">111</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li data-value="1" class="title title_click active">
-                                    <span>新增</span>
-                                    <b id="new_create_num">222</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li data-value="2" class="title title_click">
-                                    <span>已回复</span>
-                                    <b id="already_reply_num">333</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li class="title">
-                                    <span>待分配</span>
-                                    <b id="wait_allot_num">444</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <br>
-                            </ul>
-                            <ul class="work_title">
-                                <li class="title">
-                                    <span>人效</span>
-                                    <b id="positive_effect_num">555</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li class="title">
-                                    <span>回复时效（h）</span>
-                                    <b id="reply_failure_num">666</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li class="title">
-                                    <span>人效</span>
-                                    <b id="positive_effect_num">555</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                                <li class="title">
-                                    <span>回复时效（h）</span>
-                                    <b id="reply_failure_num">666</b>
-                                    <br>
-                                    <b id="">同比 环比</b>
-                                </li>
-                            </ul>
+                        <div class="margin-div">
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">活跃用户数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_num">{$order_num.same_order_num}</span>  环比：<span id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">注册用户数：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">复购用户数：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">VIP用户数：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                </span>
+                            </div>
+                            <br>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_num">{$order_num.same_order_num}</span>  环比：<span id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">客单价：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="tab-panes fade active in">
-                    <div id="form2" role="form8"
-                         style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
-                        <div style="font-size: 16px;"><b>趋势统计</b></div>
-                        <br>
-                        <div style="font-size: 16px;"><b>订单趋势统计</b></div>
-                        <br>
-                        <div id="echart1" style="height:200px;width:100%;"></div>
 
-                        <div style="font-size: 16px;"><b>活跃用户趋势统计</b></div>
-                        <br>
-                        <div id="echart3" style="height:200px;width:100%;"></div>
-                        <div style="font-size: 16px;"><b>用户购买转化漏斗</b></div>
-                        <br>
-                        <div class="col-lg-8">
-                            <div id="echart2" style="height:200px;width:100%;"></div>
-                        </div>
-                    </div>
-                </div>
+                <select id="type" style="display:none">
+<!--                    <option value="0" selected>销售额</option>-->
+                    <option value="1">订单数</option>
+                </select>
+                <div id="echart1" style="height:200px;width:100%;"></div>
+                <div id="echart2" style="height:200px;width:100%;"></div>
+                <div id="echart3" style="height:200px;width:100%;"></div>
 
             </div>
         </div>

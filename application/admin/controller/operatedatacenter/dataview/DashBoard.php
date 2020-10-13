@@ -68,14 +68,14 @@ class DashBoard extends Backend
                 $model = $this->nihaoOperate;
                 break;
         }
-        //活跃用户数
-        $active_user_num = $model->getActiveUser();
-        //注册用户数
-        $register_user_num = $model->getRegisterUser();
-        //复购用户数
-        $again_user_num = $model->getAgainUser();
-        //vip用户数
-        $vip_user_num = $model->getVipUser();
+        // //活跃用户数
+        // $active_user_num = $model->getActiveUser();
+        // //注册用户数
+        // $register_user_num = $model->getRegisterUser();
+        // //复购用户数
+        // $again_user_num = $model->getAgainUser();
+        // //vip用户数
+        // $vip_user_num = $model->getVipUser();
         //订单数
         $order_num = $model->getOrderNum('2020-10-11 00:00:00 - 2020-10-12 00:00:00');
         //客单价
