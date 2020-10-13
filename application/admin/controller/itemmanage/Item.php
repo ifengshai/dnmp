@@ -1146,9 +1146,10 @@ class Item extends Backend
         // $platform = (new MagentoPlatform())->getAuthSite();
         // dump(collection($platform)->toArray());
         // dump(collection($magentoplatformarr)->toArray());die;
-
+        reset($magentoplatformarr);
+        $first_key = key($magentoplatformarr);
         //取第一个key为默认站点
-        $site = input('site', $magentoplatformarr[1]['id']);
+        $site = input('site', $first_key);
 
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
