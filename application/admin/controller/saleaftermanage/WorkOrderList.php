@@ -852,7 +852,7 @@ class WorkOrderList extends Backend
                         }
                         //修改地址
                         if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
-                            $this->model->changeAddress($params, $work_id, $v, $res);
+                            $this->model->changeAddress($params, $work_id, 13, $res);
                         }
 
                     }
