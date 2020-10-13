@@ -92,47 +92,47 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     },
                     data: Orderdata.meeloogSalesNumList
                 },
-                {
-                    name: __('ZeeloolEs站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeeloolEsSalesNumList
-                }, {
-                    name: __('ZeeloolDe站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeeloolDeSalesNumList
-                },
-                {
-                    name: __('ZeeloolJp站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeeloolJpSalesNumList
-                }
+                // {
+                //     name: __('ZeeloolEs站销量'),
+                //     type: 'line',
+                //     smooth: true,
+                //     areaStyle: {
+                //         normal: {}
+                //     },
+                //     lineStyle: {
+                //         normal: {
+                //             width: 1.5
+                //         }
+                //     },
+                //     data: Orderdata.zeeloolEsSalesNumList
+                // }, {
+                //     name: __('ZeeloolDe站销量'),
+                //     type: 'line',
+                //     smooth: true,
+                //     areaStyle: {
+                //         normal: {}
+                //     },
+                //     lineStyle: {
+                //         normal: {
+                //             width: 1.5
+                //         }
+                //     },
+                //     data: Orderdata.zeeloolDeSalesNumList
+                // },
+                // {
+                //     name: __('ZeeloolJp站销量'),
+                //     type: 'line',
+                //     smooth: true,
+                //     areaStyle: {
+                //         normal: {}
+                //     },
+                //     lineStyle: {
+                //         normal: {
+                //             width: 1.5
+                //         }
+                //     },
+                //     data: Orderdata.zeeloolJpSalesNumList
+                // }
                 ]
             };
 
