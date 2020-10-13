@@ -1,13 +1,21 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">标题:</label>
+        <div class="col-xs-12 col-sm-8">
+            <text id="c-solution" class="form-control" rows="4" cols="30">
+            {$row.title}
+            </text>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('紧急程度')}:</label>
         <div class="col-xs-12 col-sm-8">
             <select name="row[priority]" class="form-control"  data-rule="required">
                <!-- <option value="">请选择</option> -->
-                <option value="1">低</option>
-                <option value="2">中</option>
-                <option value="3">高</option>
+                <option value="2">正常</option>
+                <option value="3">紧急</option>
+                <option value="1">不着急</option>
             </select>
         </div>
     </div>
@@ -17,11 +25,44 @@
             <input id="c-expected_time"  data-rule="required" class="form-control datetimepickernew"  name="row[expected_time]" type="text" value="{:date('Y-m-d H:i:s')}">
         </div>
     </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('需求类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[develop_type]" class="form-control"  data-rule="required">
+               <!-- <option value="">请选择</option> -->
+                <option value="1">维护</option>
+                <option value="2">优化</option>
+                <option value="3">新功能</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题描述')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-solution" class="form-control" rows="4"cols="30">
+            {$row.desc}        
+            </textarea>
+        </div>
+    </div>
+
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('解决方案')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-solution" class="form-control" rows="4" name="row[solution]"
-                    cols="30"></textarea>
+                    cols="30">{$row.solution}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('发布类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[leixing]" class="form-control"  data-rule="required">
+               <!-- <option value="">请选择</option> -->
+                <option value="1">仅保存设计</option>
+                <option value="2">保存设计并发布</option>
+            </select>
         </div>
     </div>
     <input id="c-review_status_manager"    name="row[review_status_manager]" type="hidden" value="1">

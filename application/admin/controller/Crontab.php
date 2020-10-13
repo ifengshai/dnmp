@@ -29,7 +29,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type not in (4,5)";
 
 
     /**
@@ -2528,6 +2528,7 @@ class Crontab extends Backend
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $map['order_type'] = ['not in',[4,5]];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
@@ -2711,14 +2712,14 @@ class Crontab extends Backend
         $data['meeloog_sales_num']                          = $meeloog_count;
         $data['zeelool_es_sales_num']                       = $zeelool_es_count;
         $data['zeelool_de_sales_num']                       = $zeelool_de_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count;
+        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
         $data['zeelool_sales_money']                        = $zeelool_total;
         $data['voogueme_sales_money']                       = $voogueme_total;
         $data['nihao_sales_money']                          = $nihao_total;
         $data['meeloog_sales_money']                        = $meeloog_total;
         $data['zeelool_es_sales_money']                     = $zeelool_es_total;
         $data['zeelool_de_sales_money']                     = $zeelool_de_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total;
+        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
         $data['zeelool_unit_price']                         = $zeelool_unit_price;
         $data['voogueme_unit_price']                        = $voogueme_unit_price;
         $data['nihao_unit_price']                           = $nihao_unit_price;
@@ -3246,8 +3247,9 @@ class Crontab extends Backend
             return false;
         }
         $order_status = $this->order_status;
+        $order_type = " and order_type not in (4,5)";
         //昨日销售额sql
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total   FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total   FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1  $order_status";
         //过去7天销售额sql
         $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //过去30天销售额sql
@@ -3267,13 +3269,13 @@ class Crontab extends Backend
         //过去7天订单数sql
         $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
         //过去30天订单数sql
-        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() ";
         //当月订单数sql
         $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月订单数sql
-        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 ";
         //今年订单数sql
-        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW())";
+        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) ";
         //上一年的订单数sql
         $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
         //总共的订单数sql
@@ -4169,27 +4171,27 @@ class Crontab extends Backend
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNum')->update($data);
 
-        //当日配镜架总数
-        $orderFrameNum = $orderLog->getOrderFrameNum();
-        $data['value'] = $orderFrameNum;
+        //当日配镜架总数 弃用
+        // $orderFrameNum = $orderLog->getOrderFrameNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFrameNum')->update($data);
 
-        //当日配镜片总数
-        $orderLensNum = $orderLog->getOrderLensNum();
-        $data['value'] = $orderLensNum;
+        //当日配镜片总数 弃用
+        // $orderLensNum = $orderLog->getOrderLensNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderLensNum')->update($data);
 
-        //当日加工总数
-        $orderFactoryNum = $orderLog->getOrderFactoryNum();
-        $data['value'] = $orderFactoryNum;
+        //当日加工总数 弃用
+        // $orderFactoryNum = $orderLog->getOrderFactoryNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFactoryNum')->update($data);
 
-        //当日质检总数
-        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
-        $data['value'] = $orderCheckNewNum;
+        //当日质检总数 弃用
+        // $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+        $data['value'] = 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNewNum')->update($data);
 

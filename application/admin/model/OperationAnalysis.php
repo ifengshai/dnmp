@@ -21,7 +21,7 @@ class OperationAnalysis extends Model
 
     // 追加属性
     protected $append = [];
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type not in (4,5)";
     /**
      * 通过id判断需要传递的model
      *
@@ -68,10 +68,10 @@ class OperationAnalysis extends Model
      */
     public function get_today_sales_money($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_sales_money_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_sales_money_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         $where['order_platform'] = $id;
@@ -81,7 +81,7 @@ class OperationAnalysis extends Model
         //今日销售额
         $today_sales_money_rs    = $model->query($today_sales_money_sql);
         $today_sales_money_data  = $today_sales_money_rs[0]['base_grand_total'];
-        Cache::set('operationAnalysis_get_today_sales_money_'.$id,$today_sales_money_data,3600);
+        // Cache::set('operationAnalysis_get_today_sales_money_'.$id,$today_sales_money_data,3600);
         return $today_sales_money_data;
     }
     /**
@@ -94,18 +94,18 @@ class OperationAnalysis extends Model
      */
     public function get_today_order_num($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_order_num_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_order_num_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $model = $this->get_model_by_id($id);
         //今日订单数sql
         $today_order_num_sql     = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW())";
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->query("set time_zone='+8:00'");
         //今日订单数
         $today_order_num_rs      = $model->query($today_order_num_sql);
         $today_order_num_data    = $today_order_num_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_order_num_'.$id,$today_order_num_data,3600);
+        // Cache::set('operationAnalysis_get_today_order_num_'.$id,$today_order_num_data,3600);
         return $today_order_num_data;
     }
     /**
@@ -119,19 +119,19 @@ class OperationAnalysis extends Model
      */
     public function get_today_order_success($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_order_success_'.$id);
-        if($cacheData){
-            return $cacheData;
-        }
+        // $cacheData = Cache::get('operationAnalysis_get_today_order_success_'.$id);
+        // if($cacheData){
+        //     return $cacheData;
+        // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         //今日订单支付成功数sql
         $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->query("set time_zone='+8:00'");
         //今日订单支付成功数
         $today_order_success_rs       = $model->query($today_order_success_sql);
         $today_order_success_data     = $today_order_success_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
+        // Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
         return $today_order_success_data;
     }
      /**
@@ -291,7 +291,10 @@ class OperationAnalysis extends Model
             return false;
         }
         $arr = [];
-        foreach($result as $v){
+        foreach($result as $v){ 
+            if ($v['order_platform'] > 4) {
+                continue;
+            }
             $arr['yesterday_sales_money']                       += $v['yesterday_sales_money'];
             $arr['pastsevenday_sales_money']                    += $v['pastsevenday_sales_money'];
             $arr['pastthirtyday_sales_money']                   += $v['pastthirtyday_sales_money'];
@@ -382,23 +385,23 @@ class OperationAnalysis extends Model
         //求出meeloog的总和
         $meeloog_data  = $this->getList(4);
         //求出zeelool_es的总和
-        $zeelool_es_data = $this->getList(9);
-        //求出zeelool_de的总和
-        $zeelool_de_data = $this->getList(10);  
+        // $zeelool_es_data = $this->getList(9);
+        // //求出zeelool_de的总和
+        // $zeelool_de_data = $this->getList(10);  
         //总和
-        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money'] + $meeloog_data['today_sales_money'] + $zeelool_es_data['today_sales_money'] + $zeelool_de_data['today_sales_money']),2);
-        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num'] + $meeloog_data['today_order_num'] + $zeelool_es_data['today_order_num'] + $zeelool_de_data['today_order_num']);
-        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success'] + $meeloog_data['today_order_success'] + $zeelool_es_data['today_order_success'] + $zeelool_de_data['today_order_success']);
+        $arr['today_sales_money']                           = @round(($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money'] + $meeloog_data['today_sales_money']),2);
+        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num'] + $meeloog_data['today_order_num']);
+        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success'] + $meeloog_data['today_order_success']);
         if($arr['today_order_success']>0){
             $arr['today_unit_price']                        = round($arr['today_sales_money'] /$arr['today_order_success'],2); 
         }else{
             $arr['today_unit_price']                        = 0;
         }
         //$arr['today_unit_price']                            = @round(($zeelool_data['today_unit_price'] + $voogueme_data['today_unit_price'] + $nihao_data['today_unit_price'] + $meeloog_data['today_unit_price'])/4,2);
-        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total'] + $meeloog_data['today_shoppingcart_total'] + $zeelool_es_data['today_shoppingcart_total'] + $zeelool_de_data['today_shoppingcart_total']);
-        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new'] + $zeelool_es_data['today_shoppingcart_new'] + $zeelool_de_data['today_shoppingcart_new']);
-        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer'] + $zeelool_es_data['today_register_customer'] + $zeelool_de_data['today_register_customer']);
-        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer'] + $zeelool_es_data['today_sign_customer'] + $zeelool_de_data['today_sign_customer']);
+        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total'] + $meeloog_data['today_shoppingcart_total'] );
+        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new'] + $meeloog_data['today_shoppingcart_new'] );
+        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer'] + $meeloog_data['today_register_customer']);
+        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer'] + $meeloog_data['today_sign_customer']);
        if($arr['today_shoppingcart_total']>0){
          $arr['today_shoppingcart_conversion']              = round($arr['today_order_success']/$arr['today_shoppingcart_total']*100,2);
          $arr['today_shoppingcart_newconversion']           = round($arr['today_order_success']/$arr['today_shoppingcart_new']*100,2);

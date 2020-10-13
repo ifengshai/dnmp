@@ -272,6 +272,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('库位ID'),operate:false},
+                        {field: 'sku', title: __('SKU'),visible:false,operate:'LIKE'},
                         {field: 'location_number', title: __('出库单号')},
                         {field: 'status', title: __('状态'),searchList: {"1": __('新建'), "2": __('待审核'), "3": __('已审核'), "4": __('已拒绝'), "5": __('已取消')}},
                         {field: 'create_user', title: __('创建人')},

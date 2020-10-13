@@ -54,6 +54,9 @@ class User extends Frontend
      */
     public function _empty($name)
     {
+        if (!preg_match("/^([a-z0-9_]+)$/i", $name)) {
+            $this->error(__('Invalid parameters'));
+        }
         $data = Hook::listen("user_request_empty", $name);
         foreach ($data as $index => $datum) {
             $this->view->assign($datum);

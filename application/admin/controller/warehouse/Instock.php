@@ -4,6 +4,10 @@ namespace app\admin\controller\warehouse;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -475,6 +479,7 @@ class Instock extends Backend
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
+        $allocated = new \app\admin\model\itemmanage\GoodsStockAllocated;
         $purchase->startTrans();
         $this->purchase->startTrans();
 
@@ -495,7 +500,11 @@ class Instock extends Backend
                     if ($v['purchase_id']) {
                         if ($v['replenish_id']) {
                             //查询各站补货需求量占比
-                            $rate_arr = $new_product_mapp->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])->order('rate asc')->field('rate,website_type')->select();
+                            $rate_arr = $new_product_mapp
+                                ->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'is_show' => 0])
+                                // ->order('rate asc')
+                                ->field('rate,website_type')
+                                ->select();
                             // dump(collection($rate_arr)->toArray());die;
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
@@ -503,14 +512,24 @@ class Instock extends Backend
                             foreach ($rate_arr as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
+                                    //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
+                                    //入库的时候减少待入库数量
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $stock_num);
+
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
                                     $stock_num -= $num;
+                                    //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
+                                    //入库的时候减少待入库数量
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $num);
                                 }
                             }
                         } else {
+                            //记录没有采购比例直接入库的sku
+                            $allocated->allowField(true)->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
+
                             $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
@@ -639,7 +658,10 @@ class Instock extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
+                        //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
+                        //减少待入库数量
+                        $stock_res1 = $item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
                     }
 
                     if ($stock_res === false) {
@@ -1033,4 +1055,176 @@ class Instock extends Backend
 
         $writer->save('php://output');
     }
+
+    /**
+     * 入库单批量导入
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/9/24
+     * Time: 14:00:16
+     */
+    public function import()
+    {
+        $this->model = new \app\admin\model\warehouse\Instock();
+        $_item = new \app\admin\model\warehouse\InstockItem();
+        $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+        //校验参数空值
+        $file = $this->request->request('file');
+        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
+
+        //校验文件路径
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        !is_file($filePath) && $this->error(__('No results were found'));
+
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
+        if ('csv' === $ext) {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if (0 == $n || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ('xls' === $ext) {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if (!empty($val)) {
+                        $fields[] = $val;
+                    }
+                }
+            }
+
+            //校验模板文件格式
+            // $listName = ['商品SKU', '类型', '补货需求数量'];
+            $listName = ['入库分类', '平台', 'SKU', '入库数量'];
+
+            $listName !== $fields && $this->error(__('模板文件格式错误！'));
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+            empty($data) && $this->error('表格数据为空！');
+
+            //获取表格中sku集合
+            $sku_arr = [];
+            foreach ($data as $k => $v) {
+                //获取sku
+                $sku = trim($v[2]);
+                empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
+                $sku_arr[] = $sku;
+            }
+            //获取入库平台
+            $out_plat = $data[0][1];
+            switch (trim($out_plat)) {
+                case 'zeelool':
+                    $out_label = 1;
+                    break;
+                case 'voogueme':
+                    $out_label = 2;
+                    break;
+                case 'nihao':
+                    $out_label = 3;
+                    break;
+                case 'meeloog':
+                    $out_label = 4;
+                    break;
+                case 'wesee':
+                    $out_label = 5;
+                    break;
+                case 'amazon':
+                    $out_label = 8;
+                    break;
+                case 'zeelool_es':
+                    $out_label = 9;
+                    break;
+                // case 'zeelool_jp':
+                //     $label = 1;
+                case 'zeelool_de':
+                    $out_label = 10;
+                    break;
+                default:
+                    $this->error(__('请检查表格中调出仓的名称'));
+            };
+            $instock_type = Db::name('in_stock_type')->where('is_del',1)->field('id,name')->select();
+            $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
+
+            //插入一条数据到入库单主表
+            $transfer_order['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $transfer_order['type_id'] = $instock_type[$data[0][0]];
+            $transfer_order['status'] = 0;
+            $transfer_order['platform_id'] =$out_label;
+            $transfer_order['createtime'] = date('Y-m-d H:i:s');
+            $transfer_order['create_person'] = session('admin.nickname');
+            $transfer_order_id = $this->model->insertGetId($transfer_order);
+
+            //批量导入
+            $params = [];
+            foreach ($data as $v) {
+                //获取sku
+                $sku = trim($v[2]);
+
+                //校验当前平台是否存在此sku映射关系
+                if (empty($_platform->where(['platform_type'=>$out_label,'sku'=>$sku])->find())){
+                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku .'在'. $out_plat.' 平台没有映射关系！'));
+                }
+
+                //校验sku是否重复
+                isset($params[$sku]) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
+
+                //获取入库数量
+                $replenish_num = (int)$v[3];
+                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 入库数量不能为空！'));
+
+                //拼接参数 插入入库单详情表中
+                $params[$sku] = [
+                    'in_stock_num' => $replenish_num,
+                    'sku' => $sku,
+                    'in_stock_id' => $transfer_order_id,
+                ];
+            }
+
+            $_item->allowField(true)->saveAll($params) ? $this->success('导入成功！') : $this->error('导入失败！');
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
 }

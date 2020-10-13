@@ -1,4 +1,16 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+    function viewTable(table,show,hide){
+        if(show.length > 0){
+            $.each(show,function(index,value){
+                table.bootstrapTable('showColumn',value);
+            });
+        }
+        if(hide.length > 0){
+            $.each(hide,function(index,value){
+                table.bootstrapTable('hideColumn',value);
+            });
+        }
+    }
 
     var Controller = {
         index: function () {
@@ -842,7 +854,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'itemmanage/item/goods_stock_list' + location.search,
+                    index_url: 'itemmanage/item/goods_stock_list' + location.search + '&label=' + Config.label,
                     table: 'item',
                 }
             });
@@ -855,69 +867,157 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 pk: 'id',
                 sortName: 'id',
                 columns: [
-                    [
-                        { checkbox: true },
-                        {
-                            field: '', title: __('序号'), formatter: function (value, row, index) {
-                                var options = table.bootstrapTable('getOptions');
-                                var pageNumber = options.pageNumber;
-                                var pageSize = options.pageSize;
-                                return (pageNumber - 1) * pageSize + 1 + index;
-                            }, operate: false
-                        },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __('Sku'), operate: 'like' },
-                        // { field: 'name', title: __('Name') },
-
-                        { field: 'stock', title: __('总库存'), operate: false },
-                        
-                        { field: 'available_stock', title: __('可用库存'), operate: false },
-                        { field: 'zeelool_stock', title: __('虚拟仓库存Zeelool'), operate: false },
-                        { field: 'voogueme_stock', title: __('虚拟仓库存Voogueme'), operate: false },
-                        { field: 'nihao_stock', title: __('虚拟仓库存Nihao'), operate: false },
-                        { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
-                        { field: 'wesee_stock', title: __('虚拟仓库存Wesee'), operate: false },
-                        { field: 'amazon_stock', title: __('虚拟仓库存Amazon'), operate: false },
-                        { field: 'zeelool_es_stock', title: __('虚拟仓库存Zeelool_es'), operate: false },
-                        { field: 'zeelool_de_stock', title: __('虚拟仓库存Zeelool_de'), operate: false },
-                        { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
-                        {
-                            field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
-                                return row.stock - row.distribution_occupy_stock;
-                            }
-                        },
-                        { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
-                        { field: 'sample_num', title: __('留样库存'), operate: false },
-
-                        { field: 'on_way_stock', title: __('在途库存'), operate: false },
-                        { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
-                        {
-                            field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
-                            buttons: [
-                                {
-                                    name: 'detail',
-                                    text: '详情',
-                                    title: __('查看详情'),
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: Config.moduleurl + '/itemmanage/item/goods_stock_detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏+
-                                        return true;
-                                    }
-                                }
-                            ]
+                    { checkbox: true },
+                    {
+                        field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+                            return (pageNumber - 1) * pageSize + 1 + index;
+                        }, operate: false
+                    },
+                    { field: 'id', title: __('Id'), operate: false },
+                    { field: 'sku', title: __('Sku'), operate: 'like' },
+                    { field: 'name', title: __('Name'),visible: false },
+                    { field: 'stock', title: __('总库存'), operate: false },
+                    {
+                        field: '', title: __('仓库实时库存'), operate: false,
+                        formatter: function (value, row) {
+                            return row.stock - row.distribution_occupy_stock;
                         }
-                    ]
+                    },
+                    { field: 'available_stock', title: __('可用库存'), operate: false },
+
+                    { field: 'plat_stock', title: __('虚拟仓库存'), operate: false },
+                    { field: 'zeelool_stock', title: __('虚拟仓库存Zeelool'), operate: false },
+                    { field: 'voogueme_stock', title: __('Voogueme'), operate: false },
+                    { field: 'nihao_stock', title: __('Nihao'), operate: false },
+                    { field: 'meeloog_stock', title: __('Meeloog'), operate: false },
+                    { field: 'wesee_stock', title: __('Wesee'), operate: false },
+                    { field: 'amazon_stock', title: __('Amazon'), operate: false },
+                    { field: 'zeelool_es_stock', title: __('Zeelool_es'), operate: false },
+                    { field: 'zeelool_de_stock', title: __('Zeelool_de'), operate: false },
+                    { field: 'zeelool_jp_stock', title: __('Zeelool_jp'), operate: false },
+
+                    { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
+                    { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
+                    { field: 'sample_num', title: __('留样库存'), operate: false },
+                    { field: 'plat_on_way_stock', title: __('在途库存'), operate: false },
+                    { field: 'on_way_stock', title: __('在途库存'), operate: false },
+                    { field: 'wait_instock_num', title: __('待入库数量'), operate: false },
+
+                    { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
+                    {
+                        field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
+                        buttons: [
+                            {
+                                name: 'detail',
+                                text: '详情',
+                                title: __('查看详情'),
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                classname: 'btn btn-xs btn-primary btn-dialog',
+                                icon: 'fa fa-list',
+                                url: Config.moduleurl + '/itemmanage/item/goods_stock_detail',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏+
+                                    return true;
+                                }
+                            }
+                        ]
+                    }
                 ]
+                    // [
+                //         { checkbox: true },
+                //         {
+                //             field: '', title: __('序号'), formatter: function (value, row, index) {
+                //                 var options = table.bootstrapTable('getOptions');
+                //                 var pageNumber = options.pageNumber;
+                //                 var pageSize = options.pageSize;
+                //                 return (pageNumber - 1) * pageSize + 1 + index;
+                //             }, operate: false
+                //         },
+                //         { field: 'id', title: __('Id'), operate: false },
+                //         { field: 'sku', title: __('Sku'), operate: 'like' },
+                //         // { field: 'name', title: __('Name') },
+                //
+                //         { field: 'stock', title: __('总库存'), operate: false },
+                //         {
+                //             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
+                //                 return row.stock - row.distribution_occupy_stock;
+                //             }
+                //         },
+                //         { field: 'available_stock', title: __('可用库存'), operate: false },
+                //         { field: 'plat_stock', title: __('虚拟仓库存'), operate: false },
+                //         // { field: 'zeelool_stock', title: __('虚拟仓库存Zeelool'), operate: false },
+                //         // { field: 'voogueme_stock', title: __('虚拟仓库存Voogueme'), operate: false },
+                //         // { field: 'nihao_stock', title: __('虚拟仓库存Nihao'), operate: false },
+                //         // { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
+                //         // { field: 'wesee_stock', title: __('虚拟仓库存Wesee'), operate: false },
+                //         // { field: 'amazon_stock', title: __('虚拟仓库存Amazon'), operate: false },
+                //         // { field: 'zeelool_es_stock', title: __('虚拟仓库存Zeelool_es'), operate: false },
+                //         // { field: 'zeelool_de_stock', title: __('虚拟仓库存Zeelool_de'), operate: false },
+                //         // { field: 'zeelool_jp_stock', title: __('虚拟仓库存Zeelool_jp'), operate: false },
+                //         // { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
+                //
+                //         // { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
+                //         { field: 'sample_num', title: __('留样库存'), operate: false },
+                //
+                //         { field: 'on_way_stock', title: __('在途库存'), operate: false },
+                //         { field: 'wait_instock_num', title: __('待入库数量'), operate: false },
+                //         { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
+                //         {
+                //             field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
+                //             buttons: [
+                //                 {
+                //                     name: 'detail',
+                //                     text: '详情',
+                //                     title: __('查看详情'),
+                //                     extend: 'data-area = \'["100%","100%"]\'',
+                //                     classname: 'btn btn-xs btn-primary btn-dialog',
+                //                     icon: 'fa fa-list',
+                //                     url: Config.moduleurl + '/itemmanage/item/goods_stock_detail',
+                //                     callback: function (data) {
+                //                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                //                     },
+                //                     visible: function (row) {
+                //                         //返回true时按钮显示,返回false隐藏+
+                //                         return true;
+                //                     }
+                //                 }
+                //             ]
+                //         }
+                //     ]
+                // ]
+
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            var all_arr = ['zeelool_stock','occupy_stock','distribution_occupy_stock','voogueme_stock','nihao_stock','meeloog_stock','wesee_stock','amazon_stock','zeelool_es_stock','zeelool_de_stock','zeelool_jp_stock','on_way_stock'];
+            var site_arr = ['plat_stock','plat_on_way_stock'];
+
+            viewTable(table,Config.label == 100 ? all_arr : site_arr,Config.label == 100 ? site_arr : all_arr);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    params = queryParams(params);
+                    params.label = value;
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                viewTable(table,value == 100 ? all_arr : site_arr,value == 100 ? site_arr : all_arr);
+                table.bootstrapTable('refresh', {});
+            });
         },
         presell: function () {
             // 初始化表格参数配置

@@ -112,14 +112,22 @@ class Dashboard extends Backend
 
     public function index()
     {
-        $user_id = session('admin.id');
-        $arr = (new AuthGroupAccess)->getUserPrivilege($user_id);
-        if(0 == $arr){
-            $this->error('您没有权限访问','general/profile?ref=addtabs');
-        }           
+        // $user_id = session('admin.id');
+        // $arr = (new AuthGroupAccess)->getUserPrivilege($user_id);
+        // if(0 == $arr){
+        //     $this->error('您没有权限访问','general/profile?ref=addtabs');
+        // }           
         //上边部分数据 默认zeelool站数据
-        $platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
-        $zeelool_data = $this->model->getList($arr[0]);
+        //$platform = (new MagentoPlatform())->getNewOrderPlatformList($arr);
+        $platform = (new MagentoPlatform())->getNewAuthSite();
+        if(empty($platform)){
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
+        }
+        $arr = [];
+        foreach($platform as $pkey => $pv){
+            $arr[] = $pkey;
+        }
+        $zeelool_data = $this->model->getList(key($platform));
         //z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
         //z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
         $zeelool_data = collection($zeelool_data)->toArray();
@@ -403,6 +411,7 @@ class Dashboard extends Backend
         $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
+        $status['order_type'] = ['not in',[4,5]];
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
         $app['store_id']   = 5;
@@ -649,9 +658,5 @@ class Dashboard extends Backend
     {
 
     }
-    public function ceshi(){
-        $user_id = session('admin.id');
-        $result = (new AuthGroupAccess)->getUserPrivilege($user_id);
-        dump($result);
-    }
+
 }

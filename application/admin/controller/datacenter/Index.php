@@ -92,7 +92,7 @@ class Index extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+            $list = collection($list)->toArray();
             foreach ($list as &$v) {
                 //sku转换
                 $v['z_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 1);
@@ -110,7 +110,6 @@ class Index extends Backend
                 $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'],10);
             }
             unset($v);
-
             $z_sku = array_column($list, 'z_sku');
             $v_sku = array_column($list, 'v_sku');
             $n_sku = array_column($list, 'n_sku');

@@ -66,6 +66,9 @@ class Zeelool extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -112,6 +115,9 @@ class Zeelool extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;
@@ -182,8 +188,9 @@ class Zeelool extends Model
     public function getOrderSalesNum($sku = [], $where)
     {
         if ($sku) {
-            $sku_str = implode(',', $sku);
-            $map[] = ['exp', Db::raw("trim(sku) IN ( '$sku_str') ")];
+            // $sku_str = implode(',', $sku);
+            // $map[] = ['exp', Db::raw("trim() IN ( '$sku_str') ")];
+            $map['sku'] = ['in', $sku];
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
@@ -258,6 +265,9 @@ class Zeelool extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -303,6 +313,9 @@ class Zeelool extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;

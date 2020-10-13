@@ -1067,38 +1067,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     var purchase_num = $(this).val();
                     var purchase_price = $(this).parent().next().find('.purchase_price').val();
                     if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                        $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                        $(this).parent().next().next().find('.goods_total').val((purchase_num * 1 * purchase_price).toFixed(2));
                     }
                     var total = 0;
                     $('.goods_total').each(function () {
                         var purchase_total = $(this).val();
                         total += purchase_total * 1;
                     })
+                    total =  total.toFixed(2)
                     //商品总价
                     $('.total').val(total);
                     //运费
                     var freight = $('.freight').val();
                     //总计
-                    $('.purchase_total').val(total + freight * 1);
+                    // $('.purchase_total').val(total + freight * 1);
+                    $('.purchase_total').val((total + freight * 1).toFixed(2));
                 })
 
                 $(document).on('blur', '.purchase_price', function () {
                     var purchase_num = $(this).parent().prev().find('.purchase_num').val();
                     var purchase_price = $(this).val();
                     if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                        $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                        // $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                        $(this).parent().next().next().find('.goods_total').val((purchase_num * 1 * purchase_price).toFixed(2));
+
                     }
                     var total = 0;
                     $('.goods_total').each(function () {
                         var purchase_total = $(this).val();
                         total += purchase_total * 1;
                     })
+                    total =  total.toFixed(2)
                     //商品总价
                     $('.total').val(total);
                     //运费
                     var freight = $('.freight').val();
                     //总计
-                    $('.purchase_total').val(total + freight * 1);
+                    // $('.purchase_total').val(total + freight * 1);
+                    $('.purchase_total').val((total + freight * 1).toFixed(2));
+
                 })
 
                 //运费

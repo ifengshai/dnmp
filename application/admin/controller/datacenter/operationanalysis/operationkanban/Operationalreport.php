@@ -5,11 +5,11 @@ use think\Cache;
 use app\common\controller\Backend;
 use app\admin\model\OrderItemInfo;
 use app\admin\model\platformmanage\MagentoPlatform;
-use app\admin\model\AuthGroupAccess;
 class Operationalreport extends Backend{
     //订单类型数据统计
     protected $item = null;
     protected $itemPlatformSku = null;
+    protected $noNeedRight =['ceshi'];
     /**
      * 运营报告首页数据
      *
@@ -20,14 +20,17 @@ class Operationalreport extends Backend{
      */
     public function index ()
     {
-        $user_id = session('admin.id');
-        $resultPrivilege = (new AuthGroupAccess)->getOperationalreportPrivilege($user_id);
-        if(1>count($resultPrivilege)){
+        // $user_id = session('admin.id');
+        // $resultPrivilege = (new AuthGroupAccess)->getOperationalreportPrivilege($user_id);
+        // if(1>count($resultPrivilege)){
+        //     $this->error('您没有权限访问','general/profile?ref=addtabs');
+        // }
+        $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        if(empty($orderPlatform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
-        $orderPlatform = (new MagentoPlatform())->getNewOrderPlatformList($resultPrivilege);
         $create_time = input('create_time');
-        $platform    = input('order_platform', $resultPrivilege[0]);
+        $platform    = input('order_platform', current($orderPlatform));
         if($this->request->isAjax()){
             $params = $this->request->param();
             //默认7天数据
@@ -561,5 +564,10 @@ class Operationalreport extends Backend{
         {
 
         }
-
+        public function ceshi()
+        {
+            $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+            var_dump($orderPlatform);
+            var_dump($orderPlatform[1]);
+        }
 }
