@@ -87,10 +87,14 @@ class Dashboard extends Backend
         //实时查询当天购物车数量
         $total_quote_count = Cache::get('dashboard_total_quote_count');
         Db::connect('database.db_zeelool')->query("set time_zone='+8:00'");
+        Db::connect('database.db_voogueme')->query("set time_zone='+8:00'");
+        Db::connect('database.db_nihao')->query("set time_zone='+8:00'");
+        Db::connect('database.db_meeloog')->query("set time_zone='+8:00'");
         if (!$total_quote_count) {
             $stime = date("Y-m-d 00:00:00", time());
             $etime = date("Y-m-d H:i:s", time());
             $swhere['created_at'] = ['between', [$stime, $etime]];
+            $swhere['base_grand_total'] = ['>', 0];
             $zeelool_quote_count = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where($swhere)->count(1);
             $voogueme_quote_count = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where($swhere)->count(1);
             $nihao_quote_count = Db::connect('database.db_nihao')->table('sales_flat_quote')->where($swhere)->count(1);
