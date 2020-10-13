@@ -204,7 +204,7 @@ class Test4 extends Controller
             return $finalResult;
         }
     }
-    //运营数据中心
+    //新增运营数据中心
     public function zeelool_operate_data_center()
     {
         $zeelool_model = Db::connect('database.db_zeelool_online');
@@ -269,7 +269,7 @@ class Test4 extends Controller
             }
         }
     }
-    //运营数据中心
+    //新增运营数据中心
     public function voogueme_operate_data_center()
     {
         $voogueme_model = Db::connect('database.db_voogueme_online');
@@ -334,7 +334,7 @@ class Test4 extends Controller
             }
         }
     }
-    //运营数据中心
+    //新增运营数据中心
     public function nihao_operate_data_center()
     {
         $nihao_model = Db::connect('database.db_nihao_online');
@@ -394,7 +394,90 @@ class Test4 extends Controller
             }
         }
     }
-
+    //更新运营数据中心
+    public function zeelool_operate_data_center_update()
+    {
+        $date_time = Db::name('datacenter_day')->where('site',1)->field('id,day_date')->order('id asc')->select();
+        foreach ($date_time as $val) {
+            $arr = [];
+            //补发订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 4;  //补发
+            $arr['replacement_order_num'] = $this->zeelool->where($order_where)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+            //网红订单数
+            $order_where1 = [];
+            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where1['order_type'] = 3;  //网红
+            $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where1)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where1)->sum('base_grand_total');
+            //更新数据
+            Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
+            echo $val['date_time'] . "\n";
+            usleep(100000);
+        }
+    }
+    //更新运营数据中心
+    public function voogueme_operate_data_center_update()
+    {
+        $date_time = Db::name('datacenter_day')->where('site',2)->field('id,day_date')->order('id asc')->select();
+        foreach ($date_time as $val) {
+            $arr = [];
+            //补发订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 4;  //补发
+            $arr['replacement_order_num'] = $this->voogueme->where($order_where)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->voogueme->where($order_where)->sum('base_grand_total');
+            //网红订单数
+            $order_where1 = [];
+            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where1['order_type'] = 3;  //网红
+            $arr['online_celebrity_order_num'] = $this->voogueme->where($order_where1)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where1)->sum('base_grand_total');
+            //更新数据
+            Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
+            echo $val['date_time'] . "\n";
+            usleep(100000);
+        }
+    }
+    //更新运营数据中心
+    public function nihao_operate_data_center_update()
+    {
+        $date_time = Db::name('datacenter_day')->where('site',3)->field('id,day_date')->order('id asc')->select();
+        foreach ($date_time as $val) {
+            $arr = [];
+            //补发订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 4;  //补发
+            $arr['replacement_order_num'] = $this->nihao->where($order_where)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->nihao->where($order_where)->sum('base_grand_total');
+            //网红订单数
+            $order_where1 = [];
+            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where1['order_type'] = 3;  //网红
+            $arr['online_celebrity_order_num'] = $this->nihao->where($order_where1)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');
+            //更新数据
+            Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
+            echo $val['date_time'] . "\n";
+            usleep(100000);
+        }
+    }
     public function test006()
     {
 
