@@ -1142,7 +1142,7 @@ class Item extends Backend
             return json($result);
         }
         //查询对应平台权限 getNewAuthSite是存在all权限的
-        $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
+        $magentoplatformarr = $this->magentoplatform->getNewAuthSite1();
         // $platform = (new MagentoPlatform())->getAuthSite();
         // dump(collection($platform)->toArray());
         // dump(collection($magentoplatformarr)->toArray());die;
