@@ -2294,13 +2294,13 @@ class WorkOrderList extends Backend
                             $this->model->vipOrderRefund($row['work_platform'], $row['platform_order']);
                         }else{
                             //其他订单
-                            $checkSku = $this->checkMeasure($receptInfo['measure_id']);echo 999;exit;
+                            $checkSku = $this->checkMeasure($receptInfo['measure_id']);
                             if ($checkSku) {
                                 $this->error(__("以下sku库存不足{$checkSku},无法处理成功"));
                             }
                         }
                     }
-                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'],$receptInfo['is_auto_complete']);
+                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'],$receptInfo['is_auto_complete']);echo 999;exit;
                 }
                 if ($result !== false) {
                     $this->success();
