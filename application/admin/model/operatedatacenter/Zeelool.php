@@ -152,22 +152,56 @@ class Zeelool extends Model
         if($time_str){
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
-            $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start,$same_end]];
-            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[0])));
-            $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
         }else{
             $start = $end = date('Y-m-d');
-            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($start)));
-            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($start)));
             $where['day_date'] = ['between', [$start,$end]];
-            $same_where['day_date'] = ['between', [$same_start,$same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
         }
-
         $arr['replacement_order_num'] = $this->where($map)->where($where)->sum('replacement_order_num');
+        return $arr;
+    }
+    /*
+     * 获取补发订单销售额
+     * */
+    public function getReplacementOrderTotal($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['replacement_order_total'] = $this->where($map)->where($where)->sum('replacement_order_total');
+        return $arr;
+    }
+    /*
+     * 获取网红单数量
+     * */
+    public function getOnlineCelebrityOrderNum($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['online_celebrity_order_num'] = $this->where($map)->where($where)->sum('online_celebrity_order_num');
+        return $arr;
+    }
+    /*
+     * 获取网红订单销售额
+     * */
+    public function getOnlineCelebrityOrderTotal($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['online_celebrity_order_total'] = $this->where($map)->where($where)->sum('online_celebrity_order_total');
         return $arr;
     }
 }

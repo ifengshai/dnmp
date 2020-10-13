@@ -21,7 +21,6 @@ class OrderDataView extends Backend
      */
     public function index()
     {
-
         //订单数
         $order_num = $this->zeeloolOperate->getOrderNum();
         //客单价
@@ -30,11 +29,15 @@ class OrderDataView extends Backend
         $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
         //邮费
         $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
-        dump($order_num);
-        dump($order_unit_price);
-        dump($sales_total_money);
-        dump($shipping_total_money);
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money'));
+        //补发单订单数
+        $replacement_order_num = $this->zeeloolOperate->getReplacementOrderNum();
+        //补发单销售额
+        $replacement_order_total = $this->zeeloolOperate->getReplacementOrderTotal();
+        //网红单订单数
+        $online_celebrity_order_num = $this->zeeloolOperate->getOnlineCelebrityOrderNum();
+        //网红单销售额
+        $online_celebrity_order_total = $this->zeeloolOperate->getOnlineCelebrityOrderTotal();
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total'));
         return $this->view->fetch();
     }
 

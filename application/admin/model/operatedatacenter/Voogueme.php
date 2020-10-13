@@ -144,12 +144,64 @@ class Voogueme extends Model
         $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
         return $arr;
     }
-
-
-
-
-
-
-
-
+    /*
+         * 获取补发单数量
+         * */
+    public function getReplacementOrderNum($time_str = ''){
+        $map['site'] = 2;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['replacement_order_num'] = $this->where($map)->where($where)->sum('replacement_order_num');
+        return $arr;
+    }
+    /*
+     * 获取补发订单销售额
+     * */
+    public function getReplacementOrderTotal($time_str = ''){
+        $map['site'] = 2;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['replacement_order_total'] = $this->where($map)->where($where)->sum('replacement_order_total');
+        return $arr;
+    }
+    /*
+     * 获取网红单数量
+     * */
+    public function getOnlineCelebrityOrderNum($time_str = ''){
+        $map['site'] = 2;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['online_celebrity_order_num'] = $this->where($map)->where($where)->sum('online_celebrity_order_num');
+        return $arr;
+    }
+    /*
+     * 获取网红订单销售额
+     * */
+    public function getOnlineCelebrityOrderTotal($time_str = ''){
+        $map['site'] = 2;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $where['day_date'] = ['between', [$start,$end]];
+        }
+        $arr['online_celebrity_order_total'] = $this->where($map)->where($where)->sum('online_celebrity_order_total');
+        return $arr;
+    }
 }
