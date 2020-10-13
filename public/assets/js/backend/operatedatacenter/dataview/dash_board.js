@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     ]
                 ]
             });
-//工作概况中的站点选择
+            //工作概况中的站点选择
             $(document).on('click', '.plat_form', function () {
                 var platform = $(this).data('value');
                 $(".plat_form").removeClass('active');
@@ -242,7 +242,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 workload_line_chart: function(){
                     //工作量概况折线图
                     var chartOptions = {
-                        targetId: 'worknum_echart',
+                        targetId: 'echart3',
                         downLoadTitle: '图表',
                         type: 'line'
                     };
