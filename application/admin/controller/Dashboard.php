@@ -85,7 +85,7 @@ class Dashboard extends Backend
         // $zeelool_jp_total = $zeelool_jp->where($where)->sum('base_grand_total');
 
         //实时查询当天购物车数量
-        $total_quote_count = Cache::get('dashboard_total_quote_count');
+        $total_quote_count = Cache::get('dashboard_total_quote_count_true');
         Db::connect('database.db_zeelool')->query("set time_zone='+8:00'");
         Db::connect('database.db_voogueme')->query("set time_zone='+8:00'");
         Db::connect('database.db_nihao')->query("set time_zone='+8:00'");
@@ -103,7 +103,7 @@ class Dashboard extends Backend
             // $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
             // $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
             $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count;
-            Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
+            Cache::set('dashboard_total_quote_count_true', $total_quote_count, 3600);
         }
 
         //实时用户数量
