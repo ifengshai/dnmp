@@ -34,32 +34,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.daterangepicker($("form[role=form2]"));
             Controller.api.formatter.daterangepicker($("div[role=form8]"));
 
-            //获取工作量概况数据
-            $(document).on('click', '.plat_form1', function () {
-                $("#web_platform").val($(this).data('value'));
-                $(".plat_form1").removeClass('active');
-                $(this).addClass('active');
-                worknum_situation();
-                Controller.api.formatter.line_chart();
-            });
-            $("#workload_time").on("apply.daterangepicker",function(){
-                setTimeout(()=>{
-                    worknum_situation();
-                    Controller.api.formatter.line_chart();
-                },0)
-            })
-            $("#workload_time").on("cancel.daterangepicker",function(){
-                setTimeout(()=>{
-                    worknum_situation();
-                    Controller.api.formatter.line_chart();
-                },0)
-            })
+
 
             //工单量概况折线图
             Controller.api.formatter.line_chart();
+            Controller.api.formatter.funnel_chart();
             Controller.api.formatter.workload_line_chart();
-            // 基于准备好的dom，初始化echarts实例
-
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -153,7 +133,27 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
+                },
+                funnel_chart: function(){
+                    //活跃用户趋势统计折线图
+                    var chartOptions = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+
+                    var options = {
+                        type: 'post',
+                        url: 'operatedatacenter/dataview/dash_board/active_user_trend',
+                        data: {
+                            platform:$("#order_platform").val(),
+                            time_str:$("#one_time").val(),
+                            group_id:$("#customer_type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
                 }
+
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

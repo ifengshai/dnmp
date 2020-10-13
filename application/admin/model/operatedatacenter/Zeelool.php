@@ -144,5 +144,117 @@ class Zeelool extends Model
         $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
         return $arr;
     }
+    /*
+     * 活跃用户数
+     * */
+    public function getActiveUser($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
+            $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[0])));
+            $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($start)));
+            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($start)));
+            $where['day_date'] = ['between', [$start,$end]];
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }
 
+        $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
+        $arr['same_shipping_total_money'] = $this->where($map)->where($same_where)->sum('shipping_total_money');
+        $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
+        return $arr;
+    }
+    /*
+     * 注册用户数
+     * */
+    public function getRegisterUser($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
+            $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[0])));
+            $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($start)));
+            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($start)));
+            $where['day_date'] = ['between', [$start,$end]];
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }
+
+        $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
+        $arr['same_shipping_total_money'] = $this->where($map)->where($same_where)->sum('shipping_total_money');
+        $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
+        return $arr;
+    }
+    /*
+     * vip用户数
+     * */
+    public function getVipUser($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
+            $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[0])));
+            $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($start)));
+            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($start)));
+            $where['day_date'] = ['between', [$start,$end]];
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }
+
+        $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
+        $arr['same_shipping_total_money'] = $this->where($map)->where($same_where)->sum('shipping_total_money');
+        $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
+        return $arr;
+    }
+
+    /*
+     * vip用户数
+     * */
+    public function getAgainUser($time_str = ''){
+        $map['site'] = 1;
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
+            $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[0])));
+            $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }else{
+            $start = $end = date('Y-m-d');
+            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($start)));
+            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($start)));
+            $where['day_date'] = ['between', [$start,$end]];
+            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+        }
+
+        $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
+        $arr['same_shipping_total_money'] = $this->where($map)->where($same_where)->sum('shipping_total_money');
+        $arr['huan_shipping_total_money'] = $this->where($map)->where($huan_where)->sum('shipping_total_money');
+        return $arr;
+    }
 }
