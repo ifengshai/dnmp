@@ -149,10 +149,11 @@ class MagentoPlatform extends Model
         //判断全部站点
         if($this->auth->check('dashboard/all')){
             foreach ($magentoplatformarr as $k => $v) {
-                $arr[$v['id']] = $v['name'];
-                
+                $arr[$v['id']]['name'] = $v['name'];
+                $arr[$v['id']]['id'] = $v['id'];
             }
-            $arr[100] ='全部';
+            $arr[100]['name'] ='全部';
+            $arr[100]['id'] = 100;
 
         }else{
             foreach ($magentoplatformarr as $k => $v) {
@@ -161,7 +162,8 @@ class MagentoPlatform extends Model
                     unset($magentoplatformarr[$k]);
                     continue;
                 }
-                $arr[$v['id']] = $v['name'];
+                $arr[$v['id']]['name'] = $v['name'];
+                $arr[$v['id']]['id'] = $v['id'];
             }
         }
         return $arr ?? [];
