@@ -68,35 +68,6 @@
         border-color: #a9c6c9;
         border-radius: 6px;
     }
-    .btn-time {
-         width: 67px;
-         height: 40px;
-         background: inherit;
-         background-color: rgba(255,255,255,1);
-         box-sizing: border-box;
-         border-width: 1px;
-         border-style: solid;
-         border-color: rgba(26,188,156,1);
-         border-radius: 5px;
-         box-shadow: none;
-         color: #1ABC9C;
-         line-height: 30px;
-         margin-right: 10px;
-     }
-    .btn.btn-time.active{
-        width: 67px;
-        height: 40px;
-        background: rgba(26,188,156,1);
-        box-sizing: border-box;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(26,188,156,1);
-        border-radius: 5px;
-        box-shadow: none;
-        color: white;
-        line-height: 30px;
-        margin-right: 10px;
-    }
     .margin-div{
         margin-top: 30px;
     }
@@ -135,7 +106,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4" style="line-height: 31px;margin-right: -60px">工单平台</label>
                                         <div class="col-xs-8">
-                                            <select data-rule="required" class="form-control" name="order_platform">
+                                            <select data-rule="required" class="form-control" id="order_platform">
                                                 <option value="1" selected="selected">Zeelool</option>
                                                 <option value="2">Voogueme</option>
                                                 <option value="2">Nihaooptical</option>
@@ -145,41 +116,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="control-label col-xs-1 col-sm-1" style="line-height: 31px;margin-right: -100px">时间:</label>
-                                    <div class="col-xs-2" id="timetime">
+                                    <div class="col-xs-2" id="timetime" role="form">
                                         <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
                                         <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="btn btn-time active">
-                                <span class="time_extend" data-value="1">
-                                    今天
-                                </span>
-                            </div>
-                            <div class="btn btn-time">
-                                <span class="time_extend" data-value="2">
-                                   昨天
-                                </span>
-                            </div>
-                            <div class="btn btn-time">
-                                <span class="time_extend" data-value="3">
-                                    过去7天
-                                </span>
-                            </div>
-                            <div class="btn btn-time">
-                                <span class="time_extend" data-value="4">
-                                    过去30天
-                                </span>
-                            </div>
-                            <div class="btn btn-time">
-                                <span class="time_extend" data-value="5">
-                                    本月
-                                </span>
-                            </div>
-                            <div class="btn btn-time">
-                                <span class="time_extend" data-value="6">
-                                    上一月
-                                </span>
                             </div>
                             <div class="margin-div">
                                 <div class="btn btn-div">
@@ -228,6 +169,11 @@
                         <td id='online_celebrity_order_total' style="text-align: center; vertical-align: middle;color: #666666;">{$online_celebrity_order_total.online_celebrity_order_total}</td>
                     </tr>
                 </table>
+                <select id="type">
+                    <option value="0" selected>销售额</option>
+                    <option value="1">订单数</option>
+                </select>
+                <div id="echart1" style="height:200px;width:100%;"></div>
             </div>
         </div>
     </div>

@@ -12,6 +12,8 @@ class OrderDataView extends Backend
     {
         parent::_initialize();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
+        $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
+        $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
     }
 
     /**
@@ -40,6 +42,124 @@ class OrderDataView extends Backend
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total'));
         return $this->view->fetch();
     }
+    /*
+     * ajax获取订单数据概况
+     * */
+    public function ajax_order_data_view(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $time_str = $params['time_str'] ? $params['time_str'] : '';
+            switch ($order_platform){
+                case 1:
+                    $model = $this->zeeloolOperate;
+                    break;
+                case 2:
+                    $model = $this->vooguemeOperate;
+                    break;
+                case 3:
+                    $model = $this->nihaoOperate;
+                    break;
+            }
 
+            $order_num = $model->getOrderNum($time_str,1);  //订单数
+            $order_unit_price = $model->getOrderUnitPrice($time_str,1); //客单价
+            $sales_total_money = $model->getSalesTotalMoney($time_str,1);//销售额
+            $shipping_total_money = $model->getShippingTotalMoney($time_str,1);  //邮费
+            $replacement_order_num = $model->getReplacementOrderNum($time_str,1);  //补发单订单数
+            $replacement_order_total = $model->getReplacementOrderTotal($time_str,1);//补发单销售额
+            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str,1);//网红单订单数
+            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str,1);  //网红单销售额
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total')
+            $this->success('', '', $data);
+        }
+    }
+    /**
+     * ajax获取订单数据概况中销售额/订单量的折线图数据
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/07/24 13:58:28 
+     * @return void
+     */
+    public function order_data_view_line()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            $time_str = $params['time_str'];
+            //0:销售额  1：订单量
+            $type = $params['type'] ? $params['type'] : 0;
+            if ($order_platform) {
+                $where['site'] = $order_platform;
+            }
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                if($type == 1){
+                    $first_sales_total = $this->zeeloolOperate->getOrderNum($createat[0]);
+                    $date_arr = array(
+                        $createat[0] => $first_sales_total['sales_total_money']
+                    );
+                    if ($createat[0] != $createat[3]) {
+                        for ($i = 0; $i <= 100; $i++) {
+                            $m = $i + 1;
+                            $deal_date = date_create($createat[0]);
+                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
+                            $next_day = date_format($deal_date, "Y-m-d");
+                            $next_sales_total = $this->zeeloolOperate->getOrderNum($next_day);
+                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
+                            if ($next_day == $createat[3]) {
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $first_sales_total = $this->zeeloolOperate->getSalesTotalMoney($createat[0]);
+                    $date_arr = array(
+                        $createat[0] => $first_sales_total['sales_total_money']
+                    );
+                    if ($createat[0] != $createat[3]) {
+                        for ($i = 0; $i <= 100; $i++) {
+                            $m = $i + 1;
+                            $deal_date = date_create($createat[0]);
+                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
+                            $next_day = date_format($deal_date, "Y-m-d");
+                            $next_sales_total = $this->zeeloolOperate->getSalesTotalMoney($next_day);
+                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
+                            if ($next_day == $createat[3]) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                $now_day = date('Y-m-d');
+                if($type == 1){
+                    //今天的订单数
+                    $date_arr[$now_day] = $this->zeeloolOperate->getOrderNum();
+                }else{
+                    //今天的销售额
+                    $date_arr[$now_day] = $this->zeeloolOperate->getSalesTotalMoney();
+                }
+            }
+            if ($type == 1) {
+                $name = '订单数';
+            } else {
+                $name = '销售额';
+            }
+            $json['xcolumnData'] = array_keys($date_arr);
+            $json['column'] = [$name];
+            $json['columnData'] = [
+                [
+                    'name' => $name,
+                    'type' => 'line',
+                    'smooth' => true,
+                    'data' => array_values($date_arr)
+                ],
+
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
 
 }
