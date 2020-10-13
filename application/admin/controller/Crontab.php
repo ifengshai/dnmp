@@ -2712,14 +2712,14 @@ class Crontab extends Backend
         $data['meeloog_sales_num']                          = $meeloog_count;
         $data['zeelool_es_sales_num']                       = $zeelool_es_count;
         $data['zeelool_de_sales_num']                       = $zeelool_de_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count + $zeelool_es_count + $zeelool_de_count;
+        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
         $data['zeelool_sales_money']                        = $zeelool_total;
         $data['voogueme_sales_money']                       = $voogueme_total;
         $data['nihao_sales_money']                          = $nihao_total;
         $data['meeloog_sales_money']                        = $meeloog_total;
         $data['zeelool_es_sales_money']                     = $zeelool_es_total;
         $data['zeelool_de_sales_money']                     = $zeelool_de_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total + $zeelool_es_total + $zeelool_de_total;
+        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
         $data['zeelool_unit_price']                         = $zeelool_unit_price;
         $data['voogueme_unit_price']                        = $voogueme_unit_price;
         $data['nihao_unit_price']                           = $nihao_unit_price;

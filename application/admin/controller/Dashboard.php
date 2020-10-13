@@ -72,33 +72,38 @@ class Dashboard extends Backend
         $meeloog_count = $meeloog->where($where)->count(1);
         $meeloog_total = $meeloog->where($where)->sum('base_grand_total');
 
-        $zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $zeelool_es_count = $zeelool_es->where($where)->count(1);
-        $zeelool_es_total = $zeelool_es->where($where)->sum('base_grand_total');
+        // $zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        // $zeelool_es_count = $zeelool_es->where($where)->count(1);
+        // $zeelool_es_total = $zeelool_es->where($where)->sum('base_grand_total');
 
-        $zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
-        $zeelool_de_count = $zeelool_de->where($where)->count(1);
-        $zeelool_de_total = $zeelool_de->where($where)->sum('base_grand_total');
+        // $zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
+        // $zeelool_de_count = $zeelool_de->where($where)->count(1);
+        // $zeelool_de_total = $zeelool_de->where($where)->sum('base_grand_total');
 
-        $zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
-        $zeelool_jp_count = $zeelool_jp->where($where)->count(1);
-        $zeelool_jp_total = $zeelool_jp->where($where)->sum('base_grand_total');
+        // $zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        // $zeelool_jp_count = $zeelool_jp->where($where)->count(1);
+        // $zeelool_jp_total = $zeelool_jp->where($where)->sum('base_grand_total');
 
         //实时查询当天购物车数量
-        $total_quote_count = Cache::get('dashboard_total_quote_count');
+        $total_quote_count = Cache::get('dashboard_total_quote_count_true');
+        Db::connect('database.db_zeelool')->query("set time_zone='+8:00'");
+        Db::connect('database.db_voogueme')->query("set time_zone='+8:00'");
+        Db::connect('database.db_nihao')->query("set time_zone='+8:00'");
+        Db::connect('database.db_meeloog')->query("set time_zone='+8:00'");
         if (!$total_quote_count) {
             $stime = date("Y-m-d 00:00:00", time());
             $etime = date("Y-m-d H:i:s", time());
             $swhere['created_at'] = ['between', [$stime, $etime]];
+            $swhere['base_grand_total'] = ['>', 0];
             $zeelool_quote_count = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where($swhere)->count(1);
             $voogueme_quote_count = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where($swhere)->count(1);
             $nihao_quote_count = Db::connect('database.db_nihao')->table('sales_flat_quote')->where($swhere)->count(1);
             $meeloog_quote_count = Db::connect('database.db_meeloog')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_es_quote_count = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
-            $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
-            $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count + $zeelool_es_quote_count + $zeelool_de_quote_count + $zeelool_jp_quote_count;
-            Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
+            // $zeelool_es_quote_count = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where($swhere)->count(1);
+            // $zeelool_de_quote_count = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where($swhere)->count(1);
+            // $zeelool_jp_quote_count = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where($swhere)->count(1);
+            $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count + $meeloog_quote_count;
+            Cache::set('dashboard_total_quote_count_true', $total_quote_count, 3600);
         }
 
         //实时用户数量
@@ -111,14 +116,13 @@ class Dashboard extends Backend
             $total_voogueme_customer_count = Db::connect('database.db_voogueme')->table('customer_entity')->where($swhere)->count(1);
             $total_nihao_customer_count = Db::connect('database.db_nihao')->table('customer_entity')->where($swhere)->count(1);
             $total_meeloog_customer_count = Db::connect('database.db_meeloog')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_es_customer_count = Db::connect('database.db_zeelool_es')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_de_customer_count = Db::connect('database.db_zeelool_de')->table('customer_entity')->where($swhere)->count(1);
-            $total_zeelool_jp_customer_count = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where($swhere)->count(1);
-            $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count + $total_meeloog_customer_count + $total_zeelool_es_customer_count + $total_zeelool_de_customer_count + $total_zeelool_jp_customer_count;
+            // $total_zeelool_es_customer_count = Db::connect('database.db_zeelool_es')->table('customer_entity')->where($swhere)->count(1);
+            // $total_zeelool_de_customer_count = Db::connect('database.db_zeelool_de')->table('customer_entity')->where($swhere)->count(1);
+            // $total_zeelool_jp_customer_count = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where($swhere)->count(1);
+            $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count + $total_meeloog_customer_count;
             Cache::set('dashboard_total_customer_count', $total_customer_count, 3600);
         }
 
-        
         $operation = new \app\admin\model\OperationAnalysis;
         //总会员数
         $totaluser = $operation->sum('total_sign_customer');
@@ -130,22 +134,22 @@ class Dashboard extends Backend
         $totalorderamount = $operation->sum('total_sales_money');
 
         $this->view->assign([
-            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count, //实时订单总数
-            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total, //实时销售额
+            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count, //实时订单总数
+            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total, //实时销售额
             'zeelool_count'             => $zeelool_count, //Z站实时订单数
             'voogueme_count'            => $voogueme_count, //V站实时订单数
             'nihao_count'               => $nihao_count, //nihao站实时订单数
             'meeloog_count'             => $meeloog_count, //meeloog站实时订单数
-            'zeelool_es_count'          => $zeelool_es_count, //西语站实时订单数
-            'zeelool_de_count'          => $zeelool_de_count, //德语站实时订单数
-            'zeelool_jp_count'          => $zeelool_jp_count, //日语站实时订单数
+            // 'zeelool_es_count'          => $zeelool_es_count, //西语站实时订单数
+            // 'zeelool_de_count'          => $zeelool_de_count, //德语站实时订单数
+            // 'zeelool_jp_count'          => $zeelool_jp_count, //日语站实时订单数
             'zeelool_total'             => $zeelool_total, //Z站实时销售额
             'voogueme_total'            => $voogueme_total, //V站实时销售额
             'nihao_total'               => $nihao_total, //nihao站实时销售额
             'meeloog_total'             => $meeloog_total, //meeloog站实时销售额
-            'zeelool_es_total'          => $zeelool_es_total, //西语站实时销售额
-            'zeelool_de_total'          => $zeelool_de_total, //德语站实时销售额
-            'zeelool_jp_total'          => $zeelool_jp_total, //日语站实时销售额
+            // 'zeelool_es_total'          => $zeelool_es_total, //西语站实时销售额
+            // 'zeelool_de_total'          => $zeelool_de_total, //德语站实时销售额
+            // 'zeelool_jp_total'          => $zeelool_jp_total, //日语站实时销售额
             'totalorder'                => $totalorder,
             'totalorderamount'          => $totalorderamount,
             'totaluser'                 => $totaluser,
