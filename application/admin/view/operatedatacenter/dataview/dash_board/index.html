@@ -123,26 +123,28 @@
                          style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                         <div style="font-size: 16px;"><b>数据概况</b></div>
                         <br>
-                        <div style="margin-left: 57px;font-size: 14px;">
-                            站点：
-                            <span class="plat_form1 active" data-id="plat_form1" data-value="1"> Zeelool</span>
-                            <span class="plat_form1" data-id="plat_form1" data-value="2">Voogueme</span>
-                            <span class="plat_form1" data-id="plat_form1" data-value="3">Nihao</span>
-                            <span class="plat_form1" data-id="plat_form1" data-value="0">全部</span>
-                            <input type="hidden" id="web_platform" value="1">
-                        </div>
-                        <div style="margin-left: 57px;font-size: 14px;margin-top: 20px;">
-                            时间：
-                            <span>
-                            <input type="hidden" class="form-control operate" name="workload_time-operate"
-                                   data-name="one_time" value="RANGE" readonly="">
-                            <input type="text" autocomplete="off" class="datetimerange" name="workload_time"
-                                   placeholder="输入时间" id="workload_time" value="" data-index="14" style="width: 300px;">
-                        </span>
+                        <div class="col-xs-12 col-md-9">
+                            <div class="form-group" style="margin-top: 20px;">
+                                <label class="control-label col-xs-2">工单平台</label>
+                                <div class="col-xs-4">
+                                    <select  id="plat_form2" data-rule="required" class="form-control" name="plat_form2">
+                                        <option value="1" selected>Zeelool</option>
+                                        <option value="2">Voogueme</option>
+                                        <option value="3">Nihao</option>
+                                        <option value="0">全部</option>
+                                    </select>
+                                </div>
+                                <label class="control-label col-xs-1 col-sm-2">时间:</label>
+                                <div class="col-xs-4">
+                                    <input type="hidden" class="form-control operate" name="create_time_one-operate" data-name="create_time_one" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_one"  placeholder="完成时间" id="create_time_one" value="" data-index="14">
+                                </div>
+                                <div class="col-sm-4 col-xs-offset-2" style="margin-top: 20px;">
+                                    <input type="button" class="btn btn-success echart1-btn" id="question_type_submit" value="提交">
+                                    <input type="reset" class="btn btn-default btn-create_time_one reset" id="question_type_reset" value="重置"></div>
+                            </div>
                         </div>
 
-                        <hr style="height:1px;border:none;border-top:1px solid #c1bebe;"/>
-                        <input type="hidden" id="title_type" value="1">
                         <ul class="work_title">
                             <li>
                                 <span>待处理</span>
