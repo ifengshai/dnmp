@@ -83,9 +83,9 @@ class Zeelool extends Model
             $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
         }
 
-        $arr['order_unit_price'] = $this->where($map)->where($where)->sum('order_num');
-        $arr['same_order_unit_price'] = $this->where($map)->where($same_where)->sum('order_num');
-        $arr['huan_order_unit_price'] = $this->where($map)->where($huan_where)->sum('order_num');
+        $arr['order_unit_price'] = $this->where($map)->where($where)->sum('order_unit_price');
+        $arr['same_order_unit_price'] = $this->where($map)->where($same_where)->sum('order_unit_price');
+        $arr['huan_order_unit_price'] = $this->where($map)->where($huan_where)->sum('order_unit_price');
         return $arr;
     }
     /*

@@ -24,13 +24,17 @@ class OrderDataView extends Backend
 
         //订单数
         $order_num = $this->zeeloolOperate->getOrderNum();
-        /*//未达标天数
-        $no_up_to_day = $this->zendeskTasks->not_up_to_standard_day(1);
-        //人效
-        $positive_effect_num = $this->zendeskTasks->positive_effect_num(1);
-        //获取表格内容
-        $customer_data = $this->get_worknum_table(1);
-        $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));*/
+        //客单价
+        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
+        //销售额
+        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
+        //邮费
+        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
+        dump($order_num);
+        dump($order_unit_price);
+        dump($sales_total_money);
+        dump($shipping_total_money);
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money'));
         return $this->view->fetch();
     }
 
