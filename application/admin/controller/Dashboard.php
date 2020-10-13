@@ -86,6 +86,7 @@ class Dashboard extends Backend
 
         //实时查询当天购物车数量
         $total_quote_count = Cache::get('dashboard_total_quote_count');
+        Db::connect('database.db_zeelool')->query("set time_zone='+8:00'");
         if (!$total_quote_count) {
             $stime = date("Y-m-d 00:00:00", time());
             $etime = date("Y-m-d H:i:s", time());
