@@ -4,6 +4,7 @@ namespace app\admin\controller\operatedatacenter\orderdata;
 
 use app\common\controller\Backend;
 use think\Controller;
+use think\Db;
 use think\Request;
 
 class OrderDataView extends Backend
@@ -11,9 +12,13 @@ class OrderDataView extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+
     }
 
     /**
@@ -267,6 +272,34 @@ class OrderDataView extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            if ($order_platform == 1) {
+                $model = $this->zeelool;
+            } elseif ($order_platform == 2) {
+                $model = $this->voogueme;
+            } elseif ($order_platform == 3) {
+                $model = $this->nihao;
+            }
+            $time_str = $params['time_str'];
+            $time_str = '2020-09-15 00:00:00 - 2020-10-14 23:59:59';
+            $createat = explode(' ', $time_str);
+            $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+            $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['oa.address_type'] = 'shipping';
+            //获取所有的订单的国家
+            $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
+            $arr = array();
+            foreach ($country_arr as $key=>$value){
+                $arr[$key][] = $value['count'];
+                $arr[$key][] = $value['count'];
+                $arr[$key][] = $value['country_id'];
+                if(strlen((string)$value['count']) == 1){
+                    $arr[$key][] = $value['count']*10000/200;
+                } elseif(strlen((string)$value['count']) == 2){
+
+                }
+
+            }
             $data['column'] = ['国家'];
             $data['columnData'] = [
                 [
