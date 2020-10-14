@@ -188,91 +188,6 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $time_str = $params['time_str'];
-            //0:销售额  1：订单量
-            $type = $params['type'] ? $params['type'] : 0;
-            if ($order_platform == 1) {
-                $model = $this->zeeloolOperate;
-            } elseif ($order_platform == 2) {
-                $model = $this->vooguemeOperate;
-            } elseif ($order_platform == 3) {
-                $model = $this->nihaoOperate;
-            }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                if ($type == 1) {
-                    $first_sales_total = $model->getOrderNum($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['order_num']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getOrderNum($next_day);
-                            $date_arr[$next_day] = $next_sales_total['order_num'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    $first_sales_total = $model->getSalesTotalMoney($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['sales_total_money']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getSalesTotalMoney($next_day);
-                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                $now_day = date('Y-m-d');
-                if ($type == 1) {
-                    //今天的订单数
-                    $today_order_num = $model->getOrderNum();
-                    $date_arr[$now_day] = $today_order_num['order_num'];
-                } else {
-                    //今天的销售额
-                    $today_sales_total_money = $model->getSalesTotalMoney();
-                    $date_arr[$now_day] = $today_sales_total_money['sales_total_money'];
-                }
-            }
-            if ($type == 1) {
-                $name = '订单数';
-            } else {
-                $name = '销售额';
-            }
-            $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
-            $json['columnData'] = [
-                [
-                    'name' => $name,
-                    'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_values($date_arr)
-                ],
-            ];
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-    //国家分布
-    public function order_data_view_country()
-    {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $order_platform = $params['order_platform'];
             if ($order_platform == 1) {
                 $model = $this->zeelool;
             } elseif ($order_platform == 2) {
@@ -293,28 +208,19 @@ class OrderDataView extends Backend
                 $arr[$key][] = $value['count'];
                 $arr[$key][] = $value['count'];
                 $arr[$key][] = $value['country_id'];
-                if(strlen((string)$value['count']) == 1){
-                    $arr[$key][] = $value['count']*10000/200;
-                } elseif(strlen((string)$value['count']) == 2){
-
+                $lens = strlen((string)$value['count']);
+                if($lens <= 5){
+                    $xishu = str_pad(1,5-$lens,"0",STR_PAD_RIGHT);
+                }else{
+                    $xishu = 1;
                 }
-
+                $arr[$key][] = $value['count']*$xishu/200;
             }
             $data['column'] = ['国家'];
             $data['columnData'] = [
                 [
                     'name' => '国家',
-                    'data' =>  [
-                        [
-                            28604, 28604,
-                            'Australia',
-                            28604 / 200
-                        ],
-                        [31163, 31163, 'Canada', 31163 / 200],
-                        [15110, 15110, 'China', 15110 / 200],
-                        [13005, 13005, 'Cuba', 13005 / 200],
-                        [6632, 6632, 'Finland', 6632 / 200],
-                    ]
+                    'data' =>  $arr
                 ]
             ];
             return json(['code' => 1, 'data' => $data]);
