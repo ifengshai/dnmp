@@ -340,7 +340,7 @@ class WorkOrderList extends Model
             if ($res['status'] == 200) {
                 return $res['data'];
             }
-            exception($res['msg'] . '   error_code:' . $res['status']);
+            exception($res['msg']);
         } catch (Exception $e) {
             exception($e->getMessage());
         }
