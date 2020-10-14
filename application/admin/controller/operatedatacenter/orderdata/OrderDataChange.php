@@ -30,19 +30,20 @@ class OrderDataChange extends Backend
     public function order_sales_data_line()
     {
         if ($this->request->isAjax()) {
-            $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
-            $json['column'] = ['会话数', '订单金额'];
+            $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
             $json['columnData'] = [
                 [
                     'type' => 'line',
                     'data' => [430, 550, 800, 650, 410, 520, 430, 870],
                     'name' => '会话数',
+                    'yAxisIndex' => 0,
                     'smooth' => true //平滑曲线
                 ],
                 [
                     'type' => 'line',
-                    'data' => [100, 260, 450, 400, 400, 650, 730, 800],
+                    'data' => [10, 26, 45, 40, 40, 65, 73, 80],
                     'name' => '订单金额',
+                    'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
 

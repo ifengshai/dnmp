@@ -108,8 +108,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             }
             EchartObj.api.ajax(options, chartOptions)
 
-
-
             // 初始化表格参数配置
             Table.api.init({
                 commonSearch: false,
