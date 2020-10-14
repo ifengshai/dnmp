@@ -9,7 +9,7 @@ use think\Request;
 class GoodsSaleDetail extends Backend
 {
     /**
-     * 显示资源列表
+     * 商品数据-销售情况
      *
      * @return \think\Response
      */

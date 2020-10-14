@@ -9,7 +9,7 @@ use think\Request;
 class SingleItem extends Backend
 {
     /**
-     * 显示资源列表
+     * 商品数据-单品查询
      *
      * @return \think\Response
      */
