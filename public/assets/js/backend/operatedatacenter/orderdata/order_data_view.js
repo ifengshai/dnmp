@@ -15,23 +15,26 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             });
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
-            // Controller.api.formatter.line_chart();
+            Controller.api.formatter.line_chart();
+            Controller.api.formatter.country_chart();
             $("#time_str").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     order_data_view();
                     Controller.api.formatter.line_chart();
+                    Controller.api.formatter.country_chart();
                 }, 0)
             })
             $(document).on('change', '#type', function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
+                Controller.api.formatter.country_chart();
             });
             $(document).on('change', '#order_platform', function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
+                Controller.api.formatter.country_chart();
             });
-            Controller.api.formatter.line_chart();
-            Controller.api.formatter.country_chart();
+            
             
             var table = $("#table");
 
