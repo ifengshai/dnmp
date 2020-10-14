@@ -15,6 +15,8 @@ use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+use Util\ZeeloolEsPrescriptionDetailHelper;
+use Util\ZeeloolDePrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
@@ -850,7 +852,7 @@ class WorkOrderList extends Backend
                         }
                         //修改地址
                         if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
-                            $this->model->changeAddress($params, $work_id, $v, $res);
+                            $this->model->changeAddress($params, $work_id, 13, $res);
                         }
 
                     }
@@ -1853,7 +1855,7 @@ class WorkOrderList extends Backend
     public function ajax_get_order($ordertype = null, $order_number = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -1867,8 +1869,12 @@ class WorkOrderList extends Backend
                 $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 4) {
                 $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
-            } elseif (5 == $ordertype) {
+            } elseif ($ordertype == 5) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 9){
+                $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 10){
+                $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
             if (!$result) {
                 $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
@@ -1895,7 +1901,7 @@ class WorkOrderList extends Backend
     public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null, $change_type = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -1914,8 +1920,12 @@ class WorkOrderList extends Backend
                     $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 4) {
                     $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
-                } elseif (5 == $ordertype) {
+                } elseif ($ordertype == 5) {
                     $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 9) {
+                    $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 10) {
+                    $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
             } else {
                 $result = collection($result)->toArray();
@@ -2083,6 +2093,10 @@ class WorkOrderList extends Backend
             $url = config('url.new_nihao_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         } elseif ($row['work_platform'] == 4 && $row['replenish_money']) {
             $url = config('url.meeloog_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 9 && $row['replenish_money']) {
+            $url = config('url.new_zeelooles_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 10 && $row['replenish_money']) {
+            $url = config('url.new_zeeloolde_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
@@ -2133,7 +2147,7 @@ class WorkOrderList extends Backend
     public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '',$is_new_version = 0)
     {
         if ($this->request->isAjax()) {
-            if ($order_type < 1 || $order_type > 5) { //不在平台之内
+            if ($order_type < 1 || $order_type > 11) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -2948,6 +2962,12 @@ EOF;
                 case 5:
                     $work_platform = 'wesee';
                     break;
+                case 9:
+                    $work_platform = 'zeelool_es';
+                    break;
+                case 10:
+                    $work_platform = 'zeelool_de';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3314,6 +3334,12 @@ EOF;
                 case 5:
                     $work_platform = 'wesee';
                     break;
+                case 9:
+                    $work_platform = 'zeelool_es';
+                    break;
+                case 10:
+                    $work_platform = 'zeelool_de';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3601,6 +3627,12 @@ EOF;
                     break;
                 case 5:
                     $value['work_platform'] = 'wesee';
+                    break;
+                case 9:
+                    $value['work_platform'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['work_platform'] = 'zeelool_de';
                     break;
                 default:
                     $value['work_platform'] = 'zeelool';
@@ -3954,6 +3986,12 @@ EOF;
                 break;
             case 4:
                 $model = Db::connect('database.db_meeloog');
+                break;
+            case 9:
+                $model = Db::connect('database.db_zeelool_es');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
                 break;
             default:
                 $model = false;

@@ -379,7 +379,10 @@ class Ajax extends Backend
             $voogueme_order_number = $saleaftertask->getLikeOrder(2, $order_number);
             
             $nihao_order_number = $saleaftertask->getLikeOrder(3, $order_number);
-            $result = array_merge($zeelool_order_number,$voogueme_order_number,$nihao_order_number);
+            $meeloog_order_number = $saleaftertask->getLikeOrder(4, $order_number);
+            $zeelooles_order_number = $saleaftertask->getLikeOrder(9, $order_number);
+            $zeeloolde_order_number = $saleaftertask->getLikeOrder(10, $order_number);
+            $result = array_merge($zeelool_order_number,$voogueme_order_number,$nihao_order_number,$meeloog_order_number,$zeelooles_order_number,$zeeloolde_order_number);
             if (!$result) {
                 return $this->error('订单不存在，请重新尝试');
             }
