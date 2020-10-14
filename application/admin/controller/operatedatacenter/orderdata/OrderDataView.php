@@ -39,19 +39,20 @@ class OrderDataView extends Backend
         $online_celebrity_order_num = $this->zeeloolOperate->getOnlineCelebrityOrderNum();
         //网红单销售额
         $online_celebrity_order_total = $this->zeeloolOperate->getOnlineCelebrityOrderTotal();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total'));
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total'));
         return $this->view->fetch();
     }
     /*
      * ajax获取订单数据概况
      * */
-    public function ajax_order_data_view(){
+    public function ajax_order_data_view()
+    {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $now_day = date('Y-m-d').' '.'00:00:00'.' - '.date('Y-m-d');
+            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
             $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
-            switch ($order_platform){
+            switch ($order_platform) {
                 case 1:
                     $model = $this->zeeloolOperate;
                     break;
@@ -63,15 +64,15 @@ class OrderDataView extends Backend
                     break;
             }
 
-            $order_num = $model->getOrderNum($time_str,1);  //订单数
-            $order_unit_price = $model->getOrderUnitPrice($time_str,1); //客单价
-            $sales_total_money = $model->getSalesTotalMoney($time_str,1);//销售额
-            $shipping_total_money = $model->getShippingTotalMoney($time_str,1);  //邮费
-            $replacement_order_num = $model->getReplacementOrderNum($time_str,1);  //补发单订单数
-            $replacement_order_total = $model->getReplacementOrderTotal($time_str,1);//补发单销售额
-            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str,1);//网红单订单数
-            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str,1);  //网红单销售额
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','replacement_order_num','replacement_order_total','online_celebrity_order_num','online_celebrity_order_total');
+            $order_num = $model->getOrderNum($time_str, 1);  //订单数
+            $order_unit_price = $model->getOrderUnitPrice($time_str, 1); //客单价
+            $sales_total_money = $model->getSalesTotalMoney($time_str, 1); //销售额
+            $shipping_total_money = $model->getShippingTotalMoney($time_str, 1);  //邮费
+            $replacement_order_num = $model->getReplacementOrderNum($time_str, 1);  //补发单订单数
+            $replacement_order_total = $model->getReplacementOrderTotal($time_str, 1); //补发单销售额
+            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str, 1); //网红单订单数
+            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str, 1);  //网红单销售额
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total');
             $this->success('', '', $data);
         }
     }
@@ -96,7 +97,7 @@ class OrderDataView extends Backend
             }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                if($type == 1){
+                if ($type == 1) {
                     $first_sales_total = $this->zeeloolOperate->getOrderNum($createat[0]);
                     $date_arr = array(
                         $createat[0] => $first_sales_total['order_num']
@@ -114,7 +115,7 @@ class OrderDataView extends Backend
                             }
                         }
                     }
-                }else{
+                } else {
                     $first_sales_total = $this->zeeloolOperate->getSalesTotalMoney($createat[0]);
                     $date_arr = array(
                         $createat[0] => $first_sales_total['sales_total_money']
@@ -135,11 +136,11 @@ class OrderDataView extends Backend
                 }
             } else {
                 $now_day = date('Y-m-d');
-                if($type == 1){
+                if ($type == 1) {
                     //今天的订单数
                     $today_order_num = $this->zeeloolOperate->getOrderNum();
                     $date_arr[$now_day] = $today_order_num['order_num'];
-                }else{
+                } else {
                     //今天的销售额
                     $today_sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
                     $date_arr[$now_day] = $today_sales_total_money['sales_total_money'];
@@ -165,4 +166,29 @@ class OrderDataView extends Backend
         }
     }
 
+    //国家分布
+    public function order_data_view_country()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $data['column'] = ['国家'];
+            $data['columnData'] = [
+                [
+                    'name' => '国家',
+                    'data' =>  [
+                        [
+                            28604, 28604,
+                            'Australia',
+                            28604/200
+                        ],
+                        [31163, 31163, 'Canada',31163/200 ],
+                        [15110, 15110, 'China', 15110/200],
+                        [13005, 13005, 'Cuba', 13005/200],
+                        [6632, 6632, 'Finland', 6632/200],
+                    ]
+                ]
+            ];
+            return json(['code' => 1, 'data' => $data]);
+        }
+    }
 }

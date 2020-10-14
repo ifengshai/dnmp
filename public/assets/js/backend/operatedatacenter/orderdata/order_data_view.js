@@ -15,12 +15,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             });
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
-            Controller.api.formatter.line_chart();
-            $("#time_str").on("apply.daterangepicker",function(){
-                setTimeout(()=>{
+            // Controller.api.formatter.line_chart();
+            $("#time_str").on("apply.daterangepicker", function () {
+                setTimeout(() => {
                     order_data_view();
                     Controller.api.formatter.line_chart();
-                },0)
+                }, 0)
             })
             $(document).on('change', '#type', function () {
                 order_data_view();
@@ -40,15 +40,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id')},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            Controller.api.formatter.country_chart();
         },
         add: function () {
             Controller.api.bindevent();
@@ -57,7 +59,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.bindevent();
         },
         api: {
-            formatter:{
+            formatter: {
                 daterangepicker: function (form) {
                     //绑定日期时间元素事件
                     if ($(".datetimerange", form).size() > 0) {
@@ -102,6 +104,27 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
+                country_chart: function () {
+                    //订单数据概况折线图
+                    var chartOptions = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'scatter',
+                        dataType: 'store'
+                    };
+
+                    var options = {
+                        type: 'post',
+                        url: 'operatedatacenter/orderdata/order_data_view/order_data_view_country',
+                        data: {
+                            order_platform: $("#order_platform").val(),
+                            time_str: $("#time_str").val(),
+                            type: $("#type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                },
+
                 line_chart: function () {
                     //订单数据概况折线图
                     var chartOptions = {
@@ -121,6 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
+
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -129,12 +153,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     };
     return Controller;
 });
-function order_data_view(){
+function order_data_view() {
     var order_platform = $('#order_platform').val();
     var time_str = $('#time_str').val();
     Backend.api.ajax({
         url: 'operatedatacenter/orderdata/order_data_view/ajax_order_data_view',
-        data: { order_platform: order_platform, time_str: time_str}
+        data: { order_platform: order_platform, time_str: time_str }
     }, function (data, ret) {
         var order_num = ret.data.order_num;
         var order_unit_price = ret.data.order_unit_price;

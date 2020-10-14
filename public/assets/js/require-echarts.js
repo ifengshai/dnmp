@@ -1021,7 +1021,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                             if (res.firtColumnName) {
                                 chartOptions.bar.yAxis.data = res.firtColumnName;
                             }
-                           
+
                             $.extend(true, EchartObj.api.barConfig, chartOptions.bar, {
                                 targetId: chartOptions.targetId,
                                 downLoadID: chartOptions.downLoadID,
@@ -1106,12 +1106,24 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                     name: res.columnData[i].name,
                                     data: res.columnData[i].data,
                                     type: 'scatter',
-                                    symbolSize: 50,
+                                    symbolSize: function (data) {
+                                        return data[3];
+                                    },
+                                    emphasis: {
+                                        label: {
+                                            show: true,
+                                            formatter: function (param) {
+                                                return param.data[2];
+                                            },
+                                            position: 'top'
+                                        }
+                                    },
+                                  
                                     label: {
                                         emphasis: { //鼠标放到散点图上，显示的内容
                                             show: true,
                                             formatter: function (param) {
-                                                return param.seriesName + ',' + '数量:' + param.data[1];
+                                                return param.data[2] + ':' + param.data[0];
                                             },
                                             position: 'top'
                                         },
@@ -1136,64 +1148,62 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                     data: res.column
                                 },
 
-                                tooltip: {
-                                    padding: 5,
-                                    backgroundColor: '#222',
-                                    borderColor: '#777',
-                                    borderWidth: 1,
-                                    textStyle: {
-                                        fontSize: 12
-                                    },
-                                    formatter: function (param) {
-                                        var store = res.xcolumn[param.seriesName];
-                                        var store_msg = '';
-                                        for (i in store) {
-                                            store_msg += '<br>' + i;
-                                        }
-                                        return param.seriesName + store_msg;
-                                    }
-                                },
+                                // tooltip: {
+                                //     padding: 5,
+                                //     backgroundColor: '#222',
+                                //     borderColor: '#777',
+                                //     borderWidth: 1,
+                                //     textStyle: {
+                                //         fontSize: 12
+                                //     },
+                                //     formatter: function (param) {
+                                //         var store = res.xcolumn[param.seriesName];
+                                //         var store_msg = '';
+                                //         for (i in store) {
+                                //             store_msg += '<br>' + i;
+                                //         }
+                                //         return param.seriesName + store_msg;
+                                //     }
+                                // },
                                 yAxis: {
-                                    name: '门店数量',
-                                    nameLocation: 'end',
-                                    nameGap: 20,
-                                    nameTextStyle: {
-                                        color: '#666666',
-                                        fontSize: 14
-                                    },
-                                    axisLine: {
+                                    splitLine: {
                                         lineStyle: {
-                                            color: '#B3B3B3'
+                                            type: 'dashed'
                                         }
                                     },
-                                    splitLine: {
-                                        show: false
-                                    }
+                                    scale: true
                                 },
                                 xAxis: {
-                                    type: 'category', //坐标轴类型。可选值：【'value' 数值轴，适用于连续数据。】【'category' 类目轴，适用于离散的类目数据，为该类型时必须通过 data 设置类目数据。】【'time' 时间轴，适用于连续的时序数据，与数值轴相比时间轴带有时间的格式化，在刻度计算上也有所不同，例如会根据跨度的范围来决定使用月，星期，日还是小时范围的刻度。】【'log' 对数轴。适用于对数数据。】
-                                    data: res.name, //类目数据，在类目轴（type: 'category'）中有效。
-                                    axisTick: { //坐标轴刻度相关设置。
-                                        alignWithLabel: true //类目轴中在 boundaryGap 为 true 的时候有效，可以保证刻度线和标签对齐。
-                                    },
-                                    axisLabel: { //坐标轴刻度标签的相关设置。
-                                        interval: 0, //坐标轴刻度标签的显示间隔，在类目轴中有效。【0 强制显示所有标签。】【1，表示『隔一个标签显示一个标签』】【2，表示隔两个标签显示一个标签】，以次类推
-                                        rotate: 0, //倾斜度 -90 至 90 默认为0
-                                        margin: 10, //刻度标签与轴线之间的距离。
-                                        textStyle: { //类目标签的文字样式。
-                                            color: '#797979', //文字的颜色。
-                                            fontStyle: 'normal' //文字的字体系列
-                                        }
-                                    },
-                                    axisLine: { //坐标轴轴线相关设置。
+                                    splitLine: {
                                         lineStyle: {
-                                            type: 'solid', //坐标轴线线的类型。
-                                            color: '#efefef', //坐标轴线线的颜色。
-                                            width: '2' //坐标轴线线宽。
+                                            type: 'dashed'
                                         }
-                                    },
-                                    show: true //是否显示 x 轴。
+                                    }
                                 },
+                                // xAxis: {
+                                //     type: 'category', //坐标轴类型。可选值：【'value' 数值轴，适用于连续数据。】【'category' 类目轴，适用于离散的类目数据，为该类型时必须通过 data 设置类目数据。】【'time' 时间轴，适用于连续的时序数据，与数值轴相比时间轴带有时间的格式化，在刻度计算上也有所不同，例如会根据跨度的范围来决定使用月，星期，日还是小时范围的刻度。】【'log' 对数轴。适用于对数数据。】
+                                //     data: '国家：', //类目数据，在类目轴（type: 'category'）中有效。
+                                //     axisTick: { //坐标轴刻度相关设置。
+                                //         alignWithLabel: true //类目轴中在 boundaryGap 为 true 的时候有效，可以保证刻度线和标签对齐。
+                                //     },
+                                //     axisLabel: { //坐标轴刻度标签的相关设置。
+                                //         interval: 0, //坐标轴刻度标签的显示间隔，在类目轴中有效。【0 强制显示所有标签。】【1，表示『隔一个标签显示一个标签』】【2，表示隔两个标签显示一个标签】，以次类推
+                                //         rotate: 0, //倾斜度 -90 至 90 默认为0
+                                //         margin: 10, //刻度标签与轴线之间的距离。
+                                //         textStyle: { //类目标签的文字样式。
+                                //             color: '#797979', //文字的颜色。
+                                //             fontStyle: 'normal' //文字的字体系列
+                                //         }
+                                //     },
+                                //     axisLine: { //坐标轴轴线相关设置。
+                                //         lineStyle: {
+                                //             type: 'solid', //坐标轴线线的类型。
+                                //             color: '#efefef', //坐标轴线线的颜色。
+                                //             width: '2' //坐标轴线线宽。
+                                //         }
+                                //     },
+                                //     show: true //是否显示 x 轴。
+                                // },
                                 series: seriesData
                             });
                         } else {
