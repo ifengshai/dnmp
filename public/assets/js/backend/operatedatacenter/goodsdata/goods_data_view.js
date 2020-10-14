@@ -2,38 +2,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
     var Controller = {
         index: function () {
-            // 初始化表格参数配置
-            Table.api.init({
-                extend: {
-                    index_url: 'operatedatacenter/goodsdata/goods_data_view/index' + location.search,
-                    add_url: 'operatedatacenter/goodsdata/goods_data_view/add',
-                    edit_url: 'operatedatacenter/goodsdata/goods_data_view/edit',
-                    del_url: 'operatedatacenter/goodsdata/goods_data_view/del',
-                    multi_url: 'operatedatacenter/goodsdata/goods_data_view/multi',
-                    table: 'goods_data_view',
-                }
-            });
 
-            var table = $("#table");
-
-            // 初始化表格
-            table.bootstrapTable({
-                url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'id',
-                sortName: 'id',
-                columns: [
-                    [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id')},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
-                    ]
-                ]
-            });
-
-            // 为表格绑定事件
-            Table.api.bindevent(table);
 
             Controller.api.bindevent();
+
+            var val = Config.label;
+            if (val == 1) {
+                $('.zeelool-div').show();
+                $('.voogueme-div').hide();
+                $('.nihao-div').hide();
+            } else if (val == 2) {
+                $('.zeelool-div').hide();
+                $('.voogueme-div').show();
+                $('.nihao-div').hide();
+            } else if (val == 3) {
+                $('.zeelool-div').hide();
+                $('.voogueme-div').hide();
+                $('.nihao-div').show();
+            }
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -42,6 +29,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         api: {
+            formatter: {
+                line_chart: function () {
+                    //订单数据概况折线图
+                    var chartOptions = {
+                        targetId: 'echart',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+
+                    var options = {
+                        type: 'post',
+                        url: 'operatedatacenter/goodsdata/goods_data_view/goods_data_view_line',
+                        data: {
+                            order_platform: $("#order_platform").val(),
+                            time_str: $("#time_str").val(),
+                            type: $("#type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                }
+            },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
             }

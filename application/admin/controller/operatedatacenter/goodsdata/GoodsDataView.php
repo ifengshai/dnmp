@@ -15,8 +15,9 @@ class GoodsDataView extends Backend
      */
     public function index()
     {
+        $label = input('label', 1);
+        $this->assign('label', $label);
+        $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
-
-
 }
