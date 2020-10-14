@@ -109,7 +109,7 @@ class Zeelool extends Model
             $where['created_at'] = ['between', [$createat[0], $createat[3]]];
             $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
             $order_user = $this->zeelool->where($map)->where($where)->count('distinct customer_id');
-            $arr['order_unit_price'] = round($order_total/$order_user,2);
+            $arr['order_unit_price'] = $order_user != 0 ? round($order_total/$order_user,2) : 0;
             //同比
             $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[0])));
             $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($createat[3])));
