@@ -173,9 +173,15 @@
                     <option value="0" selected>销售额</option>
                     <option value="1">订单数</option>
                 </select>
-                <!-- <div id="echart1" style="height:200px;width:100%;"></div> -->
+                <div id="echart1" style="height:200px;width:100%;"></div>
                 <div id="echart2" style="height:500px;width:100%;"></div>
             </div>
         </div>
     </div>
 </div>
+<script>
+    var Orderdata = {
+        column: {:json_encode(array_keys($zeeloolSalesNumList))},
+    zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))}
+    };
+</script>
