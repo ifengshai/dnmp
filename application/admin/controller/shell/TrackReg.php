@@ -67,9 +67,9 @@ class TrackReg extends Backend
                 $shipment_data_type = $title;
             }
             $carrier = $this->getCarrier($title);
-            $shipment_reg[$k]['number'] =  $v['track_number'];
-            $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
-            $shipment_reg[$k]['order_id'] =  $v['order_id'];
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] = $v['order_id'];
 
 
             $list[$k]['order_node'] = 2;
@@ -152,7 +152,7 @@ class TrackReg extends Backend
             'dhl' => '100001',
             'chinapost' => '03011',
             'chinaems' => '03013',
-            'cpc' =>  '03041',
+            'cpc' => '03041',
             'fedex' => '100003',
             'usps' => '21051',
             'yanwen' => '190012'
@@ -201,10 +201,11 @@ class TrackReg extends Backend
         //请求URL
         $response = $client->request('POST', $url, array('form_params' => $params));
         $body = $response->getBody();
-        $stringBody = (string) $body;
+        $stringBody = (string)$body;
         $res = json_decode($stringBody);
         return $res;
     }
+
     /**
      * zendesk10分钟更新前20分钟的数据
      * @return [type] [description]
@@ -215,18 +216,21 @@ class TrackReg extends Backend
         echo 'all ok';
         exit;
     }
+
     public function voogueme_zendesk()
     {
         $this->zendeskUpateData('voogueme', 2);
         echo 'all ok';
         exit;
     }
+
     public function nihao_zendesk()
     {
         $this->zendeskUpateData('nihaooptical', 3);
         echo 'all ok';
         exit;
     }
+
     /**
      * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]
@@ -294,7 +298,7 @@ class TrackReg extends Backend
             if ($params) {
                 $skuSalesNum->saveAll($params);
             }
-           
+
         }
 
         echo "ok";
@@ -315,7 +319,7 @@ class TrackReg extends Backend
         $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-        
+
         foreach ($list as $k => $v) {
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
@@ -349,7 +353,7 @@ class TrackReg extends Backend
             }
             $itemPlatformSku->where('id', $v['id'])->update($params);
         }
-       
+
         echo "ok";
     }
 
@@ -378,7 +382,7 @@ class TrackReg extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
         if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');
+            echo('暂时没有紧急补货单需要处理');
             die;
         }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
@@ -457,6 +461,7 @@ class TrackReg extends Backend
         }
         return $grouped;
     }
+
     /**
      * 紧急补货  2020.09.07改为计划任务 周计划执行时间为每周三的24点，汇总各站提报的SKU及数量
      *
@@ -481,14 +486,13 @@ class TrackReg extends Backend
             ->column("sku,sum(replenish_num) as sum");
 
         if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');
+            echo('暂时没有紧急补货单需要处理');
             die;
         }
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
             ->where(['is_show' => 1, 'type' => 2])
-
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -496,52 +500,53 @@ class TrackReg extends Backend
         $sku_list = $this->array_group_by($sku_list, 'sku');
 
         $result = false;
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 2;
-            $data['create_person'] = 'Admin';
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = Db::name('new_product_replenish')->insertGetId($data);
+        //首先插入主表 获取主表id new_product_replenish
+        $data['type'] = 2;
+        $data['create_person'] = 'Admin';
+        $data['create_time'] = date('Y-m-d H:i:s');
+        $res = Db::name('new_product_replenish')->insertGetId($data);
 
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
+        //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+        $int = 0;
+        foreach ($sku_list as $k => $v) {
+            //求出此sku在此补货单中的总数量
+            $sku_whole_num = array_sum(array_map(function ($val) {
+                return $val['replenish_num'];
+            }, $v));
+            //求出比例赋予新数组
+            foreach ($v as $ko => $vo) {
+                $date[$int]['id'] = $vo['id'];
+                $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                $date[$int]['replenish_id'] = $res;
+                $int += 1;
             }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
+        }
+        //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+        $res1 = $this->model->allowField(true)->saveAll($date);
 
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = 'Admin';
-                // $arr[$number]['create_person'] = session('admin.nickname');
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 2;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单表
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2])
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
+        $number = 0;
+        foreach ($list as $k => $v) {
+            $arr[$number]['sku'] = $k;
+            $arr[$number]['replenishment_num'] = $v;
+            $arr[$number]['create_person'] = 'Admin';
+            // $arr[$number]['create_person'] = session('admin.nickname');
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 2;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
+        }
+        //插入补货需求单表
+        $result = $this->order->allowField(true)->saveAll($arr);
+        //更新计划补货列表
+        $ids = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->setField('is_show', 0);
 
     }
+
     //活跃用户数
-    public function google_active_user($site,$start_time)
+    public function google_active_user($site, $start_time)
     {
         // dump();die;
         $end_time = $start_time;
@@ -552,22 +557,23 @@ class TrackReg extends Backend
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
-        $response = $this->getReport_active_user($site,$analytics, $start_time, $end_time);
+        $response = $this->getReport_active_user($site, $analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
-        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'],2): 0;
+        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'], 2) : 0;
     }
-    protected function getReport_active_user($site,$analytics, $startDate, $endDate)
+
+    protected function getReport_active_user($site, $analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        if($site == 1){
+        if ($site == 1) {
             $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 2){
+        } elseif ($site == 2) {
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 3){
+        } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
@@ -600,8 +606,9 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
 
     }
+
     //session
-    public function google_session($site,$start_time)
+    public function google_session($site, $start_time)
     {
         // dump();die;
         $end_time = $start_time;
@@ -612,26 +619,27 @@ class TrackReg extends Backend
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
-        $response = $this->getReport_session($site,$analytics, $start_time, $end_time);
+        $response = $this->getReport_session($site, $analytics, $start_time, $end_time);
 
         // dump($response);die;
 
         // Print the response.
         $result = $this->printResults($response);
 
-        return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'],2): 0;
+        return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'], 2) : 0;
     }
-    protected function getReport_session($site,$analytics, $startDate, $endDate)
+
+    protected function getReport_session($site, $analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        if($site == 1){
+        if ($site == 1) {
             $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 2){
+        } elseif ($site == 2) {
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 3){
+        } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
@@ -663,6 +671,7 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
 
     }
+
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
@@ -696,69 +705,70 @@ class TrackReg extends Backend
             return $finalResult;
         }
     }
+
     //运营数据中心
-    public function zeelool_operate_data_center(){
+    public function zeelool_operate_data_center()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $zeelool_model = Db::connect('database.db_zeelool_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
 
+        $date_time = date('Y-m-d',strtotime("-1 day"));
+
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2019-09-01' and '2020-10-11' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
-        foreach ($date_time as $val){
-            $is_exist = Db::name('datacenter_day')->where('day_date',$val['date_time'])->value('id');
-            if(!$is_exist){
-                $arr = [];
-                $arr['site'] = 1;
-                $arr['day_date'] = $val['date_time'];
-                //活跃用户数
-                $arr['active_user_num'] = $this->google_active_user(1,$val['date_time']);
-                //注册用户数
-                $register_where = [];
-                $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
-                //新增vip用户数
-                $vip_where = [];
-                $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $vip_where['order_status'] = 'Success';
-                $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
-                //订单数
-                $order_where = [];
-                $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed','payment_review', 'paypal_canceled_reversal']];
-                $arr['order_num'] = $this->zeelool->where($order_where)->count();
-                //销售额
-                $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
-                //邮费
-                $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-                //购买人数
-                $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
-                //客单价
-                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money']/$order_user,2) : 0;
-                //会话
-                $arr['sessions'] = $this->google_session(1,$val['date_time']);
-                //新建购物车数量
-                $cart_where1 = [];
-                $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
-                //更新购物车数量
-                $cart_where2 = [];
-                $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$val['date_time']."'")];
-                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
-                //新增加购率
-                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num']/$arr['sessions'],2) : 0;
-                //更新加购率
-                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num']/$arr['sessions'],2) : 0;
-                //新增购物车转化率
-                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num']/$arr['new_cart_num'],2) : 0;
-                //更新购物车转化率
-                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num']/$arr['update_cart_num'],2) : 0;
-                //插入数据
-                Db::name('datacenter_day')->insert($arr);
-                echo $val['date_time']."\n";
-                usleep(100000);
-            }
-        }
+            $arr = [];
+            $arr['site'] = 1;
+            $arr['day_date'] = $date_time;
+            //活跃用户数
+            $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+            //注册用户数
+            $register_where = [];
+            $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+            $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
+            //新增vip用户数
+            $vip_where = [];
+            $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
+            $vip_where['order_status'] = 'Success';
+            $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
+            //订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $arr['order_num'] = $this->zeelool->where($order_where)->count();
+            //销售额
+            $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
+            //购买人数
+            $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+            //客单价
+            $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+            //会话
+            $arr['sessions'] = $this->google_session(1, $date_time);
+            //新建购物车数量
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+            $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+            $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+            //新增加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+            //更新加购率
+            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+            //新增购物车转化率
+            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+            //更新购物车转化率
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+            //插入数据
+            Db::name('datacenter_day')->insert($arr);
+            echo $date_time . "\n";
+            usleep(100000);
+
     }
+
 }
