@@ -778,7 +778,7 @@ class TrackReg extends Backend
         $arr['site'] = 2;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        $arr['active_user_num'] = $this->google_active_user(2, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -802,7 +802,7 @@ class TrackReg extends Backend
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         //会话
-        $arr['sessions'] = $this->google_session(1, $date_time);
+        $arr['sessions'] = $this->google_session(2, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -842,7 +842,7 @@ class TrackReg extends Backend
         $arr['site'] = 3;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        $arr['active_user_num'] = $this->google_active_user(3, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -866,7 +866,7 @@ class TrackReg extends Backend
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         //会话
-        $arr['sessions'] = $this->google_session(1, $date_time);
+        $arr['sessions'] = $this->google_session(3, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
