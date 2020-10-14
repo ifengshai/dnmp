@@ -848,10 +848,10 @@ class TrackReg extends Backend
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
         //新增vip用户数
-        $vip_where = [];
-        $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
-        $vip_where['order_status'] = 'Success';
-        $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
+        // $vip_where = [];
+        // $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
+        // $vip_where['order_status'] = 'Success';
+        // $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -862,7 +862,7 @@ class TrackReg extends Backend
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
         //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+        // $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         //会话
