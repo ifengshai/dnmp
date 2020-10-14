@@ -130,7 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     EchartObj.api.ajax(options, chartOptions)
                 },
                 user_chart: function () {
-                    //订单数据概况折线图
+                    //活跃用户数折线图
                     var chartOptions = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
@@ -158,7 +158,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/dataview/dash_board/order_trend',
+                        url: 'operatedatacenter/dataview/dash_board/active_user_trend',
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
@@ -179,33 +179,49 @@ function order_data_view(){
     var order_platform = $('#order_platform').val();
     var time_str = $('#time_str').val();
     Backend.api.ajax({
-        url: 'operatedatacenter/orderdata/order_data_view/ajax_order_data_view',
+        url: 'operatedatacenter/dataview/dash_board/ajax_top_data',
         data: { order_platform: order_platform, time_str: time_str}
     }, function (data, ret) {
         var order_num = ret.data.order_num;
         var order_unit_price = ret.data.order_unit_price;
         var sales_total_money = ret.data.sales_total_money;
         var shipping_total_money = ret.data.shipping_total_money;
-        var replacement_order_num = ret.data.replacement_order_num;
-        var replacement_order_total = ret.data.replacement_order_total;
-        var online_celebrity_order_num = ret.data.online_celebrity_order_num;
-        var online_celebrity_order_total = ret.data.online_celebrity_order_total;
+        var active_user_num = ret.data.active_user_num;
+        var register_user_num = ret.data.register_user_num;
+        var again_user_num = ret.data.again_user_num;
+        var vip_user_num = ret.data.vip_user_num;
         $('#order_num').text(order_num.order_num);
         $('#same_order_num').text(order_num.same_order_num);
         $('#huan_order_num').text(order_num.huan_order_num);
+
         $('#order_unit_price').text(order_unit_price.order_unit_price);
         $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
         $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
+
         $('#sales_total_money').text(sales_total_money.sales_total_money);
         $('#same_sales_total_money').text(sales_total_money.same_sales_total_money);
         $('#huan_sales_total_money').text(sales_total_money.huan_sales_total_money);
+
         $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
         $('#same_shipping_total_money').text(shipping_total_money.same_shipping_total_money);
         $('#huan_shipping_total_money').text(shipping_total_money.huan_shipping_total_money);
-        $('#replacement_order_num').text(replacement_order_num.replacement_order_num);
-        $('#replacement_order_total').text(replacement_order_total.replacement_order_total);
-        $('#online_celebrity_order_num').text(online_celebrity_order_num.online_celebrity_order_num);
-        $('#online_celebrity_order_total').text(online_celebrity_order_total.online_celebrity_order_total);
+
+        $('#active_user_num').text(active_user_num.active_user_num);
+        $('#same_active_user_num').text(active_user_num.same_active_user_num);
+        $('#huan_active_user_num').text(active_user_num.huan_active_user_num);
+
+        $('#register_user_num').text(register_user_num.register_user_num);
+        $('#same_register_user_num').text(register_user_num.same_register_user_num);
+        $('#huan_register_user_num').text(register_user_num.huan_register_user_num);
+
+        $('#again_user_num').text(again_user_num.again_user_num);
+        $('#same_again_user_num').text(again_user_num.same_again_user_num);
+        $('#huan_again_user_num').text(again_user_num.huan_again_user_num);
+
+        $('#vip_user_num').text(vip_user_num.vip_user_num);
+        $('#same_vip_user_num').text(vip_user_num.same_vip_user_num);
+        $('#huan_vip_user_num').text(vip_user_num.huan_vip_user_num);
+
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);

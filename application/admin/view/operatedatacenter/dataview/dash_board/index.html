@@ -104,12 +104,13 @@
                         <div class="row" style="margin-bottom: 30px">
                             <div class="col-xs-12 col-md-3">
                                 <div class="form-group">
-                                    <label class="control-label col-xs-4" style="line-height: 31px;margin-right: -60px">工单平台</label>
+                                    <label class="control-label col-xs-4" style="line-height: 31px;margin-right: -60px">平台</label>
                                     <div class="col-xs-8">
                                         <select data-rule="required" class="form-control" id="order_platform">
                                             <option value="1" selected="selected">Zeelool</option>
                                             <option value="2">Voogueme</option>
-                                            <option value="2">Nihaooptical</option>
+                                            <option value="3">Nihaooptical</option>
+                                            <option value="4">全部</option>
                                         </select>
                                     </div>
                                 </div>
@@ -125,26 +126,34 @@
                         <div class="margin-div">
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">活跃用户数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
-                                    <div class="rate_class">同比：<span id="same_order_num">{$order_num.same_order_num}</span>  环比：<span id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                    <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_active_user_num">{$active_user_num.same_active_user_num}</span>  
+                                        环比：<span id="huan_active_user_num">{$active_user_num.huan_active_user_num}</span></div>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">注册用户数：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
-                                    <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                    <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_register_user_num">{$register_user_num.same_register_user_num}</span>  
+                                        环比：<span id="huan_register_user_num">{$register_user_num.huan_register_user_num}</span></div>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">复购用户数：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
-                                    <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                    <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_again_user_num">{$again_user_num.same_again_user_num}</span>  
+                                        环比：<span id="huan_again_user_num">{$again_user_num.huan_again_user_num}</span></div>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">VIP用户数：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
-                                    <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                    <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_vip_user_num">{$vip_user_num.same_vip_user_num}</span>  
+                                        环比：<span id="huan_vip_user_num">{$vip_user_num.huan_vip_user_num}</span></div>
                                 </span>
                             </div>
                             <br>
