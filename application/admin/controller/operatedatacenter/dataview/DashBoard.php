@@ -54,16 +54,16 @@ class DashBoard extends Backend
     public function index()
     {
         //默认进入页面是z站的数据
-        // //活跃用户数
-        // $active_user_num = $model->getActiveUser();
+        //活跃用户数
+        // $active_user_num = $this->zeeloolOperate->getActiveUser();
         // //注册用户数
-        // $register_user_num = $model->getRegisterUser();
+        // $register_user_num = $this->zeeloolOperate->getRegisterUser();
         // //复购用户数
-        // $again_user_num = $model->getAgainUser();
+        // $again_user_num = $this->zeeloolOperate->getAgainUser();
         // //vip用户数
-        // $vip_user_num = $model->getVipUser();
+        // $vip_user_num = $this->zeeloolOperate->getVipUser();
         //订单数
-        $order_num = $this->zeeloolOperate->getOrderNum('2020-10-11 00:00:00 - 2020-10-12 00:00:00');
+        $order_num = $this->zeeloolOperate->getOrderNum();
         //客单价
         $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
         //销售额
@@ -106,14 +106,14 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
-            // //活跃用户数
-            // $active_user_num = $model->getActiveUser();
-            // //注册用户数
-            // $register_user_num = $model->getRegisterUser();
-            // //复购用户数
-            // $again_user_num = $model->getAgainUser();
-            // //vip用户数
-            // $vip_user_num = $model->getVipUser();
+            //活跃用户数
+            $active_user_num = $model->getActiveUser($time_str,1);
+            //注册用户数
+            $register_user_num = $model->getRegisterUser($time_str,1);
+            //复购用户数
+            $again_user_num = $model->getAgainUser($time_str,1);
+            //vip用户数
+            $vip_user_num = $model->getVipUser($time_str,1);
             //订单数
             $order_num = $model->getOrderNum($time_str,1);
             //客单价
@@ -164,9 +164,9 @@ class DashBoard extends Backend
             if ($time_str) {
                 $createat = explode(' ', $time_str);
 
-                    $first_sales_total = $model->getOrderNum($createat[0]);
+                    $first_sales_total = $model->getActiveUser($createat[0]);
                     $date_arr = array(
-                        $createat[0] => $first_sales_total['order_num']
+                        $createat[0] => $first_sales_total['active_user_num']
                     );
                     if ($createat[0] != $createat[3]) {
                         for ($i = 0; $i <= 100; $i++) {
@@ -174,8 +174,8 @@ class DashBoard extends Backend
                             $deal_date = date_create($createat[0]);
                             date_add($deal_date, date_interval_create_from_date_string("$m days"));
                             $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getOrderNum($next_day);
-                            $date_arr[$next_day] = $next_sales_total['order_num'];
+                            $next_sales_total = $model->getActiveUser($next_day);
+                            $date_arr[$next_day] = $next_sales_total['active_user_num'];
                             if ($next_day == $createat[3]) {
                                 break;
                             }
@@ -185,10 +185,10 @@ class DashBoard extends Backend
             } else {
                 $now_day = date('Y-m-d');
                     //今天的订单数
-                    $today_order_num = $model->getOrderNum();
-                    $date_arr[$now_day] = $today_order_num['order_num'];
+                    $today_order_num = $model->getActiveUser();
+                    $date_arr[$now_day] = $today_order_num['active_user_num'];
             }
-                $name = '活跃用户趋势统计';
+                $name = '活跃用户数';
 
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
@@ -265,7 +265,7 @@ class DashBoard extends Backend
                 $today_order_num = $model->getOrderNum();
                 $date_arr[$now_day] = $today_order_num['order_num'];
             }
-            $name = '订单趋势统计';
+            $name = '订单数';
 
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
