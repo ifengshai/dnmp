@@ -9,13 +9,13 @@ use think\Request;
 class GoodsDataView extends Backend
 {
     /**
-     * 显示资源列表
+     * 商品数据-数据概览
      *
      * @return \think\Response
      */
     public function index()
     {
-        //
+        return $this->view->fetch();
     }
 
 
