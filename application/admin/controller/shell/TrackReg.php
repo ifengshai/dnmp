@@ -764,8 +764,8 @@ class TrackReg extends Backend
     //运营数据中心
     public function voogueme_day_data()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $this->zeelool = new \app\admin\model\order\order\Voogueme();
+        $zeelool_model = Db::connect('database.db_voogueme_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -828,8 +828,8 @@ class TrackReg extends Backend
     //运营数据中心
     public function niaho_day_data()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $this->zeelool = new \app\admin\model\order\order\Nihao();
+        $zeelool_model = Db::connect('database.db_nihao_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
