@@ -30,7 +30,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 order_data_view();
                 Controller.api.formatter.line_chart();
             });
-            Controller.api.formatter.country_rate();
+            Controller.api.formatter.line_chart();
+            Controller.api.formatter.country_chart();
             
             var table = $("#table");
 
@@ -51,7 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            Controller.api.formatter.country_chart();
+            
         },
         add: function () {
             Controller.api.bindevent();
@@ -116,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/orderdata/order_data_view/order_data_view_country',
+                        url: 'operatedatacenter/orderdata/order_data_view/order_data_view_country_rate',
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
@@ -144,66 +145,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
-                },
-                country_rate: function () {
-                    //订单数据概况国家占比图
-                    var myChart = Echarts.init(document.getElementById('echart'), 'walden');
-
-                    // 指定图表的配置项和数据
-                    var option = {
-                        title: {
-                            text: '',
-                            subtext: ''
-                        },
-                        tooltip: {
-                            trigger: 'axis'
-                        },
-                        legend: {
-                            data: [__('国家分布')]
-                        },
-                        xAxis: {
-                            type: 'dashed',
-                            boundaryGap: false,
-                            data: Orderdata.column
-                        },
-                        yAxis: {
-                            splitLine: {
-                                lineStyle: {
-                                    type: 'dashed'
-                                }
-                            },
-                            scale: true
-                        },
-                        grid: [{
-                            left: 'left',
-                            top: 'top',
-                            right: '10',
-                            bottom: 30
-                        }],
-                        series: [{
-                            name: __('国家分布'),
-                            type: 'scatter',
-                            smooth: true,
-                            areaStyle: {
-                                normal: {}
-                            },
-                            lineStyle: {
-                                shadowBlur: 10,
-                                shadowColor: 'rgba(120, 36, 50, 0.5)',
-                                shadowOffsetY: 5,
-                                color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                                    offset: 0,
-                                    color: 'rgb(251, 118, 123)'
-                                }, {
-                                    offset: 1,
-                                    color: 'rgb(204, 46, 72)'
-                                }])
-                            },
-                            data: Orderdata.zeeloolSalesNumList
-                        }]
-                    };
-                    // 使用刚指定的配置项和数据显示图表。
-                    myChart.setOption(option);
                 },
             },
             bindevent: function () {

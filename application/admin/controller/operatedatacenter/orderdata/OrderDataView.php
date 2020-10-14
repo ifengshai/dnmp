@@ -4,6 +4,7 @@ namespace app\admin\controller\operatedatacenter\orderdata;
 
 use app\common\controller\Backend;
 use think\Controller;
+use think\Db;
 use think\Request;
 
 class OrderDataView extends Backend
@@ -11,9 +12,13 @@ class OrderDataView extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+
     }
 
     /**
@@ -183,105 +188,39 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $time_str = $params['time_str'];
-            //0:销售额  1：订单量
-            $type = $params['type'] ? $params['type'] : 0;
             if ($order_platform == 1) {
-                $model = $this->zeeloolOperate;
+                $model = $this->zeelool;
             } elseif ($order_platform == 2) {
-                $model = $this->vooguemeOperate;
+                $model = $this->voogueme;
             } elseif ($order_platform == 3) {
-                $model = $this->nihaoOperate;
+                $model = $this->nihao;
             }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                if ($type == 1) {
-                    $first_sales_total = $model->getOrderNum($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['order_num']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getOrderNum($next_day);
-                            $date_arr[$next_day] = $next_sales_total['order_num'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    $first_sales_total = $model->getSalesTotalMoney($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['sales_total_money']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getSalesTotalMoney($next_day);
-                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
+            $time_str = $params['time_str'];
+            $time_str = '2020-09-15 00:00:00 - 2020-10-14 23:59:59';
+            $createat = explode(' ', $time_str);
+            $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+            $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['oa.address_type'] = 'shipping';
+            //获取所有的订单的国家
+            $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
+            $arr = array();
+            foreach ($country_arr as $key=>$value){
+                $arr[$key][] = $value['count'];
+                $arr[$key][] = $value['count'];
+                $arr[$key][] = $value['country_id'];
+                $lens = strlen((string)$value['count']);
+                if($lens <= 5){
+                    $xishu = str_pad(1,5-$lens,"0",STR_PAD_RIGHT);
+                }else{
+                    $xishu = 1;
                 }
-            } else {
-                $now_day = date('Y-m-d');
-                if ($type == 1) {
-                    //今天的订单数
-                    $today_order_num = $model->getOrderNum();
-                    $date_arr[$now_day] = $today_order_num['order_num'];
-                } else {
-                    //今天的销售额
-                    $today_sales_total_money = $model->getSalesTotalMoney();
-                    $date_arr[$now_day] = $today_sales_total_money['sales_total_money'];
-                }
+                $arr[$key][] = $value['count']*$xishu/200;
             }
-            if ($type == 1) {
-                $name = '订单数';
-            } else {
-                $name = '销售额';
-            }
-            $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
-            $json['columnData'] = [
-                [
-                    'name' => $name,
-                    'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_values($date_arr)
-                ],
-            ];
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-    //国家分布
-    public function order_data_view_country()
-    {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
             $data['column'] = ['国家'];
             $data['columnData'] = [
                 [
                     'name' => '国家',
-                    'data' =>  [
-                        [
-                            28604, 28604,
-                            'Australia',
-                            28604 / 200
-                        ],
-                        [31163, 31163, 'Canada', 31163 / 200],
-                        [15110, 15110, 'China', 15110 / 200],
-                        [13005, 13005, 'Cuba', 13005 / 200],
-                        [6632, 6632, 'Finland', 6632 / 200],
-                    ]
+                    'data' =>  $arr
                 ]
             ];
             return json(['code' => 1, 'data' => $data]);
