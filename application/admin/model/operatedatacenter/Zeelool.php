@@ -78,13 +78,15 @@ class Zeelool extends Model
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['order_num'] = $this->where($map)->where($where)->sum('order_num');
             }
-            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
-            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
             $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num']-$same_order_num)/$same_order_num*100,2).'%' : 0;
 
-            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
-            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
             $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num']-$huan_order_num)/$huan_order_num*100,2).'%' : 0;
         }
@@ -127,23 +129,30 @@ class Zeelool extends Model
             $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total/$huan_order_user,2) : 0;
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price']-$huan_order_unit_price)/$huan_order_unit_price*100,2).'%' : 0;
         }else{
-            if(!$time_str){
-                $time_str = date('Y-m-d');
+            $start = date('Y-m-d');
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $time_str . "'")];
+            if(!$time_str || $time_str == $start){
+                //获取当天的客单价
+                $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
+                $order_user = $this->zeelool->where($map)->where($where)->count('distinct customer_id');
+                $arr['order_unit_price'] = $order_user != 0 ? round($order_total/$order_user,2) : 0;
+            }else{
+                //读取数据库中的客单价
+                $arr['order_unit_price'] = $this->where('site',1)->where($where)->value('order_unit_price');
             }
-            $where['created_at'] = ['between', [$time_str,$time_str]];
-            $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
-            $order_user = $this->zeelool->where($map)->where($where)->count('distinct customer_id');
-            $arr['order_unit_price'] = $order_user != 0 ? round($order_total/$order_user,2) : 0;
             //同比
-            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
-            $same_where['created_at'] = ['between', [$same_start,$same_end]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_total = $this->zeelool->where($map)->where($same_where)->sum('base_grand_total');
             $same_order_user = $this->zeelool->where($map)->where($same_where)->count('distinct customer_id');
             $same_order_unit_price = $same_order_user != 0 ? round($same_order_total/$same_order_user,2) : 0;
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price']-$same_order_unit_price)/$same_order_unit_price*100,2).'%' : 0;
             //环比
-            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
-            $huan_where['created_at'] = ['between', [$huan_start,$huan_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_total = $this->zeelool->where($map)->where($huan_where)->sum('base_grand_total');
             $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count('distinct customer_id');
             $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total/$huan_order_user,2) : 0;
@@ -196,13 +205,15 @@ class Zeelool extends Model
                 $arr['sales_total_money'] = $this->where($map)->where($where)->sum('sales_total_money');
             }
             //同比
-            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
-            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_sales_total_money = $this->where($map)->where($same_where)->sum('sales_total_money');
             $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money']-$same_sales_total_money)/$same_sales_total_money*100,2).'%' : 0;
             //环比
-            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
-            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_sales_total_money = $this->where($map)->where($huan_where)->sum('sales_total_money');
             $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ?round(($arr['sales_total_money']-$huan_sales_total_money)/$huan_sales_total_money*100,2).'%' : 0;
         }
@@ -252,13 +263,15 @@ class Zeelool extends Model
                 $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
             }
             //同比
-            $same_start = $same_end = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
-            $same_where['day_date'] = ['between', [$same_start,$same_end]];
+            $same_start = date( 'Y-m-d', strtotime("-1 years",strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_shipping_total_money = $this->where($map)->where($same_where)->sum('shipping_total_money');
             $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money']-$same_shipping_total_money)/$same_shipping_total_money*100,2).'%' : 0;
             //环比
-            $huan_start = $huan_end = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
-            $huan_where['day_date'] = ['between', [$huan_start,$huan_end]];
+            $huan_start = date( 'Y-m-d', strtotime("-1 months",strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_shipping_total_money = $this->where($map)->where($huan_where)->sum('shipping_total_money');
             $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money']-$huan_shipping_total_money)/$huan_shipping_total_money*100,2).'%' : 0;
         }
