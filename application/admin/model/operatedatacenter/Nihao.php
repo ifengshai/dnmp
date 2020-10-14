@@ -1,6 +1,7 @@
 <?php
 namespace app\admin\model\operatedatacenter;
 
+use think\Db;
 use think\Model;
 
 
@@ -18,7 +19,10 @@ class Nihao extends Model
     protected $append = [
 
     ];
-
+    public function __construct()
+    {
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+    }
     /**
      * 统计订单数
      *

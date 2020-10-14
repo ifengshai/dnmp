@@ -719,6 +719,7 @@ class TrackReg extends Backend
         $date_time = date('Y-m-d',strtotime("-1 day"));
 
         //查询时间
+
             $arr = [];
             $arr['site'] = 1;
             $arr['day_date'] = $date_time;
@@ -770,11 +771,12 @@ class TrackReg extends Backend
             usleep(100000);
 
     }
+
     //运营数据中心
     public function voogueme_day_data()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $this->zeelool = new \app\admin\model\order\order\Voogueme();
+        $zeelool_model = Db::connect('database.db_voogueme_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -787,7 +789,7 @@ class TrackReg extends Backend
         $arr['site'] = 2;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        $arr['active_user_num'] = $this->google_active_user(2, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -811,7 +813,7 @@ class TrackReg extends Backend
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         //会话
-        $arr['sessions'] = $this->google_session(1, $date_time);
+        $arr['sessions'] = $this->google_session(2, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -837,8 +839,8 @@ class TrackReg extends Backend
     //运营数据中心
     public function niaho_day_data()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $this->zeelool = new \app\admin\model\order\order\Nihao();
+        $zeelool_model = Db::connect('database.db_nihao_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -851,16 +853,16 @@ class TrackReg extends Backend
         $arr['site'] = 3;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        $arr['active_user_num'] = $this->google_active_user(3, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
         //新增vip用户数
-        $vip_where = [];
-        $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
-        $vip_where['order_status'] = 'Success';
-        $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
+        // $vip_where = [];
+        // $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
+        // $vip_where['order_status'] = 'Success';
+        // $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -871,11 +873,11 @@ class TrackReg extends Backend
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
         //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+        // $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         //会话
-        $arr['sessions'] = $this->google_session(1, $date_time);
+        $arr['sessions'] = $this->google_session(3, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -898,4 +900,5 @@ class TrackReg extends Backend
         usleep(100000);
 
     }
+
 }

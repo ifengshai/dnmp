@@ -493,7 +493,7 @@ class SaleAfterTask extends Backend
             if($this->request->isAjax()){
                 $ordertype = $request->post('ordertype');
                 $order_number = $request->post('order_number');
-                if($ordertype<1 || $ordertype>5){ //不在平台之内
+                if($ordertype<1 || $ordertype>11){ //不在平台之内
                     return $this->error('选择平台错误,请重新选择','','error',0);
                 }
                 if(!$order_number){

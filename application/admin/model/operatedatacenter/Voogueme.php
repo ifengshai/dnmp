@@ -1,6 +1,7 @@
 <?php
 namespace app\admin\model\operatedatacenter;
 
+use think\Db;
 use think\Model;
 
 
@@ -18,6 +19,10 @@ class Voogueme extends Model
     protected $append = [
 
     ];
+    public function __construct()
+    {
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+    }
 
     /**
      * 统计订单数
