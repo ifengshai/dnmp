@@ -281,4 +281,77 @@ class DashBoard extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+    public function user_change_trend()
+    {
+        // $date_arr = ["2020-10-07" => 0, "2020-10-08" => 0, "2020-10-09" => 1, "2020-10-10" => 500, "2020-10-11" => 20, "2020-10-12" => 1000];
+
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            switch ($order_platform) {
+                case 1:
+                    $model = $this->zeeloolOperate;
+                    break;
+                case 2:
+                    $model = $this->vooguemeOperate;
+                    break;
+                case 3:
+                    $model = $this->nihaoOperate;
+                    break;
+                case 4:
+                    $model = $this->datacenterday;
+                    break;
+            }
+            $time_str = $params['time_str'];
+
+            if ($order_platform) {
+                $where['site'] = $order_platform;
+            }
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+
+                $first_sales_total = $model->getOrderNum($createat[0]);
+                $date_arr = array(
+                    $createat[0] => $first_sales_total['order_num']
+                );
+                if ($createat[0] != $createat[3]) {
+                    for ($i = 0; $i <= 100; $i++) {
+                        $m = $i + 1;
+                        $deal_date = date_create($createat[0]);
+                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
+                        $next_day = date_format($deal_date, "Y-m-d");
+                        $next_sales_total = $model->getOrderNum($next_day);
+                        $date_arr[$next_day] = $next_sales_total['order_num'];
+                        if ($next_day == $createat[3]) {
+                            break;
+                        }
+                    }
+                }
+
+            } else {
+                $now_day = date('Y-m-d');
+                //今天的订单数
+                $today_order_num = $model->getOrderNum();
+                $date_arr[$now_day] = $today_order_num['order_num'];
+            }
+            $name = '用户购买转化漏斗';
+            $date_arr = [];
+            $date_arr = [['value'=>60,'name'=>'着陆页'],['value'=>60,'name'=>'着陆页2'],['value'=>60,'name'=>'着陆页1']];
+            // dump($date_arr);
+            // $json['xcolumnData'] = array_keys($date_arr);
+            $json['column'] = [$name];
+            $json['columnData'] = [
+                [
+                    'name' => $name,
+                    'type' => 'funnel',
+                    'smooth' => true,
+                    // 'data' => array_values($date_arr)
+                    'data' => $date_arr
+                ],
+
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+
 }
