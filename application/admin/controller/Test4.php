@@ -419,7 +419,7 @@ class Test4 extends Controller
             //客单价
             $order_where = [];
             $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-            $order_where['created_at'] = ['between',[$val['day_date'],$val['day_date']]];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $sales_total_money = $this->zeelool->where($order_where)->sum('base_grand_total');
             $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
@@ -455,7 +455,7 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where1)->sum('base_grand_total');*/
             $order_where = [];
             $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-            $order_where['created_at'] = ['between',[$val['day_date'],$val['day_date']]];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $sales_total_money = $this->voogueme->where($order_where)->sum('base_grand_total');
             $order_user = $this->voogueme->where($order_where)->count('distinct customer_id');
@@ -491,7 +491,7 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');*/
             $order_where = [];
             $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-            $order_where['created_at'] = ['between',[$val['day_date'],$val['day_date']]];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $sales_total_money = $this->nihao->where($order_where)->sum('base_grand_total');
             $order_user = $this->nihao->where($order_where)->count('distinct customer_id');
