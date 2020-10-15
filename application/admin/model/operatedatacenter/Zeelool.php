@@ -722,4 +722,109 @@ class Zeelool extends Model
         }
         return $arr;
     }
+    /*
+     * 查询时间段内金额段之间的订单数
+     * */
+    public function getMoneyOrderNum($time_str = ''){
+        //获取订单金额范围在[0,20)阶段的订单数
+        $arr['order_total0'] = $this->getMoneyOrderNumInfo(0,$time_str);
+        $arr['order_total20'] = $this->getMoneyOrderNumInfo(1,$time_str);
+        $arr['order_total30'] = $this->getMoneyOrderNumInfo(2,$time_str);
+        $arr['order_total40'] = $this->getMoneyOrderNumInfo(3,$time_str);
+        $arr['order_total50'] = $this->getMoneyOrderNumInfo(4,$time_str);
+        $arr['order_total60'] = $this->getMoneyOrderNumInfo(5,$time_str);
+        $arr['order_total80'] = $this->getMoneyOrderNumInfo(6,$time_str);
+        $arr['order_total100'] = $this->getMoneyOrderNumInfo(7,$time_str);
+        $arr['order_total200'] = $this->getMoneyOrderNumInfo(8,$time_str);
+        return $arr;
+    }
+    public function getMoneyOrderNumInfo($num,$time_str = ''){
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        switch ($num){
+            case 0:
+                $arr_where['base_grand_total'] = ['between',[0,20]];
+                break;
+            case 1:
+                $arr_where['base_grand_total'] = ['between',[20,30]];
+                break;
+            case 2:
+                $arr_where['base_grand_total'] = ['between',[30,40]];
+                break;
+            case 3:
+                $arr_where['base_grand_total'] = ['between',[40,50]];
+                break;
+            case 4:
+                $arr_where['base_grand_total'] = ['between',[50,60]];
+                break;
+            case 5:
+                $arr_where['base_grand_total'] = ['between',[60,80]];
+                break;
+            case 6:
+                $arr_where['base_grand_total'] = ['between',[80,100]];
+                break;
+            case 7:
+                $arr_where['base_grand_total'] = ['between',[100,200]];
+                break;
+            default:
+                $arr_where['base_grand_total'] = ['egt',200];
+                break;
+        }
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = date('Y-m-d');
+            $map = [];
+            $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
+        }
+        $arr['order_num'] = $this->zeelool->where($map_where)->where($arr_where)->where($map)->count();
+        $order_num = $this->zeelool->where($map_where)->where($map)->count();
+        $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
+        return $arr;
+    }
+    /*
+     * 获取订单运费数据统计信息
+     * */
+    public function getOrderShipping($time_str = ''){
+        $arr['flatrate_free'] = $this->getOrderShippingInfo(0,$time_str);
+        $arr['flatrate_nofree'] = $this->getOrderShippingInfo(1,$time_str);
+        $arr['tablerate_free'] = $this->getOrderShippingInfo(2,$time_str);
+        $arr['tablerate_nofree'] = $this->getOrderShippingInfo(3,$time_str);
+        return $arr;
+    }
+    public function getOrderShippingInfo($num,$time_str = ''){
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        switch ($num){
+            case 0:
+                $arr_where['shipping_method'] = ['in',['freeshipping_freeshipping','flatrate_flatrate']];
+                $arr_where['base_shipping_amount'] = 0;
+                break;
+            case 1:
+                $arr_where['shipping_method'] = ['in',['freeshipping_freeshipping','flatrate_flatrate']];
+                $arr_where['base_shipping_amount'] = ['gt',0];
+                break;
+            case 2:
+                $arr_where['shipping_method'] = ['in',['tablerate_bestway']];
+                $arr_where['base_shipping_amount'] = 0;
+                break;
+            case 3:
+                $arr_where['shipping_method'] = ['in',['tablerate_bestway']];
+                $arr_where['base_shipping_amount'] = ['gt',0];
+                break;
+        }
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+        }else{
+            $start = date('Y-m-d');
+            $map = [];
+            $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
+        }
+        $arr['order_num'] = $this->zeelool->where($map_where)->where($arr_where)->where($map)->count();
+        $order_num = $this->zeelool->where($map_where)->where($map)->count();
+        $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
+        $order_total = $this->zeelool->where($map_where)->where($arr_where)->where($map)->sum('base_shipping_amount');
+        $arr['order_total'] = round($order_total,2);
+        return $arr;
+    }
 }

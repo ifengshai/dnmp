@@ -44,8 +44,11 @@ class OrderDataView extends Backend
         $online_celebrity_order_num = $this->zeeloolOperate->getOnlineCelebrityOrderNum();
         //网红单销售额
         $online_celebrity_order_total = $this->zeeloolOperate->getOnlineCelebrityOrderTotal();
-        $zeeloolSalesNumList = array(['US', 250], ['AU', 500], ['AS', 750], ['UA', 1000]);
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList'));
+        //订单金额分布
+        $order_total_distribution = $this->zeeloolOperate->getMoneyOrderNum();
+        //订单运费数据统计
+        $order_shipping = $this->zeeloolOperate->getOrderShipping();
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping'));
         return $this->view->fetch();
     }
     /*
@@ -78,7 +81,9 @@ class OrderDataView extends Backend
             $replacement_order_total = $model->getReplacementOrderTotal($time_str, 1); //补发单销售额
             $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str, 1); //网红单订单数
             $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str, 1);  //网红单销售额
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total');
+            $order_total_distribution = $model->getMoneyOrderNum($time_str); //订单金额分布
+            $order_shipping = $model->getOrderShipping($time_str);//订单运费数据统计
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total','order_total_distribution','order_shipping');
             $this->success('', '', $data);
         }
     }

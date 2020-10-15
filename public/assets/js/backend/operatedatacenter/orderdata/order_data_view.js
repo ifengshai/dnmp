@@ -231,6 +231,7 @@ function order_data_view() {
         var replacement_order_total = ret.data.replacement_order_total;
         var online_celebrity_order_num = ret.data.online_celebrity_order_num;
         var online_celebrity_order_total = ret.data.online_celebrity_order_total;
+
         $('#order_num').text(order_num.order_num);
         $('#same_order_num').text(order_num.same_order_num);
         $('#huan_order_num').text(order_num.huan_order_num);
@@ -247,6 +248,52 @@ function order_data_view() {
         $('#replacement_order_total').text(replacement_order_total.replacement_order_total);
         $('#online_celebrity_order_num').text(online_celebrity_order_num.online_celebrity_order_num);
         $('#online_celebrity_order_total').text(online_celebrity_order_total.online_celebrity_order_total);
+        //订单金额分布表数据
+        var order_total0 = ret.data.order_total_distribution.order_total0;
+        var order_total20 = ret.data.order_total_distribution.order_total20;
+        var order_total30 = ret.data.order_total_distribution.order_total30;
+        var order_total40 = ret.data.order_total_distribution.order_total40;
+        var order_total50 = ret.data.order_total_distribution.order_total50;
+        var order_total60 = ret.data.order_total_distribution.order_total60;
+        var order_total80 = ret.data.order_total_distribution.order_total80;
+        var order_total100 = ret.data.order_total_distribution.order_total100;
+        var order_total200 = ret.data.order_total_distribution.order_total200;
+        
+        $('#ordernum0').text(order_total0.order_num);
+        $('#ordernum_rate0').text(order_total0.order_num_rate);
+        $('#ordernum20').text(order_total20.order_num);
+        $('#ordernum_rate20').text(order_total20.order_num_rate);
+        $('#ordernum30').text(order_total30.order_num);
+        $('#ordernum_rate30').text(order_total30.order_num_rate);
+        $('#ordernum40').text(order_total40.order_num);
+        $('#ordernum_rate40').text(order_total40.order_num_rate);
+        $('#ordernum50').text(order_total50.order_num);
+        $('#ordernum_rate50').text(order_total50.order_num_rate);
+        $('#ordernum60').text(order_total60.order_num);
+        $('#ordernum_rate60').text(order_total60.order_num_rate);
+        $('#ordernum80').text(order_total80.order_num);
+        $('#ordernum_rate80').text(order_total80.order_num_rate);
+        $('#ordernum100').text(order_total100.order_num);
+        $('#ordernum_rate100').text(order_total100.order_num_rate);
+        $('#ordernum200').text(order_total200.order_num);
+        $('#ordernum_rate200').text(order_total200.order_num_rate);
+        //订单运费数据统计
+        var flatrate_free = ret.data.order_shipping.flatrate_free;
+        var flatrate_nofree = ret.data.order_shipping.flatrate_nofree;
+        var tablerate_free = ret.data.order_shipping.tablerate_free;
+        var tablerate_nofree = ret.data.order_shipping.tablerate_nofree;
+
+        $('#flatrate_free_order_num').text(flatrate_free.order_num);
+        $('#flatrate_free_rate').text(flatrate_free.order_num_rate);
+        $('#flatrate_nofree_order_num').text(flatrate_nofree.order_num);
+        $('#flatrate_nofree_rate').text(flatrate_nofree.order_num_rate);
+        $('#flatrate_nofree_order_total').text(flatrate_nofree.order_total);
+        $('#tablerate_free_order_num').text(tablerate_free.order_num_rate);
+        $('#tablerate_free_rate').text(tablerate_free.order_num);
+        $('#tablerate_nofree_order_num').text(tablerate_nofree.order_num);
+        $('#tablerate_nofree_rate').text(tablerate_nofree.order_num_rate);
+        $('#tablerate_nofree_order_total').text(tablerate_nofree.order_total);
+
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
