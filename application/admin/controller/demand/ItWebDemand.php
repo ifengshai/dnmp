@@ -584,54 +584,69 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
     /**
-     * RDC 产品通过按钮
+     * RDC 产品通过/拒绝按钮
      * */
-    public function rdc_demand_pass()
+    public function rdc_demand_pass($ids = null)
     {
         if ($this->request->isPost()) {
             $params = input();
 
-            $row = $this->model->get($params['ids']);
+            $row = $this->model->get($params['id']);
             $row = $row->toArray();
 
-            $time_data = $this->start_time($row['priority'], $row['node_time']);
-            $add['start_time'] = $time_data['start_time'];
-            $add['end_time'] = $time_data['end_time'];
+            if($params['pm_audit_status'] == 4){
+                $add['pm_audit_status'] = 4;
+            }else{
+                $time_data = $this->start_time($row['priority'], $row['node_time']);
+                $add['start_time'] = $time_data['start_time'];
+                $add['end_time'] = $time_data['end_time'];
+                $add['pm_audit_status'] = 3;
 
-            $add['pm_audit_status'] = 3;
+                /*提出人直接确认*/
+                $add['pm_confirm'] = 1;
+                $add['pm_confirm_time'] = date('Y-m-d H:i', time());
+                $add['entry_user_confirm'] = 1;
+                $add['entry_user_confirm_time'] = date('Y-m-d H:i', time());
+                /*提出人直接确认*/
+
+                $add['status'] = 2;
+            }
             $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
 
-            /*提出人直接确认*/
-            $add['pm_confirm'] = 1;
-            $add['pm_confirm_time'] = date('Y-m-d H:i', time());
-            $add['entry_user_confirm'] = 1;
-            $add['entry_user_confirm_time'] = date('Y-m-d H:i', time());
-            /*提出人直接确认*/
-
-            $add['status'] = 2;
-            $res = $this->model->allowField(true)->save($add, ['id' => $params['ids']]);
+            $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
             if ($res) {
-                //任务评审状态变为“通过”时 推送给抄送人
-                if ($row['copy_to_user_id']) {
-                    $usersId = explode(',', $row['copy_to_user_id']);
-                    Ding::cc_ding($usersId,  '任务ID:' . $params['ids'] . '+任务已抄送给你', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
-                }
 
-                //任务激活 推送主管
-                //是否是开发主管
-                $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
-                //是否是前端主管
-                $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
-                //是否是app主管
-                $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
-                $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
-                Ding::cc_ding($usersIds,  '任务ID:' . $params['ids'] . '+任务激活，等待响应', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                if($params['pm_audit_status'] == 4){
+                    Ding::cc_ding($row['entry_user_id'],  '任务ID:' . $params['id'] . '+任务被拒绝', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                }else{
+                    //任务评审状态变为“通过”时 推送给抄送人
+                    if ($row['copy_to_user_id']) {
+                        $usersId = explode(',', $row['copy_to_user_id']);
+                        Ding::cc_ding($usersId,  '任务ID:' . $params['id'] . '+任务已抄送给你', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    }
+
+                    //任务激活 推送主管
+                    //是否是开发主管
+                    $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+                    //是否是前端主管
+                    $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
+                    //是否是app主管
+                    $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
+                    $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
+                    Ding::cc_ding($usersIds,  '任务ID:' . $params['id'] . '+任务激活，等待响应', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                }
 
                 $this->success('成功');
             } else {
                 $this->error('失败');
             }
         }
+
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
     }
     /**
      * 添加
@@ -724,58 +739,67 @@ class ItWebDemand extends Backend
             $params = $this->request->post("row/a");
 
             if ($params) {
-                if ($params['pm_audit_status']) {
-                    //产品提交
-                    $row = $this->model->get($params['id']);
-                    $row = $row->toArray();
-                    $add['site_type'] = implode(',', $params['site_type']);
 
-                    if ($row['status'] == 1) {
-                        if ($params['priority'] == 1) {
-                            if ($params['pm_audit_status'] == 3) {
-                                $add['status'] = 2;
-                            }
-                        }
-                    } else {
-                        if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-                            $add['status'] = 2;
-
-                            $add['web_designer_group'] = 0;
-                            $add['web_designer_complexity'] = null;
-                            $add['web_designer_expect_time'] = null;
-
-                            $add['phper_group'] = 0;
-                            $add['phper_complexity'] = null;
-                            $add['phper_expect_time'] = null;
-
-                            $add['app_group'] = 0;
-                            $add['app_complexity'] = null;
-                            $add['app_expect_time'] = null;
-
-                            $add['develop_finish_status'] = 1;
-                        }
-                    }
-
-                    $add['priority'] = $params['priority'];
-
-                    $add['node_time'] = $params['node_time'];
-                    $time_data = $this->start_time($params['priority'], $params['node_time']);
-                    $add['start_time'] = $time_data['start_time'];
-                    $add['end_time'] = $time_data['end_time'];
+                if($params['pm_audit_status'] == 4){//拒绝
                     $add['pm_audit_status'] = $params['pm_audit_status'];
                     $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
-                }
-                $add['type'] = $params['type'];
-                $add['site'] = $params['site'];
+                }else{
+                    if ($params['pm_audit_status']) {
+                        //产品提交
+                        $row = $this->model->get($params['id']);
+                        $row = $row->toArray();
+                        $add['site_type'] = implode(',', $params['site_type']);
 
-                $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
-                $add['title'] = $params['title'];
-                $add['content'] = $params['content'];
-                $add['accessory'] = $params['accessory'];
-                $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
-                if ($params['demand_type'] == 2) {
-                    $add['node_time'] = $params['node_time'];
+                        if ($row['status'] == 1) {
+                            if ($params['priority'] == 1) {
+                                if ($params['pm_audit_status'] == 3) {
+                                    $add['status'] = 2;
+                                }
+                            }
+                        } else {
+                            if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
+                                $add['status'] = 2;
+
+                                $add['web_designer_group'] = 0;
+                                $add['web_designer_complexity'] = null;
+                                $add['web_designer_expect_time'] = null;
+
+                                $add['phper_group'] = 0;
+                                $add['phper_complexity'] = null;
+                                $add['phper_expect_time'] = null;
+
+                                $add['app_group'] = 0;
+                                $add['app_complexity'] = null;
+                                $add['app_expect_time'] = null;
+
+                                $add['develop_finish_status'] = 1;
+                            }
+                        }
+
+                        empty($params['priority']) && $this->error('请选择优先级');
+                        empty($params['node_time']) && $this->error('任务周期不能为空');
+
+                        $add['priority'] = $params['priority'];
+                        $add['node_time'] = $params['node_time'];
+                        $time_data = $this->start_time($params['priority'], $params['node_time']);
+                        $add['start_time'] = $time_data['start_time'];
+                        $add['end_time'] = $time_data['end_time'];
+                        $add['pm_audit_status'] = $params['pm_audit_status'];
+                        $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
+                    }
+                    $add['type'] = $params['type'];
+                    $add['site'] = $params['site'];
+
+                    $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
+                    $add['title'] = $params['title'];
+                    $add['content'] = $params['content'];
+                    $add['accessory'] = $params['accessory'];
+                    $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
+                    if ($params['demand_type'] == 2) {
+                        $add['node_time'] = $params['node_time'];
+                    }
                 }
+
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
