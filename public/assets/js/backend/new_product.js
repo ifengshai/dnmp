@@ -671,24 +671,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }, operate: false
                         },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-
                         {
-                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
+                            field: 'type', title: __('需求类型'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 1: '月度计划', 2: '周度计划' },
                             formatter: Table.api.formatter.status
                         },
                         // {field: 'create_person', title: __('Create_person')},
+                        { field: 'purchase_number', title: __('采购单号'), operate: false },
                         { field: 'create_time', title: __('需求提报时间'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'replenish_num', title: __('补货需求数量'), operate: false },
-                        { field: 'distribute_num', title: __('分配数量'), operate: false },
+                        { field: 'replenish_count', title: __('补货需求数量'), operate: false },
+                        { field: 'distribute_count', title: __('分配数量'), operate: false },
                         {
                             field: 'status', title: __('需求分配状态'), custom: { 1: 'success', 2: 'danger', 3: 'success', 4: 'success' },
                             searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' }, operate: false,
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
+                        // { field: 'real_dis_num', title: __('实际采购数量'), operate: false },
                         { field: 'arrival_time', title: __('预计到货时间'), operate: false },
-                        { field: 'purchase_number', title: __('采购单号'), operate: false },
                         {
                             field: 'purchase_status', title: __('采购状态'),
                             custom: {
@@ -720,9 +719,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             operate: false,
                             formatter: Controller.api.formatter.status
                         },
-                        { field: 'real_dis_num', title: __('预计到货数量'), operate: false },
+                        { field: 'purchase_num', title: __('预计到货数量'), operate: false },
                         { field: 'arrivals_num', title: __('到货数量'), operate: false },
+                        {
+                            field: 'check_status', title: __('质检状态'),operate: false,
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'quantity_num', title: __('质检合格数量'), operate: false },
+                        {
+                            field: 'stock_status', title: __('入库状态'),operate: false,
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'in_stock_num', title: __('入库数量'), operate: false },
                         {
                             field: 'operate',

@@ -1709,22 +1709,29 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
             //默认站点
             $platform_type = input('label');
             if ($platform_type) {
                 $map['website_type'] = $platform_type;
             }
+
+            $group_by = 'a.id';
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['website_type']) {
+            if($filter['website_type']){
                 unset($map['website_type']);
+                if (100 == $filter['website_type']) {
+                    unset($filter['website_type']);
+                    $group_by = 'd.id';
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
             }
 
             //sku
             if ($filter['sku']) {
                 //改为模糊搜索
                 $map['a.sku'] = ['LIKE','%'.trim($filter['sku'].'%')];
-                // $map['d.purchase_name'] = ['=',trim($filter['sku'])];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -1743,7 +1750,7 @@ class NewProduct extends Backend
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            // dump($map);
+
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -1752,34 +1759,32 @@ class NewProduct extends Backend
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
-                // ->where('d.purchase_name', 'like','a.sku')
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
+                ->group($group_by)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model->alias('a')
-                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,c.distribute_num')
+                ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
-                // ->where('d.purchase_name', '=','WA069535-02')
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
+                ->group($group_by)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 // ->getLastSql();
                 ->select();
-            // dump($list);
-            // die;
             $list = collection($list)->toArray();
-            // dump($list);die;
+
             //根据采购单id 查询质检单
             $purchase_id = array_column($list, 'purchase_id');
-            $rows = $check_order_item->field("sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $rows = $check_order_item->field("sum(purchase_num) as purchase_num,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
             $rows = collection($rows)->toArray();
             //重组数组
             $check_list = [];
@@ -1801,6 +1806,7 @@ class NewProduct extends Backend
                 if (!$purchase_detail){
                     unset($v);
                 }else{
+                    $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
                     $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
                     $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
                     $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
@@ -1812,10 +1818,10 @@ class NewProduct extends Backend
         }
 
         //查询对应平台权限
-        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        $magentoplatformarr = array_values($this->magentoplatform->getNewAuthSite1());
+
         //取第一个key为默认站点
         $site = input('site', $magentoplatformarr[0]['id']);
-
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
@@ -1849,6 +1855,7 @@ class NewProduct extends Backend
             $map['a.purchase_id'] = $purchase_id;
             $total = $this->model->alias('a')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id', 'left')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
