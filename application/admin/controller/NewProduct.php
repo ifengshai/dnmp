@@ -1712,13 +1712,12 @@ class NewProduct extends Backend
 
             //默认站点
             $platform_type = input('label');
-            if ($platform_type) {
-                $map['website_type'] = $platform_type;
-            }
+            $map['website_type'] = $platform_type;
 
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
             if($filter['website_type']){
+                $platform_type = $filter['website_type'];
                 unset($map['website_type']);
                 if (100 == $filter['website_type']) {
                     unset($filter['website_type']);
@@ -1809,6 +1808,7 @@ class NewProduct extends Backend
                     $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
                     $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
                 }
+                $v['platform_type'] = $platform_type;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -1846,6 +1846,7 @@ class NewProduct extends Backend
                 return $this->selectpage();
             }
             $purchase_id = input('purchase_id');
+            $platform_type = input('platform_type');
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock = new \app\admin\model\warehouse\Instock();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
@@ -1860,7 +1861,7 @@ class NewProduct extends Backend
                 ->count();
             //查询分批到货
             $list = $this->model->alias('a')
-                ->field('a.purchase_id,a.id,a.arrival_time,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
+                ->field('a.purchase_id,a.id,a.arrival_time,a.replenish_id,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
                 ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id', 'left')
                 ->where($where)
@@ -1878,10 +1879,22 @@ class NewProduct extends Backend
                     //查询入库状态及入库数量
                     $in_stock_list = $in_stock->where(['check_id' => $v['check_id']])->find();
                 }
-                $v['quantity_num'] = $check_list['quantity_num'] ?: 0;
-                $v['arrivals_num'] = $check_list['arrivals_num'] ?: 0;
+                $quantity_num = $check_list['quantity_num'] ?: 0;
+                $arrivals_num = $check_list['arrivals_num'] ?: 0;
+                $wait_arrival_num = $v['wait_arrival_num'];
+                $instock_num = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+                if(100 != $platform_type){
+                    $rate = $in_stock_item->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'website_type' => $platform_type])->value('rate');
+                    $quantity_num = round($quantity_num * $rate);
+                    $arrivals_num = round($arrivals_num * $rate);
+                    $wait_arrival_num = round($wait_arrival_num * $rate);
+                    $instock_num = round($instock_num * $rate);
+                }
                 $v['instock_status'] = $in_stock_list['status'];
-                $v['instock_num'] = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+                $v['quantity_num'] = $quantity_num;
+                $v['arrivals_num'] = $arrivals_num;
+                $v['wait_arrival_num'] = $wait_arrival_num;
+                $v['instock_num'] = $instock_num;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);

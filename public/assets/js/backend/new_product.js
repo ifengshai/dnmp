@@ -748,7 +748,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'new_product/productmappingdetail/purchase_id/{purchase_id}',
+                                    url: 'new_product/productmappingdetail/purchase_id/{purchase_id}/platform_type/{platform_type}',
                                     extend: 'data-area = \'["60%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
