@@ -364,7 +364,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->zeelool->where($map_where)->where($arr_where)->count();
+        $today_order_num = $this->zeelool->where($map_where)->where('order_type',1)->where($arr_where)->count();
         if ($type == 1) {
             //时间段总和
             $createat = explode(' ', $time_str);
@@ -426,6 +426,7 @@ class Zeelool extends Model
     public function getOrderUnitPrice($time_str = '', $type = 0)
     {
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['order_type'] = 1;
         if ($type == 1) {
             //时间段统计客单价
             $createat = explode(' ', $time_str);
@@ -466,17 +467,13 @@ class Zeelool extends Model
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_order_total = $this->zeelool->where($map)->where($same_where)->sum('base_grand_total');
-            $same_order_user = $this->zeelool->where($map)->where($same_where)->count();
-            $same_order_unit_price = $same_order_user != 0 ? round($same_order_total / $same_order_user, 2) : 0;
+            $same_order_unit_price = $this->where('site', 1)->where($same_where)->value('order_unit_price');
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_order_total = $this->zeelool->where($map)->where($huan_where)->sum('base_grand_total');
-            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count();
-            $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total / $huan_order_user, 2) : 0;
+            $huan_order_unit_price = $this->where('site', 1)->where($huan_where)->value('order_unit_price');
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         }
         return $arr;
@@ -493,7 +490,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_sales_total_money = $this->zeelool->where($map_where)->where($arr_where)->sum('base_grand_total');
+        $today_sales_total_money = $this->zeelool->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_grand_total');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -554,7 +551,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_shipping_total_money = $this->zeelool->where($map_where)->where($arr_where)->sum('base_shipping_amount');
+        $today_shipping_total_money = $this->zeelool->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_shipping_amount');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -740,6 +737,7 @@ class Zeelool extends Model
     }
     public function getMoneyOrderNumInfo($num,$time_str = ''){
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map_where['order_type'] = 1;
         switch ($num){
             case 0:
                 $arr_where['base_grand_total'] = ['between',[0,20]];
@@ -794,6 +792,7 @@ class Zeelool extends Model
     }
     public function getOrderShippingInfo($num,$time_str = ''){
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map_where['order_type'] = 1;
         switch ($num){
             case 0:
                 $arr_where['shipping_method'] = ['in',['freeshipping_freeshipping','flatrate_flatrate']];
