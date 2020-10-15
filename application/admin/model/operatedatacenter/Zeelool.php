@@ -452,27 +452,29 @@ class Zeelool extends Model
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         } else {
             $start = date('Y-m-d');
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $time_str . "'")];
             if (!$time_str || $time_str == $start) {
+                $where = [];
+                $where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $time_str . "'")];
                 //获取当天的客单价
                 $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
                 $order_user = $this->zeelool->where($map)->where($where)->count();
                 $arr['order_unit_price'] = $order_user != 0 ? round($order_total / $order_user, 2) : 0;
             } else {
+                $where = [];
+                $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
                 //读取数据库中的客单价
                 $arr['order_unit_price'] = $this->where('site', 1)->where($where)->value('order_unit_price');
             }
             //同比
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
             $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $same_start . "'")];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_unit_price = $this->where('site', 1)->where($same_where)->value('order_unit_price');
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $huan_start . "'")];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_unit_price = $this->where('site', 1)->where($huan_where)->value('order_unit_price');
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         }
