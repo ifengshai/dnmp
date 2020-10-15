@@ -493,7 +493,7 @@ class Test4 extends Controller
             //补发销售额
             $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');*/
             //客单价
-            $arr['order_unit_price'] = $val['order_num']  ? round($val['sales_total_money']/$val['order_num'],2) : 0;
+            $arr['order_unit_price'] = $val['order_num'] != 0 ? round($val['sales_total_money']/$val['order_num'],2) : 0;
             //中位数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
