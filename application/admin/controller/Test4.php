@@ -418,13 +418,11 @@ class Test4 extends Controller
             $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where1)->sum('base_grand_total');*/
             //客单价
             $order_where = [];
-            $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $sales_total_money = $this->zeelool->where($order_where)->sum('base_grand_total');
-            $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
-            //客单价
-            $arr['order_unit_price'] = $order_user ? round($sales_total_money / $order_user, 2) : 0;
+            $sales_total_money = $this->zeelool->where($order_where)->column('base_grand_total');
+            //中位数
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -454,13 +452,11 @@ class Test4 extends Controller
             //补发销售额
             $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where1)->sum('base_grand_total');*/
             $order_where = [];
-            $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $sales_total_money = $this->voogueme->where($order_where)->sum('base_grand_total');
-            $order_user = $this->voogueme->where($order_where)->count('distinct customer_id');
-            //客单价
-            $arr['order_unit_price'] = $order_user ? round($sales_total_money / $order_user, 2) : 0;
+            $sales_total_money = $this->voogueme->where($order_where)->column('base_grand_total');
+            //中位数
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -490,18 +486,27 @@ class Test4 extends Controller
             //补发销售额
             $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');*/
             $order_where = [];
-            $order_where[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $sales_total_money = $this->nihao->where($order_where)->sum('base_grand_total');
-            $order_user = $this->nihao->where($order_where)->count('distinct customer_id');
-            //客单价
-            $arr['order_unit_price'] = $order_user ? round($sales_total_money / $order_user, 2) : 0;
+            $sales_total_money = $this->nihao->where($order_where)->column('base_grand_total');
+            //中位数
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
             usleep(100000);
         }
+    }
+    /**
+     *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
+     */
+    function median($numbers)
+    {
+        sort($numbers);
+        $totalNumbers = count($numbers);
+        $mid = floor($totalNumbers / 2);
+
+        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
     }
     public function test006()
     {
