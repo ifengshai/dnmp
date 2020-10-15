@@ -234,16 +234,24 @@ class OrderDataView extends Backend
             $order_platform = $params['order_platform'];
             if ($order_platform == 1) {
                 $model = $this->zeelool;
+                $model_operate = $this->zeeloolOperate;
             } elseif ($order_platform == 2) {
                 $model = $this->voogueme;
+                $model_operate = $this->vooguemeOperate;
             } elseif ($order_platform == 3) {
                 $model = $this->nihao;
+                $model_operate = $this->nihaoOperate;
             }
+            //查询时间段内每天的客单价
             $time_str = $params['time_str'];
             $createat = explode(' ', $time_str);
-            $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
-            $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where['oa.address_type'] = 'shipping';
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $where['site'] = $order_platform;
+            $order_unit_price = $model_operate->where($where)->field('order_unit_price,day_date,sales_total_money')->select();
+
+
+
+
             //获取所有的订单的国家
             $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
             $arr = array();
