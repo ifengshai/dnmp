@@ -378,11 +378,6 @@ class Test4 extends Controller
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
                 $arr['register_num'] = $nihao_model->table('customer_entity')->where($register_where)->count();
-                //新增vip用户数
-                $vip_where = [];
-                $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $vip_where['order_status'] = 'Success';
-                $arr['vip_user_num'] = $nihao_model->table('oc_vip_order')->where($vip_where)->count();
                 //订单数
                 $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
