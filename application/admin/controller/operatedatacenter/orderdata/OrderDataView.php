@@ -242,12 +242,15 @@ class OrderDataView extends Backend
                 $model = $this->nihao;
                 $model_operate = $this->nihaoOperate;
             }
-            //查询时间段内每天的客单价
+            //查询时间段内每天的客单价,中位数，订单金额
             $time_str = $params['time_str'];
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $where['site'] = $order_platform;
-            $order_unit_price = $model_operate->where($where)->field('order_unit_price,day_date,sales_total_money')->select();
+            $order_unit_price = $model_operate->where($where)->field('order_unit_price,day_date,sales_total_money,order_total_midnum')->select();
+            foreach ($order_unit_price as $value){
+                $standard = 1;
+            }
 
 
 
