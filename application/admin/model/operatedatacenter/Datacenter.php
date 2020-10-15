@@ -2,6 +2,7 @@
 
 namespace app\admin\model\operatedatacenter;
 
+use think\Db;
 use think\Model;
 
 
@@ -379,7 +380,7 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:40:15
      */
-    public function getVipUser($time_str = '', $type = 0)
+    public function getVipUser1($time_str = '', $type = 0)
     {
         if ($type == 1) {
             $createat = explode(' ', $time_str);
@@ -416,6 +417,67 @@ class Datacenter extends Model
         return $arr;
     }
 
+    public function getVipUser($time_str = '', $type = 0)
+    {
+        $start = date('Y-m-d');
+        $register_where = [];
+        $register_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $start . "'")];
+        $vip_where['order_status'] = 'Success';
+        //今天的实时vip用户数 三个站相加
+        $today_register_user_num = ($this->zeelool->table('oc_vip_order')->where($vip_where)->where($register_where)->count()
+            + ($this->voogueme->table('oc_vip_order')->where($vip_where)->where($register_where)->count())
+            + ($this->nihao->table('oc_vip_order')->where($vip_where)->where($register_where)->count()));
+
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间内的数据
+            $register_num = $this->where($where)->sum('vip_user_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                $arr['vip_user_num'] = $register_num + $today_register_user_num;
+            } else {
+                $arr['vip_user_num'] = $register_num;
+            }
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
+            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start, $same_end]];
+            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
+            $same_order_unit_price = $this->where($same_where)->sum('vip_user_num');
+            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
+            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
+            $huan_order_unit_price = $this->where($same_where)->sum('register_num');
+            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+
+        } else {
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                $arr['vip_user_num'] = $today_register_user_num;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['vip_user_num'] = $this->where($where)->sum('vip_user_num');
+            }
+            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($start)));
+            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($start)));
+            $where['day_date'] = ['between', [$start, $time_str]];
+            $same_where['day_date'] = ['between', [$same_start, $same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
+            $same_order_unit_price = $this->where($same_where)->sum('vip_user_num');
+            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
+            $huan_order_unit_price = $this->where($same_where)->sum('vip_user_num');
+            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+        }
+
+        return $arr;
+    }
     /**
      * 统计订单All
      * 0:计算某天的数据1：计算总的数据
