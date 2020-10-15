@@ -280,6 +280,72 @@ class Zeelool extends Model
         return $arr;
     }
 
+    /*
+     * 统计用户转化漏斗的几个指标的数据
+     */
+    public function getFunnelNum($time_str = '', $type = 0)
+    {
+        $map['site'] = 1;
+        $start = date('Y-m-d');
+        //今天的实时着陆页的数据 zeelool
+        $today_active_user = $this->datacenter->google_landing(1, $start);
+        //今天的实时目标一的数据
+        $today_active_user = $this->datacenter->google_target1(1, $start);
+
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间的数据
+            $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                $arr['active_user_num'] = $active_user_num + $today_active_user;
+            } else {
+                $arr['active_user_num'] = $active_user_num;
+            }
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
+            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
+            $same_where['day_date'] = ['between', [$same_start, $same_end]];
+            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
+            $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
+            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
+            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
+            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
+            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+
+        } else {
+            //查询某天的数据
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                $arr['active_user_num'] = $today_active_user;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
+            }
+            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $where['day_date'] = ['between', [$time_str, $time_str]];
+            $same_where['day_date'] = ['between', [$same_start, $same_end]];
+            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+
+            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
+            $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
+            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
+            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+
+        }
+
+        return $arr;
+    }
+
     /**
      * 统计订单数
      *

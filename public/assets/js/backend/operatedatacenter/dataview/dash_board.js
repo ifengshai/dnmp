@@ -148,25 +148,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                user_change_chart: function () {
-                    //用户购买转化漏斗
-                    var chartOptions = {
-                        targetId: 'echart3',
-                        downLoadTitle: '图表',
-                        type: 'funnel',
-                    };
-
-                    var options = {
-                        type: 'post',
-                        url: 'operatedatacenter/dataview/dash_board/user_change_trend',
-                        data: {
-                            order_platform: $("#order_platform").val(),
-                            time_str: $("#time_str").val(),
-                            type: $("#type").val()
-                        }
-                    }
-                    EchartObj.api.ajax(options, chartOptions)
-                },
+                // user_change_chart: function () {
+                //     //用户购买转化漏斗
+                //     var chartOptions = {
+                //         targetId: 'echart3',
+                //         downLoadTitle: '图表',
+                //         type: 'funnel',
+                //     };
+                //
+                //     var options = {
+                //         type: 'post',
+                //         url: 'operatedatacenter/dataview/dash_board/user_change_trend',
+                //         data: {
+                //             order_platform: $("#order_platform").val(),
+                //             time_str: $("#time_str").val(),
+                //             type: $("#type").val()
+                //         }
+                //     }
+                //     EchartObj.api.ajax(options, chartOptions)
+                // },
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

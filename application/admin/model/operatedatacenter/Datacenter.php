@@ -88,6 +88,241 @@ class Datacenter extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+    //着陆页数据
+    public function google_landing($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_landing1($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        return $result;
+        // return $result[0]['ga:secondPagePath'] ? round($result[0]['ga:secondPagePath'], 2) : 0;
+    }
+    //目标1会话数
+    public function google_target1($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_landing1($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal4Starts'] ? round($result[0]['ga:goal4Starts'], 2) : 0;
+    }
+
+    protected function getReport_landing($site, $analytics, $startDate, $endDate)
+    {
+
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $transactions = new \Google_Service_AnalyticsReporting_Metric();
+        $transactions->setExpression("ga:transactions");
+        $transactions->setAlias("transactions");
+
+        $pageviews = new \Google_Service_AnalyticsReporting_Metric();
+        $pageviews->setExpression("ga:pageviews");
+        $pageviews->setAlias("pageviews");
+
+        $uniquePageviews = new \Google_Service_AnalyticsReporting_Metric();
+        $uniquePageviews->setExpression("ga:uniquePageviews");
+        $uniquePageviews->setAlias("uniquePageviews");
+
+        $avgTimeOnPage = new \Google_Service_AnalyticsReporting_Metric();
+        $avgTimeOnPage->setExpression("ga:avgTimeOnPage");
+        $avgTimeOnPage->setAlias("avgTimeOnPage");
+
+        $entrances = new \Google_Service_AnalyticsReporting_Metric();
+        $entrances->setExpression("ga:entrances");
+        $entrances->setAlias("entrances");
+
+        $entranceRate = new \Google_Service_AnalyticsReporting_Metric();
+        $entranceRate->setExpression("ga:entranceRate");
+        $entranceRate->setAlias("entranceRate");
+
+
+        $exits = new \Google_Service_AnalyticsReporting_Metric();
+        $exits->setExpression("ga:exits");
+        $exits->setAlias("exits");
+
+        $exitRate = new \Google_Service_AnalyticsReporting_Metric();
+        $exitRate->setExpression("ga:exitRate");
+        $exitRate->setAlias("exitRate");
+
+        $pageValue = new \Google_Service_AnalyticsReporting_Metric();
+        $pageValue->setExpression("ga:pageValue");
+        $pageValue->setAlias("pageValue");
+
+
+        $pagePathDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        // $browser->setName("ga:browser");
+        // $browser->setName("ga:country");
+        $pagePathDimension->setName("ga:pagePath");
+
+        $sourceMediumDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sourceMediumDimension->setName("ga:sourceMedium");
+        // $sourceMediumDimension->setName("ga:source");
+        // $sourceMediumDimension->setName("ga:medium");
+
+
+        // $sourceMediumDimension->setName("ga:acquisitionSourceMedium");
+
+        // ga:acquisitionSourceMedium
+
+        $ordering = new \Google_Service_AnalyticsReporting_OrderBy();
+        $ordering->setFieldName("ga:pageviews");
+        $ordering->setOrderType("VALUE");
+        $ordering->setSortOrder("DESCENDING");
+
+        // Create the DimensionFilter.
+        $dimensionFilter = new \Google_Service_AnalyticsReporting_DimensionFilter();
+        $dimensionFilter->setDimensionName('ga:pagePath');
+        $dimensionFilter->setOperator('PARTIAL');
+        $dimensionFilter->setExpressions(array('-'));
+
+        // Create the DimensionFilterClauses
+        $dimensionFilterClause = new \Google_Service_AnalyticsReporting_DimensionFilterClause();
+        $dimensionFilterClause->setFilters(array($dimensionFilter));
+
+        // echo '<br>$dateRange<br>';
+        // var_dump($dateRange);
+        // echo '<br>$sessions<br>';
+        // var_dump($sessions);
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($transactions, $pageviews, $uniquePageviews, $avgTimeOnPage, $entrances, $entranceRate, $exits, $exitRate, $pageValue));
+        $request->setDimensions(array($pagePathDimension, $sourceMediumDimension));
+        $request->setOrderBys($ordering); // note this one!
+        $request->setPageSize(20000);
+
+
+        $request->setDimensionFilterClauses(array($dimensionFilterClause));
+
+
+        // echo '<br>$request<br>';
+        // var_dump($request);
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        // echo '<br>$body<br>';
+        // var_dump($body);
+        // echo '<br>$batchGet<br>';
+        // var_dump($analytics->reports->batchGet($body));
+        return $analytics->reports->batchGet($body);
+    }
+    //着陆页会话数
+    protected function getReport_landing1($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        $adCostMetric->setExpression("ga:landingPagePath");
+        $adCostMetric->setAlias("ga:landingPagePath");
+        $adCostMetric->setExpression("ga:sessions");
+        $adCostMetric->setAlias("ga:sessions");
+
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+    //目标1会话数
+    protected function getReport_target1($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal4Starts");
+        $adCostMetric->setAlias("ga:goal4Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
 
     //session
     public function google_session($site, $start_time)
@@ -152,6 +387,7 @@ class Datacenter extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+
 
     /**
      * Parses and prints the Analytics Reporting API V4 response.

@@ -54,14 +54,14 @@ class DashBoard extends Backend
     public function index()
     {
         //默认进入页面是z站的数据
-        //活跃用户数
-        // $active_user_num = $this->zeeloolOperate->getActiveUser();
-        // //注册用户数
-        // $register_user_num = $this->zeeloolOperate->getRegisterUser();
-        // //复购用户数
-        // $again_user_num = $this->zeeloolOperate->getAgainUser();
-        // //vip用户数
-        // $vip_user_num = $this->zeeloolOperate->getVipUser();
+        // 活跃用户数
+        $active_user_num = $this->zeeloolOperate->getActiveUser();
+        //注册用户数
+        $register_user_num = $this->zeeloolOperate->getRegisterUser();
+        //复购用户数
+        $again_user_num = $this->zeeloolOperate->getAgainUser();
+        //vip用户数
+        $vip_user_num = $this->zeeloolOperate->getVipUser();
         //订单数
         $order_num = $this->zeeloolOperate->getOrderNum();
         //客单价
@@ -281,8 +281,14 @@ class DashBoard extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+    /*
+     * 用户购买转化漏斗
+     */
     public function user_change_trend()
     {
+        //着陆页数据
+        $landing = $this->datacenterday->google_landing(1,'2020-10-12');
+        dump($landing);die;
         // $date_arr = ["2020-10-07" => 0, "2020-10-08" => 0, "2020-10-09" => 1, "2020-10-10" => 500, "2020-10-11" => 20, "2020-10-12" => 1000];
 
         if ($this->request->isAjax()) {
@@ -335,21 +341,10 @@ class DashBoard extends Backend
                 $date_arr[$now_day] = $today_order_num['order_num'];
             }
             $name = '用户购买转化漏斗';
-            $date_arr = [];
-            $date_arr = [['value'=>60,'name'=>'着陆页'],['value'=>60,'name'=>'着陆页2'],['value'=>60,'name'=>'着陆页1']];
-            // dump($date_arr);
-            // $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
-            $json['columnData'] = [
-                [
-                    'name' => $name,
-                    'type' => 'funnel',
-                    'smooth' => true,
-                    // 'data' => array_values($date_arr)
-                    'data' => $date_arr
-                ],
+            $date_arr = [['value'=>60,'name'=>'着陆页'],['value'=>20,'name'=>'着陆页2'],['value'=>10,'name'=>'着陆页1']];
 
-            ];
+            $json['column'] = [$name];
+            $json['columnData'] = $date_arr;
             return json(['code' => 1, 'data' => $json]);
         }
     }
