@@ -1716,14 +1716,12 @@ class NewProduct extends Backend
                 $map['website_type'] = $platform_type;
             }
 
-            $group_by = 'a.id';
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
             if($filter['website_type']){
                 unset($map['website_type']);
                 if (100 == $filter['website_type']) {
                     unset($filter['website_type']);
-                    $group_by = 'd.id';
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
             }
@@ -1762,7 +1760,7 @@ class NewProduct extends Backend
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group($group_by)
+                ->group('d.id')
                 ->order($sort, $order)
                 ->count();
 
@@ -1775,7 +1773,7 @@ class NewProduct extends Backend
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group($group_by)
+                ->group('d.id')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 // ->getLastSql();
