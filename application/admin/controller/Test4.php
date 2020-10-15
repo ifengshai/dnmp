@@ -423,6 +423,9 @@ class Test4 extends Controller
             $sales_total_money = $this->zeelool->where($order_where)->column('base_grand_total');
             //中位数
             $arr['order_total_midnum'] = $this->median($sales_total_money);
+
+
+
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -507,6 +510,26 @@ class Test4 extends Controller
         $mid = floor($totalNumbers / 2);
 
         return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
+    }
+    /**
+     * 得到数组的标准差
+     * @param unknown type $avg
+     * @param Array $list
+     * @param Boolen $isSwatch
+     * @return unknown type
+     */
+    function getVariance($arr) {
+        $length = count($arr);
+        if ($length == 0) {
+            return 0;
+        }
+        $average = array_sum($arr)/$length;
+        $count = 0;
+        foreach ($arr as $v) {
+            $count += pow($average-$v, 2);
+        }
+        $variance = $count/$length;
+        return sqrt($variance);
     }
     public function test006()
     {
