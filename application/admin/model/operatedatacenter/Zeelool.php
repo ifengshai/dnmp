@@ -218,66 +218,80 @@ class Zeelool extends Model
         return $arr;
     }
 
-    /*
-     * 获取复购用户数
+    /**
+     * 复购用户数
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/10/14
+     * Time: 11:40:04
      */
     public function getAgainUser($time_str = '', $type = 0)
     {
-        $map['site'] = 1;
-        //查询当天的订单数
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $start = date('Y-m-d');
-        $arr_where = [];
-        $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->zeelool->where($map_where)->where($arr_where)->count();
-        if ($type == 1) {
-            //时间段总和
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $order_num = $this->where($map)->where($where)->sum('order_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                $arr['order_num'] = $order_num + $today_order_num;
-            } else {
-                $arr['order_num'] = $order_num;
-            }
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
-        } else {
-            //查询某天的数据
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            //判断当前时间是否等于当前时间，如果等于，则实时读取当天数据
-            if ($time_str == $start) {
-                $arr['order_num'] = $today_order_num;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['order_num'] = $this->where($map)->where($where)->sum('order_num');
-            }
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
+        $createat = explode(' ', $time_str);
+        $again_num = $this->get_again_user($createat);
+        $same_create_at[0] = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
+        $same_create_at[1] = $createat[1];
+        $same_create_at[3] = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
+        $same_create_at[4] = $createat[4];
+        $same_again_num = $this->get_again_user($same_create_at);
+        $huan_create_at[0] = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
+        $huan_create_at[1] = $createat[1];
+        $huan_create_at[3] = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
+        $huan_create_at[4] = $createat[4];
+        $huan_again_num = $this->get_again_user($huan_create_at);
+        // dump($createat);
+        // dump($same_create_at);
+        // dump($huan_create_at);
 
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
+        $arrs['again_user_num'] = $again_num;
+        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2) . '%';
+        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2) . '%';
+        return $arrs;
+
+    }
+    //获取某一段时间内的复购用户数
+    public function get_again_user($createat){
+
+        $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $where['customer_id'] = ['>',0];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+
+        //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
+        $order = $this->zeelool
+            ->where($map_where)
+            ->where($where)
+            ->field('customer_id')
+            ->select();
+        //二维数组转一维数组
+        foreach($order as &$val){
+            $arr[] = $val['customer_id'];
         }
-        return $arr;
+        // dump($arr);
+        //复购用户数
+        $again_num = 0;
+        // dump($arr);
+        if (!empty($arr)){
+            $new_arr = array_count_values($arr);
+            // dump($new_arr);
+            //去重过后的新数组
+            foreach ($new_arr as $k=>$v){
+                if ($v > 1){
+                    $again_num += 1;
+                    unset($new_arr[$k]);
+                }
+            }
+
+            $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            foreach ($new_arr as $key=>$val){
+                //判断之前是否有这些订单
+                $another_order = $this->zeelool->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
+                if (!empty($another_order)){
+                    $again_num += 1;
+                }
+            }
+        }
+        return $again_num;
     }
 
     /*
