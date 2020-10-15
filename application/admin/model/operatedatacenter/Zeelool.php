@@ -359,21 +359,20 @@ class Zeelool extends Model
      */
     public function getOrderUnitPrice($time_str = '', $type = 0)
     {
-        $map[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         if ($type == 1) {
             //时间段统计客单价
             $createat = explode(' ', $time_str);
             $where['created_at'] = ['between', [$createat[0], $createat[3]]];
             $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
-            $order_user = $this->zeelool->where($map)->where($where)->count('distinct customer_id');
+            $order_user = $this->zeelool->where($map)->where($where)->count();
             $arr['order_unit_price'] = $order_user != 0 ? round($order_total / $order_user, 2) : 0;
             //同比
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['created_at'] = ['between', [$same_start, $same_end]];
             $same_order_total = $this->zeelool->where($map)->where($same_where)->sum('base_grand_total');
-            $same_order_user = $this->zeelool->where($map)->where($same_where)->count('distinct customer_id');
+            $same_order_user = $this->zeelool->where($map)->where($same_where)->count();
             $same_order_unit_price = $same_order_user != 0 ? round($same_order_total / $same_order_user, 2) : 0;
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
             //环比
@@ -381,7 +380,7 @@ class Zeelool extends Model
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['created_at'] = ['between', [$huan_start, $huan_end]];
             $huan_order_total = $this->zeelool->where($map)->where($huan_where)->sum('base_grand_total');
-            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count('distinct customer_id');
+            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count();
             $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total / $huan_order_user, 2) : 0;
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         } else {
@@ -391,7 +390,7 @@ class Zeelool extends Model
             if (!$time_str || $time_str == $start) {
                 //获取当天的客单价
                 $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
-                $order_user = $this->zeelool->where($map)->where($where)->count('distinct customer_id');
+                $order_user = $this->zeelool->where($map)->where($where)->count();
                 $arr['order_unit_price'] = $order_user != 0 ? round($order_total / $order_user, 2) : 0;
             } else {
                 //读取数据库中的客单价
@@ -402,7 +401,7 @@ class Zeelool extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_total = $this->zeelool->where($map)->where($same_where)->sum('base_grand_total');
-            $same_order_user = $this->zeelool->where($map)->where($same_where)->count('distinct customer_id');
+            $same_order_user = $this->zeelool->where($map)->where($same_where)->count();
             $same_order_unit_price = $same_order_user != 0 ? round($same_order_total / $same_order_user, 2) : 0;
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
             //环比
@@ -410,7 +409,7 @@ class Zeelool extends Model
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_total = $this->zeelool->where($map)->where($huan_where)->sum('base_grand_total');
-            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count('distinct customer_id');
+            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count();
             $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total / $huan_order_user, 2) : 0;
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         }
