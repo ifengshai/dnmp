@@ -232,39 +232,31 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            if ($order_platform == 1) {
-                $model_operate = $this->zeeloolOperate;
-            } elseif ($order_platform == 2) {
-                $model_operate = $this->vooguemeOperate;
-            } elseif ($order_platform == 3) {
-                $model_operate = $this->nihaoOperate;
-            }
             //查询时间段内每天的客单价,中位数，标准差
             $time_str = $params['time_str'];
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $where['site'] = $order_platform;
-            $order_info = $model_operate->where($where)->field('order_unit_price,day_date,order_total_midnum,order_total_standard')->select();
-            foreach ($order_info as $key=>$value){
-            }
-            $json['xColumnName'] = $order_info['day_date'] ? $order_info['day_date'] :[];
+            $order_info = Db::name('datacenter_day')->where($where)->field('day_date,order_unit_price,order_total_midnum,order_total_standard')->select();
+            $order_info = collection($order_info)->toArray();
+            $json['xColumnName'] = array_column($order_info,'day_date') ? array_column($order_info,'day_date') :[];
             $json['columnData'] = [
                 [
                     'type' => 'bar',
                     'barWidth' => '20%',
-                    'data' => $order_info['order_unit_price'] ? $order_info['order_unit_price']:[],
+                    'data' => array_column($order_info,'order_unit_price') ? array_column($order_info,'order_unit_price'):[],
                     'name' => '客单价'
                 ],
                 [
                     'type' => 'bar',
                     'barWidth' => '20%',
-                    'data' => $order_info['order_total_midnum'] ? $order_info['order_total_midnum']:[],
+                    'data' => array_column($order_info,'order_total_midnum') ? array_column($order_info,'order_total_midnum'):[],
                     'name' => '中位数'
                 ],
                 [
                     'type' => 'line',
                     'yAxisIndex' => 1,
-                    'data' => $order_info['order_total_standard'] ? $order_info['order_total_standard']:[],
+                    'data' => array_column($order_info,'order_total_standard') ? array_column($order_info,'order_total_standard'):[],
                     'name' => '标准差'
                 ]
 
