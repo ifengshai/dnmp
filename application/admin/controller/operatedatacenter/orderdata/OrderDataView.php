@@ -233,96 +233,43 @@ class OrderDataView extends Backend
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
             if ($order_platform == 1) {
-                $model = $this->zeelool;
                 $model_operate = $this->zeeloolOperate;
             } elseif ($order_platform == 2) {
-                $model = $this->voogueme;
                 $model_operate = $this->vooguemeOperate;
             } elseif ($order_platform == 3) {
-                $model = $this->nihao;
                 $model_operate = $this->nihaoOperate;
             }
-            //查询时间段内每天的客单价,中位数，订单金额
+            //查询时间段内每天的客单价,中位数，标准差
             $time_str = $params['time_str'];
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $where['site'] = $order_platform;
-            $order_unit_price = $model_operate->where($where)->field('order_unit_price,day_date,sales_total_money,order_total_midnum')->select();
-            foreach ($order_unit_price as $value){
-                $standard = 1;
+            $order_info = $model_operate->where($where)->field('order_unit_price,day_date,order_total_midnum,order_total_standard')->select();
+            foreach ($order_info as $key=>$value){
             }
-
-
-
-
-            //获取所有的订单的国家
-            $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
-            $arr = array();
-            foreach ($country_arr as $key=>$value){
-                $arr[$key][] = $value['count'];
-                $arr[$key][] = $value['count'];
-                $arr[$key][] = $value['country_id'];
-                $lens = strlen((string)$value['count']);
-                if($lens <= 5){
-                    $xishu = str_pad(1,5-$lens,"0",STR_PAD_RIGHT);
-                }else{
-                    $xishu = 1;
-                }
-                $arr[$key][] = $value['count']*$xishu/200;
-            }
-            $json['xColumnName'] = $json2['xColumnName'] = $create_date ? $create_date :[];
+            $json['xColumnName'] = $order_info['day_date'] ? $order_info['day_date'] :[];
             $json['columnData'] = [
                 [
                     'type' => 'bar',
                     'barWidth' => '20%',
-                    'data' => $frame_sales_num ? $frame_sales_num:[],
-                    'name' => '眼镜销售副数'
+                    'data' => $order_info['order_unit_price'] ? $order_info['order_unit_price']:[],
+                    'name' => '客单价'
                 ],
-                [
-                    'type' => 'line',
-                    'yAxisIndex' => 1,
-                    'data' => $frame_in_print_num ? $frame_in_print_num:[],
-                    'name' => '眼镜动销数'
-                ]
-
-            ];
-            $json2['columnData'] = [
                 [
                     'type' => 'bar',
                     'barWidth' => '20%',
-                    'data' => $decoration_sales_num ? $decoration_sales_num:[],
-                    'name' => '配饰销售副数'
+                    'data' => $order_info['order_total_midnum'] ? $order_info['order_total_midnum']:[],
+                    'name' => '中位数'
                 ],
                 [
                     'type' => 'line',
                     'yAxisIndex' => 1,
-                    'data' => $decoration_in_print_num ? $decoration_in_print_num:[],
-                    'name' => '配饰动销数'
+                    'data' => $order_info['order_total_standard'] ? $order_info['order_total_standard']:[],
+                    'name' => '标准差'
                 ]
+
             ];
-            if($params['key'] == 'frame_sales_num'){
-                return json(['code' => 1, 'data'=>$json]);
-
-            }elseif($params['key'] == 'decoration_sales_num'){
-                return json(['code' => 1, 'data'=>$json2]);
-            }else{
-                $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
-                if(!$result){
-                    return $this->error('暂无数据');
-                }
-                return json(['code' => 1, 'rows' => $result]);
-            }
+            return json(['code' => 1, 'data'=>$json]);
         }
-    }
-    /*
-     * 中位数
-     * */
-    function median($numbers)
-    {
-        sort($numbers);
-        $totalNumbers = count($numbers);
-        $mid = floor($totalNumbers / 2);
-
-        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
     }
 }
