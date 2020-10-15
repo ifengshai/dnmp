@@ -138,6 +138,7 @@ class MagentoPlatform extends Model
                 $arr[$v['id']]['id'] = $v['id'];
             }
         }
+        // dump($arr);die;
         return $arr ?? [];
     }
     /**

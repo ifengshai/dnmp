@@ -94,22 +94,40 @@ class Admin extends Backend
             foreach ($groups as $m => $n) {
                 $adminGroupName[$this->auth->id][$n['id']] = $n['name'];
             }
+
+            //自定义组别筛选项
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['groups_text']) {
+                $id_arr = [];
+                foreach ($adminGroupName as $key=>$value){
+                    foreach ($value as $ki=>$val){
+                        if(strpos($val,$filter['groups_text']) !== false){
+                            $id_arr[] = $key;
+                        }
+                    }
+                }
+                $id_arr = array_unique($id_arr);
+                unset($filter['groups_text']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $id_arr = $this->childrenAdminIds;
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where('id', 'in', $this->childrenAdminIds)
+                ->where('id', 'in', $id_arr)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
-                ->where('id', 'in', $this->childrenAdminIds)
+                ->where('id', 'in', $id_arr)
                 ->field(['password', 'salt', 'token'], true)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            
-			
+
 			foreach ($list as $k => &$v) {
                 $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
                 $v['groups'] = implode(',', array_keys($groups));
@@ -117,8 +135,6 @@ class Admin extends Backend
 				if($v['department_id'] != null){
 					$v['department_id'] = self::return_department_name($v['department_id']);
 				}
-				
-				
 			}
             unset($v);
             $result = array("total" => $total, "rows" => $list);
