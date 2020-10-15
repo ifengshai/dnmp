@@ -705,7 +705,37 @@ class TrackReg extends Backend
             return $finalResult;
         }
     }
+    /**
+     *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
+     */
+    function median($numbers)
+    {
+        sort($numbers);
+        $totalNumbers = count($numbers);
+        $mid = floor($totalNumbers / 2);
 
+        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
+    }
+    /**
+     * 得到数组的标准差
+     * @param unknown type $avg
+     * @param Array $list
+     * @param Boolen $isSwatch
+     * @return unknown type
+     */
+    function getVariance($arr) {
+        $length = count($arr);
+        if ($length == 0) {
+            return 0;
+        }
+        $average = array_sum($arr)/$length;
+        $count = 0;
+        foreach ($arr as $v) {
+            $count += pow($average-$v, 2);
+        }
+        $variance = $count/$length;
+        return sqrt($variance);
+    }
     //运营数据中心
     public function zeelool_day_data()
     {
@@ -720,55 +750,78 @@ class TrackReg extends Backend
 
         //查询时间
 
-            $arr = [];
-            $arr['site'] = 1;
-            $arr['day_date'] = $date_time;
-            //活跃用户数
-            $arr['active_user_num'] = $this->google_active_user(1, $date_time);
-            //注册用户数
-            $register_where = [];
-            $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-            $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
-            //新增vip用户数
-            $vip_where = [];
-            $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
-            $vip_where['order_status'] = 'Success';
-            $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
-            //订单数
-            $order_where = [];
-            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $arr['order_num'] = $this->zeelool->where($order_where)->count();
-            //销售额
-            $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
-            //邮费
-            $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-            //购买人数
-            $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
-            //客单价
-            // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
-            //会话
-            $arr['sessions'] = $this->google_session(1, $date_time);
-            //新建购物车数量
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-            $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
-            //更新购物车数量
-            $cart_where2 = [];
-            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-            $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
-            //新增加购率
-            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
-            //更新加购率
-            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
-            //新增购物车转化率
-            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
-            //更新购物车转化率
-            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
-            //插入数据
-            Db::name('datacenter_day')->insert($arr);
-            echo $date_time . "\n";
-            usleep(100000);
+        $arr = [];
+        $arr['site'] = 1;
+        $arr['day_date'] = $date_time;
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        //注册用户数
+        $register_where = [];
+        $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
+        //新增vip用户数
+        $vip_where = [];
+        $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
+        $vip_where['order_status'] = 'Success';
+        $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
+        //订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $arr['order_num'] = $this->zeelool->where($order_where)->count();
+        //销售额
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+        //邮费
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
+        //购买人数
+        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+        //客单价
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+
+        $order_where1 = [];
+        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
+        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
+        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
+        //客单价
+        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
+        //会话
+        $arr['sessions'] = $this->google_session(1, $date_time);
+        //新建购物车数量
+        $cart_where1 = [];
+        $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+        //更新购物车数量
+        $cart_where2 = [];
+        $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+        //新增购物车转化率
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+        //更新购物车转化率
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+        //插入数据
+        Db::name('datacenter_day')->insert($arr);
+        echo $date_time . "\n";
+        usleep(100000);
+
 
     }
 
@@ -812,6 +865,33 @@ class TrackReg extends Backend
         $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
+
+
+        $order_where1 = [];
+        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
+        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
+        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
+        //客单价
+        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
+
+
+
         //会话
         $arr['sessions'] = $this->google_session(2, $date_time);
         //新建购物车数量
@@ -876,6 +956,31 @@ class TrackReg extends Backend
         // $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
+
+        $order_where1 = [];
+        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
+        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
+        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
+        //客单价
+        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
+
+
         //会话
         $arr['sessions'] = $this->google_session(3, $date_time);
         //新建购物车数量

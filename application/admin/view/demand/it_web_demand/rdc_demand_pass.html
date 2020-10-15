@@ -1,0 +1,26 @@
+<style>
+    /*左边div -- start*/
+    .left_input{
+        width: 100%;
+    }
+    .left_input .item_button{
+        text-align: center;
+        height: 70px;
+        line-height: 70px;
+        margin-top: 40px;
+    }
+    .all_div form{
+        width: 33%;
+    }
+</style>
+
+<form role="form" method="POST" id="rdc_demand_pass" data-toggle="validator" action="">
+    <input type="hidden" name="id" value="{$row.id}">
+    <div class="left_input">
+        <div class="item_button">
+            <input type="hidden" name="pm_audit_status" id="pm_audit_status" value="" ><!--审核状态-->
+            <button type="submit" value="pass" class="btn btn-sub" style='background-color: #03A7EF;width: 40%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('通过')}</button>
+            <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #FF0000;width: 40%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+        </div>
+    </div>
+</form>
