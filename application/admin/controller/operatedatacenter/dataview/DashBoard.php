@@ -127,13 +127,8 @@ class DashBoard extends Backend
         }
     }
 
-    /**
+    /*
      * 活跃用户折线图
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/10/14
-     * Time: 9:56:18
      */
     public function active_user_trend()
     {
@@ -204,13 +199,8 @@ class DashBoard extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
-    /**
-     * 订单趋势统计折线图
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/10/14
-     * Time: 9:56:18
+    /*
+     * 订单趋势折线图
      */
     public function order_trend()
     {

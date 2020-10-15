@@ -28,7 +28,7 @@ class Datacenter extends Model
         $this->nihao = new \app\admin\model\order\order\Nihao();
     }
 
-    //活跃用户数
+    //活跃用户数 调用此方法
     public function google_active_user($site, $start_time)
     {
         // dump();die;
@@ -88,7 +88,7 @@ class Datacenter extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
-    //着陆页数据
+    //着陆页数据 调用此方法
     public function google_landing($site, $start_time)
     {
         $end_time = $start_time;
@@ -105,7 +105,7 @@ class Datacenter extends Model
         return $result;
         // return $result[0]['ga:secondPagePath'] ? round($result[0]['ga:secondPagePath'], 2) : 0;
     }
-    //目标1会话数
+    //目标1会话数 调用此方法
     public function google_target1($site, $start_time)
     {
         $end_time = $start_time;
@@ -324,7 +324,7 @@ class Datacenter extends Model
         return $analytics->reports->batchGet($body);
     }
 
-    //session
+    //session 调用此方法
     public function google_session($site, $start_time)
     {
         // dump();die;
@@ -573,40 +573,21 @@ class Datacenter extends Model
      */
     public function getAgainUser($time_str = '', $type = 0)
     {
-        if ($type == 1) {
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-        } else {
-            if ($time_str) {
-                $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-                $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $same_where['day_date'] = ['between', [$same_start, $same_end]];
-                $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            } else {
-                $start = $end = date('Y-m-d');
-                $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($start)));
-                $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($start)));
-                $where['day_date'] = ['between', [$start, $end]];
-                $same_where['day_date'] = ['between', [$same_start, $same_end]];
-                $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            }
-        }
-        $arr['order_unit_price'] = $this->where($where)->sum('order_unit_price');
-        $same_order_unit_price = $this->where($same_where)->sum('order_unit_price');
-        $huan_order_unit_price = $this->where($huan_where)->sum('order_unit_price');
+        $arrzeelool = $this->zeelool->getAgainUser($time_str);
+        $arrvoogueme = $this->voogueme->getAgainUser($time_str);
+        $arrnihao = $this->nihao->getAgainUser($time_str);
+        //三个站所有的复购用户数
+        $arrs['again_user_num'] = $arrzeelool['again_user_num'] + $arrvoogueme['again_user_num'] + $arrnihao['again_user_num'];
+        //三个站所有的同比复购用户数
+        $same_again_num = $arrzeelool['same_again_user_num'] + $arrvoogueme['same_again_user_num'] + $arrnihao['same_again_user_num'];
+        //三个站所有的环比复购用户数
+        $huan_again_num = $arrzeelool['huan_again_user_num'] + $arrvoogueme['huan_again_user_num'] + $arrnihao['huan_again_user_num'];
+        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2) . '%';
+        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2) . '%';
+        return $arrs;
 
-        $arr['same_order_unit_price'] = $arr['order_unit_price'] == 0 ? '100' . '%' : round(($same_order_unit_price - $arr['order_unit_price']) / $arr['order_unit_price'] * 100, 2) . '%';
-        $arr['huan_order_unit_price'] = $arr['order_unit_price'] == 0 ? '100' . '%' : round(($huan_order_unit_price - $arr['order_unit_price']) / $arr['order_unit_price'] * 100, 2) . '%';
-
-        return $arr;
     }
+
 
     /**
      * vip用户数
@@ -661,8 +642,7 @@ class Datacenter extends Model
         $vip_where['order_status'] = 'Success';
         //今天的实时vip用户数 三个站相加
         $today_register_user_num = ($this->zeelool->table('oc_vip_order')->where($vip_where)->where($register_where)->count()
-            + ($this->voogueme->table('oc_vip_order')->where($vip_where)->where($register_where)->count())
-            + ($this->nihao->table('oc_vip_order')->where($vip_where)->where($register_where)->count()));
+            + ($this->voogueme->table('oc_vip_order')->where($vip_where)->where($register_where)->count()));
 
         if ($type == 1) {
             $createat = explode(' ', $time_str);
