@@ -510,6 +510,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                         $('#order_platform').val(3);
                     } else if (site == 'Meeloog') {
                         $('#order_platform').val(4);
+                    } else if (site == 'Zeelool_Es') {
+                        $('#order_platform').val(9);
+                    } else if (site == 'Zeelool_De') {
+                        $('#order_platform').val(10);
                     }
                 }
             })
