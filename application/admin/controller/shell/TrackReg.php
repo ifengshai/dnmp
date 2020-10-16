@@ -736,6 +736,11 @@ class TrackReg extends Backend
         $variance = $count/$length;
         return sqrt($variance);
     }
+
+    public function zeelool_day_sku_data()
+    {
+
+    }
     //运营数据中心
     public function zeelool_day_data()
     {

@@ -177,7 +177,7 @@ class ItemPlatformSku extends Model
     public function getWebSkuAll($platform_type = '')
     {
         $map['platform_type'] = $platform_type;
-        return $this->where($map)->column('sku,outer_sku_status,stock', 'platform_sku');
+        return $this->where($map)->column('sku,outer_sku_status,stock,grade', 'platform_sku');
     }
 
 
