@@ -934,14 +934,16 @@ class TrackReg extends Backend
         //所有状态下的在途和待入库清零
         $_item = new \app\admin\model\itemmanage\Item;
         $_item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $res_item = $_item->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['on_way_stock'=>0,'wait_instock_num'=>0]);
+        //update fa_item set on_way_stock=0,wait_instock_num=0 where id > 0;
+        /*$res_item = $_item->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['on_way_stock'=>0,'wait_instock_num'=>0]);
         if(!$res_item){
             echo '全部清零失败';exit;
-        }
-        $res_item_platform = $_item_platform->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['plat_on_way_stock'=>0,'wait_instock_num'=>0]);
+        }*/
+        //update fa_item_platform_sku set plat_on_way_stock=0,wait_instock_num=0 where id > 0;
+        /*$res_item_platform = $_item_platform->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['plat_on_way_stock'=>0,'wait_instock_num'=>0]);
         if(!$res_item_platform){
             echo '站点清零失败';exit;
-        }
+        }*/
 
         //审核通过、录入物流单、签收状态下的加在途
         $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
@@ -992,41 +994,41 @@ class TrackReg extends Backend
             ->select();
 
         foreach ($row as $v) {
-            /*if ($v['batch_id']) {
-                $list = $_batch_item
-                    ->where(['purchase_batch_id' => $v['batch_id']])
-                    ->field('website_type,rate')
-                    ->select();
-                foreach ($list as $val) {
-                    //获取各站点比例
-                    $rate_arr = $_new_product_mapping
-                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
-                        ->field('arrival_num,sku')
-                        ->select();
-
-                    //在途库存数量
-                    $stock_num = $val['arrival_num'];
-
-                    //在途库存分站 更新映射关系表
-                    foreach ($rate_arr as $key => $vall) {
-                        if ((1 == count($rate_arr) - $key)) {//剩余数量分给最后一个站
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
-                            //更新站点待入库数量
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
-                        } else {
-                            $num = round($val['arrival_num'] * $vall['rate']);
-                            $stock_num -= $num;
-                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                            //更新站点待入库数量
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
-                        }
-                    }
-                    //减全部的在途库存
-                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
-                    //加全部的待入库数量
-                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
-                }
-            } else {
+//            if ($v['batch_id']) {
+//                $list = $_batch_item
+//                    ->where(['purchase_batch_id' => $v['batch_id']])
+//                    ->field('website_type,rate')
+//                    ->select();
+//                foreach ($list as $val) {
+//                    //获取各站点比例
+//                    $rate_arr = $_new_product_mapping
+//                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
+//                        ->field('arrival_num,sku')
+//                        ->select();
+//
+//                    //在途库存数量
+//                    $stock_num = $val['arrival_num'];
+//
+//                    //在途库存分站 更新映射关系表
+//                    foreach ($rate_arr as $key => $vall) {
+//                        if ((1 == count($rate_arr) - $key)) {//剩余数量分给最后一个站
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
+//                            //更新站点待入库数量
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
+//                        } else {
+//                            $num = round($val['arrival_num'] * $vall['rate']);
+//                            $stock_num -= $num;
+//                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+//                            //更新站点待入库数量
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
+//                        }
+//                    }
+//                    //减全部的在途库存
+//                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
+//                    //加全部的待入库数量
+//                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
+//                }
+//            } else {
                 if ($v['purchase_id']) {
                     $list = $_purchase_order_item
                         ->where(['purchase_id' => $v['purchase_id']])
@@ -1062,43 +1064,7 @@ class TrackReg extends Backend
                         $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
                     }
                 }
-            }*/
-
-            if ($v['purchase_id']) {
-                $list = $_purchase_order_item
-                    ->where(['purchase_id' => $v['purchase_id']])
-                    ->field('purchase_num,sku')
-                    ->select();
-                foreach ($list as $val) {
-                    //获取各站点比例
-                    $rate_arr = $_new_product_mapping
-                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
-                        ->field('website_type,rate')
-                        ->select();
-
-                    //在途库存数量
-                    $stock_num = $val['purchase_num'];
-
-                    //在途库存分站 更新映射关系表
-                    foreach ($rate_arr as $key => $vall) {
-                        if ((count($rate_arr) - $key) == 1) {//剩余数量分给最后一个站
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
-                            //更新站点待入库数量
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
-                        } else {
-                            $num = round($val['purchase_num'] * $vall['rate']);
-                            $stock_num -= $num;
-                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                            //更新站点待入库数量
-                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
-                        }
-                    }
-                    //减全部的在途库存
-                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
-                    //加全部的待入库数量
-                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
-                }
-            }
+//            }
         }
     }
 
