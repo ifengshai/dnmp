@@ -79,14 +79,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        //console.log(row.assign_id)
-                                        if( Config.admin_id == 1 || Config.admin_id == 75 ||Config.admin_id == 181){
+                                        var range = [row.due_id,1,75,95,114,116,117,181];
+                                        if(-1 != $.inArray(Config.admin_id, range)){
                                             return true;
-                                        }
-                                        if(row.due_id != Config.admin_id){
+                                        }else{
                                             return false;
                                         }
-                                        return true;
                                     }
                                 },
                                 {
