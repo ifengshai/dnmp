@@ -987,7 +987,7 @@ class TrackReg extends Backend
 //        $_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
         $row = $_logistics_info
             ->alias('a')
-            ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=c.id')
+            ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
             ->field('a.batch_id,a.purchase_id,b.replenish_id')
             ->where(['b.stock_status'=>['in',[0,1]]])
             ->where(['b.purchase_status'=>['in',[7,9]]])
