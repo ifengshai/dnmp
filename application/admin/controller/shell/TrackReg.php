@@ -940,11 +940,11 @@ class TrackReg extends Backend
             ->group('sku')
             ->select();
         foreach($list as $val){
-            $res_item = $_item->allowField(true)->isUpdate(true, ['sku'=>$val['sku']])->save(['on_way_stock'=>$val['all_on_way'],'wait_instock_num'=>$val['all_instock']]);
+            $res_item = $_item->where(['sku'=>$val['sku']])->update(['on_way_stock'=>$val['all_on_way'],'wait_instock_num'=>$val['all_instock']]);
             if($res_item){
-               echo $val['sku'].':success<br/>';
+               echo $val['sku'].":success\n";
             }else{
-                echo $val['sku'].':false<br/>';
+                echo $val['sku'].":false\n";
             }
         }
         exit;
