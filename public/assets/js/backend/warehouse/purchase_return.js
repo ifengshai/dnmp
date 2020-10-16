@@ -108,6 +108,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             });
 
+            //批量录入物流单号
+            $(document).on('click', ".btn-logistics", function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length <= 0) {
+                    Layer.alert('请先选择单据！！');
+                    return false;
+                }
+                var url = 'warehouse/purchase_return/logistics/do_type/1?ids=' + ids;
+                Fast.api.open(url, __('录入物流单号'), {area: ['50%', '60%']});
+            });
+
         },
         add: function () {
             Controller.api.bindevent();
