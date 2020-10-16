@@ -477,6 +477,10 @@ class OrderReturn extends Backend
             // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
+
+            if('660000123'==$increment_id){
+                print_R($customer);
+            }
             $this->view->assign('orderInfoResult', $customer);
 
         
