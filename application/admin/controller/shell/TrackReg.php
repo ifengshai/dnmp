@@ -934,6 +934,21 @@ class TrackReg extends Backend
         //所有状态下的在途和待入库清零
         $_item = new \app\admin\model\itemmanage\Item;
         $_item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $list = $_item_platform
+            ->alias('a')
+            ->field('sku,sum(plat_on_way_stock) as all_on_way,sum(wait_instock_num) as all_instock')
+            ->group('sku')
+            ->select();
+        foreach($list as $val){
+            $res_item = $_item->allowField(true)->isUpdate(true, ['sku'=>$val['sku']])->save(['on_way_stock'=>$val['all_on_way'],'wait_instock_num'=>$val['all_instock']]);
+            if($res_item){
+               echo $val['sku'].':success<br/>';
+            }else{
+                echo $val['sku'].':false<br/>';
+            }
+        }
+        exit;
+
         //update fa_item set on_way_stock=0,wait_instock_num=0 where id > 0;
         /*$res_item = $_item->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['on_way_stock'=>0,'wait_instock_num'=>0]);
         if(!$res_item){
