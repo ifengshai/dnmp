@@ -23,7 +23,7 @@ class Zeelool extends Model
 
     public function __construct()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->model = new \app\admin\model\order\order\Zeelool();
         $this->datacenter = new\app\admin\model\operatedatacenter\Datacenter();
     }
 
@@ -101,7 +101,7 @@ class Zeelool extends Model
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
         //今天的实时注册用户数
-        $today_register_user_num = $this->zeelool->table('customer_entity')->where($register_where)->count();
+        $today_register_user_num = $this->model->table('customer_entity')->where($register_where)->count();
 
         if ($type == 1) {
             $createat = explode(' ', $time_str);
@@ -165,7 +165,7 @@ class Zeelool extends Model
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $start . "'")];
         $vip_where['order_status'] = 'Success';
         //今天的实时vip用户数
-        $today_register_user_num = $this->zeelool->table('oc_vip_order')->where($vip_where)->where($register_where)->count();
+        $today_register_user_num = $this->model->table('oc_vip_order')->where($vip_where)->where($register_where)->count();
 
         if ($type == 1) {
             $createat = explode(' ', $time_str);
@@ -258,7 +258,7 @@ class Zeelool extends Model
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
 
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
-        $order = $this->zeelool
+        $order = $this->model
             ->where($map_where)
             ->where($where)
             ->field('customer_id')
@@ -285,7 +285,7 @@ class Zeelool extends Model
             $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             foreach ($new_arr as $key=>$val){
                 //判断之前是否有这些订单
-                $another_order = $this->zeelool->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
+                $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
                 if (!empty($another_order)){
                     $again_num += 1;
                 }
@@ -378,7 +378,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->zeelool->where($map_where)->where('order_type',1)->where($arr_where)->count();
+        $today_order_num = $this->model->where($map_where)->where('order_type',1)->where($arr_where)->count();
         if ($type == 1) {
             //时间段总和
             $createat = explode(' ', $time_str);
@@ -445,23 +445,23 @@ class Zeelool extends Model
             //时间段统计客单价
             $createat = explode(' ', $time_str);
             $where['created_at'] = ['between', [$createat[0], $createat[3]]];
-            $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
-            $order_user = $this->zeelool->where($map)->where($where)->count();
+            $order_total = $this->model->where($map)->where($where)->sum('base_grand_total');
+            $order_user = $this->model->where($map)->where($where)->count();
             $arr['order_unit_price'] = $order_user != 0 ? round($order_total / $order_user, 2) : 0;
             //同比
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['created_at'] = ['between', [$same_start, $same_end]];
-            $same_order_total = $this->zeelool->where($map)->where($same_where)->sum('base_grand_total');
-            $same_order_user = $this->zeelool->where($map)->where($same_where)->count();
+            $same_order_total = $this->model->where($map)->where($same_where)->sum('base_grand_total');
+            $same_order_user = $this->model->where($map)->where($same_where)->count();
             $same_order_unit_price = $same_order_user != 0 ? round($same_order_total / $same_order_user, 2) : 0;
             $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['created_at'] = ['between', [$huan_start, $huan_end]];
-            $huan_order_total = $this->zeelool->where($map)->where($huan_where)->sum('base_grand_total');
-            $huan_order_user = $this->zeelool->where($map)->where($huan_where)->count();
+            $huan_order_total = $this->model->where($map)->where($huan_where)->sum('base_grand_total');
+            $huan_order_user = $this->model->where($map)->where($huan_where)->count();
             $huan_order_unit_price = $huan_order_user != 0 ? round($huan_order_total / $huan_order_user, 2) : 0;
             $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
         } else {
@@ -470,8 +470,8 @@ class Zeelool extends Model
                 $where = [];
                 $where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $time_str . "'")];
                 //获取当天的客单价
-                $order_total = $this->zeelool->where($map)->where($where)->sum('base_grand_total');
-                $order_user = $this->zeelool->where($map)->where($where)->count();
+                $order_total = $this->model->where($map)->where($where)->sum('base_grand_total');
+                $order_user = $this->model->where($map)->where($where)->count();
                 $arr['order_unit_price'] = $order_user != 0 ? round($order_total / $order_user, 2) : 0;
             } else {
                 $where = [];
@@ -506,7 +506,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_sales_total_money = $this->zeelool->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_grand_total');
+        $today_sales_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_grand_total');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -567,7 +567,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_shipping_total_money = $this->zeelool->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_shipping_amount');
+        $today_shipping_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_shipping_amount');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -628,7 +628,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->zeelool->where($map_where)->where($arr_where)->count();
+        $today_order_num = $this->model->where($map_where)->where($arr_where)->count();
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -658,7 +658,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_total = $this->zeelool->where($map_where)->where($arr_where)->sum('base_grand_total');
+        $today_order_total = $this->model->where($map_where)->where($arr_where)->sum('base_grand_total');
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -688,7 +688,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->zeelool->where($map_where)->where($arr_where)->count();
+        $today_order_num = $this->model->where($map_where)->where($arr_where)->count();
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -718,7 +718,7 @@ class Zeelool extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_total = $this->zeelool->where($map_where)->where($arr_where)->sum('base_grand_total');
+        $today_order_total = $this->model->where($map_where)->where($arr_where)->sum('base_grand_total');
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -791,8 +791,8 @@ class Zeelool extends Model
             $map = [];
             $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
         }
-        $arr['order_num'] = $this->zeelool->where($map_where)->where($arr_where)->where($map)->count();
-        $order_num = $this->zeelool->where($map_where)->where($map)->count();
+        $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
+        $order_num = $this->model->where($map_where)->where($map)->count();
         $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
         return $arr;
     }
@@ -835,10 +835,10 @@ class Zeelool extends Model
             $map = [];
             $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
         }
-        $arr['order_num'] = $this->zeelool->where($map_where)->where($arr_where)->where($map)->count();
-        $order_num = $this->zeelool->where($map_where)->where($map)->count();
+        $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
+        $order_num = $this->model->where($map_where)->where($map)->count();
         $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
-        $order_total = $this->zeelool->where($map_where)->where($arr_where)->where($map)->sum('base_shipping_amount');
+        $order_total = $this->model->where($map_where)->where($arr_where)->where($map)->sum('base_shipping_amount');
         $arr['order_total'] = round($order_total,2);
         return $arr;
     }
