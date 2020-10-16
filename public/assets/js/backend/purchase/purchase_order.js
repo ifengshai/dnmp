@@ -14,6 +14,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     edit_url: 'purchase/purchase_order/edit',
                     // del_url: 'purchase/purchase_order/del',
                     multi_url: 'purchase/purchase_order/multi',
+                    import_url: 'purchase/purchase_order/logistics_info_import',
                     table: 'purchase_order',
                 }
             });
@@ -330,6 +331,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     table.bootstrapTable('refresh');
                 });
             })
+
+
+            
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+                    url: 'purchase/purchase_order/logistics_info_import',
+                    data: { file: data.url },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+
+                });
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -1050,6 +1066,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
 
             });
+
+
+
 
 
         },
