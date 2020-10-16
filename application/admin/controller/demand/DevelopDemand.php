@@ -842,6 +842,12 @@ class DevelopDemand extends Backend
     {
         $id = input('id');
         $row = $this->model->get($id);
+        $user = new \app\admin\model\AuthGroupAccess();
+        //开发组组员ID需要修改
+        $phpUser = $user->field('uid,group_id')->alias('a')
+            ->join(['fa_admin' => 'b'], 'a.uid=b.id')
+            ->where('a.group_id', 72)
+            ->column('nickname','uid');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -874,6 +880,7 @@ class DevelopDemand extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->assign('row', $row);
+        $this->assign('phpUser', $phpUser);//开发组组员
         return $this->view->fetch();
     }
 

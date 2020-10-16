@@ -78,7 +78,7 @@
     <div class="form-group phper_class">
         <label class="control-label col-xs-12 col-sm-2">{:__('负责人')}</label>
         <div class="col-xs-12 col-sm-8">
-            {:Form::select('assign_developer_ids[]', config('develop_demand.phper_user'), null, ['class'=>'form-control
+            {:Form::select('assign_developer_ids[]', $phpUser, null, ['class'=>'form-control
             selectpicker', null,'data-live-search' => true, 'multiple' => true,'id'=>'assign_developer_ids'])}
         </div>
     </div>
