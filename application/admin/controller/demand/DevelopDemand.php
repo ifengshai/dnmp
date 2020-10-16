@@ -846,7 +846,7 @@ class DevelopDemand extends Backend
         //开发组组员ID需要修改
         $phpUser = $user->field('uid,group_id')->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
-            ->where('a.group_id', 72)
+            ->where(['a.group_id' => 112, 'b.status' => 'normal'])
             ->column('nickname','uid');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
