@@ -172,12 +172,12 @@
                 <div class="part-wrap control-wrap">
                     <ul class="type">
                         <li>订单平台</li>
-                        <li class="site {:$order_platform == 1 ? 'active' : ''}">Zeelool</li>
-                        <li class="site {:$order_platform == 2 ? 'active' : ''}">Voogueme</li>
-                        <li class="site {:$order_platform == 3 ? 'active' : ''}">Nihao</li>
-                        <li class="site {:$order_platform == 4 ? 'active' : ''}">Meeloog</li>
-                        <li class="site {:$order_platform == 9 ? 'active' : ''}">Zeelool_Es</li>
-                        <li class="site {:$order_platform == 10 ? 'active' : ''}">Zeelool_De</li>
+                        <li data-id="1" class="site {:$order_platform == 1 ? 'active' : ''}">Zeelool</li>
+                        <li data-id="2" class="site {:$order_platform == 2 ? 'active' : ''}">Voogueme</li>
+                        <li data-id="3" class="site {:$order_platform == 3 ? 'active' : ''}">Nihao</li>
+                        <li data-id="4" class="site {:$order_platform == 4 ? 'active' : ''}">Meeloog</li>
+                        <li data-id="9" class="site {:$order_platform == 9 ? 'active' : ''}">Zeelool_Es</li>
+                        <li data-id="10" class="site {:$order_platform == 10 ? 'active' : ''}">Zeelool_De</li>
                         <!-- <li class="site">Wesee</li> -->
                     </ul>
                     <form id="form1" role="form" action="{:url('/admin/saleaftermanage/order_return/search')}"
