@@ -937,6 +937,8 @@ class TrackReg extends Backend
         $list = $_item_platform
             ->alias('a')
             ->field('sku,sum(plat_on_way_stock) as all_on_way,sum(wait_instock_num) as all_instock')
+            ->whereOr('plat_on_way_stock > 0')
+            ->whereOr('wait_instock_num > 0')
             ->group('sku')
             ->select();
         foreach($list as $val){
