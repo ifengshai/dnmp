@@ -213,7 +213,7 @@ class Test4 extends Controller
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-10-30' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-16' and '2020-10-30' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
