@@ -2,6 +2,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
     var Controller = {
         index: function () {
+            // var sku = $('#sku').val();
+            // var platform = $('#order_platform').val();
+
+            // Backend.api.ajax({
+            //     url: "operatedatacenter/goodsdata/single_item/index",
+            //     data: {
+            //         'sku': sku,
+            //         'platform': platform
+            //     }
+            // },function(data,ret){
+            //     alert(ret.msg);
+            //     return false;
+            // });
+
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
@@ -24,16 +38,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('订单编号') },
-                        { field: 'id', title: __('订单状态') },
-                        { field: 'id', title: __('金额') },
-                        { field: 'id', title: __('优惠金额') },
-                        { field: 'id', title: __('订单日期') },
-                        { field: 'id', title: __('支付邮箱') }
+                        { field: 'increment_id', title: __('订单编号') },
+                        { field: 'status', title: __('订单状态') },
+                        { field: 'base_grand_total', title: __('金额') },
+                        { field: 'base_discount_amount', title: __('优惠金额') },
+                        { field: 'created_at', title: __('订单日期') },
+                        { field: 'payer_email', title: __('支付邮箱') }
                     ]
                 ]
             });
+            var params = table.bootstrapTable('getOptions')
+            params.queryParams = function(params) {
 
+                //定义参数
+                var filter = {};
+                //遍历form 组装json
+                $.each($("#form").serializeArray(), function(i, field) {
+                    filter[field.name] = field.value;
+                });
+
+                //参数转为json字符串
+                params.filter = JSON.stringify(filter)
+                console.info(params);
+                return params;
+            }
+
+            table.bootstrapTable('refresh',params);
             // 为表格绑定事件
             Table.api.bindevent(table);
 
