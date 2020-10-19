@@ -30,6 +30,7 @@ class OrderDataChange extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $start = date('Y-m-d');
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -37,11 +38,10 @@ class OrderDataChange extends Backend
                 unset($filter['time_str']);
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
-                if($createat[0] == $createat[3]){
-                    $today_flag = date('Y-m-d');
+                if($createat[3] >= $start){
+                    $today_flag = $start;
                 }
             } else{
-                $start = date('Y-m-d');
                 $map = [];
                 $map[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $start . "'")];
                 $today_flag = $start;
@@ -86,7 +86,8 @@ class OrderDataChange extends Backend
             $list = collection($list)->toArray();
             if($today_flag){
                 $data['day_date'] = $today_flag;
-                $data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
+                //$data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
+                $data['sessions'] = 0;
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
