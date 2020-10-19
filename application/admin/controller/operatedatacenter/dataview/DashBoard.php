@@ -53,6 +53,7 @@ class DashBoard extends Backend
      */
     public function index()
     {
+        // dump(1111);die;
         //默认进入页面是z站的数据
         // 活跃用户数
         $active_user_num = $this->zeeloolOperate->getActiveUser();
@@ -107,22 +108,22 @@ class DashBoard extends Backend
                     break;
             }
             //活跃用户数
-            $active_user_num = $model->getActiveUser($time_str,1);
+            $active_user_num = $model->getActiveUser($time_str, 1);
             //注册用户数
-            $register_user_num = $model->getRegisterUser($time_str,1);
+            $register_user_num = $model->getRegisterUser($time_str, 1);
             //复购用户数
-            $again_user_num = $model->getAgainUser($time_str,1);
+            $again_user_num = $model->getAgainUser($time_str, 1);
             //vip用户数
-            $vip_user_num = $model->getVipUser($time_str,1);
+            $vip_user_num = $model->getVipUser($time_str, 1);
             //订单数
-            $order_num = $model->getOrderNum($time_str,1);
+            $order_num = $model->getOrderNum($time_str, 1);
             //客单价
-            $order_unit_price = $model->getOrderUnitPrice($time_str,1);
+            $order_unit_price = $model->getOrderUnitPrice($time_str, 1);
             //销售额
-            $sales_total_money = $model->getSalesTotalMoney($time_str,1);
+            $sales_total_money = $model->getSalesTotalMoney($time_str, 1);
             //邮费
-            $shipping_total_money = $model->getShippingTotalMoney($time_str,1);
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money','active_user_num','register_user_num','again_user_num','vip_user_num');
+            $shipping_total_money = $model->getShippingTotalMoney($time_str, 1);
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
             $this->success('', '', $data);
         }
     }
@@ -159,31 +160,31 @@ class DashBoard extends Backend
             if ($time_str) {
                 $createat = explode(' ', $time_str);
 
-                    $first_sales_total = $model->getActiveUser($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['active_user_num']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getActiveUser($next_day);
-                            $date_arr[$next_day] = $next_sales_total['active_user_num'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
+                $first_sales_total = $model->getActiveUser($createat[0]);
+                $date_arr = array(
+                    $createat[0] => $first_sales_total['active_user_num']
+                );
+                if ($createat[0] != $createat[3]) {
+                    for ($i = 0; $i <= 100; $i++) {
+                        $m = $i + 1;
+                        $deal_date = date_create($createat[0]);
+                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
+                        $next_day = date_format($deal_date, "Y-m-d");
+                        $next_sales_total = $model->getActiveUser($next_day);
+                        $date_arr[$next_day] = $next_sales_total['active_user_num'];
+                        if ($next_day == $createat[3]) {
+                            break;
                         }
                     }
+                }
 
             } else {
                 $now_day = date('Y-m-d');
-                    //今天的订单数
-                    $today_order_num = $model->getActiveUser();
-                    $date_arr[$now_day] = $today_order_num['active_user_num'];
+                //今天的订单数
+                $today_order_num = $model->getActiveUser();
+                $date_arr[$now_day] = $today_order_num['active_user_num'];
             }
-                $name = '活跃用户数';
+            $name = '活跃用户数';
 
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
@@ -199,6 +200,7 @@ class DashBoard extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+
     /*
      * 订单趋势折线图
      */
@@ -271,16 +273,12 @@ class DashBoard extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+
     /*
      * 用户购买转化漏斗
      */
     public function user_change_trend()
     {
-        //着陆页数据
-        $landing = $this->datacenterday->google_landing(1,'2020-10-12');
-        dump($landing);die;
-        // $date_arr = ["2020-10-07" => 0, "2020-10-08" => 0, "2020-10-09" => 1, "2020-10-10" => 500, "2020-10-11" => 20, "2020-10-12" => 1000];
-
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
@@ -299,39 +297,31 @@ class DashBoard extends Backend
                     break;
             }
             $time_str = $params['time_str'];
+            if ($time_str) {
+                //着陆页数据
+                $landing_num = $model->getLanding($time_str,1);
+                $detail_num = $model->getDetail($time_str,1);
+                $cart_num = $model->getCart($time_str,1);
+                $complete_num = $model->getComplete($time_str,1);
+            }else {
+                //着陆页数据
+                $landing_num = $model->getLanding();
+                $detail_num = $model->getDetail();
+                $cart_num = $model->getCart();
+                $complete_num = $model->getComplete();
+            }
 
             if ($order_platform) {
                 $where['site'] = $order_platform;
             }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
 
-                $first_sales_total = $model->getOrderNum($createat[0]);
-                $date_arr = array(
-                    $createat[0] => $first_sales_total['order_num']
-                );
-                if ($createat[0] != $createat[3]) {
-                    for ($i = 0; $i <= 100; $i++) {
-                        $m = $i + 1;
-                        $deal_date = date_create($createat[0]);
-                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                        $next_day = date_format($deal_date, "Y-m-d");
-                        $next_sales_total = $model->getOrderNum($next_day);
-                        $date_arr[$next_day] = $next_sales_total['order_num'];
-                        if ($next_day == $createat[3]) {
-                            break;
-                        }
-                    }
-                }
-
-            } else {
-                $now_day = date('Y-m-d');
-                //今天的订单数
-                $today_order_num = $model->getOrderNum();
-                $date_arr[$now_day] = $today_order_num['order_num'];
-            }
             $name = '用户购买转化漏斗';
-            $date_arr = [['value'=>60,'name'=>'着陆页'],['value'=>20,'name'=>'着陆页2'],['value'=>10,'name'=>'着陆页1']];
+            $date_arr = [
+                ['value' => $landing_num['landing_num'], 'name' => '着陆页'],
+                ['value' => $detail_num['detail_num'], 'name' => '商品详情页'],
+                ['value' => $cart_num['cart_num'], 'name' => '加购物车'],
+                ['value' => $complete_num['complete_num'], 'name' => '支付转化']
+            ];
 
             $json['column'] = [$name];
             $json['columnData'] = $date_arr;

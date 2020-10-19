@@ -24,7 +24,146 @@ class Zeelool extends Model
     public function __construct()
     {
         $this->model = new \app\admin\model\order\order\Zeelool();
-        $this->datacenter = new\app\admin\model\operatedatacenter\Datacenter();
+    }
+    //获取着陆页数据
+    public function getLanding($time_str = '', $type = 0)
+    {
+        $start = date('Y-m-d');
+// dump($time_str);
+// dump($type);
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间的数据
+            $active_user_num = $this->where($where)->sum('landing_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_landing(1, $start);
+                $arr['landing_num'] = $active_user_num + $today_active_user;
+            } else {
+                $arr['landing_num'] = $active_user_num;
+            }
+        } else {
+            //查询某天的数据
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_landing(1, $start);
+                $arr['landing_num'] = $today_active_user;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['landing_num'] = $this->where($where)->sum('landing_num');
+            }
+        }
+
+        return $arr;
+    }
+    //产品详情页
+    public function getDetail($time_str = '', $type = 0)
+    {
+        $start = date('Y-m-d');
+
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间的数据
+            $active_user_num = $this->where($where)->sum('detail_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target13(1, $start);
+                $arr['detail_num'] = $active_user_num + $today_active_user;
+            } else {
+                $arr['detail_num'] = $active_user_num;
+            }
+        } else {
+            //查询某天的数据
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target13(1, $start);
+                $arr['detail_num'] = $today_active_user;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['detail_num'] = $this->where($where)->sum('detail_num');
+            }
+        }
+
+        return $arr;
+    }
+    //加购
+    public function getCart($time_str = '', $type = 0)
+    {
+        $start = date('Y-m-d');
+
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间的数据
+            $active_user_num = $this->where($where)->sum('cart_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target1(1, $start);
+                $arr['cart_num'] = $active_user_num + $today_active_user;
+            } else {
+                $arr['cart_num'] = $active_user_num;
+            }
+        } else {
+            //查询某天的数据
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target1(1, $start);
+                $arr['cart_num'] = $today_active_user;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['cart_num'] = $this->where($where)->sum('cart_num');
+            }
+        }
+
+        return $arr;
+    }
+    //交易次数
+    public function getComplete($time_str = '', $type = 0)
+    {
+        $start = date('Y-m-d');
+        if ($type == 1) {
+            $createat = explode(' ', $time_str);
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            //这段时间的数据
+            $active_user_num = $this->where($where)->sum('complete_num');
+            //判断是否包含当天数据，如果包含需要加上今天的数据
+            if ($start <= $createat[3]) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target_end(1, $start);
+                $arr['complete_num'] = $active_user_num + $today_active_user;
+            } else {
+                $arr['complete_num'] = $active_user_num;
+            }
+        } else {
+            //查询某天的数据
+            if (!$time_str) {
+                $time_str = $start;
+            }
+            if ($time_str == $start) {
+                //今天的实时着陆页数据 z站
+                $today_active_user = $this->google_target_end(1, $start);
+                $arr['complete_num'] = $today_active_user;
+            } else {
+                $where['day_date'] = ['between', [$time_str, $time_str]];
+                $arr['complete_num'] = $this->where($where)->sum('complete_num');
+            }
+        }
+
+        return $arr;
     }
 
     /*
@@ -34,9 +173,6 @@ class Zeelool extends Model
     {
         $map['site'] = 1;
         $start = date('Y-m-d');
-        //今天的实时活跃用户数 zeelool
-        $today_active_user = $this->datacenter->google_active_user(1, $start);
-
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -44,6 +180,8 @@ class Zeelool extends Model
             $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
             //判断是否包含当天数据，如果包含需要加上今天的数据
             if ($start <= $createat[3]) {
+                //今天的实时活跃用户数 zeelool
+                $today_active_user = $this->google_active_user(1, $start);
                 $arr['active_user_num'] = $active_user_num + $today_active_user;
             } else {
                 $arr['active_user_num'] = $active_user_num;
@@ -68,6 +206,8 @@ class Zeelool extends Model
                 $time_str = $start;
             }
             if ($time_str == $start) {
+                //今天的实时活跃用户数 zeelool
+                $today_active_user = $this->google_active_user(1, $start);
                 $arr['active_user_num'] = $today_active_user;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
@@ -294,71 +434,6 @@ class Zeelool extends Model
         return $again_num;
     }
 
-    /*
-     * 统计用户转化漏斗的几个指标的数据
-     */
-    public function getFunnelNum($time_str = '', $type = 0)
-    {
-        $map['site'] = 1;
-        $start = date('Y-m-d');
-        //今天的实时着陆页的数据 zeelool
-        $today_active_user = $this->datacenter->google_landing(1, $start);
-        //今天的实时目标一的数据
-        $today_active_user = $this->datacenter->google_target1(1, $start);
-
-        if ($type == 1) {
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间的数据
-            $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                $arr['active_user_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['active_user_num'] = $active_user_num;
-            }
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
-            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
-            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
-        } else {
-            //查询某天的数据
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                $arr['active_user_num'] = $today_active_user;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $where['day_date'] = ['between', [$time_str, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
-            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
-            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
-        }
-
-        return $arr;
-    }
 
     /**
      * 统计订单数
@@ -841,5 +916,348 @@ class Zeelool extends Model
         $order_total = $this->model->where($map_where)->where($arr_where)->where($map)->sum('base_shipping_amount');
         $arr['order_total'] = round($order_total,2);
         return $arr;
+    }
+    //活跃用户数 调用此方法
+    public function google_active_user($site, $start_time)
+    {
+        // dump();die;
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_active_user($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'], 2) : 0;
+    }
+
+    protected function getReport_active_user($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:1dayUsers");
+        $adCostMetric->setAlias("ga:1dayUsers");
+        // $adCostMetric->setExpression("ga:adCost");
+        // $adCostMetric->setAlias("ga:adCost");
+
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //着陆页数据 调用此方法
+    public function google_landing($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_landing1($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'], 2) : 0;
+    }
+    //着陆页会话数
+    protected function getReport_landing1($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        $adCostMetric->setExpression("ga:landingPagePath");
+        $adCostMetric->setAlias("ga:landingPagePath");
+        $adCostMetric->setExpression("ga:sessions");
+        $adCostMetric->setAlias("ga:sessions");
+
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+
+    //目标13会话数 调用此方法 产品详情页
+    public function google_target13($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target13($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal13Starts'] ? round($result[0]['ga:goal13Starts'], 2) : 0;
+    }
+    //目标13会话数 产品详情页数据
+    protected function getReport_target13($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal13Starts");
+        $adCostMetric->setAlias("ga:goal13Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //目标1会话数 调用此方法 购物车页面
+    public function google_target1($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target1($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal1Starts'] ? round($result[0]['ga:goal1Starts'], 2) : 0;
+    }
+    //目标1会话数 购物车页面数据
+    protected function getReport_target1($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal1Starts");
+        $adCostMetric->setAlias("ga:goal1Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //最终电子商务页面交易次数数据
+    public function google_target_end($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target_end($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:transactions'] ? round($result[0]['ga:transactions'], 2) : 0;
+    }
+    //最终电子商务页面交易次数数据
+    protected function getReport_target_end($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        $adCostMetric->setExpression("ga:Ecommerce");
+        $adCostMetric->setAlias("ga:Ecommerce");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:transactions");
+        $adCostMetric->setAlias("ga:transactions");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+    protected function printResults($reports)
+    {
+        $finalResult = array();
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+            }
+            return $finalResult;
+        }
     }
 }
