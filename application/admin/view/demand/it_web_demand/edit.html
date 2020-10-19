@@ -144,6 +144,13 @@
         </div>
         {/if}
 
+        <div class="input_item">
+            <label class="input_tiem_label ">备注：</label>
+            <span class="input_tiem_span">
+                <textarea style="resize: none; margin-top: 20px;  line-height: 20px; height: 80px;" class="select_input" name="row[remark]">{$row['remark']}</textarea>
+            </span>
+        </div>
+
     </div>
 
     <div class="right_input">
@@ -184,6 +191,19 @@
                 {/if}
             {if $pm_status}
             <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
+            {/if}
+
+            {if $row['pm_audit_status'] == 1}
+            {if $pm_status}
+            <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            {else}
+            <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            {/if}
+            {else}
+            <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {/if}
 
                 {if $row['pm_audit_status'] == 3}

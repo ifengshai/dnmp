@@ -793,6 +793,7 @@ class ItWebDemand extends Backend
                     $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
                     $add['title'] = $params['title'];
                     $add['content'] = $params['content'];
+                    $add['remark'] = $params['remark'];
                     $add['accessory'] = $params['accessory'];
                     $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
                     if ($params['demand_type'] == 2) {
