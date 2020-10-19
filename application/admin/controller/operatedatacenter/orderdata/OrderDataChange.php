@@ -46,7 +46,10 @@ class OrderDataChange extends Backend
                 $site['site'] = $filter['order_platform'] ?: 1;
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $site['site'] = 1;
             }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = Db::name('datacenter_day')
                 ->where($where)
@@ -108,14 +111,14 @@ class OrderDataChange extends Backend
                     'data' => $arr['ydata']['one'],
                     'name' => '会话数',
                     'yAxisIndex' => 0,
-                    'smooth' => false //平滑曲线
+                    'smooth' => true //平滑曲线
                 ],
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['two'],
                     'name' => '销售额',
                     'yAxisIndex' => 1,
-                    'smooth' => false //平滑曲线
+                    'smooth' => true //平滑曲线
                 ],
             ];
 
@@ -155,12 +158,14 @@ class OrderDataChange extends Backend
                     'type' => 'line',
                     'data' => $arr['ydata']['one'],
                     'name' => '购物车数量',
+                    'yAxisIndex' => 0,
                     'smooth' => true //平滑曲线
                 ],
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['two'],
                     'name' => '订单数量',
+                    'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
 
