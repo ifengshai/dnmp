@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'day_date',
                 sortName: 'day_date',
-                sortOrder: 'asc',
+                sortOrder: 'desc',
                 search: false,
                 showToggle:false,
                 cardView: false,
