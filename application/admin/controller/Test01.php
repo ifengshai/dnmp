@@ -43,7 +43,7 @@ class Test01 extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        //从数据库查询需要的数据
+        /*//从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
         //常规方式：利用setCellValue()填充数据
@@ -61,22 +61,14 @@ class Test01 extends Backend
             ->setCellValue("K1", "最大月销量月份")
             ->setCellValue("L1", "201910~202009总销量")
             ->setCellValue("M1", "配镜率")
-        ;   //利用setCellValues()填充数据
+        ;   //利用setCellValues()填充数据*/
 
         $frame_texture = [ 1 => '塑料', 2 =>'板材', 3 =>'TR90', 4 =>'金属', 5 =>'钛', 6 =>'尼龙', 7=>'木质',8=>'混合材质',9=>'合金',10=>'其他材质'];
         $frame_shape = [ 1 => '长方形', 2 =>'正方形', 3 =>'猫眼', 4 =>'圆形', 5 =>'飞行款', 6 =>'多边形', 7=>'蝴蝶款'];
         $shape = [ 1 => '全框', 2 =>'半框', 3 =>'无框'];
 
+        $file_content = '';
         foreach ($list as $key => $value) {
-            $num = $key + 2;
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A{$num}", $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("B{$num}", $grade[$value['sku']]);
-            $spreadsheet->getActiveSheet()->setCellValue("C{$num}", $frame_texture[$value['frame_texture']]);
-            $spreadsheet->getActiveSheet()->setCellValue("D{$num}", $frame_shape[$value['frame_shape']]);
-            $spreadsheet->getActiveSheet()->setCellValue("E{$num}", $shape[$value['shape']]);
-            $spreadsheet->getActiveSheet()->setCellValue("F{$num}", $value['frame_color']);
-            $spreadsheet->getActiveSheet()->setCellValue("G{$num}", $value['price']);
-
             $statistics = $this->zeelool
                 ->alias('a')
                 ->field("COUNT(b.item_id) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
@@ -113,13 +105,44 @@ class Test01 extends Backend
             $average_price = $statistics[0]['price'] > 0 && $statistics[0]['num'] > 0 ? $statistics[0]['price']/$statistics[0]['num'] : 0;
             $proportion = $all_count > 0 && $statistics[0]['num'] > 0 ? $prescription[0]['num']/$all_count : 0;
 
+            /*$num = $key + 2;
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A{$num}", $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B{$num}", $grade[$value['sku']]);
+            $spreadsheet->getActiveSheet()->setCellValue("C{$num}", $frame_texture[$value['frame_texture']]);
+            $spreadsheet->getActiveSheet()->setCellValue("D{$num}", $frame_shape[$value['frame_shape']]);
+            $spreadsheet->getActiveSheet()->setCellValue("E{$num}", $shape[$value['shape']]);
+            $spreadsheet->getActiveSheet()->setCellValue("F{$num}", $value['frame_color']);
+            $spreadsheet->getActiveSheet()->setCellValue("G{$num}", $value['price']);
             $spreadsheet->getActiveSheet()->setCellValue("H{$num}", $monthly_sales);
             $spreadsheet->getActiveSheet()->setCellValue("I{$num}", $average_price);
             $spreadsheet->getActiveSheet()->setCellValue("J{$num}", $statistics[0]['num']);
             $spreadsheet->getActiveSheet()->setCellValue("K{$num}", $statistics[0]['time']);
             $spreadsheet->getActiveSheet()->setCellValue("L{$num}", $all_count);
-            $spreadsheet->getActiveSheet()->setCellValue("M{$num}", $proportion);
+            $spreadsheet->getActiveSheet()->setCellValue("M{$num}", $proportion);*/
+
+            $arr = [
+                $value['sku'],
+                $grade[$value['sku']],
+                $frame_texture[$value['frame_texture']],
+                $frame_shape[$value['frame_shape']],
+                $shape[$value['shape']],
+                $value['frame_color'],
+                $value['price'],
+                $monthly_sales,
+                $average_price,
+                $statistics[0]['num'],
+                $statistics[0]['time'],
+                $all_count,
+                $proportion
+            ];
+            $file_content = $file_content . implode(',', $arr) . "\n";
         }
+
+        $export_str = ['SKU','产品评级','材质','框型','形状','颜色','进价','平均月销量','平均售价','最大月销量','最大月销量月份','201910~202009总销量','配镜率'];
+        $file_title = implode(',', $export_str) . " \n";
+        $file = $file_title . $file_content;
+        file_put_contents('/www/wwwroot/mojing/runtime/log/analysis.csv', $file);
+        exit;
 
         //设置宽度
 //        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
