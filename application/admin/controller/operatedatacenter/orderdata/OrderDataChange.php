@@ -86,8 +86,7 @@ class OrderDataChange extends Backend
             $list = collection($list)->toArray();
             if($today_flag){
                 $data['day_date'] = $today_flag;
-                //$data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
-                $data['sessions'] = 0;
+                $data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
