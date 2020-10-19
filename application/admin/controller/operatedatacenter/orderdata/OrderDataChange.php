@@ -33,23 +33,41 @@ class OrderDataChange extends Backend
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-                unset($filter['time_str']);
                 unset($filter['create_time-operate']);
+                unset($filter['time_str']);
+                unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
+                if($createat[0] == $createat[3]){
+                    $today_flag = date('Y-m-d');
+                }
             } else{
                 $start = date('Y-m-d');
                 $map = [];
                 $map[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $start . "'")];
+                $today_flag = $start;
             }
             //站点
             if ($filter['order_platform']) {
                 $site['site'] = $filter['order_platform'] ?: 1;
+                unset($filter['create_time-operate']);
+                unset($filter['time_str']);
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }else{
                 $site['site'] = 1;
             }
-
+            if($site['site'] == 2){
+                $this->model  = new \app\admin\model\operatedatacenter\Voogueme;
+                $this->web  = new \app\admin\model\order\order\Voogueme();
+            }elseif($site['site'] == 3){
+                $this->model  = new \app\admin\model\operatedatacenter\Nihao;
+                $this->web  = new \app\admin\model\order\order\Nihao();
+            }else{
+                $this->model  = new \app\admin\model\operatedatacenter\Zeelool;
+                $this->web  = new \app\admin\model\order\order\Zeelool();
+            }
+            $this->web->table('sales_flat_quote')->query("set time_zone='+8:00'");
+            $this->web->table('customer_entity')->query("set time_zone='+8:00'");
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = Db::name('datacenter_day')
                 ->where($where)
@@ -66,6 +84,26 @@ class OrderDataChange extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            if($today_flag){
+                $data['day_date'] = $today_flag;
+                $data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
+                $cart_where1 = [];
+                $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
+                $data['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
+                $data['add_cart_rate'] = $data['sessions'] ? round(($data['new_cart_num']/$data['sessions']*100),2).'%' : 0;
+                $data['order_num'] = $this->model->getOrderNum($today_flag);
+                $data['session_rate'] = $data['sessions'] ? round(($data['order_num']/$data['sessions']*100),2).'%' : 0;
+                $data['order_unit_price'] = $this->model->getOrderUnitPrice($today_flag);
+                $cart_where2 = [];
+                $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $today_flag . "'")];
+                $data['update_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where2)->count();
+                $data['sales_total_money'] = $this->model->getSalesTotalMoney($today_flag);
+                $register_where = [];
+                $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
+                $data['register_num'] = $this->web->table('customer_entity')->where($register_where)->count();
+                $list = $data;
+            }
+
             foreach ($list as $key=>$value){
                 $list[$key]['add_cart_rate'] = $value['add_cart_rate'].'%';
                 $list[$key]['session_rate'] = $value['session_rate'].'%';
