@@ -101,7 +101,7 @@ class OrderDataChange extends Backend
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['register_num'] = $this->web->table('customer_entity')->where($register_where)->count();
-                $list[0] = $data;
+                $list[] = $data;
             }
             foreach ($list as $key=>$value){
                 $list[$key]['add_cart_rate'] = $value['add_cart_rate'].'%';
@@ -150,9 +150,10 @@ class OrderDataChange extends Backend
             $days_data = collection($days_data)->toArray();
             if($today_flag){
                 //获取今天的会话和销售额
-                $days_data[0]['day_date'] = $start;
-                $days_data[0]['sessions'] = $this->model->google_landing($where['site'],$today_flag);
-                $days_data[0]['sales_total_money'] = $this->model->getSalesTotalMoney($today_flag)['sales_total_money'];
+                $data['day_date'] = $start;
+                $data['sessions'] = $this->model->google_landing($where['site'],$today_flag);
+                $data['sales_total_money'] = $this->model->getSalesTotalMoney($today_flag)['sales_total_money'];
+                $days_data[] = $data;
             }
             $arr['xdata'] = array_column($days_data,'day_date');
             $arr['ydata']['one'] = array_column($days_data,'sessions');
@@ -219,11 +220,12 @@ class OrderDataChange extends Backend
             $days_data = collection($days_data)->toArray();
             if($today_flag){
                 //获取今天的购物车数量和订单数
-                $days_data[0]['day_date'] = $start;
+                $data['day_date'] = $start;
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
-                $days_data[0]['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
-                $days_data[0]['order_num'] = $this->model->getOrderNum($today_flag)['order_num'];
+                $data['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
+                $data['order_num'] = $this->model->getOrderNum($today_flag)['order_num'];
+                $days_data[] = $data;
             }
             $arr['xdata'] = array_column($days_data,'day_date');
             $arr['ydata']['one'] = array_column($days_data,'new_cart_num');
