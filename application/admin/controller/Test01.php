@@ -24,10 +24,6 @@ class Test01 extends Backend
             ->where(['outer_sku_status' => 1, 'platform_type' => 1])
             ->select();
         $sku_data = collection($sku_data)->toArray();
-        print_r($sku_data);
-        print_r('-------------');
-        print_r(count($sku_data));
-        print_r('-------------');
 
         $sku_arr = array_column($sku_data, 'sku');
         $platform = [];
@@ -45,8 +41,6 @@ class Test01 extends Backend
             ->join(['fa_new_product_attribute' => 'b'],'a.id=b.item_id')
             ->select();
         $list = collection($list)->toArray();
-        count($list);
-        exit;
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
