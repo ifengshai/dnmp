@@ -21,7 +21,7 @@ class Test01 extends Backend
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku')
-            ->where(['outer_sku_status' => 1, 'platform_type' => 1])
+            ->where(['outer_sku_status' => 1, 'platform_type' => 2])
             ->select();
         $sku_data = collection($sku_data)->toArray();
 
