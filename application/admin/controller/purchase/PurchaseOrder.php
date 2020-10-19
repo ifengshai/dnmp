@@ -274,7 +274,7 @@ class PurchaseOrder extends Backend
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
             foreach ($list as &$v) {
-                if ($v['status'] == 3){
+                if ($v['status'] == 3) {
                     $this->error('存在已经拒绝的补货需求，请重新选择！！');
                 }
                 //查询sku 商品名称
@@ -871,7 +871,7 @@ class PurchaseOrder extends Backend
 
                 //查询供应商
                 $supplier = new \app\admin\model\purchase\Supplier();
-                $supplier_list = $supplier->column('supplier_name','id');
+                $supplier_list = $supplier->column('supplier_name', 'id');
                 // dump($list);die;
                 foreach ($list as $v) {
                     $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
@@ -879,7 +879,7 @@ class PurchaseOrder extends Backend
                     if ($v['replenish_list_id']) {
                         $this->list
                             ->where('id', $v['replenish_list_id'])
-                            ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']],'real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                            ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']], 'real_dis_num' => $v['purchase_num'], 'status' => 2]);
                         //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
                         $replenish_id = $this->list
                             ->where('id', $v['replenish_list_id'])
@@ -887,7 +887,7 @@ class PurchaseOrder extends Backend
                         //补货需求单id $replenish_id['replenish_id'] 新逻辑在途库存分站 在更新商品表的在途库存的时候 查找补货需求单中的原始比例 进行在途库存的分站点分配
                         //比例
                         $rate_arr = Db::name('new_product_mapping')
-                            ->where(['sku'=>$v['sku'],'replenish_id'=>$replenish_id['replenish_id']])
+                            ->where(['sku' => $v['sku'], 'replenish_id' => $replenish_id['replenish_id']])
                             ->field('website_type,rate')
                             ->select();
                         //数量
@@ -899,7 +899,7 @@ class PurchaseOrder extends Backend
                             //最后一个站点 剩余数量分给最后一个站
                             if (($all_num - $key) == 1) {
                                 //根据sku站点类型进行在途库存的分配
-                                $item_platform->where(['sku'=>$v['sku'],'platform_type'=>$val['website_type']])->setInc('plat_on_way_stock',$stock_num);
+                                $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
                             } else {
                                 $num = round($v['purchase_num'] * $val['rate']);
                                 $stock_num -= $num;
@@ -1623,7 +1623,7 @@ class PurchaseOrder extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['1688单号', '物流单号'];
+        $listName = ['订单编号', '物流公司运单号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -1637,6 +1637,7 @@ class PurchaseOrder extends Backend
             for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if (!$val) continue;
                     $fields[] = $val;
                 }
             }
@@ -1658,8 +1659,9 @@ class PurchaseOrder extends Backend
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
-        
+
         //批量导入物流单号
+        $logistics = new \app\admin\model\LogisticsInfo();
         foreach ($data as $k => $v) {
 
             if (empty($v[0])) {
@@ -1668,20 +1670,24 @@ class PurchaseOrder extends Backend
             if (empty($v[1])) {
                 $this->error('导入失败！！,物流单号不能为空');
             }
-            $params[$k]['email'] = trim($v[0]);
-            $params[$k]['customer_name'] = trim($v[1]);
-            $params[$k]['mobile'] = $v[2];
-            $params[$k]['country'] = $v[3];
 
+            $row = $this->model->where(['1688_number' => $v[0]])->find();
+            if (!$row) {
+                $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
+            }
+            //拆分物流单号和物流公司
+            $logistics_data = explode(':', $v[1]);
+            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6,'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0],'logistics_company_no' => $logistics_data[0]]);
 
-            $params[$k]['create_user_id'] = session('admin.id');
-            $params[$k]['update_user_id'] = session('admin.id');
-            $params[$k]['create_time'] = date('Y-m-d H:i:s', time());
-            $params[$k]['update_time'] = date('Y-m-d H:i:s', time());
-            $params[$k]['is_del'] = 1;
+            $list = [];
+            $list['order_number'] = $row->purchase_number;
+            $list['purchase_id'] = $row->id;
+            $list['type'] = 1;
+            $list['logistics_number'] = $logistics_data[1];
+            $list['logistics_company_no'] = $logistics_data[0];
+            $logistics->addLogisticsInfo($list);
         }
 
-        $result = $this->model->allowField(true)->saveAll($params);
         if ($result) {
             $this->success('导入成功！！');
         } else {
@@ -1690,12 +1696,11 @@ class PurchaseOrder extends Backend
     }
 
 
-     /**
+    /**
      * 导入镜片库存
      */
     public function import()
     {
-        
     }
 
     //批量导出xls
@@ -1960,14 +1965,14 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
-            if ($value['is_new_product'] == 1){
+            if ($value['is_new_product'] == 1) {
                 $is_new_product = '是';
-            }else{
+            } else {
                 $is_new_product = '否';
             }
-            if ($value['is_sample'] == 1){
+            if ($value['is_sample'] == 1) {
                 $is_sample = '是';
-            }else{
+            } else {
                 $is_sample = '否';
             }
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);

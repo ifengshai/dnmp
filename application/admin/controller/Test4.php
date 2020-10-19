@@ -297,7 +297,7 @@ class Test4 extends Controller
                 $arr['site'] = 2;
                 $arr['day_date'] = $val['date_time'];
                 //活跃用户数
-                $arr['active_user_num'] = $this->google_active_user(1, $val['date_time']);
+                $arr['active_user_num'] = $this->google_active_user(2, $val['date_time']);
                 //注册用户数
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
@@ -332,7 +332,7 @@ class Test4 extends Controller
                 //补发销售额
                 $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where)->where('order_type',3)->sum('base_grand_total');
                 //会话
-                $arr['sessions'] = $this->google_session(1, $val['date_time']);
+                $arr['sessions'] = $this->google_session(2, $val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
@@ -370,10 +370,10 @@ class Test4 extends Controller
             $is_exist = Db::name('datacenter_day')->where(['day_date' => $val['date_time'], 'site' => 3])->value('id');
             if (!$is_exist) {
                 $arr = [];
-                $arr['site'] = 2;
+                $arr['site'] = 3;
                 $arr['day_date'] = $val['date_time'];
                 //活跃用户数
-                $arr['active_user_num'] = $this->google_active_user(1, $val['date_time']);
+                $arr['active_user_num'] = $this->google_active_user(3, $val['date_time']);
                 //注册用户数
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
@@ -403,7 +403,7 @@ class Test4 extends Controller
                 //补发销售额
                 $arr['online_celebrity_order_total'] = $this->nihao->where($order_where)->where('order_type',3)->sum('base_grand_total');
                 //会话
-                $arr['sessions'] = $this->google_session(1, $val['date_time']);
+                $arr['sessions'] = $this->google_session(3, $val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];

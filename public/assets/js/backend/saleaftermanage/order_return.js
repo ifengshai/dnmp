@@ -499,19 +499,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             //站点切换
             $(document).on('click', '.site', function () {
-                var site = $(this).html();
-                if (!$(this).hasClass('active')) {
-                    $(this).addClass("active").siblings().removeClass("active");
-                    if (site == 'Zeelool') {
-                        $('#order_platform').val(1);
-                    } else if (site == 'Voogueme') {
-                        $('#order_platform').val(2);
-                    } else if (site == 'Nihao') {
-                        $('#order_platform').val(3);
-                    } else if (site == 'Meeloog') {
-                        $('#order_platform').val(4);
-                    }
-                }
+                $(this).addClass("active").siblings().removeClass("active");
+                $('#order_platform').val($(this).data('id'));
             })
 
             $(document).on('click', '.option .detail-btn', function () {
