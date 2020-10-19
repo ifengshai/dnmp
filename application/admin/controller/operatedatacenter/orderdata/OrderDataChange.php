@@ -38,7 +38,7 @@ class OrderDataChange extends Backend
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
-                $start = date('Y-m-d', strtotime('-7 day'));
+                $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $map['day_date'] = ['between', [$start,$end]];
             }
@@ -95,7 +95,7 @@ class OrderDataChange extends Backend
                 $createat = explode(' ', $params['time_str']);
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             } else{
-                $start = date('Y-m-d', strtotime('-7 day'));
+                $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $map['day_date'] = ['between', [$start,$end]];
             }
@@ -143,7 +143,7 @@ class OrderDataChange extends Backend
                 $createat = explode(' ', $params['time_str']);
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             } else{
-                $start = date('Y-m-d', strtotime('-7 day'));
+                $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $map['day_date'] = ['between', [$start,$end]];
             }
