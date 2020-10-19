@@ -58,7 +58,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         // { field: 'remark', title: __('备注'), operate: false },
                         { field: 'remark', title: __('备注'),
                             events: Controller.api.events.getcontent,
-                            events: Controller.api.formatter.getClear(),
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.getcontent,
                             operate: false
