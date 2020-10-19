@@ -6,12 +6,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: false,
-                search: false,
-                showExport: false,
-                showColumns: false,
-                showToggle: false,
-                pagination: false,
                 extend: {
                     index_url: 'operatedatacenter/orderdata/order_data_change/index' + location.search,
                     add_url: 'operatedatacenter/orderdata/order_data_change/add',
@@ -23,29 +17,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             });
 
             var table = $("#table");
-
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'id',
+              
+                searchFormVisible: true,
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('日期') },
-                        { field: 'id', title: __('会话数') },
-                        { field: 'id', title: __('加购率') },
-                        { field: 'id', title: __('会话转化率') },
-                        { field: 'id', title: __('订单数') },
-                        { field: 'id', title: __('客单价') },
-                        { field: 'id', title: __('新增购物车数量') },
-                        { field: 'id', title: __('更新购物车数量') },
-                        { field: 'id', title: __('订单金额') },
-                        { field: 'id', title: __('注册量') }
+                        {field: 'day_date', title: __('日期')},
+                        { field: 'sessions', title: __('会话数') },
+                        { field: 'add_cart_rate', title: __('加购率') },
+                        { field: 'session_rate', title: __('会话转化率') },
+                        { field: 'order_num', title: __('订单数') },
+                        { field: 'order_unit_price', title: __('客单价') },
+                        { field: 'new_cart_num', title: __('新增购物车数量') },
+                        { field: 'update_cart_num', title: __('更新购物车数量') },
+                        { field: 'sales_total_money', title: __('订单金额') },
+                        { field: 'register_num', title: __('注册量') }
                     ]
                 ]
             });
-
             // 为表格绑定事件
             Table.api.bindevent(table);
 

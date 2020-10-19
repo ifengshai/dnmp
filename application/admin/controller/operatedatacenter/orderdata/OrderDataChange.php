@@ -3,11 +3,18 @@
 namespace app\admin\controller\operatedatacenter\orderdata;
 
 use app\common\controller\Backend;
-use think\Controller;
-use think\Request;
+use think\Db;
 
 class OrderDataChange extends Backend
 {
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
+        $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
+        $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+    }
+
     /**
      * 订单数据-转化率分析
      *
@@ -15,7 +22,45 @@ class OrderDataChange extends Backend
      */
     public function index()
     {
-       
+
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $site['site'] = $params['order_platform'] ? $params['order_platform'] : 1;
+            if ($params['time_str']) {
+                $createat = explode(' ', $params['time_str']);
+                $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            } else{
+                $start = date('Y-m-d');
+                $map = [];
+                $map[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $start . "'")];
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = Db::name('datacenter_day')
+                ->where($where)
+                ->where($site)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = Db::name('datacenter_day')
+                ->where($where)
+                ->where($site)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
         return $this->view->fetch();
     }
 

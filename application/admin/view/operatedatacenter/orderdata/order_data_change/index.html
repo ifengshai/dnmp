@@ -169,27 +169,23 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">订单平台</label>
                                         <div class="col-xs-8">
-                                            <select id="c-order_platform" data-rule="required" class="form-control"
+                                            <select id="order_platform" data-rule="required" class="form-control"
                                                 name="order_platform">
-                                                {foreach name="orderPlatformList" item="vo"}
-                                                {if $key == $platform}
-                                                <option value="{$key}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$key}">{$vo}</option>
-                                                {/if}
-                                                {/foreach}
+                                                <option value="1" selected="selected">Zeelool</option>
+                                                <option value="2">Voogueme</option>
+                                                <option value="3">Nihao</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                                    <label for="create_time" class="control-label col-xs-4">创建时间</label>
+                                    <label for="time_str" class="control-label col-xs-4">创建时间</label>
                                     <div class="col-xs-8">
                                         <input type="hidden" class="form-control operate" name="create_time-operate"
-                                            data-name="create_time" value="RANGE" readonly="">
+                                            data-name="time_str" value="RANGE" readonly="">
                                         <input type="text" autocomplete="off" class="form-control datetimerange"
-                                            name="create_time" placeholder="创建时间" id="create_time"
-                                            value="{$create_time}" data-index="14">
+                                            name="time_str" placeholder="创建时间" id="time_str"
+                                            value="" data-index="14">
                                     </div>
                                 </div>
                                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
