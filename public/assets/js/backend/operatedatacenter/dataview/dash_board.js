@@ -17,26 +17,26 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //订单数据概况折线图
             Controller.api.formatter.line_chart();
             Controller.api.formatter.user_chart();
-            // Controller.api.formatter.user_change_chart();
+            Controller.api.formatter.user_change_chart();
             $("#time_str").on("apply.daterangepicker",function(){
                 setTimeout(()=>{
                     order_data_view();
                     Controller.api.formatter.line_chart();
                     Controller.api.formatter.user_chart();
-                    // Controller.api.formatter.user_change_chart();
+                    Controller.api.formatter.user_change_chart();
                 },0)
             })
             $(document).on('change', '#type', function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.user_chart();
-                // Controller.api.formatter.user_change_chart();
+                Controller.api.formatter.user_change_chart();
             });
             $(document).on('change', '#order_platform', function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.user_chart();
-                // Controller.api.formatter.user_change_chart();
+                Controller.api.formatter.user_change_chart();
             });
 
             var table = $("#table");
@@ -148,25 +148,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                // user_change_chart: function () {
-                //     //用户购买转化漏斗
-                //     var chartOptions = {
-                //         targetId: 'echart3',
-                //         downLoadTitle: '图表',
-                //         type: 'funnel',
-                //     };
-                //
-                //     var options = {
-                //         type: 'post',
-                //         url: 'operatedatacenter/dataview/dash_board/user_change_trend',
-                //         data: {
-                //             order_platform: $("#order_platform").val(),
-                //             time_str: $("#time_str").val(),
-                //             type: $("#type").val()
-                //         }
-                //     }
-                //     EchartObj.api.ajax(options, chartOptions)
-                // },
+                user_change_chart: function () {
+                    //用户购买转化漏斗
+                    var chartOptions = {
+                        targetId: 'echart3',
+                        downLoadTitle: '图表',
+                        type: 'funnel',
+                    };
+
+                    var options = {
+                        type: 'post',
+                        url: 'operatedatacenter/dataview/dash_board/user_change_trend',
+                        data: {
+                            order_platform: $("#order_platform").val(),
+                            time_str: $("#time_str").val(),
+                            type: $("#type").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                },
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
