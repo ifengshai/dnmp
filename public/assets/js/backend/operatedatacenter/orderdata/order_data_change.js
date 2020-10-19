@@ -20,7 +20,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'id',
+                pk: 'day_date',
+                sortName: 'day_date',
+                sortOrder: 'asc',
                 search: false,
                 showToggle:false,
                 cardView: false,
