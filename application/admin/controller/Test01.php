@@ -21,11 +21,13 @@ class Test01 extends Backend
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku')
-            ->where(['platform_sku_status' => 1, 'outer_sku_status' => 1, 'platform_type' => 1])
+            ->where(['outer_sku_status' => 1, 'platform_type' => 1])
             ->select();
         $sku_data = collection($sku_data)->toArray();
         print_r($sku_data);
-        echo "<br/>";
+        print_r('-------------');
+        print_r(count($sku_data));
+        print_r('-------------');
 
         $sku_arr = array_column($sku_data, 'sku');
         $platform = [];
@@ -43,8 +45,7 @@ class Test01 extends Backend
             ->join(['fa_new_product_attribute' => 'b'],'a.id=b.item_id')
             ->select();
         $list = collection($list)->toArray();
-        print_r($list);
-        echo "<br/>";
+        count($list);
         exit;
 
         //从数据库查询需要的数据
