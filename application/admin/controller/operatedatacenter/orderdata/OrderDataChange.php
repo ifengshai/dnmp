@@ -86,24 +86,24 @@ class OrderDataChange extends Backend
             $list = collection($list)->toArray();
             if($today_flag){
                 $data['day_date'] = $today_flag;
-                $data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
+                //$data['sessions'] = $this->model->google_landing($site['site'],$today_flag);
+                $data['sessions'] = 0;
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['new_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where1)->count();
-                $data['add_cart_rate'] = $data['sessions'] ? round(($data['new_cart_num']/$data['sessions']*100),2).'%' : 0;
-                $data['order_num'] = $this->model->getOrderNum($today_flag);
-                $data['session_rate'] = $data['sessions'] ? round(($data['order_num']/$data['sessions']*100),2).'%' : 0;
-                $data['order_unit_price'] = $this->model->getOrderUnitPrice($today_flag);
+                $data['add_cart_rate'] = $data['sessions'] ? round(($data['new_cart_num']/$data['sessions']*100),2) : 0;
+                $data['order_num'] = $this->model->getOrderNum($today_flag)['order_num'];
+                $data['session_rate'] = $data['sessions'] ? round(($data['order_num']/$data['sessions']*100),2) : 0;
+                $data['order_unit_price'] = $this->model->getOrderUnitPrice($today_flag)['order_unit_price'];
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['update_cart_num'] = $this->web->table('sales_flat_quote')->where($cart_where2)->count();
-                $data['sales_total_money'] = $this->model->getSalesTotalMoney($today_flag);
+                $data['sales_total_money'] = $this->model->getSalesTotalMoney($today_flag)['sales_total_money'];
                 $register_where = [];
                 $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $today_flag . "'")];
                 $data['register_num'] = $this->web->table('customer_entity')->where($register_where)->count();
-                $list = $data;
+                $list[0] = $data;
             }
-
             foreach ($list as $key=>$value){
                 $list[$key]['add_cart_rate'] = $value['add_cart_rate'].'%';
                 $list[$key]['session_rate'] = $value['session_rate'].'%';
