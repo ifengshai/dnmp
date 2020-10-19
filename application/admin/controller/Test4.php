@@ -370,7 +370,7 @@ class Test4 extends Controller
             $is_exist = Db::name('datacenter_day')->where(['day_date' => $val['date_time'], 'site' => 3])->value('id');
             if (!$is_exist) {
                 $arr = [];
-                $arr['site'] = 2;
+                $arr['site'] = 3;
                 $arr['day_date'] = $val['date_time'];
                 //活跃用户数
                 $arr['active_user_num'] = $this->google_active_user(1, $val['date_time']);
