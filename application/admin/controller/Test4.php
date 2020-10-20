@@ -213,10 +213,9 @@ class Test4 extends Controller
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-01' and '2020-10-02' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-10-20' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
-            //$is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site',1)->value('id');
-            $is_exist = 0;
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site',1)->value('id');
             if (!$is_exist) {
                 $arr = [];
                 $arr['site'] = 1;
@@ -261,11 +260,11 @@ class Test4 extends Controller
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
                 //更新购物车数量
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
                 //新增加购率
                 $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //更新加购率
@@ -274,7 +273,6 @@ class Test4 extends Controller
                 $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
                 //更新购物车转化率
                 $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
-                dump($arr);exit;
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
