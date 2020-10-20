@@ -1111,4 +1111,116 @@ class Zeelool extends Model
             return $finalResult;
         }
     }
+
+    //sku的唯一身份浏览量
+    public function google_sku_detail($site, $start_time)
+    {
+        $analytics = $this->initializeAnalytics11();
+
+        $response = $this->getReport11($analytics, $start_time, $start_time);
+
+        $ga_result = $this->printResults11($response);
+        return $ga_result;
+
+    }
+
+    protected function initializeAnalytics11()
+    {
+        $client = new \Google_Client();
+        $client->setApplicationName("Hello Analytics Reporting");
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+
+        return $analytics;
+    }
+
+    protected function getReport11($analytics, $startDate, $endDate)
+    {
+        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+
+        $pageviews = new \Google_Service_AnalyticsReporting_Metric();
+        $pageviews->setExpression("ga:pageviews");
+        $pageviews->setAlias("pageviews");
+
+        $uniquePageviews = new \Google_Service_AnalyticsReporting_Metric();
+        $uniquePageviews->setExpression("ga:uniquePageviews");
+        $uniquePageviews->setAlias("uniquePageviews");
+
+
+        $pagePathDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $pagePathDimension->setName("ga:pagePath");
+
+        // $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        // $sessionDayDimension->setName("ga:day");
+        // $sessionDayDimension->setName("ga:date");
+
+        $ordering = new \Google_Service_AnalyticsReporting_OrderBy();
+        $ordering->setFieldName("ga:pageviews");
+        $ordering->setOrderType("VALUE");
+        $ordering->setSortOrder("DESCENDING");
+
+        // Create the DimensionFilter.
+        $dimensionFilter = new \Google_Service_AnalyticsReporting_DimensionFilter();
+        $dimensionFilter->setDimensionName('ga:pagePath');
+        $dimensionFilter->setOperator('PARTIAL');
+        $dimensionFilter->setExpressions(array('-'));
+
+        // Create the DimensionFilterClauses
+        $dimensionFilterClause = new \Google_Service_AnalyticsReporting_DimensionFilterClause();
+        $dimensionFilterClause->setFilters(array($dimensionFilter));
+
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($pageviews, $uniquePageviews));
+        // $request->setDimensions(array($pagePathDimension,$sessionDayDimension));
+        $request->setDimensions(array($pagePathDimension));
+        $request->setOrderBys($ordering); // note this one!
+        $request->setPageSize(20000);
+
+
+        $request->setDimensionFilterClauses(array($dimensionFilterClause));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+
+        return $analytics->reports->batchGet($body);
+    }
+
+    protected function printResults11($reports)
+    {
+        $finalResult = array();
+        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
+            $report = $reports[$reportIndex];
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[$rowIndex];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+            }
+            return $finalResult;
+        }
+    }
+
 }
