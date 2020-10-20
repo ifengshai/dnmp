@@ -23,9 +23,10 @@ class Test01 extends Backend
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku')
-            ->where(['platform_type' => 1])
+            ->where(['platform_type' => 2])
             ->select();
         $sku_data = collection($sku_data)->toArray();
+        echo "sku_data:success\n";
 
         $sku_arr = array_column($sku_data, 'sku');
         $platform = [];
@@ -43,6 +44,7 @@ class Test01 extends Backend
             ->join(['fa_new_product_attribute' => 'b'],'a.id=b.item_id')
             ->select();
         $list = collection($list)->toArray();
+        echo "list:success\n";
 
         /*//从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -70,7 +72,7 @@ class Test01 extends Backend
 
         $file_content = '';
         foreach ($list as $key => $value) {
-            $statistics = $this->zeelool
+            $statistics = $this->voogueme
                 ->alias('a')
                 ->field("COUNT(b.item_id) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
@@ -89,7 +91,7 @@ class Test01 extends Backend
                 $all_count += $item['num'];
             }
 
-            $prescription = $this->zeelool
+            $prescription = $this->voogueme
                 ->alias('a')
                 ->field("COUNT(b.item_id) AS num")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
@@ -137,6 +139,7 @@ class Test01 extends Backend
                 $proportion
             ];
             $file_content = $file_content . implode(',', $arr) . "\n";
+            echo "{$value['sku']}:success\n";
         }
 
         $export_str = ['SKU','产品评级','材质','框型','形状','颜色','进价','平均月销量','平均售价','最大月销量','最大月销量月份','201910~202009总销量','配镜率'];
