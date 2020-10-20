@@ -108,21 +108,21 @@ class DashBoard extends Backend
                     break;
             }
             //活跃用户数
-            $active_user_num = $model->getActiveUser($time_str, 1);
+            $active_user_num = $model->getActiveUser(1,$time_str);
             //注册用户数
-            $register_user_num = $model->getRegisterUser($time_str, 1);
+            $register_user_num = $model->getRegisterUser(1,$time_str);
             //复购用户数
-            $again_user_num = $model->getAgainUser($time_str, 1);
+            $again_user_num = $model->getAgainUser($time_str,1);
             //vip用户数
-            $vip_user_num = $model->getVipUser($time_str, 1);
+            $vip_user_num = $model->getVipUser(1,$time_str);
             //订单数
-            $order_num = $model->getOrderNum($time_str, 1);
+            $order_num = $model->getOrderNum(1,$time_str);
             //客单价
-            $order_unit_price = $model->getOrderUnitPrice($time_str, 1);
+            $order_unit_price = $model->getOrderUnitPrice(1,$time_str);
             //销售额
-            $sales_total_money = $model->getSalesTotalMoney($time_str, 1);
+            $sales_total_money = $model->getSalesTotalMoney(1,$time_str);
             //邮费
-            $shipping_total_money = $model->getShippingTotalMoney($time_str, 1);
+            $shipping_total_money = $model->getShippingTotalMoney(1,$time_str);
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
             $this->success('', '', $data);
         }
@@ -160,7 +160,7 @@ class DashBoard extends Backend
             if ($time_str) {
                 $createat = explode(' ', $time_str);
 
-                $first_sales_total = $model->getActiveUser($createat[0]);
+                $first_sales_total = $model->getActiveUser(0,$createat[0]);
                 $date_arr = array(
                     $createat[0] => $first_sales_total['active_user_num']
                 );
@@ -170,19 +170,39 @@ class DashBoard extends Backend
                         $deal_date = date_create($createat[0]);
                         date_add($deal_date, date_interval_create_from_date_string("$m days"));
                         $next_day = date_format($deal_date, "Y-m-d");
-                        $next_sales_total = $model->getActiveUser($next_day);
+                        $next_sales_total = $model->getActiveUser(0,$next_day);
                         $date_arr[$next_day] = $next_sales_total['active_user_num'];
                         if ($next_day == $createat[3]) {
                             break;
                         }
                     }
                 }
+                dump($date_arr);
 
             } else {
-                $now_day = date('Y-m-d');
-                //今天的订单数
-                $today_order_num = $model->getActiveUser();
-                $date_arr[$now_day] = $today_order_num['active_user_num'];
+                //默认7天的数据
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+                $createat = explode(' ', $time_str);
+                $first_sales_total = $model->getActiveUser(0,$createat[0]);
+                $date_arr = array(
+                    $createat[0] => $first_sales_total['active_user_num']
+                );
+                if ($createat[0] != $createat[3]) {
+                    for ($i = 0; $i <= 100; $i++) {
+                        $m = $i + 1;
+                        $deal_date = date_create($createat[0]);
+                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
+                        $next_day = date_format($deal_date, "Y-m-d");
+                        $next_sales_total = $model->getActiveUser(0,$next_day);
+                        $date_arr[$next_day] = $next_sales_total['active_user_num'];
+                        if ($next_day == $createat[3]) {
+                            break;
+                        }
+                    }
+                }
+                // dump($date_arr);
             }
             $name = '活跃用户数';
 
