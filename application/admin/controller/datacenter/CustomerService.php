@@ -139,7 +139,6 @@ class CustomerService extends Backend
             } else {
                 $name = '已回复工单量';
             }
-            dump($date_arr);
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
             $json['columnData'] = [
