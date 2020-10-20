@@ -18,6 +18,7 @@ class Test01 extends Backend
 
     public function test01()
     {
+        echo 'heihei';exit;
         set_time_limit (0);
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
