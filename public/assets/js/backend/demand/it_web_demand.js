@@ -55,7 +55,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         },
 
                         { field: 'create_time', title: __('创建时间'), operate: false },
-
+                        // { field: 'remark', title: __('备注'), operate: false },
+                        { field: 'remark', title: __('备注'),
+                            events: Controller.api.events.getcontent,
+                            cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getcontent,
+                            operate: false
+                        },
                         {
                             field: 'pm_audit_status',
                             title: __('评审'),
@@ -252,6 +258,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('data');
+                Layer.open({
+                    closeBtn: 1,
+                    title: '详情',
+                    area: ['900px', '500px'],
+                    content: decodeURIComponent(problem_desc)
+                });
+                return false;
+            });
         },
 
         rdc_demand_list: function () {
@@ -306,6 +323,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         },
 
                         { field: 'create_time', title: __('创建时间'), operate: false },
+                        { field: 'remark', title: __('备注'),
+                            events: Controller.api.events.getcontent,
+                            cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getcontent,
+
+                            operate: false
+                        },
 
                         {
                             field: 'pm_audit_status',
@@ -838,6 +862,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             },
 
             formatter: {
+                //
+                getcontent: function (value, row) {
+                    if (!value || value == undefined) {
+                        return '--';
+                    }
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent">' + row.remark + '</span></div>';
+                },
+                getClear: function (value) {
+
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 10) {
+                            return tem;
+                        } else {
+                            return '<div class="problem_desc_info" data = "' + encodeURIComponent(tem) + '"' + '>' + tem + '</div>';
+
+                        }
+                    }
+                },
                 //点击标题，弹出窗口
                 gettitle: function (value) {
                     return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
@@ -980,6 +1026,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 },
             },
             events: {//绑定事件的方法
+                //点击备注查看全部
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+                        var str = row.remark;
+                        Layer.open({
+                            closeBtn: 1,
+                            title: "备注：",
+                            content: str,
+                            area: ['80%', '80%'],
+                            anim: 0
+                        });
+                    }
+                },
                 //点击标题，弹出窗口
                 gettitle: {
                     //格式为：方法名+空格+DOM元素
@@ -1004,7 +1064,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 ge_rdcpm_status: {
                     'click .check_rdcpm_status': function (e, value, row, index) {
                         if(row.pm_audit_status == 1){
-                            Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['40%', '40%'] });
+                            Backend.api.open('demand/it_web_demand/edit/demand_type/2/type/view/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
+                            // Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['40%', '40%'] });
                         }
                         /*Backend.api.ajax({
                             url: 'demand/it_web_demand/rdc_demand_pass/ids/' + row.id,
