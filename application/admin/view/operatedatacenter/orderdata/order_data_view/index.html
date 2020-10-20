@@ -1,0 +1,406 @@
+<style type="text/css">
+    .echart-style td{
+        width:60px;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+    .margin-div{
+        margin-top: 30px;
+    }
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 10px;
+        margin-left: 10px;
+        width: 23%;
+    }
+    .title{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+    .rate_class{
+        font-size: 12px;
+    }
+
+    /*第一块*/
+    .new-form-group{
+        margin-top: 2%;
+        float: left;
+        min-width: 35%;
+        height: 30px;
+        line-height: 30px;
+    }
+    .new-form-group label{
+        text-align: right;
+    }
+    .col-xs-4{
+        width: 30%;
+    }
+    .new-col-xs-8{
+        width: 60%;
+    }
+    .new-background{
+        border-radius:2px;
+        margin-bottom:10px;
+        background:#f5f5f5;
+        padding:20px;
+    }
+    /*表格*/
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+
+    table.new-altrowstable{
+        float: left;
+        margin: 0 auto;
+        width: 48%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.new-altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.new-altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+    table.height-table td{
+        height: 76.5px;
+    }
+
+</style>
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group new-form-group" >
+                                <label class="control-label col-xs-4">工单平台：</label>
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <select data-rule="required" class="form-control" id="order_platform">
+                                        <option value="1" selected="selected">Zeelool</option>
+                                        <option value="2">Voogueme</option>
+                                        <option value="2">Nihaooptical</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group new-form-group" >
+                                <label class="control-label col-xs-4" >时间：</label>
+                                <div class="col-xs-8 new-col-xs-8" id="timetime" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="margin-div" style="text-align: center">
+                                <div class="btn btn-div">
+                                    <span class="extend">
+                                        <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
+                                        <div class="rate_class">同比：<span id="same_order_num">{$order_num.same_order_num}</span>  环比：<span id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                    </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="extend">
+                                        <div class="title">客单价：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
+                                        <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                    </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="extend">
+                                        <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
+                                        <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                    </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="extend">
+                                        <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
+                                        <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                    </span>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <table id="order-info-list" class="altrowstable" width="100%">
+                    <thead>
+                    <tr>
+                        <th>订单分类</th>
+                        <th>订单数</th>
+                        <th>销售额</th>
+                    </tr>
+                    </thead>
+                    <tr>
+                        <td>补发单</td>
+                        <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                    </tr>
+                    <tr>
+                        <td>网红单</td>
+                        <td id='online_celebrity_order_num' >{$online_celebrity_order_num.online_celebrity_order_num}</td>
+                        <td id='online_celebrity_order_total' >{$online_celebrity_order_total.online_celebrity_order_total}</td>
+                    </tr>
+                </table>
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">销售额/订单量趋势统计</label>
+                                <div class="col-xs-8" style="text-align: right">
+                                    <select class="form-control" id="type" style="width: 20%;float: right">
+                                        <option value="0" selected>销售额</option>
+                                        <option value="1">订单数</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
+                            <div id="echart1" style="height:200px;margin: 10px 0px 10px 0px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">订单地域分布</label>
+                            </div>
+                        </div>
+
+                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
+                            <div id="echart2" style="height:500px;width:100%;margin: 10px 0px 10px 0px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">中位数/客单价/标准差分析</label>
+                            </div>
+                        </div>
+
+                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
+                            <div id="echart3" style="height:600px;width:100%;margin: 10px 0px 10px 0px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
+
+                                <label class="control-label col-xs-6">订单金额分布</label>
+                                <label class="control-label col-xs-6">订单运费数据统计</label>
+
+                            </div>
+
+                            <table class="new-altrowstable" style="margin-left: 1%;">
+                                <thead>
+                                <tr>
+                                    <th>订单金额</th>
+                                    <th>订单数</th>
+                                    <th>占比</th>
+                                </tr>
+                                </thead>
+                                <tr>
+                                    <td>[0-20)</td>
+                                    <td id='ordernum0'>{$order_total_distribution.order_total0.order_num}</td>
+                                    <td id='ordernum_rate0'>{$order_total_distribution.order_total0.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[20-30)</td>
+                                    <td id='ordernum20'>{$order_total_distribution.order_total20.order_num}</td>
+                                    <td id='ordernum_rate20'>{$order_total_distribution.order_total20.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[30-40)</td>
+                                    <td id='ordernum30'>{$order_total_distribution.order_total30.order_num}</td>
+                                    <td id='ordernum_rate30'>{$order_total_distribution.order_total30.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[40-50)</td>
+                                    <td id='ordernum40'>{$order_total_distribution.order_total40.order_num}</td>
+                                    <td id='ordernum_rate40'>{$order_total_distribution.order_total40.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[50-60)</td>
+                                    <td id='ordernum50'>{$order_total_distribution.order_total50.order_num}</td>
+                                    <td id='ordernum_rate50'>{$order_total_distribution.order_total50.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[60-80)</td>
+                                    <td id='ordernum60'>{$order_total_distribution.order_total60.order_num}</td>
+                                    <td id='ordernum_rate60'>{$order_total_distribution.order_total60.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[80-100)</td>
+                                    <td id='ordernum80'>{$order_total_distribution.order_total80.order_num}</td>
+                                    <td id='ordernum_rate80'>{$order_total_distribution.order_total80.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>[100-200)</td>
+                                    <td id='ordernum100'>{$order_total_distribution.order_total100.order_num}</td>
+                                    <td id='ordernum_rate100'>{$order_total_distribution.order_total100.order_num_rate}</td>
+                                </tr>
+                                <tr>
+                                    <td>200+</td>
+                                    <td id='ordernum200'>{$order_total_distribution.order_total200.order_num}</td>
+                                    <td id='ordernum_rate200'>{$order_total_distribution.order_total200.order_num_rate}</td>
+                                </tr>
+                            </table>
+                            <table class="new-altrowstable height-table" style="margin-left: 2%">
+                                <thead>
+                                <tr>
+                                    <th>邮费类型</th>
+                                    <th>订单数</th>
+                                    <th>订单占比</th>
+                                    <th>运费金额</th>
+                                </tr>
+                                </thead>
+                                <tr>
+                                    <td>平邮免邮</td>
+                                    <td id='flatrate_free_order_num'>{$order_shipping.flatrate_free.order_num}</td>
+                                    <td id='flatrate_free_rate'>{$order_shipping.flatrate_free.order_num_rate}</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>平邮</td>
+                                    <td id='flatrate_nofree_order_num'>{$order_shipping.flatrate_nofree.order_num}</td>
+                                    <td id='flatrate_nofree_rate'>{$order_shipping.flatrate_nofree.order_num_rate}</td>
+                                    <td id='flatrate_nofree_order_total'>{$order_shipping.flatrate_nofree.order_total}</td>
+                                </tr>
+                                <tr>
+                                    <td>商业快递免邮</td>
+                                    <td id='tablerate_free_order_num'>{$order_shipping.tablerate_free.order_num}</td>
+                                    <td id='tablerate_free_rate'>{$order_shipping.tablerate_free.order_num_rate}</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>商业快递</td>
+                                    <td id='tablerate_nofree_order_num'>{$order_shipping.tablerate_nofree.order_num}</td>
+                                    <td id='tablerate_nofree_rate'>{$order_shipping.tablerate_nofree.order_num_rate}</td>
+                                    <td id='tablerate_nofree_order_total'>{$order_shipping.tablerate_nofree.order_total}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

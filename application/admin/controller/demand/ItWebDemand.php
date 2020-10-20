@@ -274,7 +274,6 @@ class ItWebDemand extends Backend
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution'); //开发响应
             $permissions['demand_test_handle'] = $this->auth->check('demand/it_web_demand/test_handle'); //测试响应
 
-
             foreach ($list as $k => $v) {
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
                 $list[$k]['entry_user_name'] = $user_detail['nickname']; //取提出人
@@ -793,6 +792,7 @@ class ItWebDemand extends Backend
                     $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
                     $add['title'] = $params['title'];
                     $add['content'] = $params['content'];
+                    $add['remark'] = $params['remark'];
                     $add['accessory'] = $params['accessory'];
                     $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
                     if ($params['demand_type'] == 2) {

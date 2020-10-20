@@ -1,0 +1,408 @@
+<style>
+    * {
+        margin:0;
+        padding:0;
+    }
+    ul li {
+        list-style: none;
+    }
+    p {
+        margin: 0;
+    }
+    /*html,body{*/
+    /*    background: rgb(214, 210, 210);*/
+    /*}*/
+    .wrap {
+        margin: 0 auto;
+        background: white;
+    }
+    .big-choose {
+        display: flex;
+        align-items: center;
+        line-height: 50px;
+
+    }
+    .big-choose div {
+        margin-left: 20px;
+    }
+    .big-choose .choose {
+        display: flex;
+        align-items: center;
+    }
+
+    .big-choose .choose span {
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 6px;
+    }
+    .big-choose .choose p {
+        font-size: 12px;
+    }
+    .big-choose>.dropdown button {
+        display: flex;
+        justify-content: space-between;
+        width: 117px;
+        height: 33px;
+        border: solid 1px #000;
+        border-radius: 0;
+    }
+    .dropdown-menu {
+        width: 100%;
+        min-width: auto;
+        border-radius: 0;
+    }
+    .dropdown-menu li {
+        padding-left: 10px;
+        height: 30px;
+        line-height: 30px;
+        cursor: pointer;
+    }
+    .dropdown-menu li:hover {
+        background: rgb(0, 140, 255);
+        color: white;
+    }
+    .header {
+        padding-bottom: 10px;
+        border-bottom: solid 1px  rgb(228, 228, 228);
+    }
+    .header>li {
+        height: 50px;
+        background-color: rgba(243, 243, 243, 1);
+        border: solid 1px rgb(228, 228, 228);
+    }
+    .header>li:nth-child(2) {
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+        height: 60px;
+        background: white;
+    }
+    .header .times-left {
+        display: flex;
+        width: 46%;
+        justify-content: space-between;
+    }
+    .header .times-left li {
+        width: 67px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 4px;
+        border: solid 1px rgba(26, 188, 156, 1);
+        color: #1ABC9C;
+        cursor: pointer;
+    }
+    .header .times-left .active {
+        color: white;
+        background: #1ABC9C;
+    }
+    .header .times-right {
+        display: flex;
+        align-items: center;
+        margin-left: 40px;
+    }
+    .header .times-right li {
+        margin-left: 10px;
+    }
+    .header>li:nth-child(3) {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+    }
+    .header .detail {
+        display: flex;
+        align-items: center;
+    }
+    .header .detail p {
+        margin-left: 2px;
+    }
+    .header .opreation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 175px;
+    }
+    .header .opreation p {
+        width: 80px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border: solid 1px rgba(204, 204, 204, 1);
+        cursor: pointer;
+    }
+
+    /* 内容样式 */
+    .choose-content {
+        padding-left: 40px;
+        padding-right: 10px;
+    }
+    .choose-content .nav-choose ul li>p {
+        margin-right: 35px;
+    }
+    .choose-content .nav-choose ul li {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .choose-content .nav-choose>ul>li:nth-child(2) {
+        margin: 20px 0 40px;
+    }
+    .choose-content .nav-choose ul li ul{
+        display: flex;
+        flex-wrap: wrap;
+        width: 90%;
+    }
+    .choose-content .nav-choose ul li input {
+        margin: 0 4px 0 0;
+    }
+    .choose-content .nav-choose ul li ul li {
+        display: flex;
+        align-items: center;
+        padding-left: 8px;
+        width: 121px;
+        height: 30px;
+        border: solid 1px rgba(228, 228, 228, 1);
+        margin-right: 20px;
+        margin-bottom: 10px;
+        cursor: pointer;
+
+    }
+    .choose-content .nav-choose ul li ul li span {
+        pointer-events: none
+    }
+    .choose-content .nav-choose ul li ul li input {
+        pointer-events: none
+    }
+    .choose-content table tr td,.choose-content table tr th {
+        position: relative;
+        text-align: center;
+        cursor: pointer;
+    }
+    .choose-content table tr td,.choose-content table tr th span {
+        pointer-events: none
+    }
+    .choose-content table thead tr th input {
+        display: none;
+        position: absolute;
+        bottom: -24px;
+        left: 0;
+        width: 100%;
+        z-index:10;
+
+    }
+    .choose-content table thead tr th input::placeholder {
+        font-size: 12px;
+    }
+    .choose-content table thead tr th .active {
+        display: inline-block;
+    }
+    /* table中的下拉框 */
+    .choose-content table .dropdown button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 83px;
+        height: 32px;
+        border: solid 1px #000;
+        padding: 0 4px;
+        background: white;
+        border-radius: 0;
+
+    }
+    .bottom-right>div input {
+        width: 35px;
+        height: 25px;
+        border: solid 1px rgba(215, 215, 215, 1);
+        margin: 0 6px;
+        padding-left: 10px;
+    }
+    .form-group {
+        margin: 15px 0 10px;
+    }
+    .form-group .col-xs-1 {
+        width: 30%;
+    }
+    .form-group .col-xs-2{
+        width: 70%;
+        margin-left: 40px;
+    }
+    .dropdown-menu {
+        width: auto;
+        left:284px!important;
+    }
+    .form-group {
+        width: 300px;
+    }
+
+
+</style>
+
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="wrap">
+        <ul class="header">
+            <li class="big-choose">
+                <div class="choose">
+                    <span class="glyphicon glyphicon-search"></span>
+                    <p>筛选查询</p>
+                </div>
+                <form id = "form1" action="{:url('/admin/operatedatacenter/orderdata/order_data_detail/index')}" class="form-commonsearch form-horizontal" role="form1" method="post">
+                <div class="dropdown dropdown-choose">
+                    <select id="order_platform" class="form-control">
+                        <option value="1" selected="selected">Zeelool</option>
+                        <option value="2">Voogueme</option>
+                        <option value="3">Nihao</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-xs-1 col-sm-1" style="line-height: 31px;margin-right: -100px">时间:</label>
+                    <div class="col-xs-2" id="timetime" role="form">
+                        <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                        <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                    </div>
+                </div>
+                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="col-sm-8 col-xs-offset-4">
+                        <input type="submit" class="btn btn-success" value="提交">
+                        <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                </div>
+                </form>
+            </li>
+
+            <li>
+                <div class="detail">
+                    <span class="glyphicon glyphicon-list"></span>
+                    <p>订单数据明细</p>
+                </div>
+            </li>
+        </ul>
+        <div class="choose-content">
+            <div class="nav-choose">
+                <ul>
+                    <li>
+                        <p>一级筛选</p>
+                        <ul>
+                            <li data-id="0">
+                                <input type="checkbox">
+                                <span>订单编号</span>
+                            </li>
+                            <li data-id="1">
+                                <input type="checkbox">
+                                <span>订单时间</span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>二级筛选</p>
+                        <ul>
+                            <li data-id="2">
+                                <input type="checkbox">
+                                <span>订单金额</span>
+                            </li>
+                            <li data-id="3">
+                                <input type="checkbox">
+                                <span>邮费</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>订单状态</span>
+                            </li>
+                            <li data-id="10">
+                                <input type="checkbox">
+                                <span>设备类型</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>使用的code码</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>快递类别</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>收货姓名</span>
+                            </li>
+                            <li data-id="3">
+                                <input type="checkbox">
+                                <span>支付邮箱</span>
+                            </li>
+                            <li data-id="9">
+                                <input type="checkbox">
+                                <span>客户类型</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>折扣百分比</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>折扣金额</span>
+                            </li>
+                            <li data-id="11">
+                                <input type="checkbox">
+                                <span>有无退款</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>收货国家</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>支付方式</span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>三级筛选</p>
+                        <ul>
+                            <li>
+                                <input type="checkbox">
+                                <span>镜框价格</span>
+                            </li>
+                            <li  data-id="6">
+                                <input type="checkbox">
+                                <span>镜框数量</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>镜片数量</span>
+                            </li>
+                            <li>
+                                <input type="checkbox"  data-id="7">
+                                <span>配饰数量</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>镜片价格</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>客户电话</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>商品SKU</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>注册时间</span>
+                            </li>
+                            <li>
+                                <input type="checkbox">
+                                <span>注册邮箱</span>
+                            </li>
+                            <li  data-id="12">
+                                <input type="checkbox">
+                                <span>工单数</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
+            </table>
+        </div>
+    </div>
+</div>

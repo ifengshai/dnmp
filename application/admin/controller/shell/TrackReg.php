@@ -67,9 +67,9 @@ class TrackReg extends Backend
                 $shipment_data_type = $title;
             }
             $carrier = $this->getCarrier($title);
-            $shipment_reg[$k]['number'] =  $v['track_number'];
-            $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
-            $shipment_reg[$k]['order_id'] =  $v['order_id'];
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] = $v['order_id'];
 
 
             $list[$k]['order_node'] = 2;
@@ -152,7 +152,7 @@ class TrackReg extends Backend
             'dhl' => '100001',
             'chinapost' => '03011',
             'chinaems' => '03013',
-            'cpc' =>  '03041',
+            'cpc' => '03041',
             'fedex' => '100003',
             'usps' => '21051',
             'yanwen' => '190012'
@@ -201,10 +201,11 @@ class TrackReg extends Backend
         //请求URL
         $response = $client->request('POST', $url, array('form_params' => $params));
         $body = $response->getBody();
-        $stringBody = (string) $body;
+        $stringBody = (string)$body;
         $res = json_decode($stringBody);
         return $res;
     }
+
     /**
      * zendesk10分钟更新前20分钟的数据
      * @return [type] [description]
@@ -215,18 +216,21 @@ class TrackReg extends Backend
         echo 'all ok';
         exit;
     }
+
     public function voogueme_zendesk()
     {
         $this->zendeskUpateData('voogueme', 2);
         echo 'all ok';
         exit;
     }
+
     public function nihao_zendesk()
     {
         $this->zendeskUpateData('nihaooptical', 3);
         echo 'all ok';
         exit;
     }
+
     /**
      * zendesk10分钟更新前20分钟的数据方法
      * @return [type] [description]
@@ -294,11 +298,12 @@ class TrackReg extends Backend
             if ($params) {
                 $skuSalesNum->saveAll($params);
             }
-           
+
         }
 
         echo "ok";
     }
+
     /**
      * 统计有效天数日均销量 并按30天预估销量分级
      *
@@ -314,7 +319,7 @@ class TrackReg extends Backend
         $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('id,sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
         $list = collection($list)->toArray();
-       
+
         foreach ($list as $k => $v) {
             //15天日均销量
             $days15_data = $skuSalesNum->where(['sku' => $v['sku'], 'site' => $v['site'], 'createtime' => ['<', $date]])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
@@ -348,7 +353,7 @@ class TrackReg extends Backend
             }
             $itemPlatformSku->where('id', $v['id'])->update($params);
         }
-       
+
         echo "ok";
     }
 
@@ -377,7 +382,7 @@ class TrackReg extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
         if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');
+            echo('暂时没有紧急补货单需要处理');
             die;
         }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
@@ -456,6 +461,7 @@ class TrackReg extends Backend
         }
         return $grouped;
     }
+
     /**
      * 紧急补货  2020.09.07改为计划任务 周计划执行时间为每周三的24点，汇总各站提报的SKU及数量
      *
@@ -480,14 +486,13 @@ class TrackReg extends Backend
             ->column("sku,sum(replenish_num) as sum");
 
         if (empty($list)) {
-            echo ('暂时没有紧急补货单需要处理');
+            echo('暂时没有紧急补货单需要处理');
             die;
         }
 
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $sku_list = $this->model
             ->where(['is_show' => 1, 'type' => 2])
-
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -495,52 +500,53 @@ class TrackReg extends Backend
         $sku_list = $this->array_group_by($sku_list, 'sku');
 
         $result = false;
-            //首先插入主表 获取主表id new_product_replenish
-            $data['type'] = 2;
-            $data['create_person'] = 'Admin';
-            $data['create_time'] = date('Y-m-d H:i:s');
-            $res = Db::name('new_product_replenish')->insertGetId($data);
+        //首先插入主表 获取主表id new_product_replenish
+        $data['type'] = 2;
+        $data['create_person'] = 'Admin';
+        $data['create_time'] = date('Y-m-d H:i:s');
+        $res = Db::name('new_product_replenish')->insertGetId($data);
 
-            //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
-            $int = 0;
-            foreach ($sku_list as $k => $v) {
-                //求出此sku在此补货单中的总数量
-                $sku_whole_num = array_sum(array_map(function ($val) {
-                    return $val['replenish_num'];
-                }, $v));
-                //求出比例赋予新数组
-                foreach ($v as $ko => $vo) {
-                    $date[$int]['id'] = $vo['id'];
-                    $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
-                    $date[$int]['replenish_id'] = $res;
-                    $int += 1;
-                }
+        //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+        $int = 0;
+        foreach ($sku_list as $k => $v) {
+            //求出此sku在此补货单中的总数量
+            $sku_whole_num = array_sum(array_map(function ($val) {
+                return $val['replenish_num'];
+            }, $v));
+            //求出比例赋予新数组
+            foreach ($v as $ko => $vo) {
+                $date[$int]['id'] = $vo['id'];
+                $date[$int]['rate'] = $vo['replenish_num'] / $sku_whole_num;
+                $date[$int]['replenish_id'] = $res;
+                $int += 1;
             }
-            //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
-            $res1 = $this->model->allowField(true)->saveAll($date);
+        }
+        //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+        $res1 = $this->model->allowField(true)->saveAll($date);
 
-            $number = 0;
-            foreach ($list as $k => $v) {
-                $arr[$number]['sku'] = $k;
-                $arr[$number]['replenishment_num'] = $v;
-                $arr[$number]['create_person'] = 'Admin';
-                // $arr[$number]['create_person'] = session('admin.nickname');
-                $arr[$number]['create_time'] = date('Y-m-d H:i:s');
-                $arr[$number]['type'] = 2;
-                $arr[$number]['replenish_id'] = $res;
-                $number += 1;
-            }
-            //插入补货需求单表
-            $result = $this->order->allowField(true)->saveAll($arr);
-            //更新计划补货列表
-            $ids = $this->model
-                ->where(['is_show' => 1, 'type' => 2])
-                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
-                ->setField('is_show', 0);
+        $number = 0;
+        foreach ($list as $k => $v) {
+            $arr[$number]['sku'] = $k;
+            $arr[$number]['replenishment_num'] = $v;
+            $arr[$number]['create_person'] = 'Admin';
+            // $arr[$number]['create_person'] = session('admin.nickname');
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 2;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
+        }
+        //插入补货需求单表
+        $result = $this->order->allowField(true)->saveAll($arr);
+        //更新计划补货列表
+        $ids = $this->model
+            ->where(['is_show' => 1, 'type' => 2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+            ->setField('is_show', 0);
 
     }
+
     //活跃用户数
-    public function google_active_user($site,$start_time)
+    public function google_active_user($site, $start_time)
     {
         // dump();die;
         $end_time = $start_time;
@@ -551,22 +557,23 @@ class TrackReg extends Backend
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
-        $response = $this->getReport_active_user($site,$analytics, $start_time, $end_time);
+        $response = $this->getReport_active_user($site, $analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
-        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'],2): 0;
+        return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'], 2) : 0;
     }
-    protected function getReport_active_user($site,$analytics, $startDate, $endDate)
+
+    protected function getReport_active_user($site, $analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        if($site == 1){
+        if ($site == 1) {
             $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 2){
+        } elseif ($site == 2) {
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 3){
+        } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
@@ -599,8 +606,9 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
 
     }
+
     //session
-    public function google_session($site,$start_time)
+    public function google_session($site, $start_time)
     {
         // dump();die;
         $end_time = $start_time;
@@ -611,26 +619,27 @@ class TrackReg extends Backend
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
-        $response = $this->getReport_session($site,$analytics, $start_time, $end_time);
+        $response = $this->getReport_session($site, $analytics, $start_time, $end_time);
 
         // dump($response);die;
 
         // Print the response.
         $result = $this->printResults($response);
 
-        return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'],2): 0;
+        return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'], 2) : 0;
     }
-    protected function getReport_session($site,$analytics, $startDate, $endDate)
+
+    protected function getReport_session($site, $analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        if($site == 1){
+        if ($site == 1) {
             $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 2){
+        } elseif ($site == 2) {
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        }elseif ($site == 3){
+        } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
@@ -662,6 +671,7 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
 
     }
+
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
@@ -695,7 +705,42 @@ class TrackReg extends Backend
             return $finalResult;
         }
     }
+    /**
+     *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
+     */
+    function median($numbers)
+    {
+        sort($numbers);
+        $totalNumbers = count($numbers);
+        $mid = floor($totalNumbers / 2);
 
+        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
+    }
+    /**
+     * 得到数组的标准差
+     * @param unknown type $avg
+     * @param Array $list
+     * @param Boolen $isSwatch
+     * @return unknown type
+     */
+    function getVariance($arr) {
+        $length = count($arr);
+        if ($length == 0) {
+            return 0;
+        }
+        $average = array_sum($arr)/$length;
+        $count = 0;
+        foreach ($arr as $v) {
+            $count += pow($average-$v, 2);
+        }
+        $variance = $count/$length;
+        return sqrt($variance);
+    }
+
+    public function zeelool_day_sku_data()
+    {
+
+    }
     //运营数据中心
     public function zeelool_day_data()
     {
@@ -709,6 +754,7 @@ class TrackReg extends Backend
         $date_time = date('Y-m-d',strtotime("-1 day"));
 
         //查询时间
+
         $arr = [];
         $arr['site'] = 1;
         $arr['day_date'] = $date_time;
@@ -735,7 +781,7 @@ class TrackReg extends Backend
         //购买人数
         $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
-        // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
 
         $order_where1 = [];
         $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
@@ -745,7 +791,19 @@ class TrackReg extends Backend
         $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
         //客单价
         $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
-
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
         //会话
         $arr['sessions'] = $this->google_session(1, $date_time);
         //新建购物车数量
@@ -769,7 +827,9 @@ class TrackReg extends Backend
         echo $date_time . "\n";
         usleep(100000);
 
+
     }
+
     //运营数据中心
     public function voogueme_day_data()
     {
@@ -810,7 +870,20 @@ class TrackReg extends Backend
         $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
-
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
 
 
         $order_where1 = [];
@@ -888,7 +961,20 @@ class TrackReg extends Backend
         // $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
-
+        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        //中位数
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
 
         $order_where1 = [];
         $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
@@ -923,6 +1009,165 @@ class TrackReg extends Backend
         echo $date_time . "\n";
         usleep(100000);
 
+    }
+
+    /**
+     * 更新在途库存、待入库数量
+     */
+    public function change_stock()
+    {
+        //所有状态下的在途和待入库清零
+        $_item = new \app\admin\model\itemmanage\Item;
+        $_item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $list = $_item_platform
+            ->alias('a')
+            ->field('sku,sum(plat_on_way_stock) as all_on_way,sum(wait_instock_num) as all_instock')
+            ->whereOr('plat_on_way_stock > 0')
+            ->whereOr('wait_instock_num > 0')
+            ->group('sku')
+            ->select();
+        foreach($list as $val){
+            $res_item = $_item->where(['sku'=>$val['sku']])->update(['on_way_stock'=>$val['all_on_way'],'wait_instock_num'=>$val['all_instock']]);
+            if($res_item){
+               echo $val['sku'].":success\n";
+            }else{
+                echo $val['sku'].":false\n";
+            }
+        }
+        exit;
+
+        //update fa_item set on_way_stock=0,wait_instock_num=0 where id > 0;
+        /*$res_item = $_item->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['on_way_stock'=>0,'wait_instock_num'=>0]);
+        if(!$res_item){
+            echo '全部清零失败';exit;
+        }*/
+        //update fa_item_platform_sku set plat_on_way_stock=0,wait_instock_num=0 where id > 0;
+        /*$res_item_platform = $_item_platform->allowField(true)->isUpdate(true, ['id'=>['gt',0]])->save(['plat_on_way_stock'=>0,'wait_instock_num'=>0]);
+        if(!$res_item_platform){
+            echo '站点清零失败';exit;
+        }*/
+
+        //审核通过、录入物流单、签收状态下的加在途
+        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $_new_product_mapping = new \app\admin\model\NewProductMapping;
+        $list = $_purchase_order_item
+            ->alias('a')
+            ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+            ->field('a.sku,a.replenish_list_id,a.purchase_num,b.replenish_id')
+            ->where(['b.purchase_status'=>['in',[2,6,7,9]]])
+            ->where(['b.stock_status'=>['in',[0,1]]])
+            ->where(['b.replenish_id'=>['gt',0]])
+            ->select();
+
+        foreach ($list as $v) {
+            //在途库存数量
+            $stock_num = $v['purchase_num'];
+
+            //更新全部在途
+            $_item->where(['sku' => $v['sku']])->setInc('on_way_stock', $stock_num);
+
+            //获取各站点比例
+            $rate_arr = $_new_product_mapping
+                ->where(['sku' => $v['sku'], 'replenish_id' => $v['replenish_id']])
+                ->field('website_type,rate')
+                ->select();
+
+            //在途库存分站 更新映射关系表
+            foreach ($rate_arr as $key => $val) {
+                if (1 == (count($rate_arr) - $key)) {//剩余数量分给最后一个站
+                    $_item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
+                } else {
+                    $num = round($v['purchase_num'] * $val['rate']);
+                    $stock_num -= $num;
+                    $_item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $num);
+                }
+            }
+        }
+
+        //签收状态下的加待入库数量、减在途
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+//        $_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+        $row = $_logistics_info
+            ->alias('a')
+            ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+            ->field('a.batch_id,a.purchase_id,b.replenish_id')
+            ->where(['b.stock_status'=>['in',[0,1]]])
+            ->where(['b.purchase_status'=>['in',[7,9]]])
+            ->select();
+
+        foreach ($row as $v) {
+//            if ($v['batch_id']) {
+//                $list = $_batch_item
+//                    ->where(['purchase_batch_id' => $v['batch_id']])
+//                    ->field('website_type,rate')
+//                    ->select();
+//                foreach ($list as $val) {
+//                    //获取各站点比例
+//                    $rate_arr = $_new_product_mapping
+//                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
+//                        ->field('arrival_num,sku')
+//                        ->select();
+//
+//                    //在途库存数量
+//                    $stock_num = $val['arrival_num'];
+//
+//                    //在途库存分站 更新映射关系表
+//                    foreach ($rate_arr as $key => $vall) {
+//                        if ((1 == count($rate_arr) - $key)) {//剩余数量分给最后一个站
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
+//                            //更新站点待入库数量
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
+//                        } else {
+//                            $num = round($val['arrival_num'] * $vall['rate']);
+//                            $stock_num -= $num;
+//                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+//                            //更新站点待入库数量
+//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
+//                        }
+//                    }
+//                    //减全部的在途库存
+//                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
+//                    //加全部的待入库数量
+//                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
+//                }
+//            } else {
+                if ($v['purchase_id']) {
+                    $list = $_purchase_order_item
+                        ->where(['purchase_id' => $v['purchase_id']])
+                        ->field('purchase_num,sku')
+                        ->select();
+                    foreach ($list as $val) {
+                        //获取各站点比例
+                        $rate_arr = $_new_product_mapping
+                            ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
+                            ->field('website_type,rate')
+                            ->select();
+
+                        //在途库存数量
+                        $stock_num = $val['purchase_num'];
+
+                        //在途库存分站 更新映射关系表
+                        foreach ($rate_arr as $key => $vall) {
+                            if ((count($rate_arr) - $key) == 1) {//剩余数量分给最后一个站
+                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
+                                //更新站点待入库数量
+                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
+                            } else {
+                                $num = round($val['purchase_num'] * $vall['rate']);
+                                $stock_num -= $num;
+                                $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+                                //更新站点待入库数量
+                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
+                            }
+                        }
+                        //减全部的在途库存
+                        $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
+                        //加全部的待入库数量
+                        $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
+                    }
+                }
+//            }
+        }
     }
 
 }

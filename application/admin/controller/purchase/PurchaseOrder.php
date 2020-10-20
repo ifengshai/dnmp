@@ -1623,7 +1623,7 @@ class PurchaseOrder extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['1688单号', '物流单号'];
+        $listName = ['订单编号', '物流公司运单号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -1637,6 +1637,7 @@ class PurchaseOrder extends Backend
             for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if (!$val) continue;
                     $fields[] = $val;
                 }
             }
@@ -1672,20 +1673,20 @@ class PurchaseOrder extends Backend
 
             $row = $this->model->where(['1688_number' => $v[0]])->find();
             if (!$row) {
-                $this->error('导入失败！！,1688单号未查询到记录' . $v[0]);
+                $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
             }
-
-            $result = $this->model->where(['1688_number' => $v[0]])->update(['logistics_number' => $v[1]]);
+            //拆分物流单号和物流公司
+            $logistics_data = explode(':', $v[1]);
+            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6,'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0],'logistics_company_no' => $logistics_data[0]]);
 
             $list = [];
             $list['order_number'] = $row->purchase_number;
             $list['purchase_id'] = $row->id;
             $list['type'] = 1;
-            $list['logistics_number'] = $v[1];
-            $list['logistics_company_no'] = '1688';
+            $list['logistics_number'] = $logistics_data[1];
+            $list['logistics_company_no'] = $logistics_data[0];
             $logistics->addLogisticsInfo($list);
         }
-
 
         if ($result) {
             $this->success('导入成功！！');

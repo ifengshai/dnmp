@@ -1,0 +1,199 @@
+<style>
+
+    .echart-style td {
+        width: 60px;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+
+    .margin-div {
+        margin-top: 30px;
+    }
+
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 220px;
+    }
+
+    .title {
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+
+    .rate_class {
+        font-size: 12px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <label class="control-label col-xs-1 col-sm-1">平台</label>
+    <div class="col-xs-2">
+        <select data-rule="required" class="form-control" id="order_platform">
+            <option value="1" selected="selected">Zeelool</option>
+            <option value="2">Voogueme</option>
+            <option value="3">Nihaooptical</option>
+            <option value="4">全部</option>
+        </select>
+    </div>
+
+    <label class="control-label col-xs-1 col-sm-1"
+           style="line-height: 31px;margin-right: -100px">时间:</label>
+    <div class="col-xs-2" id="timetime" role="form">
+        <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str"
+               value="RANGE" readonly="">
+        <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"
+               id="time_str" value="{$time_str}" data-index="14">
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span
+                                            id="same_active_user_num">{$active_user_num.same_active_user_num}</span>
+                                        环比：<span
+                                            id="huan_active_user_num">{$active_user_num.huan_active_user_num}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span
+                                            id="same_register_user_num">{$register_user_num.same_register_user_num}</span>
+                                        环比：<span
+                                            id="huan_register_user_num">{$register_user_num.huan_register_user_num}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_again_user_num">{$again_user_num.same_again_user_num}</span>
+                                        环比：<span
+                                            id="huan_again_user_num">{$again_user_num.huan_again_user_num}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_vip_user_num">{$vip_user_num.same_vip_user_num}</span>
+                                        环比：<span id="huan_vip_user_num">{$vip_user_num.huan_vip_user_num}</span></div>
+                                </span>
+    </div>
+    <br>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
+                                    <div class="rate_class">同比：<span
+                                            id="same_order_num">{$order_num.same_order_num}</span>  环比：<span
+                                            id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">客单价：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span
+                                            id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span
+                                            id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                </span>
+    </div>
+    <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span
+                                            id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                </span>
+    </div>
+    <select id="type" style="display:none">
+        <option value="1">订单数</option>
+    </select>
+    <div id="echart1" style="height:800px;width:100%;"></div>
+    <div id="echart2" style="height:800px;width:100%;"></div>
+    <div id="echart3" style="height:800px;width:100%;"></div>
+
+
+</div>

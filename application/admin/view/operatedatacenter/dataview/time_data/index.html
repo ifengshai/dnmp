@@ -1,0 +1,343 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+        padding: 0;
+    }
+
+
+    .handle_table1 td {
+        border: 1px solid #ccc;
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 14px;
+        border-style: solid;
+    }
+
+
+    /* #caigou-table {
+        border-width: 0px;
+    }
+    #caigou-table th{
+        border-width: 0px;
+    }
+    #caigou-table td{
+        border-width: 0px;
+    } */
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .u3431 {
+
+        width: 100%;
+        height: 100px;
+        display: flex;
+        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 28px;
+        line-height: 36px;
+        border-width: 0px;
+        margin-top: 20px;
+    }
+
+    .u3431 .text {
+
+        align-self: center;
+        padding: 0px 0px 0px 0px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .u3431_text {
+        border-width: 0px;
+        word-wrap: break-word;
+        text-transform: none;
+        width: 30%;
+        height: 80px;
+    }
+
+    .sales-div {
+        float: left;
+        width: 40%;
+        height: 100%;
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgb(228, 228, 228);
+        border-radius: 0px;
+
+        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 28px;
+        line-height: 36px;
+
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id="form" action="{:url('index')}" class="form-commonsearch form-horizontal" role="form"
+                        method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6 col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">订单平台</label>
+                                        <div class="col-xs-8">
+                                            <select id="c-order_platform" data-rule="required" class="form-control"
+                                                name="order_platform">
+                                                {foreach name="orderPlatformList" item="vo"}
+                                                {if $key == $platform}
+                                                <option value="{$key}" selected="selected">{$vo}</option>
+                                                {else}
+                                                <option value="{$key}">{$vo}</option>
+                                                {/if}
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                                    <label for="create_time" class="control-label col-xs-4">创建时间</label>
+                                    <div class="col-xs-8">
+                                        <input type="hidden" class="form-control operate" name="create_time-operate"
+                                            data-name="create_time" value="RANGE" readonly="">
+                                        <input type="text" autocomplete="off" class="form-control datetimerange"
+                                            name="create_time" placeholder="创建时间" id="create_time"
+                                            value="{$create_time}" data-index="14">
+                                    </div>
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div class="col-sm-8 col-xs-offset-4">
+                                        <input type="submit" class="btn btn-success" value="提交">
+                                        <input type="reset" class="btn btn-default reset" value="重置"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div style="width: 100%;">
+
+                        <div class="row item_info"
+                            style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
+                            <p
+                                style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                                商品实时</p>
+                            <div class="col-lg-12">
+                                <div style="float: left;width:48%;">
+                                    <p
+                                        style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
+                                        销售量</p>
+                                    <div id="echart1" style="float: left;height:400px;width:100%;"></div>
+                                </div>
+
+                                <div style="float: left;width:48%;">
+                                    <p
+                                        style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
+                                        销售额</p>
+                                    <div id="echart2" style="float: left;height:400px;width:100%;margin-left: 20px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="width: 100%;">
+
+                        <div class="row item_info"
+                            style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
+                            <p
+                                style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                                订单实时</p>
+                            <div class="col-lg-12">
+                                <div style="float: left;width:48%;">
+                                    <p
+                                        style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
+                                        订单数</p>
+                                    <div id="echart3" style="float: left;height:400px;width:100%;"></div>
+                                </div>
+
+                                <div style="float: left;width:48%;">
+                                    <p
+                                        style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
+                                        客单价</p>
+                                    <div id="echart4" style="float: left;height:400px;width:100%;margin-left: 20px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+
+                    <div style="width: 100%;">
+
+                        <div class="row item_info"
+                            style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;margin-left: 1px;padding: 10px;">
+                            <p
+                                style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                                分时转化分析</p>
+                            <div class="col-xs-6 col-md-12">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width:100%;">
+
+                                        <tr>
+                                            <td>序号</td>
+                                            <td>时间</td>
+                                            <td>订单数</td>
+                                            <td>销量</td>
+                                            <td>金额</td>
+                                            <td>客单价</td>
+                                            <td>会话数</td>
+                                            <td>加购率</td>
+                                            <td>会话转化率</td>
+                                            <td>购物车数</td>
+                                            <td>购物车转化率</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>0:00 - 0:59</td>
+                                            <td>300</td>
+                                            <td>1000</td>
+                                            <td>2000</td>
+                                            <td>100</td>
+                                            <td>100</td>
+                                            <td>12%</td>
+                                            <td>12%</td>
+                                            <td>5000</td>
+                                            <td>50%</td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>0:00 - 0:59</td>
+                                            <td>300</td>
+                                            <td>1000</td>
+                                            <td>2000</td>
+                                            <td>100</td>
+                                            <td>100</td>
+                                            <td>12%</td>
+                                            <td>12%</td>
+                                            <td>5000</td>
+                                            <td>50%</td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>0:00 - 0:59</td>
+                                            <td>300</td>
+                                            <td>1000</td>
+                                            <td>2000</td>
+                                            <td>100</td>
+                                            <td>100</td>
+                                            <td>12%</td>
+                                            <td>12%</td>
+                                            <td>5000</td>
+                                            <td>50%</td>
+
+                                        </tr>
+
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
