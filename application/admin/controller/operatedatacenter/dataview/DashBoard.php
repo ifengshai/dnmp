@@ -108,21 +108,21 @@ class DashBoard extends Backend
                     break;
             }
             //活跃用户数
-            $active_user_num = $model->getActiveUser(1,$time_str);
+            $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
-            $register_user_num = $model->getRegisterUser(1,$time_str);
+            $register_user_num = $model->getRegisterUser(1, $time_str);
             //复购用户数
-            $again_user_num = $model->getAgainUser($time_str,1);
+            $again_user_num = $model->getAgainUser($time_str, 1);
             //vip用户数
-            $vip_user_num = $model->getVipUser(1,$time_str);
+            $vip_user_num = $model->getVipUser(1, $time_str);
             //订单数
-            $order_num = $model->getOrderNum(1,$time_str);
+            $order_num = $model->getOrderNum(1, $time_str);
             //客单价
-            $order_unit_price = $model->getOrderUnitPrice(1,$time_str);
+            $order_unit_price = $model->getOrderUnitPrice(1, $time_str);
             //销售额
-            $sales_total_money = $model->getSalesTotalMoney(1,$time_str);
+            $sales_total_money = $model->getSalesTotalMoney(1, $time_str);
             //邮费
-            $shipping_total_money = $model->getShippingTotalMoney(1,$time_str);
+            $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
             $this->success('', '', $data);
         }
@@ -159,64 +159,54 @@ class DashBoard extends Backend
             }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-
-                $first_sales_total = $model->getActiveUser(0,$createat[0]);
-                $date_arr = array(
-                    $createat[0] => $first_sales_total['active_user_num']
-                );
-                if ($createat[0] != $createat[3]) {
-                    for ($i = 0; $i <= 100; $i++) {
-                        $m = $i + 1;
-                        $deal_date = date_create($createat[0]);
-                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                        $next_day = date_format($deal_date, "Y-m-d");
-                        $next_sales_total = $model->getActiveUser(0,$next_day);
-                        $date_arr[$next_day] = $next_sales_total['active_user_num'];
-                        if ($next_day == $createat[3]) {
-                            break;
-                        }
-                    }
-                }
-                dump($date_arr);
-
+                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             } else {
-                //默认7天的数据
                 $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-                $createat = explode(' ', $time_str);
-                $first_sales_total = $model->getActiveUser(0,$createat[0]);
-                $date_arr = array(
-                    $createat[0] => $first_sales_total['active_user_num']
-                );
-                if ($createat[0] != $createat[3]) {
-                    for ($i = 0; $i <= 100; $i++) {
-                        $m = $i + 1;
-                        $deal_date = date_create($createat[0]);
-                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                        $next_day = date_format($deal_date, "Y-m-d");
-                        $next_sales_total = $model->getActiveUser(0,$next_day);
-                        $date_arr[$next_day] = $next_sales_total['active_user_num'];
-                        if ($next_day == $createat[3]) {
-                            break;
-                        }
+                $end = date('Y-m-d 23:59:59');
+                $where['day_date'] = ['between', [$start, $end]];
+            }
+            if ($order_platform == 4) {
+                unset($where['site']);
+                $sales_total = $model->where($where)->column('day_date', 'active_user_num');
+                $arr = array();
+                foreach ($sales_total as $k => $v) {
+                    if ($arr[$v]) {
+                        $arr[$v] += $k;
+                    } else {
+                        $arr[$v] = $k;
                     }
                 }
-                // dump($date_arr);
+                $date_arr = $arr;
+                $name = '活跃用户数';
+
+                $json['xcolumnData'] = array_keys($date_arr);
+                $json['column'] = [$name];
+                $json['columnData'] = [
+                    [
+                        'name' => $name,
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' => array_values($date_arr)
+                    ],
+
+                ];
+            } else {
+                $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $date_arr = $arr;
+                $name = '活跃用户数';
+
+                $json['xcolumnData'] = array_values($date_arr);
+                $json['column'] = [$name];
+                $json['columnData'] = [
+                    [
+                        'name' => $name,
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' => array_keys($date_arr)
+                    ],
+
+                ];
             }
-            $name = '活跃用户数';
-
-            $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
-            $json['columnData'] = [
-                [
-                    'name' => $name,
-                    'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_values($date_arr)
-                ],
-
-            ];
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -250,46 +240,60 @@ class DashBoard extends Backend
             if ($order_platform) {
                 $where['site'] = $order_platform;
             }
+            if ($order_platform) {
+                $where['site'] = $order_platform;
+            }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-
-                $first_sales_total = $model->getOrderNum($createat[0]);
-                $date_arr = array(
-                    $createat[0] => $first_sales_total['order_num']
-                );
-                if ($createat[0] != $createat[3]) {
-                    for ($i = 0; $i <= 100; $i++) {
-                        $m = $i + 1;
-                        $deal_date = date_create($createat[0]);
-                        date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                        $next_day = date_format($deal_date, "Y-m-d");
-                        $next_sales_total = $model->getOrderNum($next_day);
-                        $date_arr[$next_day] = $next_sales_total['order_num'];
-                        if ($next_day == $createat[3]) {
-                            break;
-                        }
+                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $where['day_date'] = ['between', [$start, $end]];
+            }
+            if ($order_platform == 4) {
+                unset($where['site']);
+                $sales_total = $model->where($where)->column('day_date', 'order_num');
+                $arr = array();
+                foreach ($sales_total as $k => $v) {
+                    if ($arr[$v]) {
+                        $arr[$v] += $k;
+                    } else {
+                        $arr[$v] = $k;
                     }
                 }
+                $date_arr = $arr;
+                $name = '订单数';
 
+                $json['xcolumnData'] = array_keys($date_arr);
+                $json['column'] = [$name];
+                $json['columnData'] = [
+                    [
+                        'name' => $name,
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' => array_values($date_arr)
+                    ],
+
+                ];
             } else {
-                $now_day = date('Y-m-d');
-                //今天的订单数
-                $today_order_num = $model->getOrderNum();
-                $date_arr[$now_day] = $today_order_num['order_num'];
+                $arr = $model->where($where)->column('day_date', 'order_num');
+                $date_arr = $arr;
+                $name = '订单数';
+
+                $json['xcolumnData'] = array_values($date_arr);
+                $json['column'] = [$name];
+                $json['columnData'] = [
+                    [
+                        'name' => $name,
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' => array_keys($date_arr)
+                    ],
+
+                ];
             }
-            $name = '订单数';
 
-            $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
-            $json['columnData'] = [
-                [
-                    'name' => $name,
-                    'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_values($date_arr)
-                ],
-
-            ];
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -319,16 +323,19 @@ class DashBoard extends Backend
             $time_str = $params['time_str'];
             if ($time_str) {
                 //着陆页数据
-                $landing_num = $model->getLanding($time_str,1);
-                $detail_num = $model->getDetail($time_str,1);
-                $cart_num = $model->getCart($time_str,1);
-                $complete_num = $model->getComplete($time_str,1);
-            }else {
+                $landing_num = $model->getLanding($time_str, 1);
+                $detail_num = $model->getDetail($time_str, 1);
+                $cart_num = $model->getCart($time_str, 1);
+                $complete_num = $model->getComplete($time_str, 1);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
                 //着陆页数据
-                $landing_num = $model->getLanding();
-                $detail_num = $model->getDetail();
-                $cart_num = $model->getCart();
-                $complete_num = $model->getComplete();
+                $landing_num = $model->getLanding($time_str, 1);
+                $detail_num = $model->getDetail($time_str, 1);
+                $cart_num = $model->getCart($time_str, 1);
+                $complete_num = $model->getComplete($time_str, 1);
             }
 
             if ($order_platform) {

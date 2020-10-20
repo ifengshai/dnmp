@@ -26,66 +26,49 @@ class Nihao extends Model
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
+        $where['site'] = 3;
         $start = date('Y-m-d');
-        // dump($time_str);
-        // dump($type);
+
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('landing_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(3, $start);
-                $arr['landing_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['landing_num'] = $active_user_num;
-            }
+            $arr['landing_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(3, $start);
-                $arr['landing_num'] = $today_active_user;
+                $arr['landing_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['landing_num'] = $this->where($where)->sum('landing_num');
             }
         }
-
         return $arr;
     }
+
     //产品详情页
     public function getDetail($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 3;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('detail_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(3, $start);
-                $arr['detail_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['detail_num'] = $active_user_num;
-            }
+            $arr['detail_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(3, $start);
-                $arr['detail_num'] = $today_active_user;
+                $arr['detail_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['detail_num'] = $this->where($where)->sum('detail_num');
@@ -94,33 +77,27 @@ class Nihao extends Model
 
         return $arr;
     }
+
     //加购
     public function getCart($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 3;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('cart_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(3, $start);
-                $arr['cart_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['cart_num'] = $active_user_num;
-            }
+
+            $arr['cart_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(3, $start);
-                $arr['cart_num'] = $today_active_user;
+                $arr['cart_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['cart_num'] = $this->where($where)->sum('cart_num');
@@ -129,32 +106,26 @@ class Nihao extends Model
 
         return $arr;
     }
+
     //交易次数
     public function getComplete($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
+        $where['site'] = 3;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('complete_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(3, $start);
-                $arr['complete_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['complete_num'] = $active_user_num;
-            }
+
+            $arr['complete_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(3, $start);
-                $arr['complete_num'] = $today_active_user;
+                $arr['complete_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['complete_num'] = $this->where($where)->sum('complete_num');
@@ -505,28 +476,24 @@ class Nihao extends Model
             return $finalResult;
         }
     }
-        /*
-     * 统计活跃用户数
-     */
-    public function getActiveUser($time_str = '', $type = 0)
+    /*
+ * 统计活跃用户数
+ */
+    public function getActiveUser($type = 1,$time_str = '')
     {
-        $map['site'] = 3;
-        $start = date('Y-m-d');
-
-
+        $map['site'] = 1;
         if ($type == 1) {
+            //默认查询7天的数据
+            if (!$time_str) {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            }
+            //时间段总和
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间的数据
-            $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时活跃用户数 zeelool
-                $today_active_user = $this->google_active_user(3, $start);
-                $arr['active_user_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['active_user_num'] = $active_user_num;
-            }
+            $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
+
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
@@ -543,30 +510,23 @@ class Nihao extends Model
 
         } else {
             //查询某天的数据
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                //今天的实时活跃用户数 zeelool
-                $today_active_user = $this->google_active_user(3, $start);
-                $arr['active_user_num'] = $today_active_user;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $where['day_date'] = ['between', [$time_str, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
+            $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
 
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
             $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
             $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
             $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
         }
 
         return $arr;
@@ -575,66 +535,58 @@ class Nihao extends Model
     /*
      * 统计注册用户数
      */
-    public function getRegisterUser($time_str = '', $type = 0)
+    public function getRegisterUser($type = 1,$time_str = '')
     {
-        $map['site'] = 3;
-        $start = date('Y-m-d');
-        $register_where = [];
-        $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        //今天的实时注册用户数
-        $today_register_user_num = $this->model->table('customer_entity')->where($register_where)->count();
-
+        $map['site'] = 1;
         if ($type == 1) {
+            //默认查询7天的数据
+            if (!$time_str) {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            }
+            //时间段总和
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间内的数据
-            $register_num = $this->where($map)->where($where)->sum('register_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                $arr['register_user_num'] = $register_num + $today_register_user_num;
-            } else {
-                $arr['register_user_num'] = $register_num;
-            }
+            $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
+
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
 
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('register_num');
+            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
 
         } else {
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                $arr['register_user_num'] = $today_register_user_num;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($start)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($start)));
-            $where['day_date'] = ['between', [$start, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //查询某天的数据
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
+            $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
+
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('register_num');
+            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
         }
 
         return $arr;
     }
-
     /*
      * 统计vip用户数 nihao为0
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace app\admin\model\operatedatacenter;
 
 use think\Db;
@@ -19,74 +20,59 @@ class Voogueme extends Model
     protected $append = [
 
     ];
+
     public function __construct()
     {
         $this->model = new \app\admin\model\order\order\Voogueme();
 
     }
+
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
+        $where['site'] = 2;
         $start = date('Y-m-d');
-        // dump($time_str);
-        // dump($type);
+
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('landing_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(2, $start);
-                $arr['landing_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['landing_num'] = $active_user_num;
-            }
+            $arr['landing_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(2, $start);
-                $arr['landing_num'] = $today_active_user;
+                $arr['landing_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['landing_num'] = $this->where($where)->sum('landing_num');
             }
         }
-
         return $arr;
     }
+
     //产品详情页
     public function getDetail($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 2;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('detail_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(2, $start);
-                $arr['detail_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['detail_num'] = $active_user_num;
-            }
+            $arr['detail_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(2, $start);
-                $arr['detail_num'] = $today_active_user;
+                $arr['detail_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['detail_num'] = $this->where($where)->sum('detail_num');
@@ -95,33 +81,27 @@ class Voogueme extends Model
 
         return $arr;
     }
+
     //加购
     public function getCart($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 2;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('cart_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(2, $start);
-                $arr['cart_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['cart_num'] = $active_user_num;
-            }
+
+            $arr['cart_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(2, $start);
-                $arr['cart_num'] = $today_active_user;
+                $arr['cart_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['cart_num'] = $this->where($where)->sum('cart_num');
@@ -130,32 +110,26 @@ class Voogueme extends Model
 
         return $arr;
     }
+
     //交易次数
     public function getComplete($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
+        $where['site'] = 2;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('complete_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(2, $start);
-                $arr['complete_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['complete_num'] = $active_user_num;
-            }
+
+            $arr['complete_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(2, $start);
-                $arr['complete_num'] = $today_active_user;
+                $arr['complete_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['complete_num'] = $this->where($where)->sum('complete_num');
@@ -164,6 +138,7 @@ class Voogueme extends Model
 
         return $arr;
     }
+
     //着陆页数据 调用此方法
     public function google_landing($site, $start_time)
     {
@@ -181,6 +156,7 @@ class Voogueme extends Model
         // return $result;
         return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'], 2) : 0;
     }
+
     //着陆页会话数
     protected function getReport_landing1($site, $analytics, $startDate, $endDate)
     {
@@ -244,6 +220,7 @@ class Voogueme extends Model
         // return $result;
         return $result[0]['ga:goal13Starts'] ? round($result[0]['ga:goal13Starts'], 2) : 0;
     }
+
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
     {
@@ -308,6 +285,7 @@ class Voogueme extends Model
         // return $result;
         return $result[0]['ga:goal1Starts'] ? round($result[0]['ga:goal1Starts'], 2) : 0;
     }
+
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
     {
@@ -372,6 +350,7 @@ class Voogueme extends Model
         // return $result;
         return $result[0]['ga:transactions'] ? round($result[0]['ga:transactions'], 2) : 0;
     }
+
     //最终电子商务页面交易次数数据
     protected function getReport_target_end($site, $analytics, $startDate, $endDate)
     {
@@ -418,6 +397,7 @@ class Voogueme extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+
     //活跃用户数 调用此方法
     public function google_active_user($site, $start_time)
     {
@@ -478,6 +458,7 @@ class Voogueme extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+
     protected function printResults($reports)
     {
         $finalResult = array();
@@ -506,28 +487,25 @@ class Voogueme extends Model
             return $finalResult;
         }
     }
+
     /*
      * 统计活跃用户数
      */
-    public function getActiveUser($time_str = '', $type = 0)
+    public function getActiveUser($type = 1, $time_str = '')
     {
         $map['site'] = 2;
-        $start = date('Y-m-d');
-
-
         if ($type == 1) {
+            //默认查询7天的数据
+            if (!$time_str) {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+            }
+            //时间段总和
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间的数据
-            $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时活跃用户数 zeelool
-                $today_active_user = $this->google_active_user(2, $start);
-                $arr['active_user_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['active_user_num'] = $active_user_num;
-            }
+            $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
+
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
@@ -544,30 +522,23 @@ class Voogueme extends Model
 
         } else {
             //查询某天的数据
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                //今天的实时活跃用户数 zeelool
-                $today_active_user = $this->google_active_user(2, $start);
-                $arr['active_user_num'] = $today_active_user;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $where['day_date'] = ['between', [$time_str, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
+            $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
 
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
             $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
             $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
             $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
         }
 
         return $arr;
@@ -576,129 +547,116 @@ class Voogueme extends Model
     /*
      * 统计注册用户数
      */
-    public function getRegisterUser($time_str = '', $type = 0)
+    public function getRegisterUser($type = 1, $time_str = '')
     {
         $map['site'] = 2;
-        $start = date('Y-m-d');
-        $register_where = [];
-        $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        //今天的实时注册用户数
-        $today_register_user_num = $this->model->table('customer_entity')->where($register_where)->count();
-
         if ($type == 1) {
+            //默认查询7天的数据
+            if (!$time_str) {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+            }
+            //时间段总和
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间内的数据
-            $register_num = $this->where($map)->where($where)->sum('register_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                $arr['register_user_num'] = $register_num + $today_register_user_num;
-            } else {
-                $arr['register_user_num'] = $register_num;
-            }
+            $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
+
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
 
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('register_num');
+            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
 
         } else {
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                $arr['register_user_num'] = $today_register_user_num;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($start)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($start)));
-            $where['day_date'] = ['between', [$start, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //查询某天的数据
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
+            $arr['register_user_num'] = $this->where($map)->where($where)->sum('register_num');
+
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('register_num');
+            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
         }
 
         return $arr;
     }
 
     /*
-     * 统计vip用户数 zeelool
+     * 统计vip用户数 v
      */
-    public function getVipUser($time_str = '', $type = 0)
+    public function getVipUser($type = 1, $time_str = '')
     {
         $map['site'] = 2;
-        $start = date('Y-m-d');
-        $register_where = [];
-        $register_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $start . "'")];
-        $vip_where['order_status'] = 'Success';
-        //今天的实时vip用户数
-        $today_register_user_num = $this->model->table('oc_vip_order')->where($vip_where)->where($register_where)->count();
-
         if ($type == 1) {
+            //默认查询7天的数据
+            if (!$time_str) {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+            }
+            //时间段总和
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            //这段时间内的数据
-            $register_num = $this->where($map)->where($where)->sum('vip_user_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                $arr['vip_user_num'] = $register_num + $today_register_user_num;
-            } else {
-                $arr['vip_user_num'] = $register_num;
-            }
+            $arr['vip_user_num'] = $this->where($map)->where($where)->sum('vip_user_num');
+
             $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('vip_user_num');
-            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
 
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('register_num');
-            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('vip_user_num');
+            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+
 
         } else {
-            if (!$time_str) {
-                $time_str = $start;
-            }
-            if ($time_str == $start) {
-                $arr['vip_user_num'] = $today_register_user_num;
-            } else {
-                $where['day_date'] = ['between', [$time_str, $time_str]];
-                $arr['vip_user_num'] = $this->where($map)->where($where)->sum('vip_user_num');
-            }
-            $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($start)));
-            $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($start)));
-            $where['day_date'] = ['between', [$start, $time_str]];
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
+            //查询某天的数据
+            $where = [];
+            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
+            $arr['vip_user_num'] = $this->where($map)->where($where)->sum('vip_user_num');
+
+            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
+            $same_where = [];
+            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
             $same_order_unit_price = $this->where($map)->where($same_where)->sum('vip_user_num');
-            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
+
+            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
+            $huan_where = [];
+            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($map)->where($same_where)->sum('vip_user_num');
-            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100' . '%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+            $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('vip_user_num');
+            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
         }
 
         return $arr;
     }
+
 
     /**
      * 复购用户数
@@ -732,11 +690,13 @@ class Voogueme extends Model
         return $arrs;
 
     }
-    //获取某一段时间内的复购用户数
-    public function get_again_user($createat){
 
-        $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $where['customer_id'] = ['>',0];
+    //获取某一段时间内的复购用户数
+    public function get_again_user($createat)
+    {
+
+        $where['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        $where['customer_id'] = ['>', 0];
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
 
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
@@ -746,101 +706,35 @@ class Voogueme extends Model
             ->field('customer_id')
             ->select();
         //二维数组转一维数组
-        foreach($order as &$val){
+        foreach ($order as &$val) {
             $arr[] = $val['customer_id'];
         }
         // dump($arr);
         //复购用户数
         $again_num = 0;
         // dump($arr);
-        if (!empty($arr)){
+        if (!empty($arr)) {
             $new_arr = array_count_values($arr);
             // dump($new_arr);
             //去重过后的新数组
-            foreach ($new_arr as $k=>$v){
-                if ($v > 1){
+            foreach ($new_arr as $k => $v) {
+                if ($v > 1) {
                     $again_num += 1;
                     unset($new_arr[$k]);
                 }
             }
 
-            $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-            foreach ($new_arr as $key=>$val){
+            $wheres['created_at'] = ['not between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            foreach ($new_arr as $key => $val) {
                 //判断之前是否有这些订单
-                $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
-                if (!empty($another_order)){
+                $another_order = $this->model->where('customer_id', $key)->where($map_where)->where($wheres)->value('customer_id');
+                if (!empty($another_order)) {
                     $again_num += 1;
                 }
             }
         }
         return $again_num;
     }
-
-    /*
-     * 统计用户转化漏斗的几个指标的数据
-     */
-    // public function getFunnelNum($time_str = '', $type = 0)
-    // {
-    //     $map['site'] = 2;
-    //     $start = date('Y-m-d');
-    //     //今天的实时着陆页的数据 zeelool
-    //     $today_active_user = $this->datacenter->google_landing(1, $start);
-    //     //今天的实时目标一的数据
-    //     $today_active_user = $this->datacenter->google_target1(1, $start);
-    //
-    //     if ($type == 1) {
-    //         $createat = explode(' ', $time_str);
-    //         $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-    //         //这段时间的数据
-    //         $active_user_num = $this->where($map)->where($where)->sum('active_user_num');
-    //         //判断是否包含当天数据，如果包含需要加上今天的数据
-    //         if ($start <= $createat[3]) {
-    //             $arr['active_user_num'] = $active_user_num + $today_active_user;
-    //         } else {
-    //             $arr['active_user_num'] = $active_user_num;
-    //         }
-    //         $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-    //         $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-    //         $same_where['day_date'] = ['between', [$same_start, $same_end]];
-    //         //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-    //         $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
-    //         $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-    //
-    //         $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-    //         $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-    //         $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-    //         //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-    //         $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
-    //         $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-    //
-    //     } else {
-    //         //查询某天的数据
-    //         if (!$time_str) {
-    //             $time_str = $start;
-    //         }
-    //         if ($time_str == $start) {
-    //             $arr['active_user_num'] = $today_active_user;
-    //         } else {
-    //             $where['day_date'] = ['between', [$time_str, $time_str]];
-    //             $arr['active_user_num'] = $this->where($map)->where($where)->sum('active_user_num');
-    //         }
-    //         $same_start = $same_end = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-    //         $huan_start = $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-    //         $where['day_date'] = ['between', [$time_str, $time_str]];
-    //         $same_where['day_date'] = ['between', [$same_start, $same_end]];
-    //         $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-    //
-    //         //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-    //         $same_order_unit_price = $this->where($map)->where($same_where)->sum('active_user_num');
-    //         $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-    //         //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-    //         $huan_order_unit_price = $this->where($map)->where($huan_where)->sum('active_user_num');
-    //         $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-    //
-    //     }
-    //
-    //     return $arr;
-    // }
 
     /**
      * 统计订单数
@@ -860,7 +754,7 @@ class Voogueme extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_order_num = $this->model->where($map_where)->where('order_type',1)->where($arr_where)->count();
+        $today_order_num = $this->model->where($map_where)->where('order_type', 1)->where($arr_where)->count();
         if ($type == 1) {
             //时间段总和
             $createat = explode(' ', $time_str);
@@ -988,7 +882,7 @@ class Voogueme extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_sales_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_grand_total');
+        $today_sales_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type', 1)->sum('base_grand_total');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -1049,7 +943,7 @@ class Voogueme extends Model
         $start = date('Y-m-d');
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $today_shipping_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type',1)->sum('base_shipping_amount');
+        $today_shipping_total_money = $this->model->where($map_where)->where($arr_where)->where('order_type', 1)->sum('base_shipping_amount');
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -1217,111 +1111,119 @@ class Voogueme extends Model
         }
         return $arr;
     }
+
     /*
      * 查询时间段内金额段之间的订单数
      * */
-    public function getMoneyOrderNum($time_str = ''){
+    public function getMoneyOrderNum($time_str = '')
+    {
         //获取订单金额范围在[0,20)阶段的订单数
-        $arr['order_total0'] = $this->getMoneyOrderNumInfo(0,$time_str);
-        $arr['order_total20'] = $this->getMoneyOrderNumInfo(1,$time_str);
-        $arr['order_total30'] = $this->getMoneyOrderNumInfo(2,$time_str);
-        $arr['order_total40'] = $this->getMoneyOrderNumInfo(3,$time_str);
-        $arr['order_total50'] = $this->getMoneyOrderNumInfo(4,$time_str);
-        $arr['order_total60'] = $this->getMoneyOrderNumInfo(5,$time_str);
-        $arr['order_total80'] = $this->getMoneyOrderNumInfo(6,$time_str);
-        $arr['order_total100'] = $this->getMoneyOrderNumInfo(7,$time_str);
-        $arr['order_total200'] = $this->getMoneyOrderNumInfo(8,$time_str);
+        $arr['order_total0'] = $this->getMoneyOrderNumInfo(0, $time_str);
+        $arr['order_total20'] = $this->getMoneyOrderNumInfo(1, $time_str);
+        $arr['order_total30'] = $this->getMoneyOrderNumInfo(2, $time_str);
+        $arr['order_total40'] = $this->getMoneyOrderNumInfo(3, $time_str);
+        $arr['order_total50'] = $this->getMoneyOrderNumInfo(4, $time_str);
+        $arr['order_total60'] = $this->getMoneyOrderNumInfo(5, $time_str);
+        $arr['order_total80'] = $this->getMoneyOrderNumInfo(6, $time_str);
+        $arr['order_total100'] = $this->getMoneyOrderNumInfo(7, $time_str);
+        $arr['order_total200'] = $this->getMoneyOrderNumInfo(8, $time_str);
         return $arr;
     }
-    public function getMoneyOrderNumInfo($num,$time_str = ''){
+
+    public function getMoneyOrderNumInfo($num, $time_str = '')
+    {
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map_where['order_type'] = 1;
-        switch ($num){
+        switch ($num) {
             case 0:
-                $arr_where['base_grand_total'] = ['between',[0,20]];
+                $arr_where['base_grand_total'] = ['between', [0, 20]];
                 break;
             case 1:
-                $arr_where['base_grand_total'] = ['between',[20,30]];
+                $arr_where['base_grand_total'] = ['between', [20, 30]];
                 break;
             case 2:
-                $arr_where['base_grand_total'] = ['between',[30,40]];
+                $arr_where['base_grand_total'] = ['between', [30, 40]];
                 break;
             case 3:
-                $arr_where['base_grand_total'] = ['between',[40,50]];
+                $arr_where['base_grand_total'] = ['between', [40, 50]];
                 break;
             case 4:
-                $arr_where['base_grand_total'] = ['between',[50,60]];
+                $arr_where['base_grand_total'] = ['between', [50, 60]];
                 break;
             case 5:
-                $arr_where['base_grand_total'] = ['between',[60,80]];
+                $arr_where['base_grand_total'] = ['between', [60, 80]];
                 break;
             case 6:
-                $arr_where['base_grand_total'] = ['between',[80,100]];
+                $arr_where['base_grand_total'] = ['between', [80, 100]];
                 break;
             case 7:
-                $arr_where['base_grand_total'] = ['between',[100,200]];
+                $arr_where['base_grand_total'] = ['between', [100, 200]];
                 break;
             default:
-                $arr_where['base_grand_total'] = ['egt',200];
+                $arr_where['base_grand_total'] = ['egt', 200];
                 break;
         }
-        if($time_str){
+        if ($time_str) {
             $createat = explode(' ', $time_str);
             $map['created_at'] = ['between', [$createat[0], $createat[3]]];
-        }else{
+        } else {
             $start = date('Y-m-d');
             $map = [];
             $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
         }
         $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
         $order_num = $this->model->where($map_where)->where($map)->count();
-        $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
+        $arr['order_num_rate'] = $order_num ? round($arr['order_num'] / $order_num * 100, 2) . '%' : 0;
         return $arr;
     }
+
     /*
      * 获取订单运费数据统计信息
      * */
-    public function getOrderShipping($time_str = ''){
-        $arr['flatrate_free'] = $this->getOrderShippingInfo(0,$time_str);
-        $arr['flatrate_nofree'] = $this->getOrderShippingInfo(1,$time_str);
-        $arr['tablerate_free'] = $this->getOrderShippingInfo(2,$time_str);
-        $arr['tablerate_nofree'] = $this->getOrderShippingInfo(3,$time_str);
+    public function getOrderShipping($time_str = '')
+    {
+        $arr['flatrate_free'] = $this->getOrderShippingInfo(0, $time_str);
+        $arr['flatrate_nofree'] = $this->getOrderShippingInfo(1, $time_str);
+        $arr['tablerate_free'] = $this->getOrderShippingInfo(2, $time_str);
+        $arr['tablerate_nofree'] = $this->getOrderShippingInfo(3, $time_str);
         return $arr;
     }
-    public function getOrderShippingInfo($num,$time_str = ''){
+
+    public function getOrderShippingInfo($num, $time_str = '')
+    {
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map_where['order_type'] = 1;
-        switch ($num){
+        switch ($num) {
             case 0:
-                $arr_where['shipping_method'] = ['in',['freeshipping_freeshipping','flatrate_flatrate']];
+                $arr_where['shipping_method'] = ['in', ['freeshipping_freeshipping', 'flatrate_flatrate']];
                 $arr_where['base_shipping_amount'] = 0;
                 break;
             case 1:
-                $arr_where['shipping_method'] = ['in',['freeshipping_freeshipping','flatrate_flatrate']];
-                $arr_where['base_shipping_amount'] = ['gt',0];
+                $arr_where['shipping_method'] = ['in', ['freeshipping_freeshipping', 'flatrate_flatrate']];
+                $arr_where['base_shipping_amount'] = ['gt', 0];
                 break;
             case 2:
-                $arr_where['shipping_method'] = ['in',['tablerate_bestway']];
+                $arr_where['shipping_method'] = ['in', ['tablerate_bestway']];
                 $arr_where['base_shipping_amount'] = 0;
                 break;
             case 3:
-                $arr_where['shipping_method'] = ['in',['tablerate_bestway']];
-                $arr_where['base_shipping_amount'] = ['gt',0];
+                $arr_where['shipping_method'] = ['in', ['tablerate_bestway']];
+                $arr_where['base_shipping_amount'] = ['gt', 0];
                 break;
         }
-        if($time_str){
+        if ($time_str) {
             $createat = explode(' ', $time_str);
             $map['created_at'] = ['between', [$createat[0], $createat[3]]];
-        }else{
+        } else {
             $start = date('Y-m-d');
             $map = [];
             $map[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
         }
         $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
         $order_num = $this->model->where($map_where)->where($map)->count();
-        $arr['order_num_rate'] = $order_num ? round($arr['order_num']/$order_num*100,2).'%' : 0;
+        $arr['order_num_rate'] = $order_num ? round($arr['order_num'] / $order_num * 100, 2) . '%' : 0;
         $order_total = $this->model->where($map_where)->where($arr_where)->where($map)->sum('base_shipping_amount');
-        $arr['order_total'] = round($order_total,2);
+        $arr['order_total'] = round($order_total, 2);
         return $arr;
     }
     // /**

@@ -28,66 +28,48 @@ class Zeelool extends Model
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
+        $where['site'] = 1;
         $start = date('Y-m-d');
-// dump($time_str);
-// dump($type);
+
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('landing_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(1, $start);
-                $arr['landing_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['landing_num'] = $active_user_num;
-            }
+            $arr['landing_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_landing(1, $start);
-                $arr['landing_num'] = $today_active_user;
+                $arr['landing_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['landing_num'] = $this->where($where)->sum('landing_num');
             }
         }
-
         return $arr;
     }
     //产品详情页
     public function getDetail($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 1;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('detail_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(1, $start);
-                $arr['detail_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['detail_num'] = $active_user_num;
-            }
+            $arr['detail_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target13(1, $start);
-                $arr['detail_num'] = $today_active_user;
+                $arr['detail_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['detail_num'] = $this->where($where)->sum('detail_num');
@@ -100,29 +82,22 @@ class Zeelool extends Model
     public function getCart($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-
+        $where['site'] = 1;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('cart_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(1, $start);
-                $arr['cart_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['cart_num'] = $active_user_num;
-            }
+
+            $arr['cart_num'] = $active_user_num;
+
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target1(1, $start);
-                $arr['cart_num'] = $today_active_user;
+                $arr['cart_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['cart_num'] = $this->where($where)->sum('cart_num');
@@ -135,28 +110,21 @@ class Zeelool extends Model
     public function getComplete($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
+        $where['site'] = 1;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             //这段时间的数据
             $active_user_num = $this->where($where)->sum('complete_num');
-            //判断是否包含当天数据，如果包含需要加上今天的数据
-            if ($start <= $createat[3]) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(1, $start);
-                $arr['complete_num'] = $active_user_num + $today_active_user;
-            } else {
-                $arr['complete_num'] = $active_user_num;
-            }
+
+            $arr['complete_num'] = $active_user_num;
         } else {
             //查询某天的数据
             if (!$time_str) {
                 $time_str = $start;
             }
             if ($time_str == $start) {
-                //今天的实时着陆页数据 z站
-                $today_active_user = $this->google_target_end(1, $start);
-                $arr['complete_num'] = $today_active_user;
+                $arr['complete_num'] = 0;
             } else {
                 $where['day_date'] = ['between', [$time_str, $time_str]];
                 $arr['complete_num'] = $this->where($where)->sum('complete_num');
