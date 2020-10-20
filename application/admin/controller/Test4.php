@@ -213,9 +213,10 @@ class Test4 extends Controller
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-16' and '2020-10-30' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-01' and '2020-10-01' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
-            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site',1)->value('id');
+            //$is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site',1)->value('id');
+            $is_exist = 0;
             if (!$is_exist) {
                 $arr = [];
                 $arr['site'] = 1;
@@ -273,6 +274,7 @@ class Test4 extends Controller
                 $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
                 //更新购物车转化率
                 $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+                dump($arr);exit;
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
