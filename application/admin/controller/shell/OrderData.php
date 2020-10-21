@@ -39,13 +39,20 @@ class OrderData extends Backend
         $id = $this->order->max('entity_id');
 
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])
-        ->field('entity_id,status,store_id,increment_id,base_grand_total,order_type,base_currency_code,customer_email,customer_firstname,customer_lastname,created_at,updated_at')
+        ->field('entity_id,status,store_id,increment_id as order_number,base_grand_total,order_type,base_currency_code,customer_email,customer_firstname,customer_lastname,created_at,updated_at')
         ->limit(100)
         ->select();
         $list = collection($list)->toArray();
-        foreach($list as $k => $v) {
-            
+
+        $order_ids = array_column($list,'entity_id');
+        //查询每个单号购买的商品数量
+        $goods_data = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['order_id' => ['in',$order_ids]])->column("sum(qty_ordered)",'order_id');
+        foreach($list as &$v) {
+            $v['created_at'] = strtotime($v['created_at']);
+            $v['updated_at'] = strtotime($v['updated_at']);
+            $v['all_goods_num'] = $goods_data[$v['entity_id']] ?? 0;
         }
+        dump($list);die;
         
     }
 }
