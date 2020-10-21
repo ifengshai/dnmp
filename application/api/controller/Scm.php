@@ -21,6 +21,18 @@ class Scm extends Api
     }
 
     /**
+     * 检测Token
+     *
+     * @参数 string token  加密值
+     * @return bool
+     */
+    protected function check()
+    {
+        $this->auth->init($this->request->request('token'));
+        return $this->auth->id ? true : false;
+    }
+
+    /**
      * 登录
      *
      * @参数 string account  账号
