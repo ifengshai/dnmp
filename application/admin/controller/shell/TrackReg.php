@@ -785,15 +785,10 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-        //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+
         //客单价
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
 
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
 
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
@@ -877,8 +872,7 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-        //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+
         //客单价
         // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
@@ -895,16 +889,6 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
         //补发销售额
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
-
-
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
 
 
         //会话
@@ -994,16 +978,6 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
         //补发销售额
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
-
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
-
 
         //会话
         $arr['sessions'] = $this->google_session(3, $date_time);
