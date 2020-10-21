@@ -42,17 +42,6 @@ class Scm extends Api
         ],
     ];
 
-    public function _initialize()
-    {
-        parent::_initialize();
-
-        //校验Token
-        $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
-
-        //校验请求类型
-        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
-    }
-
     /**
      * 检测Token
      *
@@ -63,6 +52,17 @@ class Scm extends Api
     {
         $this->auth->init($this->request->request('token'));
         return $this->auth->id ? true : false;
+    }
+
+    public function _initialize()
+    {
+        parent::_initialize();
+
+        //校验Token
+        $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
+
+        //校验请求类型
+//        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
     }
 
     /**
@@ -111,6 +111,88 @@ class Scm extends Api
         }
 
         $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 质检列表
+     *
+     * @参数 string query  查询内容
+     * @参数 int status  状态
+     * @参数 int is_stock  是否创建入库单
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @return mixed
+     */
+    public function quality_list()
+    {
+        $query = $this->request->request('query');
+        $status = $this->request->request('status');
+        $is_stock = $this->request->request('is_stock');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 406);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
+
+        $where = [];
+        if($query){
+            $where['a.check_order_number|a.create_person|b.sku|c.purchase_number|c.create_person'] = ['like', '%' . $query . '%'];
+        }
+        if($status){
+            $where['a.status'] = $status;
+        }
+        if($is_stock){
+            $where['a.is_stock'] = $is_stock;
+        }
+        if($start_time && $end_time){
+            $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        $_check = new \app\admin\model\warehouse\Check;
+        $list = $_check
+            ->alias('a')
+            ->where($where)
+            ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number')
+            ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id','left')
+            ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+            ->order('a.createtime', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+
+        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
+        foreach($list as $key=>$value){
+            $list[$key]['status'] = $status[$value['status']];
+            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+        }
+
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 取消质检
+     *
+     * @参数 int id  质检单ID
+     * @return mixed
+     */
+    public function quality_cancel()
+    {
+        $id = $this->request->request('id');
+        empty($id) && $this->error(__('Id can not be empty'), [], 408);
+
+        $_check = new \app\admin\model\warehouse\Check;
+        $row = $_check->get($id);
+        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 409);
+
+        $res = $_check->allowField(true)->isUpdate(true, ['id'=>$id])->save(['status'=>4]);
+        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 410);
     }
 
 }
