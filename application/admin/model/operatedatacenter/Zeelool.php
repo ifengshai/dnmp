@@ -1239,14 +1239,12 @@ class Zeelool extends Model
         }
         $createat = explode(' ', $time_str);
         $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
-        $where['day_date'] = ['between', [$createat[0], $createat[3]]];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         //获取所有的订单的国家
         $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
         //总订单数
-        $where['site'] = 1;
-        $order_num = $this->where($where)->sum('order_num');
+        $order_num = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->count();
         $country_arr = collection($country_arr)->toArray();
         foreach ($country_arr as $key=>$value){
             $country_arr[$key]['rate'] = $order_num ? round($value['count']/$order_num*100,0).'%' : 0;
