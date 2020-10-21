@@ -193,8 +193,8 @@ class SkuDetail extends Backend
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $data = $this->prescrtion_data($site,$params['time_str'],$params['sku']);
-
-            $json['column'] = ['reading glasses', 'progressive', 'no prescription', 'sunglasses', 'sunglasses non-prescription', 'Frame Only', 'single vision'];
+            $column = array_column($data,'name');
+            $json['column'] = $column;
             $json['columnData'] = $data;
 
             return json(['code' => 1, 'data' => $json]);
