@@ -115,7 +115,7 @@ class SkuDetail extends Backend
                 $map_where['o.created_at'] = ['between', [$start,$end]];
                 $order_where['o.created_at'] = ['lt',$start];
             }
-            //收购人数
+            //首购人数
             if($site == 2){
                 $order_model = new \app\admin\model\order\order\Voogueme();
             }elseif($site == 3){
@@ -162,7 +162,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
-            $again_buy_num = $again_buy_num1+$again_buy_num1;
+            $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
                 [
