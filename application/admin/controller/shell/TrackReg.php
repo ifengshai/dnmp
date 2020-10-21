@@ -794,10 +794,7 @@ class TrackReg extends Backend
         $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
         $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
+
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
