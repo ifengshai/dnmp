@@ -442,10 +442,14 @@ class Test4 extends Controller
             $arr['add_cart_rate'] = $val['sessions'] ? round($arr['new_cart_num'] / $val['sessions']*100, 2) : 0;
             //新增购物车转化率
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
-            /*//更新加购率
-            $arr['update_add_cart_rate'] = $val['sessions'] ? round($val['update_cart_num'] / $val['sessions']*100, 2) : 0;
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
+            //更新加购率
+            $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
             //更新购物车转化率
-            $arr['update_cart_cart'] = $val['update_cart_num'] ? round($val['order_num'] / $val['update_cart_num']*100, 2) : 0;*/
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($val['order_num'] / $arr['update_cart_num']*100, 2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -467,10 +471,14 @@ class Test4 extends Controller
             $arr['add_cart_rate'] = $val['sessions'] ? round($arr['new_cart_num'] / $val['sessions']*100, 2) : 0;
             //新增购物车转化率
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
-            /*//更新加购率
-            $arr['update_add_cart_rate'] = $val['sessions'] ? round($val['update_cart_num'] / $val['sessions']*100, 2) : 0;
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
+            //更新加购率
+            $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
             //更新购物车转化率
-            $arr['update_cart_cart'] = $val['update_cart_num'] ? round($val['order_num'] / $val['update_cart_num']*100, 2) : 0;*/
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($val['order_num'] / $arr['update_cart_num']*100, 2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -492,10 +500,14 @@ class Test4 extends Controller
             $arr['add_cart_rate'] = $val['sessions'] ? round($arr['new_cart_num'] / $val['sessions']*100, 2) : 0;
             //新增购物车转化率
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
-            /*//更新加购率
-            $arr['update_add_cart_rate'] = $val['sessions'] ? round($val['update_cart_num'] / $val['sessions']*100, 2) : 0;
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
+            //更新加购率
+            $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
             //更新购物车转化率
-            $arr['update_cart_cart'] = $val['update_cart_num'] ? round($val['order_num'] / $val['update_cart_num']*100, 2) : 0;*/
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($val['order_num'] / $arr['update_cart_num']*100, 2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
