@@ -1234,7 +1234,6 @@ class Voogueme extends Model
      * 收获地址的国家信息统计
      * */
     public function getCountryNum($time_str = ''){
-        dump(111);exit;
         if(!$time_str){
             $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
