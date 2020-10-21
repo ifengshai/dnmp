@@ -37,17 +37,17 @@ class OrderDataView extends Backend
         //邮费
         $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney(1);
         //补发单订单数
-        $replacement_order_num = $this->zeeloolOperate->getReplacementOrderNum(1);
+        $replacement_order_num = $this->zeeloolOperate->getReplacementOrderNum();
         //补发单销售额
-        $replacement_order_total = $this->zeeloolOperate->getReplacementOrderTotal(1);
+        $replacement_order_total = $this->zeeloolOperate->getReplacementOrderTotal();
         //网红单订单数
-        $online_celebrity_order_num = $this->zeeloolOperate->getOnlineCelebrityOrderNum(1);
+        $online_celebrity_order_num = $this->zeeloolOperate->getOnlineCelebrityOrderNum();
         //网红单销售额
-        $online_celebrity_order_total = $this->zeeloolOperate->getOnlineCelebrityOrderTotal(1);
+        $online_celebrity_order_total = $this->zeeloolOperate->getOnlineCelebrityOrderTotal();
         //订单金额分布
-        $order_total_distribution = $this->zeeloolOperate->getMoneyOrderNum(1);
+        $order_total_distribution = $this->zeeloolOperate->getMoneyOrderNum();
         //订单运费数据统计
-        $order_shipping = $this->zeeloolOperate->getOrderShipping(1);
+        $order_shipping = $this->zeeloolOperate->getOrderShipping();
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping'));
         return $this->view->fetch();
     }
@@ -59,8 +59,10 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
-            $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $default_day = $start . ' ' . '00:00:00' . ' - ' . $end;
+            $time_str = $params['time_str'] ? $params['time_str'] : $default_day;
             switch ($order_platform) {
                 case 1:
                     $model = $this->zeeloolOperate;
@@ -121,14 +123,12 @@ class OrderDataView extends Backend
                 $end   = date('Y-m-d 23:59:59');
                 $where['day_date'] = ['between', [$start, $end]];
             }
-            $order_num = $model->where($where)->column('day_date','order_num');
-            $sales_total = $model->where($where)->column('day_date','sales_total_money');
             if ($type == 1) {
                 $name = '订单数';
-                $date_arr = $order_num;
+                $date_arr = $model->where($where)->column('order_num','day_date');
             } else {
                 $name = '销售额';
-                $date_arr = $sales_total;
+                $date_arr = $model->where($where)->column('sales_total_money','day_date');
             }
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
@@ -165,6 +165,11 @@ class OrderDataView extends Backend
                 $model = $this->nihao;
             }
             $time_str = $params['time_str'];
+            if(!$time_str){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - '. $end;
+            }
             $createat = explode(' ', $time_str);
             $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
             $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -203,6 +208,11 @@ class OrderDataView extends Backend
             $order_platform = $params['order_platform'];
             //查询时间段内每天的客单价,中位数，标准差
             $time_str = $params['time_str'];
+            if(!$time_str){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - '. $end;
+            }
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $where['site'] = $order_platform;

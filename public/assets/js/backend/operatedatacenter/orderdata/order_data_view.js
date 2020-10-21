@@ -27,10 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 }, 0)
             })
             $(document).on('change', '#type', function () {
-                order_data_view();
                 Controller.api.formatter.line_chart();
-                Controller.api.formatter.country_chart();
-                Controller.api.formatter.line_histogram();
             });
             $(document).on('change', '#order_platform', function () {
                 order_data_view();
