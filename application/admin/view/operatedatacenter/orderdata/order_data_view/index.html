@@ -272,20 +272,6 @@
                     <div class="new-background">
                         <div class="row">
                             <div class="form-group" >
-                                <label class="control-label col-xs-4">订单地域分布</label>
-                            </div>
-                        </div>
-
-                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
-                            <div id="echart2" style="height:700px;width:100%;margin: 10px 0px 10px 0px;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="widget-body no-padding">
-                    <div class="new-background">
-                        <div class="row">
-                            <div class="form-group" >
                                 <label class="control-label col-xs-4">中位数/客单价/标准差分析</label>
                             </div>
                         </div>
@@ -395,11 +381,36 @@
                                 </tr>
                             </table>
                         </div>
-
-
                     </div>
                 </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">订单地域统计</label>
+                            </div>
+                        </div>
 
+                        <table id="order-country-list" class="altrowstable" width="100%">
+                            <thead>
+                            <tr>
+                                <th>国家</th>
+                                <th>数量</th>
+                                <th>占比</th>
+                            </tr>
+                            </thead>
+                            <tbody id="country_info">
+                            {foreach name="country" item="vo" key="key"}
+                            <tr>
+                                <td>{$vo.country_id}</td>
+                                <td>{$vo.count}</td>
+                                <td>{$vo.rate}</td>
+                            </tr>
+                            {/foreach}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

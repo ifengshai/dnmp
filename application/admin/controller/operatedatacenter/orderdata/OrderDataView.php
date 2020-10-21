@@ -48,7 +48,9 @@ class OrderDataView extends Backend
         $order_total_distribution = $this->zeeloolOperate->getMoneyOrderNum();
         //订单运费数据统计
         $order_shipping = $this->zeeloolOperate->getOrderShipping();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping'));
+        //国家地域统计
+        $country = $this->zeeloolOperate->getCountryNum();
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country'));
         return $this->view->fetch();
     }
     /*
@@ -85,7 +87,12 @@ class OrderDataView extends Backend
             $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal(1,$time_str);  //网红单销售额
             $order_total_distribution = $model->getMoneyOrderNum($time_str); //订单金额分布
             $order_shipping = $model->getOrderShipping($time_str);//订单运费数据统计
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total','order_total_distribution','order_shipping');
+            $country = $model->getCountryNum($time_str);//国家地域统计
+            $country_str = '';
+            foreach ($country as $value){
+                $country_str.= '<tr><td>'.$value['country_id'].'</td><td>'.$value['count'].'</td><td>'.$value['rate'].'</td></tr>';
+            }
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total','order_total_distribution','order_shipping','country_str');
             $this->success('', '', $data);
         }
     }
