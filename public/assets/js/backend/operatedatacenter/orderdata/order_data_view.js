@@ -161,7 +161,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 padding: 5,
                                 top: '2%',
                                 data: ['客单价', '中位数','标准差']
-                            },                        
+                            },   
+                            grid: { //直角坐标系内绘图网格
+                                top: '20%', //grid 组件离容器上侧的距离。
+                                left: '5%', //grid 组件离容器左侧的距离。
+                                right: '10%', //grid 组件离容器右侧的距离。
+                                bottom: '10%', //grid 组件离容器下侧的距离。
+                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
+                            },                     
                             tooltip: { //提示框组件。
                                 trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
                                 axisPointer: { //坐标轴指示器配置项。
