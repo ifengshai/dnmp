@@ -9,7 +9,7 @@ use app\common\controller\Api;
  */
 class Scm extends Api
 {
-    protected $noNeedLogin = ['login'];
+    protected $noNeedLogin = '*';
     protected $noNeedRight = '*';
     protected $menu = [//PDA菜单
         [
@@ -47,7 +47,7 @@ class Scm extends Api
         parent::_initialize();
 
         //校验Token
-        $this->auth->match($this->noNeedLogin) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
+        $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
