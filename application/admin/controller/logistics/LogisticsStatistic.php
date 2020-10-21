@@ -237,9 +237,7 @@ class LogisticsStatistic extends Backend
                         } else {
                             $gtTwenty_num++;
                         }
-                    } elseif ($val['signing_time']) {
-                        $send_order_num--;
-                    }
+                    } 
                 }
 
                 $arr['send_order_num'][$k] = $rs[$v['shipment_data_type']] = $send_order_num;
