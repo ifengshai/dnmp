@@ -115,7 +115,7 @@ class SkuDetail extends Backend
                 $map_where['o.created_at'] = ['between', [$start,$end]];
                 $order_where['o.created_at'] = ['lt',$start];
             }
-            //收购人数
+            //首购人数
             if($site == 2){
                 $order_model = new \app\admin\model\order\order\Voogueme();
             }elseif($site == 3){
@@ -162,7 +162,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
-            $again_buy_num = $again_buy_num1+$again_buy_num1;
+            $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
                 [
@@ -193,8 +193,8 @@ class SkuDetail extends Backend
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $data = $this->prescrtion_data($site,$params['time_str'],$params['sku']);
-
-            $json['column'] = ['reading glasses', 'progressive', 'no prescription', 'sunglasses', 'sunglasses non-prescription', 'Frame Only', 'single vision'];
+            $column = array_column($data,'name');
+            $json['column'] = $column;
             $json['columnData'] = $data;
 
             return json(['code' => 1, 'data' => $json]);
