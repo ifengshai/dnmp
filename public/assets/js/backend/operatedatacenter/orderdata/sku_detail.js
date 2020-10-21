@@ -81,26 +81,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#sku").val('');
-                Controller.api.formatter.user_data_pie();
-                Controller.api.formatter.lens_data_pie();
-
-                var params = table.bootstrapTable('getOptions')
-                params.queryParams = function(params) {
-         
-                    //定义参数
-                    var filter = {};
-                    //遍历form 组装json
-                    $.each($("#form").serializeArray(), function(i, field) {
-                        filter[field.name] = field.value;
-                    });
-         
-                    //参数转为json字符串
-                    params.filter = JSON.stringify(filter)
-                    console.info(params);
-                    return params;
-                }
-
-                table.bootstrapTable('refresh',params);
             });
         },
         add: function () {
