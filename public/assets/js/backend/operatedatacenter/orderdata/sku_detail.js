@@ -44,7 +44,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             // 为表格绑定事件
             Table.api.bindevent(table);
             $("#sku_submit").click(function(){
-                $("#sku_data").css('display','block'); 
                 var sku = $("#sku").val();
                 var time_str = $("#time_str").val();
                 if(sku.length <= 0){
@@ -55,6 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     Layer.alert('请选择时间');
                     return false;
                 }
+                $("#sku_data").css('display','block'); 
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
