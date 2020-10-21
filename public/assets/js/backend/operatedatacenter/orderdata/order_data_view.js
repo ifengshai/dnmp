@@ -16,13 +16,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
             Controller.api.formatter.line_chart();
-            Controller.api.formatter.country_chart();
             Controller.api.formatter.line_histogram();
             $("#time_str").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     order_data_view();
                     Controller.api.formatter.line_chart();
-                    Controller.api.formatter.country_chart();
                     Controller.api.formatter.line_histogram();
                 }, 0)
             })
@@ -32,7 +30,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $(document).on('change', '#order_platform', function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
-                Controller.api.formatter.country_chart();
                 Controller.api.formatter.line_histogram();
             });
             
@@ -110,27 +107,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
-                country_chart: function () {
-                    //订单数据概况折线图
-                    var chartOptions = {
-                        targetId: 'echart2',
-                        downLoadTitle: '图表',
-                        type: 'scatter',
-                        dataType: 'store'
-                    };
-
-                    var options = {
-                        type: 'post',
-                        url: 'operatedatacenter/orderdata/order_data_view/order_data_view_country_rate',
-                        data: {
-                            order_platform: $("#order_platform").val(),
-                            time_str: $("#time_str").val(),
-                            type: $("#type").val()
-                        }
-                    }
-                    EchartObj.api.ajax(options, chartOptions)
-                },
-
                 line_chart: function () {
                     //订单数据概况折线图
                     var chartOptions = {
@@ -297,7 +273,8 @@ function order_data_view() {
         $('#tablerate_nofree_order_num').text(tablerate_nofree.order_num);
         $('#tablerate_nofree_rate').text(tablerate_nofree.order_num_rate);
         $('#tablerate_nofree_order_total').text(tablerate_nofree.order_total);
-
+        //国家地域分布
+        $("#country_info").html(ret.data.country_str);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
