@@ -1245,8 +1245,8 @@ class Zeelool extends Model
         //获取所有的订单的国家
         $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
         //总订单数
+        $where['site'] = 1;
         $order_num = $this->where($where)->sum('order_num');
-        dump($order_num);exit;
         $country_arr = collection($country_arr)->toArray();
         foreach ($country_arr as $key=>$value){
             $country_arr[$key]['rate'] = $order_num ? round($value['count']/$order_num*100,0).'%' : 0;
