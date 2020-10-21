@@ -6,6 +6,8 @@ use app\common\controller\Api;
 
 /**
  * 供应链接口类
+ * @author lzh
+ * @since 2020-10-20
  */
 class Scm extends Api
 {
@@ -46,6 +48,7 @@ class Scm extends Api
      * 检测Token
      *
      * @参数 string token  加密值
+     * @author lzh
      * @return bool
      */
     protected function check()
@@ -70,6 +73,7 @@ class Scm extends Api
      *
      * @参数 string account  账号
      * @参数 string password  密码
+     * @author lzh
      * @return mixed
      */
     public function login()
@@ -91,6 +95,7 @@ class Scm extends Api
     /**
      * 首页
      *
+     * @author lzh
      * @return mixed
      */
     public function index()
@@ -123,6 +128,7 @@ class Scm extends Api
      * @参数 string end_time  结束时间
      * @参数 int page  页码
      * @参数 int page_size  每页显示数量
+     * @author lzh
      * @return mixed
      */
     public function quality_list()
@@ -155,6 +161,7 @@ class Scm extends Api
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
+        //获取质检单列表数据
         $_check = new \app\admin\model\warehouse\Check;
         $list = $_check
             ->alias('a')
@@ -180,6 +187,7 @@ class Scm extends Api
      * 取消质检
      *
      * @参数 int id  质检单ID
+     * @author lzh
      * @return mixed
      */
     public function quality_cancel()
@@ -187,12 +195,42 @@ class Scm extends Api
         $id = $this->request->request('id');
         empty($id) && $this->error(__('Id can not be empty'), [], 408);
 
+        //检测质检单状态
         $_check = new \app\admin\model\warehouse\Check;
         $row = $_check->get($id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 409);
 
         $res = $_check->allowField(true)->isUpdate(true, ['id'=>$id])->save(['status'=>4]);
         $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 410);
+    }
+
+    /**
+     * 新建质检单页面
+     *
+     * @参数 int id  物流单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function quality_add()
+    {
+        $id = $this->request->request('id');
+        empty($id) && $this->error(__('Id can not be empty'), [], 411);
+
+        //获取物流单数据
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $logistics_data = $_logistics_info->get($id);
+        empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
+
+        //获取采购单数据
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_data = $_purchase_order->get($logistics_data['purchase_id']);
+        empty($purchase_data) && $this->error(__('采购单不存在'), [], 413);
+
+        //质检单号
+        $info['check_order_number'] = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $info['purchase_number'] = $purchase_data['purchase_number'];
+
+        $this->success('', ['info' => $info],200);
     }
 
 }
