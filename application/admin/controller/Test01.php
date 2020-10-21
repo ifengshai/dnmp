@@ -503,6 +503,10 @@ class Test01 extends Backend
                 ->where('base_grand_total','gt',0)
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
+            //日期
+            $arr[$key]['day_date'] = $data;
+            //站点
+            $arr[$key]['site'] = 1;
             $arr[$key]['sku'] = $value['sku'];
             if (!$arr[$key]['sku_grand_total']){
                 $arr[$key]['sku_grand_total'] = 0;
