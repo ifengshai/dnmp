@@ -17,7 +17,7 @@ class Scm extends Api
         parent::_initialize();
 
         //校验Token
-        $this->auth->match($this->noNeedLogin) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 400);
+        $this->auth->match($this->noNeedLogin) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
     }
 
     /**
@@ -43,15 +43,15 @@ class Scm extends Api
     {
         $account = $this->request->request('account');
         $password = $this->request->request('password');
-        empty($account) && $this->error(__('Username can not be empty'));
-        empty($password) && $this->error(__('Password can not be empty'));
+        empty($account) && $this->error(__('Username can not be empty'), [], 402);
+        empty($password) && $this->error(__('Password can not be empty'), [], 403);
 
         if ($this->auth->login($account, $password)) {
             $user = $this->auth->getUserinfo();
             $data = ['token' => $user['token']];
             $this->success(__('Logged in successful'), $data,200);
         } else {
-            $this->error($this->auth->getError());
+            $this->error($this->auth->getError(), [], 404);
         }
     }
 
@@ -99,15 +99,16 @@ class Scm extends Api
             foreach($value['menu'] as $k=>$val){
                 //校验菜单展示权限
                 if(!$this->auth->check($val['link'])){
-                    unset($list[$key]['menu'][$k]);
+                    unset($value['menu'][$k]);
                 }
+                unset($val['link']);
             }
             if(!empty($value['menu'])){
                 $data[] = $value;
             }
         }
 
-        $this->success('', $data,200);
+        $this->success('', ['list' => $data],200);
     }
 
 }
