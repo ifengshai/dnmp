@@ -10,7 +10,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 showExport: false,
                 showColumns: false,
                 showToggle: false,
-                pagination: false,
                 extend: {
                     index_url: 'operatedatacenter/orderdata/sku_detail/index' + location.search,
                     add_url: 'operatedatacenter/orderdata/sku_detail/add',
