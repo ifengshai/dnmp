@@ -611,6 +611,7 @@ class ItWebDemand extends Backend
                 $add['status'] = 2;
             }
             $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
+            $add['remark'] = $params['row']['remark'];//备注
 
             $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
             if ($res) {
@@ -643,8 +644,13 @@ class ItWebDemand extends Backend
 
         $row = $this->model->get($ids);
         $row = $row->toArray();
+        $row['site_type_arr'] = explode(',', $row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
 
+        $this->view->assign('demand_type', input('demand_type'));
+        $this->view->assign("type", input('type'));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
     /**
