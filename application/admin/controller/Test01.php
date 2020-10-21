@@ -423,9 +423,11 @@ class Test01 extends Backend
                 if (!$arr[$key]['now_pricce']){
                     $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool_online')
                     // $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool')
-                        ->table('catalog_product_index_price')
-                        ->where('entity_id',$vv['entity_id'])
-                        ->value('final_price');
+                        ->table('catalog_product_index_price')//为了获取现价找的表
+                        ->alias('a')
+                        ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                        ->where('a.sku','like',$vv['sku'])
+                        ->value('b.final_price');
                 }
                 //商品的类型
                 if (!$arr[$key]['goods_type']){
