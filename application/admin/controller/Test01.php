@@ -246,7 +246,7 @@ class Test01 extends Backend
         $zeelool_order = new Zeelool();
         foreach ($arr as $key => $value) {
             $arr[$key]['order_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order_item')
-                ->where('sku', 'like', '%' . $value['sku'] . '%')
+                ->where('sku', 'like', $value['sku'] . '%')
                 ->where($time_where)
                 ->distinct('order_id')
                 ->field('order_id,created_at')
@@ -258,7 +258,7 @@ class Test01 extends Backend
                 ->where($map)
                 ->where($time_where1)
                 ->alias('a')
-                ->field('grand_total,entity_id,row_total,b.sku,a.created_at,c.goods_type')
+                ->field('base_grand_total,entity_id,base_row_total,b.sku,a.created_at,c.goods_type')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->join(['sales_flat_order_item_prescription' => 'c'], 'a.entity_id=c.order_id')
                 ->select();
@@ -266,18 +266,18 @@ class Test01 extends Backend
             //统计某个sku某一天的销售额 实际支付的金额
             foreach ($sku_order_data as $kk=>$vv){
                 if ($arr[$key]['sku_grand_total']){
-                    $arr[$key]['sku_grand_total'] += $vv['grand_total'];
+                    $arr[$key]['sku_grand_total'] += $vv['base_grand_total'];
                 }else{
-                    $arr[$key]['sku_grand_total'] = $vv['grand_total'];
+                    $arr[$key]['sku_grand_total'] = $vv['base_grand_total'];
                 }
                 if ($arr[$key]['sku_row_total']){
-                    $arr[$key]['sku_row_total'] += $vv['row_total'];
+                    $arr[$key]['sku_row_total'] += $vv['base_row_total'];
                 }else{
-                    $arr[$key]['sku_row_total'] += $vv['row_total'];
+                    $arr[$key]['sku_row_total'] += $vv['base_row_total'];
                 }
                 //找到商品的现价
                 if (!$arr[$key]['now_pricce']){
-                    $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool')->table('catalog_product_index_price')->where('entity_id',$vv['entity_id'])->value('final_price');
+                    $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool_online')->table('catalog_product_index_price')->where('entity_id',$vv['entity_id'])->value('final_price');
                 }
                 //商品的类型
                 if (!$arr[$key]['goods_type']){
@@ -286,9 +286,9 @@ class Test01 extends Backend
             }
             //销售副数
             $arr[$key]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order_item')
-                ->where('sku', 'like', '%' . $value['sku'] . '%')
+                ->where('sku', 'like',  $value['sku'] . '%')
                 ->where($time_where)
-                ->count();
+                ->sum('qty_ordered');
             //副单价
             $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total']/$arr[$key]['glass_num'],0);
             // dump($sku_order_data);
@@ -297,7 +297,7 @@ class Test01 extends Backend
             //站点
             $arr[$key]['site'] = 1;
             //购物车数量
-            $zeelool_model = Db::connect('database.db_zeelool');
+            $zeelool_model = Db::connect('database.db_zeelool_online');
             $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
             $cart_where1 = [];
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
