@@ -208,9 +208,10 @@ class Test01 extends Backend
     //跑sku每天的数据
     public function sku_day_data()
     {
+        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-10';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -220,7 +221,7 @@ class Test01 extends Backend
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
         //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $this->zeeloolOperate->google_sku_detail(1,$data);
+        $ga_skus = $zeeloolOperate->google_sku_detail(1,$data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
 
         //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
@@ -310,9 +311,10 @@ class Test01 extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             //插入数据
-            Db::name('datacenter_sku_day')->insert($arr[$key]);
-            echo $key . "\n";
-            usleep(100000);
+            // Db::name('datacenter_sku_day')->insert($arr[$key]);
+            // echo $key . "\n";
+            // usleep(100000);
         }
+        dump($arr);
     }
 }
