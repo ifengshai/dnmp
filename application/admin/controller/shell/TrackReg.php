@@ -148,7 +148,7 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
-        }
+        } 
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
@@ -156,7 +156,8 @@ class TrackReg extends Backend
             'cpc' => '03041',
             'fedex' => '100003',
             'usps' => '21051',
-            'yanwen' => '190012'
+            'yanwen' => '190012',
+            'eub' => '03011',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
