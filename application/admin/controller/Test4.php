@@ -430,22 +430,22 @@ class Test4 extends Controller
     //更新运营数据中心
     public function zeelool_operate_data_center_update()
     {
-        $zeelool_model = Db::connect('database.db_nihao_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model = Db::connect('database.db_zeelool_online');
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site',1)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
             $arr = [];
             $cart_where1 = [];
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
+            $arr['new_cart_num'] = $model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
             //新增加购率
             $arr['add_cart_rate'] = $val['sessions'] ? round($arr['new_cart_num'] / $val['sessions']*100, 2) : 0;
             //新增购物车转化率
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
             //更新购物车数量
             $cart_where2 = [];
-            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-            $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
             //更新加购率
             $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
             //更新购物车转化率
@@ -459,7 +459,7 @@ class Test4 extends Controller
     //更新运营数据中心
     public function voogueme_operate_data_center_update()
     {
-        $model = Db::connect('database.db_nihao_online');
+        $model = Db::connect('database.db_voogueme_online');
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site',2)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
@@ -473,7 +473,7 @@ class Test4 extends Controller
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
             //更新购物车数量
             $cart_where2 = [];
-            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
             //更新加购率
             $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
@@ -502,7 +502,7 @@ class Test4 extends Controller
             $arr['cart_rate'] = $arr['new_cart_num'] ? round($val['order_num'] / $arr['new_cart_num']*100, 2) : 0;
             //更新购物车数量
             $cart_where2 = [];
-            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
             //更新加购率
             $arr['update_add_cart_rate'] = $val['sessions'] ? round($arr['update_cart_num'] / $val['sessions']*100, 2) : 0;
