@@ -1117,7 +1117,7 @@ class Zeelool extends Model
     {
         $analytics = $this->initializeAnalytics11();
 
-        $response = $this->getReport11($analytics, $start_time, $start_time);
+        $response = $this->getReport11($site,$analytics, $start_time, $start_time);
 
         $ga_result = $this->printResults11($response);
         return $ga_result;
@@ -1135,9 +1135,15 @@ class Zeelool extends Model
         return $analytics;
     }
 
-    protected function getReport11($analytics, $startDate, $endDate)
+    protected function getReport11($site,$analytics, $startDate, $endDate)
     {
-        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
 

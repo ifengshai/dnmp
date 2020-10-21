@@ -47,37 +47,40 @@
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
-
-
-            <form id = "form1" action="{:url('/admin/operatedatacenter/goodsdata/goods_change/index')}" class="form-commonsearch form-horizontal" role="form1" method="post">
-                <div class="" style="float: left;width: 100%;height: 70px;line-height: 70px;margin-bottom: 10px;background-color: #F5F5F5;">
-                    <div class="col-md-4">
-                        <label class="control-label col-xs-4" style="padding-top: 0px;">订单平台：</label>
-                        <div class="col-xs-8">
-                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
-                                {foreach name="orderPlatformList" item="vo"}
-                                {if $key == $platform}
-                                <option value="{$key}" selected="selected">{$vo}</option>
-                                {else}
-                                <option value="{$key}">{$vo}</option>
-                                {/if}
-                                {/foreach}
-                            </select>
+            <form id="form" action="{:url('/admin/operatedatacenter/goodsdata/goods_change/index')}" class="form-commonsearch form-horizontal" role="form" method="post">
+                <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">订单平台</label>
+                                <div class="col-xs-8">
+                                    <select id="c-order_platform" data-rule="required" class="form-control"
+                                            name="order_platform">
+                                        {foreach name="orderPlatformList" key="key" item="vo"}
+                                        {if $key == $label}
+                                        <option value="{$key}" selected="selected">{$vo}</option>
+                                        {else}
+                                        <option value="{$key}">{$vo}</option>
+                                        {/if}
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-
-                    <div class="col-md-4">
-                        <label for="create_time" class="control-label col-xs-4" style="padding-top: 0px;">创建时间：</label>
-                        <div class="col-xs-8">
-                            <input type="hidden" class="form-control operate" name="create_time-operate" data-name="create_time" value="RANGE" readonly="">
-                            <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time"  placeholder="创建时间" id="create_time" value="{$create_time}" data-index="14">
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                            <label for="time_str" class="control-label col-xs-4">创建时间</label>
+                            <div class="col-xs-8">
+                                <input type="hidden" class="form-control operate" name="create_time-operate"
+                                       data-name="time_str" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange"
+                                       name="time_str" placeholder="创建时间" id="time_str"
+                                       value="" data-index="14">
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="col-sm-8 col-xs-offset-4">
-                            <input type="submit" class="btn btn-success" value="提交">
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="col-sm-8 col-xs-offset-4">
+                                <input type="submit" class="btn btn-success" id="btnsubmit" value="提交">
+                                <input type="reset" class="btn btn-default reset" value="重置"></div>
                         </div>
                     </div>
                 </div>
@@ -101,145 +104,155 @@
                     </tr>
                     <tr>
                         <td>A+</td>
-                        <td id='a_plus_num'></td>
-                        <td id='a_plus_session_num'></td>
-                        <td id='a_plus_cart_num'></td>
-                        <td id='a_plus_session_change'></td>
-                        <td id='a_plus_order_num'></td>
-                        <td id='a_plus_cart_change'></td>
-                        <td id='a_plus_sku_total'></td>
+                        <td id='a_plus_num'>{$a_plus.a_plus_num}</td>
+                        <td id='a_plus_session_num'>{$a_plus.a_plus_session_num}</td>
+                        <td id='a_plus_cart_num'>{$a_plus.a_plus_cart_num}</td>
+                        <td id='a_plus_session_change'>{$a_plus.a_plus_session_change}</td>
+                        <td id='a_plus_order_num'>{$a_plus.a_plus_order_num}</td>
+                        <td id='a_plus_cart_change'>{$a_plus.a_plus_cart_change}</td>
+                        <td id='a_plus_sku_total'>{$a_plus.a_plus_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>A</td>
-                        <td id='a_num'></td>
-                        <td id='a_session_num'></td>
-                        <td id='a_cart_num'></td>
-                        <td id='a_session_change'></td>
-                        <td id='a_order_num'></td>
-                        <td id='a_cart_change'></td>
-                        <td id='a_sku_total'></td>
+                        <td id='a_num'>{$aa.a_plus_num}</td>
+                        <td id='a_session_num'>{$aa.a_session_num}</td>
+                        <td id='a_cart_num'>{$aa.a_cart_num}</td>
+                        <td id='a_session_change'>{$aa.a_session_change}</td>
+                        <td id='a_order_num'>{$aa.a_order_num}</td>
+                        <td id='a_cart_change'>{$aa.a_cart_change}</td>
+                        <td id='a_sku_total'>{$aa.a_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>B</td>
-                        <td id='b_num'></td>
-                        <td id='b_session_num'></td>
-                        <td id='b_cart_num'></td>
-                        <td id='b_session_change'></td>
-                        <td id='b_order_num'></td>
-                        <td id='b_cart_change'></td>
-                        <td id='b_sku_total'></td>
+                        <td id='b_num'>{$bb.a_plus_num}</td>
+                        <td id='b_session_num'>{$bb.b_session_num}</td>
+                        <td id='b_cart_num'>{$bb.b_cart_num}</td>
+                        <td id='b_session_change'>{$bb.b_session_change}</td>
+                        <td id='b_order_num'>{$bb.b_order_num}</td>
+                        <td id='b_cart_change'>{$bb.b_cart_change}</td>
+                        <td id='b_sku_total'>{$bb.b_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>C+</td>
-                        <td id= 'c_plus_num'></td>
-                        <td id='c_plus_session_num'></td>
-                        <td id='c_plus_cart_num'></td>
-                        <td id='c_plus_session_change'></td>
-                        <td id='c_plus_order_num'></td>
-                        <td id='c_plus_cart_change'></td>
-                        <td id='c_plus_sku_total'></td>
+                        <td id= 'c_plus_num'>{$c_plus.c_plus_num}</td>
+                        <td id='c_plus_session_num'>{$c_plus.c_plus_session_num}</td>
+                        <td id='c_plus_cart_num'>{$c_plus.c_plus_cart_num}</td>
+                        <td id='c_plus_session_change'>{$c_plus.c_plus_session_change}</td>
+                        <td id='c_plus_order_num'>{$c_plus.c_plus_order_num}</td>
+                        <td id='c_plus_cart_change'>{$c_plus.c_plus_cart_change}</td>
+                        <td id='c_plus_sku_total'>{$c_plus.c_plus_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>C</td>
-                        <td id='c_num'></td>
-                        <td id='c_session_num'></td>
-                        <td id='c_cart_num'></td>
-                        <td id='c_session_change'></td>
-                        <td id='c_order_num'></td>
-                        <td id='c_cart_change'></td>
-                        <td id='c_sku_total'></td>
+                        <td id='c_num'>{$cc.c_num}</td>
+                        <td id='c_session_num'>{$cc.c_session_num}</td>
+                        <td id='c_cart_num'>{$cc.c_cart_num}</td>
+                        <td id='c_session_change'>{$cc.c_session_change}</td>
+                        <td id='c_order_num'>{$cc.c_order_num}</td>
+                        <td id='c_cart_change'>{$cc.c_cart_change}</td>
+                        <td id='c_sku_total'>{$cc.c_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>D</td>
-                        <td id='d_num'></td>
-                        <td id='d_session_num'></td>
-                        <td id='d_cart_num'></td>
-                        <td id='d_session_change'></td>
-                        <td id='d_order_num'></td>
-                        <td id='d_cart_change'></td>
-                        <td id='d_sku_total'></td>
+                        <td id='d_num'>{$ddd.d_num}</td>
+                        <td id='d_session_num'>{$ddd.d_session_num}</td>
+                        <td id='d_cart_num'>{$ddd.d_cart_num}</td>
+                        <td id='d_session_change'>{$ddd.d_session_change}</td>
+                        <td id='d_order_num'>{$ddd.d_order_num}</td>
+                        <td id='d_cart_change'>{$ddd.d_cart_change}</td>
+                        <td id='d_sku_total'>{$ddd.d_sku_total}</td>
 
                     </tr>
                     <tr>
                         <td>E</td>
-                        <td id='e_num'></td>
-                        <td id='e_session_num'></td>
-                        <td id='e_cart_num'></td>
-                        <td id='e_session_change'></td>
-                        <td id='e_order_num'></td>
-                        <td id='e_cart_change'></td>
-                        <td id='e_sku_total'></td>
+                        <td id='e_num'>{$ee.e_num}</td>
+                        <td id='e_session_num'>{$ee.e_session_num}</td>
+                        <td id='e_cart_num'>{$ee.e_cart_num}</td>
+                        <td id='e_session_change'>{$ee.e_session_change}</td>
+                        <td id='e_order_num'>{$ee.e_order_num}</td>
+                        <td id='e_cart_change'>{$ee.e_cart_change}</td>
+                        <td id='e_sku_total'>{$ee.e_sku_total}</td>
 
                     </tr>
                 </table>
             </div>
-            <form id = "form2" action="{:url('/admin/operatedatacenter/goodsdata/goods_change/sku_change')}" class="form-commonsearch form-horizontal" role="form1" method="post">
-                <div class="" style="float: left;width: 100%;height: 70px;line-height: 70px;margin-bottom: 10px;background-color: #F5F5F5;">
+<!--            <form id = "form2" action="{:url('/admin/operatedatacenter/goodsdata/goods_change/sku_change')}" class="form-commonsearch form-horizontal" role="form1" method="post">-->
+<!--                <div class="" style="float: left;width: 100%;height: 70px;line-height: 70px;margin-bottom: 10px;background-color: #F5F5F5;">-->
 
-                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                        <label for="sku" class="control-label col-xs-4">输入搜索</label>
-                        <div class="col-xs-8">
-                            <input type="hidden" class="form-control operate" name="create_time-operate"
-                                   data-name="create_time" value="RANGE" readonly="">
-                            <input type="text" autocomplete="off" class="form-control"
-                                   name="sku" placeholder="请输入sku" id="sku"
-                                   value="{$sku}" data-index="14">
-                        </div>
-                    </div>
+<!--                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">-->
+<!--                        <label for="sku" class="control-label col-xs-4">输入搜索</label>-->
+<!--                        <div class="col-xs-8">-->
+<!--                            <input type="hidden" class="form-control operate" name="create_time-operate"-->
+<!--                                   data-name="create_time" value="RANGE" readonly="">-->
+<!--                            <input type="text" autocomplete="off" class="form-control"-->
+<!--                                   name="sku" placeholder="请输入sku" id="sku"-->
+<!--                                   value="{$sku}" data-index="14">-->
+<!--                        </div>-->
+<!--                    </div>-->
 
-                    <div class="col-md-4">
-                        <div class="col-sm-8 col-xs-offset-4">
-                            <input type="submit" class="btn btn-success" value="提交">
-                        </div>
-                    </div>
+<!--                    <div class="col-md-4">-->
+<!--                        <div class="col-sm-8 col-xs-offset-4">-->
+<!--                            <input type="submit" class="btn btn-success" value="提交">-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--            <div style="width: 100%;float: left;">-->
+<!--                <table id="" class="altrowstable" style="width: 100%;">-->
+<!--                    <tr>-->
+<!--                        <td colspan="14" style="font-size: 16px;font-weight: bold">sku转化率情况</td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td>站点sku</td>-->
+<!--                        <td>sku转换</td>-->
+<!--                        <td>购物车数量</td>-->
+<!--                        <td>订单成功数</td>-->
+<!--                        <td>订单金额（Grand Total）</td>-->
+<!--                        <td>购物车转化率</td>-->
+<!--                        <td>售价</td>-->
+<!--                        <td>更新时间</td>-->
+<!--                        <td>状态</td>-->
+<!--                        <td>销售副数</td>-->
+<!--                        <td>实际支付的销售额（Row Total）</td>-->
+<!--                        <td>副单价</td>-->
+<!--                        <td>虚拟库存</td>-->
+<!--                        <td>在途库存</td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td id='plat_sku'>111</td>-->
+<!--                        <td id='change_sku'></td>-->
+<!--                        <td id='cart_num'></td>-->
+<!--                        <td id='success_order'></td>-->
+<!--                        <td id='order_grand_total'></td>-->
+<!--                        <td id='cart_change'></td>-->
+<!--                        <td id='sku_price'></td>-->
+<!--                        <td id='sku_update_time'></td>-->
+<!--                        <td id='sku_status'></td>-->
+<!--                        <td id='sku_sale_glass'></td>-->
+<!--                        <td id='sku_true_row_total'></td>-->
+<!--                        <td id='avg_glass_price'></td>-->
+<!--                        <td id='sku_xuni_stock'></td>-->
+<!--                        <td id='sku_onway_stock'></td>-->
+<!--                    </tr>-->
+
+<!--                </table>-->
+<!--            </div>-->
+            <div class="widget-body no-padding">
+                <div id="toolbar" class="toolbar">
+                    <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                            class="fa fa-refresh"></i> </a>
                 </div>
-            </form>
-            <div style="width: 100%;float: left;">
-                <table id="" class="altrowstable" style="width: 100%;">
-                    <tr>
-                        <td colspan="14" style="font-size: 16px;font-weight: bold">sku转化率情况</td>
-                    </tr>
-                    <tr>
-                        <td>站点sku</td>
-                        <td>sku转换</td>
-                        <td>购物车数量</td>
-                        <td>订单成功数</td>
-                        <td>订单金额（Grand Total）</td>
-                        <td>购物车转化率</td>
-                        <td>售价</td>
-                        <td>更新时间</td>
-                        <td>状态</td>
-                        <td>销售副数</td>
-                        <td>实际支付的销售额（Row Total）</td>
-                        <td>副单价</td>
-                        <td>虚拟库存</td>
-                        <td>在途库存</td>
-                    </tr>
-                    <tr>
-                        <td id='plat_sku'>111</td>
-                        <td id='change_sku'></td>
-                        <td id='cart_num'></td>
-                        <td id='success_order'></td>
-                        <td id='order_grand_total'></td>
-                        <td id='cart_change'></td>
-                        <td id='sku_price'></td>
-                        <td id='sku_update_time'></td>
-                        <td id='sku_status'></td>
-                        <td id='sku_sale_glass'></td>
-                        <td id='sku_true_row_total'></td>
-                        <td id='avg_glass_price'></td>
-                        <td id='sku_xuni_stock'></td>
-                        <td id='sku_onway_stock'></td>
-                    </tr>
 
+                <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                       data-operate-edit="{:$auth->check('order/sales_flat_order/edit')}"
+                       data-operate-del="{:$auth->check('order/sales_flat_order/del')}" width="100%">
                 </table>
             </div>
-
         </div>
     </div>
 </div>
