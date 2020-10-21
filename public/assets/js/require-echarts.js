@@ -1030,7 +1030,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                             }, {
                                 xAxis: {
                                     data: res.xColumnName,
-                                    boundaryGap: false
+                                    //boundaryGap: false
                                 },
                                 legend: {
                                     data: res.column
