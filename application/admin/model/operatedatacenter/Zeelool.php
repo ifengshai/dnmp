@@ -1247,7 +1247,7 @@ class Zeelool extends Model
         $order_num = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->count();
         $country_arr = collection($country_arr)->toArray();
         foreach ($country_arr as $key=>$value){
-            $country_arr[$key]['rate'] = $order_num ? round($value['count']/$order_num*100,0).'%' : 0;
+            $country_arr[$key]['rate'] = $order_num ? round($value['count']/$order_num*100,2).'%' : 0;
         }
         return $country_arr;
     }
