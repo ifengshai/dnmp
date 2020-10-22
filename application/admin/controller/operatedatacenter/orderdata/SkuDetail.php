@@ -151,7 +151,8 @@ class SkuDetail extends Backend
                 ->where($map)
                 ->group('customer_id')
                 ->having('count(customer_id)<=1')
-                ->column('customer_id');
+                ->field('customer_id')
+                ->select();
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
                 //查询时间段内是否进行购买行为
