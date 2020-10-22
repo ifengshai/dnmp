@@ -145,7 +145,6 @@ class SkuDetail extends Backend
                 ->group('customer_id')
                 ->having('count(customer_id)>1')
                 ->count('customer_id');
-            dump($again_buy_num1);exit;
             $again_buy_data2 = $order_model->alias('o')
                 ->join('sales_flat_order_item i','o.entity_id=i.order_id')
                 ->where($map_where)
@@ -163,6 +162,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
+            dump($again_buy_num2);exit;
             $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
