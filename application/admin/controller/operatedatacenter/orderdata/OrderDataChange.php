@@ -66,6 +66,7 @@ class OrderDataChange extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            dump($list);exit;
             foreach ($list as $key=>$value){
                 $list[$key]['add_cart_rate'] = $value['add_cart_rate'].'%';
                 $list[$key]['session_rate'] = $value['session_rate'].'%';
