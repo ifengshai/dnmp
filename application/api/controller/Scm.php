@@ -231,6 +231,7 @@ class Scm extends Api
             ->where(['purchase_id'=>$logistics_data['purchase_id']])
             ->field('sku,supplier_sku')
             ->select();
+        $order_item_list = collection($order_item_list)->toArray();
         $order_item = array_column($order_item_list,NULL,'sku');
 
         //获取供应商数据
