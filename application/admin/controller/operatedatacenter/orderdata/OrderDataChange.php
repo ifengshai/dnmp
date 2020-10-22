@@ -40,6 +40,10 @@ class OrderDataChange extends Backend
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
+                if(isset($filter['time_str'])){
+                    unset($filter['time_str']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $map['day_date'] = ['between', [$start,$end]];
