@@ -107,7 +107,7 @@ class SkuDetail extends Backend
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
-                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 $order_where['o.created_at'] = ['lt',$createat[0]];
             } else{
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -151,9 +151,7 @@ class SkuDetail extends Backend
                 ->where($map)
                 ->group('customer_id')
                 ->having('count(customer_id)<=1')
-                ->field('customer_id')
-                ->select();
-            dump($again_buy_data2);exit;
+                ->column('customer_id');
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
                 //查询时间段内是否进行购买行为
