@@ -780,7 +780,9 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
+        //$arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->field('entity_id,created_at')->select();
+        dump($arr['order_num']);exit;
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
@@ -926,7 +928,6 @@ class TrackReg extends Backend
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
 
-        //$date_time = date('Y-m-d', strtotime("-1 day"));
         $date_time = date('Y-m-d', strtotime("-1 day"));
 
         //查询时间
@@ -943,9 +944,7 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        //$arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->field('entity_id,created_at')->select();
-        dump($arr['order_num']);exit;
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
