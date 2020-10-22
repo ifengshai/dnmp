@@ -825,6 +825,7 @@ class TrackReg extends Backend
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
+        echo date("Y-m-d H:i:s"). "\n";
         usleep(100000);
 
 
@@ -909,6 +910,7 @@ class TrackReg extends Backend
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
+        echo date("Y-m-d H:i:s"). "\n";
         usleep(100000);
 
     }
@@ -988,6 +990,7 @@ class TrackReg extends Backend
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
+        echo date("Y-m-d H:i:s"). "\n";
         usleep(100000);
 
     }
