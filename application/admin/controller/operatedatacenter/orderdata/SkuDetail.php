@@ -124,8 +124,7 @@ class SkuDetail extends Backend
                 $order_model = new \app\admin\model\order\order\Zeelool();
             }
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            //$map['o.customer_id'] = ['>',0];
-            $map['o.customer_id'] = 330661;
+            $map['o.customer_id'] = ['>',0];
             $map['i.sku'] = $params['sku'];
 
             $customer_ids = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->column('distinct o.customer_id');
@@ -152,8 +151,9 @@ class SkuDetail extends Backend
                 ->where($map)
                 ->group('customer_id')
                 ->having('count(customer_id)<=1')
-                ->column('customer_id');
-            dump($again_buy_data2);exit;
+                ->field('customer_id')
+                ->select(false);
+            echo $again_buy_data2;exit;
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
                 //查询时间段内是否进行购买行为
