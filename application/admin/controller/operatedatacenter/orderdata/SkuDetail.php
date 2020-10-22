@@ -151,8 +151,7 @@ class SkuDetail extends Backend
                 ->where($map)
                 ->group('customer_id')
                 ->having('count(customer_id)<=1')
-                ->field('customer_id')
-                ->select();
+                ->column('customer_id');
             dump($again_buy_data2);exit;
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
