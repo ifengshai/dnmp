@@ -757,11 +757,8 @@ class TrackReg extends Backend
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
-
         $date_time = date('Y-m-d', strtotime("-1 day"));
-
         //查询时间
-
         $arr = [];
         $arr['site'] = 1;
         $arr['day_date'] = $date_time;
@@ -780,10 +777,7 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        //$arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->field('entity_id,created_at')->select();
-        $arr['order_num'] = collection($arr['order_num'])->toArray();
-        dump($arr['order_num']);exit;
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
