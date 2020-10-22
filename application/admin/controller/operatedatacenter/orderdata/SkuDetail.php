@@ -153,7 +153,7 @@ class SkuDetail extends Backend
                 ->having('count(customer_id)<=1')
                 ->field('customer_id')
                 ->select();
-            echo $again_buy_data2;exit;
+            dump($again_buy_data2);exit;
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
                 //查询时间段内是否进行购买行为
