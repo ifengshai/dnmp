@@ -102,8 +102,8 @@ class OrderDataChange extends Backend
             $days_data = Db::name('datacenter_day')->where($map)->select();
             $days_data = collection($days_data)->toArray();
             $arr['xdata'] = array_column($days_data,'day_date');
-            $arr['ydata']['one'] = array_column($days_data,'sessions') ? array_column($days_data,'sessions') : '未统计';
-            $arr['ydata']['two'] = array_column($days_data,'sales_total_money') ? array_column($days_data,'sales_total_money') : '未统计';
+            $arr['ydata']['one'] = array_column($days_data,'sessions') ? array_column($days_data,'sessions') : '无';
+            $arr['ydata']['two'] = array_column($days_data,'sales_total_money') ? array_column($days_data,'sales_total_money') : '无';
 
             $json['xColumnName'] = $arr['xdata'];
             $json['columnData'] = [
@@ -150,8 +150,8 @@ class OrderDataChange extends Backend
             $days_data = Db::name('datacenter_day')->where($where)->where($map)->select();
             $days_data = collection($days_data)->toArray();
             $arr['xdata'] = array_column($days_data,'day_date');
-            $arr['ydata']['one'] = array_column($days_data,'new_cart_num') ? array_column($days_data,'new_cart_num') : '未统计';
-            $arr['ydata']['two'] = array_column($days_data,'order_num') ? array_column($days_data,'order_num') : '未统计';
+            $arr['ydata']['one'] = array_column($days_data,'new_cart_num') ? array_column($days_data,'new_cart_num') : '无';
+            $arr['ydata']['two'] = array_column($days_data,'order_num') ? array_column($days_data,'order_num') : '无';
 
             $json['xColumnName'] = $arr['xdata'];
             $json['columnData'] = [
