@@ -339,7 +339,7 @@ class Nihao extends Model
         $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-
+        $where['order_type'] = 1;
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $order = $this->model
             ->where($map_where)
@@ -1239,6 +1239,7 @@ class Nihao extends Model
         $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].'23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
+        $order_where['o.order_type'] = 1;
         //获取所有的订单的国家
         $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
         //总订单数
