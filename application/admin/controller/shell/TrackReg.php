@@ -757,11 +757,8 @@ class TrackReg extends Backend
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
-
         $date_time = date('Y-m-d', strtotime("-1 day"));
-
         //查询时间
-
         $arr = [];
         $arr['site'] = 1;
         $arr['day_date'] = $date_time;
@@ -786,7 +783,7 @@ class TrackReg extends Backend
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
         //客单价
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
@@ -869,7 +866,7 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
@@ -947,7 +944,7 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
