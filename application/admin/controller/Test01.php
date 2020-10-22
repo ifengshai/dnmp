@@ -505,7 +505,7 @@ class Test01 extends Backend
                     ->table('catalog_product_index_price')//为了获取现价找的表
                     ->alias('a')
                     ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
-                    ->where('a.sku','like',$value['sku'])
+                    ->where('b.sku','like',$value['sku'])
                     ->value('a.final_price');
             }
             //日期
