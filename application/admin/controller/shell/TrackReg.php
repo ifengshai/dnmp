@@ -786,7 +786,7 @@ class TrackReg extends Backend
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
         //客单价
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
@@ -869,7 +869,7 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
@@ -917,7 +917,7 @@ class TrackReg extends Backend
     }
 
     //运营数据中心
-    public function niaho_day_data()
+    public function nihao_day_data()
     {
         $this->zeelool = new \app\admin\model\order\order\Nihao();
         $zeelool_model = Db::connect('database.db_nihao_online');
@@ -950,7 +950,7 @@ class TrackReg extends Backend
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);

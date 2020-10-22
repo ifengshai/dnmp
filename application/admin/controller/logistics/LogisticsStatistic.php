@@ -184,7 +184,7 @@ class LogisticsStatistic extends Backend
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
         //$orderNode['order_node'] = ['egt', 3];
-        $orderNode['node_type'] = ['egt', 7];
+        // $orderNode['node_type'] = ['egt', 7];
         //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
         $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
         if ($all_shipment_type) {
@@ -199,8 +199,8 @@ class LogisticsStatistic extends Backend
             foreach ($all_shipment_type as $k => $v) {
                 //物流渠道
                 $arr['shipment_data_type'][$k] = $v['shipment_data_type'];
-                //发货订单号
-                $delievered_order = $this->orderNode->where(['shipment_data_type' => $v['shipment_data_type']])->where($orderNode)->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
+                //发货订单号->where($orderNode)
+                $delievered_order = $this->orderNode->where(['shipment_data_type' => $v['shipment_data_type']])->where($whereSite)->where($map)->field('order_number,delivery_time,signing_time')->select();
                 $delievered_order = collection($delievered_order)->toArray();
                 if (!$delievered_order) {
                     $arr['send_order_num'][$k] = 0;
