@@ -247,7 +247,8 @@
                     <span class="glyphicon glyphicon-search"></span>
                     <p>筛选查询</p>
                 </div>
-                <form id = "form1" action="{:url('/admin/operatedatacenter/orderdata/order_data_detail/index')}" class="form-commonsearch form-horizontal" role="form1" method="post">
+                <form id="form" class="form-commonsearch form-horizontal" role="form"
+                        method="post">
                 <div class="dropdown dropdown-choose">
                     <select id="order_platform" class="form-control">
                         <option value="1" selected="selected">Zeelool</option>
@@ -264,8 +265,8 @@
                 </div>
                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                     <div class="col-sm-8 col-xs-offset-4">
-                        <input type="submit" class="btn btn-success" value="提交">
-                        <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                        <input type="button" class="btn btn-success" value="提交">
+                        <input type="button" class="btn btn-default reset" value="重置" ></div>
                 </div>
                 </form>
             </li>

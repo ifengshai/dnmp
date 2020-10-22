@@ -185,7 +185,7 @@ class Crontab extends Backend
                 $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
             }
 
-            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_base_price'];
             if ($product_options['info_buyRequest']['tmplens']['lens_base_price']) {
                 $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
             } else {
@@ -576,9 +576,9 @@ class Crontab extends Backend
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
             $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
 
-            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
-            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_base_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
@@ -961,8 +961,8 @@ class Crontab extends Backend
             $finalResult[$key]['four_id'] = $tmp_product_options['info_buyRequest']['tmplens']['four_id'];
             $finalResult[$key]['four_price'] = $tmp_product_options['info_buyRequest']['tmplens']['four_price'];
             $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
-
-            $finalResult[$key]['frame_price'] = $tmp_product_options['info_buyRequest']['tmplens']['frame_price'];
+            $finalResult[$key]['index_price'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            $finalResult[$key]['frame_price'] = $tmp_product_options['info_buyRequest']['tmplens']['frame_base_price'];
             $finalResult[$key]['frame_regural_price'] = $tmp_product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 
             $finalResult[$key]['cart_currency'] = $tmp_product_options['info_buyRequest']['cart_currency'];
@@ -1099,6 +1099,8 @@ class Crontab extends Backend
                     . "'" . $value['four_id'] . "',"
                     . "'" . $value['four_price'] . "',"
                     . "'" . $value['four_name'] . "',"
+                    
+                    . "'" . $value['index_price'] . "',"
 
                     . "'" . $value['frame_price'] . "',"
                     . "'" . $value['frame_regural_price'] . "',"
@@ -1138,7 +1140,7 @@ class Crontab extends Backend
                     . "),";
             }
 
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(item_id,quote_item_id,order_id,sku,qty_ordered,created_at,name,second_id,second_name,second_price,third_id,third_price,third_name,four_id,four_price,four_name,frame_price,frame_regural_price,
+            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(item_id,quote_item_id,order_id,sku,qty_ordered,created_at,name,second_id,second_name,second_price,third_id,third_price,third_name,four_id,four_price,four_name,index_price,frame_price,frame_regural_price,
                 cart_currency,is_frame_only,zsl,lens_price,total,prescription_type,year,month,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,
                 od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,pdcheck,information,is_custom_lens) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');

@@ -6,6 +6,7 @@
 
 namespace app\admin\controller\shell;
 
+use app\admin\model\operatedatacenter\Zeelool;
 use app\common\controller\Backend;
 use GuzzleHttp\Client;
 use think\Db;
@@ -147,7 +148,7 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
-        }
+        } 
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
@@ -155,7 +156,8 @@ class TrackReg extends Backend
             'cpc' => '03041',
             'fedex' => '100003',
             'usps' => '21051',
-            'yanwen' => '190012'
+            'yanwen' => '190012',
+            'eub' => '03011',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
@@ -705,6 +707,7 @@ class TrackReg extends Backend
             return $finalResult;
         }
     }
+
     /**
      *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
      */
@@ -716,6 +719,7 @@ class TrackReg extends Backend
 
         return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
     }
+
     /**
      * 得到数组的标准差
      * @param unknown type $avg
@@ -723,17 +727,18 @@ class TrackReg extends Backend
      * @param Boolen $isSwatch
      * @return unknown type
      */
-    function getVariance($arr) {
+    function getVariance($arr)
+    {
         $length = count($arr);
         if ($length == 0) {
             return 0;
         }
-        $average = array_sum($arr)/$length;
+        $average = array_sum($arr) / $length;
         $count = 0;
         foreach ($arr as $v) {
-            $count += pow($average-$v, 2);
+            $count += pow($average - $v, 2);
         }
-        $variance = $count/$length;
+        $variance = $count / $length;
         return sqrt($variance);
     }
 
@@ -741,20 +746,19 @@ class TrackReg extends Backend
     {
 
     }
+
     //运营数据中心
     public function zeelool_day_data()
     {
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         $zeelool_model = Db::connect('database.db_zeelool_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
-
-        $date_time = date('Y-m-d',strtotime("-1 day"));
-
+        $date_time = date('Y-m-d', strtotime("-1 day"));
         //查询时间
-
         $arr = [];
         $arr['site'] = 1;
         $arr['day_date'] = $date_time;
@@ -773,56 +777,52 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-        //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
         //客单价
-        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
-
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
-        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
         //标准差
         $arr['order_total_standard'] = $this->getVariance($sales_total_money);
         //补发订单数
-        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type', 4)->count();
         //补发销售额
-        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type', 4)->sum('base_grand_total');
         //网红订单数
-        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
         //补发销售额
-        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
         $arr['sessions'] = $this->google_session(1, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
         //更新购物车数量
         $cart_where2 = [];
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
-        //插入数据
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13(1, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
         usleep(100000);
@@ -838,9 +838,9 @@ class TrackReg extends Backend
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
 
-
-        $date_time = date('Y-m-d',strtotime("-1 day"));
+        $date_time = date('Y-m-d', strtotime("-1 day"));
 
         //查询时间
         $arr = [];
@@ -861,77 +861,69 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-        //购买人数
-        $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
-        //客单价
-        // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
-        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
-        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
         //标准差
         $arr['order_total_standard'] = $this->getVariance($sales_total_money);
         //补发订单数
-        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type', 4)->count();
         //补发销售额
-        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type', 4)->sum('base_grand_total');
         //网红订单数
-        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
         //补发销售额
-        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
-
-
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
-
-
-
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
         $arr['sessions'] = $this->google_session(2, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
         //更新购物车数量
         $cart_where2 = [];
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13(2, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1(2, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
         usleep(100000);
 
     }
+
     //运营数据中心
-    public function niaho_day_data()
+    public function nihao_day_data()
     {
         $this->zeelool = new \app\admin\model\order\order\Nihao();
         $zeelool_model = Db::connect('database.db_nihao_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
 
-
-        $date_time = date('Y-m-d',strtotime("-1 day"));
+        $date_time = date('Y-m-d', strtotime("-1 day"));
 
         //查询时间
         $arr = [];
@@ -943,67 +935,56 @@ class TrackReg extends Backend
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
-        //新增vip用户数
-        // $vip_where = [];
-        // $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
-        // $vip_where['order_status'] = 'Success';
-        // $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-        //购买人数
-        // $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
-        //客单价
-        // $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
-        $arr['order_unit_price'] = $arr['order_num'] == 0  ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
-        $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
         //标准差
         $arr['order_total_standard'] = $this->getVariance($sales_total_money);
         //补发订单数
-        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type', 4)->count();
         //补发销售额
-        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type', 4)->sum('base_grand_total');
         //网红订单数
-        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
         //补发销售额
-        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
-
-        $order_where1 = [];
-        $order_where1[] = ['exp', Db::raw("customer_id is not null and customer_id != 0")];
-        $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money1 = $this->zeelool->where($order_where1)->sum('base_grand_total');
-        $order_user1 = $this->zeelool->where($order_where1)->count('distinct customer_id');
-        //客单价
-        $arr['order_unit_price'] = $order_user1 ? round($sales_total_money1 / $order_user1, 2) : 0;
-
+        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
 
         //会话
         $arr['sessions'] = $this->google_session(3, $date_time);
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
         //更新购物车数量
         $cart_where2 = [];
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1026,12 +1007,12 @@ class TrackReg extends Backend
             ->whereOr('wait_instock_num > 0')
             ->group('sku')
             ->select();
-        foreach($list as $val){
-            $res_item = $_item->where(['sku'=>$val['sku']])->update(['on_way_stock'=>$val['all_on_way'],'wait_instock_num'=>$val['all_instock']]);
-            if($res_item){
-               echo $val['sku'].":success\n";
-            }else{
-                echo $val['sku'].":false\n";
+        foreach ($list as $val) {
+            $res_item = $_item->where(['sku' => $val['sku']])->update(['on_way_stock' => $val['all_on_way'], 'wait_instock_num' => $val['all_instock']]);
+            if ($res_item) {
+                echo $val['sku'] . ":success\n";
+            } else {
+                echo $val['sku'] . ":false\n";
             }
         }
         exit;
@@ -1054,9 +1035,9 @@ class TrackReg extends Backend
             ->alias('a')
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
             ->field('a.sku,a.replenish_list_id,a.purchase_num,b.replenish_id')
-            ->where(['b.purchase_status'=>['in',[2,6,7,9]]])
-            ->where(['b.stock_status'=>['in',[0,1]]])
-            ->where(['b.replenish_id'=>['gt',0]])
+            ->where(['b.purchase_status' => ['in', [2, 6, 7, 9]]])
+            ->where(['b.stock_status' => ['in', [0, 1]]])
+            ->where(['b.replenish_id' => ['gt', 0]])
             ->select();
 
         foreach ($list as $v) {
@@ -1086,87 +1067,87 @@ class TrackReg extends Backend
 
         //签收状态下的加待入库数量、减在途
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
-//        $_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+        //        $_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
         $row = $_logistics_info
             ->alias('a')
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
             ->field('a.batch_id,a.purchase_id,b.replenish_id')
-            ->where(['b.stock_status'=>['in',[0,1]]])
-            ->where(['b.purchase_status'=>['in',[7,9]]])
+            ->where(['b.stock_status' => ['in', [0, 1]]])
+            ->where(['b.purchase_status' => ['in', [7, 9]]])
             ->select();
 
         foreach ($row as $v) {
-//            if ($v['batch_id']) {
-//                $list = $_batch_item
-//                    ->where(['purchase_batch_id' => $v['batch_id']])
-//                    ->field('website_type,rate')
-//                    ->select();
-//                foreach ($list as $val) {
-//                    //获取各站点比例
-//                    $rate_arr = $_new_product_mapping
-//                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
-//                        ->field('arrival_num,sku')
-//                        ->select();
-//
-//                    //在途库存数量
-//                    $stock_num = $val['arrival_num'];
-//
-//                    //在途库存分站 更新映射关系表
-//                    foreach ($rate_arr as $key => $vall) {
-//                        if ((1 == count($rate_arr) - $key)) {//剩余数量分给最后一个站
-//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
-//                            //更新站点待入库数量
-//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
-//                        } else {
-//                            $num = round($val['arrival_num'] * $vall['rate']);
-//                            $stock_num -= $num;
-//                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-//                            //更新站点待入库数量
-//                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
-//                        }
-//                    }
-//                    //减全部的在途库存
-//                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
-//                    //加全部的待入库数量
-//                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
-//                }
-//            } else {
-                if ($v['purchase_id']) {
-                    $list = $_purchase_order_item
-                        ->where(['purchase_id' => $v['purchase_id']])
-                        ->field('purchase_num,sku')
+            //            if ($v['batch_id']) {
+            //                $list = $_batch_item
+            //                    ->where(['purchase_batch_id' => $v['batch_id']])
+            //                    ->field('website_type,rate')
+            //                    ->select();
+            //                foreach ($list as $val) {
+            //                    //获取各站点比例
+            //                    $rate_arr = $_new_product_mapping
+            //                        ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
+            //                        ->field('arrival_num,sku')
+            //                        ->select();
+            //
+            //                    //在途库存数量
+            //                    $stock_num = $val['arrival_num'];
+            //
+            //                    //在途库存分站 更新映射关系表
+            //                    foreach ($rate_arr as $key => $vall) {
+            //                        if ((1 == count($rate_arr) - $key)) {//剩余数量分给最后一个站
+            //                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
+            //                            //更新站点待入库数量
+            //                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
+            //                        } else {
+            //                            $num = round($val['arrival_num'] * $vall['rate']);
+            //                            $stock_num -= $num;
+            //                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+            //                            //更新站点待入库数量
+            //                            $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
+            //                        }
+            //                    }
+            //                    //减全部的在途库存
+            //                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
+            //                    //加全部的待入库数量
+            //                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
+            //                }
+            //            } else {
+            if ($v['purchase_id']) {
+                $list = $_purchase_order_item
+                    ->where(['purchase_id' => $v['purchase_id']])
+                    ->field('purchase_num,sku')
+                    ->select();
+                foreach ($list as $val) {
+                    //获取各站点比例
+                    $rate_arr = $_new_product_mapping
+                        ->where(['sku' => $val['sku'], 'replenish_id' => $v['replenish_id']])
+                        ->field('website_type,rate')
                         ->select();
-                    foreach ($list as $val) {
-                        //获取各站点比例
-                        $rate_arr = $_new_product_mapping
-                            ->where(['sku'=>$val['sku'],'replenish_id'=>$v['replenish_id']])
-                            ->field('website_type,rate')
-                            ->select();
 
-                        //在途库存数量
-                        $stock_num = $val['purchase_num'];
+                    //在途库存数量
+                    $stock_num = $val['purchase_num'];
 
-                        //在途库存分站 更新映射关系表
-                        foreach ($rate_arr as $key => $vall) {
-                            if ((count($rate_arr) - $key) == 1) {//剩余数量分给最后一个站
-                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setDec('plat_on_way_stock',$stock_num);
-                                //更新站点待入库数量
-                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$stock_num);
-                            } else {
-                                $num = round($val['purchase_num'] * $vall['rate']);
-                                $stock_num -= $num;
-                                $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                                //更新站点待入库数量
-                                $_item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
-                            }
+                    //在途库存分站 更新映射关系表
+                    foreach ($rate_arr as $key => $vall) {
+                        if ((count($rate_arr) - $key) == 1) {//剩余数量分给最后一个站
+                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
+                            //更新站点待入库数量
+                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
+                        } else {
+                            $num = round($val['purchase_num'] * $vall['rate']);
+                            $stock_num -= $num;
+                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+                            //更新站点待入库数量
+                            $_item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
                         }
-                        //减全部的在途库存
-                        $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
-                        //加全部的待入库数量
-                        $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
                     }
+                    //减全部的在途库存
+                    $_item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
+                    //加全部的待入库数量
+                    $_item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
                 }
-//            }
+            }
+            //            }
         }
     }
 

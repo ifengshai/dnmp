@@ -2,6 +2,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
     var Controller = {
         index: function () {
+            Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
@@ -13,7 +14,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     table: 'order_data_detail',
                 }
             });
-            Controller.api.formatter.daterangepicker($("div[role=form]"));
+
             var table = $("#table");
             // 初始化表格
             table.bootstrapTable({
@@ -53,7 +54,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-        
+             // 为表格绑定事件
+            Table.api.bindevent(table);
             $('#table tr').find(`th`).hide();
             $('#table tr').find(`td`).hide();
             $('.nav-choose ul li ul li').click(function(e){
@@ -68,8 +70,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('#table tr').find(`td:eq(${clickNum})`).show();
                 }
             })
-            // 为表格绑定事件
-            Table.api.bindevent(table);
+            $(".btn-success").click(function(){
+                Controller.api.formatter.order_sales_data_line();
+                Controller.api.formatter.order_num_data_line();
+
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
+         
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+         
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
+            });
         },
         add: function () {
             Controller.api.bindevent();

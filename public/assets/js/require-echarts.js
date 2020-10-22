@@ -93,6 +93,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 fontStyle: 'normal' //文字的字体系列
                             }
                         },
+                        boundaryGap: false,
                         axisLine: { //坐标轴轴线相关设置。
                             lineStyle: {
                                 type: 'solid', //坐标轴线线的类型。
@@ -967,11 +968,11 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
 
                         EchartObj.api.barConfig = EchartObj.config.bar;
                         //置空数据配置，独立没个图表的配置，防止初始配置被污染
-                        console.log(EchartObj.api.barConfig)
+                        
                         EchartObj.api.barConfig.legend.data = [];
                         EchartObj.api.barConfig.xAxis.data = [];
                         EchartObj.api.barConfig.series = [];
-                        console.log(res.columnData);
+                        
                         //单类目数据转换
                         if (chartOptions.dataType == 'single') {
                             //转换数据格式
@@ -1028,7 +1029,8 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 downLoadTitle: chartOptions.downLoadTitle
                             }, {
                                 xAxis: {
-                                    data: res.xColumnName
+                                    data: res.xColumnName,
+                                    //boundaryGap: false
                                 },
                                 legend: {
                                     data: res.column
@@ -1036,6 +1038,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 series: res.columnData
                             });
                         }
+
                     } else if (chartOptions.type == 'pie') {
                         EchartObj.api.pieConfig = EchartObj.config.pie;
                         //置空数据配置，独立没个图表的配置，防止初始配置被污染

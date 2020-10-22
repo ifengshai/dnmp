@@ -35,4 +35,8 @@ return [
     'Change password successful'            => '修改密码成功',
     'Reset password successful'             => '重置密码成功',
     'Token invalid, please log in again'    => 'Token已失效，请重新登录',
+    'Request method must be post'           => '请求方式必须是POST',
+    'Page can not be empty'                 => '页码不能为空',
+    'Page size can not be empty'            => '每页显示数量不能为空',
+    'Id can not be empty'                   => 'Id不能为空',
 ];
