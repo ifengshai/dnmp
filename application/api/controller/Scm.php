@@ -17,29 +17,29 @@ class Scm extends Api
         [
             'title'=>'配货管理',
             'menu'=>[
-                ['name'=>'配货', 'link'=>''],
-                ['name'=>'镜片分拣', 'link'=>''],
-                ['name'=>'配镜片', 'link'=>''],
-                ['name'=>'加工', 'link'=>''],
-                ['name'=>'成品质检', 'link'=>''],
-                ['name'=>'合单', 'link'=>''],
-                ['name'=>'审单', 'link'=>''],
-                ['name'=>'跟单', 'link'=>''],
-                ['name'=>'工单', 'link'=>'']
+                ['name'=>'配货', 'link'=>'', 'href'=>''],
+                ['name'=>'镜片分拣', 'link'=>'', 'href'=>''],
+                ['name'=>'配镜片', 'link'=>'', 'href'=>''],
+                ['name'=>'加工', 'link'=>'', 'href'=>''],
+                ['name'=>'成品质检', 'link'=>'', 'href'=>''],
+                ['name'=>'合单', 'link'=>'', 'href'=>''],
+                ['name'=>'审单', 'link'=>'', 'href'=>''],
+                ['name'=>'跟单', 'link'=>'', 'href'=>''],
+                ['name'=>'工单', 'link'=>'', 'href'=>'']
             ],
         ],
         [
             'title'=>'质检管理',
             'menu'=>[
-                ['name'=>'质检单', 'link'=>'warehouse/check'],
-                ['name'=>'物流检索', 'link'=>'warehouse/logistics_info/index']
+                ['name'=>'质检单', 'link'=>'warehouse/check', 'href'=>''],
+                ['name'=>'物流检索', 'link'=>'warehouse/logistics_info/index', 'href'=>'']
             ],
         ],
         [
             'title'=>'出入库管理',
             'menu'=>[
-                ['name'=>'出库单', 'link'=>'warehouse/outstock'],
-                ['name'=>'入库单', 'link'=>'warehouse/instock']
+                ['name'=>'出库单', 'link'=>'warehouse/outstock', 'href'=>''],
+                ['name'=>'入库单', 'link'=>'warehouse/instock', 'href'=>'']
             ],
         ],
     ];
@@ -108,7 +108,7 @@ class Scm extends Api
                 if(!$this->auth->check($val['link'])){
                     unset($value['menu'][$k]);
                 }
-                unset($val['link']);
+                unset($value['menu'][$k]['link']);
             }
             if(!empty($value['menu'])){
                 $list[] = $value;
@@ -218,7 +218,7 @@ class Scm extends Api
 
         //获取物流单数据
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
-        $logistics_data = $_logistics_info->where('id', $id)->field('id,purchase_id')->find();
+        $logistics_data = $_logistics_info->where('id', $id)->field('id,purchase_id,batch_id')->find();
         empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
 
         //获取采购单数据
@@ -253,7 +253,7 @@ class Scm extends Api
                 ->select();
             $item_list = collection($item_list)->toArray();
             foreach($item_list as $key=>$value){
-                $item_list[$key]['supplier_sku'] = $order_item[$value['sku']]['supplier_sku'];
+                $item_list[$key]['supplier_sku'] = isset($order_item[$value['sku']]['supplier_sku']) ? $order_item[$value['sku']]['supplier_sku'] : '';
             }
         }else{
             $item_list = $order_item_list;
