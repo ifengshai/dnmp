@@ -30,12 +30,14 @@ class OrderDataChange extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            if($filter['create_time-operate']){
+                unset($filter['create_time-operate']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-                unset($filter['create_time-operate']);
                 unset($filter['time_str']);
-                unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -45,8 +47,6 @@ class OrderDataChange extends Backend
             //站点
             if ($filter['order_platform']) {
                 $map['site'] = $filter['order_platform'] ?: 1;
-                unset($filter['create_time-operate']);
-                unset($filter['time_str']);
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }else{
