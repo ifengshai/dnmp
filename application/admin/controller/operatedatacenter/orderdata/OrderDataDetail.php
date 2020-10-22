@@ -53,7 +53,7 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $where['created_at'] = ['between', [$createat[0], $createat[3]]];
+                $where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model
