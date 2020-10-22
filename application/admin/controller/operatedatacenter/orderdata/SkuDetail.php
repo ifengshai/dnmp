@@ -67,7 +67,7 @@ class SkuDetail extends Backend
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-
+            $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
@@ -133,7 +133,7 @@ class SkuDetail extends Backend
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['o.customer_id'] = ['>',0];
             $map['i.sku'] = $params['sku'];
-
+            $map['o.order_type'] = 1;
             $customer_ids = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->column('distinct o.customer_id');
             $first_shopping_num = 0;
             foreach ($customer_ids as $val){
@@ -282,6 +282,7 @@ class SkuDetail extends Backend
         $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['p.sku'] = $sku;
+        $where['o.order_type'] = 1;
         if($flag){
             $map['p.prescription_type'] = $flag;
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
