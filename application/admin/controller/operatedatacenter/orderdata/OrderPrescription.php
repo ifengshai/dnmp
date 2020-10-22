@@ -33,7 +33,7 @@ class OrderPrescription extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $order_num_where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $order_num_where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $order_num = Db::name('datacenter_day')->where($order_num_where)->sum('order_num');
         $single_vision_num = $this->prescrtion_num('SingleVision',$site,$time_str);
         $single_vision_rate = $order_num ? round($single_vision_num/$order_num*100,0).'%' : 0;
@@ -127,7 +127,7 @@ class OrderPrescription extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['p.prescription_type'] = $flag;
         $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->count();
@@ -149,7 +149,7 @@ class OrderPrescription extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['created_at'] = ['between', [$createat[0], $createat[3]]];
+        $where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $orderids = $order_model->table('sales_flat_order')->where($where)->column('entity_id');
 

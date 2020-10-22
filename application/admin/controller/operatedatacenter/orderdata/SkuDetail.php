@@ -30,7 +30,7 @@ class SkuDetail extends Backend
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['p.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
@@ -272,7 +272,7 @@ class SkuDetail extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['p.sku'] = $sku;
         if($flag){
