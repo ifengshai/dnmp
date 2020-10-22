@@ -917,7 +917,7 @@ class TrackReg extends Backend
     }
 
     //运营数据中心
-    public function niaho_day_data()
+    public function nihao_day_data()
     {
         $this->zeelool = new \app\admin\model\order\order\Nihao();
         $zeelool_model = Db::connect('database.db_nihao_online');
