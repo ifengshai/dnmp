@@ -150,7 +150,7 @@ class OrderDataChange extends Backend
             $days_data = Db::name('datacenter_day')->where($where)->where($map)->select();
             $days_data = collection($days_data)->toArray();
             $arr['xdata'] = array_column($days_data,'day_date');
-            $arr['ydata']['one'] = array_column($days_data,'new_cart_num') ? array_column($days_data,'new_cart_num') : 0;
+            $arr['ydata']['one'] = array_column($days_data,'new_cart_num') ? array_column($days_data,'new_cart_num') : '你';
             $arr['ydata']['two'] = array_column($days_data,'order_num') ? array_column($days_data,'order_num') : 0;
 
             $json['xColumnName'] = $arr['xdata'];
