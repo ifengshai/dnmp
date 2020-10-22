@@ -2,10 +2,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
     var Controller = {
         index: function () {
+            Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'operatedatacenter/goodsdata/single_item/index' + location.search,
+                    index_url: 'operatedatacenter/goodsdata/single_item/index',
                     add_url: 'operatedatacenter/goodsdata/single_item/add',
                     edit_url: 'operatedatacenter/goodsdata/single_item/edit',
                     del_url: 'operatedatacenter/goodsdata/single_item/del',
@@ -24,21 +25,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('订单编号') },
-                        { field: 'id', title: __('订单状态') },
-                        { field: 'id', title: __('金额') },
-                        { field: 'id', title: __('优惠金额') },
-                        { field: 'id', title: __('订单日期') },
-                        { field: 'id', title: __('支付邮箱') }
+                        { field: 'increment_id', title: __('订单编号') },
+                        { field: 'status', title: __('订单状态') },
+                        { field: 'base_grand_total', title: __('金额') },
+                        { field: 'base_discount_amount', title: __('优惠金额') },
+                        { field: 'created_at', title: __('订单日期') },
+                        { field: 'payer_email', title: __('支付邮箱') }
                     ]
                 ]
             });
-
             // 为表格绑定事件
             Table.api.bindevent(table);
 
             Controller.api.formatter.line_chart();
             Controller.api.formatter.sku_sales_data_bar();
+            // $(document).on('change', '#btnsubmit', function () {
+            //     alert(111);
+            //     order_data_view();
+            //     Controller.api.formatter.line_chart();
+            //     Controller.api.formatter.sku_sales_data_bar();
+            // });
+            var params = table.bootstrapTable('getOptions')
+            params.queryParams = function(params) {
+
+                //定义参数
+                var filter = {};
+                //遍历form 组装json
+                $.each($("#form").serializeArray(), function(i, field) {
+                    filter[field.name] = field.value;
+                });
+
+                //参数转为json字符串
+                params.filter = JSON.stringify(filter)
+                console.info(params);
+                return params;
+            }
+
+            table.bootstrapTable('refresh',params);
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -104,13 +128,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/goodsdata/single_item/sku_sales_data_line',
                         data: {
-
+                            sku:$('#sku').val(),
+                            site:$('#order_platform').val(),
+                            site:$('#time_str').val()
                         }
-
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
                 sku_sales_data_bar: function () {
+
                     //销售排行榜图表
                     var chartOptions = {
                         targetId: 'echart2',
@@ -140,16 +166,55 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/goodsdata/single_item/sku_sales_data_bar',
                         data: {
-                            
+                            sku:$('#sku').val(),
+                            site:$('#order_platform').val(),
+                            site:$('#time_str').val()
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
             },
             bindevent: function () {
+
                 Form.api.bindevent($("form[role=form]"));
             }
         }
     };
     return Controller;
 });
+// function order_data_view(){
+//     var order_platform = $('#order_platform').val();
+//     var sku = $('#sku').val();
+//     var time_str = $('#time_str').val();
+//     Backend.api.ajax({
+//         url: 'operatedatacenter/goodsdata/single_item/ajax_top_data',
+//         data: { order_platform: order_platform, time_str: time_str,sku:sku}
+//     }, function (data, ret) {
+//
+//         var total = ret.data.total;
+//         $('#total').text(total);
+//         var whole_platform_order_num = ret.data.whole_platform_order_num;
+//         $('#whole_platform_order_num').text(whole_platform_order_num);
+//         var order_rate = ret.data.order_rate;
+//         $('#order_rate').text(order_rate);
+//         var avg_order_glass = ret.data.avg_order_glass;
+//         $('#avg_order_glass').text(avg_order_glass);
+//         var pay_jingpian_glass = ret.data.pay_jingpian_glass;
+//         $('#pay_jingpian_glass').text(pay_jingpian_glass);
+//         var pay_jingpian_glass_rate = ret.data.pay_jingpian_glass_rate;
+//         $('#pay_jingpian_glass_rate').text(pay_jingpian_glass_rate);
+//         var only_one_glass_num = ret.data.only_one_glass_num;
+//         $('#only_one_glass_num').text(only_one_glass_num);
+//         var only_one_glass_rate = ret.data.only_one_glass_rate;
+//         $('#only_one_glass_rate').text(only_one_glass_rate);
+//         var every_price = ret.data.every_price;
+//         $('#every_price').text(every_price);
+//         var whole_price = ret.data.whole_price;
+//         $('#whole_price').text(whole_price);
+//
+//         return false;
+//     }, function (data, ret) {
+//         Layer.alert(ret.msg);
+//         return false;
+//     });
+// }

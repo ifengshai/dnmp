@@ -1,7 +1,6 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], function ($, undefined, Backend, Table, Form, EchartObj) {
 
     var Controller = {
-    
         index: function () {
             Controller.api.bindevent();
             // 初始化表格参数配置

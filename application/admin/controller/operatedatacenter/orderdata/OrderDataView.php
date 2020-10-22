@@ -29,13 +29,13 @@ class OrderDataView extends Backend
     public function index()
     {
         //订单数
-        $order_num = $this->zeeloolOperate->getOrderNum();
+        $order_num = $this->zeeloolOperate->getOrderNum(1);
         //客单价
-        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
+        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice(1);
         //销售额
-        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
+        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney(1);
         //邮费
-        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
+        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney(1);
         //补发单订单数
         $replacement_order_num = $this->zeeloolOperate->getReplacementOrderNum();
         //补发单销售额
@@ -48,7 +48,9 @@ class OrderDataView extends Backend
         $order_total_distribution = $this->zeeloolOperate->getMoneyOrderNum();
         //订单运费数据统计
         $order_shipping = $this->zeeloolOperate->getOrderShipping();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping'));
+        //国家地域统计
+        $country = $this->zeeloolOperate->getCountryNum();
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country'));
         return $this->view->fetch();
     }
     /*
@@ -59,8 +61,10 @@ class OrderDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
-            $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $default_day = $start . ' ' . '00:00:00' . ' - ' . $end;
+            $time_str = $params['time_str'] ? $params['time_str'] : $default_day;
             switch ($order_platform) {
                 case 1:
                     $model = $this->zeeloolOperate;
@@ -73,17 +77,22 @@ class OrderDataView extends Backend
                     break;
             }
 
-            $order_num = $model->getOrderNum($time_str, 1);  //订单数
-            $order_unit_price = $model->getOrderUnitPrice($time_str, 1); //客单价
-            $sales_total_money = $model->getSalesTotalMoney($time_str, 1); //销售额
-            $shipping_total_money = $model->getShippingTotalMoney($time_str, 1);  //邮费
-            $replacement_order_num = $model->getReplacementOrderNum($time_str, 1);  //补发单订单数
-            $replacement_order_total = $model->getReplacementOrderTotal($time_str, 1); //补发单销售额
-            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str, 1); //网红单订单数
-            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str, 1);  //网红单销售额
+            $order_num = $model->getOrderNum(1,$time_str);  //订单数
+            $order_unit_price = $model->getOrderUnitPrice(1,$time_str); //客单价
+            $sales_total_money = $model->getSalesTotalMoney(1,$time_str); //销售额
+            $shipping_total_money = $model->getShippingTotalMoney(1,$time_str);  //邮费
+            $replacement_order_num = $model->getReplacementOrderNum(1,$time_str);  //补发单订单数
+            $replacement_order_total = $model->getReplacementOrderTotal(1,$time_str); //补发单销售额
+            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum(1,$time_str); //网红单订单数
+            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal(1,$time_str);  //网红单销售额
             $order_total_distribution = $model->getMoneyOrderNum($time_str); //订单金额分布
             $order_shipping = $model->getOrderShipping($time_str);//订单运费数据统计
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total','order_total_distribution','order_shipping');
+            $country = $model->getCountryNum($time_str);//国家地域统计
+            $country_str = '';
+            foreach ($country as $value){
+                $country_str.= '<tr><td>'.$value['country_id'].'</td><td>'.$value['count'].'</td><td>'.$value['rate'].'</td></tr>';
+            }
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total','order_total_distribution','order_shipping','country_str');
             $this->success('', '', $data);
         }
     }
@@ -104,67 +113,29 @@ class OrderDataView extends Backend
             //0:销售额  1：订单量
             $type = $params['type'] ? $params['type'] : 0;
             if ($order_platform == 1) {
+                $where['site'] = 1;
                 $model = $this->zeeloolOperate;
             } elseif ($order_platform == 2) {
+                $where['site'] = 2;
                 $model = $this->vooguemeOperate;
             } elseif ($order_platform == 3) {
+                $where['site'] = 3;
                 $model = $this->nihaoOperate;
             }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                if ($type == 1) {
-                    $first_sales_total = $model->getOrderNum($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['order_num']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getOrderNum($next_day);
-                            $date_arr[$next_day] = $next_sales_total['order_num'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    $first_sales_total = $model->getSalesTotalMoney($createat[0]);
-                    $date_arr = array(
-                        $createat[0] => $first_sales_total['sales_total_money']
-                    );
-                    if ($createat[0] != $createat[3]) {
-                        for ($i = 0; $i <= 100; $i++) {
-                            $m = $i + 1;
-                            $deal_date = date_create($createat[0]);
-                            date_add($deal_date, date_interval_create_from_date_string("$m days"));
-                            $next_day = date_format($deal_date, "Y-m-d");
-                            $next_sales_total = $model->getSalesTotalMoney($next_day);
-                            $date_arr[$next_day] = $next_sales_total['sales_total_money'];
-                            if ($next_day == $createat[3]) {
-                                break;
-                            }
-                        }
-                    }
-                }
+                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             } else {
-                $now_day = date('Y-m-d');
-                if ($type == 1) {
-                    //今天的订单数
-                    $today_order_num = $model->getOrderNum();
-                    $date_arr[$now_day] = $today_order_num['order_num'];
-                } else {
-                    //今天的销售额
-                    $today_sales_total_money = $model->getSalesTotalMoney();
-                    $date_arr[$now_day] = $today_sales_total_money['sales_total_money'];
-                }
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $where['day_date'] = ['between', [$start, $end]];
             }
             if ($type == 1) {
                 $name = '订单数';
+                $date_arr = $model->where($where)->column('order_num','day_date');
             } else {
                 $name = '销售额';
+                $date_arr = $model->where($where)->column('sales_total_money','day_date');
             }
             $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
@@ -201,6 +172,11 @@ class OrderDataView extends Backend
                 $model = $this->nihao;
             }
             $time_str = $params['time_str'];
+            if(!$time_str){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - '. $end;
+            }
             $createat = explode(' ', $time_str);
             $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
             $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -239,6 +215,11 @@ class OrderDataView extends Backend
             $order_platform = $params['order_platform'];
             //查询时间段内每天的客单价,中位数，标准差
             $time_str = $params['time_str'];
+            if(!$time_str){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - '. $end;
+            }
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $where['site'] = $order_platform;

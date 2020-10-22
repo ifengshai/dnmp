@@ -1064,8 +1064,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 ge_rdcpm_status: {
                     'click .check_rdcpm_status': function (e, value, row, index) {
                         if(row.pm_audit_status == 1){
-                            Backend.api.open('demand/it_web_demand/edit/demand_type/2/type/view/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
-                            // Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['40%', '40%'] });
+                            Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
                         }
                         /*Backend.api.ajax({
                             url: 'demand/it_web_demand/rdc_demand_pass/ids/' + row.id,
