@@ -151,8 +151,7 @@ class SkuDetail extends Backend
                 ->where($map)
                 ->group('customer_id')
                 ->having('count(customer_id)<=1')
-                ->field('customer_id')
-                ->select();
+                ->column('customer_id');
             $again_buy_num2 = 0;
             foreach ($again_buy_data2 as $v){
                 //查询时间段内是否进行购买行为
@@ -162,6 +161,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
+
             $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
