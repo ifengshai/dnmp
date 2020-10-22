@@ -65,7 +65,7 @@ class Scm extends Api
         $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
-//        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
+        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
     }
 
     /**
@@ -218,17 +218,54 @@ class Scm extends Api
 
         //获取物流单数据
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
-        $logistics_data = $_logistics_info->get($id);
+        $logistics_data = $_logistics_info->where('id', $id)->field('id,purchase_id')->find();
         empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
 
         //获取采购单数据
         $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $_purchase_order->get($logistics_data['purchase_id']);
+        $purchase_data = $_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id')->find();
         empty($purchase_data) && $this->error(__('采购单不存在'), [], 413);
 
+        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $order_item_list = $_purchase_order_item
+            ->where(['purchase_id'=>$logistics_data['purchase_id']])
+            ->field('sku,supplier_sku')
+            ->select();
+        $order_item = array_column($order_item_list,NULL,'sku');
+
+        //获取供应商数据
+        $_supplier = new \app\admin\model\purchase\Supplier;
+        $supplier_data = $_supplier->where('id', $purchase_data['supplier_id'])->field('supplier_name')->find();
+        empty($supplier_data) && $this->error(__('供应商不存在'), [], 414);
+
+        //获取采购批次数据
+        $batch = 0;
+        if($logistics_data['batch_id']){
+            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
+            $batch_data = $_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
+            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 415);
+            $batch = $batch_data['batch'];
+            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+            $item_list = $_purchase_batch_item
+                ->where(['purchase_batch_id'=>$logistics_data['batch_id']])
+                ->field('sku')
+                ->select();
+            $item_list = collection($item_list)->toArray();
+            foreach($item_list as $key=>$value){
+                $item_list[$key]['supplier_sku'] = $order_item[$value['sku']]['supplier_sku'];
+            }
+        }else{
+            $item_list = $order_item_list;
+        }
+
         //质检单号
-        $info['check_order_number'] = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $info['purchase_number'] = $purchase_data['purchase_number'];
+        $info =[
+            'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+            'purchase_number'=>$purchase_data['purchase_number'],
+            'supplier_name'=>$supplier_data['supplier_name'],
+            'batch'=>$batch,
+            'item_list'=>$item_list,
+        ];
 
         $this->success('', ['info' => $info],200);
     }
