@@ -506,7 +506,7 @@ class Test01 extends Backend
                     ->alias('a')
                     ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
                     ->where('a.sku','like',$value['sku'])
-                    ->value('b.final_price');
+                    ->value('a.final_price');
             }
             //日期
             $arr[$key]['day_date'] = $data;
