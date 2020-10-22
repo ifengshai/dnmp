@@ -713,7 +713,7 @@ class Voogueme extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -757,7 +757,7 @@ class Voogueme extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');

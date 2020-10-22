@@ -709,7 +709,7 @@ class Nihao extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -753,7 +753,7 @@ class Nihao extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -1236,7 +1236,7 @@ class Nihao extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].'23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         //获取所有的订单的国家
