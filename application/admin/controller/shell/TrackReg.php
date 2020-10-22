@@ -782,6 +782,7 @@ class TrackReg extends Backend
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         //$arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->field('entity_id,created_at')->select();
+        $arr['order_num'] = collection($arr['order_num'])->toArray();
         dump($arr['order_num']);exit;
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
