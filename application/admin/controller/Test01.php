@@ -204,9 +204,7 @@ class Test01 extends Backend
 
     public function test02()
     {
-        Db::name('datacenter_day')->where(['day_date'=>'2020-10-21','site'=>1])->setField('order_unit_price',65.95);
-        Db::name('datacenter_day')->where(['day_date'=>'2020-10-21','site'=>2])->setField('order_unit_price',57.51);
-        Db::name('datacenter_day')->where(['day_date'=>'2020-10-21','site'=>3])->setField('order_unit_price',63.31);
+
     }
 
     //跑sku每天的数据
