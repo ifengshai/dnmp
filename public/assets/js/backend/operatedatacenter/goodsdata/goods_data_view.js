@@ -20,6 +20,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $('.voogueme-div').hide();
                 $('.nihao-div').show();
             }
+            order_data_view();
+            $("#sku_submit").click(function(){
+                order_data_view();
+                Controller.api.formatter.line_chart();
+                Controller.api.formatter.goods_type_chart();
+                Form.api.bindevent($("form[role=form]"));
+
+                table.bootstrapTable('refresh',params);
+
+            });
 
             Controller.api.formatter.line_chart();
             Controller.api.formatter.goods_type_chart();
@@ -118,3 +128,50 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
     };
     return Controller;
 });
+function order_data_view(){
+    var order_platform =Config.label;
+    var time_str = $('#create_time').val();
+    Backend.api.ajax({
+        url: 'operatedatacenter/goodsdata/goods_data_view/ajax_top_data',
+        data: { order_platform: order_platform, time_str: time_str}
+    }, function (data, ret) {
+
+        var sun_glass_num = ret.data.sun_glass_num;
+        $('#sun_glass_num').text(sun_glass_num);
+
+        var glass_num = ret.data.glass_num;
+        $('#glass_num').text(glass_num);
+
+        var run_glass_num = ret.data.run_glass_num;
+        $('#run_glass_num').text(run_glass_num);
+
+        var old_glass_num = ret.data.old_glass_num;
+        $('#old_glass_num').text(old_glass_num);
+
+        var son_glass_num = ret.data.son_glass_num;
+        $('#son_glass_num').text(son_glass_num);
+
+        var other_num = ret.data.other_num;
+        $('#other_num').text(other_num);
+
+        var total_num = ret.data.total_num;
+        $('#total_num').text(total_num);
+
+        var v_sun_glass_num = ret.data.sun_glass_num;
+        $('#v_sun_glass_num').text(v_sun_glass_num);
+        var v_glass_num = ret.data.glass_num;
+        $('#v_glass_num').text(v_glass_num);
+        var v_other_num = ret.data.other_num;
+        $('#v_other_num').text(v_other_num);
+
+        var n_sun_glass_num = ret.data.sun_glass_num;
+        $('#n_sun_glass_num').text(n_sun_glass_num);
+        var n_glass_num = ret.data.glass_num;
+        $('#n_glass_num').text(n_glass_num);
+
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
