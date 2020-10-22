@@ -51,10 +51,13 @@ class SkuDetail extends Backend
             }else{
                 $site = 1;
             }
+            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
             if($site == 2){
                 $order_model = Db::connect('database.db_voogueme');
+
             }elseif($site == 3){
                 $order_model = Db::connect('database.db_nihao');
+                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
             }else{
                 $order_model = Db::connect('database.db_zeelool');
             }
@@ -65,7 +68,7 @@ class SkuDetail extends Backend
             $total = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
                 ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field('p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price')
+                ->field($field)
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -74,7 +77,7 @@ class SkuDetail extends Backend
             $list = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
                 ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field('p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price')
+                ->field($field)
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
