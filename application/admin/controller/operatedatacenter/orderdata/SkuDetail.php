@@ -107,7 +107,7 @@ class SkuDetail extends Backend
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
-                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 $order_where['o.created_at'] = ['lt',$createat[0]];
             } else{
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -162,6 +162,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
+
             $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
@@ -283,3 +284,13 @@ class SkuDetail extends Backend
         return $count;
     }
 }
+
+
+
+
+
+
+
+
+
+
