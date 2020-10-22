@@ -28,14 +28,6 @@ class OrderDataDetail extends Backend
      */
     public function index()
     {
-        $platform = (new MagentoPlatform())->getNewAuthSite();
-        if(empty($platform)){
-            $this->error('您没有权限访问','general/profile?ref=addtabs');
-        }
-        $arr = [];
-        foreach($platform as $pkey => $pv){
-            $arr[] = $pkey;
-        }
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
