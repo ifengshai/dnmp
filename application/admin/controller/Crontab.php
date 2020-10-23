@@ -197,7 +197,7 @@ class Crontab extends Backend
             } else {
                 $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
             }
-
+            $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
             $items[$order_item_key]['is_prescribe'] = $final_params['is_prescribe'] = $product_options['info_buyRequest']['tmplens']['is_prescribe'];
@@ -585,6 +585,7 @@ class Crontab extends Backend
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_base_price'];
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
+            $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
