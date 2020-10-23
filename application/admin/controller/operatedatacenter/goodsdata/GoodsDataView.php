@@ -188,16 +188,16 @@ class GoodsDataView extends Backend
             ->field('site,sku,day_date,goods_grade,goods_type')
             ->select();
         // foreach ($skus)
-        dump($skus);
+        // dump($skus);
         $data_center_day = array_column($data_center_day, null, 'goods_grade');
         dump($data_center_day);
         $a_plus_data = ['total_order_num' => $data_center_day['A+']['total_order_num'], 'goods_num' => $data_center_day['A+']['goods_num']];
-        $a_data = [];
-        $b_data = [];
-        $c_plus_data = [];
-        $d_data = [];
-        $e_data = [];
-        $f_data = [];
+        $a_data = ['total_order_num' => $data_center_day['A']['total_order_num'], 'goods_num' => $data_center_day['A']['goods_num']];
+        $b_data = ['total_order_num' => $data_center_day['B']['total_order_num'], 'goods_num' => $data_center_day['B']['goods_num']];
+        $c_plus_data = ['total_order_num' => $data_center_day['C']['total_order_num'], 'goods_num' => $data_center_day['C']['goods_num']];
+        $d_data = ['total_order_num' => $data_center_day['D']['total_order_num'], 'goods_num' => $data_center_day['D']['goods_num']];
+        $e_data = ['total_order_num' => $data_center_day['E']['total_order_num'], 'goods_num' => $data_center_day['E']['goods_num']];
+        $f_data = ['total_order_num' => $data_center_day['F']['total_order_num'], 'goods_num' => $data_center_day['F']['goods_num']];
         // }
         $data = compact('a_plus_data', 'a_data', 'b_data', 'c_plus_data', 'd_data', 'e_data', 'f_data', 'glass_num', 'sun_glass_num', 'run_glass_num', 'old_glass_num', 'son_glass_num', 'other_num', 'total_num');
         $this->success('', '', $data);

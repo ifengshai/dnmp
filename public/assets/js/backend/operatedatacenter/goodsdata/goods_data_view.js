@@ -11,6 +11,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $('.zeelool-div').show();
                 $('.voogueme-div').hide();
                 $('.nihao-div').hide();
+                $('#c-order_platform').hide();
+
             } else if (val == 2) {
                 $('.zeelool-div').hide();
                 $('.voogueme-div').show();

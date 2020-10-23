@@ -148,7 +148,7 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
-        } 
+        }
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
@@ -777,11 +777,11 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
         //客单价
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
@@ -799,6 +799,8 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
         $arr['sessions'] = $this->google_session(1, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -808,13 +810,13 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
         //产品详情页
@@ -825,7 +827,7 @@ class TrackReg extends Backend
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
-        echo date("Y-m-d H:i:s"). "\n";
+        echo date("Y-m-d H:i:s") . "\n";
         usleep(100000);
 
 
@@ -862,11 +864,11 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
@@ -883,6 +885,8 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
         $arr['sessions'] = $this->google_session(2, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -892,13 +896,13 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
         //产品详情页
@@ -910,7 +914,7 @@ class TrackReg extends Backend
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
-        echo date("Y-m-d H:i:s"). "\n";
+        echo date("Y-m-d H:i:s") . "\n";
         usleep(100000);
 
     }
@@ -941,11 +945,11 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
+        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
         //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
+        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
         $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
@@ -963,6 +967,8 @@ class TrackReg extends Backend
 
         //会话
         $arr['sessions'] = $this->google_session(3, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -972,13 +978,13 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
         //产品详情页
@@ -990,7 +996,7 @@ class TrackReg extends Backend
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
-        echo date("Y-m-d H:i:s"). "\n";
+        echo date("Y-m-d H:i:s") . "\n";
         usleep(100000);
 
     }
