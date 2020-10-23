@@ -44,10 +44,7 @@ class OrderPrescription extends Backend
             $end   = date('Y-m-d 23:59:59');
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
-        $createat = explode(' ', $time_str);
-        $order_num_where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $order_num_where['site'] = $site;
-        $order_num = Db::name('datacenter_day')->where($order_num_where)->sum('order_num');
+        $order_num = $this->prescrtion_num('',1,$time_str);
         $single_vision_num = $this->prescrtion_num('SingleVision',$site,$time_str);
         $single_vision_rate = $order_num ? round($single_vision_num/$order_num*100,0).'%' : 0;
         $single_vision_arr = array(
@@ -125,7 +122,7 @@ class OrderPrescription extends Backend
         );
         return $result;
     }
-    function prescrtion_num($flag,$site,$time_str){
+    function prescrtion_num($flag = '',$site = 1,$time_str = ''){
         if($site == 2){
             $order_model = Db::connect('database.db_voogueme');
         }elseif($site == 3){
@@ -134,17 +131,17 @@ class OrderPrescription extends Backend
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        if(!$time_str){
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-        }
         $createat = explode(' ', $time_str);
         $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['o.order_type'] = 1;
-        $where['p.prescription_type'] = $flag;
-        $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->count();
+        $map['p.prescription_type'] = $flag;
+        if($flag){
+            $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
+        }
+        else{
+            $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->count();
+        }
         return $count;
     }
     //镀膜
