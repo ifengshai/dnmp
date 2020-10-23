@@ -158,7 +158,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     EchartObj.api.ajax(options1, chartOptions1)
                 },
                 order_sales_data_line: function () {
-                    /* var chartOptions = {
+                    var chartOptions = {
                         targetId: 'echart',
                         downLoadTitle: '图表',
                         type: 'bar',
@@ -218,7 +218,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         }
 
                     }
-                    EchartObj.api.ajax(options, chartOptions) */
+                    EchartObj.api.ajax(options, chartOptions)
                 },
                
             },
