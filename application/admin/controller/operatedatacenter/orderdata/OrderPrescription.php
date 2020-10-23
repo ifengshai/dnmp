@@ -148,7 +148,6 @@ class OrderPrescription extends Backend
         return $result;
     }
     function prescrtion_num($flag = '',$site = 1,$time_str = ''){
-        echo $flag;
         if($site == 2){
             $order_model = Db::connect('database.db_voogueme');
         }elseif($site == 3){
@@ -164,6 +163,9 @@ class OrderPrescription extends Backend
         $map['p.prescription_type'] = $flag;
         if($flag){
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
+            if($flag == 'ReadingNoprescription'){
+                echo 55;
+            }
         }
         else{
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->count();
