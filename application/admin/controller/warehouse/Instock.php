@@ -101,6 +101,8 @@ class Instock extends Backend
      */
     public function add()
     {
+//        var_dump($this->request->post());
+//        die;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
