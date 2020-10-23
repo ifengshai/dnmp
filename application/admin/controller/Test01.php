@@ -561,8 +561,8 @@ class Test01 extends Backend
         $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
         $skus = Db::name('datacenter_sku_day')->field('sku,glass_num,sales_num,platform_sku')->select();
         foreach ($skus as $k => $v) {
-            Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['sales_num'=>$v['glass_num']]);
-            $map['sku'] = ['like', $v['platform_sku'] . '%'];
+            // Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['sales_num'=>$v['glass_num']]);
+            $map['sku'] = ['like', '%'.$v['platform_sku'] . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')
@@ -571,12 +571,12 @@ class Test01 extends Backend
                 ->where($time_where1)
                 ->field('sku,created_at,goods_type')
                 ->select();
-            // dump($sku_order_data);
+            dump($sku_order_data);
             $arr = [];
             //统计某个sku某一天的产品类型
-                foreach ($sku_order_data as $kk => $vv) {
-                    Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['goods_type'=>$vv['goods_type']]);
-                }
+            //     foreach ($sku_order_data as $kk => $vv) {
+            //         // Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['goods_type'=>$vv['goods_type']]);
+            //     }
             }
 
             // dump($skus);
