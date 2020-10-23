@@ -175,14 +175,14 @@
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
-                            <form action="{:url('index')}">
+                            <form action="{:url('index')}" method="post" id="prescription_info" role="form">
                             <div class="form-group new-form-group" >
                                 <label class="control-label col-xs-4">工单平台：</label>
                                 <div class="col-xs-8 new-col-xs-8">
-                                    <select data-rule="required" class="form-control" name="order_platform">
-                                        <option value="1" selected="selected">Zeelool</option>
-                                        <option value="2">Voogueme</option>
-                                        <option value="2">Nihaooptical</option>
+                                    <select data-rule="required" class="form-control" name="order_platform" id="order_platform">
+                                        <option value="1" {if condition="$web_site == 1"}selected="selected"{/if}>Zeelool</option>
+                                        <option value="2" {if condition="$web_site == 2"}selected="selected"{/if}>Voogueme</option>
+                                        <option value="3" {if condition="$web_site == 3"}selected="selected"{/if}>Nihaooptical</option>
                                     </select>
                                 </div>
                             </div>
@@ -191,11 +191,11 @@
                                 <label class="control-label col-xs-4" >时间：</label>
                                 <div class="col-xs-8 new-col-xs-8" id="timetime" role="form">
                                     <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_show}" data-index="14">
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-success" id="change_submit" value="提交">
-                            <input type="button" class="btn btn-default reset" id="change_reset" value="重置">
+                            <input type="submit" class="btn btn-success" id="change_submit" value="提交">
+                            <input type="reset" class="btn btn-default reset" id="change_reset" value="重置">
                             </form>
                         </div>
                     </div>
@@ -206,8 +206,9 @@
                             <div class="form-group" style="float:left;width: 100%;" >
 
                                 <label class="control-label col-xs-6">处方统计</label>
+                                {if condition="$web_site != 3"}
                                 <label class="control-label col-xs-6">镀膜统计</label>
-
+                                {/if}
                             </div>
 
                             <table class="new-altrowstable" style="margin-left: 1%;">
@@ -234,6 +235,7 @@
                                     <td></td>
                                 </tr>
                             </table>
+                            {if condition="$web_site != 3"}
                             <table class="new-altrowstable height-table" style="margin-left: 2%">
                                 <thead>
                                 <tr>
@@ -246,18 +248,16 @@
                                 {foreach name="coating_arr" item="val" key="key"}
                                 <tr>
                                     <td>{$key}</td>
-                                    <td>{$val.id}</td>
-                                    <td>{$val.id}</td>
-                                    <td>{$val.id}</td>
+                                    <td>{$val.type}</td>
+                                    <td>{$val.count}</td>
+                                    <td>{$val.rate}</td>
                                 </tr>
                                 {/foreach}
                             </table>
+                        {/if}
                         </div>
-
-
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
