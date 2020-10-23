@@ -553,6 +553,7 @@ class Test01 extends Backend
         // dump($arr);
     }
 
+    //产品类型有点问题 跑一下数据
     public function test10()
     {
         set_time_limit(0);
