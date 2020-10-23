@@ -164,7 +164,7 @@ class OrderPrescription extends Backend
         if($flag){
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
             if($flag == 'ReadingNoprescription'){
-                echo $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->select(false);
+                echo $count;
             }
         }
         else{
