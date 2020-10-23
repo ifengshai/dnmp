@@ -73,9 +73,9 @@ class SingleItem extends Backend
             // if (!$total){
             //     $total = 0;
             // }
-            // if (!$list){
-            //     $list = [];
-            // }
+            if (!$list){
+                $list = [];
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);

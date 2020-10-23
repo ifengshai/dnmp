@@ -405,7 +405,7 @@ class Test01 extends Backend
                 ->distinct('order_id')
                 ->field('order_id,created_at')
                 ->count();
-            $map['b.sku'] = ['=', $value['sku']];
+            $map['b.sku'] = ['like', $value['sku'].'%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             //获取这个sku所有的订单情况
@@ -488,6 +488,7 @@ class Test01 extends Backend
                 ->where('sku', 'like', $value['platform_sku'] . '%')
                 ->where($time_where)
                 ->count('qty_ordered');
+            $arr[$key]['sales_num'] = $arr[$key]['glass_num'];
             //副单价
             $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 2);
             //日期
@@ -499,7 +500,7 @@ class Test01 extends Backend
             $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
             $cart_where1 = [];
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
-            $cart_where1['b.sku'] = ['=', $value['sku']];
+            $cart_where1['b.sku'] = ['like', $value['sku'].'%'];
             $arr[$key]['cart_num'] = $zeelool_model->table('sales_flat_quote')
                 ->alias('a')
                 ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
@@ -514,7 +515,7 @@ class Test01 extends Backend
                     ->table('catalog_product_index_price') //为了获取现价找的表
                     ->alias('a')
                     ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                    ->where('b.sku', 'like', $value['sku'])
+                    ->where('b.sku', 'like', $value['sku'].'%')
                     ->value('a.final_price');
             }
             //日期
