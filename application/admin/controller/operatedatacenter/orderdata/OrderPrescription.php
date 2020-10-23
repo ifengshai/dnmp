@@ -59,14 +59,24 @@ class OrderPrescription extends Backend
             'num'=>$progressive_num,
             'rate'=>$progressive_rate
         );
-        $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
+        if($site == 3){
+            $reading_glasses_num1 = $this->prescrtion_num('Reading Glasses2',$site,$time_str);
+            $reading_glasses_num2 = $this->prescrtion_num('Readingglasses',$site,$time_str);
+            $reading_glasses_num = $reading_glasses_num1+$reading_glasses_num2;
+        }else{
+            $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
+        }
         $reading_glasses_rate = $order_num ? round($reading_glasses_num/$order_num*100,0).'%' : 0;
         $reading_glasses_arr = array(
             'name'=>'reading glasses',
             'num'=>$reading_glasses_num,
             'rate'=>$reading_glasses_rate
         );
-        $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str);
+        if($site == 2){
+            $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
+        }else{
+            $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str);
+        }
         $reading_glassesno_rate = $order_num ? round($reading_glassesno_num/$order_num*100,0).'%' : 0;
         $reading_glassesno_arr = array(
             'name'=>'reading glasses no prescription',
@@ -80,14 +90,28 @@ class OrderPrescription extends Backend
             'num'=>$no_prescription_num,
             'rate'=>$no_prescription_rate
         );
-        $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str);
+        if($site == 3){
+            $sunglasses_num1 = $this->prescrtion_num('SunSingleVision',$site,$time_str);
+            $sunglasses_num2 = $this->prescrtion_num('SunNonPrescription',$site,$time_str);
+            $sunglasses_num = $sunglasses_num1+$sunglasses_num2;
+        }else{
+            $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str);
+        }
+
         $sunglasses_rate = $order_num ? round($sunglasses_num/$order_num*100,0).'%' : 0;
         $sunglasses_arr = array(
             'name'=>'sunglasses',
             'num'=>$sunglasses_num,
             'rate'=>$sunglasses_rate
         );
-        $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
+        if($site == 2){
+            $sunglassesno_num1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$time_str);
+            $sunglassesno_num2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
+            $sunglassesno_num = $sunglassesno_num1+$sunglassesno_num2;
+        }else{
+            $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
+        }
+
         $sunglassesno_rate = $order_num ? round($sunglassesno_num/$order_num*100,0).'%' : 0;
         $sunglassesno_arr = array(
             'name'=>'sunglasses non-prescription',
