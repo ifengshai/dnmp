@@ -232,6 +232,7 @@ class Crontab extends Backend
             $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
             $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
 
+            $items[$order_item_key]['coating_id'] = $final_params['coating_id'];
             $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
             $items[$order_item_key]['index_type'] = $final_params['index_type'];
             $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
@@ -369,6 +370,7 @@ class Crontab extends Backend
                     . "'" . $value['index_type'] . "',"
                     . "'" . $value['prescription_type'] . "',"
                     . "'" . $value['coatiing_name'] . "',"
+                    . "'" . $value['coating_id'] . "',"
 
                     . "'" . $value['year'] . "',"
                     . "'" . $value['month'] . "',"
@@ -415,7 +417,7 @@ class Crontab extends Backend
                     . "),";
             }
 
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
+            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,coating_id,year,month,frame_price,index_price,coatiing_price,
                 frame_regural_price,goods_type,is_prescribe,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens,options_color) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
             $result = Db::connect('database.db_zeelool')->execute($batch_order_item_prescription_insertSql);
@@ -617,6 +619,7 @@ class Crontab extends Backend
             $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
             $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
 
+            $items[$order_item_key]['coating_id'] = $final_params['coating_id'];
             $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
             $items[$order_item_key]['index_type'] = $final_params['index_type'];
             $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
@@ -739,6 +742,7 @@ class Crontab extends Backend
                     . "'" . $value['index_type'] . "',"
                     . "'" . $value['prescription_type'] . "',"
                     . "'" . $value['coatiing_name'] . "',"
+                    . "'" . $value['coating_id'] . "',"
 
                     . "'" . $value['year'] . "',"
                     . "'" . $value['month'] . "',"
@@ -784,7 +788,7 @@ class Crontab extends Backend
                     . "),";
             }
 
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
+            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,coating_id,year,month,frame_price,index_price,coatiing_price,
                 frame_regural_price,goods_type,is_prescribe,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
 
