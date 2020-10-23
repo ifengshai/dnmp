@@ -351,6 +351,8 @@ class Scm extends Api
         if($get_check_id){
             $row = $_check->get($get_check_id);
             empty($row) && $this->error(__('质检单不存在'), [], 418);
+            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 418);
+
             $check_id = $get_check_id;
             $purchase_id = $row['purchase_id'];
             $logistics_id = $row['logistics_id'];
@@ -945,6 +947,79 @@ class Scm extends Api
         }
 
         $this->success('签收成功', [],200);
+    }
+
+    /**
+     * 新建/编辑出库单页面
+     *
+     * @参数 int out_stock_id  出库单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function out_stock_add()
+    {
+        $out_stock_id = $this->request->request('out_stock_id');
+
+        //获取出库分类数据
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $type_list = $_out_stock_type
+            ->field('id,name')
+            ->where('is_del', 1)
+            ->select()
+        ;
+
+        //站点列表
+        $site_list = [
+            ['id'=>1,'title'=>'zeelool'],
+            ['id'=>2,'title'=>'voogueme'],
+            ['id'=>3,'title'=>'nihao'],
+            ['id'=>4,'title'=>'meeloog'],
+            ['id'=>5,'title'=>'wesee'],
+            ['id'=>8,'title'=>'amazon'],
+            ['id'=>9,'title'=>'zeelool_es'],
+            ['id'=>10,'title'=>'zeelool_de'],
+            ['id'=>11,'title'=>'zeelool_jp']
+        ];
+
+        if($out_stock_id){
+            $_out_stock = new \app\admin\model\warehouse\Outstock;
+            $info = $_out_stock
+                ->field('out_stock_number,type_id,platform_id,status')
+                ->where('is_del', 1)
+                ->find()
+            ;
+            0 != $info['status'] && $this->error(__('只有新建状态才能编辑'), [], 434);
+            unset($info['status']);
+
+            //获取出库单商品数据
+            $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
+            $item_data = $_out_stock_item
+                ->field('sku,out_stock_num')
+                ->where('out_stock_id', $out_stock_id)
+                ->select()
+            ;
+
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $stock_list = $_item_platform_sku
+                ->where('platform_type', $info['platform_id'])
+                ->column('stock','sku')
+            ;
+
+            foreach($item_data as $key=>$value){
+                $item_data[$key]['stock'] = $stock_list[$value['sku']];
+            }
+
+            $info['item_data'] = $item_data;
+        }else{
+            $info = [
+                'out_stock_number'=>'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+                'type_id'=>0,
+                'platform_id'=>0,
+                'item_data'=>[]
+            ];
+        }
+
+        $this->success('', ['type_list' => $type_list,'site_list' => $site_list,'info' => $info],200);
     }
 
 }
