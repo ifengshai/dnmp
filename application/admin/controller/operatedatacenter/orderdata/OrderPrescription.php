@@ -74,6 +74,7 @@ class OrderPrescription extends Backend
         );
         if($site == 2){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
+            exit;
         }else{
             $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str);
         }
@@ -147,6 +148,7 @@ class OrderPrescription extends Backend
         return $result;
     }
     function prescrtion_num($flag = '',$site = 1,$time_str = ''){
+        echo $flag;
         if($site == 2){
             $order_model = Db::connect('database.db_voogueme');
         }elseif($site == 3){
