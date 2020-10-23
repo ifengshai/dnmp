@@ -3,6 +3,10 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 供应链接口类
@@ -184,6 +188,350 @@ class Scm extends Api
     }
 
     /**
+     * 新建质检单页面
+     *
+     * @参数 int logistics_id  物流单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function quality_add()
+    {
+        $logistics_id = $this->request->request('logistics_id');
+        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 411);
+
+        //获取物流单数据
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $logistics_data = $_logistics_info->where('id', $logistics_id)->field('id,purchase_id,batch_id')->find();
+        empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
+
+        //获取采购单数据
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_data = $_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id,replenish_id')->find();
+        empty($purchase_data) && $this->error(__('采购单不存在'), [], 413);
+
+        //获取采购单商品数据
+        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $order_item_list = $_purchase_order_item
+            ->where(['purchase_id'=>$logistics_data['purchase_id']])
+            ->field('sku,supplier_sku,purchase_num')
+            ->select();
+        $order_item_list = collection($order_item_list)->toArray();
+
+        //获取供应商数据
+        $_supplier = new \app\admin\model\purchase\Supplier;
+        $supplier_data = $_supplier->where('id', $purchase_data['supplier_id'])->field('supplier_name')->find();
+        empty($supplier_data) && $this->error(__('供应商不存在'), [], 414);
+
+        //获取采购批次数据
+        $batch = 0;
+        if($logistics_data['batch_id']){
+            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
+            $batch_data = $_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
+            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 415);
+
+            $batch = $batch_data['batch'];
+            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+            $item_list = $_purchase_batch_item
+                ->where(['purchase_batch_id'=>$logistics_data['batch_id']])
+                ->field('sku,arrival_num as should_arrival_num')
+                ->select();
+            $item_list = collection($item_list)->toArray();
+            $order_item = array_column($order_item_list,NULL,'sku');
+            foreach($item_list as $key=>$value){
+                $item_list[$key]['supplier_sku'] = isset($order_item[$value['sku']]['supplier_sku']) ?? '';
+                $item_list[$key]['purchase_num'] = isset($order_item[$value['sku']]['purchase_num']) ?? 0;
+            }
+        }else{
+            $item_list = [];
+            foreach($order_item_list as $key=>$value){
+                $value['should_arrival_num'] = $value['purchase_num'];
+                $item_list[] = $value;
+            }
+        }
+
+        //质检单所需数据
+        $info =[
+            'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+            'purchase_number'=>$purchase_data['purchase_number'],
+            'supplier_name'=>$supplier_data['supplier_name'],
+            'batch'=>$batch,
+            'purchase_id'=>$logistics_data['purchase_id'],
+            'supplier_id'=>$purchase_data['supplier_id'],
+            'batch_id'=>$logistics_data['batch_id'],
+            'replenish_id'=>$purchase_data['replenish_id'],
+            'item_list'=>$item_list,
+        ];
+
+        $this->success('', ['info' => $info],200);
+    }
+
+    /**
+     * 编辑质检单页面
+     *
+     * @参数 int check_id  质检单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function quality_edit()
+    {
+        $check_id = $this->request->request('check_id');
+        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 411);
+
+        //获取质检单数据
+        $_check = new \app\admin\model\warehouse\Check;
+        $check_data = $_check->where('id', $check_id)->field('purchase_id,batch_id,check_order_number,supplier_id')->find();
+        empty($check_data) && $this->error(__('质检单不存在'), [], 412);
+
+        //获取采购单数据
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_data = $_purchase_order->where('id', $check_data['purchase_id'])->field('purchase_number')->find();
+        empty($purchase_data) && $this->error(__('采购单不存在'), [], 413);
+
+        //获取供应商数据
+        $_supplier = new \app\admin\model\purchase\Supplier;
+        $supplier_data = $_supplier->where('id', $check_data['supplier_id'])->field('supplier_name')->find();
+        empty($supplier_data) && $this->error(__('供应商不存在'), [], 414);
+
+        //获取采购批次数据
+        $batch = 0;
+        if($check_data['batch_id']){
+            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
+            $batch_data = $_purchase_batch->where('id', $check_data['batch_id'])->field('batch')->find();
+            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 415);
+            $batch = $batch_data['batch'];
+        }
+
+        //获取质检单商品数据
+        $_check_item = new \app\admin\model\warehouse\CheckItem;
+        $item_list = $_check_item
+            ->where(['check_id'=>$check_id])
+            ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
+            ->select();
+        $item_list = collection($item_list)->toArray();
+
+        //质检单所需数据
+        $info =[
+            'check_order_number'=>$check_data['check_order_number'],
+            'purchase_number'=>$purchase_data['purchase_number'],
+            'supplier_name'=>$supplier_data['supplier_name'],
+            'batch'=>$batch,
+            'item_list'=>$item_list
+        ];
+
+        $this->success('', ['info' => $info],200);
+    }
+
+    /**
+     * 新建/编辑质检单提交
+     *
+     * @参数 int check_id  质检单ID
+     * @参数 int logistics_id  物流单ID
+     * @参数 string check_order_number  质检单号
+     * @参数 int purchase_id  采购单ID
+     * @参数 int supplier_id  供应商ID
+     * @参数 int replenish_id  补货单ID
+     * @参数 int do_type  提交类型：1提交2保存
+     * @参数 int is_error  是否错发：1是2否
+     * @参数 int batch_id  批次ID
+     * @参数 json item_data  sku数据集合
+     * @author lzh
+     * @return mixed
+     */
+    public function quality_submit()
+    {
+        $item_data = $this->request->request('item_data');
+        $item_data = array_filter(json_decode($item_data,true));
+        empty($item_data) && $this->error(__('sku集合不能为空'), [], 416);
+
+        $do_type = $this->request->request('do_type');
+        $is_error = $this->request->request('is_error');
+        $get_check_id = $this->request->request('check_id');
+
+        $_check = new \app\admin\model\warehouse\Check;
+        if($get_check_id){
+            $row = $_check->get($get_check_id);
+            empty($row) && $this->error(__('质检单不存在'), [], 416);
+            $check_id = $get_check_id;
+            $purchase_id = $row['purchase_id'];
+            $logistics_id = $row['logistics_id'];
+
+            //编辑质检单
+            $check_data = [
+                'is_error'=>1 == $is_error ?? 0,
+                'status'=>1 == $do_type ?? 0
+            ];
+            $result = $row->allowField(true)->save($check_data);
+        }else{
+            $batch_id = $this->request->request('batch_id');
+            $logistics_id = $this->request->request('logistics_id');
+            empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 416);
+
+            $check_order_number = $this->request->request('check_order_number');
+            empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 416);
+
+            $purchase_id = $this->request->request('purchase_id');
+            empty($purchase_id) && $this->error(__('采购单ID不能为空'), [], 416);
+
+            $supplier_id = $this->request->request('supplier_id');
+            empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 416);
+
+            $replenish_id = $this->request->request('replenish_id');
+            empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 416);
+
+            //创建质检单
+            $check_data = [
+                'check_order_number'=>$check_order_number,
+                'purchase_id'=>$purchase_id,
+                'supplier_id'=>$supplier_id,
+                'batch_id'=>$batch_id,
+                'is_error'=>1 == $is_error ?? 0,
+                'status'=>1 == $do_type ?? 0,
+                'logistics_id'=>$logistics_id,
+                'replenish_id'=>$replenish_id,
+                'create_person'=>$this->auth->nickname,
+                'createtime'=>date('Y-m-d H:i:s')
+            ];
+            $result = $_check->allowField(true)->save($check_data);
+            $check_id = $_check->id;
+        }
+
+        false === $result && $this->error(__('提交失败'), [], 417);
+
+        Db::startTrans();
+        try {
+            //检测条形码是否已绑定
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $where['check_id'] = [['>',0], ['neq',$check_id]];
+            foreach ($item_data as $key => $value) {
+                //检测合格条形码
+                $quantity_agg = array_unique(array_filter(explode(',',$value['quantity_agg'])));
+                $where['code'] = ['in',$quantity_agg];
+                $check_quantity = $_product_bar_code_item
+                    ->where($where)
+                    ->field('code')
+                    ->find();
+                if(!empty($check_quantity['code'])){
+                    $this->error(__('合格条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 418);
+                    exit;
+                }
+
+                //检测不合格条形码
+                $unqualified_agg = array_unique(array_filter(explode(',',$value['unqualified_agg'])));
+                $where['code'] = ['in',$unqualified_agg];
+                $check_unqualified = $_product_bar_code_item
+                    ->where($where)
+                    ->field('code')
+                    ->find();
+                if(!empty($check_unqualified['code'])){
+                    $this->error(__('不合格条形码:'.$check_unqualified['code'].' 已绑定,请移除'), [], 418);
+                    exit;
+                }
+
+                //检测留样条形码
+                $sample_agg = array_unique(array_filter(explode(',',$value['sample_agg'])));
+                $where['code'] = ['in',$sample_agg];
+                $check_sample = $_product_bar_code_item
+                    ->where($where)
+                    ->field('code')
+                    ->find();
+                if(!empty($check_sample)){
+                    $this->error(__('留样条形码:'.$check_sample['code'].' 已绑定,请移除'), [], 418);
+                    exit;
+                }
+
+                $item_data[$key]['quantity_agg'] = $quantity_agg;
+                $item_data[$key]['unqualified_agg'] = $unqualified_agg;
+                $item_data[$key]['sample_agg'] = $sample_agg;
+            }
+
+            //批量创建或更新质检单商品
+            $_check_item = new \app\admin\model\warehouse\CheckItem;
+            foreach ($item_data as $key => $value) {
+                //错误类型、合格率
+                if($value['should_arrival_num'] > $value['arrival_num']){
+                    $error_type = 2;
+                }elseif($value['should_arrival_num'] < $value['arrival_num']){
+                    $error_type = 1;
+                }else{
+                    $error_type = 0;
+                }
+                $quantity_rate = round(($value['quantity_num'] / $value['arrivals_num'] * 100),2);
+
+                $item_save = [
+                    'arrivals_num'=>$value['arrivals_num'],
+                    'quantity_num'=>$value['quantity_num'],
+                    'sample_num'=>$value['sample_num'],
+                    'unqualified_num'=>$value['unqualified_num'],
+                    'quantity_rate'=>$quantity_rate,
+                    'error_type'=>$error_type,
+                    'remark'=>$value['remark']
+                ];
+                if($get_check_id){//更新
+                    $where = ['sku' => $value['sku'],'check_id' => $check_id];
+                    $_check_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+
+                    //清除质检单旧条形码数据
+                    $code_clear = [
+                        'sku' => '',
+                        'purchase_id' => 0,
+                        'logistics_id' => 0,
+                        'check_id' => 0
+                    ];
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, $where)->save($code_clear);
+                }else{//新增
+                    $item_save['check_id'] = $check_id;
+                    $item_save['sku'] = $value['sku'];
+                    $item_save['supplier_sku'] = $value['supplier_sku'];
+                    $item_save['purchase_id']  = $purchase_id;
+                    $item_save['purchase_num'] = $value['purchase_num'];
+                    $item_save['should_arrival_num'] = $value['should_arrival_num'];
+                    $_check_item->allowField(true)->save($item_save);
+                }
+
+                $code_item = [
+                    'purchase_id'=>$purchase_id,
+                    'sku'=>$value['sku'],
+                    'logistics_id'=>$logistics_id,
+                    'check_id'=>$check_id,
+                    'create_person'=>$this->auth->nickname,
+                    'create_time'=>date('Y-m-d H:i:s')
+                ];
+
+                //绑定合格条形码
+                foreach($value['quantity_agg'] as $v){
+                    $code_item['is_quantity'] = 1;
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                }
+
+                //绑定不合格条形码
+                foreach($value['unqualified_agg'] as $v){
+                    $code_item['is_quantity'] = 2;
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                }
+
+                //绑定留样条形码
+                foreach($value['sample_agg'] as $v){
+                    $code_item['is_sample'] = 1;
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                }
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 419);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 420);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 421);
+        }
+
+        $this->success('提交成功', [],200);
+    }
+
+    /**
      * 取消质检
      *
      * @参数 int id  质检单ID
@@ -202,73 +550,6 @@ class Scm extends Api
 
         $res = $_check->allowField(true)->isUpdate(true, ['id'=>$id])->save(['status'=>4]);
         $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 410);
-    }
-
-    /**
-     * 新建质检单页面
-     *
-     * @参数 int id  物流单ID
-     * @author lzh
-     * @return mixed
-     */
-    public function quality_add()
-    {
-        $id = $this->request->request('id');
-        empty($id) && $this->error(__('Id can not be empty'), [], 411);
-
-        //获取物流单数据
-        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
-        $logistics_data = $_logistics_info->where('id', $id)->field('id,purchase_id,batch_id')->find();
-        empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
-
-        //获取采购单数据
-        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id')->find();
-        empty($purchase_data) && $this->error(__('采购单不存在'), [], 413);
-
-        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $order_item_list = $_purchase_order_item
-            ->where(['purchase_id'=>$logistics_data['purchase_id']])
-            ->field('sku,supplier_sku')
-            ->select();
-        $order_item_list = collection($order_item_list)->toArray();
-        $order_item = array_column($order_item_list,NULL,'sku');
-
-        //获取供应商数据
-        $_supplier = new \app\admin\model\purchase\Supplier;
-        $supplier_data = $_supplier->where('id', $purchase_data['supplier_id'])->field('supplier_name')->find();
-        empty($supplier_data) && $this->error(__('供应商不存在'), [], 414);
-
-        //获取采购批次数据
-        $batch = 0;
-        if($logistics_data['batch_id']){
-            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
-            $batch_data = $_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
-            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 415);
-            $batch = $batch_data['batch'];
-            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
-            $item_list = $_purchase_batch_item
-                ->where(['purchase_batch_id'=>$logistics_data['batch_id']])
-                ->field('sku')
-                ->select();
-            $item_list = collection($item_list)->toArray();
-            foreach($item_list as $key=>$value){
-                $item_list[$key]['supplier_sku'] = isset($order_item[$value['sku']]['supplier_sku']) ? $order_item[$value['sku']]['supplier_sku'] : '';
-            }
-        }else{
-            $item_list = $order_item_list;
-        }
-
-        //质检单号
-        $info =[
-            'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-            'purchase_number'=>$purchase_data['purchase_number'],
-            'supplier_name'=>$supplier_data['supplier_name'],
-            'batch'=>$batch,
-            'item_list'=>$item_list,
-        ];
-
-        $this->success('', ['info' => $info],200);
     }
 
 }
