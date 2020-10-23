@@ -608,7 +608,7 @@ class Scm extends Api
                         'createtime'=>date('Y-m-d H:i:s')
                     ];
                     $_sample_work_order = new \app\admin\model\purchase\SampleWorkorder;
-                    $_sample_work_order->save($work_order_data);
+                    $_sample_work_order->allowField(true)->save($work_order_data);
 
                     //生成入库子表数据
                     $work_order_item_data = [];
@@ -678,7 +678,7 @@ class Scm extends Api
                             'createtime'=>date('Y-m-d H:i:s'),
                             'is_error'=>$is_error
                         ];
-                        $_purchase_abnormal->save($abnormal_save);
+                        $_purchase_abnormal->allowField(true)->save($abnormal_save);
 
                         //新增收货异常子表数据
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
@@ -704,6 +704,247 @@ class Scm extends Api
         }
 
         $this->success('审核成功', [],200);
+    }
+
+    /**
+     * 物流检索列表
+     *
+     * @参数 string logistics_number  物流单号
+     * @参数 string sign_number  签收编号
+     * @参数 int status  签收状态：1已签收 0未签收
+     * @参数 int is_new_product  是否为新品采购单：1是 0否
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author lzh
+     * @return mixed
+     */
+    public function logistics_list()
+    {
+        $logistics_number = $this->request->request('logistics_number');
+        $sign_number = $this->request->request('sign_number');
+        $status = $this->request->request('status');
+        $is_new_product = $this->request->request('is_new_product');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 406);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
+
+        $where = [];
+        if($logistics_number){
+            $where['logistics_number'] = ['like', '%' . $logistics_number . '%'];
+        }
+        if($sign_number){
+            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
+        }
+        if(isset($status)){
+            $where['status'] = $status;
+        }
+        if($start_time && $end_time){
+            $where['createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        //获取采购单数据
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_list = $_purchase_order
+            ->where(['purchase_status'=>[['=',6], ['=',7], 'or']])
+            ->field('id,purchase_number,is_new_product')
+            ->select();
+        $purchase_list = array_column($purchase_list,NULL,'id');
+
+        //拼接采购单条件
+        if(isset($is_new_product)){
+            $purchase_ids = array_filter($purchase_list,function($v) use ($is_new_product){
+                if($v['is_new_product'] == $is_new_product){
+                    return $v;
+                }
+            });
+            $purchase_ids = array_keys($purchase_ids);
+            $where['purchase_id'] = ['in',$purchase_ids];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        //获取物流单列表数据
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $list = $_logistics_info
+            ->where($where)
+            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type')
+            ->order('createtime', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+
+        foreach($list as $key=>$value){
+            $purchase_number = '';
+            $is_new_product = 0;
+            if($value['purchase_id']){
+                $purchase_number = $purchase_list[$value['purchase_id']]['purchase_number'];
+                $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ?: 0;
+            }
+            $list[$key]['purchase_number'] = $purchase_number;
+            $list[$key]['is_new_product'] = $is_new_product;
+            $list[$key]['status'] = 1 == $value['status'] ? '已签收' : '未签收';
+            $list[$key]['show_sign'] = 0 == $value['status'] && 1 == $value['type'] ? 1 : 0;
+            $list[$key]['show_quality'] = 1 == $value['status'] && 1 == $value['type'] ? 1 : 0;
+        }
+
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 物流单签收
+     *
+     * @参数 int logistics_id  物流单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function logistics_sign()
+    {
+        $logistics_id = $this->request->request('logistics_id');
+        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 433);
+
+        //检测质检单状态
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $row = $_logistics_info->get($logistics_id);
+        (0 != $row['status'] || 1 != $row['type']) && $this->error(__('只有未签收状态才能操作'), [], 434);
+
+        //签收关联操作
+        Db::startTrans();
+        try {
+            $logistics_save = [
+                'sign_person'=>$this->auth->nickname,
+                'sign_time'=>date('Y-m-d H:i:s'),
+                'status'=>1
+            ];
+            $res = $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$logistics_id])->save($logistics_save);
+            false === $res && $this->error(__('签收失败'), [], 435);
+
+            //签收成功时更改采购单签收状态
+            $count = $_logistics_info->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
+            $purchase_save = [
+                'purchase_status'=>$count > 0 ? 9 : 7,
+                'receiving_time'=>date('Y-m-d H:i:s')
+            ];
+            $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+            $_purchase_order->allowField(true)->isUpdate(true, ['id'=>$row['purchase_id']])->save($purchase_save);
+
+            //签收扣减在途库存
+            $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+            $_new_product_mapping = new \app\admin\model\NewProductMapping;
+            $_item = new \app\admin\model\itemmanage\Item;
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
+            //根据采购单获取补货单ID
+            $replenish_id = $_purchase_order->where(['id' => $row['purchase_id']])->value('replenish_id');
+
+            //获取补货单数据
+            $mapping_list = $_new_product_mapping
+                ->field('website_type,rate,sku')
+                ->where(['replenish_id'=>$replenish_id])
+                ->select()
+            ;
+
+            //批次物流签收
+            if ($row['batch_id']) {
+                //获取批次商品数据
+                $batch_item_list = $_purchase_batch_item
+                    ->field('sku,arrival_num')
+                    ->where(['purchase_batch_id' => $row['batch_id']])
+                    ->select()
+                ;
+                foreach ($batch_item_list as $v) {
+                    $sku = $v['sku'];
+                    $arrival_num = $v['arrival_num'];
+                    //获取各站虚拟仓占比
+                    $rate_arr = array_filter($mapping_list,function($value) use ($sku){
+                        if($value['sku'] == $sku){
+                            return $value;
+                        }
+                    });
+                    //各站点列表总数
+                    $all_num = count($rate_arr);
+                    //在途库存数量
+                    $stock_num = $arrival_num;
+                    foreach ($rate_arr as $key => $val) {
+                        $website_type = $val['website_type'];
+                        //剩余数量分给最后一个站点
+                        if (($all_num - $key) == 1) {
+                            $num = $stock_num;
+                        } else {
+                            $num = round($arrival_num * $val['rate']);
+                            $stock_num -= $num;
+                        }
+                        //减站点在途
+                        $_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setDec('plat_on_way_stock',$num);
+                        //加站点待入库数量
+                        $_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setInc('wait_instock_num',$num);
+                    }
+                    //减全部在途
+                    $_item->where(['sku' => $sku])->setDec('on_way_stock', $arrival_num);
+                    //加全部待入库数量
+                    $_item->where(['sku' => $sku])->setInc('wait_instock_num', $arrival_num);
+                }
+            } elseif ($row['purchase_id']) {//采购物流签收
+                //获取采购单商品数据
+                $purchase_item_list = $_purchase_order_item
+                    ->field('sku,purchase_num')
+                    ->where(['purchase_id' => $row['purchase_id']])
+                    ->select()
+                ;
+                foreach ($purchase_item_list as $v) {
+                    $sku = $v['sku'];
+                    $purchase_num = $v['purchase_num'];
+                    //获取各站虚拟仓占比
+                    $rate_arr = array_filter($mapping_list,function($value) use ($sku){
+                        if($value['sku'] == $sku){
+                            return $value;
+                        }
+                    });
+                    //各站点列表总数
+                    $all_num = count($rate_arr);
+                    //在途库存数量
+                    $stock_num = $purchase_num;
+                    foreach ($rate_arr as $key => $val) {
+                        $website_type = $val['website_type'];
+                        //剩余数量分给最后一个站点
+                        if (($all_num - $key) == 1) {
+                            $num = $stock_num;
+                        } else {
+                            $num = round($purchase_num * $val['rate']);
+                            $stock_num -= $num;
+                        }
+                        //减站点在途
+                        $_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setDec('plat_on_way_stock',$num);
+                        //加站点待入库数量
+                        $_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setInc('wait_instock_num',$num);
+                    }
+                    //减全部在途
+                    $_item->where(['sku' => $sku])->setDec('on_way_stock', $purchase_num);
+                    //加全部待入库数量
+                    $_item->where(['sku' => $sku])->setInc('wait_instock_num', $purchase_num);
+                }
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 436);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 437);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 438);
+        }
+
+        $this->success('签收成功', [],200);
     }
 
 }
