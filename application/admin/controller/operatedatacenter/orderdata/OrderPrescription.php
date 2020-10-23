@@ -44,7 +44,7 @@ class OrderPrescription extends Backend
             $end   = date('Y-m-d 23:59:59');
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
-        $order_num = $this->prescrtion_num('',1,$time_str);
+        $order_num = $this->prescrtion_num('',$site,$time_str);
         $single_vision_num = $this->prescrtion_num('SingleVision',$site,$time_str);
         $single_vision_rate = $order_num ? round($single_vision_num/$order_num*100,0).'%' : 0;
         $single_vision_arr = array(
