@@ -65,7 +65,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 timePicker24Hour: true,
                                 autoApply: true,
                                 locale: {
-                                    format: 'YYYY-MM-DD',
+                                    format: 'YYYY-MM-DD HH:mm:ss',
                                     customRangeLabel: __("Custom Range"),
                                     applyLabel: __("Apply"),
                                     cancelLabel: __("Clear"),
