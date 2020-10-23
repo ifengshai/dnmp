@@ -74,7 +74,6 @@ class OrderPrescription extends Backend
         );
         if($site == 2){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
-            exit;
         }else{
             $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str);
         }
@@ -163,9 +162,6 @@ class OrderPrescription extends Backend
         $map['p.prescription_type'] = $flag;
         if($flag){
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
-            if($flag == 'ReadingNoprescription'){
-                echo $count;
-            }
         }
         else{
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->count();
