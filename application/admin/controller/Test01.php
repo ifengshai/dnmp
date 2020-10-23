@@ -335,12 +335,12 @@ class Test01 extends Backend
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,outer_sku_status')
-            ->where(['platform_type' => 1])
-            // ->where(['platform_type' => 1,'outer_sku_status'=>1])
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            // ->where(['platform_type' => 1])
+            ->where(['platform_type' => 1,'outer_sku_status'=>1])
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
@@ -362,6 +362,8 @@ class Test01 extends Backend
                         $arr[$v['sku']]['platform_sku'] = $v['platform_sku'];
                         $arr[$v['sku']]['site'] = 1;
                         $arr[$v['sku']]['day_date'] = $data;
+                        $arr[$v['sku']]['day_stock'] = $v['stock'];
+                        $arr[$v['sku']]['day_onway_stock'] = $v['plat_on_way_stock'];
                     }
                 }
             }
@@ -375,12 +377,12 @@ class Test01 extends Backend
         }
         // dump($arr);
     }
-    //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型
+    //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型 销量
     public function sku_day_data_order()
     {
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -404,7 +406,8 @@ class Test01 extends Backend
                 ->field('order_id,created_at')
                 ->count();
             $map['b.sku'] = ['=', $value['sku']];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')
                 ->table('sales_flat_order')
@@ -467,7 +470,7 @@ class Test01 extends Backend
     {
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
