@@ -56,15 +56,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
-            $('#table tr').find(`th`).hide();
-            $('#table tr').find(`td`).hide();
+            //$('#table tr th').hide();
+            //$('#table tr td').hide();
+
+            //$('#table tr th').addClass('click_hide');
+            //$('#table tr td').addClass('click_hide');
+
+
+            //$('#table').hide();
+            //$('#table tr th').hide();
+            //$('#table tr td').hide();
+
+
             $('.nav-choose ul li ul li').click(function(e){
-                var clickNum = $(e.target).index();
-                if ($(e.target).children('input').prop('checked')) {
+                var clickNum
+                if ($(e.target).parent().parent().index() == 0) {
+                    clickNum = $(e.target).index();
+                } else if($(e.target).parent().parent().index() == 1) {
+                    clickNum = $(e.target).index() + 2;
+                } else if($(e.target).parent().parent().index() == 2) {
+                    clickNum = $(e.target).index() + 16;
+                }
+                console.log(clickNum);
+                if($(e.target).children('input').prop('checked')){
                     $(e.target).children('input').prop('checked',false)
                     $('#table tr').find(`th:eq(${clickNum})`).hide();
                     $('#table tr').find(`td:eq(${clickNum})`).hide();
-                } else {
+                }else{
                     $(e.target).children('input').prop('checked',true)
                     $('#table tr').find(`th:eq(${clickNum})`).show();
                     $('#table tr').find(`td:eq(${clickNum})`).show();
