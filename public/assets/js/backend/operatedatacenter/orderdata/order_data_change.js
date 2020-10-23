@@ -207,7 +207,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                 }
                             ],
                         }
-                    }; */
+                    };
 
                     var options = {
                         type: 'post',
@@ -218,7 +218,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         }
 
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions) */
                 },
                
             },
