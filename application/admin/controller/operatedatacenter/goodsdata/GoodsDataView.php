@@ -404,49 +404,49 @@ class GoodsDataView extends Backend
             $a_plus_data['total_sales_num'] = $data_center_day['A+']['total_sales_num'] ? $data_center_day['A+']['total_sales_num'] : 0;
             $a_plus_data['goods_num'] = $data_center_day['A+']['goods_num'] ? $data_center_day['A+']['goods_num'] : 0;
             $a_plus_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A+']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $a_plus_data['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $a_plus_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['A+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $a_plus_data['day_stock_rate'] = $total_stock != 0 ? round($a_plus_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $a_plus_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($a_plus_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $a_data['total_sales_num'] = $data_center_day['A']['total_sales_num'] ? $data_center_day['A']['total_sales_num'] : 0;
             $a_data['goods_num'] = $data_center_day['A']['goods_num'] ? $data_center_day['A']['goods_num'] : 0;
             $a_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $a_data['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $a_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['A']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $a_data['day_stock_rate'] = $total_stock != 0 ? round($a_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $a_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($a_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $b_data['total_sales_num'] = $data_center_day['B']['total_sales_num'] ? $data_center_day['B']['total_sales_num'] : 0;
             $b_data['goods_num'] = $data_center_day['B']['goods_num'] ? $data_center_day['B']['goods_num'] : 0;
             $b_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['B']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $b_data['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['B']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $b_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['B']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $b_data['day_stock_rate'] = $total_stock != 0 ? round($b_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $b_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($b_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $c_plus_data['total_sales_num'] = $data_center_day['C+']['total_sales_num'] ? $data_center_day['C+']['total_sales_num'] : 0;
             $c_plus_data['goods_num'] = $data_center_day['C+']['goods_num'] ? $data_center_day['C+']['goods_num'] : 0;
             $c_plus_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C+']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $c_plus_data['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $c_plus_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['C+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $c_plus_data['day_stock_rate'] = $total_stock != 0 ? round($c_plus_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $c_plus_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($c_plus_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $c_data ['total_sales_num'] = $data_center_day['C']['total_sales_num'] ? $data_center_day['C']['total_sales_num'] : 0;
             $c_data ['goods_num'] = $data_center_day['C']['goods_num'] ? $data_center_day['C']['goods_num'] : 0;
             $c_data ['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $c_data ['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $c_data ['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['C']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $c_data['day_stock_rate'] = $total_stock != 0 ? round($c_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $c_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($c_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $d_data['total_sales_num'] = $data_center_day['D']['total_sales_num'] ? $data_center_day['D']['total_sales_num'] : 0;
             $d_data['goods_num'] = $data_center_day['D']['goods_num'] ? $data_center_day['D']['goods_num'] : 0;
             $d_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['D']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $d_data['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['D']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $d_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['D']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $d_data['day_stock_rate'] = $total_stock != 0 ? round($d_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $d_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($d_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
 
             $e_data ['total_sales_num'] = $data_center_day['E']['total_sales_num'] ? $data_center_day['E']['total_sales_num'] : 0;
             $e_data ['goods_num'] = $data_center_day['E']['goods_num'] ? $data_center_day['E']['goods_num'] : 0;
             $e_data ['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['E']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
-            $e_data ['goods_num_rate'] = $total_sales_num != 0 ? round($data_center_day['E']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $e_data ['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['E']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
             $e_data['day_stock_rate'] = $total_stock != 0 ? round($e_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
             $e_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($e_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
             // dump($a_plus_data);
