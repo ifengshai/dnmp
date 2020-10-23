@@ -580,12 +580,12 @@ class Test01 extends Backend
         //     //         // Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['goods_type'=>$vv['goods_type']]);
         //     //     }
         // }
-        $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+        // $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
         $map['sku'] = ['=', 'ZOP012914-01'];
         $sku_order_data = Db::connect('database.db_zeelool')
             ->table('sales_flat_order_item_prescription')
             ->where($map)
-            ->where($time_where1)
+            // ->where($time_where1)
             ->field('sku,created_at,goods_type')
             ->select();
         dump($sku_order_data);
