@@ -211,7 +211,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         }
                     };
                     
-                    var options = {
+                    var options1 = {
                         type: 'post',
                         url: 'operatedatacenter/orderdata/order_data_change/order_num_data_line',
                         data: {
@@ -219,7 +219,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str': $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions1)
+                    EchartObj.api.ajax(options1, chartOptions1)
                 },
             },
             bindevent: function () {
