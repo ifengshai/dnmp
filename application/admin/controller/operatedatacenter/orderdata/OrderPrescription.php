@@ -46,6 +46,7 @@ class OrderPrescription extends Backend
         }
         $createat = explode(' ', $time_str);
         $order_num_where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $order_num_where['site'] = $site;
         $order_num = Db::name('datacenter_day')->where($order_num_where)->sum('order_num');
         $single_vision_num = $this->prescrtion_num('SingleVision',$site,$time_str);
         $single_vision_rate = $order_num ? round($single_vision_num/$order_num*100,0).'%' : 0;
