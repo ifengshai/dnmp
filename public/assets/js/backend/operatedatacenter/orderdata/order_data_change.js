@@ -148,7 +148,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                     type: 'value',
                                     name: '销售额',
                                     axisLabel: {
-                                        formatter: '1$ {value}'
+                                        formatter: '$ {value}'
                                     }
                                 }
                             ],
@@ -167,7 +167,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     EchartObj.api.ajax(options, chartOptions)
                 },
                 order_num_data_line: function () {
-                    var chartOptions = {
+                    var chartOptions1 = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'bar',
@@ -219,7 +219,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str': $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions1)
                 },
             },
             bindevent: function () {
