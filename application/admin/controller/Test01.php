@@ -405,6 +405,13 @@ class Test01 extends Backend
                 ->distinct('order_id')
                 ->field('order_id,created_at')
                 ->count();
+            //销售副数
+            $arr[$key]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order_item')
+                ->where('sku', 'like', $value['platform_sku'] . '%')
+                ->where($time_where)
+                ->count('qty_ordered');
+            $arr[$key]['sales_num'] = $arr[$key]['glass_num'];
+
             $map['b.sku'] = ['like', $value['platform_sku'].'%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -454,16 +461,18 @@ class Test01 extends Backend
             if (!$arr[$key]['goods_type']) {
                 $arr[$key]['goods_type'] = 1;
             }
+            //副单价
+            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 2);
             if (!empty($arr[$key])) {
                 //更新数据
                 Db::name('datacenter_sku_day')
                     ->where(['sku' => $arr[$key]['sku'], 'day_date' => $arr[$key]['day_date'], 'site' => $arr[$key]['site']])
-                    ->update(['order_num' => $arr[$key]['order_num'], 'sku_grand_total' => $arr[$key]['sku_grand_total'], 'sku_row_total' => $arr[$key]['sku_row_total'], 'goods_type' => $arr[$key]['goods_type']]);
+                    ->update(['glass_num' => $arr[$key]['glass_num'],'sales_num' => $arr[$key]['sales_num'], 'order_num' => $arr[$key]['order_num'], 'sku_grand_total' => $arr[$key]['sku_grand_total'], 'single_price' => $arr[$key]['single_price'], 'sku_row_total' => $arr[$key]['sku_row_total'], 'goods_type' => $arr[$key]['goods_type']]);
                 echo $arr[$key]['sku'] . "\n";
                 usleep(100000);
             }
         }
-        dump($arr);
+        // dump($arr);
     }
     //销售副数 副单价 购物车数量
     public function sku_day_data_other()
@@ -483,14 +492,13 @@ class Test01 extends Backend
         $time_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         //统计某个sku某一天的数据
         foreach ($sku_data as $key => $value) {
-            //销售副数
-            $arr[$key]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order_item')
-                ->where('sku', 'like', $value['platform_sku'] . '%')
-                ->where($time_where)
-                ->count('qty_ordered');
-            $arr[$key]['sales_num'] = $arr[$key]['glass_num'];
-            //副单价
-            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 2);
+            // //销售副数
+            // $arr[$key]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order_item')
+            //     ->where('sku', 'like', $value['platform_sku'] . '%')
+            //     ->where($time_where)
+            //     ->count('qty_ordered');
+            // $arr[$key]['sales_num'] = $arr[$key]['glass_num'];
+
             //日期
             $arr[$key]['day_date'] = $data;
             //站点
@@ -532,18 +540,46 @@ class Test01 extends Backend
             if (!$arr[$key]['now_pricce']) {
                 $arr[$key]['now_pricce'] = 0;
             }
-            if (!$arr[$key]['goods_type']) {
-                $arr[$key]['goods_type'] = 1;
-            }
+
             if (!empty($arr[$key])) {
                 //更新数据
                 Db::name('datacenter_sku_day')
                     ->where(['sku' => $arr[$key]['sku'], 'day_date' => $arr[$key]['day_date'], 'site' => $arr[$key]['site']])
-                    ->update(['glass_num' => $arr[$key]['glass_num'], 'single_price' => $arr[$key]['single_price'], 'cart_num' => $arr[$key]['cart_num'], 'now_pricce' => $arr[$key]['now_pricce']]);
+                    ->update(['cart_num' => $arr[$key]['cart_num'], 'now_pricce' => $arr[$key]['now_pricce']]);
                 echo $arr[$key]['sku'] . "\n";
                 usleep(100000);
             }
         }
         // dump($arr);
     }
+
+    //产品类型有点问题 跑一下数据
+    public function test10()
+    {
+        set_time_limit(0);
+        $data = '2020-10-22';
+        $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+        $skus = Db::name('datacenter_sku_day')->field('sku,glass_num,sales_num,platform_sku')->select();
+        foreach ($skus as $k => $v) {
+            Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['sales_num'=>$v['glass_num']]);
+            $map['sku'] = ['like', $v['platform_sku'] . '%'];
+            // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            //获取这个sku所有的订单情况
+            $sku_order_data = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order_item_prescription')
+                ->where($map)
+                ->where($time_where1)
+                ->field('sku,created_at,goods_type')
+                ->select();
+            // dump($sku_order_data);
+            $arr = [];
+            //统计某个sku某一天的产品类型
+                foreach ($sku_order_data as $kk => $vv) {
+                    Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['goods_type'=>$vv['goods_type']]);
+                }
+            }
+
+            // dump($skus);
+        }
+
 }
