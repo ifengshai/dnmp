@@ -162,15 +162,11 @@ class OrderDataChange extends Backend
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['one'],
-                    'name' => '购物车数量',
-                    'yAxisIndex' => 0,
                     'smooth' => true //平滑曲线
                 ],
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['two'],
-                    'name' => '订单数量',
-                    'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
             ];

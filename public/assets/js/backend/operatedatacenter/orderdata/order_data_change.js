@@ -202,14 +202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             yAxis: [
                                 {
                                     type: 'value',
-                                    name: '购物车数量',
-                                    axisLabel: {
-                                        formatter: '{value} 个'
-                                    }
-                                },
-                                {
-                                    type: 'value',
-                                    name: '订单数量',
+                                    name: '数量',
                                     axisLabel: {
                                         formatter: '{value} 个'
                                     }
