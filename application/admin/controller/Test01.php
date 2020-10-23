@@ -562,7 +562,7 @@ class Test01 extends Backend
         $skus = Db::name('datacenter_sku_day')->field('sku,glass_num,sales_num,platform_sku')->select();
         foreach ($skus as $k => $v) {
             // Db::name('datacenter_sku_day')->where(['sku'=>$v['sku']])->update(['sales_num'=>$v['glass_num']]);
-            $map['sku'] = ['like', $v['platform_sku'] . '%'];
+            $map['sku'] = ['like', '%'.$v['platform_sku'] . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')
