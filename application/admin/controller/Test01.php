@@ -381,6 +381,8 @@ class Test01 extends Backend
     //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型 销量
     public function sku_day_data_order()
     {
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         set_time_limit(0);
         $data = date('Y-m-d');
         $data = '2020-10-22';
@@ -480,6 +482,7 @@ class Test01 extends Backend
     public function sku_day_data_other()
     {
         set_time_limit(0);
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $data = date('Y-m-d');
         $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -559,6 +562,7 @@ class Test01 extends Backend
     public function test10()
     {
         set_time_limit(0);
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         $data = '2020-10-22';
         // $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
         // $skus = Db::name('datacenter_sku_day')->field('sku,glass_num,sales_num,platform_sku')->select();
