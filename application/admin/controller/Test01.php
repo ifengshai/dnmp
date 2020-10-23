@@ -335,12 +335,12 @@ class Test01 extends Backend
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,outer_sku_status')
-            ->where(['platform_type' => 1])
-            // ->where(['platform_type' => 1,'outer_sku_status'=>1])
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            // ->where(['platform_type' => 1])
+            ->where(['platform_type' => 1,'outer_sku_status'=>1])
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
@@ -362,6 +362,8 @@ class Test01 extends Backend
                         $arr[$v['sku']]['platform_sku'] = $v['platform_sku'];
                         $arr[$v['sku']]['site'] = 1;
                         $arr[$v['sku']]['day_date'] = $data;
+                        $arr[$v['sku']]['day_stock'] = $v['stock'];
+                        $arr[$v['sku']]['day_onway_stock'] = $v['plat_on_way_stock'];
                     }
                 }
             }
@@ -375,12 +377,12 @@ class Test01 extends Backend
         }
         // dump($arr);
     }
-    //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型
+    //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型 销量
     public function sku_day_data_order()
     {
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -403,8 +405,9 @@ class Test01 extends Backend
                 ->distinct('order_id')
                 ->field('order_id,created_at')
                 ->count();
-            $map['b.sku'] = ['=', $value['sku']];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['b.sku'] = ['like', $value['sku'].'%'];
+            // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')
                 ->table('sales_flat_order')
@@ -467,7 +470,7 @@ class Test01 extends Backend
     {
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-20';
+        $data = '2020-10-22';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -485,6 +488,7 @@ class Test01 extends Backend
                 ->where('sku', 'like', $value['platform_sku'] . '%')
                 ->where($time_where)
                 ->count('qty_ordered');
+            $arr[$key]['sales_num'] = $arr[$key]['glass_num'];
             //副单价
             $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 2);
             //日期
@@ -496,7 +500,7 @@ class Test01 extends Backend
             $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
             $cart_where1 = [];
             $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
-            $cart_where1['b.sku'] = ['=', $value['sku']];
+            $cart_where1['b.sku'] = ['like', $value['sku'].'%'];
             $arr[$key]['cart_num'] = $zeelool_model->table('sales_flat_quote')
                 ->alias('a')
                 ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
@@ -511,7 +515,7 @@ class Test01 extends Backend
                     ->table('catalog_product_index_price') //为了获取现价找的表
                     ->alias('a')
                     ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                    ->where('b.sku', 'like', $value['sku'])
+                    ->where('b.sku', 'like', $value['sku'].'%')
                     ->value('a.final_price');
             }
             //日期
