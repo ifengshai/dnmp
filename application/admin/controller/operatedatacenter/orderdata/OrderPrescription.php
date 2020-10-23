@@ -72,7 +72,6 @@ class OrderPrescription extends Backend
             'num'=>$reading_glasses_num,
             'rate'=>$reading_glasses_rate
         );
-        dump($site);exit;
         if($site == 2){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
         }else{
