@@ -82,6 +82,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.fixed-table-pagination').show();
                     $('.fixed-table-toolbar').show();
                 }
+                if ($('#table thead tr').html() == '') {
+                    $('.fixed-table-pagination').hide();
+                    $('.fixed-table-toolbar').hide();
+                }
             })
 
 
