@@ -68,6 +68,10 @@ class OrderDataDetail extends Backend
                 $end   = date('Y-m-d 23:59:59');
                 $map['day_date'] = ['between', [$start,$end]];
             }
+            if($filter['order_platform']){
+                unset($filter['order_platform']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model
                 ->where($where)
