@@ -61,11 +61,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.fixed-table-pagination').hide()
                     $('.fixed-table-toolbar').hide()
                 }
+                
+                
 
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
-
+            $(".pagination ul li").click(function(){
+                $('.fixed-table-pagination').show()
+                $('.fixed-table-toolbar').show()
+            })
 
             $('.nav-choose ul li ul li').click(function(e){
                 var data_name = $(this).attr('data-name');
