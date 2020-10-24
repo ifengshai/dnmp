@@ -21,29 +21,30 @@ class Scm extends Api
         [
             'title'=>'配货管理',
             'menu'=>[
-                ['name'=>'配货', 'link'=>'', 'href'=>''],
-                ['name'=>'镜片分拣', 'link'=>'', 'href'=>''],
-                ['name'=>'配镜片', 'link'=>'', 'href'=>''],
-                ['name'=>'加工', 'link'=>'', 'href'=>''],
-                ['name'=>'成品质检', 'link'=>'', 'href'=>''],
-                ['name'=>'合单', 'link'=>'', 'href'=>''],
-                ['name'=>'审单', 'link'=>'', 'href'=>''],
-                ['name'=>'跟单', 'link'=>'', 'href'=>''],
-                ['name'=>'工单', 'link'=>'', 'href'=>'']
+                ['name'=>'配货', 'link'=>'distribution/index', 'href'=>'com.nextmar.mojing.ui.distribution.OrderDistributionActivity'],
+                ['name'=>'镜片分拣', 'link'=>'distribution/sorting', 'href'=>'com.nextmar.mojing.ui.sorting.OrderSortingActivity'],
+                ['name'=>'配镜片', 'link'=>'distribution/withlens', 'href'=>'com.nextmar.mojing.ui.withlens.OrderWithlensActivity'],
+                ['name'=>'加工', 'link'=>'distribution/machining', 'href'=>'com.nextmar.mojing.ui.machining.OrderMachiningActivity'],
+                ['name'=>'成品质检', 'link'=>'distribution/quality', 'href'=>'com.nextmar.mojing.ui.quality.OrderQualityActivity'],
+                ['name'=>'合单', 'link'=>'distribution/merge', 'href'=>'com.nextmar.mojing.ui.merge.OrderMergeActivity'],
+                ['name'=>'合单待取', 'link'=>'distribution/waitmerge', 'href'=>'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'],
+                ['name'=>'审单', 'link'=>'distribution/audit', 'href'=>'com.nextmar.mojing.ui.audit.AuditOrderActivity']
             ],
         ],
         [
             'title'=>'质检管理',
             'menu'=>[
-                ['name'=>'质检单', 'link'=>'warehouse/check', 'href'=>''],
-                ['name'=>'物流检索', 'link'=>'warehouse/logistics_info/index', 'href'=>'']
+                ['name'=>'物流检索', 'link'=>'warehouse/logistics_info/index', 'href'=>'com.nextmar.mojing.ui.logistics.LogisticsActivity'],
+                ['name'=>'质检单', 'link'=>'warehouse/check', 'href'=>'com.nextmar.mojing.ui.quality.QualityListActivity']
             ],
         ],
         [
             'title'=>'出入库管理',
             'menu'=>[
-                ['name'=>'出库单', 'link'=>'warehouse/outstock', 'href'=>''],
-                ['name'=>'入库单', 'link'=>'warehouse/instock', 'href'=>'']
+                ['name'=>'出库单', 'link'=>'warehouse/outstock', 'href'=>'com.nextmar.mojing.ui.outstock.OutStockActivity'],
+                ['name'=>'入库单', 'link'=>'warehouse/instock', 'href'=>'com.nextmar.mojing.ui.instock.InStockActivity'],
+                ['name'=>'待入库', 'link'=>'warehouse/prestock', 'href'=>'com.nextmar.mojing".ui.prestock.PreStockActivity'],
+                ['name'=>'盘点', 'link'=>'warehouse/inventory', 'href'=>'com.nextmar.mojing.ui.inventory.InventoryActivity'],
             ],
         ],
     ];
@@ -85,14 +86,14 @@ class Scm extends Api
         $account = $this->request->request('account');
         $password = $this->request->request('password');
         empty($account) && $this->error(__('Username can not be empty'), [], 403);
-        empty($password) && $this->error(__('Password can not be empty'), [], 404);
+        empty($password) && $this->error(__('Password can not be empty'), [], 403);
 
         if ($this->auth->login($account, $password)) {
             $user = $this->auth->getUserinfo();
             $data = ['token' => $user['token']];
             $this->success(__('Logged in successful'), $data,200);
         } else {
-            $this->error($this->auth->getError(), [], 405);
+            $this->error($this->auth->getError(), [], 404);
         }
     }
 
@@ -145,8 +146,8 @@ class Scm extends Api
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
 
-        empty($page) && $this->error(__('Page can not be empty'), [], 406);
-        empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
+        empty($page) && $this->error(__('Page can not be empty'), [], 403);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
 
         $where = [];
         if($query){
@@ -197,17 +198,17 @@ class Scm extends Api
     public function quality_add()
     {
         $logistics_id = $this->request->request('logistics_id');
-        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 408);
+        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
         //获取物流单数据
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
         $logistics_data = $_logistics_info->where('id', $logistics_id)->field('id,purchase_id,batch_id')->find();
-        empty($logistics_data) && $this->error(__('物流单不存在'), [], 409);
+        empty($logistics_data) && $this->error(__('物流单不存在'), [], 403);
 
         //获取采购单数据
         $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_data = $_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id,replenish_id')->find();
-        empty($purchase_data) && $this->error(__('采购单不存在'), [], 410);
+        empty($purchase_data) && $this->error(__('采购单不存在'), [], 403);
 
         //获取采购单商品数据
         $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
@@ -220,14 +221,14 @@ class Scm extends Api
         //获取供应商数据
         $_supplier = new \app\admin\model\purchase\Supplier;
         $supplier_data = $_supplier->where('id', $purchase_data['supplier_id'])->field('supplier_name')->find();
-        empty($supplier_data) && $this->error(__('供应商不存在'), [], 411);
+        empty($supplier_data) && $this->error(__('供应商不存在'), [], 403);
 
         //获取采购批次数据
         $batch = 0;
         if($logistics_data['batch_id']){
             $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
             $batch_data = $_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
-            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 412);
+            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
 
             $batch = $batch_data['batch'];
             $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
@@ -275,29 +276,29 @@ class Scm extends Api
     public function quality_edit()
     {
         $check_id = $this->request->request('check_id');
-        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 413);
+        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         //获取质检单数据
         $_check = new \app\admin\model\warehouse\Check;
         $check_data = $_check->where('id', $check_id)->field('purchase_id,batch_id,check_order_number,supplier_id')->find();
-        empty($check_data) && $this->error(__('质检单不存在'), [], 414);
+        empty($check_data) && $this->error(__('质检单不存在'), [], 403);
 
         //获取采购单数据
         $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_data = $_purchase_order->where('id', $check_data['purchase_id'])->field('purchase_number')->find();
-        empty($purchase_data) && $this->error(__('采购单不存在'), [], 415);
+        empty($purchase_data) && $this->error(__('采购单不存在'), [], 403);
 
         //获取供应商数据
         $_supplier = new \app\admin\model\purchase\Supplier;
         $supplier_data = $_supplier->where('id', $check_data['supplier_id'])->field('supplier_name')->find();
-        empty($supplier_data) && $this->error(__('供应商不存在'), [], 416);
+        empty($supplier_data) && $this->error(__('供应商不存在'), [], 403);
 
         //获取采购批次数据
         $batch = 0;
         if($check_data['batch_id']){
             $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
             $batch_data = $_purchase_batch->where('id', $check_data['batch_id'])->field('batch')->find();
-            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 417);
+            empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
         }
 
@@ -341,7 +342,7 @@ class Scm extends Api
     {
         $item_data = $this->request->request('item_data');
         $item_data = array_filter(json_decode($item_data,true));
-        empty($item_data) && $this->error(__('sku集合不能为空'), [], 418);
+        empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
 
         $do_type = $this->request->request('do_type');
         $is_error = $this->request->request('is_error');
@@ -350,8 +351,8 @@ class Scm extends Api
         $_check = new \app\admin\model\warehouse\Check;
         if($get_check_id){
             $row = $_check->get($get_check_id);
-            empty($row) && $this->error(__('质检单不存在'), [], 418);
-            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 418);
+            empty($row) && $this->error(__('质检单不存在'), [], 403);
+            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
 
             $check_id = $get_check_id;
             $purchase_id = $row['purchase_id'];
@@ -366,19 +367,19 @@ class Scm extends Api
         }else{
             $batch_id = $this->request->request('batch_id');
             $logistics_id = $this->request->request('logistics_id');
-            empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 418);
+            empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
             $check_order_number = $this->request->request('check_order_number');
-            empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 418);
+            empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 403);
 
             $purchase_id = $this->request->request('purchase_id');
-            empty($purchase_id) && $this->error(__('采购单ID不能为空'), [], 418);
+            empty($purchase_id) && $this->error(__('采购单ID不能为空'), [], 403);
 
             $supplier_id = $this->request->request('supplier_id');
-            empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 418);
+            empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 403);
 
             $replenish_id = $this->request->request('replenish_id');
-            empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 418);
+            empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
 
             //创建质检单
             $check_data = [
@@ -397,7 +398,7 @@ class Scm extends Api
             $check_id = $_check->id;
         }
 
-        false === $result && $this->error(__('提交失败'), [], 419);
+        false === $result && $this->error(__('提交失败'), [], 404);
 
         Db::startTrans();
         try {
@@ -413,7 +414,7 @@ class Scm extends Api
                     ->field('code')
                     ->find();
                 if(!empty($check_quantity['code'])){
-                    $this->error(__('合格条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 420);
+                    $this->error(__('合格条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
 
@@ -425,7 +426,7 @@ class Scm extends Api
                     ->field('code')
                     ->find();
                 if(!empty($check_unqualified['code'])){
-                    $this->error(__('不合格条形码:'.$check_unqualified['code'].' 已绑定,请移除'), [], 420);
+                    $this->error(__('不合格条形码:'.$check_unqualified['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
 
@@ -437,7 +438,7 @@ class Scm extends Api
                     ->field('code')
                     ->find();
                 if(!empty($check_sample)){
-                    $this->error(__('留样条形码:'.$check_sample['code'].' 已绑定,请移除'), [], 420);
+                    $this->error(__('留样条形码:'.$check_sample['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
 
@@ -521,13 +522,13 @@ class Scm extends Api
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 421);
+            $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 422);
+            $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 423);
+            $this->error($e->getMessage(), [], 408);
         }
 
         $this->success('提交成功', [],200);
@@ -543,15 +544,15 @@ class Scm extends Api
     public function quality_cancel()
     {
         $check_id = $this->request->request('check_id');
-        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 424);
+        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         //检测质检单状态
         $_check = new \app\admin\model\warehouse\Check;
         $row = $_check->get($check_id);
-        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 425);
+        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
         $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>4]);
-        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 426);
+        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
     }
 
     /**
@@ -565,18 +566,18 @@ class Scm extends Api
     public function quality_examine()
     {
         $check_id = $this->request->request('check_id');
-        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 427);
+        empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('审核类型不能为空'), [], 427);
+        empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
 
         //检测质检单状态
         $_check = new \app\admin\model\warehouse\Check;
         $row = $_check->get($check_id);
-        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 428);
+        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
         $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>$do_type]);
-        false === $res && $this->error(__('审核失败'), [], 429);
+        false === $res && $this->error(__('审核失败'), [], 404);
 
         //审核通过关联操作
         if ($do_type == 2) {
@@ -695,13 +696,13 @@ class Scm extends Api
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 430);
+                $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 431);
+                $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 432);
+                $this->error($e->getMessage(), [], 408);
             }
         }
 
@@ -733,8 +734,8 @@ class Scm extends Api
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
 
-        empty($page) && $this->error(__('Page can not be empty'), [], 406);
-        empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
+        empty($page) && $this->error(__('Page can not be empty'), [], 403);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
 
         $where = [];
         if($logistics_number){
@@ -809,12 +810,12 @@ class Scm extends Api
     public function logistics_sign()
     {
         $logistics_id = $this->request->request('logistics_id');
-        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 433);
+        empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
         //检测质检单状态
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
         $row = $_logistics_info->get($logistics_id);
-        (0 != $row['status'] || 1 != $row['type']) && $this->error(__('只有未签收状态才能操作'), [], 434);
+        (0 != $row['status'] || 1 != $row['type']) && $this->error(__('只有未签收状态才能操作'), [], 405);
 
         //签收关联操作
         Db::startTrans();
@@ -825,7 +826,7 @@ class Scm extends Api
                 'status'=>1
             ];
             $res = $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$logistics_id])->save($logistics_save);
-            false === $res && $this->error(__('签收失败'), [], 435);
+            false === $res && $this->error(__('签收失败'), [], 404);
 
             //签收成功时更改采购单签收状态
             $count = $_logistics_info->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
@@ -937,16 +938,86 @@ class Scm extends Api
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 436);
+            $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 437);
+            $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 438);
+            $this->error($e->getMessage(), [], 408);
         }
 
         $this->success('签收成功', [],200);
+    }
+
+    /**
+     * 出库单列表
+     *
+     * @参数 string query  查询内容
+     * @参数 int status  状态：0新建 1待审核 2 已审核 3已拒绝 4已取消
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author lzh
+     * @return mixed
+     */
+    public function out_stock_list()
+    {
+        $query = $this->request->request('query');
+        $status = $this->request->request('status');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 403);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
+
+        $where = [];
+        if($query){
+            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
+        }
+        if($status){
+            $where['a.status'] = $status;
+        }
+        if($start_time && $end_time){
+            $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        //获取出库单列表数据
+        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $list = $_out_stock
+            ->alias('a')
+            ->where($where)
+            ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id')
+            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.check_id','left')
+            ->order('a.createtime', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+
+        //获取出库分类数据
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $type_list = $_out_stock_type
+            ->where('is_del', 1)
+            ->column('name','id')
+        ;
+
+        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
+        foreach($list as $key=>$value){
+            $list[$key]['status'] = $status[$value['status']];
+            $list[$key]['type_name'] = $type_list[$value['type_id']];
+            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['detail_show'] = 1 < $value['status'] ? 1 : 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+        }
+
+        $this->success('', ['list' => $list],200);
     }
 
     /**
@@ -988,7 +1059,7 @@ class Scm extends Api
                 ->where('is_del', 1)
                 ->find()
             ;
-            0 != $info['status'] && $this->error(__('只有新建状态才能编辑'), [], 434);
+            0 != $info['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
             unset($info['status']);
 
             //获取出库单商品数据
@@ -1038,14 +1109,14 @@ class Scm extends Api
     public function out_stock_submit()
     {
         $type_id = $this->request->request('type_id');
-        empty($type_id) && $this->error(__('出库分类ID不能为空'), [], 418);
+        empty($type_id) && $this->error(__('出库分类ID不能为空'), [], 403);
 
         $platform_id = $this->request->request('platform_id');
-        empty($platform_id) && $this->error(__('平台ID不能为空'), [], 418);
+        empty($platform_id) && $this->error(__('平台ID不能为空'), [], 403);
 
         $item_data = $this->request->request('item_data');
         $item_data = array_filter(json_decode($item_data,true));
-        empty($item_data) && $this->error(__('sku集合不能为空'), [], 418);
+        empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
 
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
@@ -1053,8 +1124,8 @@ class Scm extends Api
         $_out_stock = new \app\admin\model\warehouse\Outstock;
         if($get_out_stock_id){
             $row = $_out_stock->get($get_out_stock_id);
-            empty($row) && $this->error(__('出库单不存在'), [], 418);
-            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 418);
+            empty($row) && $this->error(__('出库单不存在'), [], 403);
+            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
 
             //更新出库单
             $out_stock_data = [
@@ -1066,7 +1137,7 @@ class Scm extends Api
             $out_stock_id = $get_out_stock_id;
         }else{
             $out_stock_number = $this->request->request('out_stock_number');
-            empty($out_stock_number) && $this->error(__('出库单号不能为空'), [], 418);
+            empty($out_stock_number) && $this->error(__('出库单号不能为空'), [], 403);
 
             //创建出库单
             $out_stock_data = [
@@ -1081,11 +1152,11 @@ class Scm extends Api
             $out_stock_id = $_out_stock->id;
         }
 
-        false === $result && $this->error(__('提交失败'), [], 419);
+        false === $result && $this->error(__('提交失败'), [], 404);
 
         Db::startTrans();
         try {
-            count($item_data) != count(array_unique(array_column($item_data,'sku'))) && $this->error(__('sku重复，请检查'), [], 419);
+            count($item_data) != count(array_unique(array_column($item_data,'sku'))) && $this->error(__('sku重复，请检查'), [], 405);
 
             //获取各站点虚拟仓库存
             $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -1096,8 +1167,8 @@ class Scm extends Api
 
             //校验各站点虚拟仓库存
             foreach ($item_data as $key => $value) {
-                empty($stock_list[$value['sku']]) && $this->error(__('sku: '.$value['sku'].' 没有同步至对应平台'), [], 418);
-                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 418);
+                empty($stock_list[$value['sku']]) && $this->error(__('sku: '.$value['sku'].' 没有同步至对应平台'), [], 405);
+                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 405);
             }
 
             //检测条形码是否已绑定
@@ -1111,7 +1182,7 @@ class Scm extends Api
                     ->field('code')
                     ->find();
                 if(!empty($check_quantity['code'])){
-                    $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 420);
+                    $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
                 $item_data[$key]['sku_agg'] = $sku_agg;
@@ -1145,15 +1216,15 @@ class Scm extends Api
             }
 
             Db::commit();
-        }  catch (ValidateException $e) {
+        } catch (ValidateException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 421);
+            $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 422);
+            $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             Db::rollback();
-            $this->error($e->getMessage(), [], 423);
+            $this->error($e->getMessage(), [], 408);
         }
 
         $this->success('提交成功', [],200);
@@ -1170,15 +1241,15 @@ class Scm extends Api
     public function out_stock_examine()
     {
         $out_stock_id = $this->request->request('out_stock_id');
-        empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 427);
+        empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
 
         $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('审核类型不能为空'), [], 427);
+        empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
 
         //检测出库单状态
         $_out_stock = new \app\admin\model\warehouse\Outstock;
         $row = $_out_stock->get($out_stock_id);
-        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 428);
+        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
         //审核通过扣减库存
         if ($do_type == 2) {
@@ -1199,7 +1270,7 @@ class Scm extends Api
 
             //校验各站点虚拟仓库存
             foreach ($item_data as $key => $value) {
-                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 418);
+                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 405);
             }
 
             Db::startTrans();
@@ -1235,18 +1306,39 @@ class Scm extends Api
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 430);
+                $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 431);
+                $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
                 Db::rollback();
-                $this->error($e->getMessage(), [], 432);
+                $this->error($e->getMessage(), [], 408);
             }
         }
 
         $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>$do_type]);
-        false === $res ? $this->error(__('审核失败'), [], 429) : $this->success('审核成功', [],200);
+        false === $res ? $this->error(__('审核失败'), [], 404) : $this->success('审核成功', [],200);
+    }
+
+    /**
+     * 取消出库
+     *
+     * @参数 int out_stock_id  出库单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function out_stock_cancel()
+    {
+        $out_stock_id = $this->request->request('out_stock_id');
+        empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
+
+        //检测出库单状态
+        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $row = $_out_stock->get($out_stock_id);
+        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
+
+        $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>4]);
+        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
     }
 
 }
