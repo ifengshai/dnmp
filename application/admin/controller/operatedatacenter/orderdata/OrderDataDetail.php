@@ -56,7 +56,7 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }else{
@@ -66,7 +66,7 @@ class OrderDataDetail extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $map['day_date'] = ['between', [$start,$end]];
+                $map['created_at'] = ['between', [$start,$end]];
             }
             if($filter['order_platform']){
                 unset($filter['order_platform']);
@@ -75,15 +75,19 @@ class OrderDataDetail extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $order_model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->field('entity_id,increment_id,created_at,base_grand_total,base_shipping_amount,status,store_id,protect_code,shipping_method,customer_email,customer_id,base_discount_amount')
                 ->select();
             $list = collection($list)->toArray();
+            $map['order_type'] = 1;
+            $map['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $data = array();
             $i = 0;
             foreach ($list as $key=>$value){
