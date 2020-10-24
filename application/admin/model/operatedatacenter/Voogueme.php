@@ -369,7 +369,8 @@ class Voogueme extends Model
                 }
             }
 
-            $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            // $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $wheres['created_at'] = ['<', $createat[0].' '.$createat[1]];
             foreach ($new_arr as $key=>$val){
                 //判断之前是否有这些订单
                 $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
