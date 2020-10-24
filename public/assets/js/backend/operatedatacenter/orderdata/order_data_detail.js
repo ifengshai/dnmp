@@ -87,12 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.fixed-table-toolbar').hide();
                 }
             })
-
-
             $(".btn-success").click(function(){
-                Controller.api.formatter.order_sales_data_line();
-                Controller.api.formatter.order_num_data_line();
-
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function(params) {
          
