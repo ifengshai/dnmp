@@ -950,7 +950,7 @@ class Scm extends Api
     }
 
     /**
-     * 新建/编辑出库单页面
+     * 新建/编辑/详情出库单页面
      *
      * @参数 int out_stock_id  出库单ID
      * @author lzh
@@ -999,6 +999,7 @@ class Scm extends Api
                 ->select()
             ;
 
+            //获取各站点虚拟仓库存
             $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
             $stock_list = $_item_platform_sku
                 ->where('platform_type', $info['platform_id'])
@@ -1020,6 +1021,232 @@ class Scm extends Api
         }
 
         $this->success('', ['type_list' => $type_list,'site_list' => $site_list,'info' => $info],200);
+    }
+
+    /**
+     * 新建/编辑出库单提交
+     *
+     * @参数 int out_stock_id  出库单ID
+     * @参数 string out_stock_number  出库单号
+     * @参数 int do_type  提交类型：1提交，2保存
+     * @参数 int type_id  出库分类ID
+     * @参数 int platform_id  平台ID
+     * @参数 json item_data  sku集合
+     * @author lzh
+     * @return mixed
+     */
+    public function out_stock_submit()
+    {
+        $type_id = $this->request->request('type_id');
+        empty($type_id) && $this->error(__('出库分类ID不能为空'), [], 418);
+
+        $platform_id = $this->request->request('platform_id');
+        empty($platform_id) && $this->error(__('平台ID不能为空'), [], 418);
+
+        $item_data = $this->request->request('item_data');
+        $item_data = array_filter(json_decode($item_data,true));
+        empty($item_data) && $this->error(__('sku集合不能为空'), [], 418);
+
+        $do_type = $this->request->request('do_type');
+        $get_out_stock_id = $this->request->request('out_stock_id');
+
+        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        if($get_out_stock_id){
+            $row = $_out_stock->get($get_out_stock_id);
+            empty($row) && $this->error(__('出库单不存在'), [], 418);
+            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 418);
+
+            //更新出库单
+            $out_stock_data = [
+                'type_id'=>$type_id,
+                'platform_id'=>$platform_id,
+                'status'=>1 == $do_type ?: 0
+            ];
+            $result = $row->allowField(true)->save($out_stock_data);
+            $out_stock_id = $get_out_stock_id;
+        }else{
+            $out_stock_number = $this->request->request('out_stock_number');
+            empty($out_stock_number) && $this->error(__('出库单号不能为空'), [], 418);
+
+            //创建出库单
+            $out_stock_data = [
+                'out_stock_number'=>$out_stock_number,
+                'type_id'=>$type_id,
+                'platform_id'=>$platform_id,
+                'status'=>1 == $do_type ?: 0,
+                'create_person'=>$this->auth->nickname,
+                'createtime'=>date('Y-m-d H:i:s')
+            ];
+            $result = $_out_stock->allowField(true)->save($out_stock_data);
+            $out_stock_id = $_out_stock->id;
+        }
+
+        false === $result && $this->error(__('提交失败'), [], 419);
+
+        Db::startTrans();
+        try {
+            count($item_data) != count(array_unique(array_column($item_data,'sku'))) && $this->error(__('sku重复，请检查'), [], 419);
+
+            //获取各站点虚拟仓库存
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $stock_list = $_item_platform_sku
+                ->where('platform_type', $platform_id)
+                ->column('stock','sku')
+            ;
+
+            //校验各站点虚拟仓库存
+            foreach ($item_data as $key => $value) {
+                empty($stock_list[$value['sku']]) && $this->error(__('sku: '.$value['sku'].' 没有同步至对应平台'), [], 418);
+                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 418);
+            }
+
+            //检测条形码是否已绑定
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $where['out_stock_id'] = [['>',0], ['neq',$out_stock_id]];
+            foreach ($item_data as $key => $value) {
+                $sku_agg = array_unique(array_filter(explode(',',$value['sku_agg'])));
+                $where['code'] = ['in',$sku_agg];
+                $check_quantity = $_product_bar_code_item
+                    ->where($where)
+                    ->field('code')
+                    ->find();
+                if(!empty($check_quantity['code'])){
+                    $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 420);
+                    exit;
+                }
+                $item_data[$key]['sku_agg'] = $sku_agg;
+            }
+
+            //批量创建或更新出库单商品
+            $_out_stock_item = new \app\admin\model\warehouse\OutstockItem;
+            foreach ($item_data as $key => $value) {
+                $item_save = [
+                    'out_stock_num'=>$value['out_stock_num']
+                ];
+                if($get_out_stock_id){//更新
+                    $where = ['sku' => $value['sku'],'out_stock_id' => $out_stock_id];
+                    $_out_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+
+                    //清除出库单旧条形码数据
+                    $code_clear = [
+                        'out_stock_id' => 0
+                    ];
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, $where)->save($code_clear);
+                }else{//新增
+                    $item_save['out_stock_id'] = $out_stock_id;
+                    $item_save['sku'] = $value['sku'];
+                    $_out_stock_item->allowField(true)->save($item_save);
+                }
+
+                //绑定条形码
+                foreach($value['sku_agg'] as $v){
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save(['out_stock_id'=>$out_stock_id]);
+                }
+            }
+
+            Db::commit();
+        }  catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 421);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 422);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 423);
+        }
+
+        $this->success('提交成功', [],200);
+    }
+
+    /**
+     * 审核出库单
+     *
+     * @参数 int out_stock_id  出库单ID
+     * @参数 int do_type  2审核通过，3审核拒绝
+     * @author lzh
+     * @return mixed
+     */
+    public function out_stock_examine()
+    {
+        $out_stock_id = $this->request->request('out_stock_id');
+        empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 427);
+
+        $do_type = $this->request->request('do_type');
+        empty($do_type) && $this->error(__('审核类型不能为空'), [], 427);
+
+        //检测出库单状态
+        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $row = $_out_stock->get($out_stock_id);
+        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 428);
+
+        //审核通过扣减库存
+        if ($do_type == 2) {
+            //获取出库单商品数据
+            $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
+            $item_data = $_out_stock_item
+                ->field('sku,out_stock_num')
+                ->where('out_stock_id', $out_stock_id)
+                ->select()
+            ;
+
+            //获取各站点虚拟仓库存
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $stock_list = $_item_platform_sku
+                ->where('platform_type', $row['platform_id'])
+                ->column('stock','sku')
+            ;
+
+            //校验各站点虚拟仓库存
+            foreach ($item_data as $key => $value) {
+                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 418);
+            }
+
+            Db::startTrans();
+            try {
+                $stock_data = [];
+                //出库扣减库存
+                $_item = new \app\admin\model\itemmanage\Item;
+                foreach ($item_data as $key => $value) {
+                    //扣除商品表总库存
+                    $sku = $value['sku'];
+                    $_item->where(['sku'=>$sku])->dec('stock', $value['out_stock_num'])->dec('available_stock', $value['out_stock_num'])->update();
+
+                    //扣减对应平台sku库存
+                    $_item_platform_sku->where(['sku' => $sku, 'platform_type' => $row['platform_id']])->dec('stock', $value['out_stock_num'])->update();
+
+                    $stock_data[] = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $sku,
+                        'public_id'                 => $value['out_stock_id'],
+                        'stock_change'              => -$value['out_stock_num'],
+                        'available_stock_change'    => -$value['out_stock_num'],
+                        'create_person'             => $this->auth->nickname,
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '出库单减少总库存,减少可用库存'
+                    ];
+                }
+
+                //库存变动日志
+                $_stock_log = new \app\admin\model\StockLog;
+                $_stock_log->allowField(true)->saveAll($stock_data);
+
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 430);
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 431);
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 432);
+            }
+        }
+
+        $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>$do_type]);
+        false === $res ? $this->error(__('审核失败'), [], 429) : $this->success('审核成功', [],200);
     }
 
 }
