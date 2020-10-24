@@ -183,7 +183,7 @@ class OrderDataView extends Backend
             $order_where['oa.address_type'] = 'shipping';
             $order_where['o.order_type'] = 1;
             //获取所有的订单的国家
-            $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
+            $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->order('count desc')->select();
             $arr = array();
             foreach ($country_arr as $key=>$value){
                 $arr[$key][] = $value['count'];
