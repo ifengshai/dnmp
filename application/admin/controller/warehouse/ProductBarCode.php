@@ -270,7 +270,7 @@ EOF;
                 return $this->selectpage();
             }
 
-            $map = [];
+            $map['check_id'] = ['>',0];
             $filter = json_decode($this->request->get('filter'), true);
             $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
             //检测采购单号
