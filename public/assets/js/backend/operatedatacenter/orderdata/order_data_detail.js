@@ -21,14 +21,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'increment_id',
                 sortName: 'increment_id',
+                search: false,//通用搜索
+                commonSearch: false,
+                showToggle: false,
+                showColumns: false,
                 columns: [
                     [
                     
-                        {field: 'increment_id', title: __('订单编号')},
-                        {field: 'created_at', title: __('订单时间')},
-                        {field: 'base_grand_total', title: __('订单金额')},
-                        {field: 'base_shipping_amount', title: __('邮费')},
-                        {field: 'status', title: __('订单状态')},
+                        {field: 'increment_id', title: __('订单编号'),visible: false},
+                        {field: 'created_at', title: __('订单时间'),visible: false},
+                        {field: 'base_grand_total', title: __('订单金额'),visible: false},
+                        {field: 'base_shipping_amount', title: __('邮费'),visible: false},
+                        {field: 'status', title: __('订单状态'),visible: false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'store_id', title: __('设备类型'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange'}, searchList: { 1: 'PC', 4: 'M', 5: 'IOS', 6: 'Android'}, formatter: Table.api.formatter.store_id,visible: false},
                         {field: 'protect_code',title: __('使用的code码'),visible: false},
@@ -52,24 +56,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'register_email',title: __('注册邮箱'),visible: false},
                         {field: 'work_list_num',title: __('工单数'),visible: false},
                     ]
-                ]
+                ],
+                onLoadSuccess: function (data) {
+                    $('.fixed-table-pagination').hide()
+                    $('.fixed-table-toolbar').hide()
+                }
+
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
-            $('#table tr').find(`th`).hide();
-            $('#table tr').find(`td`).hide();
+
+
             $('.nav-choose ul li ul li').click(function(e){
-                var clickNum = $(e.target).index();
-                if ($(e.target).children('input').prop('checked')) {
-                    $(e.target).children('input').prop('checked',false)
-                    $('#table tr').find(`th:eq(${clickNum})`).hide();
-                    $('#table tr').find(`td:eq(${clickNum})`).hide();
-                } else {
-                    $(e.target).children('input').prop('checked',true)
-                    $('#table tr').find(`th:eq(${clickNum})`).show();
-                    $('#table tr').find(`td:eq(${clickNum})`).show();
+                var data_name = $(this).attr('data-name');
+
+                if($(this).children('input').prop('checked')){
+                    $(this).children('input').prop('checked',false)
+                    table.bootstrapTable("hideColumn", data_name);
+                } else{
+                    $(this).children('input').prop('checked',true)
+                    table.bootstrapTable("showColumn", data_name);
+                }
+
+                if ($('#table thead tr').html() != '') {
+                    $('.fixed-table-pagination').show();
+                    $('.fixed-table-toolbar').show();
+                }
+                if ($('#table thead tr').html() == '') {
+                    $('.fixed-table-pagination').hide();
+                    $('.fixed-table-toolbar').hide();
                 }
             })
+
+
             $(".btn-success").click(function(){
                 Controller.api.formatter.order_sales_data_line();
                 Controller.api.formatter.order_num_data_line();

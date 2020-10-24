@@ -815,7 +815,7 @@ class Voogueme extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 2, 'node_type' => ['<', $data['node_type']]])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();

@@ -30,10 +30,14 @@ class SkuDetail extends Backend
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['p.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
+                if(isset($filter['time_str'])){
+                    unset($filter['time_str']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $map['p.created_at'] = ['between', [$start,$end]];
@@ -51,21 +55,24 @@ class SkuDetail extends Backend
             }else{
                 $site = 1;
             }
+            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
             if($site == 2){
                 $order_model = Db::connect('database.db_voogueme');
+
             }elseif($site == 3){
                 $order_model = Db::connect('database.db_nihao');
+                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
             }else{
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-
+            $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
                 ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field('p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price')
+                ->field($field)
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -74,7 +81,7 @@ class SkuDetail extends Backend
             $list = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
                 ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field('p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price')
+                ->field($field)
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -107,7 +114,7 @@ class SkuDetail extends Backend
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
-                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 $order_where['o.created_at'] = ['lt',$createat[0]];
             } else{
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -126,7 +133,7 @@ class SkuDetail extends Backend
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['o.customer_id'] = ['>',0];
             $map['i.sku'] = $params['sku'];
-
+            $map['o.order_type'] = 1;
             $customer_ids = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->column('distinct o.customer_id');
             $first_shopping_num = 0;
             foreach ($customer_ids as $val){
@@ -162,6 +169,7 @@ class SkuDetail extends Backend
                     $again_buy_num2++;
                 }
             }
+
             $again_buy_num = $again_buy_num1+$again_buy_num2;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
@@ -271,9 +279,10 @@ class SkuDetail extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['p.sku'] = $sku;
+        $where['o.order_type'] = 1;
         if($flag){
             $map['p.prescription_type'] = $flag;
             $count = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where($map)->count();
@@ -283,3 +292,13 @@ class SkuDetail extends Backend
         return $count;
     }
 }
+
+
+
+
+
+
+
+
+
+

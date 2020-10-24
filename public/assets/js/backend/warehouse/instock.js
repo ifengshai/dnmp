@@ -196,19 +196,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 }
                 
             });
-            // 导入按钮事件
-            Upload.api.plupload($('.btn-import'), function (data, ret) {
-                Fast.api.ajax({
-
-                    url: 'warehouse/instock/import',
-                    data: {file: data.url},
-                }, function (data, ret) {
-                    layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
-                        location.reload();
-                    });
-                });
-            });
-
+           
         },
         add: function () {
             Controller.api.bindevent();
@@ -227,6 +215,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
         },
         edit: function () {
             Controller.api.bindevent();
+
+            
+            //删除商品数据
+            $(document).on('click', '.btn-del', function () {
+                var _this = $(this);
+                var id = $(this).parent().parent().find('.item_id').val();
+                if (id) {
+                    Layer.confirm(__('删除不可恢复，确定删除此数据吗?'), function () {
+                        _this.parent().parent().remove();
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/warehouse/instock/deleteItem',
+                            data: {id: id}
+                        }, function () {
+                            Layer.closeAll();
+                        });
+                    });
+                }
+            })
         },
         detail: function () {
             Controller.api.bindevent();

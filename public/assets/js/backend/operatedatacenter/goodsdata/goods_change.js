@@ -1,9 +1,127 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+// define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+//
+//     var Controller = {
+//         index: function () {
+//             // 初始化表格参数配置
+//             Table.api.init({
+//                 extend: {
+//                     index_url: 'operatedatacenter/goodsdata/goods_change/index' + location.search + '?time=' + Config.create_time + '&site=' + Config.label,
+//                     add_url: 'operatedatacenter/goodsdata/goods_change/add',
+//                     edit_url: 'operatedatacenter/goodsdata/goods_change/edit',
+//                     del_url: 'operatedatacenter/goodsdata/goods_change/del',
+//                     multi_url: 'operatedatacenter/goodsdata/goods_change/multi',
+//                     table: 'goods_change',
+//                 }
+//             });
+//             order_data_view();
+//             var table = $("#table");
+//
+//             // 初始化表格
+//             table.bootstrapTable({
+//                 url: $.fn.bootstrapTable.defaults.extend.index_url,
+//                 pk: 'id',
+//                 sortName: 'id',
+//                 columns: [
+//                     [
+//                         {checkbox: true},
+//                         {field: 'id', title: __('Id')},
+//                         {field: 'sku', title: __('sku')},
+//                         {field: 'sku_change', title: __('SKU转换')},
+//                         {field: 'cart_num', title: __('购物车数量')},
+//                         {field: 'order_num', title: __('订单成功数')},
+//                         {field: 'sku_row_total', title: __('订单金额')},
+//                         {field: 'cart_change', title: __('购物车转化率')},
+//                         {field: 'now_pricce', title: __('售价')},
+//                         {field: 'day_date', title: __('更新时间')},
+//                         {field: 'status', title: __('状态'),
+//                             custom: { 1: 'success', 2: 'blue'},
+//                             searchList: { 1: '上架', 2: '下架'},
+//                             formatter: Table.api.formatter.status},
+//                         {field: 'glass_num', title: __('销售副数')},
+//                         {field: 'sku_grand_total', title: __('实际支付的销售额')},
+//                         {field: 'single_price', title: __('副单价')},
+//                         {field: 'stock', title: __('虚拟库存')},
+//                         {field: 'on_way_stock', title: __('在途库存')},
+//                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+//                     ]
+//                 ]
+//             });
+//
+//             // 为表格绑定事件
+//             Table.api.bindevent(table);
+//         },
+//         add: function () {
+//             Controller.api.bindevent();
+//         },
+//         edit: function () {
+//             Controller.api.bindevent();
+//         },
+//         api: {
+//             formatter: {
+//                 daterangepicker: function (form) {
+//                     //绑定日期时间元素事件
+//                     if ($(".datetimerange", form).size() > 0) {
+//                         require(['bootstrap-daterangepicker'], function () {
+//                             var ranges = {};
+//                             ranges[__('Today')] = [Moment().startOf('day'), Moment().endOf('day')];
+//                             ranges[__('Yesterday')] = [Moment().subtract(1, 'days').startOf('day'), Moment().subtract(1, 'days').endOf('day')];
+//                             ranges[__('Last 7 Days')] = [Moment().subtract(6, 'days').startOf('day'), Moment().endOf('day')];
+//                             ranges[__('Last 30 Days')] = [Moment().subtract(29, 'days').startOf('day'), Moment().endOf('day')];
+//                             ranges[__('This Month')] = [Moment().startOf('month'), Moment().endOf('month')];
+//                             ranges[__('Last Month')] = [Moment().subtract(1, 'month').startOf('month'), Moment().subtract(1, 'month').endOf('month')];
+//                             var options = {
+//                                 timePicker: false,
+//                                 autoUpdateInput: false,
+//                                 timePickerSeconds: true,
+//                                 timePicker24Hour: true,
+//                                 autoApply: true,
+//                                 locale: {
+//                                     format: 'YYYY-MM-DD HH:mm:ss',
+//                                     customRangeLabel: __("Custom Range"),
+//                                     applyLabel: __("Apply"),
+//                                     cancelLabel: __("Clear"),
+//                                 },
+//                                 ranges: ranges,
+//                                 timePicker: true,
+//                                 timePickerIncrement: 1
+//                             };
+//                             var origincallback = function (start, end) {
+//                                 $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));
+//                                 $(this.element).trigger('blur');
+//                             };
+//                             $(".datetimerange", form).each(function () {
+//                                 var callback = typeof $(this).data('callback') == 'function' ? $(this).data('callback') : origincallback;
+//                                 $(this).on('apply.daterangepicker', function (ev, picker) {
+//                                     callback.call(picker, picker.startDate, picker.endDate);
+//                                 });
+//                                 $(this).on('cancel.daterangepicker', function (ev, picker) {
+//                                     $(this).val('').trigger('blur');
+//                                 });
+//                                 $(this).daterangepicker($.extend({}, options, $(this).data()), callback);
+//                             });
+//                         });
+//                     }
+//                 },
+//             },
+//             bindevent: function () {
+//                 Form.api.bindevent($("form[role=form]"));
+//             }
+//         }
+//     };
+//     return Controller;
+// });
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], function ($, undefined, Backend, Table, Form, EchartObj) {
 
     var Controller = {
         index: function () {
+            Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
+                // commonSearch: false,
+                // search: false,
+                // showExport: false,
+                // showColumns: false,
+                // showToggle: false,
                 extend: {
                     index_url: 'operatedatacenter/goodsdata/goods_change/index' + location.search + '?time=' + Config.create_time + '&site=' + Config.label,
                     add_url: 'operatedatacenter/goodsdata/goods_change/add',
@@ -13,9 +131,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     table: 'goods_change',
                 }
             });
-            order_data_view();
-            var table = $("#table");
 
+            var table = $("#table");
+            order_data_view();
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
@@ -33,7 +151,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'cart_change', title: __('购物车转化率')},
                         {field: 'now_pricce', title: __('售价')},
                         {field: 'day_date', title: __('更新时间')},
-                        {field: 'status', title: __('状态')},
+                        {field: 'status', title: __('状态'),
+                            custom: { 1: 'success', 2: 'blue'},
+                            searchList: { 1: '上架', 2: '下架'},
+                            formatter: Table.api.formatter.status},
                         {field: 'glass_num', title: __('销售副数')},
                         {field: 'sku_grand_total', title: __('实际支付的销售额')},
                         {field: 'single_price', title: __('副单价')},
@@ -43,7 +164,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -55,51 +175,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         api: {
             formatter: {
-                daterangepicker: function (form) {
-                    alert(111);
-                    //绑定日期时间元素事件
-                    if ($(".datetimerange", form).size() > 0) {
-                        require(['bootstrap-daterangepicker'], function () {
-                            var ranges = {};
-                            ranges[__('Today')] = [Moment().startOf('day'), Moment().endOf('day')];
-                            ranges[__('Yesterday')] = [Moment().subtract(1, 'days').startOf('day'), Moment().subtract(1, 'days').endOf('day')];
-                            ranges[__('Last 7 Days')] = [Moment().subtract(6, 'days').startOf('day'), Moment().endOf('day')];
-                            ranges[__('Last 30 Days')] = [Moment().subtract(29, 'days').startOf('day'), Moment().endOf('day')];
-                            ranges[__('This Month')] = [Moment().startOf('month'), Moment().endOf('month')];
-                            ranges[__('Last Month')] = [Moment().subtract(1, 'month').startOf('month'), Moment().subtract(1, 'month').endOf('month')];
-                            var options = {
-                                timePicker: false,
-                                autoUpdateInput: false,
-                                timePickerSeconds: true,
-                                timePicker24Hour: true,
-                                autoApply: true,
-                                locale: {
-                                    format: 'YYYY-MM-DD HH:mm:ss',
-                                    customRangeLabel: __("Custom Range"),
-                                    applyLabel: __("Apply"),
-                                    cancelLabel: __("Clear"),
-                                },
-                                ranges: ranges,
-                                timePicker: true,
-                                timePickerIncrement: 1
-                            };
-                            var origincallback = function (start, end) {
-                                $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));
-                                $(this.element).trigger('blur');
-                            };
-                            $(".datetimerange", form).each(function () {
-                                var callback = typeof $(this).data('callback') == 'function' ? $(this).data('callback') : origincallback;
-                                $(this).on('apply.daterangepicker', function (ev, picker) {
-                                    callback.call(picker, picker.startDate, picker.endDate);
-                                });
-                                $(this).on('cancel.daterangepicker', function (ev, picker) {
-                                    $(this).val('').trigger('blur');
-                                });
-                                $(this).daterangepicker($.extend({}, options, $(this).data()), callback);
-                            });
-                        });
-                    }
-                },
+
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -108,7 +184,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     };
     return Controller;
 });
-
 function order_data_view() {
     // var order_platform = $('#order_platform').val();
     // var time_str = $('#time_str').val();
