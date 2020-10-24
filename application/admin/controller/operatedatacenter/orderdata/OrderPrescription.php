@@ -108,6 +108,10 @@ class OrderPrescription extends Backend
             $sunglassesno_num1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$time_str);
             $sunglassesno_num2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
             $sunglassesno_num = $sunglassesno_num1+$sunglassesno_num2;
+        }elseif($site == 1){
+            $sunglassesno_num1 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
+            $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str);
+            $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
         }else{
             $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
         }
