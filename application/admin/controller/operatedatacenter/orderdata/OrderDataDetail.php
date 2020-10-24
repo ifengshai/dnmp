@@ -86,9 +86,6 @@ class OrderDataDetail extends Backend
                 ->field('entity_id,increment_id,created_at,base_grand_total,base_shipping_amount,status,store_id,protect_code,shipping_method,customer_email,customer_id,base_discount_amount')
                 ->select();
             $list = collection($list)->toArray();
-            $map['order_type'] = 1;
-            $map['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $data = array();
             $i = 0;
             foreach ($list as $key=>$value){
                 $data[$key]['increment_id'] = $value['increment_id'];
