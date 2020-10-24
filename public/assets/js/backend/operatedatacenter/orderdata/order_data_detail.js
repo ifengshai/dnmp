@@ -68,10 +68,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
              // 为表格绑定事件
             Table.api.bindevent(table);
 
-            console.log('ttttttttttttt');
-            console.log($("ul.pagination").html());
-
-            $(".pagination ul li a").click(function(){
+            $("div.pagination ul li a").click(function(){
                 $('.fixed-table-pagination').show()
                 $('.fixed-table-toolbar').show()
             })
