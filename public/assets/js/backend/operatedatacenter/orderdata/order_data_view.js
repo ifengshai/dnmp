@@ -268,8 +268,8 @@ function order_data_view() {
         $('#flatrate_nofree_order_num').text(flatrate_nofree.order_num);
         $('#flatrate_nofree_rate').text(flatrate_nofree.order_num_rate);
         $('#flatrate_nofree_order_total').text(flatrate_nofree.order_total);
-        $('#tablerate_free_order_num').text(tablerate_free.order_num_rate);
-        $('#tablerate_free_rate').text(tablerate_free.order_num);
+        $('#tablerate_free_order_num').text(tablerate_free.order_num);
+        $('#tablerate_free_rate').text(tablerate_free.order_num_rate);
         $('#tablerate_nofree_order_num').text(tablerate_nofree.order_num);
         $('#tablerate_nofree_rate').text(tablerate_nofree.order_num_rate);
         $('#tablerate_nofree_order_total').text(tablerate_nofree.order_total);
