@@ -20,15 +20,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'increment_id',
-                sortName: 'increment_id',
+                pk: 'entity_id',
+                sortName: 'entity_id',
                 search: false,//通用搜索
                 commonSearch: false,
                 showToggle: false,
                 showColumns: false,
                 columns: [
                     [
-                    
                         {field: 'increment_id', title: __('订单编号'),visible: false},
                         {field: 'created_at', title: __('订单时间'),visible: false},
                         {field: 'base_grand_total', title: __('订单金额'),visible: false},
