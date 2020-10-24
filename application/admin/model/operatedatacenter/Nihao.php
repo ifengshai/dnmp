@@ -1237,7 +1237,7 @@ class Nihao extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].'23:59:59']];
+        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;
