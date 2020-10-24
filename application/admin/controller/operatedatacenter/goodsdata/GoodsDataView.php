@@ -275,6 +275,7 @@ class GoodsDataView extends Backend
         }
     }
 
+    //商品销量概况
     public function ajax_top_data()
     {
         if ($this->request->isAjax()) {
