@@ -1,11 +1,11 @@
-define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj', 'echarts-theme', 'template','custom-css'], function ($, undefined, Backend, Datatable, Table,Form, EchartObj, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsobj', 'echarts-theme', 'template', 'custom-css'], function ($, undefined, Backend, Datatable, Table, Form, EchartObj, undefined, Template) {
 
     var Controller = {
         index: function () {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));
             var time = $('#create_time').val();
-            var platform = $('#c-order_platform').val();
+            var platform = $('#order_platform').val();
 
             Backend.api.ajax({
                 url: "operatedatacenter/goodsdata/goods_sale_detail/top_sale_list",
@@ -13,7 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     'time': time,
                     'platform': platform
                 }
-            },function (data, ret) {
+            }, function (data, ret) {
                 $('#frame_money').text(ret.rows.frame_money);
                 $('#frame_sales_num').text(ret.rows.frame_sales_num);
                 $('#frame_avg_money').text(ret.rows.frame_avg_money);
@@ -39,9 +39,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 $('#decoration_new_in_print_num').text(ret.rows.decoration_new_in_print_num);
                 $('#decoration_new_in_print_rate').text(ret.rows.decoration_new_in_print_rate);
 
-            },function(data,ret){
-                // alert(ret.msg);
-                return false;
             });
 
             // 初始化表格参数配置
@@ -66,7 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -75,18 +72,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'platformsku', title: __('平台SKU'), operate: false },
-                        { field: 'sku', title: __('SKU'), operate: false },
+                        {field: 'platformsku', title: __('平台SKU'), operate: false},
+                        {field: 'sku', title: __('SKU'), operate: false},
                         // { field: 'name', title: __('商品名称'), operate: false },
                         // { field: 'type_name', title: __('分类'), operate: false },
-                        { field: 'sales_num', title: __('销量'), operate: false },
-                        { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
-                        { field: 'grade', title: __('产品等级'), operate: false },
+                        {field: 'sales_num', title: __('销量'), operate: false},
+                        {field: 'available_stock', title: __('虚拟仓库存'), sortable: true, operate: false},
+                        {field: 'grade', title: __('产品等级'), operate: false},
 
                         {
                             field: 'is_up', title: __('平台上下架状态'), operate: false,
-                            custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '上架', 2: '下架' },
+                            custom: {1: 'success', 2: 'danger'},
+                            searchList: {1: '上架', 2: '下架'},
                             formatter: Table.api.formatter.status
                         },
 
@@ -97,19 +94,19 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-            $("#sku_submit").click(function(){
+            $("#sku_submit").click(function () {
                 var time = $('#create_time').val();
-                var platform = $('#c-order_platform').val();
-                Form.api.bindevent($("form[role=form]"));
-
-                table.bootstrapTable('refresh',params);
+                var platform = $('#order_platform').val();
+                // Form.api.bindevent($("form[role=form]"));
+                //
+                // table.bootstrapTable('refresh', params);
                 Backend.api.ajax({
                     url: "operatedatacenter/goodsdata/goods_sale_detail/top_sale_list",
                     data: {
                         'time': time,
                         'platform': platform
                     }
-                },function (data, ret) {
+                }, function (data, ret) {
                     $('#frame_money').text(ret.rows.frame_money);
                     $('#frame_sales_num').text(ret.rows.frame_sales_num);
                     $('#frame_avg_money').text(ret.rows.frame_avg_money);
@@ -135,7 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#decoration_new_in_print_num').text(ret.rows.decoration_new_in_print_num);
                     $('#decoration_new_in_print_rate').text(ret.rows.decoration_new_in_print_rate);
 
-                },function(data,ret){
+                }, function (data, ret) {
                     alert(ret.msg);
                     return false;
                 });
@@ -167,8 +164,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                                     cancelLabel: __("Clear"),
                                 },
                                 ranges: ranges,
-                                timePicker : true,
-                                timePickerIncrement : 1
+                                timePicker: true,
+                                timePickerIncrement: 1
                             };
                             var origincallback = function (start, end) {
                                 $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));

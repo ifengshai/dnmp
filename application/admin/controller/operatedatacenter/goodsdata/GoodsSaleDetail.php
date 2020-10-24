@@ -408,11 +408,53 @@ class GoodsSaleDetail extends Backend
         Cache::set('Operationalreport_platformOrderInfo' . $platform . md5(serialize($map)), $arr, 7200);
         return $arr;
     }
+    public function index()
+    {
+        $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        if (empty($orderPlatform)) {
+            $this->error('您没有权限访问', 'general/profile?ref=addtabs');
+        }
+        $create_time = input('create_time');
+        $label = input('order_platform', 1);
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            //默认当天
+            if ($params['create_time']) {
+                $time = explode(' ', $params['create_time']);
+                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $itemPlatformSku
+                // ->where($where)
+                // ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $itemPlatformSku
+                // ->where($where)
+                // ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            return json(["total" => $total,'rows' => $list]);
+        }
+        $this->assign('create_time', $create_time);
+        $this->assign('label', $label);
+        $this->assign('orderPlatformList',$orderPlatform);
+        $this->assignconfig('create_time', $create_time);
+        $this->assignconfig('label', $label);
+        return $this->view->fetch();
+    }
 
     /*
      * 商品销售情况首页数据
      */
-    public function index()
+    public function index1()
     {
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
         if (empty($orderPlatform)) {
@@ -485,6 +527,7 @@ class GoodsSaleDetail extends Backend
                 }
 
             }
+            dump($result);die;
             return json(['code' => 1, 'rows' => $result]);
         }
         $this->view->assign(
