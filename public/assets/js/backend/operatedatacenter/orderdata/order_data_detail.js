@@ -57,15 +57,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'work_list_num',title: __('工单数'),visible: false},
                     ]
                 ],
-                /* onLoadSuccess: function (data) {
+                onLoadSuccess: function (data) {
                     $('.fixed-table-pagination').hide()
                     $('.fixed-table-toolbar').hide()
-                } */
+                }
+                
+                
 
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
-
+            $(".pagination li").click(function(){
+                $('.fixed-table-pagination').show()
+                $('.fixed-table-toolbar').show()
+            })
 
             $('.nav-choose ul li ul li').click(function(e){
                 var data_name = $(this).attr('data-name');
