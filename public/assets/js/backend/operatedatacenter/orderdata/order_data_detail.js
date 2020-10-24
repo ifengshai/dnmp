@@ -57,10 +57,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'work_list_num',title: __('工单数'),visible: false},
                     ]
                 ],
-                onLoadSuccess: function (data) {
+                /* onLoadSuccess: function (data) {
                     $('.fixed-table-pagination').hide()
                     $('.fixed-table-toolbar').hide()
-                }
+                } */
 
             });
              // 为表格绑定事件
