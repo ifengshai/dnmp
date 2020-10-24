@@ -16,6 +16,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             var table = $("#table");
+            var flag = 0;
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
@@ -58,22 +59,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ],
                 onLoadSuccess: function (data) {
-                    $('.fixed-table-pagination').hide()
-                    $('.fixed-table-toolbar').hide()
+                    console.log(flag)
+                    if(flag <= 1){
+                        $('.fixed-table-pagination').hide()
+                        $('.fixed-table-toolbar').hide()
+                    }else{
+                        $('.fixed-table-pagination').show()
+                        $('.fixed-table-toolbar').show()
+                    }
+                    flag++;
                 }
-                
-                
-
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
-
-            $("ul.pagination li").click(function(){
-                console.log('aaaaaa');
-                $('.fixed-table-pagination').show()
-                $('.fixed-table-toolbar').show()
-            })
-
+            //2001-10-23 00:00:00 - 2020-10-23 00:00:00
             $('.nav-choose ul li ul li').click(function(e){
                 var data_name = $(this).attr('data-name');
 
@@ -86,8 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
 
                 if ($('#table thead tr').html() != '') {
-                    $('.fixed-table-pagination').show();
-                    $('.fixed-table-toolbar').show();
+                    flag = 2;
                 }
                 if ($('#table thead tr').html() == '') {
                     $('.fixed-table-pagination').hide();
