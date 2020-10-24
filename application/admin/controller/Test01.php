@@ -335,7 +335,7 @@ class Test01 extends Backend
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-22';
+        $data = '2020-10-23';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
@@ -385,7 +385,7 @@ class Test01 extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         set_time_limit(0);
         $data = date('Y-m-d');
-        $data = '2020-10-22';
+        $data = '2020-10-23';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -484,7 +484,7 @@ class Test01 extends Backend
         set_time_limit(0);
         Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $data = date('Y-m-d');
-        $data = '2020-10-22';
+        $data = '2020-10-23';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -562,7 +562,7 @@ class Test01 extends Backend
     public function test10()
     {
         set_time_limit(0);
-        // Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         $data = '2020-10-22';
         // $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
         // $skus = Db::name('datacenter_sku_day')->field('sku,glass_num,sales_num,platform_sku')->select();
