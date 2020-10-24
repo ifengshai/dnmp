@@ -36,7 +36,10 @@ class OrderDataDetail extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-
+            if($filter['one_time-operate']){
+                unset($filter['one_time-operate']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
