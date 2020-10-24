@@ -172,7 +172,7 @@ class GoodsDataView extends Backend
             //判断站点
             switch ($params['order_platform']) {
                 case 1:
-                    $goods_type = [1 => '光学镜', 2 => '太阳镜', 3 => '运动镜', 4 => '老花镜', 5 => '儿童镜', 6 => '配饰'];
+                    $goods_type = [1 => '光学镜', 2 => '太阳镜', 5 => '运动镜', 3 => '老花镜', 4 => '儿童镜', 6 => '配饰'];
                     // $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
                     $json['xcolumnData'] = $date_arr;
 
@@ -194,19 +194,19 @@ class GoodsDataView extends Backend
                         ],
                         [
                             'type' => 'line',
-                            'data' => array_values($arr[3] ? $arr[3] : $date_arrs),
+                            'data' => array_values($arr[5] ? $arr[5] : $date_arrs),
                             'name' => '运动镜',
                             'smooth' => true //平滑曲线
                         ],
                         [
                             'type' => 'line',
-                            'data' => array_values($arr[4] ? $arr[4] : $date_arrs),
+                            'data' => array_values($arr[3] ? $arr[3] : $date_arrs),
                             'name' => '老花镜',
                             'smooth' => true //平滑曲线
                         ],
                         [
                             'type' => 'line',
-                            'data' => array_values($arr[5] ? $arr[5] : $date_arrs),
+                            'data' => array_values($arr[4] ? $arr[4] : $date_arrs),
                             'name' => '儿童镜',
                             'smooth' => true //平滑曲线
                         ],
@@ -305,12 +305,13 @@ class GoodsDataView extends Backend
             $data_center_day = Db::name('datacenter_sku_day')->where(['site' => $plat])->where($map)->group('goods_type')->field('site,sum(order_num) as total_order_num,goods_type')->select();
             $data_center_day = array_column($data_center_day, null, 'goods_type');
 
-            //goods_type:1光学镜,2太阳镜,,3运动镜,4老花镜,5儿童镜,6配饰
+            // goods_type:1光学镜,2太阳镜,,3运动镜,4老花镜,5儿童镜,6配饰
+            //goods_type:1光学镜,2太阳镜,,3老花镜,4儿童镜,5运动镜,6配饰
             $glass_num = $data_center_day[1]['total_order_num'] ? $data_center_day[1]['total_order_num'] : 0;
             $sun_glass_num = $data_center_day[2]['total_order_num'] ? $data_center_day[2]['total_order_num'] : 0;
-            $run_glass_num = $data_center_day[3]['total_order_num'] ? $data_center_day[3]['total_order_num'] : 0;
-            $old_glass_num = $data_center_day[4]['total_order_num'] ? $data_center_day[4]['total_order_num'] : 0;
-            $son_glass_num = $data_center_day[5]['total_order_num'] ? $data_center_day[5]['total_order_num'] : 0;
+            $run_glass_num = $data_center_day[3]['total_order_num'] ? $data_center_day[5]['total_order_num'] : 0;
+            $old_glass_num = $data_center_day[4]['total_order_num'] ? $data_center_day[3]['total_order_num'] : 0;
+            $son_glass_num = $data_center_day[5]['total_order_num'] ? $data_center_day[4]['total_order_num'] : 0;
             $other_num = $data_center_day[6]['total_order_num'] ? $data_center_day[6]['total_order_num'] : 0;
             $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
         }
