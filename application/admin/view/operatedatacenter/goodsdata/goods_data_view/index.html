@@ -160,7 +160,7 @@
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
-                    <form id="form" action="{:url('index')}" class="form-commonsearch form-horizontal" role="form"
+                    <form id="form" class="form-commonsearch form-horizontal" role="form"
                         method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
@@ -183,7 +183,7 @@
                                 </div>
                                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <div class="col-sm-8 col-xs-offset-4">
-                                        <input type="submit" class="btn btn-success" value="提交">
+                                        <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
                                         <input type="reset" class="btn btn-default reset" value="重置"></div>
                                 </div>
                             </div>
@@ -199,15 +199,15 @@
                                     <div class="zeelool-div" style="width: 60%;height:100%;float: left;">
                                         <div class="u3431">
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="sun_glass_num">{$sun_glass_num}</span></p>
                                                 <p><span>太阳镜</span></p>
                                             </div>
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="glass_num">{$glass_num}</span></p>
                                                 <p><span>光学镜</span></p>
                                             </div>
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="run_glass_num">{$run_glass_num}</span></p>
                                                 <p><span>运动镜</span></p>
                                             </div>
 
@@ -215,15 +215,15 @@
 
                                         <div class="u3431">
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="old_glass_num">{$old_glass_num}</span></p>
                                                 <p><span>老花镜</span></p>
                                             </div>
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="son_glass_num">{$son_glass_num}</span></p>
                                                 <p><span>儿童镜</span></p>
                                             </div>
                                             <div class="u3431_text ">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="other_num">{$other_num}</span></p>
                                                 <p><span>配饰</span></p>
                                             </div>
 
@@ -232,15 +232,15 @@
                                     <div class="voogueme-div" style="width: 60%;height:100%;float: left;display: none;">
                                         <div class="u3431" style="height:100%;" >
                                             <div class="u3431_text" style="margin-top: 50px;">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="v_sun_glass_num">{$sun_glass_num}</span></p>
                                                 <p><span>太阳镜</span></p>
                                             </div>
                                             <div class="u3431_text" style="margin-top: 50px;">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="v_glass_num">{$glass_num}</span></p>
                                                 <p><span>平光镜</span></p>
                                             </div>
                                             <div class="u3431_text " style="margin-top: 50px;">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="v_other_num">{$other_num}</span></p>
                                                 <p><span>配饰</span></p>
                                             </div>
 
@@ -250,11 +250,11 @@
                                     <div class="nihao-div" style="width: 60%;height:100%;float: left;display: none;">
                                         <div class="u3431" style="height:100%;" >
                                             <div class="u3431_text" style="margin-top: 50px;">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="n_sun_glass_num">{$sun_glass_num}</span></p>
                                                 <p><span>太阳镜</span></p>
                                             </div>
                                             <div class="u3431_text" style="margin-top: 50px;">
-                                                <p><span style="color:#F04844;">1000</span></p>
+                                                <p><span style="color:#F04844;" id="n_glass_num">{$glass_num}</span></p>
                                                 <p><span>平光镜</span></p>
                                             </div>
                                            
@@ -266,7 +266,7 @@
                                         
                                         <div style="float: left;margin-top: 40px;line-height: 60px;">
                                             <div>
-                                                <p><span style="color:#F04844;font-size: 40px;">31000</span></p>
+                                                <p><span style="color:#F04844;font-size: 40px;" id="total_num">{$total_num}</span></p>
                                                 <p><span style="font-size: 40px;">总销量</span></p>
                                             </div>
                                         </div>
@@ -289,7 +289,7 @@
                             
                             <div class="col-lg-12">
                                 <p style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
-                                    镜框销量/客单价趋势</p>
+                                    镜框销量/副单价趋势</p>
                                 <div id="echart" style="float: left;height:400px;width:100%;"></div>
 
                             </div>
@@ -320,16 +320,16 @@
                                 <div>
                                     <table id="caigou-table" class="handle_table1" style="width:100%;">
                                         <tr>
-                                            <td colspan="2" style="font-size: 16px;font-weight:1000">产品等级分布</td>
-                                            <td colspan="2">
+                                            <td colspan="3" style="font-size: 16px;font-weight:1000">产品等级分布</td>
+                                            <td colspan="2" id="select_choose">
                                                 <select id="c-order_platform" data-rule="required" class="form-control"
                                                     name="order_platform">
-                                                    <option>平光镜</option>
-                                                    <option>太阳镜</option>
-                                                    <option>All</option>
+                                                    {foreach name="goods_type" item="vo" key="key"}
+                                                    <option value="{$key}">{$vo}</option>
+                                                    {/foreach}
                                                 </select>
                                             </td>
-                                            <td colspan="3"></td>
+                                            <td colspan="2"></td>
 
                                         </tr>
                                         <tr>
@@ -343,77 +343,84 @@
                                         </tr>
                                         <tr>
                                             <td>A+</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='a_plus_num'>{$a_plus.a_plus_num}</td>
+                                            <td id='a_plus_session_num'>{$a_plus.a_plus_session_num}</td>
+                                            <td id='a_plus_cart_num'>{$a_plus.a_plus_cart_num}</td>
+                                            <td id='a_plus_session_change'>{$a_plus.a_plus_session_change}</td>
+                                            <td id='a_plus_order_num'>{$a_plus.a_plus_order_num}</td>
+                                            <td id='a_plus_cart_change'>{$a_plus.a_plus_cart_change}</td>
 
                                         </tr>
                                         <tr>
                                             <td>A</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='a_num'>{$aa.a_plus_num}</td>
+                                            <td id='a_session_num'>{$aa.a_session_num}</td>
+                                            <td id='a_cart_num'>{$aa.a_cart_num}</td>
+                                            <td id='a_session_change'>{$aa.a_session_change}</td>
+                                            <td id='a_order_num'>{$aa.a_order_num}</td>
+                                            <td id='a_cart_change'>{$aa.a_cart_change}</td>
+
                                         </tr>
                                         <tr>
                                             <td>B</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='b_num'>{$bb.a_plus_num}</td>
+                                            <td id='b_session_num'>{$bb.b_session_num}</td>
+                                            <td id='b_cart_num'>{$bb.b_cart_num}</td>
+                                            <td id='b_session_change'>{$bb.b_session_change}</td>
+                                            <td id='b_order_num'>{$bb.b_order_num}</td>
+                                            <td id='b_cart_change'>{$bb.b_cart_change}</td>
+
                                         </tr>
                                         <tr>
                                             <td>C+</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id= 'c_plus_num'>{$c_plus.c_plus_num}</td>
+                                            <td id='c_plus_session_num'>{$c_plus.c_plus_session_num}</td>
+                                            <td id='c_plus_cart_num'>{$c_plus.c_plus_cart_num}</td>
+                                            <td id='c_plus_session_change'>{$c_plus.c_plus_session_change}</td>
+                                            <td id='c_plus_order_num'>{$c_plus.c_plus_order_num}</td>
+                                            <td id='c_plus_cart_change'>{$c_plus.c_plus_cart_change}</td>
+
                                         </tr>
                                         <tr>
                                             <td>C</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='c_num'>{$cc.c_num}</td>
+                                            <td id='c_session_num'>{$cc.c_session_num}</td>
+                                            <td id='c_cart_num'>{$cc.c_cart_num}</td>
+                                            <td id='c_session_change'>{$cc.c_session_change}</td>
+                                            <td id='c_order_num'>{$cc.c_order_num}</td>
+                                            <td id='c_cart_change'>{$cc.c_cart_change}</td>
+
                                         </tr>
                                         <tr>
                                             <td>D</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='d_num'>{$ddd.d_num}</td>
+                                            <td id='d_session_num'>{$ddd.d_session_num}</td>
+                                            <td id='d_cart_num'>{$ddd.d_cart_num}</td>
+                                            <td id='d_session_change'>{$ddd.d_session_change}</td>
+                                            <td id='d_order_num'>{$ddd.d_order_num}</td>
+                                            <td id='d_cart_change'>{$ddd.d_cart_change}</td>
+
                                         </tr>
                                         <tr>
                                             <td>E</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td id='e_num'>{$ee.e_num}</td>
+                                            <td id='e_session_num'>{$ee.e_session_num}</td>
+                                            <td id='e_cart_num'>{$ee.e_cart_num}</td>
+                                            <td id='e_session_change'>{$ee.e_session_change}</td>
+                                            <td id='e_order_num'>{$ee.e_order_num}</td>
+                                            <td id='e_cart_change'>{$ee.e_cart_change}</td>
                                         </tr>
                                         <tr>
-                                            <td>F</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
-                                            <td>123</td>
+                                            <td>总计</td>
+                                            <td id='f_num'>{$ff.f_num}</td>
+                                            <td id='f_session_num'>100%</td>
+                                            <td id='f_cart_num'>{$ff.f_cart_num}</td>
+                                            <td id='f_session_change'>100%</td>
+                                            <td id='f_order_num'>{$ff.f_order_num}</td>
+                                            <td id='f_cart_change'>{$ff.f_cart_change}</td>
                                         </tr>
+
+                                        
 
                                     </table>
                                 </div>

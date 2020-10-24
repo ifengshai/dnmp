@@ -33,10 +33,11 @@ class GoodsSaleDetail extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao;
 
     }
+
     /*
-     * 商品销售情况首页数据
-     */
-    public function index()
+ * 销量榜单列表
+ */
+    public function top_sale_list()
     {
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
         if (empty($orderPlatform)) {
@@ -409,86 +410,96 @@ class GoodsSaleDetail extends Backend
     }
 
     /*
-     * 销量榜单列表
+     * 商品销售情况首页数据
      */
-    public function top_sale_list()
+    public function index()
     {
+        $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        if (empty($orderPlatform)) {
+            $this->error('您没有权限访问', 'general/profile?ref=addtabs');
+        }
         $create_time = input('create_time');
-        $label = input('label', 1);
+        $label = input('order_platform', 1);
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             //默认当天默认7天数据
-            if ($params['time']) {
-                $time = explode(' ', $params['time']);
+            if ($params['create_time']) {
+                $time = explode(' ', $params['create_time']);
                 $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
-
             //列表
             $result = [];
-            if ($params['type'] == 'list') {
-                $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-                if ($params['site'] == 1) {
-                    //查询对应平台销量
-                    $list = $this->zeelool->getOrderSalesNum([], $map);
-                    //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(1);
-                } elseif ($params['site'] == 2) {
-                    //查询对应平台销量
-                    $list = $this->voogueme->getOrderSalesNum([], $map);
-                    //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(2);
-                } elseif ($params['site'] == 3) {
-                    //查询对应平台销量
-                    $list = $this->nihao->getOrderSalesNum([], $map);
-                    //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(3);
-                } elseif ($params['site'] == 4) {
-                    //查询对应平台销量
-                    $list = $this->meeloog->getOrderSalesNum([], $map);
-                    //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(4);
-                }elseif ($params['site'] == 5){
-                    //查询对应平台销量
-                    $list = $this->wesee->getOrderSalesNum([], $map);
-                    //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(5);
-                }
-                $productInfo = $this->item->getSkuInfo();
-                $list = $list ?? [];
-                $i = 0;
-                foreach ($list as $k => $v) {
-                    $result[$i]['platformsku'] = $k;
-                    $result[$i]['sales_num'] = $v;
-                    $result[$i]['sku'] = $skus[trim($k)]['sku'];
-                    $result[$i]['grade'] = $skus[trim($k)]['grade'];
-                    $result[$i]['is_up'] = $skus[trim($k)]['outer_sku_status'];
-                    $result[$i]['available_stock'] = $skus[trim($k)]['stock'];
-                    $result[$i]['name'] = $productInfo[$skus[trim($k)]['sku']]['name'];
-                    $result[$i]['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
-                    $i++;
-                }
+            // if ($params['type'] == 'list') {
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            if ($params['order_platform'] == 1) {
+                //查询对应平台销量
+                $list = $this->zeelool->getOrderSalesNum([], $map);
+                //查询对应平台商品SKU
+                $skus = $itemPlatformSku->getWebSkuAll(1);
+            } elseif ($params['order_platform'] == 2) {
+                //查询对应平台销量
+                $list = $this->voogueme->getOrderSalesNum([], $map);
+                //查询对应平台商品SKU
+                $skus = $itemPlatformSku->getWebSkuAll(2);
+            } elseif ($params['order_platform'] == 3) {
+                //查询对应平台销量
+                $list = $this->nihao->getOrderSalesNum([], $map);
+                //查询对应平台商品SKU
+                $skus = $itemPlatformSku->getWebSkuAll(3);
+            } elseif ($params['order_platform'] == 4) {
+                //查询对应平台销量
+                $list = $this->meeloog->getOrderSalesNum([], $map);
+                //查询对应平台商品SKU
+                $skus = $itemPlatformSku->getWebSkuAll(4);
+            } elseif ($params['order_platform'] == 5) {
+                //查询对应平台销量
+                $list = $this->wesee->getOrderSalesNum([], $map);
+                //查询对应平台商品SKU
+                $skus = $itemPlatformSku->getWebSkuAll(5);
             }
-            if(array_filter($result)>0){
-                $sortField = array_column($result,'available_stock');
+            $productInfo = $this->item->getSkuInfo();
+            $list = $list ?? [];
+            $i = 0;
+            foreach ($list as $k => $v) {
+                $result[$i]['platformsku'] = $k;
+                $result[$i]['sales_num'] = $v;
+                $result[$i]['sku'] = $skus[trim($k)]['sku'];
+                $result[$i]['grade'] = $skus[trim($k)]['grade'];
+                $result[$i]['is_up'] = $skus[trim($k)]['outer_sku_status'];
+                $result[$i]['available_stock'] = $skus[trim($k)]['stock'];
+                $result[$i]['name'] = $productInfo[$skus[trim($k)]['sku']]['name'];
+                $result[$i]['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
+                $i++;
+            }
+            // }
+            if (array_filter($result) > 0) {
+                $sortField = array_column($result, 'available_stock');
                 //可用库存倒叙排列
-                if(($params['sort'] == 'available_stock') && ($params['order'] == 'desc')){
-                    array_multisort($sortField,SORT_DESC,$result);
+                if (($params['sort'] == 'available_stock') && ($params['order'] == 'desc')) {
+                    array_multisort($sortField, SORT_DESC, $result);
                     //可用库存正序排列
-                }elseif(($params['sort'] == 'available_stock') && ($params['order'] == 'asc')){
-                    array_multisort($sortField,SORT_ASC,$result);
+                } elseif (($params['sort'] == 'available_stock') && ($params['order'] == 'asc')) {
+                    array_multisort($sortField, SORT_ASC, $result);
                 }
 
             }
-            return json(['code' => 1,'rows' => $result]);
+            return json(['code' => 1, 'rows' => $result]);
         }
+        $this->view->assign(
+            [
+                'orderPlatformList' => $orderPlatform,
+                'create_time' => $create_time,
+            ]
+        );
         $this->assign('create_time', $create_time);
         $this->assign('label', $label);
         $this->assignconfig('create_time', $create_time);
         $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
+
     public function ceshi()
     {
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
