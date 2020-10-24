@@ -250,6 +250,11 @@ class Scm extends Api
             }
         }
 
+        //默认合格、不合格、留样sku集合
+        array_walk($item_list, function (&$value, $k, $p) {
+            $value = array_merge($value, $p);
+        },['quantity_agg' => [],'unqualified_agg' => [],'sample_agg' => []]);
+
         //质检单所需数据
         $info =[
             'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
@@ -309,6 +314,81 @@ class Scm extends Api
             ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
+
+        //获取条形码数据
+        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $bar_code_list = $_product_bar_code_item
+            ->where(['check_id'=>$check_id])
+            ->field('sku,code,is_quantity,is_sample')
+            ->select();
+
+        //合格
+        $quantity_list = array_filter($bar_code_list,function($v){
+            if($v['is_quantity'] == 1){
+                return $v;
+            }
+        });
+
+        //不合格
+        $unqualified_list = array_filter($bar_code_list,function($v){
+            if($v['is_quantity'] == 2){
+                return $v;
+            }
+        });
+
+        //留样合格
+        $sample_list = array_filter($bar_code_list,function($v){
+            if($v['is_sample'] == 1){
+                return $v;
+            }
+        });
+
+        //拼接sku条形码数据
+        foreach($item_list as $key=>$value){
+            $quantity_agg = [];
+            $unqualified_agg = [];
+            $sample_agg = [];
+
+            //合格条形码集合
+            if(!empty($quantity_list)){
+                foreach($quantity_list as $val){
+                    if($value['sku'] == $val['sku']){
+                        $quantity_agg[] = [
+                            'code'=>$val['sku'],
+                            'is_new'=>0
+                        ];
+                    }
+                }
+            }
+
+            //不合格条形码集合
+            if(!empty($unqualified_list)){
+                foreach($unqualified_list as $val){
+                    if($value['sku'] == $val['sku']){
+                        $unqualified_agg[] = [
+                            'code'=>$val['sku'],
+                            'is_new'=>0
+                        ];
+                    }
+                }
+            }
+
+            //留样条形码集合
+            if(!empty($sample_list)){
+                foreach($sample_list as $val){
+                    if($value['sku'] == $val['sku']){
+                        $sample_agg[] = [
+                            'code'=>$val['sku'],
+                            'is_new'=>0
+                        ];
+                    }
+                }
+            }
+
+            $item_list[$key]['quantity_agg'] = $quantity_agg;
+            $item_list[$key]['unqualified_agg'] = $unqualified_agg;
+            $item_list[$key]['sample_agg'] = $sample_agg;
+        }
 
         //质检单所需数据
         $info =[
@@ -407,8 +487,12 @@ class Scm extends Api
             $where['check_id'] = [['>',0], ['neq',$check_id]];
             foreach ($item_data as $key => $value) {
                 //检测合格条形码
-                $quantity_agg = array_unique(array_filter(explode(',',$value['quantity_agg'])));
-                $where['code'] = ['in',$quantity_agg];
+                $quantity_code = array_column($value['quantity_agg'],'code');
+                count($value['quantity_agg']) != count(array_unique($quantity_code))
+                &&
+                $this->error(__('合格条形码有重复，请检查'), [], 405);
+
+                $where['code'] = ['in',$quantity_code];
                 $check_quantity = $_product_bar_code_item
                     ->where($where)
                     ->field('code')
@@ -419,8 +503,12 @@ class Scm extends Api
                 }
 
                 //检测不合格条形码
-                $unqualified_agg = array_unique(array_filter(explode(',',$value['unqualified_agg'])));
-                $where['code'] = ['in',$unqualified_agg];
+                $unqualified_code = array_column($value['unqualified_agg'],'code');
+                count($value['unqualified_agg']) != count(array_unique($unqualified_code))
+                &&
+                $this->error(__('不合格条形码有重复，请检查'), [], 405);
+
+                $where['code'] = ['in',$unqualified_code];
                 $check_unqualified = $_product_bar_code_item
                     ->where($where)
                     ->field('code')
@@ -431,8 +519,12 @@ class Scm extends Api
                 }
 
                 //检测留样条形码
-                $sample_agg = array_unique(array_filter(explode(',',$value['sample_agg'])));
-                $where['code'] = ['in',$sample_agg];
+                $sample_code = array_column($value['sample_agg'],'code');
+                count($value['sample_agg']) != count(array_unique($sample_code))
+                &&
+                $this->error(__('不合格条形码有重复，请检查'), [], 405);
+
+                $where['code'] = ['in',$sample_code];
                 $check_sample = $_product_bar_code_item
                     ->where($where)
                     ->field('code')
@@ -441,10 +533,6 @@ class Scm extends Api
                     $this->error(__('留样条形码:'.$check_sample['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
-
-                $item_data[$key]['quantity_agg'] = $quantity_agg;
-                $item_data[$key]['unqualified_agg'] = $unqualified_agg;
-                $item_data[$key]['sample_agg'] = $sample_agg;
             }
 
             //批量创建或更新质检单商品
@@ -473,14 +561,16 @@ class Scm extends Api
                     $where = ['sku' => $value['sku'],'check_id' => $check_id];
                     $_check_item->allowField(true)->isUpdate(true, $where)->save($item_save);
 
-                    //清除质检单旧条形码数据
-                    $code_clear = [
-                        'sku' => '',
-                        'purchase_id' => 0,
-                        'logistics_id' => 0,
-                        'check_id' => 0
-                    ];
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, $where)->save($code_clear);
+                    //质检单移除条形码
+                    if(!empty($value['remove_agg'])){
+                        $code_clear = [
+                            'sku' => '',
+                            'purchase_id' => 0,
+                            'logistics_id' => 0,
+                            'check_id' => 0
+                        ];
+                        $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$value['remove_agg']]])->save($code_clear);
+                    }
                 }else{//新增
                     $item_save['check_id'] = $check_id;
                     $item_save['sku'] = $value['sku'];
@@ -501,21 +591,33 @@ class Scm extends Api
                 ];
 
                 //绑定合格条形码
-                foreach($value['quantity_agg'] as $v){
-                    $code_item['is_quantity'] = 1;
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                if(!empty($value['quantity_agg'])){
+                    foreach($value['quantity_agg'] as $v){
+                        if($v['is_new'] == 1){
+                            $code_item['is_quantity'] = 1;
+                            $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                        }
+                    }
                 }
 
                 //绑定不合格条形码
-                foreach($value['unqualified_agg'] as $v){
-                    $code_item['is_quantity'] = 2;
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                if(!empty($value['unqualified_agg'])){
+                    foreach($value['unqualified_agg'] as $v){
+                        if($v['is_new'] == 1){
+                            $code_item['is_quantity'] = 2;
+                            $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                        }
+                    }
                 }
 
                 //绑定留样条形码
-                foreach($value['sample_agg'] as $v){
-                    $code_item['is_sample'] = 1;
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save($code_item);
+                if(!empty($value['sample_agg'])){
+                    foreach($value['sample_agg'] as $v){
+                        if($v['is_new'] == 1){
+                            $code_item['is_sample'] = 1;
+                            $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                        }
+                    }
                 }
             }
 
@@ -551,8 +653,32 @@ class Scm extends Api
         $row = $_check->get($check_id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
-        $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>4]);
-        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
+        Db::startTrans();
+        try {
+            //移除质检单条形码绑定关系
+            $code_clear = [
+                'sku' => '',
+                'purchase_id' => 0,
+                'logistics_id' => 0,
+                'check_id' => 0
+            ];
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
+
+            $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>4]);
+            $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
+        }
     }
 
     /**
@@ -570,6 +696,7 @@ class Scm extends Api
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
+        !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测质检单状态
         $_check = new \app\admin\model\warehouse\Check;
@@ -579,11 +706,11 @@ class Scm extends Api
         $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>$do_type]);
         false === $res && $this->error(__('审核失败'), [], 404);
 
-        //审核通过关联操作
-        if ($do_type == 2) {
-            Db::startTrans();
-            try {
-                //标记物流单检索为已创建质检单
+        Db::startTrans();
+        try {
+            //审核通过关联操作
+            if ($do_type == 2) {
+//标记物流单检索为已创建质检单
                 $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
                 $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$row['logistics_id']])->save(['is_check_order'=>1]);
 
@@ -692,18 +819,28 @@ class Scm extends Api
                         $_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
                 }
-
-                Db::commit();
-            } catch (ValidateException $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 406);
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 407);
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 408);
+            }else{//审核拒绝关联操作
+                //移除质检单条形码绑定关系
+                $code_clear = [
+                    'sku' => '',
+                    'purchase_id' => 0,
+                    'logistics_id' => 0,
+                    'check_id' => 0
+                ];
+                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+                $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
         }
 
         $this->success('审核成功', [],200);
@@ -1077,8 +1214,26 @@ class Scm extends Api
                 ->column('stock','sku')
             ;
 
+            //获取条形码数据
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $bar_code_list = $_product_bar_code_item
+                ->where(['out_stock_id'=>$out_stock_id])
+                ->field('sku,code')
+                ->select();
+
             foreach($item_data as $key=>$value){
-                $item_data[$key]['stock'] = $stock_list[$value['sku']];
+                $sku = $value['sku'];
+                //条形码列表
+                $sku_agg = array_filter($bar_code_list,function($v) use ($sku){
+                    if($v['sku'] == $sku){
+                        return $v;
+                    }
+                });
+                array_walk($sku_agg, function (&$value, $k, $p) {
+                    $value = array_merge($value, $p);
+                },['is_new' => 0]);
+                $item_data[$key]['sku_agg'] = $sku_agg;
+                $item_data[$key]['stock'] = $stock_list[$sku];
             }
 
             $info['item_data'] = $item_data;
@@ -1175,8 +1330,12 @@ class Scm extends Api
             $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
             $where['out_stock_id'] = [['>',0], ['neq',$out_stock_id]];
             foreach ($item_data as $key => $value) {
-                $sku_agg = array_unique(array_filter(explode(',',$value['sku_agg'])));
-                $where['code'] = ['in',$sku_agg];
+                $sku_code = array_column($value['sku_agg'],'code');
+                count($value['sku_agg']) != count(array_unique($sku_code))
+                &&
+                $this->error(__('条形码有重复，请检查'), [], 405);
+
+                $where['code'] = ['in',$sku_code];
                 $check_quantity = $_product_bar_code_item
                     ->where($where)
                     ->field('code')
@@ -1185,7 +1344,6 @@ class Scm extends Api
                     $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
                     exit;
                 }
-                $item_data[$key]['sku_agg'] = $sku_agg;
             }
 
             //批量创建或更新出库单商品
@@ -1198,11 +1356,13 @@ class Scm extends Api
                     $where = ['sku' => $value['sku'],'out_stock_id' => $out_stock_id];
                     $_out_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
 
-                    //清除出库单旧条形码数据
-                    $code_clear = [
-                        'out_stock_id' => 0
-                    ];
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, $where)->save($code_clear);
+                    //出库单移除条形码
+                    if(!empty($value['remove_agg'])){
+                        $code_clear = [
+                            'out_stock_id' => 0
+                        ];
+                        $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$value['remove_agg']]])->save($code_clear);
+                    }
                 }else{//新增
                     $item_save['out_stock_id'] = $out_stock_id;
                     $item_save['sku'] = $value['sku'];
@@ -1211,7 +1371,7 @@ class Scm extends Api
 
                 //绑定条形码
                 foreach($value['sku_agg'] as $v){
-                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v])->save(['out_stock_id'=>$out_stock_id]);
+                    $_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save(['out_stock_id'=>$out_stock_id]);
                 }
             }
 
@@ -1245,36 +1405,37 @@ class Scm extends Api
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
+        !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测出库单状态
         $_out_stock = new \app\admin\model\warehouse\Outstock;
         $row = $_out_stock->get($out_stock_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        //审核通过扣减库存
-        if ($do_type == 2) {
-            //获取出库单商品数据
-            $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
-            $item_data = $_out_stock_item
-                ->field('sku,out_stock_num')
-                ->where('out_stock_id', $out_stock_id)
-                ->select()
-            ;
+        Db::startTrans();
+        try {
+            //审核通过扣减库存
+            if ($do_type == 2) {
+                //获取出库单商品数据
+                $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
+                $item_data = $_out_stock_item
+                    ->field('sku,out_stock_num')
+                    ->where('out_stock_id', $out_stock_id)
+                    ->select()
+                ;
 
-            //获取各站点虚拟仓库存
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $stock_list = $_item_platform_sku
-                ->where('platform_type', $row['platform_id'])
-                ->column('stock','sku')
-            ;
+                //获取各站点虚拟仓库存
+                $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                $stock_list = $_item_platform_sku
+                    ->where('platform_type', $row['platform_id'])
+                    ->column('stock','sku')
+                ;
 
-            //校验各站点虚拟仓库存
-            foreach ($item_data as $key => $value) {
-                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 405);
-            }
+                //校验各站点虚拟仓库存
+                foreach ($item_data as $key => $value) {
+                    $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 405);
+                }
 
-            Db::startTrans();
-            try {
                 $stock_data = [];
                 //出库扣减库存
                 $_item = new \app\admin\model\itemmanage\Item;
@@ -1302,18 +1463,24 @@ class Scm extends Api
                 //库存变动日志
                 $_stock_log = new \app\admin\model\StockLog;
                 $_stock_log->allowField(true)->saveAll($stock_data);
-
-                Db::commit();
-            } catch (ValidateException $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 406);
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 407);
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage(), [], 408);
+            }else{//审核拒绝解除条形码绑定关系
+                $code_clear = [
+                    'out_stock_id' => 0
+                ];
+                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+                $_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
             }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
         }
 
         $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>$do_type]);
@@ -1336,6 +1503,13 @@ class Scm extends Api
         $_out_stock = new \app\admin\model\warehouse\Outstock;
         $row = $_out_stock->get($out_stock_id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
+
+        //解除条形码绑定关系
+        $code_clear = [
+            'out_stock_id' => 0
+        ];
+        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
 
         $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>4]);
         $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
