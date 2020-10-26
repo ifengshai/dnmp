@@ -183,7 +183,7 @@ class TimeData extends Backend
                     'type' => 'line',
                     'data' => $ydata,
                     'name' => '销售量',
-                    'smooth' => true //平滑曲线
+                    'smooth' => false //平滑曲线
                 ],
 
             ];
@@ -217,7 +217,7 @@ class TimeData extends Backend
                     'type' => 'line',
                     'data' => $ydata,
                     'name' => '销售额',
-                    'smooth' => true //平滑曲线
+                    'smooth' => false //平滑曲线
                 ]
 
             ];
@@ -251,7 +251,7 @@ class TimeData extends Backend
                     'type' => 'line',
                     'data' => $ydata,
                     'name' => '订单数量',
-                    'smooth' => true //平滑曲线
+                    'smooth' => false //平滑曲线
                 ],
 
             ];
@@ -286,7 +286,7 @@ class TimeData extends Backend
                     'type' => 'line',
                     'data' => $ydata,
                     'name' => '客单价',
-                    'smooth' => true //平滑曲线
+                    'smooth' => false //平滑曲线
                 ],
 
             ];
