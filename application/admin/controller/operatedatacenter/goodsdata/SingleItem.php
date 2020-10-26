@@ -26,7 +26,7 @@ class SingleItem extends Backend
      */
     public function index()
     {
-        $orderPlatform = (new \app\admin\model\platformmanage\MagentoPlatform())->getAuthSite();
+        $orderPlatform = (new \app\admin\model\platformmanage\MagentoPlatform())->getNewAuthSite();
         if (empty($orderPlatform)) {
             $this->error('您没有权限访问', 'general/profile?ref=addtabs');
         }
