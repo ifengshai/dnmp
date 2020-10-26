@@ -321,8 +321,6 @@ class Scm extends Api
             ->where(['check_id'=>$check_id])
             ->field('sku,code,is_quantity,is_sample')
             ->select();
-        print_r($bar_code_list);
-        exit;
 
         //合格
         $quantity_list = array_filter($bar_code_list,function($v){
