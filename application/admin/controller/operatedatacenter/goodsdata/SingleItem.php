@@ -170,7 +170,7 @@ class SingleItem extends Backend
             $map['sku'] = ['like', $sku . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $map['a.created_at'] = ['between', [$createat[1].''.$createat[2], $createat[4].''.$createat[5]]];
+            $map['a.created_at'] = ['between', [$createat[0].''.$createat[1], $createat[3].''.$createat[4]]];
             $map['a.order_type'] = ['=', 1];
             dump($map);
             $total = $order_model
