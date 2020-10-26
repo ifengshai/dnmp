@@ -19,7 +19,7 @@ class OrderDataDetail extends Backend
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
-
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
      * 订单数据明细页面展示
@@ -43,12 +43,15 @@ class OrderDataDetail extends Backend
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
+                $site = 2;
             }elseif($filter['order_platform'] == 3){
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
+                $site = 3;
             }else{
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
+                $site = 1;
             }
             $web_model->table('customer_entity')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
@@ -162,7 +165,11 @@ class OrderDataDetail extends Backend
                 $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
                 $list[$key]['frame_price'] = round($frame_price,2);
                 $list[$key]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
-                $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
+                if($site == 3){
+                    $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
+                }else{
+                    $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
+                }
                 $list[$key]['is_box_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
                 $lens_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('index_price');
                 $list[$key]['lens_price'] = round($lens_price,2);
@@ -179,6 +186,14 @@ class OrderDataDetail extends Backend
 
             return json($result);
         }
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr',$magentoplatformarr);
         return $this->view->fetch();
     }
 }
