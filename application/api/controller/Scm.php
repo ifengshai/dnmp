@@ -1515,4 +1515,361 @@ class Scm extends Api
         $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
     }
 
+    /**
+     * 标记异常
+     *
+     * @参数 string item_order_number  子订单号
+     * @参数 int type  异常类型
+     * @author lzh
+     * @return mixed
+     */
+    public function sign_abnormal()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
+        $type = $this->request->request('type');
+        empty($type) && $this->error(__('异常类型不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $item_process_id = $_new_order_item_process
+            ->where('item_order_number', $item_order_number)
+            ->value('id')
+        ;
+        empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
+
+        //解除条形码绑定关系
+        $abnormal_data = [
+            'item_process_id' => $item_process_id,
+            'type' => $type,
+            'status' => 1,
+            'create_time' => date('Y-m-d H:i:s'),
+            'create_person' => $this->auth->nickname
+        ];
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $res = $_distribution_abnormal->allowField(true)->save($abnormal_data);
+        $res ? $this->success('标记成功', [],200) : $this->error(__('标记失败'), [], 404);
+    }
+
+    /**
+     * 镜片分拣（待定）
+     *
+     * @参数 string query  查询内容
+     * @参数 int status  状态：0新建 1待审核 2 已审核 3已拒绝 4已取消
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_sorting()
+    {
+        $query = $this->request->request('query');
+        $status = $this->request->request('status');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 403);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
+
+        $where = [];
+        if($query){
+            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
+        }
+        if($status){
+            $where['a.status'] = $status;
+        }
+        if($start_time && $end_time){
+            $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        //获取出库单列表数据
+        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $list = $_out_stock
+            ->alias('a')
+            ->where($where)
+            ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id')
+            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.check_id','left')
+            ->order('a.createtime', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+
+        //获取出库分类数据
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $type_list = $_out_stock_type
+            ->where('is_del', 1)
+            ->column('name','id')
+        ;
+
+        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
+        foreach($list as $key=>$value){
+            $list[$key]['status'] = $status[$value['status']];
+            $list[$key]['type_name'] = $type_list[$value['type_id']];
+            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['detail_show'] = 1 < $value['status'] ? 1 : 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+        }
+
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 记录配货流程操作日志
+     *
+     * @param int $item_process_id  子订单表ID
+     * @param string $remark  备注
+     * @author lzh
+     * @return bool
+     */
+    public function distribution_log($item_process_id,$remark)
+    {
+        $_distribution_log = new \app\admin\model\DistributionLog();
+        $log_data = [
+            'item_process_id' => $item_process_id,
+            'remark' => $remark,
+            'create_time' => date('Y-m-d H:i:s'),
+            'create_person' => $this->auth->nickname
+        ];
+        $res = $_distribution_log->allowField(true)->save($log_data);
+        return $res;
+    }
+
+    /**
+     * 获取并校验子订单数据（配货通用）
+     *
+     * @param string $item_order_number  子订单号
+     * @param int $check_status  检测状态
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_info($item_order_number,$check_status)
+    {
+        empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $item_process_info = $_new_order_item_process
+            ->where('item_order_number', $item_order_number)
+            ->field('id,option_id,distribution_status')
+            ->find()
+        ;
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+
+        //检测状态
+        $status_arr = [
+            3=>'待配镜片',
+            4=>'待加工',
+            6=>'待成品质检'
+        ];
+        $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
+
+        //TODO::判断工单状态
+
+        //判断异常状态
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $abnormal_id = $_distribution_abnormal
+            ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
+            ->value('id')
+        ;
+        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //获取子订单处方数据
+        $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+        $option_info = $_new_order_item_option
+            ->where('id', $item_process_info['option_id'])
+            ->find()
+        ;
+
+        //异常原因列表
+        $abnormal_arr = [
+            3=>[
+                ['id'=>3,'name'=>'核实处方'],
+                ['id'=>4,'name'=>'镜片缺货'],
+                ['id'=>5,'name'=>'镜片重做'],
+                ['id'=>6,'name'=>'定制片超时']
+            ],
+            4=>[
+                ['id'=>7,'name'=>'不可加工'],
+                ['id'=>8,'name'=>'镜架加工报损'],
+                ['id'=>9,'name'=>'镜片加工报损']
+            ],
+            6=>[
+                ['id'=>1,'name'=>'加工调整'],
+                ['id'=>2,'name'=>'镜架报损'],
+                ['id'=>3,'name'=>'镜片报损'],
+                ['id'=>4,'name'=>'logo调整']
+            ]
+        ];
+        $abnormal_list = $abnormal_arr[$check_status] ?? [];
+
+        $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info],200);
+    }
+
+    /**
+     * 提交操作（配货通用）
+     *
+     * @param string $item_order_number  子订单号
+     * @param int $check_status  检测状态
+     * @param int $save_status  保存状态
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_save($item_order_number,$check_status,$save_status)
+    {
+        empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $item_process_info = $_new_order_item_process
+            ->where('item_order_number', $item_order_number)
+            ->value('id,distribution_status')
+            ->find()
+        ;
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+
+        //检测状态
+        $status_arr = [
+            3=>'待配镜片',
+            4=>'待加工',
+            6=>'待成品质检'
+        ];
+        $msg_arr = [
+            3=>'配镜片',
+            4=>'加工',
+            6=>'成品质检'
+        ];
+        $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
+
+        //TODO::判断工单状态
+
+        //判断异常状态
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $abnormal_id = $_distribution_abnormal
+            ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
+            ->value('id')
+        ;
+        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        $res = $_new_order_item_process
+            ->allowField(true)
+            ->isUpdate(true, ['item_order_number'=>$item_order_number])
+            ->save(['distribution_status'=>$save_status])
+        ;
+        if($res){
+            //记录操作日志
+            $remark_arr = [
+                4=>'配镜片完成',
+                6=>'加工完成',
+                7=>'成品质检完成'
+            ];
+            $this->distribution_log($item_process_info['id'],$remark_arr[$save_status]);
+
+            $this->success($msg_arr[$check_status].'成功', [],200);
+        }else{
+            $this->error(__($msg_arr[$check_status].'失败'), [], 404);
+        }
+    }
+
+    /**
+     * 配镜片扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_lens()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,3);
+    }
+
+    /**
+     * 配镜片提交
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_lens_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_save($item_order_number,3,4);
+    }
+
+    /**
+     * 加工扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_machining()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,4);
+    }
+
+    /**
+     * 加工提交
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_machining_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_save($item_order_number,4,6);
+    }
+
+    /**
+     * 成品质检扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_finish()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,6);
+    }
+
+    /**
+     * 质检通过/拒绝
+     *
+     * @参数 string item_order_number  子订单号
+     * @参数 int do_type  操作类型：1通过，2拒绝
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_finish_adopt()
+    {
+        $do_type = $this->request->request('do_type');
+        !in_array($do_type,[1,2]) && $this->error(__('操作类型错误'), [], 403);
+
+        if($do_type == 1){
+            $item_order_number = $this->request->request('item_order_number');
+            $this->distribution_save($item_order_number,6,7);
+        }else{
+
+            //状态回滚
+            $status_arr = [
+                ['id'=>1,'name'=>'加工调整'],
+                ['id'=>2,'name'=>'镜架报损'],
+                ['id'=>3,'name'=>'镜片报损'],
+                ['id'=>4,'name'=>'logo调整']
+            ];
+
+        }
+    }
+
 }
