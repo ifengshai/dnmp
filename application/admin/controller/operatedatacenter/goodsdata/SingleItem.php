@@ -46,9 +46,9 @@ class SingleItem extends Backend
             $map = [];
             if ($sku && $platform && $time_str) {
                 // dump(111);
-                $map['a.created_at'] = ['between', [$createat[0], $createat[3]]];
+                $map['a.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
                 $map['sku'] = ['like', $sku . '%'];
-                $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             }
             switch ($platform) {
                 case 1:
@@ -61,6 +61,9 @@ class SingleItem extends Backend
                     $model = Db::connect('database.db_nihao');
                     break;
             }
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model
                 ->table('sales_flat_order')
