@@ -280,7 +280,6 @@ class Scm extends Api
      */
     public function quality_edit()
     {
-        print_r('aaaaaaaaaa');exit;
         $check_id = $this->request->request('check_id');
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
@@ -307,7 +306,7 @@ class Scm extends Api
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
         }
-
+        print_r('bbbbbbbbbb');exit;
         //获取质检单商品数据
         $_check_item = new \app\admin\model\warehouse\CheckItem;
         $item_list = $_check_item
