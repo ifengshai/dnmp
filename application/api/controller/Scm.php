@@ -318,8 +318,8 @@ class Scm extends Api
         //获取条形码数据
         $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $bar_code_list = $_product_bar_code_item
-            ->where(['check_id'=>$check_id])
-//            ->field('sku,code,is_quantity,is_sample')
+//            ->where(['check_id'=>$check_id])
+            ->field('sku,code,is_quantity,is_sample')
                 ->limit(0,10)
             ->select();
         print_R($bar_code_list);
