@@ -314,16 +314,13 @@ class Scm extends Api
             ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
-        print_R('cccccccccc');exit;
+
         //获取条形码数据
         $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $bar_code_list = $_product_bar_code_item
-//            ->where(['check_id'=>$check_id])
+            ->where(['check_id'=>$check_id])
             ->field('sku,code,is_quantity,is_sample')
-                ->limit(0,10)
             ->select();
-        print_R($bar_code_list);
-        exit;
 
         //合格
         $quantity_list = array_filter($bar_code_list,function($v){
