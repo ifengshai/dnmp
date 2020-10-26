@@ -165,23 +165,24 @@ class SingleItem extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $order_model->query("set time_zone='+8:00'");;
             //此sku的总订单量
             $map['sku'] = ['like', $sku . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['a.created_at'] = ['between', [$createat[0], $createat[3]]];
-            $map['order_type'] = ['=', 1];
-            $total = $model
-                ->table('sales_flat_order')
+            $map['a.order_type'] = ['=', 1];
+            $total = $order_model
                 ->where($map)
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
-                ->field('entity_id,sku,a.created_at')
-                ->fetchSql();
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+                // ->fetchSql();
                 // ->select();
-                // ->count();
-            dump($total);die;
+                ->count();
+            // $model->table('sales_flat_order')->fetchSql();
+            // dump($total);die;
             //整站订单量
             // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             // $whole_platform_order_num = $this->zeelool->where($maps)->count();
