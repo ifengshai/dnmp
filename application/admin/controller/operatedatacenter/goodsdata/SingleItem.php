@@ -178,7 +178,8 @@ class SingleItem extends Backend
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
                 ->field('entity_id,sku,a.created_at')
-                ->select();
+                ->fetchSql();
+                // ->select();
                 // ->count();
             dump($total);die;
             //整站订单量
