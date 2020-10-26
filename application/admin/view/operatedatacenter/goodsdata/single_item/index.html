@@ -161,7 +161,7 @@
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
-                    <form id="form" action="{:url('index')}" class="form-commonsearch form-horizontal" role="form" method="post">
+                    <form id="form" class="form-commonsearch form-horizontal" role="form" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div class="col-xs-12 col-sm-6 col-md-3">
@@ -303,7 +303,7 @@
                                             <td>数量</td>
 
                                         </tr>
-                                        {foreach name="array" key="key" item="vo"}
+                                        {foreach name="array_sku" key="key" item="vo"}
                                         <tr>
                                             <td>{$key}</td>
                                             <td>{$vo}</td>

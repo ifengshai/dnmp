@@ -7,6 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.init({
                 extend: {
                     // index_url: 'operatedatacenter/goodsdata/single_item/index'+ location.search,
+                    index_url: 'operatedatacenter/goodsdata/single_item/index',
                     add_url: 'operatedatacenter/goodsdata/single_item/add',
                     edit_url: 'operatedatacenter/goodsdata/single_item/edit',
                     del_url: 'operatedatacenter/goodsdata/single_item/del',
@@ -54,23 +55,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.sku_sales_data_bar();
                 order_data_view();
-                var params = table.bootstrapTable('getOptions')
-                params.queryParams = function(params) {
+                // var params = table.bootstrapTable('getOptions')
+                // params.queryParams = function(params) {
+                //
+                //     //定义参数
+                //     var filter = {};
+                //     //遍历form 组装json
+                //     $.each($("#form").serializeArray(), function(i, field) {
+                //         filter[field.name] = field.value;
+                //     });
+                //
+                //     //参数转为json字符串
+                //     params.filter = JSON.stringify(filter)
+                //     console.info(params);
+                //     return params;
+                // }
 
-                    //定义参数
-                    var filter = {};
-                    //遍历form 组装json
-                    $.each($("#form").serializeArray(), function(i, field) {
-                        filter[field.name] = field.value;
-                    });
-
-                    //参数转为json字符串
-                    params.filter = JSON.stringify(filter)
-                    console.info(params);
-                    return params;
-                }
-
-                table.bootstrapTable('refresh',params);
+                // table.bootstrapTable('refresh',params);
             });
             // Controller.api.formatter.line_chart();
             // Controller.api.formatter.sku_sales_data_bar();
