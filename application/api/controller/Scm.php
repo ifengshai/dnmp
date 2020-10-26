@@ -306,7 +306,7 @@ class Scm extends Api
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
         }
-        print_R('cccccccccc');exit;
+
         //获取质检单商品数据
         $_check_item = new \app\admin\model\warehouse\CheckItem;
         $item_list = $_check_item
@@ -314,7 +314,7 @@ class Scm extends Api
             ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
-
+        print_R('ddddddddddd');exit;
         //获取条形码数据
         $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $bar_code_list = $_product_bar_code_item
