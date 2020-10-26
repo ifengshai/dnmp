@@ -167,7 +167,7 @@ class Scm extends Api
         $limit = $page_size;
 
         //获取质检单列表数据
-        $_check = new \app\admin\model\warehouse\Check;
+        $_check = new \app\admin\model\warehouse\Check();
         $list = $_check
             ->alias('a')
             ->where($where)
@@ -201,17 +201,17 @@ class Scm extends Api
         empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
         //获取物流单数据
-        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
         $logistics_data = $_logistics_info->where('id', $logistics_id)->field('id,purchase_id,batch_id')->find();
         empty($logistics_data) && $this->error(__('物流单不存在'), [], 403);
 
         //获取采购单数据
-        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder();
         $purchase_data = $_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id,replenish_id')->find();
         empty($purchase_data) && $this->error(__('采购单不存在'), [], 403);
 
         //获取采购单商品数据
-        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem();
         $order_item_list = $_purchase_order_item
             ->where(['purchase_id'=>$logistics_data['purchase_id']])
             ->field('sku,supplier_sku,purchase_num')
@@ -219,19 +219,19 @@ class Scm extends Api
         $order_item_list = collection($order_item_list)->toArray();
 
         //获取供应商数据
-        $_supplier = new \app\admin\model\purchase\Supplier;
+        $_supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $_supplier->where('id', $purchase_data['supplier_id'])->field('supplier_name')->find();
         empty($supplier_data) && $this->error(__('供应商不存在'), [], 403);
 
         //获取采购批次数据
         $batch = 0;
         if($logistics_data['batch_id']){
-            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
+            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch();
             $batch_data = $_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
 
             $batch = $batch_data['batch'];
-            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
+            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
             $item_list = $_purchase_batch_item
                 ->where(['purchase_batch_id'=>$logistics_data['batch_id']])
                 ->field('sku,arrival_num as should_arrival_num')
@@ -284,31 +284,31 @@ class Scm extends Api
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         //获取质检单数据
-        $_check = new \app\admin\model\warehouse\Check;
+        $_check = new \app\admin\model\warehouse\Check();
         $check_data = $_check->where('id', $check_id)->field('purchase_id,batch_id,check_order_number,supplier_id')->find();
         empty($check_data) && $this->error(__('质检单不存在'), [], 403);
 
         //获取采购单数据
-        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder();
         $purchase_data = $_purchase_order->where('id', $check_data['purchase_id'])->field('purchase_number')->find();
         empty($purchase_data) && $this->error(__('采购单不存在'), [], 403);
 
         //获取供应商数据
-        $_supplier = new \app\admin\model\purchase\Supplier;
+        $_supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $_supplier->where('id', $check_data['supplier_id'])->field('supplier_name')->find();
         empty($supplier_data) && $this->error(__('供应商不存在'), [], 403);
 
         //获取采购批次数据
         $batch = 0;
         if($check_data['batch_id']){
-            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch;
+            $_purchase_batch = new \app\admin\model\purchase\PurchaseBatch();
             $batch_data = $_purchase_batch->where('id', $check_data['batch_id'])->field('batch')->find();
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
         }
 
         //获取质检单商品数据
-        $_check_item = new \app\admin\model\warehouse\CheckItem;
+        $_check_item = new \app\admin\model\warehouse\CheckItem();
         $item_list = $_check_item
             ->where(['check_id'=>$check_id])
             ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
@@ -316,7 +316,7 @@ class Scm extends Api
         $item_list = collection($item_list)->toArray();
 
         //获取条形码数据
-        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $bar_code_list = $_product_bar_code_item
             ->where(['check_id'=>$check_id])
             ->field('sku,code,is_quantity,is_sample')
@@ -428,7 +428,7 @@ class Scm extends Api
         $is_error = $this->request->request('is_error');
         $get_check_id = $this->request->request('check_id');
 
-        $_check = new \app\admin\model\warehouse\Check;
+        $_check = new \app\admin\model\warehouse\Check();
         if($get_check_id){
             $row = $_check->get($get_check_id);
             empty($row) && $this->error(__('质检单不存在'), [], 403);
@@ -483,7 +483,7 @@ class Scm extends Api
         Db::startTrans();
         try {
             //检测条形码是否已绑定
-            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
             $where['check_id'] = [['>',0], ['neq',$check_id]];
             foreach ($item_data as $key => $value) {
                 //检测合格条形码
@@ -536,7 +536,7 @@ class Scm extends Api
             }
 
             //批量创建或更新质检单商品
-            $_check_item = new \app\admin\model\warehouse\CheckItem;
+            $_check_item = new \app\admin\model\warehouse\CheckItem();
             foreach ($item_data as $key => $value) {
                 //错误类型、合格率
                 if($value['should_arrival_num'] > $value['arrival_num']){
@@ -649,7 +649,7 @@ class Scm extends Api
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         //检测质检单状态
-        $_check = new \app\admin\model\warehouse\Check;
+        $_check = new \app\admin\model\warehouse\Check();
         $row = $_check->get($check_id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
@@ -662,7 +662,7 @@ class Scm extends Api
                 'logistics_id' => 0,
                 'check_id' => 0
             ];
-            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
             $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
 
             $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>4]);
@@ -699,7 +699,7 @@ class Scm extends Api
         !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测质检单状态
-        $_check = new \app\admin\model\warehouse\Check;
+        $_check = new \app\admin\model\warehouse\Check();
         $row = $_check->get($check_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
@@ -711,7 +711,7 @@ class Scm extends Api
             //审核通过关联操作
             if ($do_type == 2) {
 //标记物流单检索为已创建质检单
-                $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+                $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
                 $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$row['logistics_id']])->save(['is_check_order'=>1]);
 
                 //查询物流信息表对应采购单数据是否全部质检完毕
@@ -720,12 +720,12 @@ class Scm extends Api
                     $count = $_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
 
                     //修改采购单质检状态
-                    $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+                    $_purchase_order = new \app\admin\model\purchase\PurchaseOrder();
                     $_purchase_order->allowField(true)->isUpdate(true, ['id'=>$row['purchase_id']])->save(['check_status'=>$count > 0 ? 1 : 2]);
                 }
 
                 //查询质检单明细表有样品的数据
-                $_check_item = new \app\admin\model\warehouse\CheckItem;
+                $_check_item = new \app\admin\model\warehouse\CheckItem();
                 $list = $_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
                 if ($list) {
                     //生成入库主表数据
@@ -737,7 +737,7 @@ class Scm extends Api
                         'create_user'=>$this->auth->nickname,
                         'createtime'=>date('Y-m-d H:i:s')
                     ];
-                    $_sample_work_order = new \app\admin\model\purchase\SampleWorkorder;
+                    $_sample_work_order = new \app\admin\model\purchase\SampleWorkorder();
                     $_sample_work_order->allowField(true)->save($work_order_data);
 
                     //生成入库子表数据
@@ -749,7 +749,7 @@ class Scm extends Api
                             'stock'=>$value['sample_num'],
                         ];
                     }
-                    $_sample_work_order_item = new \app\admin\model\purchase\SampleWorkorderItem;
+                    $_sample_work_order_item = new \app\admin\model\purchase\SampleWorkorderItem();
                     $_sample_work_order_item->allowField(true)->saveAll($work_order_item_data);
                 }
 
@@ -771,7 +771,7 @@ class Scm extends Api
                     ;
                     if ($check_item_list) {
                         //获取采购价格
-                        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+                        $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem();
                         $purchase_item_list = $_purchase_order_item
                             ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
@@ -799,7 +799,7 @@ class Scm extends Api
                         }
 
                         //新增收货异常主表数据
-                        $_purchase_abnormal = new \app\admin\model\purchase\PurchaseAbnormal;
+                        $_purchase_abnormal = new \app\admin\model\purchase\PurchaseAbnormal();
                         $abnormal_save = [
                             'error_number'=>'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
                             'supplier_id'=>$row['supplier_id'],
@@ -815,7 +815,7 @@ class Scm extends Api
                             $value = array_merge($value, $p);
                         },['abnormal_id' => $_purchase_abnormal->id]);
 
-                        $_purchase_abnormal_item = new \app\admin\model\purchase\PurchaseAbnormalItem;
+                        $_purchase_abnormal_item = new \app\admin\model\purchase\PurchaseAbnormalItem();
                         $_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
                 }
@@ -827,7 +827,7 @@ class Scm extends Api
                     'logistics_id' => 0,
                     'check_id' => 0
                 ];
-                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
                 $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
 
@@ -889,7 +889,7 @@ class Scm extends Api
         }
 
         //获取采购单数据
-        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $_purchase_order = new \app\admin\model\purchase\PurchaseOrder();
         $purchase_list = $_purchase_order
             ->where(['purchase_status'=>[['=',6], ['=',7], 'or']])
             ->field('id,purchase_number,is_new_product')
@@ -911,7 +911,7 @@ class Scm extends Api
         $limit = $page_size;
 
         //获取物流单列表数据
-        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
         $list = $_logistics_info
             ->where($where)
             ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type')
@@ -950,7 +950,7 @@ class Scm extends Api
         empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
         //检测质检单状态
-        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
+        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
         $row = $_logistics_info->get($logistics_id);
         (0 != $row['status'] || 1 != $row['type']) && $this->error(__('只有未签收状态才能操作'), [], 405);
 
@@ -971,15 +971,15 @@ class Scm extends Api
                 'purchase_status'=>$count > 0 ? 9 : 7,
                 'receiving_time'=>date('Y-m-d H:i:s')
             ];
-            $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+            $_purchase_order = new \app\admin\model\purchase\PurchaseOrder();
             $_purchase_order->allowField(true)->isUpdate(true, ['id'=>$row['purchase_id']])->save($purchase_save);
 
             //签收扣减在途库存
-            $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
-            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem;
-            $_new_product_mapping = new \app\admin\model\NewProductMapping;
-            $_item = new \app\admin\model\itemmanage\Item;
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem();
+            $_purchase_batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
+            $_new_product_mapping = new \app\admin\model\NewProductMapping();
+            $_item = new \app\admin\model\itemmanage\Item();
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
 
             //根据采购单获取补货单ID
             $replenish_id = $_purchase_order->where(['id' => $row['purchase_id']])->value('replenish_id');
@@ -1126,7 +1126,7 @@ class Scm extends Api
         $limit = $page_size;
 
         //获取出库单列表数据
-        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $_out_stock = new \app\admin\model\warehouse\Outstock();
         $list = $_out_stock
             ->alias('a')
             ->where($where)
@@ -1138,7 +1138,7 @@ class Scm extends Api
         $list = collection($list)->toArray();
 
         //获取出库分类数据
-        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType();
         $type_list = $_out_stock_type
             ->where('is_del', 1)
             ->column('name','id')
@@ -1169,7 +1169,7 @@ class Scm extends Api
         $out_stock_id = $this->request->request('out_stock_id');
 
         //获取出库分类数据
-        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType();
         $type_list = $_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
@@ -1190,7 +1190,7 @@ class Scm extends Api
         ];
 
         if($out_stock_id){
-            $_out_stock = new \app\admin\model\warehouse\Outstock;
+            $_out_stock = new \app\admin\model\warehouse\Outstock();
             $info = $_out_stock
                 ->field('out_stock_number,type_id,platform_id,status')
                 ->where('is_del', 1)
@@ -1200,7 +1200,7 @@ class Scm extends Api
             unset($info['status']);
 
             //获取出库单商品数据
-            $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
+            $_out_stock_item = new \app\admin\model\warehouse\OutStockItem();
             $item_data = $_out_stock_item
                 ->field('sku,out_stock_num')
                 ->where('out_stock_id', $out_stock_id)
@@ -1208,14 +1208,14 @@ class Scm extends Api
             ;
 
             //获取各站点虚拟仓库存
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $stock_list = $_item_platform_sku
                 ->where('platform_type', $info['platform_id'])
                 ->column('stock','sku')
             ;
 
             //获取条形码数据
-            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
             $bar_code_list = $_product_bar_code_item
                 ->where(['out_stock_id'=>$out_stock_id])
                 ->field('sku,code')
@@ -1276,7 +1276,7 @@ class Scm extends Api
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
 
-        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $_out_stock = new \app\admin\model\warehouse\Outstock();
         if($get_out_stock_id){
             $row = $_out_stock->get($get_out_stock_id);
             empty($row) && $this->error(__('出库单不存在'), [], 403);
@@ -1314,7 +1314,7 @@ class Scm extends Api
             count($item_data) != count(array_unique(array_column($item_data,'sku'))) && $this->error(__('sku重复，请检查'), [], 405);
 
             //获取各站点虚拟仓库存
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $stock_list = $_item_platform_sku
                 ->where('platform_type', $platform_id)
                 ->column('stock','sku')
@@ -1327,7 +1327,7 @@ class Scm extends Api
             }
 
             //检测条形码是否已绑定
-            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
             $where['out_stock_id'] = [['>',0], ['neq',$out_stock_id]];
             foreach ($item_data as $key => $value) {
                 $sku_code = array_column($value['sku_agg'],'code');
@@ -1347,7 +1347,7 @@ class Scm extends Api
             }
 
             //批量创建或更新出库单商品
-            $_out_stock_item = new \app\admin\model\warehouse\OutstockItem;
+            $_out_stock_item = new \app\admin\model\warehouse\OutstockItem();
             foreach ($item_data as $key => $value) {
                 $item_save = [
                     'out_stock_num'=>$value['out_stock_num']
@@ -1408,7 +1408,7 @@ class Scm extends Api
         !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测出库单状态
-        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $_out_stock = new \app\admin\model\warehouse\Outstock();
         $row = $_out_stock->get($out_stock_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
@@ -1417,7 +1417,7 @@ class Scm extends Api
             //审核通过扣减库存
             if ($do_type == 2) {
                 //获取出库单商品数据
-                $_out_stock_item = new \app\admin\model\warehouse\OutStockItem;
+                $_out_stock_item = new \app\admin\model\warehouse\OutStockItem();
                 $item_data = $_out_stock_item
                     ->field('sku,out_stock_num')
                     ->where('out_stock_id', $out_stock_id)
@@ -1425,7 +1425,7 @@ class Scm extends Api
                 ;
 
                 //获取各站点虚拟仓库存
-                $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
                 $stock_list = $_item_platform_sku
                     ->where('platform_type', $row['platform_id'])
                     ->column('stock','sku')
@@ -1438,7 +1438,7 @@ class Scm extends Api
 
                 $stock_data = [];
                 //出库扣减库存
-                $_item = new \app\admin\model\itemmanage\Item;
+                $_item = new \app\admin\model\itemmanage\Item();
                 foreach ($item_data as $key => $value) {
                     //扣除商品表总库存
                     $sku = $value['sku'];
@@ -1461,13 +1461,13 @@ class Scm extends Api
                 }
 
                 //库存变动日志
-                $_stock_log = new \app\admin\model\StockLog;
+                $_stock_log = new \app\admin\model\StockLog();
                 $_stock_log->allowField(true)->saveAll($stock_data);
             }else{//审核拒绝解除条形码绑定关系
                 $code_clear = [
                     'out_stock_id' => 0
                 ];
-                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+                $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
                 $_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
             }
 
@@ -1500,7 +1500,7 @@ class Scm extends Api
         empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
 
         //检测出库单状态
-        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $_out_stock = new \app\admin\model\warehouse\Outstock();
         $row = $_out_stock->get($out_stock_id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
@@ -1508,7 +1508,7 @@ class Scm extends Api
         $code_clear = [
             'out_stock_id' => 0
         ];
-        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
 
         $res = $_out_stock->allowField(true)->isUpdate(true, ['id'=>$out_stock_id])->save(['status'=>4]);
@@ -1590,7 +1590,7 @@ class Scm extends Api
         $limit = $page_size;
 
         //获取出库单列表数据
-        $_out_stock = new \app\admin\model\warehouse\Outstock;
+        $_out_stock = new \app\admin\model\warehouse\Outstock();
         $list = $_out_stock
             ->alias('a')
             ->where($where)
@@ -1602,7 +1602,7 @@ class Scm extends Api
         $list = collection($list)->toArray();
 
         //获取出库分类数据
-        $_out_stock_type = new \app\admin\model\warehouse\OutstockType;
+        $_out_stock_type = new \app\admin\model\warehouse\OutstockType();
         $type_list = $_out_stock_type
             ->where('is_del', 1)
             ->column('name','id')
@@ -1848,27 +1848,46 @@ class Scm extends Api
      *
      * @参数 string item_order_number  子订单号
      * @参数 int do_type  操作类型：1通过，2拒绝
+     * @参数 int reason  拒绝原因
      * @author lzh
      * @return mixed
      */
     public function distribution_finish_adopt()
     {
+        $item_order_number = $this->request->request('item_order_number');
         $do_type = $this->request->request('do_type');
         !in_array($do_type,[1,2]) && $this->error(__('操作类型错误'), [], 403);
 
         if($do_type == 1){
-            $item_order_number = $this->request->request('item_order_number');
             $this->distribution_save($item_order_number,6,7);
         }else{
+            $reason = $this->request->request('reason');
+            !in_array($do_type,[1,2,3,4]) && $this->error(__('拒绝原因错误'), [], 403);
 
-            //状态回滚
+            //获取子订单数据
+            $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+            $item_process_id = $_new_order_item_process
+                ->where('item_order_number', $item_order_number)
+                ->value('id')
+            ;
+
+            //状态
             $status_arr = [
-                ['id'=>1,'name'=>'加工调整'],
-                ['id'=>2,'name'=>'镜架报损'],
-                ['id'=>3,'name'=>'镜片报损'],
-                ['id'=>4,'name'=>'logo调整']
+                1=>['status'=>4,'name'=>'加工调整'],
+                2=>['status'=>2,'name'=>'镜架报损'],
+                3=>['status'=>3,'name'=>'镜片报损'],
+                4=>['status'=>5,'name'=>'logo调整']
             ];
 
+            //状态回滚
+            $_new_order_item_process
+                ->allowField(true)
+                ->isUpdate(true, ['id'=>$item_process_id])
+                ->save(['distribution_status'=>$status_arr[$reason]['status']])
+            ;
+
+            //记录日志
+            $this->distribution_log($item_process_id,$status_arr[$reason]['name']);
         }
     }
 
