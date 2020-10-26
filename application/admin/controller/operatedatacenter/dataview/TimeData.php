@@ -42,8 +42,7 @@ class TimeData extends Backend
     //获取销售量
     public function get_data($site,$time_str){
         if(!$time_str){
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d');
+            $start = $end   = date('Y-m-d');
         }else{
             $createat = explode(' ', $time_str);
             $start = $createat[0];
