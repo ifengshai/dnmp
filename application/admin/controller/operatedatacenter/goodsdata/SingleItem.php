@@ -172,6 +172,7 @@ class SingleItem extends Backend
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['a.created_at'] = ['between', [$createat[1].''.$createat[2], $createat[4].''.$createat[5]]];
             $map['a.order_type'] = ['=', 1];
+            dump($map);
             $total = $order_model
                 ->where($map)
                 ->alias('a')
