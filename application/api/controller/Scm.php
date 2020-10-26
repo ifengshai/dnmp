@@ -70,7 +70,7 @@ class Scm extends Api
         $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
-//        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
+        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
     }
 
     /**
@@ -311,7 +311,7 @@ class Scm extends Api
         $_check_item = new \app\admin\model\warehouse\CheckItem;
         $item_list = $_check_item
             ->where(['check_id'=>$check_id])
-            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
+            ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
 
