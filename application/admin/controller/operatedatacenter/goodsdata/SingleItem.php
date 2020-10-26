@@ -177,10 +177,10 @@ class SingleItem extends Backend
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
-                // ->field('entity_id,sku,a.created_at')
-                // ->select();
-                ->count();
-            // dump($total);
+                ->field('entity_id,sku,a.created_at')
+                ->select();
+                // ->count();
+            dump($total);die;
             //整站订单量
             // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             // $whole_platform_order_num = $this->zeelool->where($maps)->count();
