@@ -70,18 +70,6 @@
         font-size: 14px;
         border-style: solid;
     }
-
-
-    /* #caigou-table {
-        border-width: 0px;
-    }
-    #caigou-table th{
-        border-width: 0px;
-    }
-    #caigou-table td{
-        border-width: 0px;
-    } */
-
     .nav-tabs>li {
         float: left;
         margin-bottom: -1px;
@@ -91,7 +79,6 @@
         position: relative;
         display: block;
     }
-
     .nav-tabs>li>a {
         margin-right: 4px;
         color: #95a5a6;
@@ -107,53 +94,7 @@
         border-bottom-color: transparent;
     }
 
-    .u3431 {
 
-        width: 100%;
-        height: 100px;
-        display: flex;
-        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
-        font-weight: 400;
-        font-style: normal;
-        font-size: 28px;
-        line-height: 36px;
-        border-width: 0px;
-        margin-top: 20px;
-    }
-
-    .u3431 .text {
-
-        align-self: center;
-        padding: 0px 0px 0px 0px;
-        box-sizing: border-box;
-        width: 100%;
-    }
-
-    .u3431_text {
-        border-width: 0px;
-        word-wrap: break-word;
-        text-transform: none;
-        width: 30%;
-        height: 80px;
-    }
-
-    .sales-div {
-        float: left;
-        width: 40%;
-        height: 100%;
-
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgb(228, 228, 228);
-        border-radius: 0px;
-
-        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
-        font-weight: 400;
-        font-style: normal;
-        font-size: 28px;
-        line-height: 36px;
-
-    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -171,12 +112,8 @@
                                         <div class="col-xs-8">
                                             <select id="c-order_platform" data-rule="required" class="form-control"
                                                 name="order_platform">
-                                                {foreach name="orderPlatformList" item="vo"}
-                                                {if $key == $platform}
-                                                <option value="{$key}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$key}">{$vo}</option>
-                                                {/if}
+                                                {foreach name="magentoplatformarr" item="vo" key="key"}
+                                                <option value="{$vo.id}" {if condition="$vo.id == $web_site"}selected="selected"{/if}>{$vo.name}</option>
                                                 {/foreach}
                                             </select>
                                         </div>
@@ -284,48 +221,21 @@
                                             <td>购物车数</td>
                                             <td>购物车转化率</td>
                                         </tr>
+                                        {foreach name="data" item="vo" key="key"}
                                         <tr>
-                                            <td>1</td>
-                                            <td>0:00 - 0:59</td>
-                                            <td>300</td>
-                                            <td>1000</td>
-                                            <td>2000</td>
-                                            <td>100</td>
-                                            <td>100</td>
-                                            <td>12%</td>
-                                            <td>12%</td>
-                                            <td>5000</td>
-                                            <td>50%</td>
-
+                                            <td>{$vo.hour}</td>
+                                            <td>{$vo.hour_created}</td>
+                                            <td>{$vo.order_counter}</td>
+                                            <td>{$vo.orderitem_counter}</td>
+                                            <td>{$vo.hour_grand_total}</td>
+                                            <td>{$vo.grand_total_order_conversion}</td>
+                                            <td>{$vo.sessions}</td>
+                                            <td>{$vo.quote_sessions_conversion}</td>
+                                            <td>{$vo.order_sessions_conversion}</td>
+                                            <td>{$vo.quote_counter}</td>
+                                            <td>{$vo.order_quote_conversion}</td>
                                         </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>0:00 - 0:59</td>
-                                            <td>300</td>
-                                            <td>1000</td>
-                                            <td>2000</td>
-                                            <td>100</td>
-                                            <td>100</td>
-                                            <td>12%</td>
-                                            <td>12%</td>
-                                            <td>5000</td>
-                                            <td>50%</td>
-
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>0:00 - 0:59</td>
-                                            <td>300</td>
-                                            <td>1000</td>
-                                            <td>2000</td>
-                                            <td>100</td>
-                                            <td>100</td>
-                                            <td>12%</td>
-                                            <td>12%</td>
-                                            <td>5000</td>
-                                            <td>50%</td>
-
-                                        </tr>
+                                        {/foreach}
 
                                     </table>
                                 </div>

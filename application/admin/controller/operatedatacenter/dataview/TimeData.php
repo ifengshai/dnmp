@@ -10,6 +10,14 @@ use think\Request;
 
 class TimeData extends Backend
 {
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
+        $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
+        $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+    }
     /**
      * 分时数据
      *
@@ -18,24 +26,57 @@ class TimeData extends Backend
     public function index()
     {
         $time_str = input('time_str');
+        $web_site = input('order_platform') ? input('order_platform') : 1;
+        $info = $this->get_data($web_site,$time_str);
+        $data = $info['finalList'];
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign(compact('data','web_site','time_str','magentoplatformarr'));
+        return $this->view->fetch();
+    }
+    //获取销售量
+    public function get_data($site,$time_str){
         if(!$time_str){
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d');
-            $time_between = $start.' 00:00:00 - '.$end.' 23:59:59';
-            $time_show = '';
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
         }else{
             $createat = explode(' ', $time_str);
-            $start = $createat[0];
-            $end = $createat[3];
-            $time_between = $time_str;
-            $time_show = $time_str;
+            $start = $createat[0].' '.$createat[1];
+            $end = $createat[3].' '.$createat[4];
         }
-        $web_site = input('order_platform') ? input('order_platform') : 1;
+        if($site == 2){
+            $model = $this->vooguemeOperate;
+            $web_model = Db::connect('database.db_voogueme');
+        }elseif ($site == 3){
+            $model = $this->nihaoOperate;
+            $web_model = Db::connect('database.db_nihao');
+        }else{
+            $model = $this->zeeloolOperate;
+            $web_model = Db::connect('database.db_zeelool');
+        }
+        $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $time_where['created_at'] = ['between', [$start,$end]];
+        $itemtime_where['i.created_at'] = ['between', [$start,$end]];
+        $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        //订单数据
+        $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
+        //销售量
+        $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,count(*) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
+        //购物车数量
+        $quote_where['base_grand_total'] = ['>',0];
+        $quote_resultList = $web_model->table('sales_flat_quote')->where($time_where)->where($quote_where)->field('DATE_FORMAT(created_at,"%H") hour_created_at ,count(*) quote_counter')->group("DATE_FORMAT(created_at,'%H')")->select();
         //获取session
-        $ga_result = $this->initializeAnalytics($web_site,$start,$end);
+        $ga_result = $model->ga_hour_data($start,$end);
         $finalList = array();
         for ($i = 0; $i < 24; $i++) {
-            $finalList[$i]['hour'] = $i;
+            $finalList[$i]['hour'] = $i+1;
             $finalList[$i]['hour_created'] = "$i:00 - $i:59";
         }
         foreach ($finalList as $final_key => $final_value) {
@@ -45,98 +86,77 @@ class TimeData extends Backend
                 }
             }
         }
-        dump($finalList);exit;
-
-        //查询对应平台权限
-        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
-        $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
-                unset($magentoplatformarr[$key]);
-            }
-        }
-        $this->view->assign(compact('data', 'total', 'coating_arr','coating_count','web_site','time_show','magentoplatformarr'));
-        return $this->view->fetch();
-    }
-    protected function initializeAnalytics($site,$start_time,$end_time)
-    {
-        $client = new \Google_Client();
-        $client->setAuthConfig('./oauth/oauth-credentials.json');
-        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-        // Create an authorized analytics service object.
-        $analytics = new \Google_Service_AnalyticsReporting($client);
-        // $analytics = $this->initializeAnalytics();
-        // Call the Analytics Reporting API V4.
-        $response = $this->getReport_session($site,$analytics, $start_time, $end_time);
-
-        // dump($response);die;
-
-        // Print the response.
-        $result = $this->printResults($response);
-
-        return $result;
-    }
-    protected function getReport_session($site, $analytics, $startDate, $endDate)
-    {
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
-        $dateRange->setStartDate($startDate);
-        $dateRange->setEndDate($endDate);
-
-        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
-        $adCostMetric->setExpression("ga:sessions");
-        $adCostMetric->setAlias("ga:sessions");
-        // $adCostMetric->setExpression("ga:adCost");
-        // $adCostMetric->setAlias("ga:adCost");
-        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
-        $sessionDayDimension->setName("ga:day");
-        $sessionDayDimension->setName("ga:dateHour");
-
-        // Create the ReportRequest object.
-        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
-        $request->setViewId($VIEW_ID);
-        $request->setDateRanges($dateRange);
-        $request->setMetrics(array($adCostMetric));
-        $request->setDimensions(array($sessionDayDimension));
-
-        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-        $body->setReportRequests(array($request));
-        return $analytics->reports->batchGet($body);
-    }
-    protected function printResults($reports)
-    {
-        $finalResult = array();
-        for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
-            $report = $reports[$reportIndex];
-            $header = $report->getColumnHeader();
-            $dimensionHeaders = $header->getDimensions();
-            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
-            $rows = $report->getData()->getRows();
-            for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
-                $row = $rows[$rowIndex];
-                $dimensions = $row->getDimensions();
-                $metrics = $row->getMetrics();
-                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
-                    $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
-                }
-
-                for ($j = 0; $j < count($metrics); $j++) {
-                    $values = $metrics[$j]->getValues();
-                    for ($k = 0; $k < count($values); $k++) {
-                        $entry = $metricHeaders[$k];
-                        $finalResult[$rowIndex][$entry->getName()] = $values[$k];
-                    }
+        foreach ($finalList as $final_key => $final_value) {
+            foreach ($order_resultList as $order_key => $order_value) {
+                if ((int)$final_value['hour'] == (int)$order_value['hour_created_at']) {
+                    $finalList[$final_key]['hour_grand_total'] = $order_value['hour_grand_total'];
+                    $finalList[$final_key]['order_counter'] = $order_value['order_counter'];
                 }
             }
-            return $finalResult;
         }
+        foreach ($finalList as $final_key => $final_value) {
+            foreach ($orderitem_resultlist as $orderitem_key => $orderitem_value) {
+                if ((int)$final_value['hour'] == (int)$orderitem_value['hour_created_at']) {
+                    $finalList[$final_key]['orderitem_counter'] = $orderitem_value['orderitem_counter'];
+                }
+            }
+        }
+        foreach ($finalList as $final_key => $final_value) {
+            foreach ($quote_resultList as $quote_key => $quote_value) {
+                if ((int)$final_value['hour'] == (int)$quote_value['hour_created_at']) {
+                    $finalList[$final_key]['quote_counter'] = $quote_value['quote_counter'];
+                }
+            }
+        }
+        $total_array = array();
+        foreach ($finalList as $key => $value) {
+            $total_array['sessions'] += $value['sessions'];
+            $total_array['hour_grand_total'] += $value['hour_grand_total'];
+            $total_array['order_counter'] += $value['order_counter'];
+            $total_array['orderitem_counter'] += $value['orderitem_counter'];
+            $total_array['quote_counter'] += $value['quote_counter'];
+            //会话转化率 订单/sessions
+            $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2) : 0;
+            $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2) : 0;
+            $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2) : 0;
+            $finalList[$key]['grand_total_order_conversion'] = $finalList[$key]['order_counter'] ? round($finalList[$key]['hour_grand_total'] / $finalList[$key]['order_counter'], 2) : 0;
+        }
+        $total_array['order_sessions_conversion'] = $total_array['sessions'] ? round($total_array['order_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
+        $total_array['order_quote_conversion'] = $total_array['quote_counter'] ? round($total_array['order_counter'] / $total_array['quote_counter'] * 100, 2) . "%" : 0;
+        $total_array['quote_sessions_conversion'] = $total_array['sessions'] ? round($total_array['quote_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
+        $total_array['grand_total_order_conversion'] = $total_array['order_counter'] ? round($total_array['hour_grand_total'] / $total_array['order_counter'], 2) : 0;
+
+        $echart_data['hourStr'] = "";
+        $echart_data['sale_amount'] = "";
+        $echart_data['order_counter'] = "";
+        $echart_data['orderitem_counter'] = "";
+        $echart_data['grand_total_order_conversion'] = "";
+
+        for ($i = 0; $i < 24; $i++) {
+            if ($finalList[$i]['sessions'] || $finalList[$i]['quote_counter']) {
+                $echart_data['hourStr'] .= "$i:00,";
+                $echart_data['sale_amount'] .= $finalList[$i]['hour_grand_total'] . ",";
+                $echart_data['order_counter'] .= $finalList[$i]['order_counter'] . ",";
+                $echart_data['orderitem_counter'] .= $finalList[$i]['orderitem_counter'] . ",";
+                $echart_data['grand_total_order_conversion'] .= $finalList[$i]['grand_total_order_conversion'] . ",";
+            } else {
+                $echart_data['hourStr'] .= "$i:00,";
+                $echart_data['sale_amount'] .= "0,";
+                $echart_data['order_counter'] .= "0,";
+                $echart_data['orderitem_counter'] .= "0,";
+                $echart_data['grand_total_order_conversion'] .= "0,";
+            }
+        }
+        $echart_data['hourStr'] = rtrim($echart_data['hourStr'], ',');
+        $echart_data['sale_amount'] = rtrim($echart_data['sale_amount'], ',');
+        $echart_data['order_counter'] = rtrim($echart_data['order_counter'], ',');
+        $echart_data['orderitem_counter'] = rtrim($echart_data['orderitem_counter'], ',');
+        $echart_data['grand_total_order_conversion'] = rtrim($echart_data['grand_total_order_conversion'], ',');
+        //缓存
+        $cache_data['echart_data'] = $echart_data;
+        $cache_data['total_array'] = $total_array;
+        $cache_data['finalList'] = $finalList;
+        return $cache_data;
     }
     /**
      * 销售量
@@ -149,12 +169,19 @@ class TimeData extends Backend
     public function sales_num_line()
     {
         if ($this->request->isAjax()) {
-            $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $time_str = $params['time_str'];
+            $info = $this->get_data($order_platform,$time_str);
+            $data = $info['echart_data'];
+            $xdata = explode(',',$data['hourStr']);
+            $ydata = explode(',',$data['orderitem_counter']);
+            $json['xcolumnData'] = $xdata;
             $json['column'] = ['销售量'];
             $json['columnData'] = [
                 [
                     'type' => 'line',
-                    'data' => [100, 260, 450, 400, 400, 650, 730, 800],
+                    'data' => $ydata,
                     'name' => '销售量',
                     'smooth' => true //平滑曲线
                 ],
@@ -176,12 +203,19 @@ class TimeData extends Backend
     public function sales_money_line()
     {
         if ($this->request->isAjax()) {
-            $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $time_str = $params['time_str'];
+            $info = $this->get_data($order_platform,$time_str);
+            $data = $info['echart_data'];
+            $xdata = explode(',',$data['hourStr']);
+            $ydata = explode(',',$data['sale_amount']);
+            $json['xcolumnData'] = $xdata;
             $json['column'] = ['销售额'];
             $json['columnData'] = [
                 [
                     'type' => 'line',
-                    'data' => [430, 550, 800, 650, 410, 520, 430, 870],
+                    'data' => $ydata,
                     'name' => '销售额',
                     'smooth' => true //平滑曲线
                 ]
@@ -203,12 +237,19 @@ class TimeData extends Backend
     public function order_num_line()
     {
         if ($this->request->isAjax()) {
-            $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $time_str = $params['time_str'];
+            $info = $this->get_data($order_platform,$time_str);
+            $data = $info['echart_data'];
+            $xdata = explode(',',$data['hourStr']);
+            $ydata = explode(',',$data['order_counter']);
+            $json['xcolumnData'] = $xdata;
             $json['column'] = ['订单数量'];
             $json['columnData'] = [
                 [
                     'type' => 'line',
-                    'data' => [100, 260, 450, 400, 400, 650, 730, 800],
+                    'data' => $ydata,
                     'name' => '订单数量',
                     'smooth' => true //平滑曲线
                 ],
@@ -230,13 +271,20 @@ class TimeData extends Backend
     public function unit_price_line()
     {
         if ($this->request->isAjax()) {
-            $json['xcolumnData'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $time_str = $params['time_str'];
+            $info = $this->get_data($order_platform,$time_str);
+            $data = $info['echart_data'];
+            $xdata = explode(',',$data['hourStr']);
+            $ydata = explode(',',$data['grand_total_order_conversion']);
+            $json['xcolumnData'] = $xdata;
             $json['column'] = ['客单价'];
             $json['columnData'] = [
 
                 [
                     'type' => 'line',
-                    'data' => [100, 260, 450, 400, 400, 650, 730, 800],
+                    'data' => $ydata,
                     'name' => '客单价',
                     'smooth' => true //平滑曲线
                 ],
