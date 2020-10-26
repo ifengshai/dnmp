@@ -115,9 +115,9 @@ class TimeData extends Backend
             $total_array['orderitem_counter'] += $value['orderitem_counter'];
             $total_array['quote_counter'] += $value['quote_counter'];
             //会话转化率 订单/sessions
-            $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2) : 0;
-            $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2) : 0;
-            $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2) : 0;
+            $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
+            $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2).'%' : 0;
+            $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
             $finalList[$key]['grand_total_order_conversion'] = $finalList[$key]['order_counter'] ? round($finalList[$key]['hour_grand_total'] / $finalList[$key]['order_counter'], 2) : 0;
         }
         $total_array['order_sessions_conversion'] = $total_array['sessions'] ? round($total_array['order_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
