@@ -314,7 +314,7 @@ class Scm extends Api
             ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
-        print_R('aaaaaaaaaa');
+        print_R('aaaaaaaaaa');exit;
         //获取条形码数据
         $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $bar_code_list = $_product_bar_code_item
