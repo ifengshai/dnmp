@@ -311,10 +311,10 @@ class Scm extends Api
         $_check_item = new \app\admin\model\warehouse\CheckItem;
         $item_list = $_check_item
             ->where(['check_id'=>$check_id])
-            ->field('sku,supplier_sku,arrival_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
+            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
-        print_R('ddddddddddd');exit;
+        print_R('cccccccccc');exit;
         //获取条形码数据
         $_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $bar_code_list = $_product_bar_code_item
