@@ -171,13 +171,13 @@ class SingleItem extends Backend
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['a.created_at'] = ['between', [$createat[0], $createat[3]]];
-            $map['order_type'] = ['=', 1];
+            $map['a.order_type'] = ['=', 1];
             $total = $order_model
                 ->where($map)
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
-                ->field('entity_id,sku,a.created_at')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
                 // ->fetchSql();
                 ->select();
                 // ->count();.
