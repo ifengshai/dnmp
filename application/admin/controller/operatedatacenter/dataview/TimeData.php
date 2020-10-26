@@ -19,18 +19,34 @@ class TimeData extends Backend
     {
         $time_str = input('time_str');
         if(!$time_str){
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_between = $start.' - '.$end;
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d');
+            $time_between = $start.' 00:00:00 - '.$end.' 23:59:59';
             $time_show = '';
         }else{
+            $createat = explode(' ', $time_str);
+            $start = $createat[0];
+            $end = $createat[3];
             $time_between = $time_str;
             $time_show = $time_str;
         }
         $web_site = input('order_platform') ? input('order_platform') : 1;
         //获取session
-        $session = $this->initializeAnalytics($web_site,$start,$end);
-        dump($session);exit;
+        $ga_result = $this->initializeAnalytics($web_site,$start,$end);
+        $finalList = array();
+        for ($i = 0; $i < 24; $i++) {
+            $finalList[$i]['hour'] = $i;
+            $finalList[$i]['hour_created'] = "$i:00 - $i:59";
+        }
+        foreach ($finalList as $final_key => $final_value) {
+            foreach ($ga_result as $ga_key => $ga_value) {
+                if ((int)$final_value['hour'] == (int)substr($ga_value['ga:dateHour'], 8)) {
+                    $finalList[$final_key]['sessions'] += $ga_value['ga:sessions'];
+                }
+            }
+        }
+        dump($finalList);exit;
+
         //查询对应平台权限
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
