@@ -42,12 +42,12 @@ class TimeData extends Backend
     //获取销售量
     public function get_data($site,$time_str){
         if(!$time_str){
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d');
         }else{
             $createat = explode(' ', $time_str);
-            $start = $createat[0].' '.$createat[1];
-            $end = $createat[3].' '.$createat[4];
+            $start = $createat[0];
+            $end = $createat[3];
         }
         if($site == 2){
             $model = $this->vooguemeOperate;
@@ -62,8 +62,8 @@ class TimeData extends Backend
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $time_where['created_at'] = ['between', [$start,$end]];
-        $itemtime_where['i.created_at'] = ['between', [$start,$end]];
+        $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
+        $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
         $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         //订单数据
         $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
