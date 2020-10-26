@@ -170,7 +170,7 @@ class SingleItem extends Backend
             $map['sku'] = ['like', $sku . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $map['a.created_at'] = ['between', [$createat[0], $createat[3]]];
+            // $map['a.created_at'] = ['between', [$createat[0], $createat[3]]];
             $map['a.order_type'] = ['=', 1];
             $total = $order_model
                 ->where($map)
@@ -179,10 +179,10 @@ class SingleItem extends Backend
                 ->group('order_id')
                 ->field('entity_id,sku,a.created_at,a.order_type,a.status')
                 // ->fetchSql();
-                // ->select();
-                ->count();
+                ->select();
+                // ->count();
             // $model->table('sales_flat_order')->fetchSql();
-            // dump($total);die;
+            dump($total);die;
             //整站订单量
             // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             // $whole_platform_order_num = $this->zeelool->where($maps)->count();
