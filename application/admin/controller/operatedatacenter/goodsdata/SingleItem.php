@@ -173,17 +173,17 @@ class SingleItem extends Backend
             $map['a.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             $map['a.order_type'] = ['=', 1];
             dump($map);
-            $total = $order_model
+            $total = $model->table('sales_flat_order')
                 ->where($map)
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
                 ->field('entity_id,sku,a.created_at,a.order_type,a.status')
                 // ->fetchSql();
-                ->select();
-                // ->count();
+                // ->select();
+                ->count();
             // $model->table('sales_flat_order')->fetchSql();
-            dump($total);die;
+            // dump($total);die;
             //整站订单量
             // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             // $whole_platform_order_num = $this->zeelool->where($maps)->count();
@@ -197,7 +197,7 @@ class SingleItem extends Backend
             $whole_glass = $model
                 ->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('created_at', 'between', [$createat[0], $createat[3]])
+                ->where('created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->sum('qty_ordered');//sku总副数
                 // ->field('item_id,sku,created_at')
                 // ->select();
@@ -209,7 +209,7 @@ class SingleItem extends Backend
                 ->table('sales_flat_order')
                 ->alias('a')
                 ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
-                ->where('a.created_at', 'between', [$createat[0], $createat[3]])
+                ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->where('sku', 'like', $sku . '%')
                 ->where('b.coatiing_price', '>', 0)
                 ->group('order_id')
@@ -224,7 +224,7 @@ class SingleItem extends Backend
             $only_one_glass_num = $model
                 ->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('b.created_at', 'between', [$createat[0], $createat[3]])
+                ->where('b.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
                 ->field('order_id,sum(qty_ordered) as all_qty_ordered')
@@ -248,7 +248,7 @@ class SingleItem extends Backend
             $whole_price = $model
                 ->table('sales_flat_order')
                 ->where($map)
-                ->where('a.created_at', 'between', [$createat[0], $createat[3]])
+                ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
