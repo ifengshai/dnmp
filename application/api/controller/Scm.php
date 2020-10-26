@@ -297,7 +297,7 @@ class Scm extends Api
         $_supplier = new \app\admin\model\purchase\Supplier;
         $supplier_data = $_supplier->where('id', $check_data['supplier_id'])->field('supplier_name')->find();
         empty($supplier_data) && $this->error(__('供应商不存在'), [], 403);
-        print_R('bbbbbbbbbb');exit;
+
         //获取采购批次数据
         $batch = 0;
         if($check_data['batch_id']){
@@ -306,7 +306,7 @@ class Scm extends Api
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
         }
-
+        print_R('cccccccccc');exit;
         //获取质检单商品数据
         $_check_item = new \app\admin\model\warehouse\CheckItem;
         $item_list = $_check_item
