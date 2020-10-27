@@ -7,7 +7,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.formatter.sales_money_line();
             Controller.api.formatter.order_num_line();
             Controller.api.formatter.unit_price_line();
-
         },
         add: function () {
             Controller.api.bindevent();
@@ -27,9 +26,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/dataview/time_data/sales_num_line',
                         data: {
-
+                            'order_platform' : $("#order_platform").val(),
+                            'time_str' : $("#time_str").val(),
                         }
-
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
@@ -43,9 +42,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/dataview/time_data/sales_money_line',
                         data: {
-
+                            'order_platform' : $("#order_platform").val(),
+                            'time_str' : $("#time_str").val(),
                         }
-
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
@@ -59,9 +58,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/dataview/time_data/order_num_line',
                         data: {
-
+                            'order_platform' : $("#order_platform").val(),
+                            'time_str' : $("#time_str").val(),
                         }
-
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
@@ -75,9 +74,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/dataview/time_data/unit_price_line',
                         data: {
-
+                            'order_platform' : $("#order_platform").val(),
+                            'time_str' : $("#time_str").val(),
                         }
-
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
