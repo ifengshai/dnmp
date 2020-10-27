@@ -17,9 +17,9 @@ class OrderData extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->order = new \app\admin\model\order\Order();
-        $this->orderitem = new \app\admin\model\order\OrderItem();
-        $this->orderoptions = new \app\admin\model\order\OrderOptions();
+        // $this->order = new \app\admin\model\order\Order();
+        // $this->orderitem = new \app\admin\model\order\OrderItem();
+        // $this->orderoptions = new \app\admin\model\order\OrderOptions();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
@@ -130,12 +130,12 @@ class OrderData extends Backend
                                 case 'nihao':
                                     $model = $this->nihao;
                                     break;
-                                case 'meeloog':
-                                    $model = $this->meeloog;
-                                    break;
-                                case 'wesee':
-                                    $model = $this->wesee;
-                                    break;
+                                // case 'meeloog':
+                                //     $model = $this->meeloog;
+                                //     break;
+                                // case 'wesee':
+                                //     $model = $this->wesee;
+                                //     break;
                                 // case 'zeelool_es':
                                 //     $model = $this->zeelool_es;
                                 //     break;
