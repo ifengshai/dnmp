@@ -157,6 +157,7 @@ class OrderData extends Backend
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
+                                    $params['status'] = $v['status'];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
@@ -165,7 +166,7 @@ class OrderData extends Backend
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
-                                    $params['shipping_title'] = $v['shipping_title'];
+                                    $params['shipping_title'] = $v['shipping_description'];
                                     $params['country_id'] = $v['country_id'];
                                     $params['region'] = $v['region'];
                                     $params['city'] = $v['city'];
