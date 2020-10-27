@@ -30,6 +30,7 @@ class TimeData extends Backend
         $info = $this->get_data($web_site,$time_str);
         $data = $info['finalList'];
         $total = $info['total_array'];
+        $count = count($info['finalList'])+1;
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
@@ -37,7 +38,7 @@ class TimeData extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('data','total','web_site','time_str','magentoplatformarr'));
+        $this->view->assign(compact('data','total','count','web_site','time_str','magentoplatformarr'));
         return $this->view->fetch();
     }
     //获取销售量
