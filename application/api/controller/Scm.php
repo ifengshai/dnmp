@@ -1557,8 +1557,6 @@ class Scm extends Api
     /**
      * 镜片分拣（待定）
      *
-     * @参数 string query  查询内容
-     * @参数 int status  状态：0新建 1待审核 2 已审核 3已拒绝 4已取消
      * @参数 string start_time  开始时间
      * @参数 string end_time  结束时间
      * @参数 int page  页码
@@ -1568,8 +1566,6 @@ class Scm extends Api
      */
     public function distribution_sorting()
     {
-        $query = $this->request->request('query');
-        $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
@@ -1578,48 +1574,28 @@ class Scm extends Api
         empty($page) && $this->error(__('Page can not be empty'), [], 403);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
 
-        $where = [];
-        if($query){
-            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
-        }
-        if($status){
-            $where['a.status'] = $status;
-        }
+        $where = [
+            'a.status'=>3,
+            'b.index_name'=>['neq',''],
+        ];
         if($start_time && $end_time){
-            $where['a.createtime'] = ['between', [$start_time, $end_time]];
+            $where['a.created_at'] = ['between', [strtotime($start_time), strtotime($end_time)]];
         }
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
         //获取出库单列表数据
-        $_out_stock = new \app\admin\model\warehouse\Outstock();
-        $list = $_out_stock
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $_new_order_item_process
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id')
-            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.check_id','left')
-            ->order('a.createtime', 'desc')
+            ->field('count(*) as all_count,b.prescription_type,b.index_type,b.index_name')
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->group('b.prescription_type,b.index_type,b.index_name')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
-
-        //获取出库分类数据
-        $_out_stock_type = new \app\admin\model\warehouse\OutstockType();
-        $type_list = $_out_stock_type
-            ->where('is_del', 1)
-            ->column('name','id')
-        ;
-
-        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
-        foreach($list as $key=>$value){
-            $list[$key]['status'] = $status[$value['status']];
-            $list[$key]['type_name'] = $type_list[$value['type_id']];
-            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
-            $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
-            $list[$key]['detail_show'] = 1 < $value['status'] ? 1 : 0;
-            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
-        }
 
         $this->success('', ['list' => $list],200);
     }
