@@ -52,7 +52,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     var chartOptions = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
-                        type: 'line'
+                        type: 'line',
+                        bar: {
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    name: '销售额',
+                                    axisLabel: {
+                                        formatter: '$ {value}'
+                                    },
+                                    offset: -5
+                                }
+                                
+                            ],
+                        }
                     };
                     var options = {
                         type: 'post',
