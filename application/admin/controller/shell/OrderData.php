@@ -46,7 +46,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'order_data';
+        $topic = 'mojing_order';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
