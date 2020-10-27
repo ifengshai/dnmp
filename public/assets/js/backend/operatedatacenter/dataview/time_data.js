@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.formatter.sales_money_line();
             Controller.api.formatter.order_num_line();
             Controller.api.formatter.unit_price_line();
-            $("#order_platform").click(function(){
+            $(document).on('change', '#order_platform', function () {
                 data_view();
                 Controller.api.formatter.sales_num_line();
                 Controller.api.formatter.sales_money_line();
