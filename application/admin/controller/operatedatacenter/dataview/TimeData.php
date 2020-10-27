@@ -84,7 +84,7 @@ class TimeData extends Backend
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $cache_vag = 'day_hour_order_quote_'.$time;
+        $cache_vag = 'day_hour_order_quote_'.$site.$time;
         $cache_arr = Cache::get($cache_vag);
         if(!$cache_arr){
             $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
