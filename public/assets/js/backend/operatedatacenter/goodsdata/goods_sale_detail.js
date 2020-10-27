@@ -54,6 +54,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('#run_glass').hide();
                     $('#old_glass').hide();
                     $('#son_glass').hide();
+                }else{
+                    $('#run_glass').show();
+                    $('#old_glass').show();
+                    $('#son_glass').show();
                 }
                 Form.api.bindevent($("form[role=form]"));
                 var params = table.bootstrapTable('getOptions')
