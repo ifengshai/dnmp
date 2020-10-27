@@ -1694,11 +1694,10 @@ class Scm extends Api
      *
      * @param string $item_order_number  子订单号
      * @param int $check_status  检测状态
-     * @param int $save_status  保存状态
      * @author lzh
      * @return mixed
      */
-    public function distribution_save($item_order_number,$check_status,$save_status)
+    public function distribution_save($item_order_number,$check_status)
     {
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
@@ -1706,33 +1705,86 @@ class Scm extends Api
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->value('id,distribution_status')
+            ->value('id,distribution_status,option_id,order_id')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
-        //检测状态
+        //检测当前状态
         $status_arr = [
             3=>'待配镜片',
             4=>'待加工',
-            6=>'待成品质检'
-        ];
-        $msg_arr = [
-            3=>'配镜片',
-            4=>'加工',
-            6=>'成品质检'
+            5=>'待印logo',
+            6=>'待成品质检',
+            7=>'待合单'
         ];
         $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
 
-        //TODO::判断工单状态
-
-        //判断异常状态
+        //检测异常状态
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
         $abnormal_id = $_distribution_abnormal
             ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
             ->value('id')
         ;
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //TODO::检测工单状态
+
+        //获取订单购买总数
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $total_qty_ordered = $_new_order
+            ->where('id', $item_process_info['order_id'])
+            ->value('total_qty_ordered')
+        ;
+
+        //下一步提示信息及状态
+        if(3 == $check_status){
+            $save_status = 4;
+        }elseif(4 == $check_status){
+            //获取子订单处方数据
+            $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+            $is_print_logo = $_new_order_item_option
+                ->where('id', $item_process_info['option_id'])
+                ->value('is_print_logo')
+            ;
+            if($is_print_logo){
+                $save_status = 5;
+            }else{
+                if($total_qty_ordered > 1){
+                    $save_status = 6;
+                }else{
+                    $save_status = 8;
+                }
+            }
+        }elseif(5 == $check_status){
+            $save_status = 6;
+        }elseif(6 == $check_status){
+            if($total_qty_ordered > 1){
+                $save_status = 7;
+            }else{
+                $save_status = 8;
+            }
+        }elseif(7 == $check_status){
+            $save_status = 8;
+        }
+
+        //订单主表标记已合单
+        if(8 == $save_status){
+            $_new_order
+                ->allowField(true)
+                ->isUpdate(true, ['id'=>$item_process_info['order_id']])
+                ->save(['combined_order_status'=>1])
+            ;
+        }
+
+        //备注及报错信息
+        $msg_arr = [
+            3=>'配镜片',
+            4=>'加工',
+            5=>'印logo',
+            6=>'成品质检',
+            7=>'合单'
+        ];
 
         $res = $_new_order_item_process
             ->allowField(true)
@@ -1741,15 +1793,19 @@ class Scm extends Api
         ;
         if($res){
             //记录操作日志
-            $remark_arr = [
-                4=>'配镜片完成',
-                6=>'加工完成',
-                7=>'成品质检完成'
-            ];
-            $this->distribution_log($item_process_info['id'],$remark_arr[$save_status]);
+            $this->distribution_log($item_process_info['id'],$msg_arr[$check_status].'完成');
 
-            $this->success($msg_arr[$check_status].'成功', [],200);
+            //成功返回
+            $next_step = [
+                4=>'去加工',
+                5=>'印logo',
+                6=>'去质检',
+                7=>'去合单',
+                8=>'去审单'
+            ];
+            $this->success($next_step[$save_status], [],200);
         }else{
+            //失败返回
             $this->error(__($msg_arr[$check_status].'失败'), [], 404);
         }
     }
@@ -1777,7 +1833,7 @@ class Scm extends Api
     public function distribution_lens_submit()
     {
         $item_order_number = $this->request->request('item_order_number');
-        $this->distribution_save($item_order_number,3,4);
+        $this->distribution_save($item_order_number,3);
     }
 
     /**
@@ -1803,7 +1859,7 @@ class Scm extends Api
     public function distribution_machining_submit()
     {
         $item_order_number = $this->request->request('item_order_number');
-        $this->distribution_save($item_order_number,4,6);
+        $this->distribution_save($item_order_number,4);
     }
 
     /**
@@ -1835,7 +1891,7 @@ class Scm extends Api
         !in_array($do_type,[1,2]) && $this->error(__('操作类型错误'), [], 403);
 
         if($do_type == 1){
-            $this->distribution_save($item_order_number,6,7);
+            $this->distribution_save($item_order_number,6);
         }else{
             $reason = $this->request->request('reason');
             !in_array($do_type,[1,2,3,4]) && $this->error(__('拒绝原因错误'), [], 403);
@@ -1865,6 +1921,32 @@ class Scm extends Api
             //记录日志
             $this->distribution_log($item_process_id,$status_arr[$reason]['name']);
         }
+    }
+
+    /**
+     * 印logo扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_logo()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,5);
+    }
+
+    /**
+     * 印logo提交
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function distribution_logo_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_save($item_order_number,5);
     }
 
 }
