@@ -157,7 +157,7 @@ class OrderData extends Backend
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
-                                    $params['entity_id'] = $v['entity_id'];
+                                    $params['status'] = $v['status'];
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
                                     $params['total_item_count'] = $v['total_qty_ordered'];
@@ -165,7 +165,7 @@ class OrderData extends Backend
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
-                                    $params['shipping_title'] = $v['shipping_title'];
+                                    $params['shipping_title'] = $v['shipping_description'];
                                     $params['country_id'] = $v['country_id'];
                                     $params['region'] = $v['region'];
                                     $params['city'] = $v['city'];
@@ -188,7 +188,34 @@ class OrderData extends Backend
                                 //插入订单处理表
                                 $this->orderprocess->saveAll($order_params);
                             }
+
+                            //更新主表
+                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order') {
+                                $params = [];
+                                foreach ($payload['data'] as $k => $v) {
+                                    $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['total_item_count'] = $v['total_qty_ordered'];
+                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
+                                    $params['order_type'] = $v['order_type'];
+                                    $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['shipping_method'] = $v['shipping_method'];
+                                    $params['shipping_title'] = $v['shipping_description'];
+                                    $params['country_id'] = $v['country_id'];
+                                    $params['region'] = $v['region'];
+                                    $params['city'] = $v['city'];
+                                    $params['street'] = $v['street'];
+                                    $params['postcode'] = $v['postcode'];
+                                    $params['telephone'] = $v['telephone'];
+                                    $params['customer_email'] = $v['customer_email'];
+                                    $params['customer_firstname'] = $v['customer_firstname'];
+                                    $params['customer_lastname'] = $v['customer_lastname'];
+                                    $params['taxno'] = $v['taxno'];
+                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    $this->order->where('entity_id', $v['entity_id'])->update($params);
+                                }
+                            }
                         }
+
 
                         //子表
                         // if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
