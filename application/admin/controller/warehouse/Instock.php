@@ -101,8 +101,6 @@ class Instock extends Backend
      */
     public function add()
     {
-//        var_dump($this->request->post());
-//        die;
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -212,7 +210,6 @@ class Instock extends Backend
         $ids = input('ids');
         //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
         $types = input('type');
-        // dump($type);die;
         if ($ids) {
             $this->assign('ids', $ids);
             $this->assign('instocktype', 1);
