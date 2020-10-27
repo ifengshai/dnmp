@@ -254,11 +254,11 @@ class SingleItem extends Backend
                 ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
+                // ->group('order_id')
                 ->field('base_grand_total')
-                // ->sum('base_grand_total');
-                ->select();
-            $whole_price = array_sum(array_map(function($val){return $val['base_grand_total'];}, $whole_price));
+                ->sum('base_grand_total');
+                // ->select();
+            // $whole_price = round(array_sum(array_map(function($val){return $val['base_grand_total'];}, $whole_price)),2);
 
             //订单客单价
             $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
