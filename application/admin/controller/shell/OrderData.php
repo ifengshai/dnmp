@@ -25,9 +25,9 @@ class OrderData extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->meeloog = new \app\admin\model\order\order\Meeloog();
         $this->wesee = new \app\admin\model\order\order\Weseeoptical();
-        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
-        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        // $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        // $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
+        // $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
     }
 
 
@@ -136,15 +136,15 @@ class OrderData extends Backend
                                 case 'wesee':
                                     $model = $this->wesee;
                                     break;
-                                case 'zeelool_es':
-                                    $model = $this->zeelool_es;
-                                    break;
-                                case 'zeelool_de':
-                                    $model = $this->zeelool_de;
-                                    break;
-                                case 'zeelool_jp':
-                                    $model = $this->zeelool_jp;
-                                    break;
+                                // case 'zeelool_es':
+                                //     $model = $this->zeelool_es;
+                                //     break;
+                                // case 'zeelool_de':
+                                //     $model = $this->zeelool_de;
+                                //     break;
+                                // case 'zeelool_jp':
+                                //     $model = $this->zeelool_jp;
+                                //     break;
                             }
 
                             if ($payload['type'] == 'INSERT') {
