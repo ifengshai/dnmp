@@ -17,9 +17,9 @@ class OrderData extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        // $this->order = new \app\admin\model\order\Order();
+        $this->order = new \app\admin\model\order\Order();
         // $this->orderitem = new \app\admin\model\order\OrderItem();
-        // $this->orderoptions = new \app\admin\model\order\OrderOptions();
+        $this->orderprocess = new \app\admin\model\order\OrderProcess();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
@@ -123,12 +123,15 @@ class OrderData extends Backend
                             switch ($payload['database']) {
                                 case 'zeelool':
                                     $model = $this->zeelool;
+                                    $site = 1;
                                     break;
                                 case 'voogueme':
                                     $model = $this->voogueme;
+                                    $site = 2;
                                     break;
                                 case 'nihao':
                                     $model = $this->nihao;
+                                    $site = 3;
                                     break;
                                 // case 'meeloog':
                                 //     $model = $this->meeloog;
@@ -146,12 +149,87 @@ class OrderData extends Backend
                                 //     $model = $this->zeelool_jp;
                                 //     break;
                             }
-
-                            if ($payload['type'] == 'INSERT') {
-                                
+                            //主表
+                            if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
+                                $params = [];
+                                $order_params = [];
+                                foreach($payload['data'] as $k => $v) {
+                                    $params['entity_id'] = $v['entity_id'];
+                                    $params['site'] = $site;
+                                    $params['increment_id'] = $v['increment_id'];
+                                    $params['entity_id'] = $v['entity_id'];
+                                    $params['store_id'] = $v['store_id'];
+                                    $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['total_item_count'] = $v['total_qty_ordered'];
+                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
+                                    $params['order_type'] = $v['order_type'];
+                                    $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['shipping_method'] = $v['shipping_method'];
+                                    $params['shipping_title'] = $v['shipping_title'];
+                                    $params['country_id'] = $v['country_id'];
+                                    $params['region'] = $v['region'];
+                                    $params['city'] = $v['city'];
+                                    $params['street'] = $v['street'];
+                                    $params['postcode'] = $v['postcode'];
+                                    $params['telephone'] = $v['telephone'];
+                                    $params['customer_email'] = $v['customer_email'];
+                                    $params['customer_firstname'] = $v['customer_firstname'];
+                                    $params['customer_lastname'] = $v['customer_lastname'];
+                                    $params['taxno'] = $v['taxno'];
+                                    $params['created_at'] = strtotime($v['created_at']);
+                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    //插入订单主表
+                                    $order_id = $this->order->insertGetId($params);
+                                    $order_params[$k]['site'] = $site;
+                                    $order_params[$k]['order_id'] = $order_id;
+                                    $order_params[$k]['entity_id'] = $v['entity_id'];
+                                    $order_params[$k]['increment_id'] = $v['increment_id'];
+                                }
+                                //插入订单处理表
+                                $this->orderprocess->saveAll($order_params);
                             }
                         }
 
+                        //子表
+                        // if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
+                        //     $params = [];
+                        //     $order_params = [];
+                        //     foreach($payload['data'] as $k => $v) {
+                        //         $params['entity_id'] = $v['entity_id'];
+                        //         $params['site'] = $site;
+                        //         $params['increment_id'] = $v['increment_id'];
+                        //         $params['entity_id'] = $v['entity_id'];
+                        //         $params['store_id'] = $v['store_id'];
+                        //         $params['base_grand_total'] = $v['base_grand_total'];
+                        //         $params['total_item_count'] = $v['total_qty_ordered'];
+                        //         $params['total_qty_ordered'] = $v['total_qty_ordered'];
+                        //         $params['order_type'] = $v['order_type'];
+                        //         $params['base_currency_code'] = $v['base_currency_code'];
+                        //         $params['shipping_method'] = $v['shipping_method'];
+                        //         $params['shipping_title'] = $v['shipping_title'];
+                        //         $params['country_id'] = $v['country_id'];
+                        //         $params['region'] = $v['region'];
+                        //         $params['city'] = $v['city'];
+                        //         $params['street'] = $v['street'];
+                        //         $params['postcode'] = $v['postcode'];
+                        //         $params['telephone'] = $v['telephone'];
+                        //         $params['customer_email'] = $v['customer_email'];
+                        //         $params['customer_firstname'] = $v['customer_firstname'];
+                        //         $params['customer_lastname'] = $v['customer_lastname'];
+                        //         $params['taxno'] = $v['taxno'];
+                        //         $params['created_at'] = strtotime($v['created_at']);
+                        //         $params['updated_at'] = strtotime($v['updated_at']);
+                        //         //插入订单主表
+                        //         $order_id = $this->order->insertGetId($params);
+                        //         $order_params[$k]['site'] = $site;
+                        //         $order_params[$k]['order_id'] = $order_id;
+                        //         $order_params[$k]['entity_id'] = $v['entity_id'];
+                        //         $order_params[$k]['increment_id'] = $v['increment_id'];
+                        //     }
+                        //     //插入订单处理表
+                        //     $this->orderprocess->saveAll($order_params);
+                        // }
+                    }
 
                         break;
                     case RD_KAFKA_RESP_ERR__PARTITION_EOF: //没有数据
