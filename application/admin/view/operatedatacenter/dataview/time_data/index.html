@@ -223,7 +223,7 @@
                                         </tr>
                                         {foreach name="data" item="vo" key="key"}
                                         <tr>
-                                            <td>{$vo.hour}</td>
+                                            <td>{$key+1}</td>
                                             <td>{$vo.hour_created}</td>
                                             <td>{$vo.order_counter}</td>
                                             <td>{$vo.orderitem_counter}</td>
@@ -236,7 +236,19 @@
                                             <td>{$vo.order_quote_conversion}</td>
                                         </tr>
                                         {/foreach}
-
+                                        <tr>
+                                            <td>{$total.hour}</td>
+                                            <td>{$total.hour_created}</td>
+                                            <td>{$total.order_counter}</td>
+                                            <td>{$total.orderitem_counter}</td>
+                                            <td>{$total.hour_grand_total}</td>
+                                            <td>{$total.grand_total_order_conversion}</td>
+                                            <td>{$total.sessions}</td>
+                                            <td>{$total.quote_sessions_conversion}</td>
+                                            <td>{$total.order_sessions_conversion}</td>
+                                            <td>{$total.quote_counter}</td>
+                                            <td>{$total.order_quote_conversion}</td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>

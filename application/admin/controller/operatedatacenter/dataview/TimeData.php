@@ -29,6 +29,7 @@ class TimeData extends Backend
         $web_site = input('order_platform') ? input('order_platform') : 1;
         $info = $this->get_data($web_site,$time_str);
         $data = $info['finalList'];
+        $total = $info['total_array'];
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
@@ -36,17 +37,19 @@ class TimeData extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('data','web_site','time_str','magentoplatformarr'));
+        $this->view->assign(compact('data','total','web_site','time_str','magentoplatformarr'));
         return $this->view->fetch();
     }
     //获取销售量
     public function get_data($site,$time_str){
         if(!$time_str){
-            $start = $end   = date('Y-m-d');
+            $start = $end = date('Y-m-d');
+            $time_flag = 'today';
         }else{
             $createat = explode(' ', $time_str);
             $start = $createat[0];
             $end = $createat[3];
+            $time_flag = '';
         }
         if($site == 2){
             $model = $this->vooguemeOperate;
@@ -77,8 +80,16 @@ class TimeData extends Backend
         $ga_result = $model->ga_hour_data($start,$end);
         $finalList = array();
         for ($i = 0; $i < 24; $i++) {
-            $finalList[$i]['hour'] = $i;
-            $finalList[$i]['hour_created'] = "$i:00 - $i:59";
+            if($time_flag){
+                $hour = date('H');
+                if($i <= $hour){
+                    $finalList[$i]['hour'] = $i;
+                    $finalList[$i]['hour_created'] = "$i:00 - $i:59";
+                }
+            }else{
+                $finalList[$i]['hour'] = $i;
+                $finalList[$i]['hour_created'] = "$i:00 - $i:59";
+            }
         }
         foreach ($finalList as $final_key => $final_value) {
             foreach ($ga_result as $ga_key => $ga_value) {
