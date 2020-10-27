@@ -61,13 +61,15 @@ class TimeData extends Backend
     //获取销售量
     public function get_data($site,$time_str){
         if(!$time_str){
-            $start = $end = date('Y-m-d');
+            $start = $end = $time_str = date('Y-m-d');
             $time_flag = 'today';
+            $time = time().time();
         }else{
             $createat = explode(' ', $time_str);
             $start = $createat[0];
             $end = $createat[3];
             $time_flag = '';
+            $time = strtotime($createat[0]).strtolower($createat[3]);
         }
         if($site == 2){
             $model = $this->vooguemeOperate;
@@ -82,110 +84,117 @@ class TimeData extends Backend
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
-        $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
-        $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        //订单数据
-        $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
+        $cache_vag = 'day_hour_order_quote_'.$time;
+        $cache_arr = Cache::get($cache_vag);
+        if(!$cache_arr){
+            $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
+            $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
+            $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            //订单数据
+            $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
 
-        //销售量
-        $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,count(*) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
+            //销售量
+            $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,count(*) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
 
-        //购物车数量
-        $quote_where['base_grand_total'] = ['>',0];
-        $quote_resultList = $web_model->table('sales_flat_quote')->where($time_where)->where($quote_where)->field('DATE_FORMAT(created_at,"%H") hour_created_at ,count(*) quote_counter')->group("DATE_FORMAT(created_at,'%H')")->select();
-        //获取session
-        $ga_result = $model->ga_hour_data($start,$end);
-        $finalList = array();
-        for ($i = 0; $i < 24; $i++) {
-            if($time_flag){
-                $hour = date('H');
-                if($i <= $hour){
+            //购物车数量
+            $quote_where['base_grand_total'] = ['>',0];
+            $quote_resultList = $web_model->table('sales_flat_quote')->where($time_where)->where($quote_where)->field('DATE_FORMAT(created_at,"%H") hour_created_at ,count(*) quote_counter')->group("DATE_FORMAT(created_at,'%H')")->select();
+            //获取session
+            $ga_result = $model->ga_hour_data($start,$end);
+            $finalList = array();
+            for ($i = 0; $i < 24; $i++) {
+                if($time_flag){
+                    $hour = date('H');
+                    if($i <= $hour){
+                        $finalList[$i]['hour'] = $i;
+                        $finalList[$i]['hour_created'] = "$i:00 - $i:59";
+                    }
+                }else{
                     $finalList[$i]['hour'] = $i;
                     $finalList[$i]['hour_created'] = "$i:00 - $i:59";
                 }
-            }else{
-                $finalList[$i]['hour'] = $i;
-                $finalList[$i]['hour_created'] = "$i:00 - $i:59";
             }
-        }
-        foreach ($finalList as $final_key => $final_value) {
-            foreach ($ga_result as $ga_key => $ga_value) {
-                if ((int)$final_value['hour'] == (int)substr($ga_value['ga:dateHour'], 8)) {
-                    $finalList[$final_key]['sessions'] += $ga_value['ga:sessions'];
+            foreach ($finalList as $final_key => $final_value) {
+                foreach ($ga_result as $ga_key => $ga_value) {
+                    if ((int)$final_value['hour'] == (int)substr($ga_value['ga:dateHour'], 8)) {
+                        $finalList[$final_key]['sessions'] += $ga_value['ga:sessions'];
+                    }
                 }
             }
-        }
-        foreach ($finalList as $final_key => $final_value) {
-            foreach ($order_resultList as $order_key => $order_value) {
-                if ((int)$final_value['hour'] == (int)$order_value['hour_created_at']) {
-                    $finalList[$final_key]['hour_grand_total'] = $order_value['hour_grand_total'];
-                    $finalList[$final_key]['order_counter'] = $order_value['order_counter'];
+            foreach ($finalList as $final_key => $final_value) {
+                foreach ($order_resultList as $order_key => $order_value) {
+                    if ((int)$final_value['hour'] == (int)$order_value['hour_created_at']) {
+                        $finalList[$final_key]['hour_grand_total'] = $order_value['hour_grand_total'];
+                        $finalList[$final_key]['order_counter'] = $order_value['order_counter'];
+                    }
                 }
             }
-        }
-        foreach ($finalList as $final_key => $final_value) {
-            foreach ($orderitem_resultlist as $orderitem_key => $orderitem_value) {
-                if ((int)$final_value['hour'] == (int)$orderitem_value['hour_created_at']) {
-                    $finalList[$final_key]['orderitem_counter'] = $orderitem_value['orderitem_counter'];
+            foreach ($finalList as $final_key => $final_value) {
+                foreach ($orderitem_resultlist as $orderitem_key => $orderitem_value) {
+                    if ((int)$final_value['hour'] == (int)$orderitem_value['hour_created_at']) {
+                        $finalList[$final_key]['orderitem_counter'] = $orderitem_value['orderitem_counter'];
+                    }
                 }
             }
-        }
-        foreach ($finalList as $final_key => $final_value) {
-            foreach ($quote_resultList as $quote_key => $quote_value) {
-                if ((int)$final_value['hour'] == (int)$quote_value['hour_created_at']) {
-                    $finalList[$final_key]['quote_counter'] = $quote_value['quote_counter'];
+            foreach ($finalList as $final_key => $final_value) {
+                foreach ($quote_resultList as $quote_key => $quote_value) {
+                    if ((int)$final_value['hour'] == (int)$quote_value['hour_created_at']) {
+                        $finalList[$final_key]['quote_counter'] = $quote_value['quote_counter'];
+                    }
                 }
             }
-        }
-        $total_array = array();
-        foreach ($finalList as $key => $value) {
-            $total_array['sessions'] += $value['sessions'];
-            $total_array['hour_grand_total'] += $value['hour_grand_total'];
-            $total_array['order_counter'] += $value['order_counter'];
-            $total_array['orderitem_counter'] += $value['orderitem_counter'];
-            $total_array['quote_counter'] += $value['quote_counter'];
-            //会话转化率 订单/sessions
-            $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
-            $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2).'%' : 0;
-            $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
-            $finalList[$key]['grand_total_order_conversion'] = $finalList[$key]['order_counter'] ? round($finalList[$key]['hour_grand_total'] / $finalList[$key]['order_counter'], 2) : 0;
-        }
-        $total_array['order_sessions_conversion'] = $total_array['sessions'] ? round($total_array['order_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
-        $total_array['order_quote_conversion'] = $total_array['quote_counter'] ? round($total_array['order_counter'] / $total_array['quote_counter'] * 100, 2) . "%" : 0;
-        $total_array['quote_sessions_conversion'] = $total_array['sessions'] ? round($total_array['quote_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
-        $total_array['grand_total_order_conversion'] = $total_array['order_counter'] ? round($total_array['hour_grand_total'] / $total_array['order_counter'], 2) : 0;
+            $total_array = array();
+            foreach ($finalList as $key => $value) {
+                $total_array['sessions'] += $value['sessions'];
+                $total_array['hour_grand_total'] += $value['hour_grand_total'];
+                $total_array['order_counter'] += $value['order_counter'];
+                $total_array['orderitem_counter'] += $value['orderitem_counter'];
+                $total_array['quote_counter'] += $value['quote_counter'];
+                //会话转化率 订单/sessions
+                $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
+                $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2).'%' : 0;
+                $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
+                $finalList[$key]['grand_total_order_conversion'] = $finalList[$key]['order_counter'] ? round($finalList[$key]['hour_grand_total'] / $finalList[$key]['order_counter'], 2) : 0;
+            }
+            $total_array['order_sessions_conversion'] = $total_array['sessions'] ? round($total_array['order_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
+            $total_array['order_quote_conversion'] = $total_array['quote_counter'] ? round($total_array['order_counter'] / $total_array['quote_counter'] * 100, 2) . "%" : 0;
+            $total_array['quote_sessions_conversion'] = $total_array['sessions'] ? round($total_array['quote_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
+            $total_array['grand_total_order_conversion'] = $total_array['order_counter'] ? round($total_array['hour_grand_total'] / $total_array['order_counter'], 2) : 0;
 
-        $echart_data['hourStr'] = "";
-        $echart_data['sale_amount'] = "";
-        $echart_data['order_counter'] = "";
-        $echart_data['orderitem_counter'] = "";
-        $echart_data['grand_total_order_conversion'] = "";
+            $echart_data['hourStr'] = "";
+            $echart_data['sale_amount'] = "";
+            $echart_data['order_counter'] = "";
+            $echart_data['orderitem_counter'] = "";
+            $echart_data['grand_total_order_conversion'] = "";
 
-        for ($i = 0; $i < 24; $i++) {
-            if ($finalList[$i]['sessions'] || $finalList[$i]['quote_counter']) {
-                $echart_data['hourStr'] .= "$i:00,";
-                $echart_data['sale_amount'] .= $finalList[$i]['hour_grand_total'] . ",";
-                $echart_data['order_counter'] .= $finalList[$i]['order_counter'] . ",";
-                $echart_data['orderitem_counter'] .= $finalList[$i]['orderitem_counter'] . ",";
-                $echart_data['grand_total_order_conversion'] .= $finalList[$i]['grand_total_order_conversion'] . ",";
-            } else {
-                $echart_data['hourStr'] .= "$i:00,";
-                $echart_data['sale_amount'] .= "0,";
-                $echart_data['order_counter'] .= "0,";
-                $echart_data['orderitem_counter'] .= "0,";
-                $echart_data['grand_total_order_conversion'] .= "0,";
+            for ($i = 0; $i < 24; $i++) {
+                if ($finalList[$i]['sessions'] || $finalList[$i]['quote_counter']) {
+                    $echart_data['hourStr'] .= "$i:00,";
+                    $echart_data['sale_amount'] .= $finalList[$i]['hour_grand_total'] . ",";
+                    $echart_data['order_counter'] .= $finalList[$i]['order_counter'] . ",";
+                    $echart_data['orderitem_counter'] .= $finalList[$i]['orderitem_counter'] . ",";
+                    $echart_data['grand_total_order_conversion'] .= $finalList[$i]['grand_total_order_conversion'] . ",";
+                } else {
+                    $echart_data['hourStr'] .= "$i:00,";
+                    $echart_data['sale_amount'] .= "0,";
+                    $echart_data['order_counter'] .= "0,";
+                    $echart_data['orderitem_counter'] .= "0,";
+                    $echart_data['grand_total_order_conversion'] .= "0,";
+                }
             }
+            $echart_data['hourStr'] = rtrim($echart_data['hourStr'], ',');
+            $echart_data['sale_amount'] = rtrim($echart_data['sale_amount'], ',');
+            $echart_data['order_counter'] = rtrim($echart_data['order_counter'], ',');
+            $echart_data['orderitem_counter'] = rtrim($echart_data['orderitem_counter'], ',');
+            $echart_data['grand_total_order_conversion'] = rtrim($echart_data['grand_total_order_conversion'], ',');
+            //缓存
+            $cache_data['echart_data'] = $echart_data;
+            $cache_data['total_array'] = $total_array;
+            $cache_data['finalList'] = $finalList;
+            Cache::set($cache_vag, $cache_data, 300);
+        }else{
+            $cache_data = $cache_arr;
         }
-        $echart_data['hourStr'] = rtrim($echart_data['hourStr'], ',');
-        $echart_data['sale_amount'] = rtrim($echart_data['sale_amount'], ',');
-        $echart_data['order_counter'] = rtrim($echart_data['order_counter'], ',');
-        $echart_data['orderitem_counter'] = rtrim($echart_data['orderitem_counter'], ',');
-        $echart_data['grand_total_order_conversion'] = rtrim($echart_data['grand_total_order_conversion'], ',');
-        //缓存
-        $cache_data['echart_data'] = $echart_data;
-        $cache_data['total_array'] = $total_array;
-        $cache_data['finalList'] = $finalList;
         return $cache_data;
     }
     /**
