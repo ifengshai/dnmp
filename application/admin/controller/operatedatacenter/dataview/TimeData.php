@@ -25,9 +25,7 @@ class TimeData extends Backend
      */
     public function index()
     {
-        $time_str = input('time_str');
-        $web_site = input('order_platform') ? input('order_platform') : 1;
-        $info = $this->get_data($web_site,$time_str);
+        $info = $this->get_data(1,'');
         $data = $info['finalList'];
         $total = $info['total_array'];
         $count = count($info['finalList'])+1;
@@ -40,6 +38,25 @@ class TimeData extends Backend
         }
         $this->view->assign(compact('data','total','count','web_site','time_str','magentoplatformarr'));
         return $this->view->fetch();
+    }
+    public function ajax_get_data(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $info = $this->get_data($order_platform,$time_str);
+            $data = $info['finalList'];
+            $total = $info['total_array'];
+            $count = count($info['finalList'])+1;
+            $str = '';
+            foreach ($data as $key=>$val){
+                $num = $key+1;
+                $str .= '<tr><td>'.$num.'</td><td>'.$val['hour_created'].'</td><td>'.$val['order_counter'].'</td><td>'.$val['orderitem_counter'].'</td><td>'.$val['hour_grand_total'].'</td><td>'.$val['grand_total_order_conversion'].'</td><td>'.$val['sessions'].'</td><td>'.$val['quote_sessions_conversion'].'</td><td>'.$val['order_sessions_conversion'].'</td><td>'.$val['quote_counter'].'</td><td>'.$val['order_quote_conversion'].'</td></tr>';
+            }
+            $str .= '<tr><td>'.$count.'</td><td>合计</td><td>'.$total['order_counter'].'</td><td>'.$total['orderitem_counter'].'</td><td>'.$total['hour_grand_total'].'</td><td>'.$total['grand_total_order_conversion'].'</td><td>'.$total['sessions'].'</td><td>'.$total['quote_sessions_conversion'].'</td><td>'.$total['order_sessions_conversion'].'</td><td>'.$total['quote_counter'].'</td><td>'.$total['order_quote_conversion'].'</td></tr>';
+            $data = compact('time_str', 'order_platform','str');
+            $this->success('', '', $data);
+        }
     }
     //获取销售量
     public function get_data($site,$time_str){

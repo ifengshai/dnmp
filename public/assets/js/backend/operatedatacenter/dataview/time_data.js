@@ -7,6 +7,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.formatter.sales_money_line();
             Controller.api.formatter.order_num_line();
             Controller.api.formatter.unit_price_line();
+            $("#order_platform").click(function(){
+                data_view();
+                Controller.api.formatter.sales_num_line();
+                Controller.api.formatter.sales_money_line();
+                Controller.api.formatter.order_num_line();
+                Controller.api.formatter.unit_price_line();
+            });
+            $("#time_str").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    data_view();
+                    Controller.api.formatter.sales_num_line();
+                    Controller.api.formatter.sales_money_line();
+                    Controller.api.formatter.order_num_line();
+                    Controller.api.formatter.unit_price_line();
+                }, 0)
+            })
         },
         add: function () {
             Controller.api.bindevent();
@@ -88,3 +104,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
     };
     return Controller;
 });
+function data_view() {
+    var order_platform = $('#order_platform').val();
+    var time_str = $('#time_str').val();
+    Backend.api.ajax({
+        url: 'operatedatacenter/dataview/time_data/ajax_get_data',
+        data: { order_platform: order_platform, time_str: time_str }
+    }, function (data, ret) {
+        var order_platform = ret.data.order_platform;
+        var time_str = ret.data.time_str;
+        var str = ret.data.str;
+  
+        $('#order_platform').val(order_platform);
+        $('#time_str').val(time_str);
+        $('#table_data').html(str);
+   
+        return true;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
