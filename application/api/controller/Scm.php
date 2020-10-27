@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\DistributionLog;
 use app\common\controller\Api;
 use think\Db;
 use think\Exception;
@@ -1598,27 +1599,6 @@ class Scm extends Api
     }
 
     /**
-     * 记录配货流程操作日志
-     *
-     * @param int $item_process_id  子订单表ID
-     * @param string $remark  备注
-     * @author lzh
-     * @return bool
-     */
-    public function distribution_log($item_process_id,$remark)
-    {
-        $_distribution_log = new \app\admin\model\DistributionLog();
-        $log_data = [
-            'item_process_id' => $item_process_id,
-            'remark' => $remark,
-            'create_time' => date('Y-m-d H:i:s'),
-            'create_person' => $this->auth->nickname
-        ];
-        $res = $_distribution_log->allowField(true)->save($log_data);
-        return $res;
-    }
-
-    /**
      * 获取并校验子订单数据（配货通用）
      *
      * @param string $item_order_number  子订单号
@@ -1708,17 +1688,27 @@ class Scm extends Api
             ->value('id,distribution_status,option_id,order_id')
             ->find()
         ;
-        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
-        //检测当前状态
+        //状态类型
         $status_arr = [
-            3=>'待配镜片',
-            4=>'待加工',
-            5=>'待印logo',
-            6=>'待成品质检',
-            7=>'待合单'
+            3=>'配镜片',
+            4=>'加工',
+            5=>'印logo',
+            6=>'成品质检',
+            7=>'合单'
         ];
-        $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
+
+        //操作失败记录
+        if(empty($item_process_info)){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：子订单不存在');
+            $this->error(__('子订单不存在'), [], 403);
+        }
+
+        //操作失败记录
+        if($check_status != $item_process_info['distribution_status']){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：当前状态['.$status_arr[$item_process_info['distribution_status']].']无法操作');
+            $this->error(__('当前状态无法操作'), [], 405);
+        }
 
         //检测异常状态
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
@@ -1726,7 +1716,12 @@ class Scm extends Api
             ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
             ->value('id')
         ;
-        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //操作失败记录
+        if($abnormal_id){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：有异常['.$abnormal_id.']待处理不可操作');
+            $this->error(__('有异常待处理无法操作'), [], 405);
+        }
 
         //TODO::检测工单状态
 
@@ -1777,23 +1772,14 @@ class Scm extends Api
             ;
         }
 
-        //备注及报错信息
-        $msg_arr = [
-            3=>'配镜片',
-            4=>'加工',
-            5=>'印logo',
-            6=>'成品质检',
-            7=>'合单'
-        ];
-
         $res = $_new_order_item_process
             ->allowField(true)
             ->isUpdate(true, ['item_order_number'=>$item_order_number])
             ->save(['distribution_status'=>$save_status])
         ;
         if($res){
-            //记录操作日志
-            $this->distribution_log($item_process_info['id'],$msg_arr[$check_status].'完成');
+            //操作成功记录
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'完成');
 
             //成功返回
             $next_step = [
@@ -1805,8 +1791,11 @@ class Scm extends Api
             ];
             $this->success($next_step[$save_status], [],200);
         }else{
+            //操作失败记录
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：保存失败');
+
             //失败返回
-            $this->error(__($msg_arr[$check_status].'失败'), [], 404);
+            $this->error(__($status_arr[$check_status].'失败'), [], 404);
         }
     }
 
@@ -1919,7 +1908,7 @@ class Scm extends Api
             ;
 
             //记录日志
-            $this->distribution_log($item_process_id,$status_arr[$reason]['name']);
+            DistributionLog::record($this->auth,$item_process_id,$status_arr[$reason]['name']);
         }
     }
 
