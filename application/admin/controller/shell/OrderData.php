@@ -133,27 +133,27 @@ class OrderData extends Backend
                                     $model = $this->nihao;
                                     $site = 3;
                                     break;
-                                case 'meeloog':
-                                    $model = $this->meeloog;
-                                    break;
-                                case 'wesee':
-                                    $model = $this->wesee;
-                                    break;
-                                case 'zeelool_es':
-                                    $model = $this->zeelool_es;
-                                    break;
-                                case 'zeelool_de':
-                                    $model = $this->zeelool_de;
-                                    break;
-                                case 'zeelool_jp':
-                                    $model = $this->zeelool_jp;
-                                    break;
+                                    // case 'meeloog':
+                                    //     $model = $this->meeloog;
+                                    //     break;
+                                    // case 'wesee':
+                                    //     $model = $this->wesee;
+                                    //     break;
+                                    // case 'zeelool_es':
+                                    //     $model = $this->zeelool_es;
+                                    //     break;
+                                    // case 'zeelool_de':
+                                    //     $model = $this->zeelool_de;
+                                    //     break;
+                                    // case 'zeelool_jp':
+                                    //     $model = $this->zeelool_jp;
+                                    //     break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $params = [];
                                 $order_params = [];
-                                foreach($payload['data'] as $k => $v) {
+                                foreach ($payload['data'] as $k => $v) {
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
@@ -229,7 +229,6 @@ class OrderData extends Backend
                         //     //插入订单处理表
                         //     $this->orderprocess->saveAll($order_params);
                         // }
-                    }
 
                         break;
                     case RD_KAFKA_RESP_ERR__PARTITION_EOF: //没有数据
@@ -249,7 +248,6 @@ class OrderData extends Backend
             }
         }
     }
-
     /**
      * 处理订单处方数据
      *
