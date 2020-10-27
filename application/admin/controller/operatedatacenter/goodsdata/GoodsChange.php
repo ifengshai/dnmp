@@ -24,18 +24,22 @@ class GoodsChange extends Backend
         $start = date('Y-m-d', strtotime('-6 day'));
         $end = date('Y-m-d 23:59:59');
         $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
-        // $order_platform = input('order_platform') ? input('order_platform') : 1;
-        // //默认七天的数据
-        // $create_time = input('time_str') ? input('time_str') : $seven_days;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
-        if (empty($orderPlatform)) {
-            $this->error('您没有权限访问', 'general/profile?ref=addtabs');
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
         }
+
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
+            // dump($filter);
+
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -48,7 +52,9 @@ class GoodsChange extends Backend
             } else{
                 $createat = explode(' ', $seven_days);
             }
-
+            if($filter['create_time-operate']){
+                unset($filter['create_time-operate']);
+            }
             if($filter['order_platform']){
                 $order_platform = $filter['order_platform'];
                 unset($filter['order_platform']);
@@ -56,24 +62,28 @@ class GoodsChange extends Backend
             }else{
                 $order_platform = 1;
             }
-            // $params = $this->request->param();
-            // //站点
-            // $order_platform = input('order_platform') ? input('order_platform') : 1;
-            //时间
-            // $time_str = $filter['time_str'] ? input('time_str') : $seven_days;
+
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            // dump($map);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = Db::name('datacenter_sku_day')
                 ->where($where)
-                ->field('')
-                ->order($sort, $order)
+                ->where($map)
+                ->group('sku')
+                // ->order($sort, $order)
+                ->order('day_date','desc')
                 ->count();
             $sku_data_day = Db::name('datacenter_sku_day')
                 ->where($where)
-                ->order($sort, $order)
+                ->where($map)
+                ->group('sku')
+                ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
+                // ->order($sort, $order)
+                ->order('day_date','desc')
                 ->limit($offset, $limit)
                 ->select();
+            // dump($sku_data_day);
             foreach ($sku_data_day as $k => $v) {
                 $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
@@ -85,13 +95,9 @@ class GoodsChange extends Backend
                 $sku_data_day[$k]['cart_change'] = $sku_data_day[$k]['cart_num'] == 0 ? 0 : round($sku_data_day[$k]['order_num'] / $sku_data_day[$k]['cart_num'] * 100, 2) . '%';
             }
             $result = array("total" => $total, "rows" => $sku_data_day);
-            // $this->assignconfig('label', $order_platform);
-            // $this->assignconfig('create_time', $create_time);
             return json($result);
         }
-        $this->assign('orderPlatformList', $orderPlatform);
-        // $this->assignconfig('label', $order_platform);
-        // $this->assignconfig('create_time', $create_time);
+        $this->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
 
@@ -116,7 +122,8 @@ class GoodsChange extends Backend
             $where['site'] = $order_platform;
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $sku_data_day = Db::name('datacenter_sku_day')->where($where)->field('')->select();
-            $sku_data_days = Db::name('datacenter_sku_day')->where('site', $order_platform)->field('')->select();
+            $sku_data_days = Db::name('datacenter_sku_day')->where('site', $order_platform)->where($where)->field('')->select();
+            // dump($sku_data_days);
 
             //各个等级产品数量
             $arr = array_column($sku_data_days, 'goods_grade');
@@ -137,7 +144,9 @@ class GoodsChange extends Backend
                 }
 
             }
-
+            // dump($arr);
+            // dump($arrs);die;
+            // dump($sku_data_days);
             $a_plus['a_plus_num'] = $arr['A+'];
             $a_plus['a_plus_session_num'] = $arrs['A+']['unique_pageviews'];
             $a_plus['a_plus_cart_num'] = $arrs['A+']['cart_num'];
