@@ -728,7 +728,7 @@ class ZeeloolJp extends Backend
     }
 
 
-    public function generate_barcode($text, $fileName)
+    protected function generate_barcode($text, $fileName)
     {
         // 引用barcode文件夹对应的类
         Loader::import('BCode.BCGFontFile', EXTEND_PATH);
