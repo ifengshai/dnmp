@@ -66,8 +66,10 @@ class TimeData extends Backend
         $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         //订单数据
         $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
+
         //销售量
         $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,count(*) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
+
         //购物车数量
         $quote_where['base_grand_total'] = ['>',0];
         $quote_resultList = $web_model->table('sales_flat_quote')->where($time_where)->where($quote_where)->field('DATE_FORMAT(created_at,"%H") hour_created_at ,count(*) quote_counter')->group("DATE_FORMAT(created_at,'%H')")->select();
@@ -75,7 +77,7 @@ class TimeData extends Backend
         $ga_result = $model->ga_hour_data($start,$end);
         $finalList = array();
         for ($i = 0; $i < 24; $i++) {
-            $finalList[$i]['hour'] = $i+1;
+            $finalList[$i]['hour'] = $i;
             $finalList[$i]['hour_created'] = "$i:00 - $i:59";
         }
         foreach ($finalList as $final_key => $final_value) {
