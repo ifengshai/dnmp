@@ -23,8 +23,12 @@ class OrderData extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->meeloog = new \app\admin\model\order\order\Meeloog();
+        $this->wesee = new \app\admin\model\order\order\Weseeoptical();
+        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
     }
-
 
 
     /**
@@ -37,28 +41,134 @@ class OrderData extends Backend
      */
     public function process_order_data()
     {
-        //查询订单表最大id
-        $id = $this->order->max('entity_id');
+        /**
+         * 代码中的输出注释都可以打开供调试使用
+         * 对 中台生产的  用户信息 进行消费
+         */
+        // 设置将要消费消息的主题
+        $topic = 'order_data';
+        $host = '127.0.0.1:9092';
+        $group_id = '0';
+        $conf = new \RdKafka\Conf();
+        // 当有新的消费进程加入或者退出消费组时，kafka 会自动重新分配分区给消费者进程，这里注册了一个回调函数，当分区被重新分配时触发
+        $conf->setRebalanceCb(function (\RdKafka\KafkaConsumer $kafka, $err, array $partitions = null) {
+            switch ($err) {
+                case RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS:
+                    $kafka->assign($partitions);
+                    break;
+                case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
+                    $kafka->assign(NULL);
+                    break;
+                default:
+                    throw new \Exception($err);
+            }
+        });
+        // 配置groud.id 具有相同 group.id 的consumer 将会处理不同分区的消息，
+        // 所以同一个组内的消费者数量如果订阅了一个topic，
+        // 那么消费者进程的数量多于 多于这个topic 分区的数量是没有意义的。
+        $conf->set('group.id', $group_id);
 
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])
-            ->field('entity_id,status,store_id,increment_id as order_number,base_grand_total,order_type,base_currency_code,customer_email,customer_firstname,customer_lastname,created_at,updated_at')
-            ->limit(200)
-            ->select();
-        $list = collection($list)->toArray();
+        // 添加 kafka集群服务器地址
+        $conf->set('metadata.broker.list', $host); //'localhost:9092,localhost:9093,localhost:9094,localhost:9095'
 
-        $order_ids = array_column($list, 'entity_id');
-        //查询每个单号购买的商品数量
-        $goods_data = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['order_id' => ['in', $order_ids]])->column("sum(qty_ordered)", 'order_id');
-        foreach ($list as &$v) {
-            $v['status'] = $v['status'] ?: '';
-            $v['created_at'] = strtotime($v['created_at']);
-            $v['customer_firstname'] = $v['customer_firstname'] ?: '';
-            $v['customer_lastname'] = $v['customer_lastname'] ?: '';
-            $v['customer_email'] = $v['customer_email'] ?: '';
-            $v['updated_at'] = strtotime($v['updated_at']);
-            $v['all_goods_num'] = $goods_data[$v['entity_id']] ?? 0;
+        // 针对低延迟进行了优化的配置。这允许PHP进程/请求尽快发送消息并快速终止
+        $conf->set('socket.timeout.ms', 50);
+        //多进程和信号
+        if (function_exists('pcntl_sigprocmask')) {
+            pcntl_sigprocmask(SIG_BLOCK, array(SIGIO));
+            $conf->set('internal.termination.signal', SIGIO);
+        } else {
+            $conf->set('queue.buffering.max.ms', 1);
         }
-        $this->order->insertAll($list);
+
+        $topicConf = new \RdKafka\TopicConf();
+        // 在interval.ms的时间内自动提交确认、建议不要启动, 1是启动，0是未启动
+        $topicConf->set('auto.commit.enable', 0);
+        $topicConf->set('auto.commit.interval.ms', 100);
+        //smallest：简单理解为从头开始消费，largest：简单理解为从最新的开始消费
+        $topicConf->set('auto.offset.reset', 'smallest');
+        // 设置offset的存储为broker
+        //$topicConf->set('offset.store.method', 'broker');
+        // 设置offset的存储为file
+        //$topicConf->set('offset.store.method', 'file');
+        // 设置offset的存储路径
+        $topicConf->set('offset.store.path', 'kafka_offset.log');
+        //$topicConf->set('offset.store.path', __DIR__);
+
+        $consumer = new \RdKafka\KafkaConsumer($conf);
+
+        // 更新订阅集（自动分配partitions ）
+        $consumer->subscribe([$topic]);
+
+        //指定topic分配partitions使用那个分区
+        // $consumer->assign([
+        //     new \RdKafka\TopicPartition("zzy8", 0),
+        //     new \RdKafka\TopicPartition("zzy8", 1),
+        // ]);
+
+        while (true) {
+            //设置120s为超时
+            $message = $consumer->consume(120 * 1000);
+            if (!empty($message)) {
+                switch ($message->err) {
+                    case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
+                        //拆解对象为数组，并根据业务需求处理数据
+                        $payload = json_decode($message->payload, true);
+                        $key = $message->key;
+                        //根据kafka中不同key，调用对应方法传递处理数据
+                        //对该条message进行处理，比如用户数据同步， 记录日志。
+                        if ($payload) {
+                            //根据库名判断站点
+                            switch ($payload['database']) {
+                                case 'zeelool':
+                                    $model = $this->zeelool;
+                                    break;
+                                case 'voogueme':
+                                    $model = $this->voogueme;
+                                    break;
+                                case 'nihao':
+                                    $model = $this->nihao;
+                                    break;
+                                case 'meeloog':
+                                    $model = $this->meeloog;
+                                    break;
+                                case 'wesee':
+                                    $model = $this->wesee;
+                                    break;
+                                case 'zeelool_es':
+                                    $model = $this->zeelool_es;
+                                    break;
+                                case 'zeelool_de':
+                                    $model = $this->zeelool_de;
+                                    break;
+                                case 'zeelool_jp':
+                                    $model = $this->zeelool_jp;
+                                    break;
+                            }
+
+                            if ($payload['type'] == 'INSERT') {
+                                
+                            }
+                        }
+
+
+                        break;
+                    case RD_KAFKA_RESP_ERR__PARTITION_EOF: //没有数据
+                        echo "No more messages; will wait for more\n";
+                        break;
+                    case RD_KAFKA_RESP_ERR__TIMED_OUT: //超时
+                        echo "Timed out\n";
+                        // var_dump("##################");
+                        break;
+                    default:
+                        // var_dump("nothing");
+                        throw new \Exception($message->errstr(), $message->err);
+                        break;
+                }
+            } else {
+                // var_dump('this is empty obj!!!');
+            }
+        }
     }
 
     /**
@@ -136,9 +246,9 @@ class OrderData extends Backend
                 $data[$i]['option_id'] = $options_id;
                 $str = '';
                 if ($i < 10) {
-                    $str = '0' . $i+1;
+                    $str = '0' . $i + 1;
                 } else {
-                    $str = $i+1;
+                    $str = $i + 1;
                 }
                 $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
                 $data[$i]['sku'] = $v['sku'];
