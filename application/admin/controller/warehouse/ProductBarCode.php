@@ -149,12 +149,21 @@ class ProductBarCode extends Backend
     /**
      * 打印
      */
-    public function print_label($ids = null)
+    public function print_label($ids = null,$do_type = null)
     {
+        //批量打印
+        if(1 == $do_type){
+            $where['barcode_id'] = ['in',$ids];
+        }else{
+            //检测打印状态
+            $check_status = $this->model->where(['id' => $ids])->value('status');
+            1 == $check_status && $this->error('请勿重复打印！');
 
-        //检测打印状态
-        $check_status = $this->model->where(['id' => $ids])->value('status');
-        $check_status == 1 && $this->error('请勿重复打印！');
+            $where['barcode_id'] = $ids;
+
+            //标记打印
+            $this->model->allowField(true)->save(['status' => 1], ['id' => $ids]);
+        }
 
         ob_start();
         $file_header =
@@ -172,14 +181,11 @@ table.addpro.re tbody td{ position:relative}
 EOF;
 
         $list = $this->item
-            ->where(['barcode_id'=>$ids])
+            ->where($where)
             ->order('id', 'asc')
             ->field('code')
             ->select();
         $list = collection($list)->toArray();
-
-        //标记打印
-        $this->model->allowField(true)->save(['status' => 1], ['id' => $ids]);
 
         $file_content = '';
         foreach ($list as $value) {
@@ -249,6 +255,61 @@ EOF;
         header('Content-Type: image/png');
         // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
         $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
+    }
+
+    /**
+     * 条形码绑定关系列表
+     */
+    public function binding()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $map['check_id'] = ['>',0];
+            $filter = json_decode($this->request->get('filter'), true);
+            $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+            //检测采购单号
+            if ($filter['purchase_number']) {
+                $purchase_ids = $_purchase_order->where(['purchase_number'=>['like', '%' . $filter['purchase_number'] . '%']])->column('id');
+                $map['purchase_id'] = ['in',$purchase_ids];
+                unset($filter['purchase_number']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->item
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->item
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            //获取采购单数据
+            $purchase_list = $_purchase_order
+                ->where(['purchase_status'=>[['=',6], ['=',7], 'or']])
+                ->column('purchase_number','id');
+
+            foreach ($list as $k=>$val){
+                $list[$k]['purchase_number'] = $purchase_list[$val['purchase_id']];
+            }
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
     }
 
 }

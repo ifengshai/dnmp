@@ -124,7 +124,7 @@ class OrderDataView extends Backend
             }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+                $where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -178,9 +178,10 @@ class OrderDataView extends Backend
                 $time_str = $start . ' - '. $end;
             }
             $createat = explode(' ', $time_str);
-            $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+            $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $order_where['oa.address_type'] = 'shipping';
+            $order_where['o.order_type'] = 1;
             //获取所有的订单的国家
             $country_arr = $model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
             $arr = array();
@@ -221,7 +222,7 @@ class OrderDataView extends Backend
                 $time_str = $start . ' - '. $end;
             }
             $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             $where['site'] = $order_platform;
             $order_info = Db::name('datacenter_day')->where($where)->field('day_date,order_unit_price,order_total_midnum,order_total_standard')->select();
             $order_info = collection($order_info)->toArray();

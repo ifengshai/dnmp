@@ -74,6 +74,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         add: function () {
             Controller.api.bindevent();
         },
+        binding: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'warehouse/product_bar_code/binding' + location.search,
+                    table: 'product_bar_code'
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), visible: false, operate: false },
+                        { field: 'code', title: __('商品条形码编号'), operate: 'LIKE' },
+                        { field: 'sku', title: __('Sku'), operate: 'LIKE' },
+                        { field: 'purchase_number', title: __('采购单号'), operate: 'LIKE' },
+                        { field: 'create_person', title: __('创建人') },
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+            //批量打印条形码
+            $('.btn-batch-printed_test').click(function () {
+                var id_params = [];
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params.push(row['id']);
+                });
+                window.open(Config.moduleurl + '/warehouse/product_bar_code/print_label/do_type/1/ids/' + id_params.join(','), '_blank');
+            });
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

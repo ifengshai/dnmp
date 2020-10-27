@@ -340,6 +340,7 @@ class Zeelool extends Model
 
         $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
+        $where['order_type'] = 1;
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
 
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
@@ -367,7 +368,8 @@ class Zeelool extends Model
                 }
             }
 
-            $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            // $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $wheres['created_at'] = ['<', $createat[0].' '.$createat[1]];
             foreach ($new_arr as $key=>$val){
                 //判断之前是否有这些订单
                 $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
@@ -711,7 +713,7 @@ class Zeelool extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -755,7 +757,7 @@ class Zeelool extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3]]];
+            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -1241,6 +1243,7 @@ class Zeelool extends Model
         $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
+        $order_where['o.order_type'] = 1;
         //获取所有的订单的国家
         $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
         //总订单数
