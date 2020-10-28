@@ -1132,7 +1132,7 @@ class Scm extends Api
         $list = $_out_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id')
+            ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id,a.remark')
             ->join(['fa_out_stock_item' => 'b'], 'a.id=b.out_stock_id','left')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
