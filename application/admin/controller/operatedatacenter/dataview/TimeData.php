@@ -69,9 +69,10 @@ class TimeData extends Backend
             $start = $createat[0];
             $end = $createat[3];
             $time_flag = '';
-            $time = strtotime($createat[0]).strtolower($createat[3]);
-            if($createat[0] == $createat[3]){
+            $time = strtotime($start).strtolower($end);
+            if($start == $end){
                 $time_flag = 'today';
+                echo 111;exit;
             }
         }
         if($site == 2){
