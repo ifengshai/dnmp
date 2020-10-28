@@ -129,15 +129,15 @@ class TimeData extends Backend
             foreach ($finalList as $final_key => $final_value) {
                 foreach ($order_resultList as $order_key => $order_value) {
                     if ((int)$final_value['hour'] == (int)$order_value['hour_created_at']) {
-                        $finalList[$final_key]['hour_grand_total'] = $order_value['hour_grand_total'];
-                        $finalList[$final_key]['order_counter'] = $order_value['order_counter'];
+                        $finalList[$final_key]['hour_grand_total'] = $order_value['hour_grand_total'] ? $order_value['hour_grand_total'] : 0;
+                        $finalList[$final_key]['order_counter'] = $order_value['order_counter'] ? $order_value['order_counter'] : 0;
                     }
                 }
             }
             foreach ($finalList as $final_key => $final_value) {
                 foreach ($orderitem_resultlist as $orderitem_key => $orderitem_value) {
                     if ((int)$final_value['hour'] == (int)$orderitem_value['hour_created_at']) {
-                        $finalList[$final_key]['orderitem_counter'] = (int)$orderitem_value['orderitem_counter'];
+                        $finalList[$final_key]['orderitem_counter'] = $orderitem_value['orderitem_counter'] ? (int)$orderitem_value['orderitem_counter'] : 0;
                     }
                 }
             }
@@ -175,9 +175,9 @@ class TimeData extends Backend
             for ($i = 0; $i < 24; $i++) {
                 if ($finalList[$i]['sessions'] || $finalList[$i]['quote_counter']) {
                     $echart_data['hourStr'] .= "$i:00,";
-                    $echart_data['sale_amount'] .= $finalList[$i]['hour_grand_total'] . ",";
-                    $echart_data['order_counter'] .= $finalList[$i]['order_counter'] . ",";
-                    $echart_data['orderitem_counter'] .= $finalList[$i]['orderitem_counter'] . ",";
+                    $echart_data['sale_amount'] .= $finalList[$i]['hour_grand_total'] ? $finalList[$i]['hour_grand_total'] . "," : "0,";
+                    $echart_data['order_counter'] .= $finalList[$i]['order_counter'] ? $finalList[$i]['order_counter'] . "," : "0,";
+                    $echart_data['orderitem_counter'] .= $finalList[$i]['orderitem_counter'] ? $finalList[$i]['orderitem_counter'] . "," : "0,";
                     $echart_data['grand_total_order_conversion'] .= $finalList[$i]['grand_total_order_conversion'] . ",";
                 } else {
                     $echart_data['hourStr'] .= "$i:00,";
