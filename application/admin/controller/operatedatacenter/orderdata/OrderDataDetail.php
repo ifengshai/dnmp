@@ -59,9 +59,7 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-                unset($filter['time_str']);
-                $this->request->get(['filter' => json_encode($filter)]);
+                $map['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             }else{
                 if(isset($filter['time_str'])){
                     unset($filter['time_str']);
@@ -69,33 +67,66 @@ class OrderDataDetail extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $map['created_at'] = ['between', [$start,$end]];
+                $map['o.created_at'] = ['between', [$start,$end]];
             }
-            if($filter['order_platform']){
-                unset($filter['order_platform']);
-                $this->request->get(['filter' => json_encode($filter)]);
+            if($filter['order_status']){
+                if($filter['order_status'] == 1){
+                    //已发货
+                    $node_where['node_type'] = 7;
+                }elseif ($filter['order_status'] == 2){
+                    //进行中
+                    $node_where['node_type'] = ['>',7];
+                    $node_where['node_type'] = ['<',12];
+                }elseif ($filter['order_status'] == 3){
+                    $node_where['node_type'] = 12;
+                }
+                $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
+                $map['o.entity_id'] = ['in',$order_ids];
             }
+            if($filter['customer_type']){
+                $map['c.group_id'] = $filter['customer_type'];
+            }
+            if($filter['store_id']){
+                $map['o.store_id'] = $filter['store_id'];
+            }
+            unset($filter['time_str']);
+            unset($filter['order_platform']);
+            unset($filter['order_status']);
+            unset($filter['customer_type']);
+            unset($filter['store_id']);
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $order_model
+            $sort = 'o.entity_id';
+            $total = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
-                ->count();
-            $list = $order_model
+                ->count('o.entity_id');
+            $list = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('entity_id,increment_id,created_at,base_grand_total,base_shipping_amount,status,store_id,protect_code,shipping_method,customer_email,customer_id,base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.protect_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
                 ->select();
             $list = collection($list)->toArray();
             $i = 0;
             foreach ($list as $key=>$value){
                 $list[$key]['increment_id'] = $value['increment_id'];
                 $list[$key]['created_at'] = $value['created_at'];
-                $list[$key]['base_grand_total'] = $value['base_grand_total'];
-                $list[$key]['base_shipping_amount'] = $value['base_shipping_amount'];
-                $list[$key]['status'] = $value['status'];
+                $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
+                $list[$key]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
+                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
+                if($order_node == 7){
+                    $order_shipping_status = '已发货';
+                }elseif ($order_node>7 && $order_node<12){
+                    $order_shipping_status = '进行中';
+                }elseif ($order_node == 12){
+                    $order_shipping_status = '已收到货';
+                }
+                $list[$key]['status'] = $order_shipping_status;
                 switch ($value['store_id']){
                     case 1:
                         $store_id = 'PC';
