@@ -154,6 +154,8 @@ class OrderData extends Backend
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
+
+                                dump($payload['data']);
                                 $params = [];
                                 $order_params = [];
                                 $order_item_params = [];
@@ -170,18 +172,14 @@ class OrderData extends Backend
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
-                                    $params['country_id'] = $v['country_id'];
-                                    $params['region'] = $v['region'];
-                                    $params['city'] = $v['city'];
-                                    $params['street'] = $v['street'];
-                                    $params['postcode'] = $v['postcode'];
-                                    $params['telephone'] = $v['telephone'];
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['created_at'] = strtotime($v['created_at']);
                                     $params['updated_at'] = strtotime($v['updated_at']);
+
+                                    dump($params);
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -202,6 +200,7 @@ class OrderData extends Backend
 
                             //更新主表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order') {
+                                dump($payload['data']);
                                 $params = [];
                                 foreach ($payload['data'] as $k => $v) {
                                     $params['base_grand_total'] = $v['base_grand_total'];
@@ -220,6 +219,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
+                                    dump($params);
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
                             }
