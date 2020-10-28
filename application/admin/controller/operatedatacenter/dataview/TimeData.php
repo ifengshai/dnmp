@@ -60,8 +60,9 @@ class TimeData extends Backend
     }
     //获取销售量
     public function get_data($site,$time_str){
+        $now_date = date('Y-m-d');
         if(!$time_str){
-            $start = $end = $time_str = date('Y-m-d');
+            $start = $end = $time_str = $now_date;
             $time_flag = 'today';
             $time = time().time();
         }else{
@@ -70,7 +71,7 @@ class TimeData extends Backend
             $end = $createat[3];
             $time_flag = '';
             $time = strtotime($start).strtolower($end);
-            if($start == $end){
+            if(($start == $end) && ($start == $now_date) && ($end == $now_date)){
                 $time_flag = 'today';
             }
         }
