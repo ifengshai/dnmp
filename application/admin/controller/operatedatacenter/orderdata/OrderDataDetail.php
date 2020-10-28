@@ -75,8 +75,7 @@ class OrderDataDetail extends Backend
                     $node_where['node_type'] = 7;
                 }elseif ($filter['order_status'] == 2){
                     //进行中
-                    $node_where['node_type'] = ['>',7];
-                    $node_where['node_type'] = ['<',12];
+                    $node_where['node_type'] = ['between',[7,12]];
                 }elseif ($filter['order_status'] == 3){
                     $node_where['node_type'] = 12;
                 }
