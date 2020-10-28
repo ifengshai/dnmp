@@ -910,7 +910,7 @@ class Voogueme extends Model
         // Print the response.
         $result = $this->printResults($response);
         // return $result;
-        return $result[0]['ga:goal13Starts'] ? round($result[0]['ga:goal13Starts'], 2) : 0;
+        return $result[0]['ga:goal20Starts'] ? round($result[0]['ga:goal20Starts'], 2) : 0;
     }
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
@@ -941,8 +941,8 @@ class Voogueme extends Model
         // $adCostMetric->setExpression("ga:sessions");
         // $adCostMetric->setAlias("ga:sessions");
         //目标4的数量
-        $adCostMetric->setExpression("ga:goal13Starts");
-        $adCostMetric->setAlias("ga:goal13Starts");
+        $adCostMetric->setExpression("ga:goal20Starts");
+        $adCostMetric->setAlias("ga:goal20Starts");
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:date");
@@ -974,7 +974,7 @@ class Voogueme extends Model
         // Print the response.
         $result = $this->printResults($response);
         // return $result;
-        return $result[0]['ga:goal1Starts'] ? round($result[0]['ga:goal1Starts'], 2) : 0;
+        return $result[0]['ga:goal2Starts'] ? round($result[0]['ga:goal2Starts'], 2) : 0;
     }
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
@@ -1005,8 +1005,8 @@ class Voogueme extends Model
         // $adCostMetric->setExpression("ga:sessions");
         // $adCostMetric->setAlias("ga:sessions");
         //目标4的数量
-        $adCostMetric->setExpression("ga:goal1Starts");
-        $adCostMetric->setAlias("ga:goal1Starts");
+        $adCostMetric->setExpression("ga:goal2Starts");
+        $adCostMetric->setAlias("ga:goal2Starts");
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:date");
