@@ -256,7 +256,7 @@
     }
 
     .margin-div {
-        margin-top: 30px;
+        /*margin-top: 30px;*/
     }
 
     .btn-div {
@@ -270,7 +270,8 @@
         font-family: 'Arial Negreta', 'Arial';
         font-weight: 700;
         font-style: normal;
-        margin-right: 20px;
+        margin-right: 100px;
+        margin-top: 30px;
         width: 220px;
     }
 
@@ -323,36 +324,87 @@
                                     <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
                                     <div class="rate_class">
                                         同比：<span
-                                            id="same_active_user_num">{$active_user_num.same_active_user_num}</span>
+                                            id="same_active_user_num">
+                                        {if condition="((float)$active_user_num.same_active_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$active_user_num.same_active_user_num}
+                                    </span>
                                         环比：<span
-                                            id="huan_active_user_num">{$active_user_num.huan_active_user_num}</span></div>
+                                            id="huan_active_user_num">
+                                        {if condition="((float)$active_user_num.huan_active_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$active_user_num.huan_active_user_num}
+                                    </span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
                                     <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
-                                    <div class="rate_class">
-                                        同比：<span
-                                            id="same_register_user_num">{$register_user_num.same_register_user_num}</span>
-                                        环比：<span
-                                            id="huan_register_user_num">{$register_user_num.huan_register_user_num}</span></div>
+                                    <div class="rate_class">同比：
+                                        <span id="same_register_user_num">
+                                        {if condition="((float)$register_user_num.same_register_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$register_user_num.same_register_user_num}
+                                    </span>
+
+                                        环比：<span id="huan_register_user_num">
+                                        {if condition="((float)$register_user_num.huan_register_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$register_user_num.huan_register_user_num}</span>
+                                    </div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
                                     <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
                                     <div class="rate_class">
-                                        同比：<span id="same_again_user_num">{$again_user_num.same_again_user_num}</span>
+                                        同比：<span id="same_again_user_num">
+                                        {if condition="((float)$again_user_num.same_again_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$again_user_num.same_again_user_num}</span>
                                         环比：<span
-                                            id="huan_again_user_num">{$again_user_num.huan_again_user_num}</span></div>
+                                            id="huan_again_user_num">
+                                        {if condition="((float)$again_user_num.huan_again_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$again_user_num.huan_again_user_num}</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
                                     <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
                                     <div class="rate_class">
-                                        同比：<span id="same_vip_user_num">{$vip_user_num.same_vip_user_num}</span>
-                                        环比：<span id="huan_vip_user_num">{$vip_user_num.huan_vip_user_num}</span></div>
+                                        同比：<span id="same_vip_user_num">
+                                        {if condition="((float)$vip_user_num.same_vip_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$vip_user_num.same_vip_user_num}</span>
+                                        环比：<span id="huan_vip_user_num">
+                                        {if condition="((float)$vip_user_num.huan_vip_user_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$vip_user_num.huan_vip_user_num}</span></div>
                                 </span>
                                 </div>
                                 <br>
@@ -360,29 +412,79 @@
                                 <span class="extend">
                                     <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
                                     <div class="rate_class">同比：<span
-                                            id="same_order_num">{$order_num.same_order_num}</span>  环比：<span
-                                            id="huan_order_num">{$order_num.huan_order_num}</span></div>
+                                            id="same_order_num">
+                                        {if condition="((float)$order_num.same_order_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$order_num.same_order_num}</span>  环比：<span
+                                            id="huan_order_num">
+                                        {if condition="((float)$order_num.huan_order_num/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$order_num.huan_order_num}</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">客单价：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
-                                    <div class="rate_class">同比：<span id="same_order_unit_price">{$order_unit_price.same_order_unit_price}</span>  环比：<span
-                                            id="huan_order_unit_price">{$order_unit_price.huan_order_unit_price}</span></div>
+                                    <div class="title">客单价：<span style="color: red;" id="order_unit_price">
+
+                                        {$order_unit_price.order_unit_price}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_unit_price">
+                                        {if condition="((float)$order_unit_price.same_order_unit_price/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$order_unit_price.same_order_unit_price}</span>  环比：<span
+                                            id="huan_order_unit_price">
+                                        {if condition="((float)$order_unit_price.huan_order_unit_price/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$order_unit_price.huan_order_unit_price}</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
                                     <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
-                                    <div class="rate_class">同比：<span id="same_sales_total_money">{$sales_total_money.same_sales_total_money}</span>  环比：<span
-                                            id="huan_sales_total_money">{$sales_total_money.huan_sales_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_sales_total_money">
+                                        {if condition="((float)$sales_total_money.same_sales_total_money/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$sales_total_money.same_sales_total_money}</span>  环比：<span
+                                            id="huan_sales_total_money">
+                                        {if condition="((float)$sales_total_money.huan_sales_total_money/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$sales_total_money.huan_sales_total_money}</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
                                     <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
-                                    <div class="rate_class">同比：<span id="same_shipping_total_money">{$shipping_total_money.same_shipping_total_money}</span>  环比：<span
-                                            id="huan_shipping_total_money">{$shipping_total_money.huan_shipping_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_shipping_total_money">
+                                         {if condition="((float)$shipping_total_money.same_shipping_total_money/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$shipping_total_money.same_shipping_total_money}</span>  环比：<span
+                                            id="huan_shipping_total_money">
+                                         {if condition="((float)$shipping_total_money.huan_shipping_total_money/100 < 0)"}
+                                        <img src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0">
+                                        {/if}
+                                        {$shipping_total_money.huan_shipping_total_money}</span></div>
                                 </span>
                                 </div>
                             </div>
@@ -396,9 +498,30 @@
                 <select id="type" style="display:none">
                     <option value="1">订单数</option>
                 </select>
-                <div id="echart1" style="height:800px;width:100%;"></div>
-                <div id="echart2" style="height:800px;width:100%;"></div>
-                <div id="echart3" style="height:800px;width:100%;margin-left: 15rem;"></div>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">订单趋势统计</label>
+                        </div>
+                    </div>
+                    <div id="echart1" style="height:800px;width:80%;margin-left: 200px;"></div>
+                </div>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">活跃用户趋势统计</label>
+                        </div>
+                    </div>
+                    <div id="echart2" style="height:800px;width:80%;margin-left: 200px;"></div>
+                </div>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">用户购买转化漏斗</label>
+                        </div>
+                    </div>
+                    <div id="echart3" style="height:800px;width:80%;margin-left: 330px;"></div>
+                </div>
             </div>
         </div>
     </div>
