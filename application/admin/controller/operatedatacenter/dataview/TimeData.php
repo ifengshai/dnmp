@@ -70,6 +70,9 @@ class TimeData extends Backend
             $end = $createat[3];
             $time_flag = '';
             $time = strtotime($createat[0]).strtolower($createat[3]);
+            if($createat[0] == $createat[3]){
+                $time_flag = 'today';
+            }
         }
         if($site == 2){
             $model = $this->vooguemeOperate;
