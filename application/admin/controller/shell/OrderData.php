@@ -220,7 +220,8 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
-                                    $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
+                          
+                                    $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
 
