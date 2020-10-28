@@ -1689,6 +1689,14 @@ class Scm extends Api
             ->find()
         ;
 
+        //获取子订单处方数据
+        $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+        $item_option_info = $_new_order_item_option
+            ->where('id', $item_process_info['option_id'])
+            ->value('is_print_logo,qty,sku')
+            ->find()
+        ;
+
         //状态类型
         $status_arr = [
             3=>'配镜片',
@@ -1736,13 +1744,7 @@ class Scm extends Api
         if(3 == $check_status){
             $save_status = 4;
         }elseif(4 == $check_status){
-            //获取子订单处方数据
-            $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
-            $is_print_logo = $_new_order_item_option
-                ->where('id', $item_process_info['option_id'])
-                ->value('is_print_logo')
-            ;
-            if($is_print_logo){
+            if($item_option_info['is_print_logo']){
                 $save_status = 5;
             }else{
                 if($total_qty_ordered > 1){
@@ -1759,6 +1761,16 @@ class Scm extends Api
             }else{
                 $save_status = 8;
             }
+
+            //扣减订单占用库存、配货占用库存、总库存
+            $_item = new \app\admin\model\itemmanage\Item;
+            $_item
+                ->where(['sku'=>$item_option_info['sku']])
+                ->dec('occupy_stock', $item_option_info['qty'])
+                ->dec('distribution_occupy_stock', $item_option_info['qty'])
+                ->dec('stock', $item_option_info['qty'])
+                ->update()
+            ;
         }elseif(7 == $check_status){
             $save_status = 8;
         }
