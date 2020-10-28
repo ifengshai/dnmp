@@ -124,6 +124,8 @@ class OrderDataDetail extends Backend
                     $order_shipping_status = '进行中';
                 }elseif ($order_node == 12){
                     $order_shipping_status = '已收到货';
+                }else{
+                    $order_shipping_status = '-';
                 }
                 $list[$key]['status'] = $order_shipping_status;
                 switch ($value['store_id']){
