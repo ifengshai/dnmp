@@ -287,7 +287,7 @@ class Scm extends Api
 
         //获取质检单数据
         $_check = new \app\admin\model\warehouse\Check();
-        $check_data = $_check->where('id', $check_id)->field('purchase_id,batch_id,check_order_number,supplier_id')->find();
+        $check_data = $_check->where('id', $check_id)->field('purchase_id,batch_id,check_order_number,supplier_id,is_error')->find();
         empty($check_data) && $this->error(__('质检单不存在'), [], 403);
 
         //获取采购单数据
@@ -397,6 +397,7 @@ class Scm extends Api
             'check_order_number'=>$check_data['check_order_number'],
             'purchase_number'=>$purchase_data['purchase_number'],
             'supplier_name'=>$supplier_data['supplier_name'],
+            'is_error'=>$check_data['is_error'],
             'batch'=>$batch,
             'item_list'=>$item_list
         ];
@@ -1540,17 +1541,45 @@ class Scm extends Api
         ;
         empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
 
-        //绑定异常子单号
-        $abnormal_data = [
-            'item_process_id' => $item_process_id,
-            'type' => $type,
-            'status' => 1,
-            'create_time' => date('Y-m-d H:i:s'),
-            'create_person' => $this->auth->nickname
-        ];
-        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
-        $res = $_distribution_abnormal->allowField(true)->save($abnormal_data);
-        $res ? $this->success('标记成功', [],200) : $this->error(__('标记失败'), [], 404);
+        //自动分配异常库位号
+        $_stock_house = new \app\admin\model\warehouse\StockHouse;
+        $stock_house_info = $_stock_house
+            ->field('id,coding')
+            ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
+            ->order('occupy', 'desc')
+            ->find()
+        ;
+        if(!empty($stock_house_info)){
+            //绑定异常子单号
+            $abnormal_data = [
+                'item_process_id' => $item_process_id,
+                'type' => $type,
+                'status' => 1,
+                'create_time' => date('Y-m-d H:i:s'),
+                'create_person' => $this->auth->nickname
+            ];
+            $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+            $_distribution_abnormal->allowField(true)->save($abnormal_data);
+
+            //子订单绑定异常库位号
+            $_new_order_item_process
+                ->allowField(true)
+                ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                ->save(['abnormal_house_id'=>$stock_house_info['id']])
+            ;
+
+            //异常库位号占用数量+1
+            $_stock_house
+                ->where(['id' => $stock_house_info['id']])
+                ->setInc('occupy', 1)
+            ;
+
+            DistributionLog::record($this->auth,$item_process_id,'异常库位号：'.$stock_house_info['coding']);
+            $this->success(__('异常库位号：'.$stock_house_info['coding']), [], 200);
+        }else{
+            DistributionLog::record($this->auth,$item_process_id,'异常无库位号');
+            $this->error(__('异常无库位号'), [], 405);
+        }
     }
 
     /**
@@ -1615,7 +1644,7 @@ class Scm extends Api
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status')
+            ->field('id,option_id,distribution_status,temporary_house_id')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -1637,6 +1666,59 @@ class Scm extends Api
             ->value('id')
         ;
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //配镜片：判断定制片
+        if(3 == $check_status){
+            $_stock_house = new \app\admin\model\warehouse\StockHouse;
+            //判断定制片暂存
+            if(1 == $item_process_info['temporary_house_id']){
+                //获取库位号
+                $coding = $_stock_house
+                    ->where(['id'=>$item_process_info['temporary_house_id']])
+                    ->value('coding')
+                ;
+            }else{
+                //获取子订单处方数据
+                $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+                $is_custom_lens = $_new_order_item_option
+                    ->where('id', $item_process_info['option_id'])
+                    ->value('is_custom_lens')
+                ;
+
+                //判断是否定制片
+                if(1 == $is_custom_lens){
+                    //暂存自动分配库位
+                    $stock_house_info = $_stock_house
+                        ->field('id,coding')
+                        ->where(['status'=>1,'type'=>3,'occupy'=>['<',10]])
+                        ->order('occupy', 'desc')
+                        ->find()
+                    ;
+                    if(!empty($stock_house_info)){
+                        //子订单绑定定制片库位号
+                        $_new_order_item_process
+                            ->allowField(true)
+                            ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                            ->save(['temporary_house_id'=>$stock_house_info['id']])
+                        ;
+
+                        //定制片库位号占用数量+1
+                        $_stock_house
+                            ->where(['id' => $stock_house_info['id']])
+                            ->setInc('occupy', 1)
+                        ;
+                        $coding = $stock_house_info['coding'];
+                    }else{
+                        DistributionLog::record($this->auth,$item_process_info['id'],'定制片无库位号');
+                        $this->error(__('定制片无库位号'), [], 405);
+                    }
+                }
+            }
+
+            //定制片提示库位号信息
+            DistributionLog::record($this->auth,$item_process_info['id'],'定制片库位号：'.$coding);
+            $coding && $this->error(__('定制片库位号：'.$coding), [], 405);
+        }
 
         //获取子订单处方数据
         $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
@@ -1694,7 +1776,7 @@ class Scm extends Api
         $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
         $item_option_info = $_new_order_item_option
             ->where('id', $item_process_info['option_id'])
-            ->value('is_print_logo,qty,sku')
+            ->field('is_print_logo,sku')
             ->find()
         ;
 
@@ -1762,9 +1844,9 @@ class Scm extends Api
             $_item = new \app\admin\model\itemmanage\Item;
             $_item
                 ->where(['sku'=>$item_option_info['sku']])
-                ->dec('occupy_stock', $item_option_info['qty'])
-                ->dec('distribution_occupy_stock', $item_option_info['qty'])
-                ->dec('stock', $item_option_info['qty'])
+                ->dec('occupy_stock', 1)
+                ->dec('distribution_occupy_stock', 1)
+                ->dec('stock', 1)
                 ->update()
             ;
         }
@@ -1930,7 +2012,7 @@ class Scm extends Api
                     $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
                     $item_option_info = $_new_order_item_option
                         ->where('id', $item_process_info['option_id'])
-                        ->value('qty,sku')
+                        ->field('sku')
                         ->find()
                     ;
 
@@ -1941,7 +2023,7 @@ class Scm extends Api
                     //扣减虚拟仓库存
                     $_item_platform_sku
                         ->where(['sku'=>$true_sku,'platform_type'=>$order_info['site']])
-                        ->dec('stock', $item_option_info['qty'])
+                        ->dec('stock', 1)
                         ->update()
                     ;
 
@@ -1949,9 +2031,9 @@ class Scm extends Api
                     $_item = new \app\admin\model\itemmanage\Item();
                     $_item
                         ->where(['sku'=>$true_sku])
-                        ->dec('available_stock', $item_option_info['qty'])
-                        ->dec('distribution_occupy_stock', $item_option_info['qty'])
-                        ->dec('stock', $item_option_info['qty'])
+                        ->dec('available_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
                         ->update()
                     ;
                 }
