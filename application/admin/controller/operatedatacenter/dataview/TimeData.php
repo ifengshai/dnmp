@@ -94,11 +94,12 @@ class TimeData extends Backend
             $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
             $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
             $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_time['o.order_type'] = 1;
             //订单数据
             $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
 
             //销售量
-            $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,count(*) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
+            $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,sum(i.qty_ordered) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
 
             //购物车数量
             $quote_where['base_grand_total'] = ['>',0];
