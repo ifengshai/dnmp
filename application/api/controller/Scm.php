@@ -184,6 +184,7 @@ class Scm extends Api
         foreach($list as $key=>$value){
             $list[$key]['status'] = $status[$value['status']];
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
         }
 
         $this->success('', ['list' => $list],200);
