@@ -59,8 +59,10 @@ class DashBoard extends Backend
         $active_user_num = $this->zeeloolOperate->getActiveUser();
         //注册用户数
         $register_user_num = $this->zeeloolOperate->getRegisterUser();
+        $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')).' - '.date('Y-m-d H:i:s', time());
+        // dump($time_arr);die;
         //复购用户数
-        $again_user_num = $this->zeeloolOperate->getAgainUser(date('Y-m-d 00:00:00', strtotime('-7 day')).' '.date('Y-m-d H:i:s', time()),0);
+        $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr,0);
         //vip用户数
         $vip_user_num = $this->zeeloolOperate->getVipUser();
         //订单数
