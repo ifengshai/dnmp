@@ -10,6 +10,8 @@ namespace app\admin\controller\shell;
 use app\common\controller\Backend;
 use think\Db;
 
+
+
 class OrderData extends Backend
 {
     protected $noNeedLogin = ['*'];
@@ -307,7 +309,6 @@ class OrderData extends Backend
                                     }
                                 }
                             }
-
                         }
 
                         break;
@@ -660,7 +661,57 @@ class OrderData extends Backend
         return $arr;
     }
 
+    /**
+     * 批量生成子订单表子单号
+     * 
+     * @Description
+     * @todo 计划任务 10分钟一次
+     * @author wpl
+     * @since 2020/10/28 17:36:27 
+     * @return void
+     */
+    public function set_order_item_number()
+    {
+        //查询未生成子单号的数据
+        $list = $this->orderitemprocess->where('order_id', 0)->limit(100)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['order_id'] = $res->id;
+            $params[$k]['item_order_number'] = $res->increment_id . $v['item_order_number'];
+            $params[$k]['updated_at'] = time();
+        }
+        //更新数据
+        if ($params) $this->orderitemprocess->saveAll($params);
+        echo "ok";
+    }
 
+    /**
+     * 批量更新order表主键
+     *
+     * @Description
+     * @todo 计划任务 10分钟一次
+     * @author wpl
+     * @since 2020/10/28 17:58:46 
+     * @return void
+     */
+    public function set_order_id()
+    {
+        //查询未生成子单号的数据
+        $list = $this->orderitemoption->where('order_id', 0)->field('id,site,magento_order_id')->limit(100)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['order_id'] = $order_id;
+        }
+        //更新数据
+        if ($params) $this->orderitemoption->saveAll($params);
+        echo "ok";
+    }
 
 
 
