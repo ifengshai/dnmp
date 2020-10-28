@@ -47,7 +47,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'order_data';
+        $topic = 'mojing_order';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
@@ -227,12 +227,8 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-<<<<<<< Updated upstream
-                                $data = []; //子订单表数据
-=======
                                
                                 $options = [];
->>>>>>> Stashed changes
                                 foreach ($payload['data'] as $k => $v) {
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
