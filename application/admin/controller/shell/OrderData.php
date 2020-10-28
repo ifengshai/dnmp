@@ -118,7 +118,7 @@ class OrderData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         $key = $message->key;
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/canal.log', serialize($payload) . "\n");
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/canal.log', serialize($payload) . "\n", FILE_APPEND);
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
