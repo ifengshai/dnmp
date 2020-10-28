@@ -74,23 +74,23 @@ class StockHouse extends Backend
      */
     public function add()
     {
+        $type = input('type');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
 
-
                 //判断选择的库位是否已存在
+                if(2 == $type){
+                    $map['subarea'] = $params['subarea'];
+                }
+                $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $count = $this->model->where($map)->count();
-                if ($count > 0) {
-                    $this->error('已存在此编码！！');
-                }
-
+                $count > 0 && $this->error('已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
@@ -123,6 +123,7 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $this->view->assign("type", $type);
         return $this->view->fetch();
     }
 
@@ -131,6 +132,7 @@ class StockHouse extends Backend
      */
     public function edit($ids = null)
     {
+        $type = input('type');
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -148,12 +150,14 @@ class StockHouse extends Backend
                 $params = $this->preExcludeFields($params);
 
                 //判断选择的库位是否已存在
+                if(2 == $type){
+                    $map['subarea'] = $params['subarea'];
+                }
+                $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $count = $this->model->where($map)->count();
-                if ($count > 0) {
-                    $this->error('已存在此编码！！');
-                }
+                $count > 0 && $this->error('已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
@@ -164,7 +168,6 @@ class StockHouse extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-
 
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
@@ -186,6 +189,7 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -223,13 +227,81 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type'=>1])
+                ->where(['type'=>2])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type'=>1])
+                ->where(['type'=>2])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 暂存架库位列表
+     */
+    public function temporary_shelf()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where(['type'=>3])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where(['type'=>3])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 异常架库位列表
+     */
+    public function abnormal_shelf()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where(['type'=>4])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where(['type'=>4])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
