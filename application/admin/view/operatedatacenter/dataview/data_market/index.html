@@ -1,0 +1,504 @@
+<style>
+    .content{
+        max-width:100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+    .caigou-table {
+        width: 30%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        float: left;
+        margin-left: 30px;
+        background-color: #c3dde0;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
+                    <form id = "form1" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6 col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">订单平台</label>
+                                        <div class="col-xs-8">
+                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+                                                {foreach name="orderPlatformList" item="vo"}
+                                                <option value="{$key}">{$vo}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">日期</th>
+                            <th style="text-align: center; vertical-align: middle;">销售额($)</th>
+                            <th style="text-align: center; vertical-align: middle;">订单数</th>
+                            <th style="text-align: center; vertical-align: middle;">订单支付成功数</th>
+                            <th style="text-align: center; vertical-align: middle;">客单价($)</th>
+                            <th style="text-align: center; vertical-align: middle;">新增购物车</th>
+                            <th style="text-align: center; vertical-align: middle;">新增购物车转化率(%)</th>
+                            <th style="text-align: center; vertical-align: middle;">更新购物车数</th>
+                            <th style="text-align: center; vertical-align: middle;">更新购物车转化率(%)</th>
+                            <th style="text-align: center; vertical-align: middle;">新增注册用户数</th>
+                            <th style="text-align: center; vertical-align: middle;">登录用户数</th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">今天</td>
+                            <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sales_money}</td>
+                            <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_num}</td>
+                            <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_success}</td>
+                            <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$zeelool_data.today_unit_price}</td>
+                            <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
+                            <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_conversion}</td>
+                            <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td>
+                            <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_newconversion}</td>
+                            <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$zeelool_data.today_register_customer}</td>
+                            <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">昨天</td>
+                            <td id='yesterday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_sales_money}</td>
+                            <td id='yesterday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_order_num}</td>
+                            <td id='yesterday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_order_success}</td>
+                            <td id='yesterday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_unit_price}</td>
+                            <td id='yesterday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_total}</td>
+                            <td id='yesterday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_conversion}</td>
+                            <td id='yesterday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_new}</td>
+                            <td id='yesterday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_newconversion}</td>
+                            <td id='yesterday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_register_customer}</td>
+                            <td id='yesterday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">过去7天</td>
+                            <td id='pastsevenday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_sales_money}</td>
+                            <td id='pastsevenday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_order_num}</td>
+                            <td id='pastsevenday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_order_success}</td>
+                            <td id='pastsevenday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_unit_price}</td>
+                            <td id='pastsevenday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_total}</td>
+                            <td id='pastsevenday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_conversion}</td>
+                            <td id='pastsevenday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_new}</td>
+                            <td id='pastsevenday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_newconversion}</td>
+                            <td id='pastsevenday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_register_customer}</td>
+                            <td id='pastsevenday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">过去30天</td>
+                            <td id='pastthirtyday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_sales_money}</td>
+                            <td id='pastthirtyday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_order_num}</td>
+                            <td id='pastthirtyday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_order_success}</td>
+                            <td id='pastthirtyday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_unit_price}</td>
+                            <td id='pastthirtyday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_total}</td>
+                            <td id='pastthirtyday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_conversion}</td>
+                            <td id='pastthirtyday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_new}</td>
+                            <td id='pastthirtyday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_newconversion}</td>
+                            <td id='pastthirtyday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_register_customer}</td>
+                            <td id='pastthirtyday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">当月</td>
+                            <td id='thismonth_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_sales_money}</td>
+                            <td id='thismonth_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_order_num}</td>
+                            <td id='thismonth_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_order_success}</td>
+                            <td id='thismonth_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_unit_price}</td>
+                            <td id='thismonth_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_total}</td>
+                            <td id='thismonth_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_conversion}</td>
+                            <td id='thismonth_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_new}</td>
+                            <td id='thismonth_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_newconversion}</td>
+                            <td id='thismonth_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_register_customer}</td>
+                            <td id='thismonth_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">上月</td>
+                            <td id='lastmonth_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_sales_money}</td>
+                            <td id='lastmonth_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_order_num}</td>
+                            <td id='lastmonth_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_order_success}</td>
+                            <td id='lastmonth_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_unit_price}</td>
+                            <td id='lastmonth_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_total}</td>
+                            <td id='lastmonth_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_conversion}</td>
+                            <td id='lastmonth_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_new}</td>
+                            <td id='lastmonth_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_newconversion}</td>
+                            <td id='lastmonth_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_register_customer}</td>
+                            <td id='lastmonth_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">今年</td>
+                            <td id='thisyear_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_sales_money}</td>
+                            <td id='thisyear_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_order_num}</td>
+                            <td id='thisyear_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_order_success}</td>
+                            <td id='thisyear_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_unit_price}</td>
+                            <td id='thisyear_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_total}</td>
+                            <td id='thisyear_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_conversion}</td>
+                            <td id='thisyear_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_new}</td>
+                            <td id='thisyear_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_newconversion}</td>
+                            <td id='thisyear_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_register_customer}</td>
+                            <td id='thisyear_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">去年</td>
+                            <td id='lastyear_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_sales_money}</td>
+                            <td id='lastyear_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_order_num}</td>
+                            <td id='lastyear_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_order_success}</td>
+                            <td id='lastyear_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_unit_price}</td>
+                            <td id='lastyear_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_total}</td>
+                            <td id='lastyear_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_conversion}</td>
+                            <td id='lastyear_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_new}</td>
+                            <td id='lastyear_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_newconversion}</td>
+                            <td id='lastyear_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_register_customer}</td>
+                            <td id='lastyear_sign_customer'style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_sign_customer}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">总计</td>
+                            <td id='total_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_sales_money}</td>
+                            <td id='total_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_order_num}</td>
+                            <td id='total_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_order_success}</td>
+                            <td id='total_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_unit_price}</td>
+                            <td id='total_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_total}</td>
+                            <td id='total_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_conversion}</td>
+                            <td id='total_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_new}</td>
+                            <td id='total_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_newconversion}</td>
+                            <td id='total_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_register_customer}</td>
+                            <td id='total_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_sign_customer}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <form id = "form2" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">销售额</div>
+                        </div>
+                    </div>
+                </form>
+                <form id = "form3" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart2" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">订单数</div>
+                        </div>
+                    </div>
+
+                </form>
+                <form id = "form4" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart3" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">客单价</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="row">
+                <form id = "form5" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart4" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">购物车数</div>
+                        </div>
+                    </div>
+                </form>
+                <form id = "form6" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart5" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">购物车转化率</div>
+                        </div>
+                    </div>
+                </form>
+                <form id = "form7" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;">
+                        <div class="col-xs-12 col-sm-6 col-md-12">
+                            <div id="echart6" style="height:200px;width:100%;"></div>
+                            <div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">注册用户数</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="tab-pane fade active in">
+                <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <div class="row">
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4">
+                            <label for="create_time" class="control-label col-xs-4">创建时间</label>
+                            <div class="col-xs-8">
+                                <input type="hidden" class="form-control operate" name="create_time-operate" data-name="create_time" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time"  placeholder="创建时间" id="created_at" value="{$create_time}" data-index="14">
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="col-sm-8 col-xs-offset-4">
+                                <input id="submit" type="submit" class="btn btn-success" value="提交">
+                                <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">序号</th>
+                            <th style="text-align: center; vertical-align: middle;">平台</th>
+                            <th style="text-align: center; vertical-align: middle;">来源</th>
+                            <th style="text-align: center; vertical-align: middle;">销售额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">订单数</th>
+                            <th style="text-align: center; vertical-align: middle;">客单价（$）</th>
+                        </tr>
+                        </thead>
+                        {if isset($arr) && in_array(1,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">1</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_pc_sales_money}</td>
+                            <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_pc_sales_num}</td>
+                            <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">2</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='zeelool_wap_sales_money' style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_wap_sales_money}</td>
+                            <td id='zeelool_wap_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_wap_sales_num}</td>
+                            <td id='zeelool_wap_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_wap_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">3</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool</td>
+                            <td style="text-align: center; vertical-align: middle;">IOS</td>
+                            <td id='zeelool_app_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_money}</td>
+                            <td id='zeelool_app_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_sales_num}</td>
+                            <td id='zeelool_app_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_app_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">4</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool</td>
+                            <td style="text-align: center; vertical-align: middle;">Android</td>
+                            <td id='zeelool_android_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_sales_money}</td>
+                            <td id='zeelool_android_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_sales_num}</td>
+                            <td id='zeelool_android_unit_price'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_android_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(2,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">5</td>
+                            <td style="text-align: center; vertical-align: middle;">voogueme</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='voogueme_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_pc_sales_money}</td>
+                            <td id='voogueme_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_pc_sales_num}</td>
+                            <td id='voogueme_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">6</td>
+                            <td style="text-align: center; vertical-align: middle;">voogueme</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='voogueme_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_sales_money}</td>
+                            <td id='voogueme_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_sales_num}</td>
+                            <td id='voogueme_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.voogueme_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(3,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">7</td>
+                            <td style="text-align: center; vertical-align: middle;">nihao</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='nihao_pc_sales_money'       style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_pc_sales_money}</td>
+                            <td id='nihao_pc_sales_num'          style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_pc_sales_num}</td>
+                            <td id='nihao_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">8</td>
+                            <td style="text-align: center; vertical-align: middle;">nihao</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='nihao_wap_sales_money'     style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_sales_money}</td>
+                            <td id='nihao_wap_sales_num'       style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_sales_num}</td>
+                            <td id='nihao_wap_unit_price'      style="text-align: center; vertical-align: middle;">{$bottom_data.nihao_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(4,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">9</td>
+                            <td style="text-align: center; vertical-align: middle;">meeloog</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='meeloog_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_pc_sales_money}</td>
+                            <td id='meeloog_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_pc_sales_num}</td>
+                            <td id='meeloog_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">10</td>
+                            <td style="text-align: center; vertical-align: middle;">meeloog</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='meeloog_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_money}</td>
+                            <td id='meeloog_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_sales_num}</td>
+                            <td id='meeloog_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.meeloog_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(9,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">11</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_es</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='zeelool_es_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_sales_money}</td>
+                            <td id='zeelool_es_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_sales_num}</td>
+                            <td id='zeelool_es_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">12</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_es</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='zeelool_es_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_sales_money}</td>
+                            <td id='zeelool_es_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_sales_num}</td>
+                            <td id='zeelool_es_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_es_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                        {if isset($arr) && in_array(10,$arr)}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">13</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_de</td>
+                            <td style="text-align: center; vertical-align: middle;">网页端</td>
+                            <td id='zeelool_de_pc_sales_money'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_sales_money}</td>
+                            <td id='zeelool_de_pc_sales_num'     style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_sales_num}</td>
+                            <td id='zeelool_de_pc_unit_price'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_pc_unit_price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">14</td>
+                            <td style="text-align: center; vertical-align: middle;">zeelool_de</td>
+                            <td style="text-align: center; vertical-align: middle;">移动端</td>
+                            <td id='zeelool_de_wap_sales_money'  style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_sales_money}</td>
+                            <td id='zeelool_de_wap_sales_num'    style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_sales_num}</td>
+                            <td id='zeelool_de_wap_unit_price'   style="text-align: center; vertical-align: middle;">{$bottom_data.zeelool_de_wap_unit_price}</td>
+                        </tr>
+                        {/if}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    var Orderdata = {
+        column: {:json_encode(array_keys($zeeloolSalesNumList))},
+    zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))},
+    vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
+    nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
+    meeloogSalesNumList: {:json_encode(array_values($meeloogSalesNumList))},
+    zeelool_esSalesNumList: {:json_encode(array_values($zeelool_esSalesNumList))},
+    zeelool_deSalesNumList: {:json_encode(array_values($zeelool_deSalesNumList))},
+    zeeloolSalesMoneyList : {:json_encode(array_values($zeeloolSalesMoneyList))},
+    vooguemeSalesMoneyList : {:json_encode(array_values($vooguemeSalesMoneyList))},
+    nihaoSalesMoneyList :{:json_encode(array_values($nihaoSalesMoneyList))},
+    meeloogSalesMoneyList :{:json_encode(array_values($meeloogSalesMoneyList))},
+    zeelool_esSalesMoneyList :{:json_encode(array_values($zeelool_esSalesMoneyList))},
+    zeelool_deSalesMoneyList :{:json_encode(array_values($zeelool_deSalesMoneyList))},
+    zeeloolUnitPriceList :{:json_encode(array_values($zeeloolUnitPriceList))},
+    vooguemeUnitPriceList :{:json_encode(array_values($vooguemeUnitPriceList))},
+    nihaoUnitPriceList :{:json_encode(array_values($nihaoUnitPriceList))},
+    meeloogUnitPriceList :{:json_encode(array_values($meeloogUnitPriceList))},
+    zeelool_esUnitPriceList :{:json_encode(array_values($zeelool_esUnitPriceList))},
+    zeelool_deUnitPriceList :{:json_encode(array_values($zeelool_deUnitPriceList))},
+    zeeloolShoppingcartTotal :{:json_encode(array_values($zeeloolShoppingcartTotal))},
+    vooguemeShoppingcartTotal :{:json_encode(array_values($vooguemeShoppingcartTotal))},
+    nihaoShoppingcartTotal :{:json_encode(array_values($nihaoShoppingcartTotal))},
+    meeloogShoppingcartTotal :{:json_encode(array_values($meeloogShoppingcartTotal))},
+    zeelool_esShoppingcartTotal :{:json_encode(array_values($zeelool_esShoppingcartTotal))},
+    zeelool_deShoppingcartTotal :{:json_encode(array_values($zeelool_deShoppingcartTotal))},
+    zeeloolShoppingcartConversion :{:json_encode(array_values($zeeloolShoppingcartConversion))},
+    vooguemeShoppingcartConversion :{:json_encode(array_values($vooguemeShoppingcartConversion))},
+    nihaoShoppingcartConversion :{:json_encode(array_values($nihaoShoppingcartConversion))},
+    meeloogShoppingcartConversion :{:json_encode(array_values($meeloogShoppingcartConversion))},
+    zeelool_esShoppingcartConversion :{:json_encode(array_values($zeelool_esShoppingcartConversion))},
+    zeelool_deShoppingcartConversion :{:json_encode(array_values($zeelool_deShoppingcartConversion))},
+    zeeloolRegisterCustomer :{:json_encode(array_values($zeeloolRegisterCustomer))},
+    vooguemeRegisterCustomer :{:json_encode(array_values($vooguemeRegisterCustomer))},
+    nihaoRegisterCustomer :{:json_encode(array_values($nihaoRegisterCustomer))},
+    meeloogRegisterCustomer :{:json_encode(array_values($meeloogRegisterCustomer))},
+    zeelool_esRegisterCustomer :{:json_encode(array_values($zeelool_esRegisterCustomer))},
+    zeelool_deRegisterCustomer :{:json_encode(array_values($zeelool_deRegisterCustomer))},
+    };
+</script>
