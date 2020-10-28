@@ -74,10 +74,13 @@ class OrderDataDetail extends Backend
                     //已发货
                     $node_where['node_type'] = 7;
                 }elseif ($filter['order_status'] == 2){
-                    //进行中
-                    $node_where['node_type'] = ['between',[8,11]];
+                    $node_where['node_type'] = ['in',[8,10]];
                 }elseif ($filter['order_status'] == 3){
-                    $node_where['node_type'] = 12;
+                    $node_where['node_type'] = 30;
+                }elseif ($filter['order_status'] == 4){
+                    $node_where['node_type'] = 40;
+                }elseif ($filter['order_status'] == 5){
+                    $node_where['node_type'] = 35;
                 }
                 $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
                 $map['o.entity_id'] = ['in',$order_ids];
@@ -120,10 +123,14 @@ class OrderDataDetail extends Backend
                 $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
                 if($order_node == 7){
                     $order_shipping_status = '已发货';
-                }elseif ($order_node>7 && $order_node<12){
-                    $order_shipping_status = '进行中';
-                }elseif ($order_node == 12){
-                    $order_shipping_status = '已收到货';
+                }elseif ($order_node == 8 && $order_node == 10){
+                    $order_shipping_status = '运输途中';
+                }elseif ($order_node == 30){
+                    $order_shipping_status = '到达待取';
+                }elseif ($order_node == 40){
+                    $order_shipping_status = '成功签收';
+                }elseif ($order_node == 35){
+                    $order_shipping_status = '投递失败';
                 }else{
                     $order_shipping_status = '-';
                 }
