@@ -334,8 +334,10 @@ class Test01 extends Backend
     {
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
-        $data = date('Y-m-d');
-        $data = '2020-10-23';
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        // dump($data);die;
+        // $data = '2020-10-23';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
@@ -361,6 +363,84 @@ class Test01 extends Backend
                         $arr[$v['sku']]['sku'] = $v['sku'];
                         $arr[$v['sku']]['platform_sku'] = $v['platform_sku'];
                         $arr[$v['sku']]['site'] = 1;
+                        $arr[$v['sku']]['day_date'] = $data;
+                        $arr[$v['sku']]['day_stock'] = $v['stock'];
+                        $arr[$v['sku']]['day_onway_stock'] = $v['plat_on_way_stock'];
+                    }
+                }
+            }
+            // dump($arr[$v['sku']]);
+            if (!empty($arr[$v['sku']])) {
+                Db::name('datacenter_sku_day')->insert($arr[$v['sku']]);
+                echo $v['sku'] . "\n";
+                echo '<br>';
+                usleep(100000);
+            }
+        }
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            // ->where(['platform_type' => 1])
+            ->where(['platform_type' => 2, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(2, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
+        $arr = [];
+        foreach ($sku_data as $k => $v) {
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    if ($arr[$v['sku']]) {
+                        $arr[$v['sku']]['unique_pageviews'] += $vv;
+                    } else {
+                        $arr[$v['sku']]['unique_pageviews'] = $vv;
+                        $arr[$v['sku']]['goods_grade'] = $v['grade'];
+                        $arr[$v['sku']]['sku'] = $v['sku'];
+                        $arr[$v['sku']]['platform_sku'] = $v['platform_sku'];
+                        $arr[$v['sku']]['site'] = 2;
+                        $arr[$v['sku']]['day_date'] = $data;
+                        $arr[$v['sku']]['day_stock'] = $v['stock'];
+                        $arr[$v['sku']]['day_onway_stock'] = $v['plat_on_way_stock'];
+                    }
+                }
+            }
+            // dump($arr[$v['sku']]);
+            if (!empty($arr[$v['sku']])) {
+                Db::name('datacenter_sku_day')->insert($arr[$v['sku']]);
+                echo $v['sku'] . "\n";
+                echo '<br>';
+                usleep(100000);
+            }
+        }
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            // ->where(['platform_type' => 1])
+            ->where(['platform_type' => 3, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(3, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
+        $arr = [];
+        foreach ($sku_data as $k => $v) {
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    if ($arr[$v['sku']]) {
+                        $arr[$v['sku']]['unique_pageviews'] += $vv;
+                    } else {
+                        $arr[$v['sku']]['unique_pageviews'] = $vv;
+                        $arr[$v['sku']]['goods_grade'] = $v['grade'];
+                        $arr[$v['sku']]['sku'] = $v['sku'];
+                        $arr[$v['sku']]['platform_sku'] = $v['platform_sku'];
+                        $arr[$v['sku']]['site'] = 3;
                         $arr[$v['sku']]['day_date'] = $data;
                         $arr[$v['sku']]['day_stock'] = $v['stock'];
                         $arr[$v['sku']]['day_onway_stock'] = $v['plat_on_way_stock'];
