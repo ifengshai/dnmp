@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\DistributionLog;
 use app\common\controller\Api;
 use think\Db;
 use think\Exception;
@@ -697,9 +698,6 @@ class Scm extends Api
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
         !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
-
-        $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('审核类型不能为空'), [], 427);
 
         //检测质检单状态
         $_check = new \app\admin\model\warehouse\Check();
@@ -1601,27 +1599,6 @@ class Scm extends Api
     }
 
     /**
-     * 记录配货流程操作日志
-     *
-     * @param int $item_process_id  子订单表ID
-     * @param string $remark  备注
-     * @author lzh
-     * @return bool
-     */
-    public function distribution_log($item_process_id,$remark)
-    {
-        $_distribution_log = new \app\admin\model\DistributionLog();
-        $log_data = [
-            'item_process_id' => $item_process_id,
-            'remark' => $remark,
-            'create_time' => date('Y-m-d H:i:s'),
-            'create_person' => $this->auth->nickname
-        ];
-        $res = $_distribution_log->allowField(true)->save($log_data);
-        return $res;
-    }
-
-    /**
      * 获取并校验子订单数据（配货通用）
      *
      * @param string $item_order_number  子订单号
@@ -1697,11 +1674,10 @@ class Scm extends Api
      *
      * @param string $item_order_number  子订单号
      * @param int $check_status  检测状态
-     * @param int $save_status  保存状态
      * @author lzh
      * @return mixed
      */
-    public function distribution_save($item_order_number,$check_status,$save_status)
+    public function distribution_save($item_order_number,$check_status)
     {
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
@@ -1709,33 +1685,92 @@ class Scm extends Api
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->value('id,distribution_status')
+            ->value('id,distribution_status,option_id,order_id')
             ->find()
         ;
-        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
-        //检测状态
+        //状态类型
         $status_arr = [
-            3=>'待配镜片',
-            4=>'待加工',
-            6=>'待成品质检'
-        ];
-        $msg_arr = [
             3=>'配镜片',
             4=>'加工',
-            6=>'成品质检'
+            5=>'印logo',
+            6=>'成品质检',
+            7=>'合单'
         ];
-        $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
 
-        //TODO::判断工单状态
+        //操作失败记录
+        if(empty($item_process_info)){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：子订单不存在');
+            $this->error(__('子订单不存在'), [], 403);
+        }
 
-        //判断异常状态
+        //操作失败记录
+        if($check_status != $item_process_info['distribution_status']){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：当前状态['.$status_arr[$item_process_info['distribution_status']].']无法操作');
+            $this->error(__('当前状态无法操作'), [], 405);
+        }
+
+        //检测异常状态
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
         $abnormal_id = $_distribution_abnormal
             ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
             ->value('id')
         ;
-        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //操作失败记录
+        if($abnormal_id){
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：有异常['.$abnormal_id.']待处理不可操作');
+            $this->error(__('有异常待处理无法操作'), [], 405);
+        }
+
+        //TODO::检测工单状态
+
+        //获取订单购买总数
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $total_qty_ordered = $_new_order
+            ->where('id', $item_process_info['order_id'])
+            ->value('total_qty_ordered')
+        ;
+
+        //下一步提示信息及状态
+        if(3 == $check_status){
+            $save_status = 4;
+        }elseif(4 == $check_status){
+            //获取子订单处方数据
+            $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+            $is_print_logo = $_new_order_item_option
+                ->where('id', $item_process_info['option_id'])
+                ->value('is_print_logo')
+            ;
+            if($is_print_logo){
+                $save_status = 5;
+            }else{
+                if($total_qty_ordered > 1){
+                    $save_status = 6;
+                }else{
+                    $save_status = 8;
+                }
+            }
+        }elseif(5 == $check_status){
+            $save_status = 6;
+        }elseif(6 == $check_status){
+            if($total_qty_ordered > 1){
+                $save_status = 7;
+            }else{
+                $save_status = 8;
+            }
+        }elseif(7 == $check_status){
+            $save_status = 8;
+        }
+
+        //订单主表标记已合单
+        if(8 == $save_status){
+            $_new_order
+                ->allowField(true)
+                ->isUpdate(true, ['id'=>$item_process_info['order_id']])
+                ->save(['combined_order_status'=>1])
+            ;
+        }
 
         $res = $_new_order_item_process
             ->allowField(true)
@@ -1743,17 +1778,24 @@ class Scm extends Api
             ->save(['distribution_status'=>$save_status])
         ;
         if($res){
-            //记录操作日志
-            $remark_arr = [
-                4=>'配镜片完成',
-                6=>'加工完成',
-                7=>'成品质检完成'
-            ];
-            $this->distribution_log($item_process_info['id'],$remark_arr[$save_status]);
+            //操作成功记录
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'完成');
 
-            $this->success($msg_arr[$check_status].'成功', [],200);
+            //成功返回
+            $next_step = [
+                4=>'去加工',
+                5=>'印logo',
+                6=>'去质检',
+                7=>'去合单',
+                8=>'去审单'
+            ];
+            $this->success($next_step[$save_status], [],200);
         }else{
-            $this->error(__($msg_arr[$check_status].'失败'), [], 404);
+            //操作失败记录
+            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：保存失败');
+
+            //失败返回
+            $this->error(__($status_arr[$check_status].'失败'), [], 404);
         }
     }
 
@@ -1780,7 +1822,7 @@ class Scm extends Api
     public function distribution_lens_submit()
     {
         $item_order_number = $this->request->request('item_order_number');
-        $this->distribution_save($item_order_number,3,4);
+        $this->distribution_save($item_order_number,3);
     }
 
     /**
@@ -1806,7 +1848,7 @@ class Scm extends Api
     public function distribution_machining_submit()
     {
         $item_order_number = $this->request->request('item_order_number');
-        $this->distribution_save($item_order_number,4,6);
+        $this->distribution_save($item_order_number,4);
     }
 
     /**
@@ -1838,7 +1880,7 @@ class Scm extends Api
         !in_array($do_type,[1,2]) && $this->error(__('操作类型错误'), [], 403);
 
         if($do_type == 1){
-            $this->distribution_save($item_order_number,6,7);
+            $this->distribution_save($item_order_number,6);
         }else{
             $reason = $this->request->request('reason');
             !in_array($do_type,[1,2,3,4]) && $this->error(__('拒绝原因错误'), [], 403);
@@ -1866,238 +1908,34 @@ class Scm extends Api
             ;
 
             //记录日志
-            $this->distribution_log($item_process_id,$status_arr[$reason]['name']);
+            DistributionLog::record($this->auth,$item_process_id,$status_arr[$reason]['name']);
         }
     }
 
     /**
-     * 入库单列表
+     * 印logo扫码
      *
-     * @参数 string query  查询内容
-     * @参数 int status  状态
-     * @参数 string start_time  开始时间
-     * @参数 string end_time  结束时间
-     * @参数 int page  * 页码
-     * @参数 int page_size  * 每页显示数量
-     * @author wgj
+     * @参数 string item_order_number  子订单号
+     * @author lzh
      * @return mixed
      */
-    public function in_stock_list()
+    public function distribution_logo()
     {
-        $query = $this->request->request('query');
-        $status = $this->request->request('status');
-        $start_time = $this->request->request('start_time');
-        $end_time = $this->request->request('end_time');
-        $page = $this->request->request('page');
-        $page_size = $this->request->request('page_size');
-
-        empty($page) && $this->error(__('Page can not be empty'), [], 501);
-        empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
-
-        $where = [];
-        if($query){
-            $where['a.in_stock_number|c.check_order_number|b.sku|a.create_person|c.create_person'] = ['like', '%' . $query . '%'];
-        }
-        if($status){
-            $where['a.status'] = $status;
-        }
-        if($start_time && $end_time){
-            $where['a.createtime'] = ['between', [$start_time, $end_time]];
-        }
-
-        $offset = ($page - 1) * $page_size;
-        $limit = $page_size;
-
-        //获取入库单列表数据
-        $_in_stock = new \app\admin\model\warehouse\Instock;
-        $list = $_in_stock
-            ->alias('a')
-            ->where($where)
-            ->field('a.id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
-            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
-            ->order('a.createtime', 'desc')
-            ->limit($offset, $limit)
-            ->select();
-        $list = collection($list)->toArray();
-
-        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
-        foreach($list as $key=>$value){
-            $list[$key]['status'] = $status[$value['status']];
-            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
-        }
-
-        $this->success('', ['list' => $list],200);
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,5);
     }
 
     /**
-     * 取消入库单
+     * 印logo提交
      *
-     * @参数 int id  入库单ID
-     * @author wgj
+     * @参数 string item_order_number  子订单号
+     * @author lzh
      * @return mixed
      */
-    public function in_stock_cancel()
+    public function distribution_logo_submit()
     {
-        $id = $this->request->request('id');
-        empty($id) && $this->error(__('Id can not be empty'), [], 503);
-
-        //检测入库单状态
-        $_in_stock = new \app\admin\model\warehouse\Instock;
-        $row = $_in_stock->get($id);
-        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
-
-        $res = $_in_stock->allowField(true)->isUpdate(true, ['id'=>$id])->save(['status'=>4]);
-        $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 505);
-    }
-
-    /**
-     * 新建入库单页面提交
-     *
-     * @参数 int id
-     * @author wgj
-     * @return mixed
-     */
-    public function in_stock_add_do()
-    {
-        $params = $this->request->post("row/a");//入库单信息
-        if ($params) {
-            empty($params['in_stock_number']) && $this->error(__('入库单号不能为空'), [], 507);
-            empty($params['check_id']) && $this->error(__('质检单号不能为空'), [], 508);
-            empty($params['type_id']) && $this->error(__('请选择入库分类'), [], 509);
-
-            $sku = $this->request->post("sku/a");
-            if (count(array_filter($sku)) < 1) {
-                $this->error(__('sku不能为空！！'), [], 510);
-            }
-
-            $result = false;
-            Db::startTrans();
-            try {
-
-                //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
-                if ($params['platform_id']) {
-                    foreach (array_filter($sku) as $k => $v) {
-                        $item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-
-                        $sku_platform = $item_platform_sku->where(['sku' => $v, 'platform_type' => $params['platform_id']])->find();
-                        if (!$sku_platform) {
-                            $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
-                        }
-                    }
-                    $params['create_person'] = session('admin.nickname');
-                    $params['createtime'] = date('Y-m-d H:i:s', time());
-                    $result = $this->model->allowField(true)->save($params);
-
-                    //添加入库信息
-                    if ($result !== false) {
-
-                        $in_stock_num = $this->request->post("in_stock_num/a");
-                        $sample_num = $this->request->post("sample_num/a");
-                        $purchase_id = $this->request->post("purchase_id/a");
-                        $data = [];
-                        foreach (array_filter($sku) as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['in_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['sample_num'] = $sample_num[$k];
-                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['purchase_id'] = $purchase_id[$k];
-                            $data[$k]['in_stock_id'] = $this->model->id;
-                        }
-                        //批量添加
-                        $this->instockItem->allowField(true)->saveAll($data);
-                    }
-                } else {
-                    //质检单页面去入库单
-//                    $token = $this->request->request('token');
-                    $userInfo = $this->auth->getUserinfo();
-                    $params['create_person'] = $userInfo['nickname'];
-                    $params['createtime'] = date('Y-m-d H:i:s', time());
-//                    var_dump($params);
-//                    die;
-                    $_in_stock = new \app\admin\model\warehouse\Instock;
-                    $result = $_in_stock->allowField(true)->save($params);
-
-                    //添加入库信息
-                    if ($result !== false) {
-                        //更改质检单为已创建入库单
-                        $_check = new \app\admin\model\warehouse\Check;
-                        $_check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
-
-
-                        $in_stock_num = $this->request->post("in_stock_num/a");
-                        $sample_num = $this->request->post("sample_num/a");
-                        $purchase_id = $this->request->post("purchase_id/a");
-                        $data = [];
-                        foreach (array_filter($sku) as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['in_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['sample_num'] = $sample_num[$k];
-                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['purchase_id'] = $purchase_id[$k];
-                            $data[$k]['in_stock_id'] = $result;
-                        }
-                        //批量添加
-                        $_in_stock_item = new \app\admin\model\warehouse\InstockItem;
-                        $_in_stock_item->allowField(true)->saveAll($data);
-                    }
-                }
-
-                Db::commit();
-            } catch (ValidateException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            }
-            if ($result !== false) {
-                $this->success('添加成功！！', '', 200);
-            } else {
-                $this->error(__('No rows were inserted'), [], 511);
-            }
-        }
-        $this->error(__('入库单信息不能为空'), [], 506);
-
-//        $this->success('', ['info' => $info],200);
-    }
-
-
-    public function in_stock_add()
-    {
-
-        $params = $this->request->post("row/a");//入库单信息
-        empty($params['in_stock_number']) && $this->error(__('入库单号不能为空'), [], 506);
-        empty($params['check_id']) && $this->error(__('质检单号不能为空'), [], 507);
-        empty($params['type_id']) && $this->error(__('请选择入库分类'), [], 508);
-
-        //获取物流单数据
-        $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo;
-//        $logistics_data = $_logistics_info->where('id', $id)->field('id,purchase_id,batch_id')->find();
-        empty($logistics_data) && $this->error(__('物流单不存在'), [], 412);
-        //质检单页面进入创建入库单
-//        $in_stock_number = $this->request->request('in_stock_number');
-//        $check_order_number = $this->request->request('check_order_number');
-//        $type_id = $this->request->request('type_id');
-        $sku = $this->request->request("sku/a");
-
-        if (count(array_filter($sku)) < 1) {
-            $this->error('sku不能为空！！');
-        }
-
-
-
-        //质检单号
-        $info =[
-            'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-//            'supplier_name'=>$supplier_data['supplier_name'],
-//            'batch'=>$batch,
-//            'item_list'=>$item_list,
-        ];
-
-        $this->success('', ['info' => $info],200);
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_save($item_order_number,5);
     }
 
 }
