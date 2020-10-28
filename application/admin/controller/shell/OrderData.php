@@ -305,7 +305,7 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     if ($options) {
-                                        $this->orderitemoption->where(['entity_id' => $v['item_id'], 'site' => $site])->update($options);
+                                        $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
                                     }
                                 }
                             }
