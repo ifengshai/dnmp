@@ -227,12 +227,8 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-<<<<<<< Updated upstream
-                                $data = []; //子订单表数据
-=======
                                
                                 $options = [];
->>>>>>> Stashed changes
                                 foreach ($payload['data'] as $k => $v) {
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
