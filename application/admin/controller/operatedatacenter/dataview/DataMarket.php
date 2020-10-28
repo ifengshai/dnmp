@@ -3,7 +3,6 @@
 namespace app\admin\controller\operatedatacenter\dataview;
 
 use app\admin\model\OrderStatistics;
-use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Controller;
@@ -16,6 +15,7 @@ class DataMarket extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\OperationAnalysis;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
      *定义时间日志
@@ -38,7 +38,7 @@ class DataMarket extends Backend
      */
     public function index()
     {
-        $platform = (new MagentoPlatform())->getNewAuthSite();
+        $platform = $this->magentoplatform->getNewAuthSite();
         if(empty($platform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
