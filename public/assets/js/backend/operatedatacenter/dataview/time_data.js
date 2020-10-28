@@ -46,25 +46,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str' : $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions);
                 },
                 sales_money_line: function () {
                     var chartOptions = {
                         targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'line',
-                        bar: {
-                            yAxis: [
-                                {
-                                    type: 'value',
-                                    name: '销售额',
-                                    axisLabel: {
-                                        formatter: '$ {value}'
-                                    },
-                                    offset: -5
-                                }
-                                
-                            ],
+                        line: {
+                            legend: { //图例配置
+                                padding: 5,
+                                top: '2%',
+                                data: ['销售额']
+                            },
+                            grid: {
+                                left: '8%',
+                            },
                         }
                     };
                     var options = {
@@ -75,7 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str' : $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions);
                 },
                 order_num_line: function () {
                     var chartOptions = {
@@ -91,7 +88,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str' : $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions);
                 },
                 unit_price_line: function () {
                     var chartOptions = {
@@ -107,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             'time_str' : $("#time_str").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
+                    EchartObj.api.ajax(options, chartOptions);
                 },
             },
             bindevent: function () {
