@@ -272,8 +272,8 @@ class OrderData extends Backend
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
                                             $str = '';
-                                            if ($i < 10) {
-                                                $str = '0' . $i + 1;
+                                            if ($i < 9) {
+                                                $str = '0' . ($i + 1);
                                             } else {
                                                 $str = $i + 1;
                                             }
