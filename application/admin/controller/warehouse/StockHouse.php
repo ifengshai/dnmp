@@ -34,6 +34,40 @@ class StockHouse extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
+
+    /**
+     * 库位列表
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where(['type'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where(['type'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
     
      /**
      * 添加
@@ -117,7 +151,7 @@ class StockHouse extends Backend
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $count = $this->model->where($map)->count();
-                if ($count > 　0) {
+                if ($count > 0) {
                     $this->error('已存在此编码！！');
                 }
 
@@ -157,7 +191,7 @@ class StockHouse extends Backend
     }
 
     /**
-     * 审核
+     * 启用、禁用
      */
     public function setStatus()
     {
@@ -174,4 +208,39 @@ class StockHouse extends Backend
             $this->error('修改失败！！');
         }
     }
+
+    /**
+     * 合单架库位列表
+     */
+    public function merge_shelf()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where(['type'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where(['type'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
 }
