@@ -863,7 +863,7 @@ class Datacenter extends Model
         $z = $this->zeelool->getOrderUnitPrice(1,$time_str);
         $v = $this->voogueme->getOrderUnitPrice(1,$time_str);
         $n = $this->nihao->getOrderUnitPrice(1,$time_str);
-        $num['order_unit_price'] = $z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'];
+        $num['order_unit_price'] = round($z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'],2);
         $num['same_order_unit_price'] = round(($z['same_order_unit_price'] + $v['same_order_unit_price'] + $n['same_order_unit_price'])/3,2).'%';
         $num['huan_order_unit_price'] =round( ($z['huan_order_unit_price'] + $v['huan_order_unit_price'] + $n['huan_order_unit_price'])/3,2).'%';
         return $num;
@@ -877,7 +877,7 @@ class Datacenter extends Model
         $z = $this->zeelool->getSalesTotalMoney(1,$time_str);
         $v = $this->voogueme->getSalesTotalMoney(1,$time_str);
         $n = $this->nihao->getSalesTotalMoney(1,$time_str);
-        $num['sales_total_money'] = $z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'];
+        $num['sales_total_money'] = round($z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'],2);
         $num['same_sales_total_money'] = round(($z['same_sales_total_money'] + $v['same_sales_total_money'] + $n['same_sales_total_money'])/3,2).'%';
         $num['huan_sales_total_money'] = round(($z['huan_sales_total_money'] + $v['huan_sales_total_money'] + $n['huan_sales_total_money'])/3,2).'%';
         return $num;
@@ -891,7 +891,7 @@ class Datacenter extends Model
         $z = $this->zeelool->getShippingTotalMoney(1,$time_str);
         $v = $this->voogueme->getShippingTotalMoney(1,$time_str);
         $n = $this->nihao->getShippingTotalMoney(1,$time_str);
-        $num['shipping_total_money'] = $z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'];
+        $num['shipping_total_money'] = round($z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'],2);
         $num['same_shipping_total_money'] = round(($z['same_shipping_total_money'] + $v['same_shipping_total_money'] + $n['same_shipping_total_money'])/3,2).'%';
         $num['huan_shipping_total_money'] = round(($z['huan_shipping_total_money'] + $v['huan_shipping_total_money'] + $n['huan_shipping_total_money'])/3,2).'%';
         return $num;

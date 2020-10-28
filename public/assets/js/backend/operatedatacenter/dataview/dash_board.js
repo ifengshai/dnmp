@@ -231,7 +231,7 @@ function order_data_view() {
             $('#same_order_unit_price').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_unit_price.same_order_unit_price);
         }
         // $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
-        if (parseInt(order_unit_price.huan_order_num) < 0) {
+        if (parseInt(order_unit_price.huan_order_unit_price) < 0) {
             $('#huan_order_unit_price').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + order_unit_price.huan_order_unit_price);
         } else {
             $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_unit_price.huan_order_unit_price);
