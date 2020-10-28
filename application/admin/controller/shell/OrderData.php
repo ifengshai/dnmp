@@ -200,7 +200,7 @@ class OrderData extends Backend
 
                             //更新主表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order') {
-                                dump($payload['data']);
+                            
                                 $params = [];
                                 foreach ($payload['data'] as $k => $v) {
                                     $params['base_grand_total'] = $v['base_grand_total'];
@@ -219,7 +219,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
-                                    dump($params);
+                          
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
                             }
