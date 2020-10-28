@@ -245,8 +245,10 @@ class OrderData extends Backend
                                     } elseif ($site == 3) {
                                         $options =  $this->nihao_prescription_analysis($v['product_options']);
                                     }
+                                    dump($options);
                                     //合并数组
                                     $arr = array_merge($arr, $options);
+                                    dump($arr);
                                     $options_id = $this->orderoptions->insertGetId($arr);
                                     for ($i = 0; $i < $v['qty_ordered']; $i++) {
                                         $data[$i]['item_id'] = $v['item_id'];
