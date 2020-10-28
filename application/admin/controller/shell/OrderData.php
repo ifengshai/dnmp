@@ -20,6 +20,7 @@ class OrderData extends Backend
         $this->order = new \app\admin\model\order\Order();
         $this->orderitemoption = new \app\admin\model\order\OrderItemOption();
         $this->orderprocess = new \app\admin\model\order\OrderProcess();
+        $this->orderitemprocess = new \app\admin\model\order\OrderItemProcess();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
@@ -195,7 +196,6 @@ class OrderData extends Backend
                                 }
                                 //插入订单处理表
                                 $this->orderprocess->saveAll($order_params);
-                               
                             }
 
                             //更新主表
@@ -225,33 +225,45 @@ class OrderData extends Backend
                                 }
                             }
 
-                            //更新子表
-                            // if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-                            //     $params = [];
-                            //     foreach ($payload['data'] as $k => $v) {
-                            //         $params['base_grand_total'] = $v['base_grand_total'];
-                            //         $params['total_item_count'] = $v['total_qty_ordered'];
-                            //         $params['total_qty_ordered'] = $v['total_qty_ordered'];
-                            //         $params['order_type'] = $v['order_type'];
-                            //         $params['status'] = $v['status'] ?: '';
-                            //         $params['base_currency_code'] = $v['base_currency_code'];
-                            //         $params['shipping_method'] = $v['shipping_method'];
-                            //         $params['shipping_title'] = $v['shipping_description'];
-                            //         $params['country_id'] = $v['country_id'];
-                            //         $params['region'] = $v['region'];
-                            //         $params['city'] = $v['city'];
-                            //         $params['street'] = $v['street'];
-                            //         $params['postcode'] = $v['postcode'];
-                            //         $params['telephone'] = $v['telephone'];
-                            //         $params['customer_email'] = $v['customer_email'];
-                            //         $params['customer_firstname'] = $v['customer_firstname'];
-                            //         $params['customer_lastname'] = $v['customer_lastname'];
-                            //         $params['taxno'] = $v['taxno'];
-                            //         $params['updated_at'] = strtotime($v['updated_at']);
-                            //         $this->order->where('entity_id', $v['entity_id'])->update($params);
-                            //     }
-                            // }
+                            //新增子表
+                            if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
+                                $arr = []; //处方表数据
+                                $data = []; //子订单表数据
+                                foreach ($payload['data'] as $k => $v) {
+                                    $arr['item_id'] = $v['item_id'];
+                                    $arr['site'] = $site;
+                                    $arr['magento_order_id'] = $v['magento_order_id'];
+                                    $arr['sku'] = $v['sku'];
+                                    $arr['qty'] = $v['qty_ordered'];
+                                    $arr['base_row_total'] = $v['base_row_total'];
 
+                                    //处方解析 不同站不同字段
+                                    if ($site == 1) {
+                                        $options =  $this->zeelool_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 2) {
+                                        $options =  $this->voogueme_prescription_analysis($v['product_options']);
+                                    }
+                                    //合并数组
+                                    $arr = array_merge($arr, $options);
+                                    $options_id = $this->orderoptions->insertGetId($arr);
+                                    for ($i = 0; $i < $v['qty_ordered']; $i++) {
+                                        $data[$i]['item_id'] = $v['item_id'];
+                                        $data[$i]['order_id'] = $v['order_id'];
+                                        $data[$i]['option_id'] = $options_id;
+                                        $str = '';
+                                        if ($i < 10) {
+                                            $str = '0' . $i + 1;
+                                        } else {
+                                            $str = $i + 1;
+                                        }
+                                        $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
+                                        $data[$i]['sku'] = $v['sku'];
+                                        $data[$i]['created_at'] = strtotime($v['created_at']);
+                                        $data[$i]['updated_at'] = strtotime($v['updated_at']);
+                                    }
+                                    $this->orderitemprocess->insertAll($data);
+                                }
+                            }
                         }
 
                         break;
@@ -272,6 +284,146 @@ class OrderData extends Backend
             }
         }
     }
+
+    /**
+     * Zeelool 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function zeelool_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_name'] ?: '';
+        $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
+        $options_params = array();
+        foreach ($prescription_params as $key => $value) {
+            $arr_value = explode("=", $value);
+            $options_params[$arr_value[0]] = $arr_value[1];
+        }
+        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        $arr['coatiing_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
+        $arr['coatiing_price'] = $options['info_buyRequest']['tmplens']['coatiing_price'];
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['index_price'];
+        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
+        $arr['is_special_price'] = $options['info_buyRequest']['tmplens']['is_special_price'] ?? 0;
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_axis'] = $options_params['od_axis'];
+        $arr['pd_l'] = $options_params['pd_l'];
+        $arr['pd_r'] = $options_params['pd_r'];
+        $arr['pd'] = $options_params['pd'];
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
+        $arr['od_pv'] = $options_params['od_pv'];
+        $arr['os_pv'] = $options_params['os_pv'];
+        $arr['od_pv_r'] = $options_params['od_pv_r'];
+        $arr['os_pv_r'] = $options_params['os_pv_r'];
+        $arr['od_bd'] = $options_params['od_bd'];
+        $arr['os_bd'] = $options_params['os_bd'];
+        $arr['od_bd_r'] = $options_params['od_bd_r'];
+        $arr['os_bd_r'] = $options_params['os_bd_r'];
+        $arr['is_prescription'] = 0;
+        $arr['is_custom_lens'] = 0;
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+        if ($arr['prescription_type'] == 'Progressive') {
+            $arr['is_custom_lens'] = 1;
+        }
+
+
+        if (strpos($arr['index_type'], 'Polarized') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        //染色
+        if (strpos($arr['index_type'], 'Tinted') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        return $arr;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 处理订单处方数据
      *
