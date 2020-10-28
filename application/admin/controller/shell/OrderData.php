@@ -227,7 +227,7 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-                               
+
                                 $options = [];
                                 foreach ($payload['data'] as $k => $v) {
                                     //处方解析 不同站不同字段
@@ -245,6 +245,7 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    dump($options);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -266,7 +267,6 @@ class OrderData extends Backend
                                         }
                                         $this->orderitemprocess->insertAll($data);
                                     }
-                                    
                                 }
                             }
                         }
@@ -353,7 +353,7 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
-        
+
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -465,7 +465,7 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
-        
+
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -530,8 +530,8 @@ class OrderData extends Backend
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['third_name'] ?: '';
         //光度等参数
-        $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription']);
-       
+        $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription'], true);
+
         //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
@@ -573,7 +573,7 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
-        
+
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
