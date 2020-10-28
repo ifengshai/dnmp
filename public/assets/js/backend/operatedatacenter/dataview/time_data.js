@@ -60,7 +60,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                 data: ['销售额']
                             },
                             grid: {
-                                left: '8%',
+                                left: '10%',
                             },
                         }
                     };
