@@ -163,12 +163,12 @@ class ZeeloolDe extends Model
         $whereFrame['o.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing', 'free_proccessing']];
         $whereFrame['o.created_at'] = ['between', [$start_time, $end_time]];
         //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
-        $all_frame_result = Db::connect('database.db_meeloog')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+        $all_frame_result = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
         //镜架成本
         $all_frame_price = 0;
         foreach ($all_frame_result as $key => $value) {
-            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 4);
+            $true_sku = $this->itemPlatform->getTrueSku($value['sku'], 10);
             $all_frame_price += $value['counter'] * $sku_list[trim($true_sku)];
         }
         //求镜片成本价格
@@ -182,7 +182,7 @@ class ZeeloolDe extends Model
         $all_lens_price = 0;
 
         //求销售额、运费、毛利润
-        $base_grand_total_result = Db::connect('database.db_meeloog')->table('sales_flat_order o')->where($whereFrame)
+        $base_grand_total_result = Db::connect('database.db_zeelool_de')->table('sales_flat_order o')->where($whereFrame)
             ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'], 2);
