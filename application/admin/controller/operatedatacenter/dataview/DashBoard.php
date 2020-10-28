@@ -346,9 +346,9 @@ class DashBoard extends Backend
             $name = '用户购买转化漏斗';
             $date_arr = [
                 ['value' => round($landing_num['landing_num'], 0), 'percent' => '100%', 'name' => '着陆页'],
-                ['value' => round($detail_num['detail_num'], 0), 'percent' => $detail_num['detail_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
-                ['value' => round($cart_num['cart_num'], 0), 'percent' => $cart_num['cart_num'] == 0 ? '0%' : round($cart_num['cart_num'] / $detail_num['detail_num'] * 100, 2) . '%', 'name' => '加购物车'],
-                ['value' => round($complete_num['complete_num'], 0), 'percent' => $complete_num['complete_num'] == 0 ? '0%' : round($complete_num['complete_num'] / $cart_num['cart_num'] * 100, 2) . '%', 'name' => '支付转化']
+                ['value' => round($detail_num['detail_num'], 0), 'percent' =>  $landing_num['landing_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
+                ['value' => round($cart_num['cart_num'], 0), 'percent' => $detail_num['detail_num'] == 0 ? '0%' : round($cart_num['cart_num'] / $detail_num['detail_num'] * 100, 2) . '%', 'name' => '加购物车'],
+                ['value' => round($complete_num['complete_num'], 0), 'percent' => $cart_num['cart_num'] == 0 ? '0%' : round($complete_num['complete_num'] / $cart_num['cart_num'] * 100, 2) . '%', 'name' => '支付转化']
             ];
 
             $json['column'] = [$name];
