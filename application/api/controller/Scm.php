@@ -2128,9 +2128,10 @@ class Scm extends Api
         $list = $_check
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_order_number,c.logistics_number,a.createtime createtime,')
+            ->field('a.id,a.check_order_number,c.logistics_number,a.createtime,a.examine_time')
             ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id','left')
-            ->join(['fa_logistics_info' => 'c'], 'a.logistics_id=c.id')
+            ->join(['fa_logistics_info' => 'c'], 'a.logistics_id=c.id','left')
+            ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -2140,7 +2141,7 @@ class Scm extends Api
     }
 
     /**
-     * 入库单列表
+     * 入库单列表--ok
      *
      * @参数 string query  查询内容
      * @参数 int status  状态
@@ -2184,6 +2185,7 @@ class Scm extends Api
             ->where($where)
             ->field('a.id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -2192,7 +2194,11 @@ class Scm extends Api
         $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
         foreach($list as $key=>$value){
             $list[$key]['status'] = $status[$value['status']];
-            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+            //按钮
+            $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
+            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
+            $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0;//审核按钮
+            $list[$key]['show_detail'] = in_array($value['status'], [3,4]) ? 1 : 0;//详情按钮
         }
 
         $this->success('', ['list' => $list],200);
@@ -2237,9 +2243,6 @@ class Scm extends Api
      */
     public function in_stock_submit()
     {
-        //----------------需要再次确定添加和编辑页面的字段----------------//
-        //----------------原型图未确定,暂停----------------//
-        //----------------确定质检单入库时是否可以修改SKU类目和数量,逻辑需要----------------//
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("sku");
         $item_sku = array_filter(json_decode($item_sku,true));
@@ -2327,7 +2330,7 @@ class Scm extends Api
 //                            $data[$k]['sample_num'] = $v['sample_num'];//留样数量
 //                            $data[$k]['no_stock_num'] = $v['no_stock_num'];//未入库数量
 //                            $data[$k]['purchase_id'] = $v['purchase_id'];//采购单ID
-                            $data[$k]['in_stock_id'] = $result;
+                            $data[$k]['in_stock_id'] = $_in_stock->id;
                         }
                         //批量添加
                         $_in_stock_item->allowField(true)->saveAll($data);
@@ -2351,7 +2354,7 @@ class Scm extends Api
 //                            $data[$k]['sample_num'] = $v['sample_num'];//留样数量
 //                            $data[$k]['no_stock_num'] = $v['no_stock_num'];//未入库数量
 //                            $data[$k]['purchase_id'] = $v['purchase_id'];//采购单ID
-                            $data[$k]['in_stock_id'] = $result;
+                            $data[$k]['in_stock_id'] = $_in_stock->id;
                         }
                         //批量添加
                         $_in_stock_item->allowField(true)->saveAll($data);
@@ -2814,7 +2817,7 @@ class Scm extends Api
     }
 
     /**
-     * 盘点单列表
+     * 盘点单列表--ok
      *
      * @参数 string query  查询内容
      * @参数 int status  状态
@@ -2826,8 +2829,6 @@ class Scm extends Api
      * @author wgj
      * @return mixed
      */
-    //join 关联查询出错数据量未与主表保持一致-----------改
-    //子查询待调整
     public function inventory_list()
     {
         $query = $this->request->request('query');
@@ -2865,18 +2866,27 @@ class Scm extends Api
             ->where($where)
             ->field('a.id,a.number,a.createtime,a.status,a.check_status')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id','left')
+            ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
 
-        $status = [ 0=>'待盘点',1=>'盘点中',2=>'已完成' ];
-        $check_status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
+        $check_status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消'];
         foreach($list as $key=>$value){
-            $list[$key]['status'] = $check_status[$value['status']];
-            $list[$key]['check_status'] = $status[$value['check_status']];
-            $list[$key]['inventory_qty'] = '';//需要fa_inventory_item表数据加和
-            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
+            unset($list[$key]['status']);
+            $list[$key]['check_status'] = $check_status[$value['check_status']];
+            //按钮
+            $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0;//开始盘点按钮
+            $list[$key]['show_continue'] = 1 == $value['status'] ? 1 : 0;//继续盘点按钮
+            $list[$key]['show_examine'] = 2 == $value['status'] && 1 == $value['check_status'] ? 1 : 0;//审核按钮
+            $list[$key]['show_detail'] = in_array($value['check_status'], [2,3]) ? 1 : 0;//详情按钮
+            //计算已盘点数量
+            $_inventory_item = new \app\admin\model\warehouse\InventoryItem;
+            $count = $_inventory_item->where(['inventory_id' => $value['id']])->count();
+            $sum = $_inventory_item->where(['inventory_id' => $value['id'], 'is_add' => 0])->count();
+
+            $list[$key]['sum_count'] = $sum.'/'.$count;//需要fa_inventory_item表数据加和
         }
 
         $this->success('', ['list' => $list],200);
@@ -2947,7 +2957,8 @@ class Scm extends Api
         } else {
             //点击保存，创建盘点单
             //继续写
-            $item_sku = $this->request->request("sku");
+            $item_sku = $this->request->request("item_sku");
+            $item_sku = html_entity_decode($item_sku);
             $item_sku = array_filter(json_decode($item_sku,true));
             if (count(array_filter($item_sku)) < 1) {
                 $this->error(__('sku集合不能为空！！'), [], 524);
@@ -2956,32 +2967,34 @@ class Scm extends Api
             $result = false;
             Db::startTrans();
             try {
-
                 //保存--创建盘点单
                 $_inventory = new \app\admin\model\warehouse\Inventory;
                 $_inventory_item = new \app\admin\model\warehouse\InventoryItem;
+                $arr = [];
                 $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
-                $inventory_id = $_inventory->allowField(true)->save($arr);
-                if ($inventory_id) {
+                $result = $_inventory->allowField(true)->save($arr);
+
+                if ($result) {
                     $list = [];
-                    foreach (array_filter($item_sku) as $k => $v) {
-                        $list['in_stock_id'] = $inventory_id;
-                        $list['sku'] = $v['sku'];
+                    foreach ($item_sku as $k => $v) {
+                        $list[$k]['inventory_id'] = $_inventory->id;
+                        $list[$k]['sku'] = $v['sku'];
                         $_item = new \app\admin\model\itemmanage\Item;
                         $item = $_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku',$v['sku'])->find();
-                        $list['name'] = $item['name'];//商品名
-                        $list['real_time_qty'] = $item['real_time_qty'];//实时库存
-                        $list['distribution_occupy_stock'] = $item['distribution_occupy_stock'];//配货站用数量
-                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);
-                        $list['available_stock'] = $real_time_qty ?? 0;//可用库存
-                        $list['inventory_qty'] = $v['inventory_qty'];//盘点数量
-                        $list['error_qty'] = $v['error_qty'];//误差数量
-                        $list['remark'] = $v['remark'];//备注
+
+                        $list[$k]['name'] = $item['name'];//商品名
+                        $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'];//配货站用数量
+                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
+                        $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
+                        $list[$k]['available_stock'] = $item['available_stock'];//可用库存
+//                        $list[$k]['inventory_qty'] = $v['inventory_qty'];//盘点数量
+//                        $list[$k]['error_qty'] = $v['error_qty'];//误差数量
+                        $list[$k]['remark'] = $v['remark'];//备注
                     }
                     //添加明细表数据
-                    $result = $this->item->allowField(true)->saveAll($list);
+                    $result = $_inventory_item->allowField(true)->saveAll($list);
                 }
 
                 Db::commit();
@@ -3006,7 +3019,7 @@ class Scm extends Api
     }
 
     /**
-     * 编辑盘点单页面/详情/开始盘点/继续盘点页面
+     * 盘点单详情/开始盘点/继续盘点页面--ok
      *
      * @参数 int inventory_id  盘点单ID
      * @author wgj
@@ -3046,7 +3059,7 @@ class Scm extends Api
     }
 
     /**
-     * 开始盘点页面，提交
+     * 开始盘点页面，保存/提交--ok
      *
      * @参数 int inventory_id  盘点单ID
      * @参数 int do_type  提交类型 1提交-盘点结束 2保存-盘点中
@@ -3058,6 +3071,7 @@ class Scm extends Api
     {
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_sku");
+        $item_sku = html_entity_decode($item_sku);
         $item_sku = array_filter(json_decode($item_sku,true));
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('sku集合不能为空！！'), [], 540);
@@ -3070,33 +3084,37 @@ class Scm extends Api
         $_inventory_item = new \app\admin\model\warehouse\InventoryItem;
         $row = $_inventory->get($inventory_id);
         empty($row) && $this->error(__('盘点单不存在'), [], 543);
-        if ($row['status'] > 0) {
+        if ($row['status'] > 1) {
             $this->error(__('此状态不能编辑'), [], 544);
         }
 
-        $save_data = [];
-
         if ($do_type == 1) {
-            $params['status'] = 2;
+            //提交
+            $params['status'] = 2;//盘点完成
             $params['end_time'] = date('Y-m-d H:i:s', time());
-            $save_data['is_add'] = 1;//更新为盘点
+            $is_add = 1;//更新为盘点
+            $msg = '提交成功';
         } else {
+            //保存
+            $is_add = 0;//未盘点
             $params['status'] = 1;
+            $msg = '保存成功';
         }
 
-        //保存
-        //不需要编辑盘点单
+        //保存不需要编辑盘点单
         //编辑盘点单明细item
         foreach (array_filter($item_sku) as $k => $v) {
+            $save_data = [];
+            $save_data['is_add'] = $is_add;//是否盘点
             $save_data['inventory_qty'] = $v['inventory_qty'];//盘点数量
             $save_data['error_qty'] = $v['error_qty'];//误差数量
             $save_data['remark'] = $v['remark'];//备注
-            $_inventory_item->allowField(true)->save($save_data, ['inventory_id' => $inventory_id,'sku' => $v['sku']]);
+            $_inventory_item->where(['inventory_id' => $inventory_id,'sku' => $v['sku']])->update($save_data);
         }
 
         //提交盘点单状态为已完成，保存盘点单状态为盘点中
         $_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
-        $this->success('', ['info' => ''],200);
+        $this->success($msg, ['info' => ''],200);
     }
 
     /**
@@ -3124,10 +3142,11 @@ class Scm extends Api
         $data['check_time'] = date('Y-m-d H:i:s', time());
         $data['check_person'] = $this->auth->nickname;
 
+        $msg = '';
         if ($do_type == 2){
             $data['check_status'] = 4;
             $_inventory->allowField(true)->save($data, ['id' => $inventory_id]);
-            $this->success('', ['info' => ''],200);
+            $msg = '操作成功';
         }
 
         $data['check_status'] = 2;
@@ -3302,8 +3321,24 @@ class Scm extends Api
             Db::rollback();
             $this->error($e->getMessage(), [], 444);
         }
+        if ($res){
+            $msg = '审核成功';
+        }
 
-        $this->success('', ['info' => ''],200);
+        $this->success($msg, ['info' => ''],200);
+    }
+
+    /**
+     * 配货扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author wgj
+     * @return mixed
+     */
+    public function distribution_product()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->distribution_info($item_order_number,3);
     }
 
 }
