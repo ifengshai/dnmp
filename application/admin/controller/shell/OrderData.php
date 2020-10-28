@@ -227,7 +227,12 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
+<<<<<<< Updated upstream
                                 $data = []; //子订单表数据
+=======
+                               
+                                $options = [];
+>>>>>>> Stashed changes
                                 foreach ($payload['data'] as $k => $v) {
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
@@ -244,26 +249,28 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
-                                    dump($options);
-                                    $options_id = $this->orderoptions->insertGetId($options);
-                                  
-                                    for ($i = 0; $i < $v['qty_ordered']; $i++) {
-                                        $data[$i]['item_id'] = $v['item_id'];
-                                        $data[$i]['magento_order_id'] = $v['order_id'];
-                                        $data[$i]['site'] = $site;
-                                        $data[$i]['option_id'] = $options_id;
-                                        $str = '';
-                                        if ($i < 10) {
-                                            $str = '0' . $i + 1;
-                                        } else {
-                                            $str = $i + 1;
+                                    if ($options) {
+                                        $options_id = $this->orderoptions->insertGetId($options);
+                                        $data = []; //子订单表数据
+                                        for ($i = 0; $i < $v['qty_ordered']; $i++) {
+                                            $data[$i]['item_id'] = $v['item_id'];
+                                            $data[$i]['magento_order_id'] = $v['order_id'];
+                                            $data[$i]['site'] = $site;
+                                            $data[$i]['option_id'] = $options_id;
+                                            $str = '';
+                                            if ($i < 10) {
+                                                $str = '0' . $i + 1;
+                                            } else {
+                                                $str = $i + 1;
+                                            }
+                                            $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
+                                            $data[$i]['sku'] = $v['sku'];
+                                            $data[$i]['created_at'] = strtotime($v['created_at']);
+                                            $data[$i]['updated_at'] = strtotime($v['updated_at']);
                                         }
-                                        $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
-                                        $data[$i]['sku'] = $v['sku'];
-                                        $data[$i]['created_at'] = strtotime($v['created_at']);
-                                        $data[$i]['updated_at'] = strtotime($v['updated_at']);
+                                        $this->orderitemprocess->insertAll($data);
                                     }
-                                    $this->orderitemprocess->insertAll($data);
+                                    
                                 }
                             }
                         }
