@@ -221,9 +221,25 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
-                                    $this->order->where('entity_id', $v['entity_id'])->update($params);
+                                    $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
                             }
+
+                            //地址表插入时或更新时更新主表地址
+                            if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
+                                $params = [];
+                                foreach ($payload['data'] as $k => $v) {
+                                    $params['country_id'] = $v['country_id'];
+                                    $params['region'] = $v['region'];
+                                    $params['city'] = $v['city'];
+                                    $params['street'] = $v['street'];
+                                    $params['postcode'] = $v['postcode'];
+                                    $params['telephone'] = $v['telephone'];
+                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
+                                }
+                            }
+
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
@@ -245,7 +261,6 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
-                                    dump($options);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -269,6 +284,30 @@ class OrderData extends Backend
                                     }
                                 }
                             }
+
+                            //新增子表
+                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order_item') {
+
+                                $options = [];
+                                foreach ($payload['data'] as $k => $v) {
+                                    //处方解析 不同站不同字段
+                                    if ($site == 1) {
+                                        $options =  $this->zeelool_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 2) {
+                                        $options =  $this->voogueme_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 3) {
+                                        $options =  $this->nihao_prescription_analysis($v['product_options']);
+                                    }
+
+                                    $options['sku'] = $v['sku'];
+                                    $options['qty'] = $v['qty_ordered'];
+                                    $options['base_row_total'] = $v['base_row_total'];
+                                    if ($options) {
+                                        $this->orderitemoption->where(['entity_id' => $v['item_id'], 'site' => $site])->update($options);
+                                    }
+                                }
+                            }
+
                         }
 
                         break;
