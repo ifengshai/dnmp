@@ -246,7 +246,7 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     if ($options) {
-                                        $options_id = $this->orderoptions->isUpdate(false)->save($options);
+                                        $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
                                         for ($i = 0; $i < $v['qty_ordered']; $i++) {
                                             $data[$i]['item_id'] = $v['item_id'];
