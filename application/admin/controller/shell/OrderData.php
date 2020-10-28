@@ -227,16 +227,8 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-                                $arr = []; //处方表数据
                                 $data = []; //子订单表数据
                                 foreach ($payload['data'] as $k => $v) {
-                                    $arr['item_id'] = $v['item_id'];
-                                    $arr['site'] = $site;
-                                    $arr['magento_order_id'] = $v['magento_order_id'];
-                                    $arr['sku'] = $v['sku'];
-                                    $arr['qty'] = $v['qty_ordered'];
-                                    $arr['base_row_total'] = $v['base_row_total'];
-
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
                                         $options =  $this->zeelool_prescription_analysis($v['product_options']);
@@ -245,14 +237,19 @@ class OrderData extends Backend
                                     } elseif ($site == 3) {
                                         $options =  $this->nihao_prescription_analysis($v['product_options']);
                                     }
+
+                                    $options['item_id'] = $v['item_id'];
+                                    $options['site'] = $site;
+                                    $options['magento_order_id'] = $v['order_id'];
+                                    $options['sku'] = $v['sku'];
+                                    $options['qty'] = $v['qty_ordered'];
+                                    $options['base_row_total'] = $v['base_row_total'];
                                     dump($options);
-                                    //合并数组
-                                    $arr = array_merge($arr, $options);
-                                    dump($arr);
-                                    $options_id = $this->orderoptions->insertGetId($arr);
+                                    $options_id = $this->orderoptions->insertGetId($options);
+                                  
                                     for ($i = 0; $i < $v['qty_ordered']; $i++) {
                                         $data[$i]['item_id'] = $v['item_id'];
-                                        $data[$i]['magento_order_id'] = $v['magento_order_id'];
+                                        $data[$i]['magento_order_id'] = $v['order_id'];
                                         $data[$i]['site'] = $site;
                                         $data[$i]['option_id'] = $options_id;
                                         $str = '';
