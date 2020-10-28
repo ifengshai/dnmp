@@ -1539,7 +1539,7 @@ class Scm extends Api
         ;
         empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
 
-        //解除条形码绑定关系
+        //绑定异常子单号
         $abnormal_data = [
             'item_process_id' => $item_process_id,
             'type' => $type,
@@ -1702,8 +1702,7 @@ class Scm extends Api
             3=>'配镜片',
             4=>'加工',
             5=>'印logo',
-            6=>'成品质检',
-            7=>'合单'
+            6=>'成品质检'
         ];
 
         //操作失败记录
@@ -1747,11 +1746,7 @@ class Scm extends Api
             if($item_option_info['is_print_logo']){
                 $save_status = 5;
             }else{
-                if($total_qty_ordered > 1){
-                    $save_status = 6;
-                }else{
-                    $save_status = 8;
-                }
+                $save_status = 6;
             }
         }elseif(5 == $check_status){
             $save_status = 6;
@@ -1759,7 +1754,7 @@ class Scm extends Api
             if($total_qty_ordered > 1){
                 $save_status = 7;
             }else{
-                $save_status = 8;
+                $save_status = 9;
             }
 
             //扣减订单占用库存、配货占用库存、总库存
@@ -1771,12 +1766,10 @@ class Scm extends Api
                 ->dec('stock', $item_option_info['qty'])
                 ->update()
             ;
-        }elseif(7 == $check_status){
-            $save_status = 8;
         }
 
         //订单主表标记已合单
-        if(8 == $save_status){
+        if(9 == $save_status){
             $_new_order
                 ->allowField(true)
                 ->isUpdate(true, ['id'=>$item_process_info['order_id']])
@@ -1799,7 +1792,7 @@ class Scm extends Api
                 5=>'印logo',
                 6=>'去质检',
                 7=>'去合单',
-                8=>'去审单'
+                9=>'去审单'
             ];
             $this->success($next_step[$save_status], [],200);
         }else{
@@ -1895,13 +1888,14 @@ class Scm extends Api
             $this->distribution_save($item_order_number,6);
         }else{
             $reason = $this->request->request('reason');
-            !in_array($do_type,[1,2,3,4]) && $this->error(__('拒绝原因错误'), [], 403);
+            !in_array($reason,[1,2,3,4]) && $this->error(__('拒绝原因错误'), [], 403);
 
             //获取子订单数据
             $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
-            $item_process_id = $_new_order_item_process
+            $item_process_info = $_new_order_item_process
                 ->where('item_order_number', $item_order_number)
-                ->value('id')
+                ->field('id,option_id,order_id')
+                ->find()
             ;
 
             //状态
@@ -1912,15 +1906,69 @@ class Scm extends Api
                 4=>['status'=>5,'name'=>'质检拒绝：logo调整']
             ];
 
-            //状态回滚
-            $_new_order_item_process
-                ->allowField(true)
-                ->isUpdate(true, ['id'=>$item_process_id])
-                ->save(['distribution_status'=>$status_arr[$reason]['status']])
-            ;
+            Db::startTrans();
+            try {
+                //子订单状态回滚
+                $_new_order_item_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['id'=>$item_process_info['id']])
+                    ->save(['distribution_status'=>$status_arr[$reason]['status']])
+                ;
 
-            //记录日志
-            DistributionLog::record($this->auth,$item_process_id,$status_arr[$reason]['name']);
+                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                if(2 == $reason){
+                    //获取订单主表数据
+                    $_new_order = new \app\admin\model\order\order\NewOrder();
+                    $order_info = $_new_order
+                        ->where('id', $item_process_info['order_id'])
+                        ->value('site')
+                        ->find()
+                    ;
+
+                    //获取子订单处方数据
+                    $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+                    $item_option_info = $_new_order_item_option
+                        ->where('id', $item_process_info['option_id'])
+                        ->value('qty,sku')
+                        ->find()
+                    ;
+
+                    //获取true_sku
+                    $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    $true_sku = $_item_platform_sku->getTrueSku($item_option_info['sku'], $order_info['site']);
+
+                    //扣减虚拟仓库存
+                    $_item_platform_sku
+                        ->where(['sku'=>$true_sku,'platform_type'=>$order_info['site']])
+                        ->dec('stock', $item_option_info['qty'])
+                        ->update()
+                    ;
+
+                    //扣减可用库存、配货占用库存、总库存
+                    $_item = new \app\admin\model\itemmanage\Item();
+                    $_item
+                        ->where(['sku'=>$true_sku])
+                        ->dec('available_stock', $item_option_info['qty'])
+                        ->dec('distribution_occupy_stock', $item_option_info['qty'])
+                        ->dec('stock', $item_option_info['qty'])
+                        ->update()
+                    ;
+                }
+
+                //记录日志
+                DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$reason]['name']);
+
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 406);
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 407);
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage(), [], 408);
+            }
         }
     }
 
