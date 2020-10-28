@@ -242,13 +242,16 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_prescription_analysis($v['product_options']);
                                     } elseif ($site == 2) {
                                         $options =  $this->voogueme_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 3) {
+                                        $options =  $this->nihao_prescription_analysis($v['product_options']);
                                     }
                                     //合并数组
                                     $arr = array_merge($arr, $options);
                                     $options_id = $this->orderoptions->insertGetId($arr);
                                     for ($i = 0; $i < $v['qty_ordered']; $i++) {
                                         $data[$i]['item_id'] = $v['item_id'];
-                                        $data[$i]['order_id'] = $v['order_id'];
+                                        $data[$i]['magento_order_id'] = $v['magento_order_id'];
+                                        $data[$i]['site'] = $site;
                                         $data[$i]['option_id'] = $options_id;
                                         $str = '';
                                         if ($i < 10) {
@@ -296,23 +299,40 @@ class OrderData extends Backend
     protected function zeelool_prescription_analysis($data)
     {
         $options = unserialize($data);
-        $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_name'] ?: '';
+        //镜片类型
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
+        //镜片名称
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
+        //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
         foreach ($prescription_params as $key => $value) {
             $arr_value = explode("=", $value);
             $options_params[$arr_value[0]] = $arr_value[1];
         }
+        //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
-        $arr['coatiing_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
-        $arr['coatiing_price'] = $options['info_buyRequest']['tmplens']['coatiing_price'];
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
-        $arr['index_price'] = $options['info_buyRequest']['tmplens']['index_price'];
+        //镀膜名称
+        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['coating_name'] ?: '';
+        //镀膜价格
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coating_base_price'];
+        //镜框价格
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        //镜片价格
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        //镜框原始价格
         $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
-        $arr['is_special_price'] = $options['info_buyRequest']['tmplens']['is_special_price'] ?? 0;
+        //镜片颜色
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_data_name'];
+        //镜框颜色
+        $arr['frame_color'] = $options['options'][0]['value'];
+        //镜片+镀膜价格
         $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        //镜框+镜片+镀膜价格
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        //镜片分类
+        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
@@ -331,8 +351,7 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
-        $arr['is_prescription'] = 0;
-        $arr['is_custom_lens'] = 0;
+        
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -380,6 +399,225 @@ class OrderData extends Backend
         return $arr;
     }
 
+
+    /**
+     * Voogueme 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function voogueme_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        //镜片类型
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //镜片名称
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //光度等参数
+        $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
+        $options_params = array();
+        foreach ($prescription_params as $key => $value) {
+            $arr_value = explode("=", $value);
+            $options_params[$arr_value[0]] = $arr_value[1];
+        }
+        //处方类型
+        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        //镀膜名称
+        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
+        //镀膜价格
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_base_price'];
+        //镜框价格
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        //镜片价格
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        //镜框原始价格
+        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
+        //镜片颜色
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
+        //镜框颜色
+        $arr['frame_color'] = $options['options'][0]['value'];
+        //镜片+镀膜价格
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        //镜框+镜片+镀膜价格
+        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        //镜片分类
+        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        //光度参数
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_axis'] = $options_params['od_axis'];
+        $arr['pd_l'] = $options_params['pd_l'];
+        $arr['pd_r'] = $options_params['pd_r'];
+        $arr['pd'] = $options_params['pd'];
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
+        $arr['od_pv'] = $options_params['od_pv'];
+        $arr['os_pv'] = $options_params['os_pv'];
+        $arr['od_pv_r'] = $options_params['od_pv_r'];
+        $arr['os_pv_r'] = $options_params['os_pv_r'];
+        $arr['od_bd'] = $options_params['od_bd'];
+        $arr['os_bd'] = $options_params['os_bd'];
+        $arr['od_bd_r'] = $options_params['od_bd_r'];
+        $arr['os_bd_r'] = $options_params['os_bd_r'];
+        
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+        if ($arr['prescription_type'] == 'Progressive') {
+            $arr['is_custom_lens'] = 1;
+        }
+
+
+        if (strpos($arr['index_type'], 'Polarized') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        //染色
+        if (strpos($arr['index_type'], 'Tinted') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        return $arr;
+    }
+
+
+    /**
+     * Nihao 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function nihao_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        //镜片类型
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_type'] ?: '';
+        //镜片名称
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['third_name'] ?: '';
+        //光度等参数
+        $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription']);
+       
+        //处方类型
+        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        //镀膜名称
+        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['four_name'] ?: '';
+        //镀膜价格
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_base_price'];
+        //镜框价格
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        //镜片价格
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        //镜框原始价格
+        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
+        //镜片颜色
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
+        //镜框颜色
+        $arr['frame_color'] = $options['options'][0]['value'];
+        //镜片+镀膜价格
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        //镜框+镜片+镀膜价格
+        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        //镜片分类
+        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        //光度参数
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_axis'] = $options_params['od_axis'];
+        $arr['pd_l'] = $options_params['pd_l'];
+        $arr['pd_r'] = $options_params['pd_r'];
+        $arr['pd'] = $options_params['pd'];
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
+        $arr['od_pv'] = $options_params['od_pv'];
+        $arr['os_pv'] = $options_params['os_pv'];
+        $arr['od_pv_r'] = $options_params['od_pv_r'];
+        $arr['os_pv_r'] = $options_params['os_pv_r'];
+        $arr['od_bd'] = $options_params['od_bd'];
+        $arr['os_bd'] = $options_params['os_bd'];
+        $arr['od_bd_r'] = $options_params['od_bd_r'];
+        $arr['os_bd_r'] = $options_params['os_bd_r'];
+        
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+        if ($arr['prescription_type'] == 'Progressive') {
+            $arr['is_custom_lens'] = 1;
+        }
+
+
+        if (strpos($arr['index_type'], 'Polarized') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        //染色
+        if (strpos($arr['index_type'], 'Tinted') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        return $arr;
+    }
 
 
 
