@@ -2297,6 +2297,7 @@ class Scm extends Api
                     $_in_stock_item->allowField(true)->save($save_data, ['id' => $in_stock_id]);
                 }
             }
+            $this->success('保存成功', ['info' => ''],200);
 
         } else {
 
@@ -2373,7 +2374,7 @@ class Scm extends Api
                 $this->error($e->getMessage(), [], 444);
             }
             if ($result !== false) {
-                $this->success('添加成功！！', '', 200);
+                $this->success('提交成功！！', '', 200);
             } else {
                 $this->error(__('No rows were inserted'), [], 511);
             }
