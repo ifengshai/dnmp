@@ -228,6 +228,7 @@ class OrderData extends Backend
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
                                 $data = []; //子订单表数据
+                                $options = [];
                                 foreach ($payload['data'] as $k => $v) {
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
@@ -246,7 +247,7 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['base_row_total'];
                                     dump($options);
                                     $options_id = $this->orderoptions->insertGetId($options);
-                                  
+                                    dump($options_id);
                                     for ($i = 0; $i < $v['qty_ordered']; $i++) {
                                         $data[$i]['item_id'] = $v['item_id'];
                                         $data[$i]['magento_order_id'] = $v['order_id'];
