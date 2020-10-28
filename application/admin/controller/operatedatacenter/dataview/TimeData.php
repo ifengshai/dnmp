@@ -137,7 +137,7 @@ class TimeData extends Backend
             foreach ($finalList as $final_key => $final_value) {
                 foreach ($orderitem_resultlist as $orderitem_key => $orderitem_value) {
                     if ((int)$final_value['hour'] == (int)$orderitem_value['hour_created_at']) {
-                        $finalList[$final_key]['orderitem_counter'] = $orderitem_value['orderitem_counter'];
+                        $finalList[$final_key]['orderitem_counter'] = (int)$orderitem_value['orderitem_counter'];
                     }
                 }
             }
