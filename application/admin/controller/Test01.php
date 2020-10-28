@@ -838,8 +838,8 @@ class Test01 extends Backend
         Db::connect('database.db_nihao')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         Db::connect('database.db_nihao')->table('sales_flat_order')->query("set time_zone='+8:00'");
         set_time_limit(0);
-        $data = date('Y-m-d');
-        $data = '2020-10-23';
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
@@ -937,8 +937,8 @@ class Test01 extends Backend
     {
         set_time_limit(0);
         Db::connect('database.db_nihao')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        $data = date('Y-m-d');
-        $data = '2020-10-23';
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
