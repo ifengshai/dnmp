@@ -704,14 +704,14 @@ class Scm extends Api
         $row = $_check->get($check_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>$do_type]);
+        $res = $_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>$do_type,'examine_time'=>date('Y-m-d H:i:s')]);
         false === $res && $this->error(__('审核失败'), [], 404);
 
         Db::startTrans();
         try {
             //审核通过关联操作
             if ($do_type == 2) {
-//标记物流单检索为已创建质检单
+                //标记物流单检索为已创建质检单
                 $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
                 $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$row['logistics_id']])->save(['is_check_order'=>1]);
 
@@ -729,7 +729,7 @@ class Scm extends Api
                 $_check_item = new \app\admin\model\warehouse\CheckItem();
                 $list = $_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
                 if ($list) {
-                    //生成入库主表数据
+                    //生成样品入库主表数据
                     $work_order_data = [
                         'location_number'=>'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999),
                         'status'=>1,
@@ -741,7 +741,7 @@ class Scm extends Api
                     $_sample_work_order = new \app\admin\model\purchase\SampleWorkorder();
                     $_sample_work_order->allowField(true)->save($work_order_data);
 
-                    //生成入库子表数据
+                    //生成样品入库子表数据
                     $work_order_item_data = [];
                     foreach ($list as $value) {
                         $work_order_item_data[] = [
