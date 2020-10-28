@@ -71,7 +71,7 @@ class Scm extends Api
         $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
-        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
+//        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
     }
 
     /**
@@ -1132,7 +1132,7 @@ class Scm extends Api
             ->alias('a')
             ->where($where)
             ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id')
-            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.check_id','left')
+            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.out_stock_id','left')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
