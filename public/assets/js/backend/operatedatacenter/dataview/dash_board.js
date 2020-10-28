@@ -191,8 +191,29 @@ function order_data_view(){
         var again_user_num = ret.data.again_user_num;
         var vip_user_num = ret.data.vip_user_num;
         $('#order_num').text(order_num.order_num);
-        $('#same_order_num').text(order_num.same_order_num);
-        $('#huan_order_num').text(order_num.huan_order_num);
+        if (parseInt(order_num.same_order_num) < 0){
+            var $table = $('#same_order_num');
+            // var $tr = $("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>"+ order_num.same_order_num)
+            var $tr = $(order_num.same_order_num)
+            $table.append($tr);
+        }else{
+            var $table = $('#same_order_num');
+            var $tr = $(order_num.same_order_num)
+            $table.append($tr);
+        }
+        if (parseInt(order_num.huan_order_num) < 0){
+            var $table = $('#huan_order_num');
+            // var $tr = $("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>"+ order_num.same_order_num)
+            var $tr = $(order_num.huan_order_num)
+            $table.append($tr);
+        }else{
+            var $table = $('#huan_order_num');
+            var $tr = $(order_num.huan_order_num)
+            $table.append($tr);
+        }
+        // $('#same_order_num').text(order_num.same_order_num);
+
+        // $('#huan_order_num').text(order_num.huan_order_num);
 
         $('#order_unit_price').text(order_unit_price.order_unit_price);
         $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
