@@ -208,16 +208,13 @@ class OrderData extends Backend
                                     $params['total_item_count'] = $v['total_qty_ordered'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
-                                    $params['status'] = $v['status'] ?: '';
+                                    if ($v['status']) {
+                                        $params['status'] = $v['status'];
+                                    }
+                                   
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
-                                    $params['country_id'] = $v['country_id'];
-                                    $params['region'] = $v['region'];
-                                    $params['city'] = $v['city'];
-                                    $params['street'] = $v['street'];
-                                    $params['postcode'] = $v['postcode'];
-                                    $params['telephone'] = $v['telephone'];
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
