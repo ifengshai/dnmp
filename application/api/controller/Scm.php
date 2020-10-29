@@ -1574,11 +1574,11 @@ class Scm extends Api
                 ->setInc('occupy', 1)
             ;
 
-            DistributionLog::record($this->auth,$item_process_id,'异常库位号：'.$stock_house_info['coding']);
-            $this->success(__('异常库位号：'.$stock_house_info['coding']), [], 200);
+            DistributionLog::record($this->auth,$item_process_id,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), [], 200);
         }else{
-            DistributionLog::record($this->auth,$item_process_id,'异常无库位号');
-            $this->error(__('异常无库位号'), [], 405);
+            DistributionLog::record($this->auth,$item_process_id,'异常暂存架没有空余库位');
+            $this->error(__('异常暂存架没有空余库位'), [], 405);
         }
     }
 
@@ -1626,6 +1626,32 @@ class Scm extends Api
         $list = collection($list)->toArray();
 
         $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 子单号模糊搜索（配货通用）
+     *
+     * @参数 string query  搜索内容
+     * @author lzh
+     * @return mixed
+     */
+    public function fuzzy_search()
+    {
+        $query = $this->request->request('query');
+        empty($query) && $this->error(__('搜索内容不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $_new_order_item_process
+            ->where(['item_order_number'=>['like',"%{$query}%"]])
+            ->field('item_order_number,sku')
+            ->order('created_at','desc')
+            ->limit(0,100)
+            ->select()
+        ;
+        $list = collection($list)->toArray();
+
+        $this->success('', ['$list' => $list],200);
     }
 
     /**
@@ -1717,7 +1743,7 @@ class Scm extends Api
 
             //定制片提示库位号信息
             if($coding){
-                DistributionLog::record($this->auth,$item_process_info['id'],"定制片库位号：{$coding}");
+                DistributionLog::record($this->auth,$item_process_info['id'],"子单号{$item_order_number}，定制片库位号：{$coding}");
                 $this->error(__("请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位"), [], 405);
             }
         }
