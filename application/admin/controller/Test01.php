@@ -1049,6 +1049,13 @@ class Test01 extends Backend
         dump($sku_order_data);
         // dump($skus);
     }
-    
+
+    public function delete_purchase_data()
+    {
+        Db::name('purchase_order')->where('purchase_number','PO20201023090310717435')->update(['purchase_status'=>3]);
+        // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
+        // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
+        // Db::name('purchase_order')->where('purchase_number','PO20201023090457598387')->update(['purchase_status'=>3]);
+    }
 
 }
