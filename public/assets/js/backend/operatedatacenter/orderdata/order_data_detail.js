@@ -138,7 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var customer_type = $('#customer_type').val();
                 var store_id = $('#store_id').val();
                 var field = $('#field').val();
-                window.location.href=Config.moduleurl+'operatedatacenter/orderdata/order_data_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&increment_id='+increment_id+'&order_status='+order_status+'&customer_type='+customer_type+'&store_id='+store_id+'&field='+field;
+                window.location.href=Config.moduleurl+'/operatedatacenter/orderdata/order_data_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&increment_id='+increment_id+'&order_status='+order_status+'&customer_type='+customer_type+'&store_id='+store_id+'&field='+field;
             });
         },
         add: function () {
