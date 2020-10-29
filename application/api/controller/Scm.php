@@ -1574,11 +1574,11 @@ class Scm extends Api
                 ->setInc('occupy', 1)
             ;
 
-            DistributionLog::record($this->auth,$item_process_id,'异常库位号：'.$stock_house_info['coding']);
-            $this->success(__('异常库位号：'.$stock_house_info['coding']), [], 200);
+            DistributionLog::record($this->auth,$item_process_id,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), [], 200);
         }else{
-            DistributionLog::record($this->auth,$item_process_id,'异常无库位号');
-            $this->error(__('异常无库位号'), [], 405);
+            DistributionLog::record($this->auth,$item_process_id,'异常暂存架没有空余库位');
+            $this->error(__('异常暂存架没有空余库位'), [], 405);
         }
     }
 
@@ -1717,7 +1717,7 @@ class Scm extends Api
 
             //定制片提示库位号信息
             if($coding){
-                DistributionLog::record($this->auth,$item_process_info['id'],"定制片库位号：{$coding}");
+                DistributionLog::record($this->auth,$item_process_info['id'],"子单号{$item_order_number}，定制片库位号：{$coding}");
                 $this->error(__("请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位"), [], 405);
             }
         }
