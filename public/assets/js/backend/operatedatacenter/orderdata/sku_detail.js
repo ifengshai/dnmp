@@ -99,6 +99,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
                 table.bootstrapTable('refresh',params);
             });
+            $("#export").click(function(){
+                var order_platform = $('#order_platform').val();
+                var time_str = $('#time_str').val();
+                var sku = $('#sku').val();
+                if(sku.length <= 0){
+                    Layer.alert('请填写平台sku');
+                    return false;
+                }
+                if(time_str.length <= 0){
+                    Layer.alert('请选择时间');
+                    return false;
+                }
+                window.location.href=Config.moduleurl+'/operatedatacenter/orderdata/sku_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&sku='+sku;
+            });
         },
         add: function () {
             Controller.api.bindevent();
