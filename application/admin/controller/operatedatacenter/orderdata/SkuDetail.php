@@ -47,6 +47,8 @@ class SkuDetail extends Backend
                 $map['p.sku'] = $filter['sku'];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $map['p.sku'] = '';
             }
             if($filter['order_platform']){
                 $site = $filter['order_platform'];
