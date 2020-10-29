@@ -10,7 +10,7 @@ class NewOrderItemOption extends Model
     protected $connection = 'database.db_new_order';
 
     // 表名
-    protected $table = 'order_item_option';
+    protected $name = 'order_item_option';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;

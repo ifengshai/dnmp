@@ -115,7 +115,7 @@ class Distribution extends Backend  /*这里继承的是app\common\controller\Ba
             //TODO::加工类型、是否有工单
             $list = $this->model
                 ->alias('a')
-                ->field('a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,b.store_house_id')
+                ->field('a.id,a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,b.store_house_id,b.order_prescription_type')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
