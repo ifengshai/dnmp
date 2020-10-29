@@ -41,6 +41,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 ]
             });
             // 为表格绑定事件
+            Controller.api.formatter.user_data_pie();
+            Controller.api.formatter.lens_data_pie();
             Table.api.bindevent(table);
             $("#sku_submit").click(function(){
                 var sku = $("#sku").val();
@@ -53,8 +55,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     Layer.alert('请选择时间');
                     return false;
                 }
-                $("#echart1").css('display','block'); 
-                $("#echart2").css('display','block'); 
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
