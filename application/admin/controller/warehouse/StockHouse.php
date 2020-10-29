@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use think\Loader;
 
 /**
  * 库位管理
@@ -313,6 +314,107 @@ class StockHouse extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+    /**
+     * 打印
+     */
+    public function print_label($ids = null)
+    {
+        //检测状态
+        $stock_house_info = $this->model
+            ->where(['id' => $ids])
+            ->field('status,subarea,coding')
+            ->find()
+        ;
+        1 != $stock_house_info['status'] && $this->error('禁用中无法打印！');
+        $coding = $stock_house_info['subarea'].'-'.$stock_house_info['coding'];
+
+        ob_start();
+        $file_header =
+            <<<EOF
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+body{ margin:0; padding:0}
+.single_box{margin:0 auto;}
+table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
+table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
+table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
+table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
+table.addpro.re tbody td{ position:relative}
+</style>
+EOF;
+
+        //检测文件夹
+        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
+        !file_exists($dir) && mkdir($dir, 0777, true);
+
+        //生成条形码
+        $fileName = $dir . DS . $coding .".png";
+        $this->generate_barcode($coding, $fileName);
+
+        //拼接条形码
+        $img_url = "/uploads/stock_house/merge_shelf/{$coding}.png";
+        $file_content = "
+<div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
+    <p>合单架库位条形码</p>
+    <img src='" . $img_url . "' style='width:36mm'>
+</div>
+            ";
+
+        echo $file_header . $file_content;
+    }
+
+    /**
+     * 生成条形码
+     */
+    protected function generate_barcode($text, $fileName)
+    {
+        // $text = '1007000000030';
+        // 引用barcode文件夹对应的类
+        Loader::import('BCode.BCGFontFile', EXTEND_PATH);
+        //Loader::import('BCode.BCGColor',EXTEND_PATH);
+        Loader::import('BCode.BCGDrawing', EXTEND_PATH);
+        // 条形码的编码格式
+        // Loader::import('BCode.BCGcode39',EXTEND_PATH,'.barcode.php');
+        Loader::import('BCode.BCGcode128', EXTEND_PATH, '.barcode.php');
+
+        // $code = '';
+        // 加载字体大小
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 20);
+        //颜色条形码
+        $color_black = new \BCGColor(0, 0, 0);
+        $color_white = new \BCGColor(255, 255, 255);
+        $drawException = null;
+        try {
+            // $code = new \BCGcode39();
+            $code = new \BCGcode128();
+            $code->setScale(2);
+            $code->setThickness(60); // 条形码的厚度
+            $code->setForegroundColor($color_black); // 条形码颜色
+            $code->setBackgroundColor($color_white); // 空白间隙颜色
+            $code->setFont($font); //设置字体
+            // $code->setOffsetX(10); //设置字体
+            $code->parse($text); // 条形码需要的数据内容
+        } catch (\Exception $exception) {
+            $drawException = $exception;
+        }
+        //根据以上条件绘制条形码
+        $drawing = new \BCGDrawing('', $color_white);
+        if ($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            if ($fileName) {
+                // echo 'setFilename<br>';
+                $drawing->setFilename($fileName);
+            }
+            $drawing->draw();
+        }
+        // 生成PNG格式的图片
+        header('Content-Type: image/png');
+        // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
+        $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
     }
 
 }
