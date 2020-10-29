@@ -123,7 +123,7 @@ class OrderData extends Backend
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
                             //根据库名判断站点
-                            switch ($payload['database']) {
+                            switch ($payload['data']) {
                                 case 'zeelool':
                                     $site = 1;
                                     break;
@@ -822,20 +822,31 @@ class OrderData extends Backend
     }
 
 
+    /**
+     * zeelool旧数据同步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/29 15:58:49 
+     * @return void
+     */
+    public function zeelool_old_order()
+    {
+        $this->zeelool;
+    }
 
+    /**
+     * voogueme旧数据同步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/29 15:59:18 
+     * @return void
+     */
+    public function voogueme_old_order()
+    {
 
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 
 
