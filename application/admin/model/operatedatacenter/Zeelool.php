@@ -313,7 +313,9 @@ class Zeelool extends Model
      */
     public function getAgainUser($time_str = '', $type = 0)
     {
+
         $createat = explode(' ', $time_str);
+        // dump($createat);
         $again_num = $this->get_again_user($createat);
         $same_create_at[0] = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
         $same_create_at[1] = $createat[1];
@@ -1085,6 +1087,52 @@ class Zeelool extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+    //获取分时数据
+    public function ga_hour_data($start_time,$end_time)
+    {
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_session($analytics, $start_time, $end_time);
+
+        // dump($response);die;
+
+        // Print the response.
+        $result = $this->printResults($response);
+
+        return $result;
+    }
+    protected function getReport_session($analytics, $startDate, $endDate)
+    {
+        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:sessions");
+        $adCostMetric->setAlias("ga:sessions");
+        // $adCostMetric->setExpression("ga:adCost");
+        // $adCostMetric->setAlias("ga:adCost");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:dateHour");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
     protected function printResults($reports)
     {
         $finalResult = array();
@@ -1240,12 +1288,12 @@ class Zeelool extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;
         //获取所有的订单的国家
-        $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
+        $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->order('count desc')->select();
         //总订单数
         $order_num = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->count();
         $country_arr = collection($country_arr)->toArray();
@@ -1254,5 +1302,4 @@ class Zeelool extends Model
         }
         return $country_arr;
     }
-
 }

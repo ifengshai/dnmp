@@ -1,135 +1,127 @@
 <?php
 
-namespace app\admin\controller\operatedatacenter\GoodsData;
+namespace app\admin\controller\operatedatacenter\goodsdata;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
-use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
 use think\Controller;
 use think\Db;
 use think\Request;
 
-class SingleItem extends Backend
+class SingleItems extends Backend
 {
-    public function _initialize()
-    {
-        parent::_initialize();
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
-    }
-
     /**
-     * 商品数据-单品查询
+     * 单品查询
      *
-     * @return \think\Response
      */
     public function index()
     {
-        $orderPlatform = (new \app\admin\model\platformmanage\MagentoPlatform())->getNewAuthSite();
-        if (empty($orderPlatform)) {
-            $this->error('您没有权限访问', 'general/profile?ref=addtabs');
-        }
         //设置过滤方法
+        $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-            $sku = input('sku');
-
-
-            $platform = input('order_platform') ? input('order_platform') : 1;
-            $time_str = input('time_str');
-            $item_platform = new ItemPlatformSku();
-            $sku = $item_platform->where('sku', $sku)->where('platform_sku', $platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_sku', $platform)->value('platform_sku') : $sku;
-            $createat = explode(' ', $time_str);
-            // dump($platform);
-            // dump($time_str);
-            // dump($sku);
-            $map = [];
-            if ($sku && $platform && $time_str) {
-                // dump(111);
-                $map['a.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-                $map['sku'] = ['like', $sku . '%'];
-                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $filter = json_decode($this->request->get('filter'), true);
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
             }
-            switch ($platform) {
-                case 1:
-                    $model = Db::connect('database.db_zeelool');
-                    break;
-                case 2:
-                    $model = Db::connect('database.db_voogueme');
-                    break;
-                case 3:
-                    $model = Db::connect('database.db_nihao');
-                    break;
+            if($filter['create_time-operate']){
+                unset($filter['create_time-operate']);
+                $this->request->get(['filter' => json_encode($filter)]);
             }
-            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
-            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            if ($filter['time_str']) {
+                $createat = explode(' ', $filter['time_str']);
+                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                unset($filter['time_str']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } else{
+                if(isset($filter['time_str'])){
+                    unset($filter['time_str']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $map['p.created_at'] = ['between', [$start,$end]];
+            }
+
+            if($filter['sku']){
+                $map['p.sku'] = $filter['sku'];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if($filter['order_platform']){
+                $site = $filter['order_platform'];
+                unset($filter['order_platform']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $site = 1;
+            }
+            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
+            if($site == 2){
+                $order_model = Db::connect('database.db_voogueme');
+
+            }elseif($site == 3){
+                $order_model = Db::connect('database.db_nihao');
+                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
+            }else{
+                $order_model = Db::connect('database.db_zeelool');
+            }
+            $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $model
+            $total = $order_model->table('sales_flat_order_item_prescription')
+                ->alias('p')
+                ->join('sales_flat_order o','p.order_id=o.entity_id')
+                ->field($field)
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $order_model->table('sales_flat_order_item_prescription')
+                ->alias('p')
+                ->join('sales_flat_order o','p.order_id=o.entity_id')
+                ->field($field)
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $total = $order_model
                 ->table('sales_flat_order')
                 ->where($map)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('a.entity_id')
+                ->alias('o')
+                ->join(['sales_flat_order_item' => 'p'], 'o.entity_id=p.order_id')
+                ->group('o.entity_id')
                 // ->order($order)
                 ->count();
-            $list = $model
+            $list = $order_model
                 ->table('sales_flat_order')
                 ->where($map)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('a.entity_id')
+                ->alias('o')
+                ->join(['sales_flat_order_item' => 'p'], 'o.entity_id=p.order_id')
+                ->group('o.entity_id')
                 // ->order($order)
                 ->limit($offset, $limit)
                 ->select();
-            // if (!$total){
-            //     $total = 0;
+            $list = collection($list)->toArray();
+            // foreach ($list as $key=>$value){
+            //     $list[$key]['number'] = $key+1;
+            //     $list[$key]['price'] = round($value['frame_price']+$value['index_price'],2);
             // }
-            if (!$list) {
-                $list = [];
-            }
             $result = array("total" => $total, "rows" => $list);
-            //关联购买
-            $andWhere = "FIND_IN_SET({$sku},sku)";
-            $connect_buy = $model->table('sales_flat_order_item')
-                ->where('sku', 'like', $sku . '%')
-                ->where('created_at', 'between', [$createat[0], $createat[3]])
-                ->distinct('order_id')
-                ->field('order_id')
-                ->select();//包含此sku的所有订单好
-            // dump($connect_buy);
-            $connect_buy = array_column($connect_buy, 'order_id');
-            // dump($connect_buy);
-            $skus = array();
-            foreach ($connect_buy as $value) {
-                $arr = $model->table('sales_flat_order_item')
-                    ->where('order_id', $value)
-                    // ->where('created_at','between', [$createat[0], $createat[3]])
-                    ->field('sku')
-                    ->select();//这些订单号内的所有sku
-                $skus[] = array_column($arr, 'sku');
-            }
-            // dump($skus);
-            $array_sku = [];
-            //获取关联购买的数量
-            foreach ($skus as $k => $v) {
-                foreach ($v as $vv) {
-                    if ($vv != $sku) {
-                        $array_sku[$vv] += 1;
-                    }
-                }
-            }
-            // dump($array_sku);
-            // dump($result);
-            $this->assign('array_sku', $array_sku);
+
             return json($result);
         }
-
-        // $this->assignconfig('platform', $platform);
-        // $this->assignconfig('sku', $sku);
-        // $this->view->assign(compact('sku','array','total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price'));
-        $this->assign('orderPlatformList', $orderPlatform);
-        // $this->assign('array', $array);
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr',$magentoplatformarr);
         return $this->view->fetch();
     }
 
@@ -168,7 +160,7 @@ class SingleItem extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $order_model->query("set time_zone='+8:00'");;
+            // $order_model->query("set time_zone='+8:00'");;
             //此sku的总订单量
             $map['sku'] = ['like', $sku . '%'];
             // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
@@ -202,22 +194,37 @@ class SingleItem extends Backend
                 ->where('sku', 'like', $sku . '%')
                 ->where('created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->sum('qty_ordered');//sku总副数
-                // ->field('item_id,sku,created_at')
-                // ->select();
+            // ->field('item_id,sku,created_at')
+            // ->select();
             // dump($whole_glass);
             $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 0);
 
-            //付费镜片订单数
-            $pay_jingpian_glass = $model
-                ->table('sales_flat_order')
-                ->alias('a')
-                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
-                ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
-                ->where('sku', 'like', $sku . '%')
-                ->where('b.coatiing_price', '>', 0)
-                ->group('order_id')
-                // ->select();
-                ->count();
+            if ($order_platform!=3){
+                //付费镜片订单数
+                $pay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('b.coatiing_price', '>', 0)
+                    ->group('order_id')
+                    // ->select();
+                    ->count();
+            }else{
+                //付费镜片订单数
+                $pay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('b.index_price', '>', 0)
+                    ->group('order_id')
+                    // ->select();
+                    ->count();
+            }
+
             // dump($pay_jingpian_glass);
 
             //付费镜片订单数占比
@@ -257,42 +264,42 @@ class SingleItem extends Backend
                 // ->group('order_id')
                 ->field('base_grand_total')
                 ->sum('base_grand_total');
-                // ->select();
+            // ->select();
             // $whole_price = round(array_sum(array_map(function($val){return $val['base_grand_total'];}, $whole_price)),2);
 
             //订单客单价
             $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
             // //关联购买
-            // $andWhere = "FIND_IN_SET({$sku},sku)";
-            // $connect_buy = $model->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $sku . '%')
-            //     ->where('created_at', 'between', [$createat[0], $createat[3]])
-            //     ->distinct('order_id')
-            //     ->field('order_id')
-            //     ->select();//包含此sku的所有订单好
-            // // dump($connect_buy);
-            // $connect_buy = array_column($connect_buy, 'order_id');
-            // // dump($connect_buy);
-            // $skus = array();
-            // foreach ($connect_buy as $value) {
-            //     $arr = $model->table('sales_flat_order_item')
-            //         ->where('order_id', $value)
-            //         // ->where('created_at','between', [$createat[0], $createat[3]])
-            //         ->field('sku')
-            //         ->select();//这些订单号内的所有sku
-            //     $skus[] = array_column($arr, 'sku');
-            // }
-            // // dump($skus);
-            // $array_sku = [];
-            // //获取关联购买的数量
-            // foreach ($skus as $k => $v) {
-            //     foreach ($v as $vv) {
-            //         if ($vv != $sku) {
-            //             $array_sku[$vv] += 1;
-            //         }
-            //     }
-            // }
-            // dump($array);
+            $andWhere = "FIND_IN_SET({$sku},sku)";
+            $connect_buy = $model->table('sales_flat_order_item')
+                ->where('sku', 'like', $sku . '%')
+                ->where('created_at', 'between', [$createat[0], $createat[3]])
+                ->distinct('order_id')
+                ->field('order_id')
+                ->select();//包含此sku的所有订单好
+            // dump($connect_buy);
+            $connect_buy = array_column($connect_buy, 'order_id');
+            // dump($connect_buy);
+            $skus = array();
+            foreach ($connect_buy as $value) {
+                $arr = $model->table('sales_flat_order_item')
+                    ->where('order_id', $value)
+                    // ->where('created_at','between', [$createat[0], $createat[3]])
+                    ->field('sku')
+                    ->select();//这些订单号内的所有sku
+                $skus[] = array_column($arr, 'sku');
+            }
+            // dump($skus);
+            $array_sku = [];
+            //获取关联购买的数量
+            foreach ($skus as $k => $v) {
+                foreach ($v as $vv) {
+                    if ($vv != $sku) {
+                        $array_sku[$vv] += 1;
+                    }
+                }
+            }
+            // dump($array_sku);
             $data = compact('sku', 'array_sku', 'total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price');
             $this->success('', '', $data);
         }
@@ -376,5 +383,14 @@ class SingleItem extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
-
 }
+
+
+
+
+
+
+
+
+
+

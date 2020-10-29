@@ -96,6 +96,15 @@ class SkuDetail extends Backend
 
             return json($result);
         }
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr',$magentoplatformarr);
         return $this->view->fetch();
     }
 

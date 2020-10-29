@@ -171,9 +171,9 @@
                                         <div class="col-xs-8">
                                             <select id="order_platform" data-rule="required" class="form-control"
                                                 name="order_platform">
-                                                <option value="1" selected="selected">Zeelool</option>
-                                                <option value="2">Voogueme</option>
-                                                <option value="3">Nihao</option>
+                                                {foreach name="magentoplatformarr" item="vo" key="key"}
+                                                <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
+                                                {/foreach}
                                             </select>
                                         </div>
                                     </div>

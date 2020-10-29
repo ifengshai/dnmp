@@ -59,8 +59,10 @@ class DashBoard extends Backend
         $active_user_num = $this->zeeloolOperate->getActiveUser();
         //注册用户数
         $register_user_num = $this->zeeloolOperate->getRegisterUser();
+        $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')).' - '.date('Y-m-d H:i:s', time());
+        // dump($time_arr);die;
         //复购用户数
-        $again_user_num = $this->zeeloolOperate->getAgainUser();
+        $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr,0);
         //vip用户数
         $vip_user_num = $this->zeeloolOperate->getVipUser();
         //订单数
@@ -126,6 +128,7 @@ class DashBoard extends Backend
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
             $this->success('', '', $data);
         }
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
     }
 
     /*
@@ -344,14 +347,16 @@ class DashBoard extends Backend
 
             $name = '用户购买转化漏斗';
             $date_arr = [
-                ['value' => $landing_num['landing_num'], 'name' => '着陆页'],
-                ['value' => $detail_num['detail_num'], 'name' => '商品详情页'],
-                ['value' => $cart_num['cart_num'], 'name' => '加购物车'],
-                ['value' => $complete_num['complete_num'], 'name' => '支付转化']
+                ['value' => round($landing_num['landing_num'], 0), 'percent' => '100%', 'name' => '着陆页'],
+                ['value' => round($detail_num['detail_num'], 0), 'percent' =>  $landing_num['landing_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
+                ['value' => round($cart_num['cart_num'], 0), 'percent' => $detail_num['detail_num'] == 0 ? '0%' : round($cart_num['cart_num'] / $detail_num['detail_num'] * 100, 2) . '%', 'name' => '加购物车'],
+                ['value' => round($complete_num['complete_num'], 0), 'percent' => $cart_num['cart_num'] == 0 ? '0%' : round($complete_num['complete_num'] / $cart_num['cart_num'] * 100, 2) . '%', 'name' => '支付转化']
             ];
 
             $json['column'] = [$name];
             $json['columnData'] = $date_arr;
+            // $json['legendData'] = ['着陆页','商品详情页','加购物车','支付转化'];
+            // $json['legendShow'] = true;
             return json(['code' => 1, 'data' => $json]);
         }
     }

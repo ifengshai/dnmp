@@ -910,7 +910,7 @@ class Voogueme extends Model
         // Print the response.
         $result = $this->printResults($response);
         // return $result;
-        return $result[0]['ga:goal13Starts'] ? round($result[0]['ga:goal13Starts'], 2) : 0;
+        return $result[0]['ga:goal20Starts'] ? round($result[0]['ga:goal20Starts'], 2) : 0;
     }
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
@@ -941,8 +941,8 @@ class Voogueme extends Model
         // $adCostMetric->setExpression("ga:sessions");
         // $adCostMetric->setAlias("ga:sessions");
         //目标4的数量
-        $adCostMetric->setExpression("ga:goal13Starts");
-        $adCostMetric->setAlias("ga:goal13Starts");
+        $adCostMetric->setExpression("ga:goal20Starts");
+        $adCostMetric->setAlias("ga:goal20Starts");
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:date");
@@ -974,7 +974,7 @@ class Voogueme extends Model
         // Print the response.
         $result = $this->printResults($response);
         // return $result;
-        return $result[0]['ga:goal1Starts'] ? round($result[0]['ga:goal1Starts'], 2) : 0;
+        return $result[0]['ga:goal2Starts'] ? round($result[0]['ga:goal2Starts'], 2) : 0;
     }
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
@@ -1005,8 +1005,8 @@ class Voogueme extends Model
         // $adCostMetric->setExpression("ga:sessions");
         // $adCostMetric->setAlias("ga:sessions");
         //目标4的数量
-        $adCostMetric->setExpression("ga:goal1Starts");
-        $adCostMetric->setAlias("ga:goal1Starts");
+        $adCostMetric->setExpression("ga:goal2Starts");
+        $adCostMetric->setAlias("ga:goal2Starts");
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:date");
@@ -1074,6 +1074,52 @@ class Voogueme extends Model
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+    //获取分时数据
+    public function ga_hour_data($start_time,$end_time)
+    {
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_session($analytics, $start_time, $end_time);
+
+        // dump($response);die;
+
+        // Print the response.
+        $result = $this->printResults($response);
+
+        return $result;
+    }
+    protected function getReport_session($analytics, $startDate, $endDate)
+    {
+        $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        $adCostMetric->setExpression("ga:sessions");
+        $adCostMetric->setAlias("ga:sessions");
+        // $adCostMetric->setExpression("ga:adCost");
+        // $adCostMetric->setAlias("ga:adCost");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:dateHour");
 
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
@@ -1241,12 +1287,12 @@ class Voogueme extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3]]];
+        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;
         //获取所有的订单的国家
-        $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->select();
+        $country_arr = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->group('oa.country_id')->field('oa.country_id,count(oa.country_id) count')->order('count desc')->select();
         //总订单数
         $order_num = $this->model->alias('o')->join('sales_flat_order_address oa','o.entity_id=oa.parent_id')->where($order_where)->count();
         $country_arr = collection($country_arr)->toArray();

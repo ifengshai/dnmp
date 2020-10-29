@@ -408,11 +408,7 @@ class GoodsSaleDetail extends Backend
         Cache::set('Operationalreport_platformOrderInfo' . $platform . md5(serialize($map)), $arr, 7200);
         return $arr;
     }
-
-    /*
-     * 商品销售情况首页数据
-     */
-    public function index()
+    public function index1()
     {
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
         if (empty($orderPlatform)) {
@@ -422,74 +418,138 @@ class GoodsSaleDetail extends Backend
         $label = input('order_platform', 1);
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            //默认当天默认7天数据
+            //默认当天
             if ($params['create_time']) {
                 $time = explode(' ', $params['create_time']);
                 $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
-            //列表
-            $result = [];
-            // if ($params['type'] == 'list') {
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            if ($params['order_platform'] == 1) {
-                //查询对应平台销量
-                $list = $this->zeelool->getOrderSalesNum([], $map);
-                //查询对应平台商品SKU
-                $skus = $itemPlatformSku->getWebSkuAll(1);
-            } elseif ($params['order_platform'] == 2) {
-                //查询对应平台销量
-                $list = $this->voogueme->getOrderSalesNum([], $map);
-                //查询对应平台商品SKU
-                $skus = $itemPlatformSku->getWebSkuAll(2);
-            } elseif ($params['order_platform'] == 3) {
-                //查询对应平台销量
-                $list = $this->nihao->getOrderSalesNum([], $map);
-                //查询对应平台商品SKU
-                $skus = $itemPlatformSku->getWebSkuAll(3);
-            } elseif ($params['order_platform'] == 4) {
-                //查询对应平台销量
-                $list = $this->meeloog->getOrderSalesNum([], $map);
-                //查询对应平台商品SKU
-                $skus = $itemPlatformSku->getWebSkuAll(4);
-            } elseif ($params['order_platform'] == 5) {
-                //查询对应平台销量
-                $list = $this->wesee->getOrderSalesNum([], $map);
-                //查询对应平台商品SKU
-                $skus = $itemPlatformSku->getWebSkuAll(5);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $itemPlatformSku
+                // ->where($where)
+                // ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $itemPlatformSku
+                // ->where($where)
+                // ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            return json(["total" => $total,'rows' => $list]);
+        }
+        $this->assign('create_time', $create_time);
+        $this->assign('label', $label);
+        $this->assign('orderPlatformList',$orderPlatform);
+        $this->assignconfig('create_time', $create_time);
+        $this->assignconfig('label', $label);
+        return $this->view->fetch();
+    }
+
+    /*
+     * 商品销售情况首页数据
+     */
+    public function index()
+    {
+        // $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        // if (empty($orderPlatform)) {
+        //     $this->error('您没有权限访问', 'general/profile?ref=addtabs');
+        // }
+        //查询对应平台权限
+        $magentoplatformarr = (new MagentoPlatform())->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
             }
-            $productInfo = $this->item->getSkuInfo();
-            $list = $list ?? [];
-            $i = 0;
-            foreach ($list as $k => $v) {
-                $result[$i]['platformsku'] = $k;
-                $result[$i]['sales_num'] = $v;
-                $result[$i]['sku'] = $skus[trim($k)]['sku'];
-                $result[$i]['grade'] = $skus[trim($k)]['grade'];
-                $result[$i]['is_up'] = $skus[trim($k)]['outer_sku_status'];
-                $result[$i]['available_stock'] = $skus[trim($k)]['stock'];
-                $result[$i]['name'] = $productInfo[$skus[trim($k)]['sku']]['name'];
-                $result[$i]['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
-                $i++;
+        }
+        $create_time = input('create_time');
+        $label = input('order_platform', 1);
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+
+
+            $filter = json_decode($this->request->get('filter'), true);
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
             }
-            // }
-            if (array_filter($result) > 0) {
-                $sortField = array_column($result, 'available_stock');
+            if($filter['create_time-operate']){
+                unset($filter['create_time-operate']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['create_time']) {
+                $time = explode(' ', $filter['create_time']);
+                // $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map['day_date'] = ['between', [$time[0], $time[3]]];
+                unset($filter['create_time']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } else{
+                // $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                $map['day_date'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                unset($filter['create_time']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if($filter['order_platform']){
+                $site = $filter['order_platform'];
+                unset($filter['order_platform']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $site = 1;
+            }
+            $map['site'] = $site;
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            $total = Db::name('datacenter_sku_day')
+                ->where($where)
+                ->where($map)
+                ->group('sku')
+                ->order('day_date','desc')
+                ->count();
+            $sku_data_day = Db::name('datacenter_sku_day')
+                ->where($where)
+                ->where($map)
+                ->group('sku')
+                ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
+                ->order('day_date','desc')
+                ->limit($offset, $limit)
+                ->select();
+            foreach ($sku_data_day as $k => $v) {
+                $sku_detail = $itemPlatformSku
+                    ->where(['sku' => $v['sku'], 'platform_type' => $site])
+                    ->field('platform_sku,stock,plat_on_way_stock,outer_sku_status,grade')
+                    ->find();
+                //sku转换
+                $sku_data_day[$k]['sku_change'] = $sku_detail['platform_sku'];
+                //上下架状态
+                $sku_data_day[$k]['status'] = $sku_detail['outer_sku_status'];
+                $sku_data_day[$k]['available_stock'] = $sku_detail['stock'];
+                $sku_data_day[$k]['on_way_stock'] = $sku_detail['plat_on_way_stock'];
+                $sku_data_day[$k]['grade'] = $sku_detail['grade'];
+                $sku_data_day[$k]['is_up'] = $sku_detail['outer_sku_status'];
+            }
+            if (array_filter($sku_data_day) > 0) {
+                $sortField = array_column($sku_data_day, 'available_stock');
                 //可用库存倒叙排列
                 if (($params['sort'] == 'available_stock') && ($params['order'] == 'desc')) {
-                    array_multisort($sortField, SORT_DESC, $result);
+                    array_multisort($sortField, SORT_DESC, $sku_data_day);
                     //可用库存正序排列
                 } elseif (($params['sort'] == 'available_stock') && ($params['order'] == 'asc')) {
-                    array_multisort($sortField, SORT_ASC, $result);
+                    array_multisort($sortField, SORT_ASC, $sku_data_day);
                 }
 
             }
-            return json(['code' => 1, 'rows' => $result]);
+            return json(['code' => 1, 'rows' => $sku_data_day,'total' => $total]);
         }
         $this->view->assign(
             [
-                'orderPlatformList' => $orderPlatform,
+                'orderPlatformList' => $magentoplatformarr,
                 'create_time' => $create_time,
             ]
         );
@@ -500,8 +560,239 @@ class GoodsSaleDetail extends Backend
         return $this->view->fetch();
     }
 
+    public function mid_data()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            // dump($params);
+            //站点
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            //时间
+            $time_str = $params['time_str'];
+            if (!$time_str) {
+                //默认查询z站七天的数据
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+            }
+            switch ($order_platform) {
+                case 1:
+                    $glass = $this->other_key_plat($order_platform,1,$time_str);
+                    $sun_glass = $this->other_key_plat($order_platform,2,$time_str);
+                    $old_glass = $this->other_key_plat($order_platform,3,$time_str);
+                    $son_glass = $this->other_key_plat($order_platform,4,$time_str);
+                    $run_glass = $this->other_key_plat($order_platform,5,$time_str);
+                    break;
+                case 2:
+                    $glass = $this->other_key_plat($order_platform,1,$time_str);
+                    $sun_glass = $this->other_key_plat($order_platform,2,$time_str);
+                    break;
+                case 3:
+                    $glass = $this->other_key_plat($order_platform,1,$time_str);
+                    $sun_glass = $this->other_key_plat($order_platform,2,$time_str);
+                    break;
+                default:
+                    break;
+            }
+            $data = compact('glass','sun_glass','old_glass','son_glass','run_glass');
+            $this->success('', '', $data);
+        }
+    }
+
+    //其他关键指标 $platform站点,$goods_type产品类型,$time时间段
+    public function other_key_plat($platform,$goods_type,$time)
+    {
+            //默认7天数据
+            if ($time) {
+                $time = explode(' ', $time);
+                $map['created_at'] = $itemMap['m.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['created_at'] = $itemMap['m.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $platform = $platform;
+            $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . md5(serialize($map)));
+            if ($arr) {
+                return $arr;
+            }
+            $this->item = new \app\admin\model\itemmanage\Item;
+            $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+            switch ($platform) {
+                case 1:
+                    $model = Db::connect('database.db_zeelool');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao');
+                    break;
+                default:
+                    $model = false;
+                    break;
+            }
+            if (false == $model) {
+                return false;
+            }
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
+            $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+
+
+            //求出眼镜所有sku
+            $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
+
+            //求出眼镜的销售额 base_price  base_discount_amount 太阳镜
+            $frame_money_price = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_sku)
+                ->sum('m.base_price');
+            //眼镜的折扣价格
+            $frame_money_discount = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_sku)
+                ->sum('m.base_discount_amount');
+            //眼镜的实际销售额
+            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
+            //眼镜的销售副数
+            $frame_sales_num = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_sku)
+                ->count('*');
+            //眼镜平均副金额
+            if (0 < $frame_sales_num) {
+                $frame_avg_money = round(($frame_money / $frame_sales_num), 2);
+            } else {
+                $frame_avg_money = 0;
+            }
+
+            //眼镜正常售卖数
+            $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
+
+            //眼镜动销数
+            $frame_in_print_num = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_sku)
+                ->count('distinct m.sku');
+            //眼镜总共的数量
+            //$frame_num                 = $this->item->getDifferenceSkuNUm(1);
+            //眼镜动销率
+            if (0 < $frame_onsales_num) {
+                $frame_in_print_rate = round(($frame_in_print_num / $frame_onsales_num) * 100, 2);
+            } else {
+                $frame_in_print_rate = 0;
+            }
+
+            //求出所有新品眼镜sku
+            $frame_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(1, $platform);
+
+            //求出新品眼镜的销售额 base_price  base_discount_amount
+            $frame_new_money_price = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_new_sku)
+                ->sum('m.base_price');
+            //新品眼镜的折扣价格
+            $frame_new_money_discount = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_new_sku)
+                ->sum('m.base_discount_amount');
+            //新品眼镜的实际销售额
+            $frame_new_money = round(($frame_new_money_price - $frame_new_money_discount), 2);
+
+            //眼镜下单客户数
+            $frame_order_customer = $model->table('sales_flat_order o')
+                ->join('sales_flat_order_item m', 'o.entity_id=m.order_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where('m.sku', 'in', $frame_sku)
+                ->where($itemMap)
+                ->count('distinct o.customer_email');
+            //眼镜客户平均副数
+            if (0 < $frame_order_customer) {
+                $frame_avg_customer = round(($frame_sales_num / $frame_order_customer), 2);
+            }
+
+            //新品眼镜数量
+            $frame_new_num = $this->item->getDifferenceNewSkuNum(1);
+
+            //新品眼镜动销数
+            $frame_new_in_print_num = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type','=',$goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->where('m.sku', 'in', $frame_new_sku)
+                ->count('distinct m.sku');
+            //新品眼镜动销率
+            if (0 < $frame_new_num) {
+                $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);
+            } else {
+                $frame_new_in_print_rate = 0;
+            }
+
+            //光学镜
+            $arr = [
+                //眼镜的实际销售额
+                'frame_money' => $frame_money,
+                //眼镜动销数
+                'frame_in_print_num' => $frame_in_print_num,
+                //眼镜动销率
+                'frame_in_print_rate' => $frame_in_print_rate,
+                //新品眼镜的实际销售额
+                'frame_new_money' => $frame_new_money,
+                //眼镜平均副金额
+                'frame_avg_money' => $frame_avg_money,
+                //眼镜客户平均副数
+                'frame_avg_customer' => $frame_avg_customer,
+                //眼镜正常售卖数
+                'frame_onsales_num' => $frame_onsales_num,
+                //新品眼镜数量
+                'frame_new_num' => $frame_new_num,
+                //新品眼镜动销数
+                'frame_new_in_print_num' => $frame_new_in_print_num,
+                //新品眼镜动销率
+                'frame_new_in_print_rate' => $frame_new_in_print_rate,
+
+                //眼镜的销售副数
+                // 'frame_sales_num' => $frame_sales_num,
+                //眼镜下单客户数
+                'frame_order_customer' => $frame_order_customer,
+            ];
+            Cache::set('Operationalreport_platformOrderInfo1' . $platform .$goods_type. md5(serialize($map)), $arr, 7200);
+            return $arr;
+        }
+
     public function ceshi()
     {
+        $arr = $this->other_key_plat(1,1,'2020-10-21 00:00:00 - 2020-10-27 23:59:59');
+        dump($arr);die;
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
         var_dump($orderPlatform);
         var_dump($orderPlatform[1]);

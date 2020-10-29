@@ -9,9 +9,6 @@
     p {
         margin: 0;
     }
-    /*html,body{*/
-    /*    background: rgb(214, 210, 210);*/
-    /*}*/
     .wrap {
         margin: 0 auto;
         background: white;
@@ -44,11 +41,6 @@
         width: 117px;
         height: 33px;
         border: solid 1px #000;
-        border-radius: 0;
-    }
-    .dropdown-menu {
-        width: 100%;
-        min-width: auto;
         border-radius: 0;
     }
     .dropdown-menu li {
@@ -215,16 +207,24 @@
         margin: 0 6px;
         padding-left: 10px;
     }
-
-    .dropdown-menu {
-        width: auto;
+    #form{
+        display:flex;
     }
-
-
-
+    #form >div{
+        display: flex;
+        align-items: center;
+    }
+    #form >div label{
+        white-space: nowrap;
+        margin-right: 10px;
+    }
+    #timetime{
+        width: 120px;
+    }
+    #form >div select{
+        min-width: 120px;
+    }
 </style>
-
-
 
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -236,26 +236,58 @@
                     <span class="glyphicon glyphicon-search"></span>
                     <p>筛选查询</p>
                 </div>
-
                 <div style="width: 58%;height: 100%;">
                     <form id="form" class="form-commonsearch form-horizontal" role="form" method="post">
-                        <div class="col-xs-2">
+                        <div>
+                            <label style="text-align: right;">平台:</label>
                             <select id="order_platform" class="form-control" name="order_platform">
-                                <option value="1" selected="selected">Zeelool</option>
-                                <option value="2">Voogueme</option>
-                                <option value="3">Nihao</option>
+                                {foreach name="magentoplatformarr" item="vo" key="key"}
+                                <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
+                                {/foreach}
                             </select>
                         </div>
-
-                        <div class="col-xs-6">
-                            <label class=" col-xs-3" style="text-align: right;">时间:</label>
-                            <div class="col-xs-8" id="timetime" role="form">
+                        <div >
+                            <label style="text-align: right;">时间:</label>
+                            <div id="timetime" role="form">
                                 <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
                                 <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
                             </div>
                         </div>
-
-                        <div class="col-xs-2">
+                        <div>
+                            <label style="text-align: right;">订单号:</label>
+                            <input type="text" name="increment_id" id="increment_id" value="" style="width: 120px" class="form-control">
+                        </div>
+                        <div>
+                            <label  style="text-align: left;">订单状态:</label>
+                            <select id="order_status" class="form-control" name="order_status">
+                                <option value="0" selected>请选择</option>
+                                <option value="1">已发货</option>
+                                <option value="2">运输途中</option>
+                                <option value="3">到达待取</option>
+                                <option value="4">成功签收</option>
+                                <option value="5">投递失败</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="text-align: right;">客户类型:</label>
+                            <select id="customer_type" class="form-control" name="customer_type">
+                                <option value="0" selected>请选择</option>
+                                <option value="1">普通</option>
+                                <option value="2">批发</option>
+                                <option value="4">VIP</option>
+                            </select>
+                        </div>
+                        <div >
+                            <label style="text-align: right;">设备类型:</label>
+                            <select id="store_id" class="form-control" name="store_id">
+                                <option value="0" selected>请选择</option>
+                                <option value="1">PC</option>
+                                <option value="4">M</option>
+                                <option value="5">IOS</option>
+                                <option value="6">Android</option>
+                            </select>
+                        </div>
+                        <div>
                             <input type="button" class="btn btn-success" value="提交">
                             <input type="button" class="btn btn-default reset" value="重置" >
                         </div>
@@ -395,7 +427,10 @@
                     </li>
                 </ul>
             </div>
-
+            <input type="hidden" name="field" id="field" value="">
+            <div style="float: right;margin: 10px 50px 10px 0px;">
+                <input type="button" value="导出" id="export" class="btn">
+            </div>
             <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
             </table>
         </div>

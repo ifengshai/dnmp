@@ -18,7 +18,7 @@ class OrderDataView extends Backend
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
-
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
     /**
@@ -50,7 +50,14 @@ class OrderDataView extends Backend
         $order_shipping = $this->zeeloolOperate->getOrderShipping();
         //国家地域统计
         $country = $this->zeeloolOperate->getCountryNum();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country'));
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country','magentoplatformarr'));
         return $this->view->fetch();
     }
     /*

@@ -53,7 +53,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     Layer.alert('请选择时间');
                     return false;
                 }
-                $("#sku_data").css('display','block'); 
+                $("#echart1").css('display','block'); 
+                $("#echart2").css('display','block'); 
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
