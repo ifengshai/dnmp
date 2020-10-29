@@ -1709,15 +1709,17 @@ class Scm extends Api
                         ;
                         $coding = $stock_house_info['coding'];
                     }else{
-                        DistributionLog::record($this->auth,$item_process_info['id'],'定制片无库位号');
-                        $this->error(__('定制片无库位号'), [], 405);
+                        DistributionLog::record($this->auth,$item_process_info['id'],'定制片暂存架没有空余库位');
+                        $this->error(__('定制片暂存架没有空余库位，请及时处理'), [], 405);
                     }
                 }
             }
 
             //定制片提示库位号信息
-            DistributionLog::record($this->auth,$item_process_info['id'],'定制片库位号：'.$coding);
-            $coding && $this->error(__('定制片库位号：'.$coding), [], 405);
+            if($coding){
+                DistributionLog::record($this->auth,$item_process_info['id'],"定制片库位号：{$coding}");
+                $this->error(__("请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位"), [], 405);
+            }
         }
 
         //获取子订单处方数据
