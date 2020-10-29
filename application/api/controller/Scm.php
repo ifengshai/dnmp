@@ -1629,6 +1629,32 @@ class Scm extends Api
     }
 
     /**
+     * 子单号模糊搜索（配货通用）
+     *
+     * @参数 string query  搜索内容
+     * @author lzh
+     * @return mixed
+     */
+    public function fuzzy_search()
+    {
+        $query = $this->request->request('query');
+        empty($query) && $this->error(__('搜索内容不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $_new_order_item_process
+            ->where(['item_order_number'=>['like',"%{$query}%"]])
+            ->field('item_order_number,sku')
+            ->order('created_at','desc')
+            ->limit(0,100)
+            ->select()
+        ;
+        $list = collection($list)->toArray();
+
+        $this->success('', ['$list' => $list],200);
+    }
+
+    /**
      * 获取并校验子订单数据（配货通用）
      *
      * @param string $item_order_number  子订单号
