@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 commonSearch: false,
                 showToggle: false,
                 showColumns: false,
+                showExport: false,
                 columns: [
                     [
                         {field: 'increment_id', title: __('订单编号'),visible: false,operate:false},
@@ -37,13 +38,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'store_id', title: __('设备类型'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange'}, searchList: { 1: 'PC', 4: 'M', 5: 'IOS', 6: 'Android'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
                         {field: 'protect_code',title: __('使用的code码'),visible: false,operate:false},
                         {field: 'shipping_method', title: __('快递类别'), custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '平邮', 2: '商业快递'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
-                        {field: 'shipping_name',title: __('收获姓名'),visible: false,operate:false},
+                        {field: 'shipping_name',title: __('收货姓名'),visible: false,operate:false},
                         {field: 'customer_email',title: __('支付邮箱'),visible: false,operate:false},
                         {field: 'customer_type',title: __('客户类型'),searchList: { 1: '普通', 2: '批发',4:'VIP' }, visible: false, formatter: Table.api.formatter.customer_type,operate:false},
                         {field: 'discount_rate',title: __('折扣百分比'),visible: false,operate:false},
                         {field: 'discount_money',title: __('折扣金额'),visible: false,operate:false},
                         {field: 'is_refund', title: __('有无退款'), custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '有', 2: '无'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
-                        {field: 'country_id',title: __('收获国家'),visible: false,operate:false},
+                        {field: 'country_id',title: __('收货国家'),visible: false,operate:false},
                         {field: 'payment_method',title: __('支付方式'),visible: false,operate:false},
                         {field: 'frame_price',title: __('镜框价格'),visible: false,operate:false},
                         {field: 'frame_num',title: __('镜框数量'),visible: false,operate:false},
@@ -74,14 +75,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //2001-10-23 00:00:00 - 2020-10-23 00:00:00
             $('.nav-choose ul li ul li').click(function(e){
                 var data_name = $(this).attr('data-name');
-
+                var field = $("#field").val();
+                if(field){
+                    var arr = field.split(',');
+                }else{
+                    var arr = [];
+                }
+                
                 if($(this).children('input').prop('checked')){
                     $(this).children('input').prop('checked',false)
                     table.bootstrapTable("hideColumn", data_name);
+                    arr.forEach((element,index) => {
+                        if(element == data_name){
+                            arr.splice(index,1)
+                        }
+                    });
+                    console.log(arr)
+                    if($.inArray(data_name,arr) != -1){
+                        arr.splice($.inArray(data_name,arr),1);
+                    }
                 } else{
                     $(this).children('input').prop('checked',true)
                     table.bootstrapTable("showColumn", data_name);
+                    if($.inArray(data_name,arr) == -1 && data_name){
+                        arr.push(data_name);
+                    }
                 }
+                $("#field").val(arr.join(","))
 
                 if ($('#table thead tr').html() != '') {
                     flag = 2;
@@ -109,6 +129,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
 
                 table.bootstrapTable('refresh',params);
+            });
+            $("#export").click(function(){
+                var order_platform = $('#order_platform').val();
+                var time_str = $('#time_str').val();
+                var increment_id = $('#increment_id').val();
+                var order_status = $('#order_status').val();
+                var customer_type = $('#customer_type').val();
+                var store_id = $('#store_id').val();
+                var field = $('#field').val();
+                window.location.href=Config.moduleurl+'operatedatacenter/orderdata/order_data_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&increment_id='+increment_id+'&order_status='+order_status+'&customer_type='+customer_type+'&store_id='+store_id+'&field='+field;
             });
         },
         add: function () {
