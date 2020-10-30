@@ -419,7 +419,7 @@ class OrderDataDetail extends Backend
         }
         $file_title = implode(',',$export_arr) ." \n";
         file_put_contents('/www/wwwroot/mojing/runtime/log/all_exl.csv',$file_title);
-        foreach ($page as $p){
+        for ($p=1;$p<$page;$p++){
             $start = ($p-1)*$limit;
             $list = $order_model->alias('o')
                 ->join('customer_entity c','o.customer_id=c.entity_id')
