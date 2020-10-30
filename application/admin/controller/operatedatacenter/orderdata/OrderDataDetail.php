@@ -546,6 +546,7 @@ class OrderDataDetail extends Backend
                 $file_content = $file_content . "\n";
                 $i++;
                 file_put_contents('/www/wwwroot/mojing/runtime/log/all_exl.csv',$file_content,FILE_APPEND);
+                sleep(10);
             }
         }
     }
