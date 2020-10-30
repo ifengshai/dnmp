@@ -26,7 +26,10 @@ class Test01 extends Backend
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
-                Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($v);
+                $data = [];
+                $data['created_at'] = $v['created_at'];
+                $data['updated_at'] = $v['updated_at'];
+                Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
                 continue;
             } 
 
@@ -43,7 +46,10 @@ class Test01 extends Backend
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
-                Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($v);
+                $data = [];
+                $data['created_at'] = $v['created_at'];
+                $data['updated_at'] = $v['updated_at'];
+                Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
                 continue;
             } 
 
