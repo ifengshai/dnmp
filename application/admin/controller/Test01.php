@@ -52,7 +52,7 @@ class Test01 extends Backend
                 $data['updated_at'] = $v['updated_at'];
                 Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
 
-                echo Db::connect('database.db_voogueme')->table('sales_flat_order')->getLastSql(); 
+                echo Db::connect('database.db_nihao')->table('sales_flat_order')->getLastSql(); 
                 echo ";" . "\n";
                 continue;
             } 
