@@ -16,7 +16,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             var table = $("#table");
-            var flag = 0;
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
@@ -58,17 +57,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'work_list_num',title: __('工单数'),visible: false,operate:false},
                     ]
                 ],
-                onLoadSuccess: function (data) {
-                    console.log(flag)
-                    if(flag <= 1){
-                        $('.fixed-table-pagination').hide()
-                        $('.fixed-table-toolbar').hide()
-                    }else{
-                        $('.fixed-table-pagination').show()
-                        $('.fixed-table-toolbar').show()
-                    }
-                    flag++;
-                }
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
@@ -104,9 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
                 $("#field").val(arr.join(","))
 
-                if ($('#table thead tr').html() != '') {
-                    flag = 2;
-                }
+            
                 if ($('#table thead tr').html() == '') {
                     $('.fixed-table-pagination').hide();
                     $('.fixed-table-toolbar').hide();
