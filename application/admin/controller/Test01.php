@@ -918,5 +918,16 @@ class Test01 extends Backend
         // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
         // Db::name('purchase_order')->where('purchase_number','PO20201023090457598387')->update(['purchase_status'=>3]);
     }
+    public function update_v_data()
+    {
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-29'])->update(['detail_num'=>20520,'cart_num'=>4699]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-28'])->update(['detail_num'=>22869,'cart_num'=>5295]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-27'])->update(['detail_num'=>19959,'cart_num'=>4467]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-26'])->update(['detail_num'=>16710,'cart_num'=>3518]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-25'])->update(['detail_num'=>17248,'cart_num'=>3621]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-24'])->update(['detail_num'=>21029,'cart_num'=>4730]);
+        Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-23'])->update(['detail_num'=>22037,'cart_num'=>4948]);
+
+    }
 
 }
