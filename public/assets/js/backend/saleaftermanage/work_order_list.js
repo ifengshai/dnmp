@@ -807,25 +807,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 2);
+                var str = incrementId.substring(0, 3);
                 //判断站点
-                if (str == '10' || str == '40' || str == '50' || str == '53') {
+                if (str == '100' || str == '400' || str == '500' || str == '530') {
                     $("#work_platform").val(1);
-                } else if (str == '13' || str == '43') {
+                } else if (str == '130' || str == '430') {
                     $('#work_platform').val(2);
-                } else if (str == '30' || str == '60') {
+                } else if (str == '300' || str == '600') {
                     $('#work_platform').val(3);
-                } else if (str == '45' || str == '15'){
+                } else if (str == '450' || str == '150'){
                     //meeloog站
                     $('#work_platform').val(4);
-                } else if (str == '20' || str == '27'){
+                } else if (str == '200' || str == '270'){
                     //wesee站
                     $('#work_platform').val(5);
-                } else if (str == '16' || str == '46'){
+                } else if (str == '160' || str == '460'){
                     $('#work_platform').val(9);
-                } else if (str == '36' || str == '66'){
+                } else if (str == '360' || str == '660'){
                     $('#work_platform').val(10);
-                } else if (str == '36' || str == '66'){
+                } else if (str == '139' || str == '469'){
                     $('#work_platform').val(11);
                 }
                 $('.selectpicker ').selectpicker('refresh');
@@ -839,7 +839,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 }
-                var str = incrementId.substring(0, 2);
+                var str = incrementId.substring(0, 3);
                 var vip_str = incrementId.substring(1, 4);
                 if(vip_str == 'VIP'){
                     $('#order_pay_currency').val('USD');
@@ -866,22 +866,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 else{
                     //判断站点
-                    if (str == '10' || str == '40' || str == '50' || str == '53') {
+                    if (str == '100' || str == '400' || str == '500' || str == '530') {
                         $("#work_platform").val(1);
-                    } else if (str == '13' || str == '43') {
+                    } else if (str == '130' || str == '430') {
                         $('#work_platform').val(2);
-                    } else if (str == '30' || str == '60') {
+                    } else if (str == '300' || str == '600') {
                         $('#work_platform').val(3);
-                    } else if (str == '45' || str == '15'){
+                    } else if (str == '450' || str == '150'){
                         //meeloog站
                         $('#work_platform').val(4);
-                    } else if (str == '20' || str == '27'){
+                    } else if (str == '200' || str == '270'){
                         //wesee站
                         $('#work_platform').val(5);
-                    } else if (str == '16' || str == '46'){
+                    } else if (str == '160' || str == '460'){
                         $('#work_platform').val(9);
-                    } else if (str == '36' || str == '66'){
+                    } else if (str == '360' || str == '660'){
                         $('#work_platform').val(10);
+                    } else if (str == '139' || str == '469'){
+                        $('#work_platform').val(11);
                     }
 
                     var sitetype = $('#work_platform').val();
