@@ -41,6 +41,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 ]
             });
             // 为表格绑定事件
+            Controller.api.formatter.user_data_pie();
+            Controller.api.formatter.lens_data_pie();
             Table.api.bindevent(table);
             $("#sku_submit").click(function(){
                 var sku = $("#sku").val();
@@ -53,8 +55,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     Layer.alert('请选择时间');
                     return false;
                 }
-                $("#echart1").css('display','block'); 
-                $("#echart2").css('display','block'); 
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
@@ -81,6 +81,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#sku").val('');
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
+         
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+         
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
+            });
+            $("#export").click(function(){
+                var order_platform = $('#order_platform').val();
+                var time_str = $('#time_str').val();
+                var sku = $('#sku').val();
+                if(sku.length <= 0){
+                    Layer.alert('请填写平台sku');
+                    return false;
+                }
+                if(time_str.length <= 0){
+                    Layer.alert('请选择时间');
+                    return false;
+                }
+                window.location.href=Config.moduleurl+'/operatedatacenter/orderdata/sku_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&sku='+sku;
             });
         },
         add: function () {

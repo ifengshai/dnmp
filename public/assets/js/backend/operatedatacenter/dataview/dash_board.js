@@ -199,9 +199,9 @@ function order_data_view() {
         var vip_user_num = ret.data.vip_user_num;
         $('#order_num').text(order_num.order_num);
         if (parseInt(order_num.same_order_num) < 0) {
-            $('#same_order_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + order_num.same_order_num);
+            $('#same_order_num').html("<img src='/shangzhang.png'>" + order_num.same_order_num);
         } else {
-            $('#same_order_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_num.same_order_num);
+            $('#same_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.same_order_num);
         }
         // if (parseInt(order_num.huan_order_num) < 0){
         //     var $table = $('#huan_order_num');
@@ -217,108 +217,108 @@ function order_data_view() {
         //
         // $('#huan_order_num').text(order_num.huan_order_num);
         if (parseInt(order_num.huan_order_num) < 0) {
-            $('#huan_order_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + order_num.huan_order_num);
+            $('#huan_order_num').html("<img src='/xiadie.png'>" + order_num.huan_order_num);
         } else {
-            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_num.huan_order_num);
+            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.huan_order_num);
         }
 
 
         $('#order_unit_price').text(order_unit_price.order_unit_price);
         // $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
         if (parseInt(order_unit_price.same_order_unit_price) < 0) {
-            $('#same_order_unit_price').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + order_unit_price.same_order_unit_price);
+            $('#same_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.same_order_unit_price);
         } else {
-            $('#same_order_unit_price').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_unit_price.same_order_unit_price);
+            $('#same_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.same_order_unit_price);
         }
         // $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
         if (parseInt(order_unit_price.huan_order_unit_price) < 0) {
-            $('#huan_order_unit_price').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + order_unit_price.huan_order_unit_price);
+            $('#huan_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.huan_order_unit_price);
         } else {
-            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + order_unit_price.huan_order_unit_price);
+            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.huan_order_unit_price);
         }
 
         $('#sales_total_money').text(sales_total_money.sales_total_money);
         // $('#same_sales_total_money').text(sales_total_money.same_sales_total_money);
         if (parseInt(sales_total_money.same_sales_total_money) < 0) {
-            $('#same_sales_total_money').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + sales_total_money.same_sales_total_money);
+            $('#same_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.same_sales_total_money);
         } else {
-            $('#same_sales_total_money').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + sales_total_money.same_sales_total_money);
+            $('#same_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.same_sales_total_money);
         }
         // $('#huan_sales_total_money').text(sales_total_money.huan_sales_total_money);
         if (parseInt(sales_total_money.huan_sales_total_money) < 0) {
-            $('#huan_sales_total_money').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + sales_total_money.huan_sales_total_money);
+            $('#huan_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.huan_sales_total_money);
         } else {
-            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + sales_total_money.huan_sales_total_money);
+            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.huan_sales_total_money);
         }
 
         $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
         // $('#same_shipping_total_money').text(shipping_total_money.same_shipping_total_money);
         if (parseInt(shipping_total_money.same_shipping_total_money) < 0) {
-            $('#same_shipping_total_money').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + shipping_total_money.same_shipping_total_money);
+            $('#same_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.same_shipping_total_money);
         } else {
-            $('#same_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + shipping_total_money.same_shipping_total_money);
+            $('#same_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.same_shipping_total_money);
         }
         // $('#huan_shipping_total_money').text(shipping_total_money.huan_shipping_total_money);
         if (parseInt(shipping_total_money.huan_shipping_total_money) < 0) {
-            $('#huan_shipping_total_money').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + shipping_total_money.huan_shipping_total_money);
+            $('#huan_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.huan_shipping_total_money);
         } else {
-            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + shipping_total_money.huan_shipping_total_money);
+            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.huan_shipping_total_money);
         }
 
         $('#active_user_num').text(active_user_num.active_user_num);
         // $('#same_active_user_num').text(active_user_num.same_active_user_num);
         if (parseInt(active_user_num.same_active_user_num) < 0) {
-            $('#same_active_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + active_user_num.same_active_user_num);
+            $('#same_active_user_num').html("<img src='/xiadie.png'>" + active_user_num.same_active_user_num);
         } else {
-            $('#same_active_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + active_user_num.same_active_user_num);
+            $('#same_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + active_user_num.same_active_user_num);
         }
         // $('#huan_active_user_num').text(active_user_num.huan_active_user_num);
         if (parseInt(active_user_num.huan_active_user_num) < 0) {
-            $('#huan_active_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + active_user_num.huan_active_user_num);
+            $('#huan_active_user_num').html("<img src='/xiadie.png'>" + active_user_num.huan_active_user_num);
         } else {
-            $('#huan_active_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + active_user_num.huan_active_user_num);
+            $('#huan_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + active_user_num.huan_active_user_num);
         }
 
         $('#register_user_num').text(register_user_num.register_user_num);
         // $('#same_register_user_num').text(register_user_num.same_register_user_num);
         if (parseInt(register_user_num.same_register_user_num) < 0) {
-            $('#same_register_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + register_user_num.same_register_user_num);
+            $('#same_register_user_num').html("<img src='/xiadie.png'>" + register_user_num.same_register_user_num);
         } else {
-            $('#same_register_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + register_user_num.same_register_user_num);
+            $('#same_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + register_user_num.same_register_user_num);
         }
         // $('#huan_register_user_num').text(register_user_num.huan_register_user_num);
         if (parseInt(register_user_num.huan_register_user_num) < 0) {
-            $('#huan_register_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + register_user_num.huan_register_user_num);
+            $('#huan_register_user_num').html("<img src='/xiadie.png'>" + register_user_num.huan_register_user_num);
         } else {
-            $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + register_user_num.huan_register_user_num);
+            $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + register_user_num.huan_register_user_num);
         }
 
         $('#again_user_num').text(again_user_num.again_user_num);
         // $('#same_again_user_num').text(again_user_num.same_again_user_num);
         if (parseInt(again_user_num.same_again_user_num) < 0) {
-            $('#same_again_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + again_user_num.same_again_user_num);
+            $('#same_again_user_num').html("<img src='/xiadie.png'>" + again_user_num.same_again_user_num);
         } else {
-            $('#same_again_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + again_user_num.same_again_user_num);
+            $('#same_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + again_user_num.same_again_user_num);
         }
         // $('#huan_again_user_num').text(again_user_num.huan_again_user_num);
         if (parseInt(again_user_num.huan_again_user_num) < 0) {
-            $('#huan_again_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + again_user_num.huan_again_user_num);
+            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + again_user_num.huan_again_user_num);
         } else {
-            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + again_user_num.huan_again_user_num);
+            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + again_user_num.huan_again_user_num);
         }
 
         $('#vip_user_num').text(vip_user_num.vip_user_num);
         // $('#same_vip_user_num').text(vip_user_num.same_vip_user_num);
         if (parseInt(vip_user_num.same_vip_user_num) < 0) {
-            $('#same_vip_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + vip_user_num.same_vip_user_num);
+            $('#same_vip_user_num').html("<img src='/xiadie.png'>" + vip_user_num.same_vip_user_num);
         } else {
-            $('#same_vip_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + vip_user_num.same_vip_user_num);
+            $('#same_vip_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + vip_user_num.same_vip_user_num);
         }
         // $('#huan_vip_user_num').text(vip_user_num.huan_vip_user_num);
         if (parseInt(vip_user_num.huan_vip_user_num) < 0) {
-            $('#huan_vip_user_num').html("<img src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u218.svg?token=4314ca9375201884f1f2adb273d2e042d4356b2b1b6a1f8be0940c53621b16fb'>" + vip_user_num.huan_vip_user_num);
+            $('#huan_vip_user_num').html("<img src='/xiadie.png'>" + vip_user_num.huan_vip_user_num);
         } else {
-            $('#huan_vip_user_num').html("<img  style='transform:rotate(180deg);' src='https://d1icd6shlvmxi6.cloudfront.net/gsc/4P5CTG/11/dd/4b/11dd4b0e1c2f4edb8597ff210437a0b8/images/%E6%95%B0%E6%8D%AE%E5%A4%A7%E7%9B%98/u223.svg?token=4f2fec5011e680c0061fc6242b5311121d833c58e080c4c401dba18fa2530ea0'>" + vip_user_num.huan_vip_user_num);
+            $('#huan_vip_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + vip_user_num.huan_vip_user_num);
         }
 
         return false;

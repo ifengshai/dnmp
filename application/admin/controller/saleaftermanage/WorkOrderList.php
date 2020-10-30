@@ -17,6 +17,7 @@ use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolDePrescriptionDetailHelper;
+use Util\ZeeloolJpPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
@@ -1875,6 +1876,8 @@ class WorkOrderList extends Backend
                 $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 10){
                 $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 11){
+                $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
             if (!$result) {
                 $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
@@ -1926,6 +1929,8 @@ class WorkOrderList extends Backend
                     $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 10) {
                     $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 11) {
+                    $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
             } else {
                 $result = collection($result)->toArray();
@@ -2097,6 +2102,8 @@ class WorkOrderList extends Backend
             $url = config('url.new_zeelooles_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         } elseif ($row['work_platform'] == 10 && $row['replenish_money']) {
             $url = config('url.new_zeeloolde_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 11 && $row['replenish_money']) {
+            $url = config('url.new_zeelooljp_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
@@ -2967,6 +2974,9 @@ EOF;
                 case 10:
                     $work_platform = 'zeelool_de';
                     break;
+                case 11:
+                    $work_platform = 'zeelool_jp';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3339,6 +3349,9 @@ EOF;
                 case 10:
                     $work_platform = 'zeelool_de';
                     break;
+                case 11:
+                    $work_platform = 'zeelool_jp';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3632,6 +3645,9 @@ EOF;
                     break;
                 case 10:
                     $value['work_platform'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['work_platform'] = 'zeelool_jp';
                     break;
                 default:
                     $value['work_platform'] = 'zeelool';
@@ -3991,6 +4007,9 @@ EOF;
                 break;
             case 10:
                 $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;
