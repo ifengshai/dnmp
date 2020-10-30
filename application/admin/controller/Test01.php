@@ -26,6 +26,7 @@ class Test01 extends Backend
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
+                echo 111;
                 continue;
             } 
 
