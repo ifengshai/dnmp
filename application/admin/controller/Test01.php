@@ -30,7 +30,8 @@ class Test01 extends Backend
                 $data['created_at'] = $v['created_at'];
                 $data['updated_at'] = $v['updated_at'];
                 $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
-                echo $res . "\n";
+                echo Db::connect('database.db_voogueme')->table('sales_flat_order')->getLastSql();
+                echo "\n";
             } 
 
             // Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
