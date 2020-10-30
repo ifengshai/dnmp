@@ -282,6 +282,5 @@ return [
         // 数据库编码默认采用utf8
         'charset'     => Env::get('db_new_order.charset'),
         'prefix'      => Env::get('db_new_order.prefix'),
-
     ],
 ];
