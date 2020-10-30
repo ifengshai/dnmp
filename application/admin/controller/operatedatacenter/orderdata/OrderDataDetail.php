@@ -239,8 +239,6 @@ class OrderDataDetail extends Backend
         return $this->view->fetch();
     }
     public function export(){
-        $this->model = new \app\admin\model\warehouse\Check;
-        $this->check_item = new \app\admin\model\warehouse\CheckItem;
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $order_platform = input('order_platform');
@@ -300,130 +298,13 @@ class OrderDataDetail extends Backend
         if($store_id){
             $map['o.store_id'] = $store_id;
         }
-        $list = $order_model->alias('o')
+        $count = $order_model->alias('o')
             ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map)
             ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.protect_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
-            ->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $key=>$value){
-            $list[$key]['increment_id'] = $value['increment_id'];
-            $list[$key]['created_at'] = $value['created_at'];
-            $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
-            $list[$key]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
-            $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
-            if($order_node == 7){
-                $order_shipping_status = '已发货';
-            }elseif ($order_node == 8 && $order_node == 10){
-                $order_shipping_status = '运输途中';
-            }elseif ($order_node == 30){
-                $order_shipping_status = '到达待取';
-            }elseif ($order_node == 40){
-                $order_shipping_status = '成功签收';
-            }elseif ($order_node == 35){
-                $order_shipping_status = '投递失败';
-            }else{
-                $order_shipping_status = '-';
-            }
-            $list[$key]['status'] = $order_shipping_status;
-            switch ($value['store_id']){
-                case 1:
-                    $store_id = 'PC';
-                    break;
-                case 4:
-                    $store_id = 'M';
-                    break;
-                case 5:
-                    $store_id = 'Ios';
-                    break;
-                case 6:
-                    $store_id = 'Android';
-                    break;
-            }
-            $list[$key]['store_id'] = $store_id;
-            $list[$key]['protect_code'] = $value['protect_code'];
-            $list[$key]['shipping_method'] = $value['shipping_method'];  //快递类别
-            //收货信息
-            $shipping_where['address_type'] = 'shipping';
-            $shipping_where['parent_id'] = $value['entity_id'];
-            $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
-            $list[$key]['shipping_name'] = $shipping['firstname'].''.$shipping['lastname'];  //收货姓名
-            $list[$key]['customer_email'] = $value['customer_email'];   //支付邮箱
-            //客户信息
-            if($value['customer_id']){
-                $customer_where['entity_id'] = $value['customer_id'];
-                $customer = $web_model->table('customer_entity')->where($customer_where)->field('email,group_id,created_at')->find();
-                switch ($customer['group_id']){
-                    case 1:
-                        $group = '普通';
-                        break;
-                    case 2:
-                        $group = '批发';
-                        break;
-                    case 4:
-                        $group = 'VIP';
-                        break;
-                }
-                $register_time = $customer['created_at'];
-                $register_email = $customer['email'];
-            }else{
-                $group = '游客';
-                $register_time = '';
-                $register_email = '';
-            }
-            $list[$key]['customer_type'] = $group;   //客户类型
-            $list[$key]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount']/$value['base_grand_total']),2).'%' : 0;  //折扣百分比
-            $list[$key]['discount_money'] = round($value['base_discount_amount'],2);  //折扣金额
-            $work_list_where['platform_order'] = $value['increment_id'];
-            $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
-            $work_list = collection($work_list)->toArray();
-            $work_list_num = count($work_list);
-            $work_list_is_refund = array_column($work_list,'is_refund');
-            if(in_array(1,$work_list_is_refund)){
-                $is_refund = '有';
-            }else{
-                $is_refund = '无';
-            }
-            $list[$key]['is_refund'] = $is_refund;  //是否退款
-            $list[$key]['country_id'] = $shipping['country_id'];   //收货国家
-            //支付信息
-            $payment_where['parent_id'] = $value['entity_id'];
-            $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
-            $list[$key]['payment_method'] =  $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
-            //处方信息
-            $prescription_where['order_id'] = $value['entity_id'];
-            $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
-            $list[$key]['frame_price'] = round($frame_price,2);
-            $list[$key]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
-            if($site == 3){
-                $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
-            }else{
-                $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
-            }
-            $list[$key]['is_box_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
-            $lens_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('index_price');
-            $list[$key]['lens_price'] = round($lens_price,2);
-            $list[$key]['telephone'] = $shipping['telephone'];
-            $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
-            $skus = collection($skus)->toArray();
-            $list[$key]['sku'] = implode(',',$skus);
-            $list[$key]['register_time'] = $register_time;
-            $list[$key]['register_email'] = $register_email;
-            $list[$key]['work_list_num'] = $work_list_num;
-        }
-        $field_arr = explode(',',$field);
-        $data = array();
-        $i = 0;
-        foreach ($list as $k=>$v){
-            foreach ($field_arr as $kk=>$vv){
-                if(isset($v[$vv])){
-                    $data[$i][$vv] = $v[$vv];
-                }
-            }
-            $i++;
-        }
-        $table_arr = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1','W1','X1','Y1','Z1'];
-        $table_arr1 = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+            ->count();
+        $limit = 50;
+        $page = ceil($count/$limit);
         $field_info = array(
             array(
                 'name'=>'订单编号',
@@ -530,55 +411,143 @@ class OrderDataDetail extends Backend
                 'field'=>'work_list_num',
             )
         );
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->setActiveSheetIndex(0);
-        foreach($field_arr as $kkk=>$vvv){
-            $table_name = $this->filter_by_value($field_info,'field',$vvv);
-            //常规方式：利用setCellValue()填充数据
-            $spreadsheet->getActiveSheet()->setCellValue($table_arr[$kkk], $table_name['name']);
+        $field_arr = explode(',',$field);
+        $export_arr = array();
+        foreach ($field_arr as $k2=>$v2){
+            $table_name = $this->filter_by_value($field_info,'field',$v2);
+            $export_arr[] = $table_name['name'];
         }
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单数据');
-        $spreadsheet->setActiveSheetIndex(0);
-        foreach ($field_arr as $k1=>$v1){
-            foreach ($data as $key1 => $value1) {
-                $spreadsheet->getActiveSheet()->setCellValue($table_arr1[$k1] . ($key1 * 1 + 2), $value1[$field_arr[$k1]]);
+        $file_title = implode(',',$export_arr) ." \n";
+        file_put_contents('/www/wwwroot/mojing/runtime/log/all_exl.csv',$file_title);
+        foreach ($page as $p){
+            $start = ($p-1)*$limit;
+            $list = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->where($map)
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.protect_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->limit($start,$limit)
+                ->select();
+            $list = collection($list)->toArray();
+            foreach ($list as $key=>$value){
+                $list[$key]['increment_id'] = $value['increment_id'];
+                $list[$key]['created_at'] = $value['created_at'];
+                $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
+                $list[$key]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
+                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
+                if($order_node == 7){
+                    $order_shipping_status = '已发货';
+                }elseif ($order_node == 8 && $order_node == 10){
+                    $order_shipping_status = '运输途中';
+                }elseif ($order_node == 30){
+                    $order_shipping_status = '到达待取';
+                }elseif ($order_node == 40){
+                    $order_shipping_status = '成功签收';
+                }elseif ($order_node == 35){
+                    $order_shipping_status = '投递失败';
+                }else{
+                    $order_shipping_status = '-';
+                }
+                $list[$key]['status'] = $order_shipping_status;
+                switch ($value['store_id']){
+                    case 1:
+                        $store_id = 'PC';
+                        break;
+                    case 4:
+                        $store_id = 'M';
+                        break;
+                    case 5:
+                        $store_id = 'Ios';
+                        break;
+                    case 6:
+                        $store_id = 'Android';
+                        break;
+                }
+                $list[$key]['store_id'] = $store_id;
+                $list[$key]['protect_code'] = $value['protect_code'];
+                $list[$key]['shipping_method'] = $value['shipping_method'];  //快递类别
+                //收货信息
+                $shipping_where['address_type'] = 'shipping';
+                $shipping_where['parent_id'] = $value['entity_id'];
+                $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
+                $list[$key]['shipping_name'] = $shipping['firstname'].''.$shipping['lastname'];  //收货姓名
+                $list[$key]['customer_email'] = $value['customer_email'];   //支付邮箱
+                //客户信息
+                if($value['customer_id']){
+                    $customer_where['entity_id'] = $value['customer_id'];
+                    $customer = $web_model->table('customer_entity')->where($customer_where)->field('email,group_id,created_at')->find();
+                    switch ($customer['group_id']){
+                        case 1:
+                            $group = '普通';
+                            break;
+                        case 2:
+                            $group = '批发';
+                            break;
+                        case 4:
+                            $group = 'VIP';
+                            break;
+                    }
+                    $register_time = $customer['created_at'];
+                    $register_email = $customer['email'];
+                }else{
+                    $group = '游客';
+                    $register_time = '';
+                    $register_email = '';
+                }
+                $list[$key]['customer_type'] = $group;   //客户类型
+                $list[$key]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount']/$value['base_grand_total']),2).'%' : 0;  //折扣百分比
+                $list[$key]['discount_money'] = round($value['base_discount_amount'],2);  //折扣金额
+                $work_list_where['platform_order'] = $value['increment_id'];
+                $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
+                $work_list = collection($work_list)->toArray();
+                $work_list_num = count($work_list);
+                $work_list_is_refund = array_column($work_list,'is_refund');
+                if(in_array(1,$work_list_is_refund)){
+                    $is_refund = '有';
+                }else{
+                    $is_refund = '无';
+                }
+                $list[$key]['is_refund'] = $is_refund;  //是否退款
+                $list[$key]['country_id'] = $shipping['country_id'];   //收货国家
+                //支付信息
+                $payment_where['parent_id'] = $value['entity_id'];
+                $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
+                $list[$key]['payment_method'] =  $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
+                //处方信息
+                $prescription_where['order_id'] = $value['entity_id'];
+                $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
+                $list[$key]['frame_price'] = round($frame_price,2);
+                $list[$key]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
+                if($site == 3){
+                    $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
+                }else{
+                    $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
+                }
+                $list[$key]['is_box_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
+                $lens_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('index_price');
+                $list[$key]['lens_price'] = round($lens_price,2);
+                $list[$key]['telephone'] = $shipping['telephone'];
+                $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
+                $skus = collection($skus)->toArray();
+                $list[$key]['sku'] = implode('|',$skus);
+                $list[$key]['register_time'] = $register_time;
+                $list[$key]['register_email'] = $register_email;
+                $list[$key]['work_list_num'] = $work_list_num;
+            }
+            $data = array();
+            $i = 0;
+            $file_content = '';
+            foreach ($list as $k=>$v){
+                foreach ($field_arr as $kk=>$vv){
+                    if(isset($v[$vv])){
+                        $data[$i][$vv] = $v[$vv];
+                    }
+                }
+                $file_content = $file_content . implode(',',$data[$i]);
+                $file_content = $file_content . "\n";
+                $i++;
+                file_put_contents('/www/wwwroot/mojing/runtime/log/all_exl.csv',$file_content,FILE_APPEND);
             }
         }
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
-        ];
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $spreadsheet->setActiveSheetIndex(0);
-        $format = 'xlsx';
-        $savename = '订单数据' . date("YmdHis", time());;
-
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-        $writer->save('php://output');
     }
     function filter_by_value ($array, $index, $value){
         if(is_array($array) && count($array)>0)

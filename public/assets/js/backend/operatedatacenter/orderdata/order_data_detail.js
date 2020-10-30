@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showExport: false,
                 columns: [
                     [
-                        {field: 'increment_id', title: __('订单编号'),visible: false,operate:false},
+                        {field: 'increment_id', title: __('订单编号'),visible: true,operate:false},
                         {field: 'created_at', title: __('订单时间'),visible: false,operate:false},
                         {field: 'base_grand_total', title: __('订单金额'),visible: false,operate:false},
                         {field: 'base_shipping_amount', title: __('邮费'),visible: false,operate:false},
@@ -72,6 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
              // 为表格绑定事件
             Table.api.bindevent(table);
+            $('.nav-choose ul li ul li').eq(0).children('input').prop('checked',true)
             //2001-10-23 00:00:00 - 2020-10-23 00:00:00
             $('.nav-choose ul li ul li').click(function(e){
                 var data_name = $(this).attr('data-name');
