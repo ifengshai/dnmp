@@ -22,7 +22,7 @@ class Test01 extends Backend
 
     public function test01()
     {
-        $list = Db::connect('database.db_voogueme_online')->table('sales_flat_order')->where('entity_id > 272779 and entity_id < 273408')->select();
+        $list = Db::connect('database.db_voogueme_online')->table('sales_flat_order')->where(['created_at' => ['between',['2020-10-29 00:00:00','2020-10-31 00:00:00']]])->select();
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
@@ -38,7 +38,7 @@ class Test01 extends Backend
 
     public function test02()
     {
-        $list = Db::connect('database.db_nihao_online')->table('sales_flat_order')->where('entity_id > 44154 and entity_id < 44312')->select();
+        $list = Db::connect('database.db_nihao_online')->table('sales_flat_order')->where(['created_at' => ['between',['2020-10-29 00:00:00','2020-10-31 00:00:00']]])->select();
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
