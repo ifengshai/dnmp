@@ -22,19 +22,53 @@ class Test01 extends Backend
 
     public function test01()
     {
-        $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order_item')->where('order_id > 520028 and order_id < 521028')->select();
+        $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order_payment')->where('parent_id > 520028 and parent_id < 521028')->select();
         foreach($list as $k => $v) {
-            $count = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['order_id' => $v['order_id']])->count();
+            $count = Db::connect('database.db_zeelool')->table('sales_flat_order_payment')->where(['parent_id' => $v['parent_id']])->count();
             if ($count > 0) {
                 continue;
             } 
 
-            Db::connect('database.db_zeelool')->table('sales_flat_order_item')->insert($v);
+            Db::connect('database.db_zeelool')->table('sales_flat_order_payment')->insert($v);
             echo $k . "\n";
         }
         
         echo  'ok';
     }
+
+    public function test02()
+    {
+        $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order_address')->where('parent_id > 520028 and parent_id < 521028')->select();
+        foreach($list as $k => $v) {
+            $count = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => $v['parent_id']])->count();
+            if ($count > 0) {
+                continue;
+            } 
+
+            Db::connect('database.db_zeelool')->table('sales_flat_order_address')->insert($v);
+            echo $k . "\n";
+        }
+        
+        echo  'ok';
+    }
+
+
+    public function test03()
+    {
+        $list = Db::connect('database.db_zeelool_online')->table('sales_flat_shipment_track')->where('order_id > 520028 and order_id < 521028')->select();
+        foreach($list as $k => $v) {
+            $count = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where(['order_id' => $v['order_id']])->count();
+            if ($count > 0) {
+                continue;
+            } 
+
+            Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->insert($v);
+            echo $k . "\n";
+        }
+        
+        echo  'ok';
+    }
+
 
     //跑sku每天的数据
     public function sku_day_data()
