@@ -27,10 +27,10 @@ class OrderData extends Backend
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->meeloog = new \app\admin\model\order\order\Meeloog();
-        $this->wesee = new \app\admin\model\order\order\Weseeoptical();
-        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
-        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        // $this->wesee = new \app\admin\model\order\order\Weseeoptical();
+        // $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        // $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
+        // $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
     }
 
 
