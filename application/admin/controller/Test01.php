@@ -27,9 +27,10 @@ class Test01 extends Backend
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
                 Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($v);
+                continue;
             } 
 
-            Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
+            // Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
             echo $k . "\n";
         }
         
@@ -43,9 +44,10 @@ class Test01 extends Backend
             $count = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
                 Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($v);
+                continue;
             } 
 
-            Db::connect('database.db_nihao')->table('sales_flat_order')->insert($v);
+            // Db::connect('database.db_nihao')->table('sales_flat_order')->insert($v);
             echo $k . "\n";
         }
         
