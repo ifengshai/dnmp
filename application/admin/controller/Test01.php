@@ -22,7 +22,7 @@ class Test01 extends Backend
 
     public function test01()
     {
-        $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('order_id > 520028 and order_id < 521028')->select();
+        $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order_item')->where('order_id > 520028 and order_id < 521028')->select();
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['order_id' => $v['order_id']])->count();
             if ($count > 0) {
