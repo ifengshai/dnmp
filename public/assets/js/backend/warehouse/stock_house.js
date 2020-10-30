@@ -111,7 +111,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'remark', title: __('Remark') },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'print',
+                                    text: __('打印'),
+                                    title: __('打印'),
+                                    classname: 'btn btn-xs btn-click',
+                                    click:function(e, data){
+                                        window.open(Config.moduleurl + '/warehouse/stock_house/print_label/ids/' + data.id, '_blank');
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });

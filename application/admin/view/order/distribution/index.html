@@ -56,9 +56,11 @@
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
                                 class="fa fa-refresh"></i> </a>
+
                         <a href="javascript:;"
                             class="btn btn-danger btn-batch-export-xls {:$auth->check('order/printlabel/zeelool/batch_export_xls')?'':'hide'}"
                             title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
+
                         <a href="javascript:;"
                             class="btn btn-success btn-batch-printed btn-disabled disabled {:$auth->check('order/printlabel/zeelool/batch_print_label')?'':'hide'}"
                             title="{:__('打印标签')}"> {:__('打印')}</a>

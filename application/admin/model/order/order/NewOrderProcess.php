@@ -10,7 +10,7 @@ class NewOrderProcess extends Model
     protected $connection = 'database.db_new_order';
 
     // 表名
-    protected $table = 'order_process';
+    protected $name = 'order_process';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
