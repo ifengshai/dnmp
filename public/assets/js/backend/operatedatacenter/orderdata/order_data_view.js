@@ -213,21 +213,61 @@ function order_data_view() {
         var online_celebrity_order_total = ret.data.online_celebrity_order_total;
 
         $('#order_num').text(order_num.order_num);
-        $('#same_order_num').text(order_num.same_order_num);
-        $('#huan_order_num').text(order_num.huan_order_num);
-        $('#order_unit_price').text(order_unit_price.order_unit_price);
-        $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
-        $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
-        $('#sales_total_money').text(sales_total_money.sales_total_money);
-        $('#same_sales_total_money').text(sales_total_money.same_sales_total_money);
-        $('#huan_sales_total_money').text(sales_total_money.huan_sales_total_money);
-        $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
-        $('#same_shipping_total_money').text(shipping_total_money.same_shipping_total_money);
-        $('#huan_shipping_total_money').text(shipping_total_money.huan_shipping_total_money);
-        $('#replacement_order_num').text(replacement_order_num.replacement_order_num);
-        $('#replacement_order_total').text(replacement_order_total.replacement_order_total);
-        $('#online_celebrity_order_num').text(online_celebrity_order_num.online_celebrity_order_num);
-        $('#online_celebrity_order_total').text(online_celebrity_order_total.online_celebrity_order_total);
+        if(order_num.same_order_num >= 0){
+            var same_rate1 = '<img src="/shangsheng.png">';
+        }else{
+            var same_rate1 = '<img src="/xiadie.png">';
+        }
+        $('#same_order_num').html(same_rate1+order_num.same_order_num);
+        if(order_num.huan_order_num >= 0){
+            var huan_rate1 = '<img src="/shangsheng.png">';
+        }else{
+            var huan_rate1 = '<img src="/xiadie.png">';
+        }
+        $('#huan_order_num').html(huan_rate1+order_num.huan_order_num);
+        $('#order_unit_price').html(order_unit_price.order_unit_price);
+        if(order_unit_price.same_order_unit_price >= 0){
+            var same_rate2 = '<img src="/shangsheng.png">';
+        }else{
+            var same_rate2 = '<img src="/xiadie.png">';
+        }
+        $('#same_order_unit_price').html(same_rate2+order_unit_price.same_order_unit_price);
+        if(order_unit_price.huan_order_unit_price >= 0){
+            var huan_rate2 = '<img src="/shangsheng.png">';
+        }else{
+            var huan_rate2 = '<img src="/xiadie.png">';
+        }
+        $('#huan_order_unit_price').html(huan_rate2+order_unit_price.huan_order_unit_price);
+        $('#sales_total_money').html(sales_total_money.sales_total_money);
+        if(sales_total_money.same_sales_total_money >= 0){
+            var same_rate3 = '<img src="/shangsheng.png">';
+        }else{
+            var same_rate3 = '<img src="/xiadie.png">';
+        }
+        $('#same_sales_total_money').html(same_rate3+sales_total_money.same_sales_total_money);
+        if(sales_total_money.huan_sales_total_money >= 0){
+            var huan_rate3 = '<img src="/shangsheng.png">';
+        }else{
+            var huan_rate3 = '<img src="/xiadie.png">';
+        }
+        $('#huan_sales_total_money').html(huan_rate3+sales_total_money.huan_sales_total_money);
+        $('#shipping_total_money').html(shipping_total_money.shipping_total_money);
+        if(shipping_total_money.same_shipping_total_money >= 0){
+            var same_rate4 = '<img src="/shangsheng.png">';
+        }else{
+            var same_rate4 = '<img src="/xiadie.png">';
+        }
+        $('#same_shipping_total_money').html(same_rate4+shipping_total_money.same_shipping_total_money);
+        if(shipping_total_money.huan_shipping_total_money >= 0){
+            var huan_rate4 = '<img src="/shangsheng.png">';
+        }else{
+            var huan_rate4 = '<img src="/xiadie.png">';
+        }
+        $('#huan_shipping_total_money').html(huan_rate4+shipping_total_money.huan_shipping_total_money);
+        $('#replacement_order_num').html(replacement_order_num.replacement_order_num);
+        $('#replacement_order_total').html(replacement_order_total.replacement_order_total);
+        $('#online_celebrity_order_num').html(online_celebrity_order_num.online_celebrity_order_num);
+        $('#online_celebrity_order_total').html(online_celebrity_order_total.online_celebrity_order_total);
         //订单金额分布表数据
         var order_total0 = ret.data.order_total_distribution.order_total0;
         var order_total20 = ret.data.order_total_distribution.order_total20;

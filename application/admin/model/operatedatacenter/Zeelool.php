@@ -313,7 +313,9 @@ class Zeelool extends Model
      */
     public function getAgainUser($time_str = '', $type = 0)
     {
+
         $createat = explode(' ', $time_str);
+        // dump($createat);
         $again_num = $this->get_again_user($createat);
         $same_create_at[0] = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
         $same_create_at[1] = $createat[1];
