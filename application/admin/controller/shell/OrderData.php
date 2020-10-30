@@ -23,10 +23,10 @@ class OrderData extends Backend
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $this->orderprocess = new \app\admin\model\order\order\NewOrderProcess();
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
-        $this->meeloog = new \app\admin\model\order\order\Meeloog();
+        // $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        // $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        // $this->nihao = new \app\admin\model\order\order\Nihao();
+        // $this->meeloog = new \app\admin\model\order\order\Meeloog();
         // $this->wesee = new \app\admin\model\order\order\Weseeoptical();
         // $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
         // $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
