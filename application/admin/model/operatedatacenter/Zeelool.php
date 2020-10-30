@@ -959,7 +959,133 @@ class Zeelool extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+    //目标20会话数 调用此方法 产品详情页 v站单独用
+    public function google_target20($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target20($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal20Starts'] ? round($result[0]['ga:goal20Starts'], 2) : 0;
+    }
+    //目标20会话数 产品详情页数据 v站单独用
+    protected function getReport_target20($site, $analytics, $startDate, $endDate)
+    {
 
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal20Starts");
+        $adCostMetric->setAlias("ga:goal20Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //目标2会话数 调用此方法 加购数据 v站单独用
+    public function google_target2($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target20($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal2Starts'] ? round($result[0]['ga:goal2Starts'], 2) : 0;
+    }
+    //目标2会话数 加购数据 v站单独用
+    protected function getReport_target2($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal2Starts");
+        $adCostMetric->setAlias("ga:goal2Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
     //目标1会话数 调用此方法 购物车页面
     public function google_target1($site, $start_time)
     {

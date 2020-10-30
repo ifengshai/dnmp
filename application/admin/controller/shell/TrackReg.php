@@ -906,9 +906,9 @@ class TrackReg extends Backend
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
         //产品详情页
-        $arr['detail_num'] = $zeelool_data->google_target13(2, $date_time);
+        $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
         //加购
-        $arr['cart_num'] = $zeelool_data->google_target1(2, $date_time);
+        $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         //插入数据
