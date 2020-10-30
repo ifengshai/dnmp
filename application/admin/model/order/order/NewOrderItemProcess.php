@@ -7,7 +7,7 @@ use think\Model;
 class NewOrderItemProcess extends Model
 {
     //数据库
-    protected $connection = 'database.db_new_order';
+    protected $connection = 'database.db_mojing_order';
 
     // 表名
     protected $name = 'order_item_process';
