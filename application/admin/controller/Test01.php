@@ -23,7 +23,10 @@ class Test01 extends Backend
     public function test01()
     {
         $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('order_id > 520028 and order_id < 521028')->select();
-        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->insertAll($list);
+        dump($list);
+        // Db::connect('database.db_zeelool')->table('sales_flat_order_item')->insertAll($list);
+
+        
         echo  'ok';
     }
 
