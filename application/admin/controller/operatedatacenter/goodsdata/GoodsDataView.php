@@ -275,8 +275,8 @@ class GoodsDataView extends Backend
         }
     }
 
-    //商品销量概况
-    public function ajax_top_data()
+    //商品销量概况 old
+    public function ajax_top_data1()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
@@ -317,6 +317,103 @@ class GoodsDataView extends Backend
         }
         $data = compact('a_plus_data', 'a_data', 'b_data', 'c_plus_data', 'd_data', 'e_data', 'f_data', 'glass_num', 'sun_glass_num', 'run_glass_num', 'old_glass_num', 'son_glass_num', 'other_num', 'total_num');
         $this->success('', '', $data);
+    }
+    //商品销量概况
+    public function ajax_top_data()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            if ($params['time_str']) {
+                //时间段总和
+                $createat = explode(' ', $params['time_str']);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $createat = explode(' ', $seven_days);
+            }
+            $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+
+            //判断站点
+            switch ($params['order_platform']) {
+                case 1:
+                    $glass_num  = $this->glass_sales_num($itemMap,1,1);
+                    $sun_glass_num = $this->glass_sales_num($itemMap,2,1);
+                    $run_glass_num = $this->glass_sales_num($itemMap,5,1);
+                    $old_glass_num = $this->glass_sales_num($itemMap,3,1);
+                    $son_glass_num = $this->glass_sales_num($itemMap,4,1);
+                    $other_num = $this->glass_sales_num($itemMap,6,1);
+                    $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
+                    break;
+                case 2:
+                    $glass_num  = $this->glass_sales_num($itemMap,1,2);
+                    $sun_glass_num = $this->glass_sales_num($itemMap,2,2);
+                    $other_num = $this->glass_sales_num($itemMap,6,2);
+                    $total_num = $glass_num + $sun_glass_num  + $other_num;
+                    break;
+                case 3:
+                    $glass_num  = $this->glass_sales_num($itemMap,1,3);
+                    $sun_glass_num = $this->glass_sales_num($itemMap,2,3);
+                    $total_num = $glass_num + $sun_glass_num;
+                    break;
+                default:
+                    $model = false;
+                    break;
+            }
+
+            // goods_type:1光学镜,2太阳镜,,3运动镜,4老花镜,5儿童镜,6配饰
+            //goods_type:1光学镜,2太阳镜,,3老花镜,4儿童镜,5运动镜,6配饰 现在用的
+//            $glass_num = $data_center_day[1]['total_order_num'] ? $data_center_day[1]['total_order_num'] : 0;
+//            $sun_glass_num = $data_center_day[2]['total_order_num'] ? $data_center_day[2]['total_order_num'] : 0;
+//            $run_glass_num = $data_center_day[3]['total_order_num'] ? $data_center_day[5]['total_order_num'] : 0;
+//            $old_glass_num = $data_center_day[4]['total_order_num'] ? $data_center_day[3]['total_order_num'] : 0;
+//            $son_glass_num = $data_center_day[5]['total_order_num'] ? $data_center_day[4]['total_order_num'] : 0;
+//            $other_num = $data_center_day[6]['total_order_num'] ? $data_center_day[6]['total_order_num'] : 0;
+//            $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
+            $glass_num = $glass_num ? $glass_num : 0;
+            $sun_glass_num = $sun_glass_num ? $sun_glass_num : 0;
+            $run_glass_num = $run_glass_num ? $run_glass_num : 0;
+            $old_glass_num = $old_glass_num ? $old_glass_num : 0;
+            $son_glass_num = $son_glass_num ? $son_glass_num : 0;
+            $other_num = $other_num ? $other_num : 0;
+            $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
+        }
+        $data = compact('a_plus_data', 'a_data', 'b_data', 'c_plus_data', 'd_data', 'e_data', 'f_data', 'glass_num', 'sun_glass_num', 'run_glass_num', 'old_glass_num', 'son_glass_num', 'other_num', 'total_num');
+        $this->success('', '', $data);
+    }
+
+    //统计某个品类的眼睛的销量 $goods_type1光学镜,2太阳镜,,3老花镜,4儿童镜,5运动镜,6配饰 $plat站点
+    public function glass_sales_num($itemMap,$goods_type,$plat)
+    {
+        //判断站点
+        switch ($plat) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type','=',$goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->count('*');
+        return $frame_sales_num;
     }
 
     //产品等级分布表格
