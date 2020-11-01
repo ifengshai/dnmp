@@ -940,5 +940,75 @@ class Test01 extends Backend
         // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-23'])->update(['detail_num'=>22037,'cart_num'=>4948]);
 
     }
+
+    //统计昨天各品类镜框的销量
+    public function goods_type_day_center($plat,$goods_type)
+    {
+//        $plat = 1;
+        $start = date('Y-m-d', strtotime('-1 day'));
+        $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
+        $createat = explode(' ', $seven_days);
+        $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        //判断站点
+        switch ($plat) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type','=',$goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('m.qty_ordered');
+        //销售额
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+
+        $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
+        $arr['day_date'] = $start;
+        $arr['site'] = $plat;
+        $arr['goods_type'] = $goods_type;
+        $arr['glss_num'] = $frame_sales_num;
+        $arr['sales_total_money'] = $sales_total_money;
+        return $arr;
+    }
+    //计划任务跑每天的分类销量的数据
+    public function day_data_goods_type()
+    {
+        $arr = [
+            [$this->goods_type_day_center(1,1)],
+            [$this->goods_type_day_center(1,2)],
+            [$this->goods_type_day_center(1,3)],
+            [$this->goods_type_day_center(1,4)],
+            [$this->goods_type_day_center(1,5)],
+            [$this->goods_type_day_center(1,6)],
+            [$this->goods_type_day_center(2,1)],
+            [$this->goods_type_day_center(2,2)],
+            [$this->goods_type_day_center(2,6)],
+            [$this->goods_type_day_center(3,1)],
+            [$this->goods_type_day_center(3,2)],
+        ];
+        Db::name('datacenter_goods_type_data')->insert($arr);
+    }
     
 }

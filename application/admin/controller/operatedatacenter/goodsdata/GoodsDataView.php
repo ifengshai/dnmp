@@ -48,13 +48,78 @@ class GoodsDataView extends Backend
     }
 
     /**
-     * 镜框销量/客单价趋势
+     * 镜框销量/幅单价趋势
      *
      * @Description
      * @author wpl
      * @since 2020/10/14 15:02:02 
      * @return void
      */
+    //old
+    public function goods_sales_data_line1()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            if ($params['time_str']) {
+                //时间段总和
+                $createat = explode(' ', $params['time_str']);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $createat = explode(' ', $seven_days);
+            }
+            $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+
+            $data_center_day = Db::name('datacenter_sku_day')
+                ->where(['site' => $params['order_platform']])
+                ->where($map)
+                ->group('day_date')
+                ->order('day_date', 'asc')
+                ->field('sum(sales_num) as total_sales_num,day_date')
+                ->select();
+            $data_center_day1 = Db::name('datacenter_sku_day')
+                ->where(['site' => $params['order_platform']])
+                ->where($map)
+                ->group('day_date')
+                ->order('day_date', 'asc')
+                ->field('sum(sku_row_total) as total_sku_row_total,day_date')
+                ->select();
+            $data_center_day = array_column($data_center_day, 'total_sales_num', 'day_date');
+            $data_center_day1 = array_column($data_center_day1, 'total_sku_row_total', 'day_date');
+            // dump($data_center_day1);
+            foreach ($data_center_day1 as $key => $value) {
+                $data_center_day1[$key] = $data_center_day[$key] != 0 ? round($value / $data_center_day[$key], 2) : 0;
+            }
+            // dump($data_center_day);
+            // dump($data_center_day1);
+            // die;
+
+            // $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+            $json['xColumnName'] = array_keys($data_center_day);
+            $json['columnData'] = [
+                [
+                    'type' => 'line',
+                    'data' => array_values($data_center_day),
+                    'name' => '镜框销量',
+                    'yAxisIndex' => 0,
+                    'smooth' => true //平滑曲线
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_values($data_center_day1),
+                    // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
+                    'name' => '副单价',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+
+            ];
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //new
     public function goods_sales_data_line()
     {
         if ($this->request->isAjax()) {
@@ -118,7 +183,6 @@ class GoodsDataView extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
-
     /**
      * 各品类商品销量趋势
      *
