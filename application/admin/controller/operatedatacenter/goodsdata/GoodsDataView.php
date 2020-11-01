@@ -413,7 +413,8 @@ class GoodsDataView extends Backend
             ->where('p.goods_type','=',$goods_type)
             ->where($whereItem)
             ->where($itemMap)
-            ->count('*');
+//            ->count('*');
+            ->sum('m.qty_ordered');
         return $frame_sales_num;
     }
 
