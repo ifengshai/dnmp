@@ -412,13 +412,13 @@ class Zeelool extends Model
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
+            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2): 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
+            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
         } else {
             //查询某天的数据
             $where = [];
@@ -428,13 +428,13 @@ class Zeelool extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
+            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) : 0;
 
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
+            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
         }
         return $arr;
     }
@@ -458,13 +458,13 @@ class Zeelool extends Model
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             $same_sales_total_money = $this->where($map)->where($same_where)->sum('sales_total_money');
-            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2) . '%' : 0;
+            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2): 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             $huan_sales_total_money = $this->where($map)->where($huan_where)->sum('sales_total_money');
-            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2) . '%' : 0;
+            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2) : 0;
         } else {
             //判断当前时间是否等于当前时间，如果等于，则实时读取当天数据
             $where = [];
@@ -475,13 +475,13 @@ class Zeelool extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_sales_total_money = $this->where($map)->where($same_where)->sum('sales_total_money');
-            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2) . '%' : 0;
+            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2): 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_sales_total_money = $this->where($map)->where($huan_where)->sum('sales_total_money');
-            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2) . '%' : 0;
+            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2) : 0;
         }
         return $arr;
     }
@@ -516,7 +516,7 @@ class Zeelool extends Model
             $same_order_total = $this->getSalesTotalMoney(1,$same_where);
             $same_order_num = $this->getOrderNum(1,$same_where);
             $same_order_unit_price = $same_order_num['order_num'] != 0 ? round($same_order_total['sales_total_money'] / $same_order_num['order_num'], 2) : 0;
-            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
+            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2)  : 0;
 
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
@@ -525,7 +525,7 @@ class Zeelool extends Model
             $huan_order_total = $this->getSalesTotalMoney(1,$huan_where);
             $huan_order_num = $this->getOrderNum(1,$huan_where);
             $huan_order_unit_price = $huan_order_num['order_num'] != 0 ? round($huan_order_total['sales_total_money'] / $huan_order_num['order_num'], 2) : 0;
-            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
+            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) : 0;
         } else {
             $where = [];
             $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
@@ -536,13 +536,13 @@ class Zeelool extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_unit_price = $this->where('site', 1)->where($same_where)->value('order_unit_price');
-            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%' : 0;
+            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_unit_price = $this->where('site', 1)->where($huan_where)->value('order_unit_price');
-            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%' : 0;
+            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) : 0;
         }
         return $arr;
     }
@@ -566,13 +566,13 @@ class Zeelool extends Model
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             $same_shipping_total_money = $this->where($map)->where($same_where)->sum('shipping_total_money');
-            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2) . '%' : 0;
+            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2) : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             $huan_shipping_total_money = $this->where($map)->where($huan_where)->sum('shipping_total_money');
-            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2) . '%' : 0;
+            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2) : 0;
         } else {
             $where = [];
             $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
@@ -582,13 +582,13 @@ class Zeelool extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_shipping_total_money = $this->where($map)->where($same_where)->sum('shipping_total_money');
-            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2) . '%' : 0;
+            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2)  : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_shipping_total_money = $this->where($map)->where($huan_where)->sum('shipping_total_money');
-            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2) . '%' : 0;
+            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2)  : 0;
         }
         return $arr;
     }
@@ -959,7 +959,133 @@ class Zeelool extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+    //目标20会话数 调用此方法 产品详情页 v站单独用
+    public function google_target20($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target20($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal20Starts'] ? round($result[0]['ga:goal20Starts'], 2) : 0;
+    }
+    //目标20会话数 产品详情页数据 v站单独用
+    protected function getReport_target20($site, $analytics, $startDate, $endDate)
+    {
 
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal20Starts");
+        $adCostMetric->setAlias("ga:goal20Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //目标2会话数 调用此方法 加购数据 v站单独用
+    public function google_target2($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target2($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal2Starts'] ? round($result[0]['ga:goal2Starts'], 2) : 0;
+    }
+    //目标2会话数 加购数据 v站单独用
+    protected function getReport_target2($site, $analytics, $startDate, $endDate)
+    {
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "168154683";
+        // $VIEW_ID = "172731925";
+        if ($site == 1) {
+            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 2) {
+            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 3) {
+            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        }
+
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal2Starts");
+        $adCostMetric->setAlias("ga:goal2Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
     //目标1会话数 调用此方法 购物车页面
     public function google_target1($site, $start_time)
     {

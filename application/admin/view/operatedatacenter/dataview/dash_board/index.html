@@ -68,7 +68,7 @@
     .new-form-group {
         margin-top: 2%;
         float: left;
-        min-width: 35%;
+        min-width: 33%;
         height: 30px;
         line-height: 30px;
     }
@@ -293,14 +293,18 @@
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
+
                             <div class="form-group new-form-group">
                                 <label class="control-label col-xs-4">平台：</label>
                                 <div class="col-xs-8 new-col-xs-8">
                                     <select data-rule="required" class="form-control" id="order_platform">
-                                        <option value="1" selected="selected">Zeelool</option>
-                                        <option value="2">Voogueme</option>
-                                        <option value="3">Nihaooptical</option>
-                                        <option value="4">全部</option>
+                                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                                        <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+<!--                                        <option value="1" selected="selected">Zeelool</option>-->
+<!--                                        <option value="2">Voogueme</option>-->
+<!--                                        <option value="3">Nihaooptical</option>-->
+<!--                                        <option value="4">全部</option>-->
                                     </select>
                                 </div>
                             </div>
@@ -315,7 +319,15 @@
                                            id="time_str" value="{$time_str}" data-index="14">
                                 </div>
                             </div>
+                            <div class="form-group new-form-group">
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
+                                    <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                                </div>
+                            </div>
+
                         </div>
+
 
                         <div class="row">
                             <div class="margin-div" style="text-align: center">
@@ -418,14 +430,14 @@
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$order_num.same_order_num}</span>  环比：<span
+                                        {$order_num.same_order_num}%</span>  环比：<span
                                             id="huan_order_num">
                                         {if (float)$order_num.huan_order_num/100 < 0}
                                         <img src="/shangzhang.png">
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$order_num.huan_order_num}</span></div>
+                                        {$order_num.huan_order_num}%</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
@@ -439,14 +451,14 @@
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$order_unit_price.same_order_unit_price}</span>  环比：<span
+                                        {$order_unit_price.same_order_unit_price}%</span>  环比：<span
                                             id="huan_order_unit_price">
                                         {if (float)$order_unit_price.huan_order_unit_price/100 < 0}
                                         <img src="/shangzhang.png">
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$order_unit_price.huan_order_unit_price}</span></div>
+                                        {$order_unit_price.huan_order_unit_price}%</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
@@ -458,14 +470,14 @@
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$sales_total_money.same_sales_total_money}</span>  环比：<span
+                                        {$sales_total_money.same_sales_total_money}%</span>  环比：<span
                                             id="huan_sales_total_money">
                                         {if (float)$sales_total_money.huan_sales_total_money/100 < 0}
                                         <img src="/shangzhang.png">
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$sales_total_money.huan_sales_total_money}</span></div>
+                                        {$sales_total_money.huan_sales_total_money}%</span></div>
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
@@ -477,14 +489,14 @@
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$shipping_total_money.same_shipping_total_money}</span>  环比：<span
+                                        {$shipping_total_money.same_shipping_total_money}%</span>  环比：<span
                                             id="huan_shipping_total_money">
                                          {if (float)$shipping_total_money.huan_shipping_total_money/100 < 0}
                                         <img src="/shangzhang.png">
                                         {else /}
                                         <img  style="transform:rotate(180deg);" src="/xiadie.png">
                                         {/if}
-                                        {$shipping_total_money.huan_shipping_total_money}</span></div>
+                                        {$shipping_total_money.huan_shipping_total_money}%</span></div>
                                 </span>
                                 </div>
                             </div>

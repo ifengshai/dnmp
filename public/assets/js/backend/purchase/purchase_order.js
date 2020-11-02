@@ -114,6 +114,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'is_new_product', title: __('是否为新品采购单'),
+                            custom: {0: 'danger', 1: 'success'},
+                            searchList: {0: '否', 1: '是'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'is_sample', title: __('是否为留样采购单'),
                             custom: {0: 'danger', 1: 'success'},
                             searchList: {0: '否', 1: '是'},

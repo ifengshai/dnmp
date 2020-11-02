@@ -2,7 +2,9 @@
 
 namespace app\admin\controller\operatedatacenter\dataview;
 
+use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
+use think\Cache;
 use think\Request;
 
 class DashBoard extends Backend
@@ -17,6 +19,7 @@ class DashBoard extends Backend
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
     /**
@@ -53,7 +56,19 @@ class DashBoard extends Backend
      */
     public function index()
     {
-        // dump(1111);die;
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
+        // dump(collection($magentoplatformarr)->toArray());
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val,['zeelool','voogueme','nihao','全部'])){
+                unset($magentoplatformarr[$key]);
+            }
+            if($key == 100){
+                unset($magentoplatformarr[$key]);
+                $magentoplatformarr[4] = '全部';
+            }
+        }
+        // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
         // 活跃用户数
         $active_user_num = $this->zeeloolOperate->getActiveUser();
@@ -73,7 +88,7 @@ class DashBoard extends Backend
         $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
         //邮费
         $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num','magentoplatformarr'));
         return $this->view->fetch();
     }
 
@@ -109,6 +124,10 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
+            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+            if ($arr) {
+                $this->success('', '', $arr);
+            }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
@@ -125,7 +144,9 @@ class DashBoard extends Backend
             $sales_total_money = $model->getSalesTotalMoney(1, $time_str);
             //邮费
             $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
+
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
+            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
@@ -256,7 +277,7 @@ class DashBoard extends Backend
             }
             if ($order_platform == 4) {
                 unset($where['site']);
-                $sales_total = $model->where($where)->column('day_date', 'order_num');
+                $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -280,7 +301,7 @@ class DashBoard extends Backend
 
                 ];
             } else {
-                $arr = $model->where($where)->column('day_date', 'order_num');
+                $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
                 $date_arr = $arr;
                 $name = '订单数';
 
