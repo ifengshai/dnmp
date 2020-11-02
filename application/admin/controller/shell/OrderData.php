@@ -1133,11 +1133,11 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = $this->zeelool->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         } elseif ($site == 2) {
-            $res = $this->voogueme->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         } elseif ($site == 3) {
-            $res = $this->nihao->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
