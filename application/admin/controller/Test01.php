@@ -989,7 +989,7 @@ class Test01 extends Backend
             ->where('p.goods_type','=',$goods_type)
             ->where($whereItem)
             ->where($itemMap)
-            ->sum('m.base_grand_total');
+            ->sum('o.base_grand_total');
 
         // $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
         $arr['day_date'] = $start;
