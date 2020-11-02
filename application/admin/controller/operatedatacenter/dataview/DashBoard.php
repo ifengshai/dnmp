@@ -290,6 +290,7 @@ class DashBoard extends Backend
                     }
                 }
                 $date_arr = $arr;
+                dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
