@@ -18,26 +18,36 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.line_chart();
             Controller.api.formatter.user_chart();
             Controller.api.formatter.user_change_chart();
-            $("#time_str").on("apply.daterangepicker", function () {
-                setTimeout(() => {
-                    order_data_view();
-                    Controller.api.formatter.line_chart();
-                    Controller.api.formatter.user_chart();
-                    Controller.api.formatter.user_change_chart();
-                }, 0)
-            })
-            $(document).on('change', '#type', function () {
+            $("#sku_submit").click(function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.user_chart();
                 Controller.api.formatter.user_change_chart();
             });
-            $(document).on('change', '#order_platform', function () {
-                order_data_view();
-                Controller.api.formatter.line_chart();
-                Controller.api.formatter.user_chart();
-                Controller.api.formatter.user_change_chart();
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#time_str").val('');
             });
+            // $("#time_str").on("apply.daterangepicker", function () {
+            //     setTimeout(() => {
+            //         order_data_view();
+            //         Controller.api.formatter.line_chart();
+            //         Controller.api.formatter.user_chart();
+            //         Controller.api.formatter.user_change_chart();
+            //     }, 0)
+            // })
+            // $(document).on('change', '#type', function () {
+            //     order_data_view();
+            //     Controller.api.formatter.line_chart();
+            //     Controller.api.formatter.user_chart();
+            //     Controller.api.formatter.user_change_chart();
+            // });
+            // $(document).on('change', '#order_platform', function () {
+            //     order_data_view();
+            //     Controller.api.formatter.line_chart();
+            //     Controller.api.formatter.user_chart();
+            //     Controller.api.formatter.user_change_chart();
+            // });
 
             var table = $("#table");
 
@@ -199,9 +209,9 @@ function order_data_view() {
         var vip_user_num = ret.data.vip_user_num;
         $('#order_num').text(order_num.order_num);
         if (parseInt(order_num.same_order_num) < 0) {
-            $('#same_order_num').html("<img src='/shangzhang.png'>" + order_num.same_order_num);
+            $('#same_order_num').html("<img src='/shangzhang.png'>" + order_num.same_order_num + '%');
         } else {
-            $('#same_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.same_order_num);
+            $('#same_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.same_order_num + '%');
         }
         // if (parseInt(order_num.huan_order_num) < 0){
         //     var $table = $('#huan_order_num');
@@ -217,52 +227,52 @@ function order_data_view() {
         //
         // $('#huan_order_num').text(order_num.huan_order_num);
         if (parseInt(order_num.huan_order_num) < 0) {
-            $('#huan_order_num').html("<img src='/xiadie.png'>" + order_num.huan_order_num);
+            $('#huan_order_num').html("<img src='/xiadie.png'>" + order_num.huan_order_num+ '%');
         } else {
-            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.huan_order_num);
+            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.huan_order_num+ '%');
         }
 
 
         $('#order_unit_price').text(order_unit_price.order_unit_price);
         // $('#same_order_unit_price').text(order_unit_price.same_order_unit_price);
         if (parseInt(order_unit_price.same_order_unit_price) < 0) {
-            $('#same_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.same_order_unit_price);
+            $('#same_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.same_order_unit_price + '%');
         } else {
-            $('#same_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.same_order_unit_price);
+            $('#same_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.same_order_unit_price + '%');
         }
         // $('#huan_order_unit_price').text(order_unit_price.huan_order_unit_price);
         if (parseInt(order_unit_price.huan_order_unit_price) < 0) {
-            $('#huan_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.huan_order_unit_price);
+            $('#huan_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.huan_order_unit_price + '%');
         } else {
-            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.huan_order_unit_price);
+            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.huan_order_unit_price + '%');
         }
 
         $('#sales_total_money').text(sales_total_money.sales_total_money);
         // $('#same_sales_total_money').text(sales_total_money.same_sales_total_money);
         if (parseInt(sales_total_money.same_sales_total_money) < 0) {
-            $('#same_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.same_sales_total_money);
+            $('#same_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.same_sales_total_money + '%');
         } else {
-            $('#same_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.same_sales_total_money);
+            $('#same_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.same_sales_total_money + '%');
         }
         // $('#huan_sales_total_money').text(sales_total_money.huan_sales_total_money);
         if (parseInt(sales_total_money.huan_sales_total_money) < 0) {
-            $('#huan_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.huan_sales_total_money);
+            $('#huan_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.huan_sales_total_money + '%');
         } else {
-            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.huan_sales_total_money);
+            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.huan_sales_total_money + '%');
         }
 
         $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
         // $('#same_shipping_total_money').text(shipping_total_money.same_shipping_total_money);
         if (parseInt(shipping_total_money.same_shipping_total_money) < 0) {
-            $('#same_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.same_shipping_total_money);
+            $('#same_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.same_shipping_total_money + '%');
         } else {
-            $('#same_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.same_shipping_total_money);
+            $('#same_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.same_shipping_total_money + '%');
         }
         // $('#huan_shipping_total_money').text(shipping_total_money.huan_shipping_total_money);
         if (parseInt(shipping_total_money.huan_shipping_total_money) < 0) {
-            $('#huan_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.huan_shipping_total_money);
+            $('#huan_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.huan_shipping_total_money + '%');
         } else {
-            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.huan_shipping_total_money);
+            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.huan_shipping_total_money + '%');
         }
 
         $('#active_user_num').text(active_user_num.active_user_num);

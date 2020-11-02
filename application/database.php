@@ -253,19 +253,20 @@ return [
         'charset'     => Env::get('db_zeelool_jp.charset'),
         'prefix'      => Env::get('db_zeelool_jp.prefix'),
     ],
-    'db_mojing_order' => [
+
+    'db_mojing_order_shell' => [
         // 数据库类型
-        'type'        => Env::get('db_mojing_order.type'),
+        'type'        => Env::get('db_mojing_order_shell.type'),
         // 服务器地址
-        'hostname'    => Env::get('db_mojing_order.hostname'),
+        'hostname'    => Env::get('db_mojing_order_shell.hostname'),
         // 数据库名
-        'database'    => Env::get('db_mojing_order.database'),
+        'database'    => Env::get('db_mojing_order_shell.database'),
         // 数据库用户名
-        'username'    => Env::get('db_mojing_order.username'),
+        'username'    => Env::get('db_mojing_order_shell.username'),
         // 密码
-        'password'    => Env::get('db_mojing_order.password'),
+        'password'    => Env::get('db_mojing_order_shell.password'),
         // 数据库编码默认采用utf8
-        'charset'     => Env::get('db_mojing_order.charset'),
-        'prefix'      => Env::get('db_mojing_order.prefix'),
+        'charset'     => Env::get('db_mojing_order_shell.charset'),
+        'prefix'      => Env::get('db_mojing_order_shell.prefix'),
     ],
 ];

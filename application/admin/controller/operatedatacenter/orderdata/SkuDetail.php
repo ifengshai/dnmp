@@ -200,7 +200,7 @@ class SkuDetail extends Backend
 
 
     /**
-     * 各品类商品销量趋势
+     * 处方类型占比饼图
      *
      * @Description
      * @author wpl

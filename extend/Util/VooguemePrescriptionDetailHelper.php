@@ -129,6 +129,7 @@ class VooguemePrescriptionDetailHelper{
 			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+			$final_params['index_color'] = $product_options['info_buyRequest']['tmplens']['index_color'];
 				
 
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
@@ -159,7 +160,13 @@ class VooguemePrescriptionDetailHelper{
           	// dump($final_params);      
 
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
-			$items[$item_key]['index_type'] = $final_params['index_type'];
+
+			if ($final_params['index_color']) {
+				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
+			} else {
+				$items[$item_key]['index_type'] = $final_params['index_type'];
+			}
+			
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price']?$final_params['frame_price']:0;

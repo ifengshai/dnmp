@@ -26,11 +26,16 @@ class Test01 extends Backend
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
-                continue;
+                $data = [];
+                $data['created_at'] = $v['created_at'];
+                $data['updated_at'] = $v['updated_at'];
+                $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
+                echo Db::connect('database.db_voogueme')->table('sales_flat_order')->getLastSql();
+                echo "\n";
             } 
 
-            Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
-            echo $k . "\n";
+            // Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
+            
         }
         
         echo  'ok';
@@ -42,14 +47,29 @@ class Test01 extends Backend
         foreach($list as $k => $v) {
             $count = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
+                $data = [];
+                $data['created_at'] = $v['created_at'];
+                $data['updated_at'] = $v['updated_at'];
+                Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
+
+                echo Db::connect('database.db_nihao')->table('sales_flat_order')->getLastSql(); 
+                echo ";" . "\n";
                 continue;
             } 
 
-            Db::connect('database.db_nihao')->table('sales_flat_order')->insert($v);
+            // Db::connect('database.db_nihao')->table('sales_flat_order')->insert($v);
             echo $k . "\n";
         }
         
         echo  'ok';
+
+
+
+
+
+
+        
+
     }
 
 
@@ -909,5 +929,105 @@ class Test01 extends Backend
         // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
         // Db::name('purchase_order')->where('purchase_number','PO20201023090457598387')->update(['purchase_status'=>3]);
     }
+    public function update_v_data()
+    {
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-29'])->update(['detail_num'=>20520,'cart_num'=>4699]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-28'])->update(['detail_num'=>22869,'cart_num'=>5295]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-27'])->update(['detail_num'=>19959,'cart_num'=>4467]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-26'])->update(['detail_num'=>16710,'cart_num'=>3518]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-25'])->update(['detail_num'=>17248,'cart_num'=>3621]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-24'])->update(['detail_num'=>21029,'cart_num'=>4730]);
+        // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-23'])->update(['detail_num'=>22037,'cart_num'=>4948]);
 
+    }
+
+    //统计昨天各品类镜框的销量
+    public function goods_type_day_center($plat,$goods_type)
+    {
+//        $plat = 1;
+        $start = date('Y-m-d', strtotime('-1 day'));
+        // $start = '2020-10-29';
+        $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
+        $createat = explode(' ', $seven_days);
+        $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        //判断站点
+        switch ($plat) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type','=',$goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('m.qty_ordered');
+        //销售额
+        // $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        // $order_where = [];
+        // $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
+        // $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        // $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+        $sales_total_money = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type','=',$goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('o.base_grand_total');
+
+        // $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
+        $arr['day_date'] = $start;
+        $arr['site'] = $plat;
+        $arr['goods_type'] = $goods_type;
+        $arr['glass_num'] = $frame_sales_num;
+        $arr['sales_total_money'] = $sales_total_money;
+        return $arr;
+    }
+    //计划任务跑每天的分类销量的数据
+    public function day_data_goods_type()
+    {
+        // $arr = [
+        //     $this->goods_type_day_center(1,1),
+        //     $this->goods_type_day_center(1,2),
+        //     $this->goods_type_day_center(1,3),
+        //     $this->goods_type_day_center(1,4),
+        //     $this->goods_type_day_center(1,5),
+        //     $this->goods_type_day_center(1,6),
+        //     $this->goods_type_day_center(2,1),
+        //     $this->goods_type_day_center(2,2),
+        //     $this->goods_type_day_center(2,6),
+        //     $this->goods_type_day_center(3,1),
+        //     $this->goods_type_day_center(3,2),
+        // ];
+        // dump($arr);die;
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,2));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,3));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,4));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,5));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,6));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,2));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,6));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,2));
+    }
+    
 }
