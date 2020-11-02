@@ -1138,7 +1138,7 @@ class WorkOrderList extends Model
         }else{
             $dataWorkOrder['work_status'] = 5;
         }
-        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);echo 22;exit;
         //不是自动处理完成
         if($is_auto_complete != 1){
             $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
