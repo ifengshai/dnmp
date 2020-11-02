@@ -1133,21 +1133,21 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $this->zeelool->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = $this->zeelool->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         } elseif ($site == 2) {
-            $this->voogueme->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = $this->voogueme->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         } elseif ($site == 3) {
-            $this->nihao->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $res = $this->nihao->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['country_id'] = $v['country_id'];
-            $params[$k]['region'] = $v['region'];
-            $params[$k]['city'] = $v['city'];
-            $params[$k]['street'] = $v['street'];
-            $params[$k]['postcode'] = $v['postcode'];
-            $params[$k]['telephone'] = $v['telephone'];
+            $params[$k]['country_id'] = $res[$v['entity_id']]['country_id'];
+            $params[$k]['region'] = $res[$v['entity_id']]['region'];
+            $params[$k]['city'] = $res[$v['entity_id']]['city'];
+            $params[$k]['street'] = $res[$v['entity_id']]['street'];
+            $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
+            $params[$k]['telephone'] = $res[$v['entity_id']]['telephone'];
         }
         $this->order->saveAll($params);
         echo $site . 'ok';
