@@ -164,7 +164,7 @@ class GoodsDataView extends Backend
 
             //副单价
             foreach ($data_center_day1 as $key => $value) {
-                $data_center_day3[$key] = $data_center_day2[$key] == 0 ? 0 : $data_center_day1[$key] / $data_center_day2[$key];
+                $data_center_day3[$key] = $data_center_day2[$key] == 0 ? 0 : round($data_center_day1[$key] / $data_center_day2[$key],2);
             }
             // dump($data_center_day1);
             // dump($data_center_day2);
