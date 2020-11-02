@@ -126,6 +126,7 @@ class DashBoard extends Backend
             }
             $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
             if ($arr) {
+                dump($arr);
                 $this->success('', '', $arr);
             }
             //活跃用户数
