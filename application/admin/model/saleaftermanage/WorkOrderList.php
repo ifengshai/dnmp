@@ -1138,7 +1138,7 @@ class WorkOrderList extends Model
         }else{
             $dataWorkOrder['work_status'] = 5;
         }
-        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);echo 22;exit;
+        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
         //不是自动处理完成
         if($is_auto_complete != 1){
             $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
@@ -1149,7 +1149,7 @@ class WorkOrderList extends Model
             } elseif($measure_choose_id == 7){
                 $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
-        }
+        }echo 22;exit;1
         //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
         if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
             $this->deductionStock($work_id, $measure_id);
