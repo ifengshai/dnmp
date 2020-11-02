@@ -1035,9 +1035,12 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
+            echo $k . "\n";
+            usleep(2000);
         }
         //插入订单处理表
         $this->orderprocess->saveAll($order_params);
+        echo "ok";
     }
 
 
@@ -1091,8 +1094,12 @@ class OrderData extends Backend
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
+
+            echo $k . "\n";
+            usleep(2000);
         }
         //插入订单处理表
         $this->orderprocess->saveAll($order_params);
+        echo "ok";
     }
 }
