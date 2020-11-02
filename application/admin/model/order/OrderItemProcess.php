@@ -1,4 +1,4 @@
-<?php
+db_mojing_order_shell<?php
 
 /**
  * 子订单
@@ -10,7 +10,7 @@ use think\Db;
 class OrderItemProcess extends Model
 {
     //数据库
-    protected $connection = 'database.db_mojing_order';
+    protected $connection = 'database.db_mojing_order_shell';
 
     // 表名
     protected $table = 'fa_order_item_process';
