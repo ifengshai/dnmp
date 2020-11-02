@@ -1129,7 +1129,7 @@ class OrderData extends Backend
      */
     protected function order_address_data($site)
     {
-        $list = $this->order->where('country_id is null and site = ' . $site)->select();
+        $list = $this->order->where('country_id is null and site = ' . $site)->limit(1000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
