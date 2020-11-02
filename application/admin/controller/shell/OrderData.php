@@ -370,6 +370,8 @@ class OrderData extends Backend
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
         $arr['os_add'] = $options_params['os_add'];
         $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
@@ -482,6 +484,8 @@ class OrderData extends Backend
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
         $arr['os_add'] = $options_params['os_add'];
         $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
@@ -590,6 +594,8 @@ class OrderData extends Backend
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
         $arr['os_add'] = $options_params['os_add'];
         $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
@@ -701,6 +707,8 @@ class OrderData extends Backend
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
         $arr['os_add'] = $options_params['os_add'];
         $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
