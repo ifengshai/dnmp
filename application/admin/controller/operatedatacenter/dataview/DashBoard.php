@@ -280,7 +280,7 @@ class DashBoard extends Backend
             if ($order_platform == 4) {
                 unset($where['site']);
                 $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-                dump($sales_total);
+//                dump($sales_total);
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -289,10 +289,9 @@ class DashBoard extends Backend
                         $arr[$v] = $k;
                     }
                 }
-
+                ksort($arr);
                 $date_arr = $arr;
-//                $date_arr = ksort($arr,setlocale(LC_TIME,null));
-                dump($date_arr);
+//                dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
@@ -308,6 +307,7 @@ class DashBoard extends Backend
                 ];
             } else {
                 $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
+                ksort($arr);
                 $date_arr = $arr;
                 $name = '订单数';
 
