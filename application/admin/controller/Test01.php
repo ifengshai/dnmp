@@ -988,7 +988,7 @@ class Test01 extends Backend
         $arr['day_date'] = $start;
         $arr['site'] = $plat;
         $arr['goods_type'] = $goods_type;
-        $arr['glss_num'] = $frame_sales_num;
+        $arr['glass_num'] = $frame_sales_num;
         $arr['sales_total_money'] = $sales_total_money;
         return $arr;
     }
