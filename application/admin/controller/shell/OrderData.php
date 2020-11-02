@@ -1133,14 +1133,14 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $this->zeelool->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $this->zeelool->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         } elseif ($site == 2) {
-            $this->voogueme->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $this->voogueme->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         } elseif ($site == 3) {
-            $this->nihao->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+            $this->nihao->where(['entity_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
         }
         $params = [];
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
             $params[$k]['country_id'] = $v['country_id'];
             $params[$k]['region'] = $v['region'];
