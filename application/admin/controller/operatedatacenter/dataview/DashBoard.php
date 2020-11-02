@@ -289,7 +289,9 @@ class DashBoard extends Backend
                         $arr[$v] = $k;
                     }
                 }
-                $date_arr = ksort($arr);
+
+                $date_arr = $arr;
+                $date_arr = ksort($arr,setlocale(LC_TIME,null));
                 dump($date_arr);
                 $name = '订单数';
 
