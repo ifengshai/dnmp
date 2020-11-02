@@ -246,6 +246,8 @@ class OrderData extends Backend
                                         $options =  $this->voogueme_prescription_analysis($v['product_options']);
                                     } elseif ($site == 3) {
                                         $options =  $this->nihao_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 5) {
+                                        $options =  $this->wesee_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['item_id'] = $v['item_id'];
