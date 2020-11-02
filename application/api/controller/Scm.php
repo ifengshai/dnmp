@@ -59,7 +59,6 @@ class Scm extends Api
      */
     protected function check()
     {
-        $this->auth->init($this->request->request('token'));
         return $this->auth->id ? true : false;
     }
 
@@ -1555,7 +1554,7 @@ class Scm extends Api
                 'item_process_id' => $item_process_id,
                 'type' => $type,
                 'status' => 1,
-                'create_time' => date('Y-m-d H:i:s'),
+                'create_time' => time(),
                 'create_person' => $this->auth->nickname
             ];
             $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
@@ -1651,7 +1650,7 @@ class Scm extends Api
         ;
         $list = collection($list)->toArray();
 
-        $this->success('', ['$list' => $list],200);
+        $this->success('', ['list' => $list],200);
     }
 
     /**
@@ -1804,7 +1803,7 @@ class Scm extends Api
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->value('id,distribution_status,option_id,order_id')
+            ->value('id,distribution_status,option_id,order_id,site')
             ->find()
         ;
 
@@ -1891,10 +1890,14 @@ class Scm extends Api
                 $save_status = 9;
             }
 
+            //获取true_sku
+            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $true_sku = $_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
+
             //扣减订单占用库存、配货占用库存、总库存
-            $_item = new \app\admin\model\itemmanage\Item;
+            $_item = new \app\admin\model\itemmanage\Item();
             $_item
-                ->where(['sku'=>$item_option_info['sku']])
+                ->where(['sku'=>$true_sku])
                 ->dec('occupy_stock', 1)
                 ->dec('distribution_occupy_stock', 1)
                 ->dec('stock', 1)
@@ -2028,7 +2031,7 @@ class Scm extends Api
             $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
             $item_process_info = $_new_order_item_process
                 ->where('item_order_number', $item_order_number)
-                ->field('id,option_id,order_id')
+                ->field('id,option_id,order_id,sku,site')
                 ->find()
             ;
 
@@ -2051,29 +2054,13 @@ class Scm extends Api
 
                 //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
                 if(2 == $reason){
-                    //获取订单主表数据
-                    $_new_order = new \app\admin\model\order\order\NewOrder();
-                    $order_info = $_new_order
-                        ->where('id', $item_process_info['order_id'])
-                        ->value('site')
-                        ->find()
-                    ;
-
-                    //获取子订单处方数据
-                    $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
-                    $item_option_info = $_new_order_item_option
-                        ->where('id', $item_process_info['option_id'])
-                        ->field('sku')
-                        ->find()
-                    ;
-
                     //获取true_sku
                     $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-                    $true_sku = $_item_platform_sku->getTrueSku($item_option_info['sku'], $order_info['site']);
+                    $true_sku = $_item_platform_sku->getTrueSku($item_process_info['sku'], $item_process_info['site']);
 
                     //扣减虚拟仓库存
                     $_item_platform_sku
-                        ->where(['sku'=>$true_sku,'platform_type'=>$order_info['site']])
+                        ->where(['sku'=>$true_sku,'platform_type'=>$item_process_info['site']])
                         ->dec('stock', 1)
                         ->update()
                     ;

@@ -7,6 +7,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('#stock_house_num').parents('.form-group').hide();
         $('select[name="abnormal"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
+        $('.btn-finish-adopt').removeClass('hide');
+        $('.btn-finish-refuse').removeClass('hide');
         if(0 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
@@ -270,65 +272,83 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/distribution/batch_print_label/ids/' + ids, '_blank');
             });
 
-            //批量标记已打印    
-            $('.btn-tag-printed').click(function () {
+            //配货完成、配镜片完成、加工完成、印logo完成、合单完成
+            $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要这%s条记录 标记为 【已打印标签】吗?', ids.length),
-                    { icon: 3, title: __('Warning'), shadeClose: true },
-                    function (index) {
-                        Layer.close(index);
-                        Backend.api.ajax({
-                            url: Config.moduleurl + '/order/distribution/tag_printed',
-                            data: { id_params: ids },
-                            type: 'post'
-                        }, function (data, ret) {
-                            if (data == 'success') {
-                                table.bootstrapTable('refresh');
-                            }
-                        });
-
-                    }
-                );
-            });
-
-            //配货完成、配镜片完成
-            $('.btn-product').click(function () {
-                var ids = Table.api.selectedids(table);
-                var status = $(this).data('status');
                 Layer.confirm(
                     __('确定要修改这%s条记录配货状态吗?', ids.length),
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: Config.moduleurl + '/order/printlabel/zeelool/setOrderStatus',
-                            data: { id_params: ids, status: status },
+                            url: Config.moduleurl + '/order/distribution/set_status',
+                            data: { id_params: ids, status: $(this).data('status') },
                             type: 'post'
                         }, function (data, ret) {
                             if (data == 'success') {
                                 table.bootstrapTable('refresh');
                             }
                         });
-
                     }
                 );
-            })
+            });
 
-            $(document).on('input', '#search_val', function (events) {
-                if (event.target.value.length == 9) {
-                    Backend.api.ajax({
-                        url: Config.moduleurl + '/order/printlabel/zeelool/index',
-                        data: { increment_id: event.target.value },
-                        type: 'post'
-                    }, function (data, ret) {
+            //成检通过
+            $('.btn-finish-adopt').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要通过这%s条子订单吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/set_status',
+                            data: { id_params: ids, status: $(this).data('status') },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
 
-                    }, function (data, ret) {
-
-                        table.bootstrapTable("append", ret.rows[0]);
-                    });
-                }
-            })
+            //成检拒绝
+            $('.btn-finish-refuse').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要拒绝这%s条子订单吗?', ids.length),
+                    {
+                        icon: 3,
+                        title: __('Warning'),
+                        shadeClose: true,
+                        content: '<div class="layui-form-item">' +
+                        '<label class="layui-form-label">拒绝原因</label>' +
+                        '<div class="layui-input-block">' +
+                        '<select id="reason" lay-filter="range">' +
+                        '<option value="1">加工调整</option>' +
+                        '<option value="2">镜架报损</option>' +
+                        '<option value="3">镜片报损</option>' +
+                        '<option value="4">logo调整</option>' +
+                        '</select>' +
+                        '</div>' +
+                        '</div>'
+                    },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/finish_refuse',
+                            data: { id_params: ids, reason: $('#reason').val() },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
         },
         api: {
             formatter: {

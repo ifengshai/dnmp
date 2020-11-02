@@ -33,7 +33,7 @@ class DistributionLog extends Model
             self::create([
                 'item_process_id' => $val,
                 'remark' => $remark,
-                'create_time' => date('Y-m-d H:i:s'),
+                'create_time' => time(),
                 'create_person' => $auth->nickname
             ]);
         }
