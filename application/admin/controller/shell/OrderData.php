@@ -937,8 +937,9 @@ class OrderData extends Backend
     {
         $site = 1;
         $id = $this->order->where('site=1 and entity_id < 520029')->max('entity_id');
-        dump($id);die;
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
+        dump($id);
+        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(10)->select();
+        dump($list);die;
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
