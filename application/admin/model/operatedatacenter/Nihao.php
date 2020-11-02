@@ -328,8 +328,8 @@ class Nihao extends Model
         // dump($huan_create_at);
 
         $arrs['again_user_num'] = $again_num;
-        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2) . '%';
-        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2) . '%';
+        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2).'%';
+        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2).'%';
         return $arrs;
 
     }
