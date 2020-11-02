@@ -1812,12 +1812,13 @@ class Scm extends Api
         $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
         $item_option_info = $_new_order_item_option
             ->where('id', $item_process_info['option_id'])
-            ->field('is_print_logo,sku')
+            ->field('is_print_logo,sku,index_name')
             ->find()
         ;
 
         //状态类型
         $status_arr = [
+            2=>'配货',
             3=>'配镜片',
             4=>'加工',
             5=>'印logo',
@@ -1859,7 +1860,21 @@ class Scm extends Api
         ;
 
         //下一步提示信息及状态
-        if(3 == $check_status){
+        if(2 == $check_status){
+            if($item_option_info['index_name']){
+                $save_status = 3;
+            }else{
+                if($item_option_info['is_print_logo']){
+                    $save_status = 5;
+                }else{
+                    if($total_qty_ordered > 1){
+                        $save_status = 7;
+                    }else{
+                        $save_status = 9;
+                    }
+                }
+            }
+        }elseif(3 == $check_status){
             $save_status = 4;
         }elseif(4 == $check_status){
             if($item_option_info['is_print_logo']){
