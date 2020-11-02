@@ -28,11 +28,14 @@ class DistributionLog extends Model
      */
     public static function record($auth,$item_process_id,$remark)
     {
-        self::create([
-            'item_process_id' => $item_process_id,
-            'remark' => $remark,
-            'create_time' => date('Y-m-d H:i:s'),
-            'create_person' => $auth->nickname
-        ]);
+        $ids = is_array($item_process_id) ?: explode(',',$item_process_id);
+        foreach($ids as $val){
+            self::create([
+                'item_process_id' => $val,
+                'remark' => $remark,
+                'create_time' => time(),
+                'create_person' => $auth->nickname
+            ]);
+        }
     }
 }

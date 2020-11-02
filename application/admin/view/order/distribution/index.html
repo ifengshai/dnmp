@@ -58,51 +58,47 @@
                                 class="fa fa-refresh"></i> </a>
 
                         <a href="javascript:;"
-                            class="btn btn-danger btn-batch-export-xls {:$auth->check('order/printlabel/zeelool/batch_export_xls')?'':'hide'}"
+                            class="btn btn-distribution btn-danger btn-batch-export-xls hide"
                             title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
 
                         <a href="javascript:;"
-                            class="btn btn-success btn-batch-printed btn-disabled disabled {:$auth->check('order/printlabel/zeelool/batch_print_label')?'':'hide'}"
+                            class="btn btn-distribution btn-success btn-batch-printed btn-disabled disabled hide"
                             title="{:__('打印标签')}"> {:__('打印')}</a>
 
-                        <a href="javascript:;"
-                            class="btn btn-success btn-tag-printed btn-disabled disabled {:$auth->check('order/printlabel/zeelool/tag_printed')?'':'hide'}"
-                            title="{:__('标记(已打印)')}"> {:__('标记已打印')}</a>
-
-                        <a href="javascript:;" data-status="1"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="2"
+                            class="btn btn-distribution btn-success btn-product btn-set-status btn-disabled disabled hide"
                             title="{:__('配货完成')}"> {:__('配货完成')}</a>
 
-                        <a href="javascript:;" data-status="2"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="3"
+                            class="btn btn-distribution btn-success btn-lens btn-set-status btn-disabled disabled hide"
                             title="{:__('配镜片完成')}"> {:__('配镜片完成')}</a>
 
-                        <a href="javascript:;" data-status="3"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="4"
+                            class="btn btn-distribution btn-success btn-machining btn-set-status btn-disabled disabled hide"
                             title="{:__('加工完成')}"> {:__('加工完成')}</a>
 
-                        <a href="javascript:;" data-status="4"
-                           class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="5"
+                           class="btn btn-distribution btn-success btn-logo btn-set-status btn-disabled disabled hide"
                            title="{:__('印logo完成')}"> {:__('印logo完成')}</a>
 
-                        <a href="javascript:;" data-status="4"
-                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="6"
+                            class="btn btn-distribution btn-success btn-finish-adopt btn-disabled disabled hide"
                             title="{:__('成检通过')}"> {:__('成检通过')}</a>
 
-                        <a href="javascript:;" data-status="4"
-                           class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-finish-refuse btn-disabled disabled hide"
                            title="{:__('成检拒绝')}"> {:__('成检拒绝')}</a>
 
-                        <a href="javascript:;" data-status="3"
-                           class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;" data-status="9"
+                           class="btn btn-distribution btn-success btn-join-complete btn-set-status btn-disabled disabled hide"
                            title="{:__('合单完成')}"> {:__('合单完成')}</a>
 
-                        <a href="javascript:;" data-status="3"
-                           class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-abnormal-handle btn-disabled disabled hide"
                            title="{:__('处理异常')}"> {:__('处理异常')}</a>
 
-                        <a href="javascript:;" data-status="3"
-                           class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('order/printlabel/zeelool/setOrderStatus')?'':'hide'}"
+                        <a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-abnormal-sign btn-disabled disabled hide"
                            title="{:__('标记异常')}"> {:__('标记异常')}</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
