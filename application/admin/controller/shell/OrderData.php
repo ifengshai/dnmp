@@ -937,9 +937,7 @@ class OrderData extends Backend
     {
         $site = 1;
         $id = $this->order->where('site=1 and entity_id < 520029')->max('entity_id');
-        dump($id);
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(10)->select();
-        dump($list);die;
+        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
@@ -969,6 +967,8 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
+            $params['distribution_status'] = 1;
+            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
@@ -996,9 +996,10 @@ class OrderData extends Backend
     {
         $site = 2;
         $id = $this->order->where('site=2 and entity_id < 272780')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
+        $list = $this->voogueme->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
+        $order_params = [];
         foreach ($list as $k => $v) {
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1025,6 +1026,8 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
+            $params['distribution_status'] = 1;
+            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
@@ -1050,9 +1053,10 @@ class OrderData extends Backend
     {
         $site = 3;
         $id = $this->order->where('site=3 and entity_id < 44155')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
+        $list = $this->nihao->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
+        $order_params = [];
         foreach ($list as $k => $v) {
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1079,19 +1083,14 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
+            $params['distribution_status'] = 1;
+            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
-
-
-            //插入子表一条数据
-            $order_item_params[$k]['site'] = $site;
-            $order_item_params[$k]['order_id'] = $order_id;
-            $order_item_params[$k]['entity_id'] = $v['entity_id'];
-            $order_item_params[$k]['increment_id'] = $v['increment_id'];
         }
         //插入订单处理表
         $this->orderprocess->saveAll($order_params);
