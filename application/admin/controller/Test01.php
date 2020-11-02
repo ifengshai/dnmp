@@ -1003,17 +1003,17 @@ class Test01 extends Backend
     public function day_data_goods_type()
     {
         $arr = [
-            [$this->goods_type_day_center(1,1)],
-            [$this->goods_type_day_center(1,2)],
-            [$this->goods_type_day_center(1,3)],
-            [$this->goods_type_day_center(1,4)],
-            [$this->goods_type_day_center(1,5)],
-            [$this->goods_type_day_center(1,6)],
-            [$this->goods_type_day_center(2,1)],
-            [$this->goods_type_day_center(2,2)],
-            [$this->goods_type_day_center(2,6)],
-            [$this->goods_type_day_center(3,1)],
-            [$this->goods_type_day_center(3,2)],
+            $this->goods_type_day_center(1,1),
+            $this->goods_type_day_center(1,2),
+            $this->goods_type_day_center(1,3),
+            $this->goods_type_day_center(1,4),
+            $this->goods_type_day_center(1,5),
+            $this->goods_type_day_center(1,6),
+            $this->goods_type_day_center(2,1),
+            $this->goods_type_day_center(2,2),
+            $this->goods_type_day_center(2,6),
+            $this->goods_type_day_center(3,1),
+            $this->goods_type_day_center(3,2),
         ];
         dump($arr);die;
         Db::name('datacenter_goods_type_data')->insert($arr);
