@@ -1110,4 +1110,46 @@ class OrderData extends Backend
         $this->orderprocess->saveAll($order_params);
         echo "ok";
     }
+
+
+    public function order_address_data_shell()
+    {
+        $this->order_address_data(1);
+        $this->order_address_data(2);
+        $this->order_address_data(3);
+    }
+
+    /**
+     * 地址处理
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/02 18:31:12 
+     * @return void
+     */
+    protected function order_address_data($site)
+    {
+        $list = $this->order->where('country_id is null and site = ' . $site)->select();
+        $list = collection($list)->toArray();
+        $entity_id = array_column($list, 'entity_id');
+        if ($site == 1) {
+            $this->zeelool->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+        } elseif ($site == 2) {
+            $this->voogueme->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+        } elseif ($site == 3) {
+            $this->nihao->where(['entity_id', ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'entity_id');
+        }
+        $params = [];
+        foreach($list as $k => $v) {
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['country_id'] = $v['country_id'];
+            $params[$k]['region'] = $v['region'];
+            $params[$k]['city'] = $v['city'];
+            $params[$k]['street'] = $v['street'];
+            $params[$k]['postcode'] = $v['postcode'];
+            $params[$k]['telephone'] = $v['telephone'];
+        }
+        $this->order->saveAll($params);
+        echo $site . 'ok';
+    }
 }
