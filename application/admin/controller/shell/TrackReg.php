@@ -1068,18 +1068,70 @@ class TrackReg extends Backend
     {
         $res1 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,1));
         if ($res1){
-            echo '';
+            echo 'z站平光镜ok';
+        }else{
+            echo 'z站平光镜不ok';
         }
         $res2 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,2));
+        if ($res2){
+            echo 'z站太阳镜ok';
+        }else{
+            echo 'z站太阳镜不ok';
+        }
         $res3 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,3));
+        if ($res3){
+            echo 'z站老花镜ok';
+        }else{
+            echo 'z站老花镜不ok';
+        }
         $res4 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,4));
+        if ($res4){
+            echo 'z站儿童镜ok';
+        }else{
+            echo 'z站儿童镜不ok';
+        }
         $res5 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,5));
+        if ($res5){
+            echo 'z站运动镜ok';
+        }else{
+            echo 'z站运动镜不ok';
+        }
         $res6 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,6));
+        if ($res6){
+            echo 'z站配饰ok';
+        }else{
+            echo 'z站配饰不ok';
+        }
         $res7 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,1));
+        if ($res7){
+            echo 'v站平光镜ok';
+        }else{
+            echo 'v站平光镜不ok';
+        }
         $res8 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,2));
+        if ($res8){
+            echo 'v站太阳镜ok';
+        }else{
+            echo 'v站太阳镜不ok';
+        }
         $res9 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,6));
+        if ($res9){
+            echo 'v站配饰ok';
+        }else{
+            echo 'v站配饰不ok';
+        }
         $res10 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,1));
+        if ($res10){
+            echo 'nihao站平光镜ok';
+        }else{
+            echo 'nihao站平光镜不ok';
+        }
         $res11 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,2));
+        if ($res11){
+            echo 'nihao站配饰ok';
+        }else{
+            echo 'nihao站配饰不ok';
+        }
     }
     //统计昨天各品类镜框的销量
     public function goods_type_day_center($plat,$goods_type)
