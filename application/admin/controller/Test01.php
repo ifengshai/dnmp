@@ -1015,7 +1015,7 @@ class Test01 extends Backend
             $this->goods_type_day_center(3,1),
             $this->goods_type_day_center(3,2),
         ];
-        dump($arr);die;
+        // dump($arr);die;
         Db::name('datacenter_goods_type_data')->insert($arr);
     }
     
