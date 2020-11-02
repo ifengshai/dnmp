@@ -280,6 +280,7 @@ class DashBoard extends Backend
             if ($order_platform == 4) {
                 unset($where['site']);
                 $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
+                dump($sales_total);
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
