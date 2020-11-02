@@ -978,13 +978,20 @@ class Test01 extends Backend
             ->where($itemMap)
             ->sum('m.qty_ordered');
         //销售额
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+        // $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        // $order_where = [];
+        // $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $start . "'")];
+        // $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        // $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+        $sales_total_money = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type','=',$goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('m.base_grand_total');
 
-        $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
+        // $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
         $arr['day_date'] = $start;
         $arr['site'] = $plat;
         $arr['goods_type'] = $goods_type;
