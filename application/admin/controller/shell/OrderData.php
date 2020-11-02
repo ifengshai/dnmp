@@ -959,7 +959,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
@@ -1018,7 +1018,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
@@ -1078,7 +1078,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
