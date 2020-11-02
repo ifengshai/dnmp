@@ -180,13 +180,6 @@ class OrderData extends Backend
                                     $order_params[$k]['order_id'] = $order_id;
                                     $order_params[$k]['entity_id'] = $v['entity_id'];
                                     $order_params[$k]['increment_id'] = $v['increment_id'];
-
-
-                                    //插入子表一条数据
-                                    $order_item_params[$k]['site'] = $site;
-                                    $order_item_params[$k]['order_id'] = $order_id;
-                                    $order_item_params[$k]['entity_id'] = $v['entity_id'];
-                                    $order_item_params[$k]['increment_id'] = $v['increment_id'];
                                 }
                                 //插入订单处理表
                                 $this->orderprocess->saveAll($order_params);
@@ -943,10 +936,12 @@ class OrderData extends Backend
     public function zeelool_old_order()
     {
         $site = 1;
-        $id = $this->order->where('site=1 and entity_id < 521161')->max('entity_id');
+        $id = $this->order->where('site=1 and entity_id < 521028')->max('entity_id');
+        dump($id);die;
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
+        $order_params = [];
         foreach ($list as $k => $v) {
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -957,6 +952,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
@@ -979,15 +975,12 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
-
-            //插入子表一条数据
-            $order_item_params[$k]['site'] = $site;
-            $order_item_params[$k]['order_id'] = $order_id;
-            $order_item_params[$k]['entity_id'] = $v['entity_id'];
-            $order_item_params[$k]['increment_id'] = $v['increment_id'];
+            echo $k . "\n";
+            usleep(1000);
         }
         //插入订单处理表
         $this->orderprocess->saveAll($order_params);
+        echo "ok";
     }
 
     /**
@@ -1001,7 +994,7 @@ class OrderData extends Backend
     public function voogueme_old_order()
     {
         $site = 2;
-        $id = $this->order->where('site=2')->max('entity_id');
+        $id = $this->order->where('site=2 and entity_id < 273408')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
@@ -1015,6 +1008,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
@@ -1037,12 +1031,6 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
-
-            //插入子表一条数据
-            $order_item_params[$k]['site'] = $site;
-            $order_item_params[$k]['order_id'] = $order_id;
-            $order_item_params[$k]['entity_id'] = $v['entity_id'];
-            $order_item_params[$k]['increment_id'] = $v['increment_id'];
         }
         //插入订单处理表
         $this->orderprocess->saveAll($order_params);
@@ -1060,7 +1048,7 @@ class OrderData extends Backend
     public function nihao_old_order()
     {
         $site = 3;
-        $id = $this->order->where('site=3')->max('entity_id');
+        $id = $this->order->where('site=3 and entity_id < 44312')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
@@ -1074,6 +1062,7 @@ class OrderData extends Backend
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'];
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
