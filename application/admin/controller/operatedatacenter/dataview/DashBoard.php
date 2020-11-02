@@ -263,7 +263,7 @@ class DashBoard extends Backend
             }
             if ($order_platform == 4) {
                 unset($where['site']);
-                $sales_total = $model->where($where)->column('day_date', 'order_num');
+                $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -287,7 +287,7 @@ class DashBoard extends Backend
 
                 ];
             } else {
-                $arr = $model->where($where)->column('day_date', 'order_num');
+                $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
                 $date_arr = $arr;
                 $name = '订单数';
 
