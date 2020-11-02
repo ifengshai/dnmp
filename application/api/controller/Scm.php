@@ -70,7 +70,7 @@ class Scm extends Api
         $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
-//        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
+        $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
     }
 
     /**
