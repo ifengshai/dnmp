@@ -338,7 +338,7 @@ class Voogueme extends Model
 
     }
     //获取某一段时间内的复购用户数
-    public function get_again_user($createat){
+    public function get_again_user1($createat){
 
         $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
@@ -381,7 +381,46 @@ class Voogueme extends Model
         }
         return $again_num;
     }
+    //获取某一段时间内的复购用户数 new
+    public function get_again_user($createat){
+        $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $order_where['o.created_at'] = ['lt',$createat[0]];
 
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.customer_id'] = ['>',0];
+        $map['o.order_type'] = 1;
+
+        $order_model = new \app\admin\model\order\order\Voogueme();
+        //复购用户数
+        //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
+        $again_buy_num1 = $order_model->alias('o')
+            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+            ->where($map_where)
+            ->where($map)
+            ->group('customer_id')
+            ->having('count(customer_id)>1')
+            ->count('customer_id');
+        $again_buy_data2 = $order_model->alias('o')
+            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+            ->where($map_where)
+            ->where($map)
+            ->group('customer_id')
+            ->having('count(customer_id)<=1')
+            ->field('customer_id')
+            ->select();
+        $again_buy_num2 = 0;
+        foreach ($again_buy_data2 as $v){
+            //查询时间段内是否进行购买行为
+            $order_where_arr['customer_id'] = $v['customer_id'];
+            $is_buy = $order_model->where($order_where)->where($order_where_arr)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->value('o.entity_id');
+            if($is_buy){
+                $again_buy_num2++;
+            }
+        }
+
+        $again_buy_num = $again_buy_num1+$again_buy_num2;
+        return $again_buy_num;
+    }
 
     /**
      * 统计订单数
