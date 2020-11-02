@@ -133,7 +133,8 @@ class DashBoard extends Backend
             //注册用户数
             $register_user_num = $model->getRegisterUser(1, $time_str);
             //复购用户数
-            $again_user_num = $model->getAgainUser($time_str, 1);
+            // $again_user_num = $model->getAgainUser($time_str, 1);
+            $again_user_num = 0;
             //vip用户数
             $vip_user_num = $model->getVipUser(1, $time_str);
             //订单数
