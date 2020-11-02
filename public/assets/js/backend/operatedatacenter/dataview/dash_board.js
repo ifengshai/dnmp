@@ -24,6 +24,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.user_chart();
                 Controller.api.formatter.user_change_chart();
             });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#time_str").val('');
+            });
             // $("#time_str").on("apply.daterangepicker", function () {
             //     setTimeout(() => {
             //         order_data_view();
