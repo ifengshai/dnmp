@@ -114,7 +114,6 @@ class OrderData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         $key = $message->key;
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/canal.log', serialize($payload) . "\n", FILE_APPEND );
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
@@ -944,7 +943,7 @@ class OrderData extends Backend
     public function zeelool_old_order()
     {
         $site = 1;
-        $id = $this->order->where('site=1')->max('entity_id');
+        $id = $this->order->where('site=1 and entity_id < 521161')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
