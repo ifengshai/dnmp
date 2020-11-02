@@ -937,7 +937,7 @@ class OrderData extends Backend
     {
         $site = 1;
         $id = $this->order->where('site=1 and entity_id < 520029')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(10000)->select();
+        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
@@ -996,7 +996,7 @@ class OrderData extends Backend
     {
         $site = 2;
         $id = $this->order->where('site=2 and entity_id < 272780')->max('entity_id');
-        $list = $this->voogueme->where(['entity_id' => ['>', $id]])->limit(10000)->select();
+        $list = $this->voogueme->where(['entity_id' => ['>', $id]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
@@ -1056,7 +1056,7 @@ class OrderData extends Backend
     {
         $site = 3;
         $id = $this->order->where('site=3 and entity_id < 44155')->max('entity_id');
-        $list = $this->nihao->where(['entity_id' => ['>', $id]])->limit(10000)->select();
+        $list = $this->nihao->where(['entity_id' => ['>', $id]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
