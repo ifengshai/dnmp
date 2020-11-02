@@ -253,6 +253,8 @@ return [
         'charset'     => Env::get('db_zeelool_jp.charset'),
         'prefix'      => Env::get('db_zeelool_jp.prefix'),
     ],
+
+    
     'db_mojing_order' => [
         // 数据库类型
         'type'        => Env::get('db_mojing_order.type'),
