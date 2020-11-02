@@ -112,7 +112,7 @@ class DashBoard extends Backend
             }
             $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
             if ($arr) {
-                return $arr;
+                $this->success('', '', $arr);
             }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
