@@ -1034,7 +1034,7 @@ class Zeelool extends Model
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // $analytics = $this->initializeAnalytics();
         // Call the Analytics Reporting API V4.
-        $response = $this->getReport_target20($site, $analytics, $start_time, $end_time);
+        $response = $this->getReport_target2($site, $analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
         // return $result;

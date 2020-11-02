@@ -763,7 +763,7 @@ class TrackReg extends Backend
         $arr['site'] = 1;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        // $arr['active_user_num'] = $this->google_active_user(1, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -798,9 +798,9 @@ class TrackReg extends Backend
         //补发销售额
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
-        $arr['sessions'] = $this->google_session(1, $date_time);
+        // $arr['sessions'] = $this->google_session(1, $date_time);
         //会话转化率
-        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -817,6 +817,35 @@ class TrackReg extends Backend
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
+        // //着陆页数据
+        // $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
+        // //产品详情页
+        // $arr['detail_num'] = $zeelool_data->google_target13(1, $date_time);
+        // //加购
+        // $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
+        // //交易次数
+        // $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
+        Db::name('datacenter_day')->insert($arr);
+        echo $date_time . "\n";
+        echo date("Y-m-d H:i:s") . "\n";
+        usleep(100000);
+
+
+    }
+
+    //ga的数据单独摘出来跑 防止ga接口数据报错 2020.11.2防止了ga的数据报错
+    public function only_ga_data()
+    {
+        $date_time = date('Y-m-d', strtotime("-1 day"));
+        //z站
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>1])->field('order_num')->find();
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session(1, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
         //产品详情页
@@ -825,12 +854,45 @@ class TrackReg extends Backend
         $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
-        Db::name('datacenter_day')->insert($arr);
-        echo $date_time . "\n";
-        echo date("Y-m-d H:i:s") . "\n";
-        usleep(100000);
+        $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>1])->update($arr);
 
+        //v站
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>2])->field('order_num')->find();
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(2, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session(2, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
+        $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>2])->update($arr);
 
+        //nihao站
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>3])->field('order_num')->find();
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(3, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session(3, $date_time);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
+        $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>3])->update($arr);
     }
 
     //运营数据中心
@@ -850,7 +912,7 @@ class TrackReg extends Backend
         $arr['site'] = 2;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(2, $date_time);
+        // $arr['active_user_num'] = $this->google_active_user(2, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -884,9 +946,9 @@ class TrackReg extends Backend
         //补发销售额
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
         //会话
-        $arr['sessions'] = $this->google_session(2, $date_time);
+        // $arr['sessions'] = $this->google_session(2, $date_time);
         //会话转化率
-        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -904,13 +966,13 @@ class TrackReg extends Backend
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
         //着陆页数据
-        $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
-        //产品详情页
-        $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
-        //加购
-        $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
-        //交易次数
-        $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
+        // $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
+        // //产品详情页
+        // $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
+        // //加购
+        // $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
+        // //交易次数
+        // $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -936,7 +998,7 @@ class TrackReg extends Backend
         $arr['site'] = 3;
         $arr['day_date'] = $date_time;
         //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(3, $date_time);
+        // $arr['active_user_num'] = $this->google_active_user(3, $date_time);
         //注册用户数
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -966,9 +1028,9 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type', 3)->sum('base_grand_total');
 
         //会话
-        $arr['sessions'] = $this->google_session(3, $date_time);
+        // $arr['sessions'] = $this->google_session(3, $date_time);
         //会话转化率
-        $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -986,13 +1048,13 @@ class TrackReg extends Backend
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
         //着陆页数据
-        $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
+        // $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
         //产品详情页
-        $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
+        // $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
         //加购
-        $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
+        // $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
         //交易次数
-        $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
+        // $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1320,6 +1382,13 @@ class TrackReg extends Backend
         dump($arr);
         echo $date_time . "\n";dump('v');
         usleep(100000);
+    }
+
+    public function update_voogueme_data()
+    {
+        Db::name('datacenter_day')->where(['day_date'=>'2020-10-30','site'=>2])->update(['cart_num'=>4485]);
+        Db::name('datacenter_day')->where(['day_date'=>'2020-10-31','site'=>2])->update(['cart_num'=>3882]);
+        Db::name('datacenter_day')->where(['day_date'=>'2020-11-01','site'=>2])->update(['cart_num'=>3305]);
     }
 
 }
