@@ -124,11 +124,11 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
-            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-            if ($arr) {
-                dump($arr);
-                $this->success('', '', $arr);
-            }
+//            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+//            if ($arr) {
+//                Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+////                $this->success('', '', $arr);
+//            }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
@@ -148,7 +148,7 @@ class DashBoard extends Backend
             $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
 
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
-            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
+//            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
