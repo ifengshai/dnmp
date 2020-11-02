@@ -936,7 +936,7 @@ class OrderData extends Backend
     public function zeelool_old_order()
     {
         $site = 1;
-        $id = $this->order->where('site=1 and entity_id < 521028')->max('entity_id');
+        $id = $this->order->where('site=1 and entity_id < 520029')->max('entity_id');
         dump($id);die;
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
@@ -994,7 +994,7 @@ class OrderData extends Backend
     public function voogueme_old_order()
     {
         $site = 2;
-        $id = $this->order->where('site=2 and entity_id < 273408')->max('entity_id');
+        $id = $this->order->where('site=2 and entity_id < 272780')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
@@ -1048,7 +1048,7 @@ class OrderData extends Backend
     public function nihao_old_order()
     {
         $site = 3;
-        $id = $this->order->where('site=3 and entity_id < 44312')->max('entity_id');
+        $id = $this->order->where('site=3 and entity_id < 44155')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(1000)->select();
         $list = collection($list)->toArray();
         $params = [];
