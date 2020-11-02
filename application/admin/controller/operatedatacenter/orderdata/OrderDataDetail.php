@@ -693,7 +693,6 @@ class OrderDataDetail extends Backend
             //整理数据
             foreach ( $export_data as &$val ) {
                 $tmpRow = [];
-                $tmpRow[] =++$j;
                 $tmpRow[] =$val['increment_id'];
 
                 $rows = array();

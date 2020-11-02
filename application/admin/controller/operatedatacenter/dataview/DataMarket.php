@@ -161,6 +161,52 @@ class DataMarket extends Backend
         // $this->view->assign("date",$this->date());
         return $this->view->fetch();
     }
+    /***
+     * 异步获取仪表盘首页上部分数据
+     */
+    public function async_data($order_platform = null)
+    {
+        if ($this->request->isAjax()) {
+            if (!$order_platform) {
+                return   $this->error('参数不存在，请重新尝试');
+            }
+            if (100 != $order_platform) {
+                $data = $this->model->getList($order_platform);
+            } else {
+                $data = $this->model->getAllList();
+            }
+            if (false == $data) {
+                return $this->error('没有该平台数据,请重新选择');
+            }
+
+            return $this->success('', '', $data, 0);
+        }
+    }
+    /**
+     * 异步获取仪表盘首页下部分数据
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/12 15:37:42
+     * @param [type] $id
+     * @return void
+     */
+    public function async_bottom_data($create_time=null)
+    {
+        if ($this->request->isAjax()) {
+            if ($create_time) {
+                $time = explode(' ', $create_time);
+                $map['created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $data = $this->get_platform_data($map);
+            if (false == $data) {
+                return $this->error('没有对应的时间数据，请重新尝试');
+            }
+            return $this->success('', '', $data, 0);
+        }
+    }
     public function get_platform_data($map)
     {
         $arr = Cache::get('Dashboard_get_platform_data_'.md5(serialize($map)));

@@ -734,7 +734,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
 			$('#c-order_platform').on('change',function(){
 				var order_platform = $('#c-order_platform').val();
                 Backend.api.ajax({
-                    url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
+                    url:'operatedatacenter/dataview/data_market/async_data',
                     data:{order_platform:order_platform}
                 }, function(data, ret){
                     $('#today_sales_money').text(ret.data.today_sales_money);
@@ -929,7 +929,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
 			$('#submit').on('click',function(){
                 var create_time = $('#created_at').val();
                 Backend.api.ajax({
-                    url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
+                    url:'operatedatacenter/dataview/data_market/async_bottom_data',
                     data:{create_time:create_time}
                 }, function(data, ret){
                     console.log(ret);
