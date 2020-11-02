@@ -289,7 +289,7 @@ class DashBoard extends Backend
                         $arr[$v] = $k;
                     }
                 }
-                $date_arr = $arr;
+                $date_arr = ksort($arr);
                 dump($date_arr);
                 $name = '订单数';
 
