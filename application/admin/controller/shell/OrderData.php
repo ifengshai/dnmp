@@ -119,7 +119,7 @@ class OrderData extends Backend
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
                             //根据库名判断站点
-                            switch ($payload['data']) {
+                            switch ($payload['database']) {
                                 case 'zeelool':
                                     $site = 1;
                                     break;
