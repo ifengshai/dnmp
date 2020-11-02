@@ -136,7 +136,12 @@ class OrderDataDetail extends Backend
                 }elseif ($order_node == 35){
                     $order_shipping_status = '投递失败';
                 }else{
-                    $order_shipping_status = '-';
+                    $status_arr = ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'];
+                    if(in_array($value['status'],$status_arr)){
+                        $order_shipping_status = '支付成功';
+                    }else{
+                        $order_shipping_status = '-';
+                    }
                 }
                 $list[$key]['status'] = $order_shipping_status;
                 switch ($value['store_id']){
@@ -323,7 +328,12 @@ class OrderDataDetail extends Backend
             }elseif ($order_node == 35){
                 $order_shipping_status = '投递失败';
             }else{
-                $order_shipping_status = '-';
+                $status_arr = ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'];
+                if(in_array($value['status'],$status_arr)){
+                    $order_shipping_status = '支付成功';
+                }else{
+                    $order_shipping_status = '-';
+                }
             }
             $list[$key]['status'] = $order_shipping_status;
             switch ($value['store_id']){
@@ -591,5 +601,112 @@ class OrderDataDetail extends Backend
             }
         }
         return $newarray;
+    }
+    public function test(){
+        set_time_limit(0);
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d',time()) ) . ".csv" );//导出文件名
+
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+
+        $column_name = "订单号";
+        $column_name = explode(',',$column_name);
+        // 将中文标题转换编码，否则乱码
+        foreach ($column_name as $i => $v) {
+            $column_name[$i] = iconv('utf-8', 'GB18030', $v);
+        }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $column_name);
+
+
+
+        $order_platform = input('order_platform');
+        $time_str = input('time_str');
+        $increment_id = input('increment_id');
+        $order_status = input('order_status');
+        $customer_type = input('customer_type');
+        $store_id = input('store_id');
+        if($order_platform == 2){
+            $order_model = $this->voogueme;
+            $web_model = Db::connect('database.db_voogueme');
+        }elseif($order_platform == 3){
+            $order_model = $this->nihao;
+            $web_model = Db::connect('database.db_nihao');
+        }else{
+            $order_model = $this->zeelool;
+            $web_model = Db::connect('database.db_zeelool');
+        }
+        $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        if($time_str){
+            $createat = explode(' ', $time_str);
+            $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        }else{
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $map['o.created_at'] = ['between', [$start,$end]];
+        }
+        if($increment_id){
+            $map['o.increment_id'] = $increment_id;
+        }
+        if($order_status){
+            if($order_status == 1){
+                //已发货
+                $node_where['node_type'] = 7;
+            }elseif ($order_status == 2){
+                $node_where['node_type'] = ['in',[8,10]];
+            }elseif ($order_status == 3){
+                $node_where['node_type'] = 30;
+            }elseif ($order_status == 4){
+                $node_where['node_type'] = 40;
+            }elseif ($order_status == 5){
+                $node_where['node_type'] = 35;
+            }
+            $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
+            $map['o.entity_id'] = ['in',$order_ids];
+        }
+        if($customer_type){
+            $map['c.group_id'] = $customer_type;
+        }
+        if($store_id){
+            $map['o.store_id'] = $store_id;
+        }
+        $total_export_count = $order_model->alias('o')
+            ->join('customer_entity c','o.customer_id=c.entity_id')
+            ->where($map)
+            ->count();
+
+
+        $pre_count = 20;
+        $j=0;
+        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+            //切割每份数据
+            $export_data = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->where($map)
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.protect_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->select();
+            $export_data = collection($export_data)->toArray();
+            //整理数据
+            foreach ( $export_data as &$val ) {
+                $tmpRow = [];
+                $tmpRow[] =++$j;
+                $tmpRow[] =$val['increment_id'];
+
+                $rows = array();
+                foreach ( $tmpRow as $export_obj){
+                    $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+                }
+                fputcsv($fp, $rows);
+            }
+
+            // 将已经写到csv中的数据存储变量销毁，释放内存占用
+            unset($export_data);
+            ob_flush();
+            flush();
+        }
     }
 }
