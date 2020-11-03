@@ -466,7 +466,7 @@ class OrderData extends Backend
         //镜框原始价格
         $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
         //镜片颜色
-        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['index_color'];
         //镜框颜色
         $arr['frame_color'] = $options['options'][0]['value'];
         //镜片+镀膜价格
@@ -1163,5 +1163,94 @@ class OrderData extends Backend
         }
         $this->order->saveAll($params);
         echo $site . 'ok';
+    }
+
+
+    /**
+     * 处理子表旧数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/03 09:55:26 
+     * @return void
+     */
+    public function order_item_data_shell()
+    {
+        $this->order_item_data(1);
+        $this->order_item_data(2);
+        $this->order_item_data(3);
+    }
+
+
+    /**
+     * 处理子表旧数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/03 09:44:24 
+     * @return void
+     */
+    protected function order_item_data($site)
+    {
+        if ($site == 1) {
+            $id = $this->orderitemoption->where('site=1 and item_id < 911956')->max('item_id');
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 911956]]])->limit(3000)->select();
+        } elseif ($site == 2) {
+            $id = $this->orderitemoption->where('site=2 and item_id < 505102')->max('item_id');
+            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 505102]]])->limit(3000)->select();
+        } elseif ($site == 3) {
+            $id = $this->orderitemoption->where('site=3 and item_id < 72470')->max('item_id');
+            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 72470]]])->limit(3000)->select();
+        }
+
+        $options = [];
+        foreach ($list as $k => $v) {
+
+            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+
+            //处方解析 不同站不同字段
+            if ($site == 1) {
+                $options =  $this->zeelool_prescription_analysis($v['product_options']);
+            } elseif ($site == 2) {
+                $options =  $this->voogueme_prescription_analysis($v['product_options']);
+            } elseif ($site == 3) {
+                $options =  $this->nihao_prescription_analysis($v['product_options']);
+            } elseif ($site == 5) {
+                $options =  $this->wesee_prescription_analysis($v['product_options']);
+            }
+
+            $options['item_id'] = $v['item_id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $v['sku'];
+            $options['qty'] = $v['qty_ordered'];
+            $options['base_row_total'] = $v['base_row_total'];
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['qty_ordered']; $i++) {
+                    $data[$i]['item_id'] = $v['item_id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $str = '';
+                    if ($i < 9) {
+                        $str = '0' . ($i + 1);
+                    } else {
+                        $str = $i + 1;
+                    }
+                    $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
+                    $data[$i]['sku'] = $v['sku'];
+                    $data[$i]['created_at'] = strtotime($v['created_at']);
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']);
+                    $data[$i]['distribution_status'] = 9;
+                }
+                $this->orderitemprocess->insertAll($data);
+            }
+            usleep(3000);
+        }
     }
 }
