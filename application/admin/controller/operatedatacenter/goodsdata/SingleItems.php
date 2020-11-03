@@ -244,32 +244,25 @@ class SingleItems extends Backend
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->field('base_grand_total')
                 ->sum('base_grand_total');
-            // ->select();
-            // $whole_price = round(array_sum(array_map(function($val){return $val['base_grand_total'];}, $whole_price)),2);
 
             //订单客单价
             $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
-            // //关联购买
-            $andWhere = "FIND_IN_SET({$sku},sku)";
+            //关联购买
             $connect_buy = $model->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
                 ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->distinct('order_id')
                 ->field('order_id')
                 ->select();//包含此sku的所有订单好
-            // dump($connect_buy);
             $connect_buy = array_column($connect_buy, 'order_id');
-            // dump($connect_buy);
             $skus = array();
             foreach ($connect_buy as $value) {
                 $arr = $model->table('sales_flat_order_item')
                     ->where('order_id', $value)
-                    // ->where('created_at','between', [$createat[0], $createat[3]])
                     ->field('sku')
                     ->select();//这些订单号内的所有sku
                 $skus[] = array_column($arr, 'sku');
             }
-            // dump($skus);
             $array_sku = [];
             //获取关联购买的数量
             foreach ($skus as $k => $v) {
@@ -279,7 +272,6 @@ class SingleItems extends Backend
                     }
                 }
             }
-            // dump($array_sku);
             $data = compact('sku', 'array_sku', 'total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price');
             $this->success('', '', $data);
         }
