@@ -783,14 +783,12 @@ EOF;
      * @since 2020/10/28 14:45:39
      * @return void
      */
-    public function handle_abnormal($id = null)
+    public function handle_abnormal($ids = null)
     {
-        $id = $id ?? $this->request->get('id');
-
         //检测配货状态
         $item_info = $this->model
             ->field('id,site,sku,distribution_status,abnormal_house_id')
-            ->where(['id' => $id])
+            ->where(['id' => $ids])
             ->find()
         ;
         if (empty($item_info)) {
@@ -811,38 +809,38 @@ EOF;
             return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
         }
 
+        //状态列表
+        $status_arr = [
+            1=>'待打印标签',
+            2=>'待配货',
+            3=>'待配镜片',
+            4=>'待加工',
+            5=>'待印logo',
+            6=>'待成品质检'
+        ];
+
+        //异常原因列表
+        $abnormal_arr = [
+            1=>'配货缺货',
+            2=>'商品条码贴错',
+            3=>'核实处方',
+            4=>'镜片缺货',
+            5=>'镜片重做',
+            6=>'定制片超时',
+            7=>'不可加工',
+            8=>'镜架加工报损',
+            9=>'镜片加工报损',
+            10=>'logo不可加工',
+            11=>'镜架印logo报损',
+            12=>'合单缺货',
+            13=>'核实地址',
+            14=>'物流退件',
+            15=>'客户退件'
+        ];
+
         if ($this->request->isAjax()) {
             //操作人信息
             $admin = (object)session('admin');
-
-            //状态
-            $status_arr = [
-                1=>'待打印标签',
-                2=>'待配货',
-                3=>'待配镜片',
-                4=>'待加工',
-                5=>'待印logo',
-                6=>'待成品质检'
-            ];
-
-            //异常原因列表
-            $abnormal_arr = [
-                1=>'配货缺货',
-                2=>'商品条码贴错',
-                3=>'核实处方',
-                4=>'镜片缺货',
-                5=>'镜片重做',
-                6=>'定制片超时',
-                7=>'不可加工',
-                8=>'镜架加工报损',
-                9=>'镜片加工报损',
-                10=>'logo不可加工',
-                11=>'镜架印logo报损',
-                12=>'合单缺货',
-                13=>'核实地址',
-                14=>'物流退件',
-                15=>'客户退件'
-            ];
 
             //检测状态
             $check_status = [];
@@ -880,8 +878,15 @@ EOF;
                 //子订单状态回滚
                 $this->model
                     ->allowField(true)
-                    ->isUpdate(true, ['id'=>$id])
+                    ->isUpdate(true, ['id'=>$ids])
                     ->save(['distribution_status'=>$status])
+                ;
+
+                //标记异常状态
+                $_distribution_abnormal
+                    ->allowField(true)
+                    ->isUpdate(true, ['id'=>$item_info['abnormal_house_id']])
+                    ->save(['status'=>2,'do_time'=>time(),'do_person'=>$admin->nickname])
                 ;
 
                 //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
@@ -927,7 +932,7 @@ EOF;
                 }
 
                 //记录日志
-                DistributionLog::record($admin, $id, $remark);
+                DistributionLog::record($admin, $ids, $remark);
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -939,7 +944,41 @@ EOF;
             }
         }
 
+        $this->view->assign("status_arr", $status_arr);
+        $this->view->assign("abnormal_arr", $abnormal_arr);
         $this->view->assign("row", $item_info);
+        $this->view->assign("abnormal_info", $abnormal_info);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 操作记录
+     *
+     * @Description
+     * @author lzh
+     * @since 2020/10/28 14:45:39
+     * @return void
+     */
+    public function operation_log($ids = null)
+    {
+        //检测配货状态
+        $item_info = $this->model
+            ->field('id')
+            ->where(['id' => $ids])
+            ->find()
+        ;
+        if (empty($item_info)) {
+            return $this->error('子订单不存在', url('index?ref=addtabs'));
+        }
+
+        //检测异常状态
+        $list = (new DistributionLog())
+            ->where(['item_process_id'=>$ids])
+            ->select()
+        ;
+        $list = collection($list)->toArray();
+
+        $this->view->assign("list", $list);
         return $this->view->fetch();
     }
 
