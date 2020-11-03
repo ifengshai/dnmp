@@ -45,6 +45,8 @@ class SingleItems extends Backend
 
             if ($filter['sku']) {
                 $map['p.sku'] = $filter['sku'];
+                // $mapss['sku'] = ['like',$filter['sku'].'%'];
+                $sku = $filter['sku'];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -105,11 +107,35 @@ class SingleItems extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            // foreach ($list as $key=>$value){
-            //     $list[$key]['number'] = $key+1;
-            //     $list[$key]['price'] = round($value['frame_price']+$value['index_price'],2);
-            // }
             $result = array("total" => $total, "rows" => $list);
+            //关联购买
+            $connect_buy = $order_model->table('sales_flat_order_item')
+                // ->where('sku', 'like', $sku . '%')
+                ->where('sku',$sku)
+                ->where('created_at', 'between', [$createat[0], $createat[3]])
+                ->distinct('order_id')
+                ->field('order_id')
+                ->select();//包含此sku的所有订单好
+            $connect_buy = array_column($connect_buy, 'order_id');
+            $skus = array();
+            foreach ($connect_buy as $value) {
+                $arr = $order_model->table('sales_flat_order_item')
+                    ->where('order_id', $value)
+                    // ->where('created_at','between', [$createat[0], $createat[3]])
+                    ->field('sku')
+                    ->select();//这些订单号内的所有sku
+                $skus[] = array_column($arr, 'sku');
+            }
+            $array_sku = [];
+            //获取关联购买的数量
+            foreach ($skus as $k => $v) {
+                foreach ($v as $vv) {
+                    if ($vv != $sku) {
+                        $array_sku[$vv] += 1;
+                    }
+                }
+            }
+            $this->assign('array_sku', $array_sku);
 
             return json($result);
         }
