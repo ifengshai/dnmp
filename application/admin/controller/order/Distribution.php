@@ -691,9 +691,10 @@ EOF;
                 }
             }
 
-            //库存、关系映射表
+            //库存、关系映射、库存日志表
             $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $_item = new \app\admin\model\itemmanage\Item();
+            $_stock_log = new \app\admin\model\StockLog();
 
             //状态
             $status_arr = [
@@ -737,6 +738,20 @@ EOF;
                             ->dec('stock', 1)
                             ->update()
                         ;
+
+                        //扣库存日志
+                        $stock_data = [
+                            'type'                      => 2,
+                            'two_type'                  => 4,
+                            'sku'                       => $value['sku'],
+                            'public_id'                 => $value['id'],
+                            'stock_change'              => -1,
+                            'available_stock_change'    => -1,
+                            'create_person'             => $admin->nickname,
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '成检拒绝：减少总库存,减少可用库存'
+                        ];
+                        $_stock_log->allowField(true)->save($stock_data);
                     }
 
                     //记录日志
@@ -768,42 +783,36 @@ EOF;
 
         //检测配货状态
         $item_info = $this->model
-            ->field('id,site,sku,distribution_status')
+            ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $id])
             ->find()
         ;
         if (empty($item_info)) {
             return $this->error('子订单不存在', url('index?ref=addtabs'));
         }
+        if (empty($item_info['abnormal_house_id'])) {
+            return $this->error('当前子订单未标记异常', url('index?ref=addtabs'));
+        }
+
+        //检测异常状态
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $abnormal_info = $_distribution_abnormal
+            ->field('type')
+            ->where(['id'=>$item_info['abnormal_house_id'],'status'=>1])
+            ->find()
+        ;
+        if (empty($abnormal_info)) {
+            return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
+        }
 
         if ($this->request->isAjax()) {
-            $status = input('status');
-            if (!in_array($status,[1,2,3,4,5,6])) {
-                return $this->error('返回节点类型错误', url('index?ref=addtabs'));
-            }
-
-            //检测异常状态
-            $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
-            $abnormal_count = $_distribution_abnormal
-                ->where(['item_process_id'=>['in', $ids],'status'=>1])
-                ->count()
-            ;
-            if($abnormal_count > 0){
-                return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
-            }
-
-            //TODO::检测工单状态
-
-
-            foreach($item_list as $value){
-                if ($value['distribution_status'] != 6) {
-                    return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-                }
-            }
-
-            //库存、关系映射表
+            //库存、关系映射、库存日志表
             $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $_item = new \app\admin\model\itemmanage\Item();
+            $_stock_log = new \app\admin\model\StockLog();
+
+            //操作人信息
+            $admin = (object)session('admin');
 
             //状态
             $status_arr = [
@@ -813,45 +822,82 @@ EOF;
                 4=>['status'=>5,'name'=>'质检拒绝：logo调整']
             ];
 
-            //操作人信息
-            $admin = (object)session('admin');
+            //根据返回节点处理相关逻辑
+            $status = input('status');
+            switch ($status) {
+                case 1:
+                    if (!in_array($item_info['distribution_status'],[1,2,3,4])) {
+                        return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
+                    }
+                    //子订单状态回滚
+                    $this->model
+                        ->allowField(true)
+                        ->isUpdate(true, ['id'=>$id])
+                        ->save(['distribution_status'=>$status])
+                    ;
+
+                    //记录日志
+                    DistributionLog::record($admin,$id,'');
+
+                    //更新状态
+                    foreach($item_list as $value){
+                        //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                        if(2 == $reason){
+                            //获取true_sku
+                            $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+
+                            //扣减虚拟仓库存
+                            $_item_platform_sku
+                                ->where(['sku'=>$true_sku,'platform_type'=>$value['site']])
+                                ->dec('stock', 1)
+                                ->update()
+                            ;
+
+                            //扣减可用库存、配货占用库存、总库存
+                            $_item
+                                ->where(['sku'=>$true_sku])
+                                ->dec('available_stock', 1)
+                                ->dec('distribution_occupy_stock', 1)
+                                ->dec('stock', 1)
+                                ->update()
+                            ;
+                        }
+
+                        //记录日志
+                        DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
+                    }
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $model = $this->voogueme;
+                    break;
+                case 3:
+                    $db = 'database.db_nihao';
+                    $model = $this->nihao;
+                    break;
+                case 4:
+                    $db = 'database.db_weseeoptical';
+                    $model = $this->weseeoptical;
+                    break;
+                case 5:
+                    $db = 'database.db_meeloog';
+                    $model = $this->meeloog;
+                    break;
+                case 6:
+                    $db = 'database.db_zeelool_es';
+                    $model = $this->zeelool_es;
+                    break;
+                default:
+                    return $this->error('返回节点类型错误', url('index?ref=addtabs'));
+            }
+
+
+
+
 
             Db::startTrans();
             try {
-                //子订单状态回滚
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id'=>['in', $ids]])
-                    ->save(['distribution_status'=>$status_arr[$reason]['status']])
-                ;
 
-                //更新状态
-                foreach($item_list as $value){
-                    //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                    if(2 == $reason){
-                        //获取true_sku
-                        $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                        //扣减虚拟仓库存
-                        $_item_platform_sku
-                            ->where(['sku'=>$true_sku,'platform_type'=>$value['site']])
-                            ->dec('stock', 1)
-                            ->update()
-                        ;
-
-                        //扣减可用库存、配货占用库存、总库存
-                        $_item
-                            ->where(['sku'=>$true_sku])
-                            ->dec('available_stock', 1)
-                            ->dec('distribution_occupy_stock', 1)
-                            ->dec('stock', 1)
-                            ->update()
-                        ;
-                    }
-
-                    //记录日志
-                    DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
-                }
 
                 Db::commit();
             } catch (PDOException $e) {
