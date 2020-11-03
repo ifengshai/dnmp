@@ -1790,16 +1790,16 @@ class Scm extends Api
         //获取子订单数据
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
+            ->field('id,distribution_status,option_id,order_id,site')
             ->where('item_order_number', $item_order_number)
-            ->value('id,distribution_status,option_id,order_id,site')
             ->find()
         ;
 
         //获取子订单处方数据
         $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
         $item_option_info = $_new_order_item_option
-            ->where('id', $item_process_info['option_id'])
             ->field('is_print_logo,sku,index_name')
+            ->where('id', $item_process_info['option_id'])
             ->find()
         ;
 
