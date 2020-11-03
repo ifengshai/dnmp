@@ -1760,6 +1760,10 @@ class Scm extends Api
                 ['id'=>8,'name'=>'镜架加工报损'],
                 ['id'=>9,'name'=>'镜片加工报损']
             ],
+            5=>[
+                ['id'=>10,'name'=>'logo不可加工'],
+                ['id'=>11,'name'=>'镜架印logo报损']
+            ],
             6=>[
                 ['id'=>1,'name'=>'加工调整'],
                 ['id'=>2,'name'=>'镜架报损'],
@@ -1767,7 +1771,7 @@ class Scm extends Api
                 ['id'=>4,'name'=>'logo调整']
             ],
             7=>[
-                [['id'=>1,'name'=>'缺货']]
+                [['id'=>12,'name'=>'缺货']]
             ]
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
