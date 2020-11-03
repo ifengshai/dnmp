@@ -853,8 +853,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->order('sfo.created_at desc')
             ->select();
-
+      
         $resultList = collection($resultList)->toArray();
+
+        dump($resultList);
 
         $resultList = $this->qty_order_check($resultList);
 
