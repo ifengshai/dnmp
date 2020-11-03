@@ -852,7 +852,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($map)
             ->where($where)
             ->order('sfo.created_at desc')
-            ->select();
+            ->select(false);
+            echo $resultList;die;
       
         $resultList = collection($resultList)->toArray();
         echo "<br>";
