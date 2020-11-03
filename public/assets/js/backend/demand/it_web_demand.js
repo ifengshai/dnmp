@@ -51,7 +51,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             events: Controller.api.events.gettitle,
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.gettitle,
-                            operate: false
+                        },
+                        {
+                          field: 'content',
+                            title: __('关键词'),
+                            operate: 'LIKE',
+                            visible: false
                         },
 
                         { field: 'create_time', title: __('创建时间'), operate: false },
@@ -64,9 +69,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         },
                         {
                             field: 'pm_audit_status',
-                            title: __('评审'),
+                            title: __('产品评审'),
                             events: Controller.api.events.ge_pm_status,
-                            searchList: { 1: '待审', 2: 'Pending', 3: '通过', 4: '拒绝' },
+                            searchList: { 1: '待审', 2: 'Pending', 3: '通过', 4: '已拒绝' },
                             formatter: Controller.api.formatter.ge_pm_status,
                         },
                         {
@@ -94,8 +99,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         { field: 'node_time', title: __('任务周期'), operate: false },
                         {
                             field: 'status',
-                            title: __('任务状态'),
-                            searchList: { 1: '未激活', 2: '激活', 3: '已响应', 4: '完成', 5: '超时完成' },
+                            title: __('开发评审'),
+                            searchList: { 1: '未激活', 3: '已响应', 4: '完成', 5: '超时完成' },
                             custom: { 1: 'gray', 2: 'blue', 3: 'green', 4: 'gray', 5: 'yellow' },
                             formatter: Table.api.formatter.status,
                             operate: false
@@ -315,7 +320,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         {
                             field: 'title',
                             title: __('标题'),
-                            operate: 'LIKE',
                             events: Controller.api.events.getrdctitle,
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.getrdctitle,
@@ -703,6 +707,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
 
         },
+
+
+
+
+
+
+        
         distribution: function () {
             Controller.api.bindevent();
 
