@@ -218,7 +218,7 @@ class SingleItems extends Backend
             $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
 
             //只买一副的订单
-            $only_one_glass_num = $model
+            $only_one_glass_order_list = $model
                 ->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
                 ->where('b.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
@@ -227,19 +227,13 @@ class SingleItems extends Backend
                 ->field('order_id,sum(qty_ordered) as all_qty_ordered')
                 ->group('a.order_id')
                 ->select();
-            dump($only_one_glass_num);
-            // dump(array_column($only_one_glass_num, 'order_id','all_qty_ordered'));
-            // $arr = array_count_values(array_column($only_one_glass_num, 'order_id','qty_ordered'));//统计每个订单购买的副数
-            $arr = array_flip(array_column($only_one_glass_num, 'order_id', 'all_qty_ordered'));//统计每个订单购买的副数
-            dump($arr);
-            // dump($arr);die;
             $only_one_glass_num = 0;
-            foreach ($arr as $v) {
-                if ($v == 1) {
+            foreach ($only_one_glass_order_list as $k=>$v) {
+                $one = $model->table('sales_flat_order_item')->where('order_id',$v['order_id'])->sum('qty_ordered');
+                if ($one == 1){
                     $only_one_glass_num += 1;
                 }
             }
-
             //只买一副的订单占比
             $only_one_glass_rate = $total == 0 ? 0 : round($only_one_glass_num / $total * 100, 2) . '%';
 
