@@ -1083,9 +1083,6 @@ class TrackReg extends Backend
     //计划任务跑每天的分类销量的数据
     public function day_data_goods_type()
     {
-        $res = Db::name('datacenter_goods_type_data')->where('id','<=',45)->delete();
-
-
         $res1 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,1));
         if ($res1){
             echo 'z站平光镜ok';
@@ -1157,7 +1154,7 @@ class TrackReg extends Backend
     public function goods_type_day_center($plat,$goods_type)
     {
         $start = date('Y-m-d', strtotime('-1 day'));
-        $start = '2020-11-01';
+        $start = '2020-10-31';
         $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
         $createat = explode(' ', $seven_days);
         $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
