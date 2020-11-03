@@ -195,12 +195,13 @@ class SingleItems extends Backend
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
                     ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    // ->where('b.coatiing_price', '>', 0)
-                    // ->group('order_id')
-                    ->select();
-                    // ->count();
-                dump($pay_jingpian_glass);
-                die;
+                    ->where('b.coatiing_price', '>', 0)
+                    ->whereOr('b.index_price', '>', 0)
+                    ->group('order_id')
+                    // ->select();
+                    ->count();
+                // dump($pay_jingpian_glass);
+                // die;
             }else{
                 //付费镜片订单数
                 $pay_jingpian_glass = $model
@@ -209,7 +210,8 @@ class SingleItems extends Backend
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
                     ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    ->where('b.index_price', '>', 0)
+                    ->where('b.coatiing_price', '>', 0)
+                    ->whereOr('b.index_price', '>', 0)
                     ->group('order_id')
                     // ->select();
                     ->count();
