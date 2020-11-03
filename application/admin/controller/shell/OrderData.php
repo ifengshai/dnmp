@@ -979,8 +979,6 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
-            $params['distribution_status'] = 1;
-            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
@@ -1042,8 +1040,6 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
-            $params['distribution_status'] = 1;
-            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
@@ -1106,8 +1102,6 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
-            $params['distribution_status'] = 1;
-            $params['combined_order_status'] = 1;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;

@@ -164,7 +164,7 @@ class GoodsDataView extends Backend
 
             //副单价
             foreach ($data_center_day1 as $key => $value) {
-                $data_center_day3[$key] = $data_center_day2[$key] == 0 ? 0 : round($data_center_day1[$key] / $data_center_day2[$key],2);
+                $data_center_day3[$key] = $data_center_day2[$key] == 0 ? 0 : round($data_center_day1[$key] / $data_center_day2[$key], 2);
             }
             // dump($data_center_day1);
             // dump($data_center_day2);
@@ -369,10 +369,10 @@ class GoodsDataView extends Backend
                 $createat = explode(' ', $seven_days);
             }
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-
-
+            
             $data_center_day = Db::name('datacenter_goods_type_data')
                 ->where(['site' => $params['order_platform']])
+                ->where($map)
                 ->group('goods_type,day_date')
                 ->order('day_date', 'asc')
                 ->field('day_date,goods_type,glass_num,sum(glass_num) as total_sales_num')
@@ -562,23 +562,38 @@ class GoodsDataView extends Backend
             //判断站点
             switch ($params['order_platform']) {
                 case 1:
-                    $glass_num = $this->glass_sales_num($itemMap, 1, 1);
-                    $sun_glass_num = $this->glass_sales_num($itemMap, 2, 1);
-                    $run_glass_num = $this->glass_sales_num($itemMap, 5, 1);
-                    $old_glass_num = $this->glass_sales_num($itemMap, 3, 1);
-                    $son_glass_num = $this->glass_sales_num($itemMap, 4, 1);
-                    $other_num = $this->glass_sales_num($itemMap, 6, 1);
+                    //包含实时数据的
+                    // $glass_num = $this->glass_sales_num($itemMap, 1, 1);
+                    // $sun_glass_num = $this->glass_sales_num($itemMap, 2, 1);
+                    // $run_glass_num = $this->glass_sales_num($itemMap, 5, 1);
+                    // $old_glass_num = $this->glass_sales_num($itemMap, 3, 1);
+                    // $son_glass_num = $this->glass_sales_num($itemMap, 4, 1);
+                    // $other_num = $this->glass_sales_num($itemMap, 6, 1);
+                    // $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 1)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 1)->sum('glass_num');
+                    $run_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 5)->where('site', 1)->sum('glass_num');
+                    $old_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 3)->where('site', 1)->sum('glass_num');
+                    $son_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 4)->where('site', 1)->sum('glass_num');
+                    $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 1)->sum('glass_num');
                     $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
                     break;
                 case 2:
-                    $glass_num = $this->glass_sales_num($itemMap, 1, 2);
-                    $sun_glass_num = $this->glass_sales_num($itemMap, 2, 2);
-                    $other_num = $this->glass_sales_num($itemMap, 6, 2);
+                    // $glass_num = $this->glass_sales_num($itemMap, 1, 2);
+                    // $sun_glass_num = $this->glass_sales_num($itemMap, 2, 2);
+                    // $other_num = $this->glass_sales_num($itemMap, 6, 2);
+                    // $total_num = $glass_num + $sun_glass_num + $other_num;
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 2)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 2)->sum('glass_num');
+                    $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 2)->sum('glass_num');
                     $total_num = $glass_num + $sun_glass_num + $other_num;
                     break;
                 case 3:
-                    $glass_num = $this->glass_sales_num($itemMap, 1, 3);
-                    $sun_glass_num = $this->glass_sales_num($itemMap, 2, 3);
+                    // $glass_num = $this->glass_sales_num($itemMap, 1, 3);
+                    // $sun_glass_num = $this->glass_sales_num($itemMap, 2, 3);
+                    // $total_num = $glass_num + $sun_glass_num;
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 3)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 3)->sum('glass_num');
                     $total_num = $glass_num + $sun_glass_num;
                     break;
                 default:
