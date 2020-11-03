@@ -381,7 +381,7 @@ class Distribution extends Backend
             //标记打印状态
             Db::startTrans();
             try {
-                //标记状态
+            /*    //标记状态
                 $this->model
                     ->allowField(true)
                     ->isUpdate(true, ['id'=>['in', $ids]])
@@ -390,7 +390,7 @@ class Distribution extends Backend
 
                 //记录配货日志
                 $admin = (object)session('admin');
-                DistributionLog::record($admin,$ids,'标记打印完成');
+                DistributionLog::record($admin,$ids,1,'标记打印完成');*/
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -415,27 +415,130 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
+            //获取子订单列表
             $list = $this->model
-                ->field('item_order_number')
-                ->where(['id' => ['in', $ids]])
+                ->alias('a')
+                ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis')
+                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+                ->where(['a.id' => ['in', $ids]])
                 ->select();
 
+            $order_ids = [];
+            $sku_arr = [];
+            foreach ($list as $processing_value) {
+                $order_ids[] = $processing_value['order_id'];
+                $sku_arr[] = $processing_value['sku'];
+            }
+
+            //获取订单数据
+            $_new_order = new \app\admin\model\order\order\NewOrder();
+            $order_list = $_new_order
+                ->field('id,total_qty_ordered,increment_id')
+                ->where(['id' => ['in', array_unique($order_ids)]])
+                ->select()
+            ;
+            $order_list = array_column($order_list,NULL,'id');
+
+            //获取sku绑定库位数据
+            $_stock_sku = new \app\admin\model\warehouse\StockSku();
+            $store_house_list = $_stock_sku
+                ->alias('a')
+                ->field('a.sku,b.coding')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where(['a.sku' => ['in', array_unique($sku_arr)],'b.type' => 1])
+                ->select()
+            ;
+            $store_house_list = array_column($store_house_list,NULL,'sku');
+
             $file_content = '';
-            foreach ($list as $value) {
-                $item_order_number = $value['item_order_number'];
+            foreach ($list as $processing_value) {
+                $item_order_number = $processing_value['item_order_number'];
                 $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
                 $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
                 if (!file_exists($dir)) {
                     mkdir($dir, 0777, true);
                 }
                 $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
+
                 //生成条形码
                 $this->generate_barcode_new($item_order_number, $fileName);
+
+                //处理ADD
+                if (strlen($processing_value['os_add']) > 0 && strlen($processing_value['od_add']) > 0) {
+                    $os_add = "<td>" . $processing_value['od_add'] . "</td> ";
+                    $od_add = "<td>" . $processing_value['os_add'] . "</td> ";
+                } else {
+                    $od_add = "<td rowspan='2'>" . $processing_value['od_add'] . "</td>";
+                    $os_add = "";
+                }
+
+                //判断双PD
+                if ('on' == $processing_value['pdcheck']) {
+                    $od_pd = "<td>" . $processing_value['pd_r'] . "</td> ";
+                    $os_pd = "<td>" . $processing_value['pd_l'] . "</td> ";
+                } else {
+                    $od_pd = "<td rowspan='2'>" . $processing_value['pd'] . "</td>";
+                    $os_pd = "";
+                }
+
+                //判断斜视值
+                if ('on' == $processing_value['prismcheck']) {
+                    $prism_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
+                    $prism_od_value = "<td>" . $processing_value['od_pv'] . "</td><td colspan=''>" . $processing_value['od_bd'] . "</td>" . "<td>" . $processing_value['od_pv_r'] . "</td><td>" . $processing_value['od_bd_r'] . "</td>";
+                    $prism_os_value = "<td>" . $processing_value['os_pv'] . "</td><td colspan=''>" . $processing_value['os_bd'] . "</td>" . "<td>" . $processing_value['os_pv_r'] . "</td><td>" . $processing_value['os_bd_r'] . "</td>";
+                    $coating_name = '';
+                } else {
+                    $prism_title = '';
+                    $prism_od_value = '';
+                    $prism_os_value = '';
+                    $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['index_name'] .' ' .$processing_value['prescription_type'] . "</td>";
+                }
+                $serial = explode('-',$item_order_number);
+
                 $file_content .= "<div  class = 'single_box'>
-                <table width='420mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                    <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                    <tr>
+                    <td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . date("Y-m-d H:i:s", $processing_value['created_at']) . "<p>" . $store_house_list[$processing_value['sku']]['coding'] . "</p></td>
+                    <td rowspan='5' colspan='3' style='padding:10px;'><img style='width:100%;height:80%;' src='" . $img_url . "'><br></td>
+                    </tr>                
+                    </table>
+                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;border-top: none;' >
+                <tbody cellpadding='0'>
                 <tr>
-                <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
-                </table></div>";
+                <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>
+                &nbsp;&nbsp;Order:" . $order_list[$processing_value['order_id']]['increment_id'] . "
+                <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
+                <span style=' margin-left:5px;'>Num:<strong>" . $serial[1] . "/" . $order_list[$processing_value['order_id']]['total_qty_ordered'] . "</strong></span>
+                </td>
+                </tr>  
+                <tr class='title'>      
+                <td></td>  
+                <td>SPH</td>
+                <td>CYL</td>
+                <td>AXI</td>
+                " . $prism_title . "
+                <td>ADD</td>
+                <td>PD</td> 
+                " . $coating_name . "
+                </tr>   
+                <tr>  
+                <td>R</td>      
+                <td>" . $processing_value['od_sph'] . "</td> 
+                <td>" . $processing_value['od_cyl'] . "</td>
+                <td>" . $processing_value['od_axis'] . "</td>    
+                " . $prism_od_value . $od_add . $od_pd .
+                    "</tr>
+                <tr>
+                <td>L</td> 
+                <td>" . $processing_value['os_sph'] . "</td>    
+                <td>" . $processing_value['os_cyl'] . "</td>  
+                <td>" . $processing_value['os_axis'] . "</td> 
+                " . $prism_os_value . $os_add . $os_pd .
+                    " </tr>
+                <tr>
+                <td colspan='10' style=' text-align:center'>" . $processing_value['index_name'] .' ' .$processing_value['prescription_type'] . "</td>
+                </tr>  
+                </tbody></table></div>";
             }
             echo $file_header . $file_content;
         }
@@ -462,7 +565,7 @@ EOF;
         $color_white = new \BCGColor(255, 255, 255);
         $label = new \BCGLabel();
         $label->setPosition(\BCGLabel::POSITION_TOP);
-        $label->setText('Made In China');
+        $label->setText('');
         $label->setFont($font);
         $drawException = null;
         try {
@@ -642,7 +745,7 @@ EOF;
                     ;
 
                     //操作成功记录
-                    DistributionLog::record($admin,$value['id'],$status_arr[$check_status].'完成');
+                    DistributionLog::record($admin,$value['id'],$check_status,$status_arr[$check_status].'完成');
                 }
 
                 Db::commit();
@@ -761,7 +864,7 @@ EOF;
                     }
 
                     //记录日志
-                    DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
+                    DistributionLog::record($admin,$value['id'],6,$status_arr[$reason]['name']);
                 }
 
                 Db::commit();
@@ -932,7 +1035,7 @@ EOF;
                 }
 
                 //记录日志
-                DistributionLog::record($admin, $ids, $remark);
+                DistributionLog::record($admin, $ids, 10, $remark);
 
                 Db::commit();
             } catch (PDOException $e) {
