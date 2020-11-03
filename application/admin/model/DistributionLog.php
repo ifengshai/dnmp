@@ -22,16 +22,18 @@ class DistributionLog extends Model
      *
      * @param object $auth  管理员
      * @param int $item_process_id  子订单表ID
+     * @param int $distribution_node  操作类型
      * @param string $remark  备注
      * @author lzh
      * @return bool
      */
-    public static function record($auth,$item_process_id,$remark)
+    public static function record($auth,$item_process_id,$distribution_node,$remark)
     {
-        $ids = is_array($item_process_id) ?: explode(',',$item_process_id);
+        $ids = is_array($item_process_id) ? $item_process_id : explode(',',$item_process_id);
         foreach($ids as $val){
             self::create([
                 'item_process_id' => $val,
+                'distribution_node' => $distribution_node,
                 'remark' => $remark,
                 'create_time' => time(),
                 'create_person' => $auth->nickname

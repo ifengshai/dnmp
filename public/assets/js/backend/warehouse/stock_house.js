@@ -101,7 +101,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'subarea', title: __('合单分区'),
                             searchList: { 'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D' }
                         },
-                        { field: 'coding', title: __('Coding'), operate: 'like' },
+                        { field: 'location', title: __('Coding'), operate: 'like' },
                         { field: 'library_name', title: __('Library_name') },
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },
