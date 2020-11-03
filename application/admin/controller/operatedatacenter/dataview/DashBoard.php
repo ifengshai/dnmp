@@ -279,8 +279,13 @@ class DashBoard extends Backend
             }
             if ($order_platform == 4) {
                 unset($where['site']);
-                $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-//                dump($sales_total);
+                // dump($where);
+                $sales_total = $model->where($where)->column('day_date', 'order_num');
+                // $sales_total = $model->where($where)->select();
+                asort($sales_total);
+               // dump(collection($sales_total)->toArray());
+               // dump($sales_total);
+               // die;
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -291,7 +296,7 @@ class DashBoard extends Backend
                 }
                 ksort($arr);
                 $date_arr = $arr;
-//                dump($date_arr);
+               // dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
@@ -307,7 +312,9 @@ class DashBoard extends Backend
                 ];
             } else {
                 $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-                ksort($arr);
+                // dump($arr);
+                asort($arr);
+                // dump($arr);
                 $date_arr = $arr;
                 $name = '订单数';
 
