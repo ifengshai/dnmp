@@ -200,6 +200,7 @@ class SingleItems extends Backend
                     ->select();
                     // ->count();
                 dump($pay_jingpian_glass);
+                die;
             }else{
                 //付费镜片订单数
                 $pay_jingpian_glass = $model
