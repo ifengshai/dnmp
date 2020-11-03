@@ -172,7 +172,7 @@ class Scm extends Api
             $list[$key]['status'] = $status[$value['status']];
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
-            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
         }
 
         $this->success('', ['list' => $list],200);
@@ -1142,7 +1142,7 @@ class Scm extends Api
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['detail_show'] = 1 < $value['status'] ? 1 : 0;
-            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
         }
 
         $this->success('', ['list' => $list],200);
