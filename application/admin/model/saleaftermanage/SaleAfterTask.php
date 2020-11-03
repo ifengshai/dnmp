@@ -259,6 +259,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -299,6 +302,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -337,6 +343,9 @@ class SaleAfterTask extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;
@@ -380,6 +389,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -421,6 +433,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -461,6 +476,9 @@ class SaleAfterTask extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;

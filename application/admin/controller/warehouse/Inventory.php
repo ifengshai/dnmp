@@ -1212,6 +1212,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1375,6 +1377,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1475,6 +1479,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1640,6 +1646,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
