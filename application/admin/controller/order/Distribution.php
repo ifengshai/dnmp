@@ -9,6 +9,7 @@ use think\Exception;
 use think\Loader;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Util\SKUHelper;
 
 /**
  * 配货列表
@@ -381,7 +382,7 @@ class Distribution extends Backend
             //标记打印状态
             Db::startTrans();
             try {
-            /*    //标记状态
+                //标记状态
                 $this->model
                     ->allowField(true)
                     ->isUpdate(true, ['id'=>['in', $ids]])
@@ -390,7 +391,7 @@ class Distribution extends Backend
 
                 //记录配货日志
                 $admin = (object)session('admin');
-                DistributionLog::record($admin,$ids,1,'标记打印完成');*/
+                DistributionLog::record($admin,$ids,1,'标记打印完成');
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -418,7 +419,7 @@ EOF;
             //获取子订单列表
             $list = $this->model
                 ->alias('a')
-                ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis')
+                ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coatiing_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis')
                 ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
                 ->where(['a.id' => ['in', $ids]])
                 ->select();
@@ -491,21 +492,29 @@ EOF;
                     $prism_title = '';
                     $prism_od_value = '';
                     $prism_os_value = '';
-                    $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['index_name'] .' ' .$processing_value['prescription_type'] . "</td>";
+                    $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['coatiing_name'] . "</td>";
                 }
                 $serial = explode('-',$item_order_number);
+
+                if($store_house_list[$processing_value['sku']]['coding']){
+                    $coding = "<b>" . $store_house_list[$processing_value['sku']]['coding'] . "</b><br>";
+                }else{
+                    $coding = '';
+                }
 
                 $file_content .= "<div  class = 'single_box'>
                     <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
                     <tr>
-                    <td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . date("Y-m-d H:i:s", $processing_value['created_at']) . "<p>" . $store_house_list[$processing_value['sku']]['coding'] . "</p></td>
+                    <td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . date("Y-m-d H:i:s", $processing_value['created_at']) . "</td>
                     <td rowspan='5' colspan='3' style='padding:10px;'><img style='width:100%;height:80%;' src='" . $img_url . "'><br></td>
                     </tr>                
-                    </table>
-                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;border-top: none;' >
+                    </table></div>
+                    <div  class = 'single_box'>
+                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
                 <tbody cellpadding='0'>
                 <tr>
                 <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>
+                ".$processing_value['prescription_type']."
                 &nbsp;&nbsp;Order:" . $order_list[$processing_value['order_id']]['increment_id'] . "
                 <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
                 <span style=' margin-left:5px;'>Num:<strong>" . $serial[1] . "/" . $order_list[$processing_value['order_id']]['total_qty_ordered'] . "</strong></span>
@@ -536,7 +545,8 @@ EOF;
                 " . $prism_os_value . $os_add . $os_pd .
                     " </tr>
                 <tr>
-                <td colspan='10' style=' text-align:center'>" . $processing_value['index_name'] .' ' .$processing_value['prescription_type'] . "</td>
+                <td colspan='2'>" . $coding . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
+                <td colspan='8' style=' text-align:center'>" . $processing_value['index_name'] . "</td>
                 </tr>  
                 </tbody></table></div>";
             }
@@ -575,7 +585,7 @@ EOF;
             $code->setThickness(18); // 条形码的厚度
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
-            $code->setFont($font); //设置字体
+            $code->setFont(0); //设置字体
             $code->addLabel($label); //设置字体
             $code->parse($text); // 条形码需要的数据内容
         } catch (\Exception $exception) {
