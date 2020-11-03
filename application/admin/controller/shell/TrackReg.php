@@ -1154,7 +1154,7 @@ class TrackReg extends Backend
     public function goods_type_day_center($plat,$goods_type)
     {
         $start = date('Y-m-d', strtotime('-1 day'));
-        $start = '2020-10-31';
+        $start = '2020-10-30';
         $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
         $createat = explode(' ', $seven_days);
         $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
