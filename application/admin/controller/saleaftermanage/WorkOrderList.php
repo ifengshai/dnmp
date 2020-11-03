@@ -1030,8 +1030,6 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-             dump($stock);
-             dump($num[$k]);exit;
             //判断库存是否足够
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
