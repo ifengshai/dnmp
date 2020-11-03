@@ -325,6 +325,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             formatter: Controller.api.formatter.getrdctitle,
                             operate: false
                         },
+                        {
+                            field: 'content',
+                            title: __('关键词'),
+                            operate: 'LIKE',
+                            visible: false
+                        },
 
                         { field: 'create_time', title: __('创建时间'), operate: false },
                         { field: 'remark', title: __('备注'),
