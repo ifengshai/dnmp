@@ -148,7 +148,6 @@ class OrderData extends Backend
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $params = [];
                                 $order_params = [];
-                                $order_item_params = [];
                                 foreach ($payload['data'] as $k => $v) {
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
@@ -205,6 +204,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
+                                    $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
@@ -1261,6 +1261,6 @@ class OrderData extends Backend
      */
     public function order_total_qty_ordered()
     {
-        
+
     }
 }
