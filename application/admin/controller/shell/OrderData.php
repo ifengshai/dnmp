@@ -1247,7 +1247,20 @@ class OrderData extends Backend
             echo $v['item_id'] . "\n";
             usleep(10000);
         }
-
         echo "ok";
+    }
+
+
+    /**
+     * 获取订单商品总数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/03 15:04:12 
+     * @return void
+     */
+    public function order_total_qty_ordered()
+    {
+        
     }
 }
