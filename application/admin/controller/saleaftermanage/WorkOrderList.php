@@ -851,7 +851,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     
-echo 444;exit;
+
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
