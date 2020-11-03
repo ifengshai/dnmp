@@ -702,6 +702,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
 
         },
+
+
+
+
+
+
+        
         distribution: function () {
             Controller.api.bindevent();
 
