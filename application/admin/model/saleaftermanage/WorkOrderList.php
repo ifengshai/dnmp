@@ -538,7 +538,6 @@ class WorkOrderList extends Model
                     //}
                     WorkOrderChangeSku::create($data);
                     WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
-                    echo 555;exit;
                 }
                 Db::commit();
             } catch (\Exception $e) {

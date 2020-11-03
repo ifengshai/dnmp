@@ -844,7 +844,8 @@ class WorkOrderList extends Backend
                             }
                             
                             //更改镜片，补发，赠品，地址
-                            $this->model->changeLens($params, $work_id, $v, $res);
+                            $aa = $this->model->changeLens($params, $work_id, $v, $res);
+                            dump($aa);exit;
                             $this->model->changeFrame($params, $work_id, $v, $res);
                             $this->model->cancelOrder($params, $work_id, $v, $res);
                             
