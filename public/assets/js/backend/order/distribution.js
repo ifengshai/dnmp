@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-finish-refuse').removeClass('hide');
         }else if(7 == value){
             $('#stock_house_num').parents('.form-group').show();
-            $('.btn-join-complete').removeClass('hide');
+            // $('.btn-join-complete').removeClass('hide');
         }else if(8 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
@@ -159,7 +159,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false  },
                         { field: 'created_at', title: __('创建时间'), operate: false},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
+                            buttons: [
                                 {
                                     name: 'detail',
                                     text: '处理异常',
@@ -173,7 +174,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(8 == Config.label){
+                                        if(8 == Config.label && row.abnormal_house_id > 0){
                                             return true;
                                         }else{
                                             return false;
@@ -193,7 +194,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(8 == Config.label){
+                                        if(8 == Config.label && row.abnormal_house_id > 0){
                                             return true;
                                         }else{
                                             return false;
