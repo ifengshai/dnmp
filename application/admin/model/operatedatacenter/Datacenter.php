@@ -724,7 +724,7 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:40:04
      */
-    public function getAgainUser($time_str = '', $type = 0)
+    public function getAgainUser1($time_str = '', $type = 0)
     {
         $arrzeelool = $this->zeelool->getAgainUser($time_str);
         $arrvoogueme = $this->voogueme->getAgainUser($time_str);
@@ -735,8 +735,36 @@ class Datacenter extends Model
         $same_again_num = $arrzeelool['same_again_user_num'] + $arrvoogueme['same_again_user_num'] + $arrnihao['same_again_user_num'];
         //三个站所有的环比复购用户数
         $huan_again_num = $arrzeelool['huan_again_user_num'] + $arrvoogueme['huan_again_user_num'] + $arrnihao['huan_again_user_num'];
-        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2) . '%';
-        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2) . '%';
+        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2).'%';
+        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2).'%';
+        return $arrs;
+    }
+    public function getAgainUser($time_str = '', $type = 0)
+    {
+        $createat = explode(' ', $time_str);
+        $again_user_numzeelool = $this->zeelool->get_again_user($createat);
+        $again_user_numvoogueme = $this->voogueme->get_again_user($createat);
+        $again_user_numnihao = $this->nihao->get_again_user($createat);
+        //三个站所有的复购用户数
+        $arrs['again_user_num'] = $again_user_numzeelool + $again_user_numvoogueme + $again_user_numnihao;
+
+        $same_create_at[0] = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
+        $same_create_at[1] = $createat[1];
+        $same_create_at[3] = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
+        $same_create_at[4] = $createat[4];
+        $same_again_num = $this->zeelool->get_again_user($same_create_at) + $this->voogueme->get_again_user($same_create_at) + $this->nihao->get_again_user($same_create_at);
+        $huan_create_at[0] = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
+        $huan_create_at[1] = $createat[1];
+        $huan_create_at[3] = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
+        $huan_create_at[4] = $createat[4];
+        $huan_again_num = $this->zeelool->get_again_user($huan_create_at) + $this->voogueme->get_again_user($huan_create_at) + $this->nihao->get_again_user($huan_create_at);
+        // dump($createat);
+        // dump($same_create_at);
+        // dump($huan_create_at);
+
+        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2).'%';
+        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2).'%';
+
         return $arrs;
     }
 
@@ -828,13 +856,13 @@ class Datacenter extends Model
             $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
             $same_where['day_date'] = ['between', [$same_start, $same_end]];
             $same_order_num = $this->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
+            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) : 0;
             //环比
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
             $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
             $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
             $huan_order_num = $this->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
+            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
         } else {
             //查询某天的数据
             $where = [];
@@ -844,13 +872,13 @@ class Datacenter extends Model
             $same_where = [];
             $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
             $same_order_num = $this->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) . '%' : 0;
+            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2): 0;
 
             $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
             $huan_where = [];
             $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
             $huan_order_num = $this->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) . '%' : 0;
+            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
         }
         return $arr;
     }
@@ -864,8 +892,8 @@ class Datacenter extends Model
         $v = $this->voogueme->getOrderUnitPrice(1,$time_str);
         $n = $this->nihao->getOrderUnitPrice(1,$time_str);
         $num['order_unit_price'] = round($z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'],2);
-        $num['same_order_unit_price'] = round(($z['same_order_unit_price'] + $v['same_order_unit_price'] + $n['same_order_unit_price'])/3,2).'%';
-        $num['huan_order_unit_price'] =round( ($z['huan_order_unit_price'] + $v['huan_order_unit_price'] + $n['huan_order_unit_price'])/3,2).'%';
+        $num['same_order_unit_price'] = round(($z['same_order_unit_price'] + $v['same_order_unit_price'] + $n['same_order_unit_price'])/3,2);
+        $num['huan_order_unit_price'] =round( ($z['huan_order_unit_price'] + $v['huan_order_unit_price'] + $n['huan_order_unit_price'])/3,2);
         return $num;
     }
 
@@ -878,8 +906,8 @@ class Datacenter extends Model
         $v = $this->voogueme->getSalesTotalMoney(1,$time_str);
         $n = $this->nihao->getSalesTotalMoney(1,$time_str);
         $num['sales_total_money'] = round($z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'],2);
-        $num['same_sales_total_money'] = round(($z['same_sales_total_money'] + $v['same_sales_total_money'] + $n['same_sales_total_money'])/3,2).'%';
-        $num['huan_sales_total_money'] = round(($z['huan_sales_total_money'] + $v['huan_sales_total_money'] + $n['huan_sales_total_money'])/3,2).'%';
+        $num['same_sales_total_money'] = round(($z['same_sales_total_money'] + $v['same_sales_total_money'] + $n['same_sales_total_money'])/3,2);
+        $num['huan_sales_total_money'] = round(($z['huan_sales_total_money'] + $v['huan_sales_total_money'] + $n['huan_sales_total_money'])/3,2);
         return $num;
     }
 
@@ -892,8 +920,8 @@ class Datacenter extends Model
         $v = $this->voogueme->getShippingTotalMoney(1,$time_str);
         $n = $this->nihao->getShippingTotalMoney(1,$time_str);
         $num['shipping_total_money'] = round($z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'],2);
-        $num['same_shipping_total_money'] = round(($z['same_shipping_total_money'] + $v['same_shipping_total_money'] + $n['same_shipping_total_money'])/3,2).'%';
-        $num['huan_shipping_total_money'] = round(($z['huan_shipping_total_money'] + $v['huan_shipping_total_money'] + $n['huan_shipping_total_money'])/3,2).'%';
+        $num['same_shipping_total_money'] = round(($z['same_shipping_total_money'] + $v['same_shipping_total_money'] + $n['same_shipping_total_money'])/3,2);
+        $num['huan_shipping_total_money'] = round(($z['huan_shipping_total_money'] + $v['huan_shipping_total_money'] + $n['huan_shipping_total_money'])/3,2);
         return $num;
     }
 
