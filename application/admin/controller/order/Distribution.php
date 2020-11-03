@@ -540,10 +540,20 @@ EOF;
 
             //获取订单购买总数
             $_new_order = new \app\admin\model\order\order\NewOrder();
-            $total_list = $_new_order
-                ->where(['id' => ['in', array_unique($order_ids)]])
-                ->column('total_qty_ordered','id')
-            ;
+            if(8 == $check_status){
+                $check_count = $this->model
+                    ->where(['order_id'=>['in', array_unique($order_ids)]])
+                    ->count()
+                ;
+                if($check_count != count($item_list)){
+                    return $this->error('有未勾选的子订单', url('index?ref=addtabs'));
+                }
+            }else{
+                $total_list = $_new_order
+                    ->where(['id' => ['in', array_unique($order_ids)]])
+                    ->column('total_qty_ordered','id')
+                ;
+            }
 
             //获取子订单处方数据
             $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
@@ -564,7 +574,8 @@ EOF;
                 3=>'配镜片',
                 4=>'加工',
                 5=>'印logo',
-                6=>'成品质检'
+                6=>'成品质检',
+                8=>'合单'
             ];
 
             //操作人信息
@@ -617,6 +628,8 @@ EOF;
                             ->dec('stock', 1)
                             ->update()
                         ;
+                    }elseif(8 == $check_status){
+                        $save_status = 9;
                     }
 
                     //订单主表标记已合单
