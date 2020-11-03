@@ -1201,6 +1201,7 @@ class TrackReg extends Backend
         //求出眼镜的销售额 base_price  base_discount_amount
         $frame_money_price = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
             ->where($whereItem)
             ->where('p.goods_type','=',$goods_type)
             ->where($itemMap)
@@ -1208,6 +1209,7 @@ class TrackReg extends Backend
         //眼镜的折扣价格
         $frame_money_discount = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
             ->where($whereItem)
             ->where('p.goods_type','=',$goods_type)
             ->where($itemMap)
