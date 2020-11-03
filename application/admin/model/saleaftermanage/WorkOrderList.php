@@ -812,7 +812,6 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            echo json_encode($postData);exit;
             if(!empty($postData)){
                 try {
                     //file_put_contents('/www/wwwroot/mojing/runtime/log/bufa_new.txt',json_encode($postData),FILE_APPEND);
