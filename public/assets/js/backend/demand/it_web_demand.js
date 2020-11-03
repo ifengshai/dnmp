@@ -52,6 +52,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.gettitle,
                         },
+                        {
+                          field: 'content',
+                            title: __('关键词'),
+                            operate: 'LIKE',
+                            visible: false
+                        },
 
                         { field: 'create_time', title: __('创建时间'), operate: false },
                         // { field: 'remark', title: __('备注'), operate: false },
@@ -314,7 +320,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         {
                             field: 'title',
                             title: __('标题'),
-                            operate: 'LIKE',
                             events: Controller.api.events.getrdctitle,
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.getrdctitle,
