@@ -799,136 +799,130 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 max: 5000
             });
 
-            //失去焦点
-            $('#c-platform_order').blur(function () {
-                var incrementId = $(this).val().replace(/^\s+|\s+$/g, "");
-                //var incrementId = replace(/^\s+|\s+$/g,"");
-                if (!incrementId) {
-                    Toastr.error('订单号不能为空');
-                    return false;
-                }
-                var str = incrementId.substring(0, 3);
-                //判断站点
-                if (str == '100' || str == '400' || str == '500' || str == '530') {
+        //失去焦点
+        $('#c-platform_order').blur(function () {
+            var incrementId = $(this).val().replace(/^\s+|\s+$/g, "");
+            //var incrementId = replace(/^\s+|\s+$/g,"");
+            if (!incrementId) {
+                Toastr.error('订单号不能为空');
+                return false;
+            }
+            var str = incrementId.substring(0, 2);
+            //判断站点
+            if (str == '10' || str == '40' || str == '50' || str == '53') {
+                $("#work_platform").val(1);
+            } else if (str == '13' || str == '43') {
+                $('#work_platform').val(2);
+            } else if (str == '30' || str == '60') {
+                $('#work_platform').val(3);
+            } else if (str == '45' || str == '15'){
+                //meeloog站
+                $('#work_platform').val(4);
+            } else if (str == '20' || str == '27'){
+                //wesee站
+                $('#work_platform').val(5);
+            } else if (str == '16' || str == '46'){
+                $('#work_platform').val(9);
+            } else if (str == '36' || str == '66'){
+                $('#work_platform').val(10);
+            }
+            $('.selectpicker ').selectpicker('refresh');
+
+        })
+
+        //载入数据
+        $('#platform_order').click(function () {
+            var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
+            if (!incrementId) {
+                Toastr.error('订单号不能为空');
+                return false;
+            }
+            var str = incrementId.substring(0, 2);
+            var vip_str = incrementId.substring(1, 4);
+            if(vip_str == 'VIP'){
+                $('#order_pay_currency').val('USD');
+                $('#step2_pay_currency').val('USD');
+                $('#c-refund_money').val(29.8);
+                $('#c-refund_way').val('原路退回');
+                var site = incrementId.substring(0, 1);
+                if(site == 'Z'){
                     $("#work_platform").val(1);
-                } else if (str == '130' || str == '430') {
+                }else if(site == 'V'){
+                    $("#work_platform").val(2);
+                }else if(site == 'M'){
+                    $("#work_platform").val(4);
+                }else if(site == 'E'){
+                    $("#work_platform").val(9);
+                }else if(site == 'D'){
+                    $("#work_platform").val(10);
+                }
+                $('#order_type').val(100);
+                $('#c-order_type').val(100);
+                $('.selectpicker ').selectpicker('refresh');
+            }
+            else{
+                //判断站点
+                if (str == '10' || str == '40' || str == '50' || str == '53') {
+                    $("#work_platform").val(1);
+                } else if (str == '13' || str == '43') {
                     $('#work_platform').val(2);
-                } else if (str == '300' || str == '600') {
+                } else if (str == '30' || str == '60') {
                     $('#work_platform').val(3);
-                } else if (str == '450' || str == '150'){
+                } else if (str == '45' || str == '15'){
                     //meeloog站
                     $('#work_platform').val(4);
-                } else if (str == '200' || str == '270'){
+                } else if (str == '20' || str == '27'){
                     //wesee站
                     $('#work_platform').val(5);
-                } else if (str == '160' || str == '460'){
+                } else if (str == '16' || str == '46'){
                     $('#work_platform').val(9);
-                } else if (str == '360' || str == '660'){
+                } else if (str == '36' || str == '66'){
                     $('#work_platform').val(10);
-                } else if (str == '139' || str == '469'){
-                    $('#work_platform').val(11);
                 }
-                $('.selectpicker ').selectpicker('refresh');
 
-            })
-
-            //载入数据
-            $('#platform_order').click(function () {
-                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
-                if (!incrementId) {
-                    Toastr.error('订单号不能为空');
-                    return false;
-                }
-                var str = incrementId.substring(0, 3);
-                var vip_str = incrementId.substring(1, 4);
-                if(vip_str == 'VIP'){
-                    $('#order_pay_currency').val('USD');
-                    $('#step2_pay_currency').val('USD');
-                    $('#c-refund_money').val(29.8);
-                    $('#c-refund_way').val('原路退回');
-                    var site = incrementId.substring(0, 1);
-                    if(site == 'Z'){
-                        $("#work_platform").val(1);
-                    }else if(site == 'V'){
-                        $("#work_platform").val(2);
-                    }else if(site == 'M'){
-                        $("#work_platform").val(4);
-                    }else if(site == 'E'){
-                        $("#work_platform").val(9);
-                    }else if(site == 'D'){
-                        $("#work_platform").val(10);
-                    }else if(site == 'J'){
-                        $("#work_platform").val(11);
+                var sitetype = $('#work_platform').val();
+                $('#c-order_sku').html('');
+                Layer.load();
+                Backend.api.ajax({
+                    url: 'saleaftermanage/work_order_list/get_sku_list',
+                    data: {
+                        sitetype: sitetype,
+                        order_number: incrementId
                     }
-                    $('#order_type').val(100);
-                    $('#c-order_type').val(100);
+                }, function (data, ret) {
+                    Layer.closeAll();
+                    $('#payment_time').val(data.payment_time);
+                    $('#order_pay_currency').val(data.base_currency_code);
+                    $('#step2_pay_currency').val(data.base_currency_code);
+                    $('#c-rewardpoint_discount_money').val(data.mw_rewardpoint_discount);
+                    $('#grand_total').val(data.grand_total);
+                    $('#base_grand_total').val(data.base_grand_total);
+                    $('#base_to_order_rate').val(data.base_to_order_rate); 
+                    $('#order_pay_method').val(data.method);
+                    $('#c-refund_way').val(data.method);
+                    $('#customer_email').val(data.customer_email);
+                    $('#order_type').val(data.order_type);
+                    $('#c-order_type').val(data.order_type);
+                    $('#is_new_version').val(data.is_new_version);
+                    var shtml = '';
+                    for (var i in data.sku) {
+                        shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
+                    }
+                    $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
-                }
-                else{
-                    //判断站点
-                    if (str == '100' || str == '400' || str == '500' || str == '530') {
-                        $("#work_platform").val(1);
-                    } else if (str == '130' || str == '430') {
-                        $('#work_platform').val(2);
-                    } else if (str == '300' || str == '600') {
-                        $('#work_platform').val(3);
-                    } else if (str == '450' || str == '150'){
-                        //meeloog站
-                        $('#work_platform').val(4);
-                    } else if (str == '200' || str == '270'){
-                        //wesee站
-                        $('#work_platform').val(5);
-                    } else if (str == '160' || str == '460'){
-                        $('#work_platform').val(9);
-                    } else if (str == '360' || str == '660'){
-                        $('#work_platform').val(10);
-                    } else if (str == '139' || str == '469'){
-                        $('#work_platform').val(11);
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step1-1').is(':hidden')) {
+                        changeFrame()
                     }
-
-                    var sitetype = $('#work_platform').val();
-                    $('#c-order_sku').html('');
-                    Layer.load();
-                    Backend.api.ajax({
-                        url: 'saleaftermanage/work_order_list/get_sku_list',
-                        data: {
-                            sitetype: sitetype,
-                            order_number: incrementId
-                        }
-                    }, function (data, ret) {
-                        Layer.closeAll();
-                        $('#payment_time').val(data.payment_time);
-                        $('#order_pay_currency').val(data.base_currency_code);
-                        $('#step2_pay_currency').val(data.base_currency_code);
-                        $('#c-rewardpoint_discount_money').val(data.mw_rewardpoint_discount);
-                        $('#grand_total').val(data.grand_total);
-                        $('#base_grand_total').val(data.base_grand_total);
-                        $('#base_to_order_rate').val(data.base_to_order_rate); 
-                        $('#order_pay_method').val(data.method);
-                        $('#c-refund_way').val(data.method);
-                        $('#customer_email').val(data.customer_email);
-                        $('#order_type').val(data.order_type);
-                        $('#c-order_type').val(data.order_type);
-                        $('#is_new_version').val(data.is_new_version);
-                        var shtml = '';
-                        for (var i in data.sku) {
-                            shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
-                        }
-                        $('#c-order_sku').append(shtml);
-                        $('.selectpicker ').selectpicker('refresh');
-                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                        if (!$('.step1-1').is(':hidden')) {
-                            changeFrame()
-                        }
-                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                        if (!$('.step3').is(':hidden')) {
-                            cancelOrder();
-                        }
-                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
-                    });
-                }
-            })
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step3').is(':hidden')) {
+                        cancelOrder();
+                    }
+                    // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
+                });
+            }
+        })
 
             //补发点击填充数据
             var lens_click_data;
