@@ -259,7 +259,7 @@ class SingleItems extends Backend
                 ->select();//包含此sku的所有订单好
             // dump($connect_buy);
             $connect_buy = array_column($connect_buy, 'order_id');
-            dump($connect_buy);
+            // dump($connect_buy);
             $skus = array();
             foreach ($connect_buy as $value) {
                 $arr = $model->table('sales_flat_order_item')
@@ -269,7 +269,7 @@ class SingleItems extends Backend
                     ->select();//这些订单号内的所有sku
                 $skus[] = array_column($arr, 'sku');
             }
-            dump($skus);
+            // dump($skus);
             $array_sku = [];
             //获取关联购买的数量
             foreach ($skus as $k => $v) {
@@ -279,7 +279,7 @@ class SingleItems extends Backend
                     }
                 }
             }
-            dump($array_sku);
+            // dump($array_sku);
             $data = compact('sku', 'array_sku', 'total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price');
             $this->success('', '', $data);
         }
