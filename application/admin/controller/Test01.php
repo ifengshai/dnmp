@@ -1028,8 +1028,8 @@ class Test01 extends Backend
 
     public function testtest()
     {
-        Db::name('in_stock')->where('id',18373)->setField('status',1);
-        Db::name('in_stock')->where('id',18372)->setField('status',1);
+        Db::name('in_stock')->where('id',18574)->setField('status',1);
+        // Db::name('in_stock')->where('id',18372)->setField('status',1);
     }
 
 }
