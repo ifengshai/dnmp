@@ -5,6 +5,7 @@ namespace app\admin\controller\operatedatacenter\dataview;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
 use think\Cache;
+use think\Db;
 use think\Request;
 
 class DashBoard extends Backend
@@ -59,11 +60,11 @@ class DashBoard extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         // dump(collection($magentoplatformarr)->toArray());
-        foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val,['zeelool','voogueme','nihao','全部'])){
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'nihao', '全部'])) {
                 unset($magentoplatformarr[$key]);
             }
-            if($key == 100){
+            if ($key == 100) {
                 unset($magentoplatformarr[$key]);
                 $magentoplatformarr[4] = '全部';
             }
@@ -74,10 +75,10 @@ class DashBoard extends Backend
         $active_user_num = $this->zeeloolOperate->getActiveUser();
         //注册用户数
         $register_user_num = $this->zeeloolOperate->getRegisterUser();
-        $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')).' - '.date('Y-m-d H:i:s', time());
+        $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')) . ' - ' . date('Y-m-d H:i:s', time());
         // dump($time_arr);die;
         //复购用户数
-        $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr,0);
+        $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
         //vip用户数
         $vip_user_num = $this->zeeloolOperate->getVipUser();
         //订单数
@@ -88,7 +89,7 @@ class DashBoard extends Backend
         $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
         //邮费
         $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num','magentoplatformarr'));
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num', 'magentoplatformarr'));
         return $this->view->fetch();
     }
 
@@ -124,11 +125,11 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
-//            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-//            if ($arr) {
-//                Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-////                $this->success('', '', $arr);
-//            }
+            //            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+            //            if ($arr) {
+            //                Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+            ////                $this->success('', '', $arr);
+            //            }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
@@ -148,7 +149,7 @@ class DashBoard extends Backend
             $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
 
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
-//            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
+            //            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
@@ -166,16 +167,16 @@ class DashBoard extends Backend
             $order_platform = $params['order_platform'];
             switch ($order_platform) {
                 case 1:
-                    $model = $this->zeeloolOperate;
+                    $model = new \app\admin\model\operatedatacenter\Zeelool;
                     break;
                 case 2:
-                    $model = $this->vooguemeOperate;
+                    $model = new \app\admin\model\operatedatacenter\Voogueme();
                     break;
                 case 3:
-                    $model = $this->nihaoOperate;
+                    $model = new \app\admin\model\operatedatacenter\Nihao();
                     break;
                 case 4:
-                    $model = $this->datacenterday;
+                    $model = new \app\admin\model\operatedatacenter\Datacenter();
                     break;
             }
             $time_str = $params['time_str'];
@@ -249,23 +250,20 @@ class DashBoard extends Backend
             $order_platform = $params['order_platform'];
             switch ($order_platform) {
                 case 1:
-                    $model = $this->zeeloolOperate;
+                    $model = new \app\admin\model\operatedatacenter\Zeelool;
                     break;
                 case 2:
-                    $model = $this->vooguemeOperate;
+                    $model = new \app\admin\model\operatedatacenter\Voogueme();
                     break;
                 case 3:
-                    $model = $this->nihaoOperate;
+                    $model = new \app\admin\model\operatedatacenter\Nihao();
                     break;
                 case 4:
-                    $model = $this->datacenterday;
+                    $model = new \app\admin\model\operatedatacenter\Datacenter();
                     break;
             }
             $time_str = $params['time_str'];
 
-            if ($order_platform) {
-                $where['site'] = $order_platform;
-            }
             if ($order_platform) {
                 $where['site'] = $order_platform;
             }
@@ -280,12 +278,12 @@ class DashBoard extends Backend
             if ($order_platform == 4) {
                 unset($where['site']);
                 // dump($where);
-                $sales_total = $model->where($where)->column('day_date', 'order_num');
+                // $sales_total = $model->where($where)->fetchSql(true)->column('day_date', 'order_num');
+                $sales_total = Db::name('datacenter_day')->where($where)->column('day_date', 'order_num');
                 // $sales_total = $model->where($where)->select();
                 asort($sales_total);
-               // dump(collection($sales_total)->toArray());
-               // dump($sales_total);
-               // die;
+                dump($sales_total);
+                // die;
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -296,7 +294,7 @@ class DashBoard extends Backend
                 }
                 ksort($arr);
                 $date_arr = $arr;
-               // dump($date_arr);
+                dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
@@ -382,7 +380,7 @@ class DashBoard extends Backend
             $name = '用户购买转化漏斗';
             $date_arr = [
                 ['value' => round($landing_num['landing_num'], 0), 'percent' => '100%', 'name' => '着陆页'],
-                ['value' => round($detail_num['detail_num'], 0), 'percent' =>  $landing_num['landing_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
+                ['value' => round($detail_num['detail_num'], 0), 'percent' => $landing_num['landing_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
                 ['value' => round($cart_num['cart_num'], 0), 'percent' => $detail_num['detail_num'] == 0 ? '0%' : round($cart_num['cart_num'] / $detail_num['detail_num'] * 100, 2) . '%', 'name' => '加购物车'],
                 ['value' => round($complete_num['complete_num'], 0), 'percent' => $cart_num['cart_num'] == 0 ? '0%' : round($complete_num['complete_num'] / $cart_num['cart_num'] * 100, 2) . '%', 'name' => '支付转化']
             ];
