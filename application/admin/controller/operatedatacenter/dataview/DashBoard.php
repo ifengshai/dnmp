@@ -124,10 +124,11 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
-            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-            if ($arr) {
-                $this->success('', '', $arr);
-            }
+//            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+//            if ($arr) {
+//                Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+////                $this->success('', '', $arr);
+//            }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
@@ -147,7 +148,7 @@ class DashBoard extends Backend
             $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
 
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
-            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
+//            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
@@ -279,6 +280,7 @@ class DashBoard extends Backend
             if ($order_platform == 4) {
                 unset($where['site']);
                 $sales_total = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
+//                dump($sales_total);
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v]) {
@@ -287,7 +289,9 @@ class DashBoard extends Backend
                         $arr[$v] = $k;
                     }
                 }
+                ksort($arr);
                 $date_arr = $arr;
+//                dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
@@ -303,6 +307,7 @@ class DashBoard extends Backend
                 ];
             } else {
                 $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
+                ksort($arr);
                 $date_arr = $arr;
                 $name = '订单数';
 

@@ -23,7 +23,7 @@ class Test01 extends Backend
     public function test01()
     {
         $list = Db::connect('database.db_voogueme_online')->table('sales_flat_order')->where('entity_id > 272779 and entity_id < 273408')->select();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
                 $data = [];
@@ -32,19 +32,19 @@ class Test01 extends Backend
                 $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
                 echo Db::connect('database.db_voogueme')->table('sales_flat_order')->getLastSql();
                 echo "\n";
-            } 
+            }
 
             // Db::connect('database.db_voogueme')->table('sales_flat_order')->insert($v);
-            
+
         }
-        
-        echo  'ok';
+
+        echo 'ok';
     }
 
     public function test02()
     {
         $list = Db::connect('database.db_nihao_online')->table('sales_flat_order')->where('entity_id > 44154 and entity_id < 44312')->select();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $count = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->count();
             if ($count > 0) {
                 $data = [];
@@ -52,23 +52,17 @@ class Test01 extends Backend
                 $data['updated_at'] = $v['updated_at'];
                 Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => $v['entity_id']])->update($data);
 
-                echo Db::connect('database.db_nihao')->table('sales_flat_order')->getLastSql(); 
+                echo Db::connect('database.db_nihao')->table('sales_flat_order')->getLastSql();
                 echo ";" . "\n";
                 continue;
-            } 
+            }
 
             // Db::connect('database.db_nihao')->table('sales_flat_order')->insert($v);
             echo $k . "\n";
         }
-        
-        echo  'ok';
 
+        echo 'ok';
 
-
-
-
-
-        
 
     }
 
@@ -76,17 +70,17 @@ class Test01 extends Backend
     public function test03()
     {
         $list = Db::connect('database.db_zeelool_online')->table('sales_flat_shipment_track')->where('order_id > 520028 and order_id < 521028')->select();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $count = Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->where(['order_id' => $v['order_id']])->count();
             if ($count > 0) {
                 continue;
-            } 
+            }
 
             Db::connect('database.db_zeelool')->table('sales_flat_shipment_track')->insert($v);
             echo $k . "\n";
         }
-        
-        echo  'ok';
+
+        echo 'ok';
     }
 
 
@@ -924,11 +918,12 @@ class Test01 extends Backend
 
     public function delete_purchase_data()
     {
-        Db::name('purchase_order')->where('purchase_number','PO20201023090310717435')->update(['purchase_status'=>3]);
+        Db::name('purchase_order')->where('purchase_number', 'PO20201023090310717435')->update(['purchase_status' => 3]);
         // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
         // Db::name('purchase_order')->where('purchase_number','PO20201023090109313843')->update(['purchase_status'=>3]);
         // Db::name('purchase_order')->where('purchase_number','PO20201023090457598387')->update(['purchase_status'=>3]);
     }
+
     public function update_v_data()
     {
         // Db::name('datacenter_day')->where(['site'=>2,'day_date'=>'2020-10-29'])->update(['detail_num'=>20520,'cart_num'=>4699]);
@@ -942,7 +937,7 @@ class Test01 extends Backend
     }
 
     //统计昨天各品类镜框的销量
-    public function goods_type_day_center($plat,$goods_type)
+    public function goods_type_day_center($plat, $goods_type)
     {
 //        $plat = 1;
         $start = date('Y-m-d', strtotime('-1 day'));
@@ -974,7 +969,7 @@ class Test01 extends Backend
         $frame_sales_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where('p.goods_type','=',$goods_type)
+            ->where('p.goods_type', '=', $goods_type)
             ->where($whereItem)
             ->where($itemMap)
             ->sum('m.qty_ordered');
@@ -987,7 +982,7 @@ class Test01 extends Backend
         $sales_total_money = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where('p.goods_type','=',$goods_type)
+            ->where('p.goods_type', '=', $goods_type)
             ->where($whereItem)
             ->where($itemMap)
             ->sum('o.base_grand_total');
@@ -1000,6 +995,7 @@ class Test01 extends Backend
         $arr['sales_total_money'] = $sales_total_money;
         return $arr;
     }
+
     //计划任务跑每天的分类销量的数据
     public function day_data_goods_type()
     {
@@ -1017,17 +1013,54 @@ class Test01 extends Backend
         //     $this->goods_type_day_center(3,2),
         // ];
         // dump($arr);die;
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,1));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,2));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,3));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,4));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,5));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,6));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,1));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,2));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2,6));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,1));
-        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3,2));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 2));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 3));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 4));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 5));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1, 6));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2, 1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2, 2));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(2, 6));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3, 1));
+        Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(3, 2));
     }
-    
+
+    public function testtest()
+    {
+        $arr = [
+            "2020-10-25" => 1292,
+            "2020-10-05" => 851,
+            "2020-11-01" => 1296,
+            "2020-10-06" => 531,
+            "2020-10-17" => 1588,
+            "2020-10-07" => 1273,
+            "2020-10-24" => 1748,
+            "2020-10-22" => 1553,
+            "2020-10-08" => 564,
+            "2020-10-09" => 1651,
+            "2020-10-10" => 1431,
+            "2020-10-11" => 1208,
+            "2020-10-12" => 1228,
+            "2020-10-13" => 1470,
+            "2020-10-14" => 1763,
+            "2020-10-15" => 1723,
+            "2020-10-16" => 1770,
+            "2020-10-18" => 1158,
+            "2020-10-26" => 1273,
+            "2020-10-19" => 1171,
+            "2020-10-20" => 1495,
+            "2020-10-21" => 1330,
+            "2020-10-29" => 1687,
+            "2020-10-23" => 1598,
+            "2020-11-02" => 476,
+            "2020-10-27" => 1454,
+            "2020-10-28" => 1568,
+            "2020-10-30" => 1811,
+            "2020-10-31" => 1659,
+        ];
+        ksort($arr);
+        dump($arr);
+    }
+
 }
