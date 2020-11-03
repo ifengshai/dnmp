@@ -810,9 +810,9 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
@@ -837,14 +837,20 @@ class TrackReg extends Backend
     public function only_ga_data()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
+
         //z站
-        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>1])->field('order_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>1])->field('order_num,new_cart_num,update_cart_num')->find();
+
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(1, $date_time);
         //会话
         $arr['sessions'] = $this->google_session(1, $date_time);
         //会话转化率
         $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
@@ -855,15 +861,20 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>1])->update($arr);
+        usleep(100000);
 
         //v站
-        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>2])->field('order_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>2])->field('order_num,new_cart_num,update_cart_num')->find();
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(2, $date_time);
         //会话
         $arr['sessions'] = $this->google_session(2, $date_time);
         //会话转化率
         $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
@@ -874,15 +885,20 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>2])->update($arr);
+        usleep(100000);
 
         //nihao站
-        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>3])->field('order_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>3])->field('order_num,new_cart_num,update_cart_num')->find();
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(3, $date_time);
         //会话
         $arr['sessions'] = $this->google_session(3, $date_time);
         //会话转化率
         $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         //着陆页数据
         $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
@@ -893,6 +909,7 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date'=>$date_time,'site'=>3])->update($arr);
+        usleep(100000);
     }
 
     //运营数据中心 voogueme
@@ -958,9 +975,9 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
@@ -1040,9 +1057,9 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
         //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        // $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
