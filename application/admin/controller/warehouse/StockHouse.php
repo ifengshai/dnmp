@@ -86,7 +86,8 @@ class StockHouse extends Backend
 
                 //判断选择的库位是否已存在
                 if(2 == $type){
-                    $map['subarea'] = $params['subarea'];
+                    $params['location'] = $params['coding'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -152,7 +153,8 @@ class StockHouse extends Backend
 
                 //判断选择的库位是否已存在
                 if(2 == $type){
-                    $map['subarea'] = $params['subarea'];
+                    $params['location'] = $params['coding'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -327,8 +329,8 @@ class StockHouse extends Backend
             ->field('status,subarea,coding')
             ->find()
         ;
-        1 != $stock_house_info['status'] && $this->error('禁用中无法打印！');
-        $coding = $stock_house_info['subarea'].'-'.$stock_house_info['coding'];
+        1 != $stock_house_info['status'] && $this->error('禁用状态无法打印！');
+        $coding = $stock_house_info['coding'];
 
         ob_start();
         $file_header =
