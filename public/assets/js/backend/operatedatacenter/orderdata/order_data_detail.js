@@ -117,6 +117,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 table.bootstrapTable('refresh',params);
             });
+            $(".reset").click(function(){
+                $('#order_platform').val(1);
+                $('#time_str').val('');
+                $('#increment_id').val('');
+                $('#order_status').val(0);
+                $('#customer_type').val(0);
+                $('#store_id').val(0);
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
+         
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+         
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
+            });
             $("#export").click(function(){
                 var order_platform = $('#order_platform').val();
                 var time_str = $('#time_str').val();
