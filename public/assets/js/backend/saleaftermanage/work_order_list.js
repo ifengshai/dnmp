@@ -811,7 +811,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //判断站点
                 if (str == '100' || str == '400' || str == '500' || str == '530') {
                     $("#work_platform").val(1);
-                } else if (str == '130' || str == '430') {
+                } else if (str == '130' || str == '430' || str == '131' || str == '431') {
                     $('#work_platform').val(2);
                 } else if (str == '300' || str == '600') {
                     $('#work_platform').val(3);
@@ -868,7 +868,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断站点
                     if (str == '100' || str == '400' || str == '500' || str == '530') {
                         $("#work_platform").val(1);
-                    } else if (str == '130' || str == '430') {
+                    } else if (str == '130' || str == '430' || str == '131' || str == '431') {
                         $('#work_platform').val(2);
                     } else if (str == '300' || str == '600') {
                         $('#work_platform').val(3);
