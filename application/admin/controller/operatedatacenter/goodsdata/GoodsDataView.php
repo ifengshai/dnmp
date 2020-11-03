@@ -369,10 +369,10 @@ class GoodsDataView extends Backend
                 $createat = explode(' ', $seven_days);
             }
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-
-
+            
             $data_center_day = Db::name('datacenter_goods_type_data')
                 ->where(['site' => $params['order_platform']])
+                ->where($map)
                 ->group('goods_type,day_date')
                 ->order('day_date', 'asc')
                 ->field('day_date,goods_type,glass_num,sum(glass_num) as total_sales_num')
