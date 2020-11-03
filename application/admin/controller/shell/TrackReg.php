@@ -1083,6 +1083,9 @@ class TrackReg extends Backend
     //计划任务跑每天的分类销量的数据
     public function day_data_goods_type()
     {
+        $res = Db::name('datacenter_goods_type_data')->where('id','>=',45)->delete();
+
+
         $res1 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(1,1));
         if ($res1){
             echo 'z站平光镜ok';
