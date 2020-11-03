@@ -1025,7 +1025,6 @@ class WorkOrderList extends Backend
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 throw new Exception($sku . '库存不足！！');
-                return false;
             }
         }
         return true;
