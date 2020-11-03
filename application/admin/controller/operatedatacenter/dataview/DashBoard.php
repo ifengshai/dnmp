@@ -277,24 +277,18 @@ class DashBoard extends Backend
             }
             if ($order_platform == 4) {
                 unset($where['site']);
-                // dump($where);
-                // $sales_total = $model->where($where)->fetchSql(true)->column('day_date', 'order_num');
-                $sales_total = Db::name('datacenter_day')->where($where)->column('day_date', 'order_num');
-                // $sales_total = $model->where($where)->select();
-                asort($sales_total);
-                dump($sales_total);
-                // die;
+
+                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date','asc')->field('day_date,order_num')->select();
+
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
-                    if ($arr[$v]) {
-                        $arr[$v] += $k;
+                    if ($arr[$v['day_date']]) {
+                        $arr[$v['day_date']] += $v['order_num'];
                     } else {
-                        $arr[$v] = $k;
+                        $arr[$v['day_date']] = $v['order_num'];
                     }
                 }
-                ksort($arr);
                 $date_arr = $arr;
-                dump($date_arr);
                 $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
@@ -309,21 +303,27 @@ class DashBoard extends Backend
 
                 ];
             } else {
-                $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-                // dump($arr);
-                asort($arr);
-                // dump($arr);
+                // $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
+                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date','asc')->field('day_date,order_num')->select();
+                $arr = array();
+                foreach ($sales_total as $k => $v) {
+                    if ($arr[$v['day_date']]) {
+                        $arr[$v['day_date']] += $v['order_num'];
+                    } else {
+                        $arr[$v['day_date']] = $v['order_num'];
+                    }
+                }
                 $date_arr = $arr;
                 $name = '订单数';
 
-                $json['xcolumnData'] = array_values($date_arr);
+                $json['xcolumnData'] = array_keys($date_arr);
                 $json['column'] = [$name];
                 $json['columnData'] = [
                     [
                         'name' => $name,
                         'type' => 'line',
                         'smooth' => true,
-                        'data' => array_keys($date_arr)
+                        'data' => array_values($date_arr)
                     ],
 
                 ];
