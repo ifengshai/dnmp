@@ -1,0 +1,17 @@
+<table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+    <thead>
+    <tr role="row">
+        <th style="width: 150px;">操作内容</th>
+        <th style="width: 150px;">操作人</th>
+        <th style="width: 150px;">操作时间</th>
+    </thead>
+    <tbody id="product_data">
+    {foreach name="list" item="value"}
+    <tr role="row" class="odd">
+        <td>{$value.remark}</td>
+        <td>{$value.create_person|date='Y-m-d H:i:s'}</td>
+        <td>{$value.create_time}</td>
+    </tr>
+    {/foreach}
+    </tbody>
+</table>
