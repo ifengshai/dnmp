@@ -1198,13 +1198,28 @@ class TrackReg extends Backend
             ->where($whereItem)
             ->where($itemMap)
             ->sum('o.base_grand_total');
+        //求出眼镜的销售额 base_price  base_discount_amount
+        $frame_money_price = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type','=',$goods_type)
+            ->where($itemMap)
+            ->sum('m.base_price');
+        //眼镜的折扣价格
+        $frame_money_discount = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type','=',$goods_type)
+            ->where($itemMap)
+            ->sum('m.base_discount_amount');
+        //眼镜的实际销售额
+        $frame_money = round(($frame_money_price - $frame_money_discount), 2);
 
-        // $glass_avg_price = $frame_sales_num == 0 ? 0:round($sales_total_money / $frame_sales_num,2);
         $arr['day_date'] = $start;
         $arr['site'] = $plat;
         $arr['goods_type'] = $goods_type;
         $arr['glass_num'] = $frame_sales_num;
-        $arr['sales_total_money'] = $sales_total_money;
+        $arr['sales_total_money'] = $frame_money;
         return $arr;
     }
 
