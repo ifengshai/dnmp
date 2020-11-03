@@ -812,11 +812,6 @@ EOF;
         }
 
         if ($this->request->isAjax()) {
-            //库存、关系映射、库存日志表
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $_item = new \app\admin\model\itemmanage\Item();
-            $_stock_log = new \app\admin\model\StockLog();
-
             //操作人信息
             $admin = (object)session('admin');
 
@@ -830,82 +825,109 @@ EOF;
                 6=>'待成品质检'
             ];
 
+            //异常原因列表
+            $abnormal_arr = [
+                1=>'配货缺货',
+                2=>'商品条码贴错',
+                3=>'核实处方',
+                4=>'镜片缺货',
+                5=>'镜片重做',
+                6=>'定制片超时',
+                7=>'不可加工',
+                8=>'镜架加工报损',
+                9=>'镜片加工报损',
+                10=>'logo不可加工',
+                11=>'镜架印logo报损',
+                12=>'合单缺货',
+                13=>'核实地址',
+                14=>'物流退件',
+                15=>'客户退件'
+            ];
+
+            //检测状态
+            $check_status = [];
+
             //根据返回节点处理相关逻辑
             $status = input('status');
             switch ($status) {
                 case 1:
-                    if (!in_array($item_info['distribution_status'],[4,5,6])) {
-                        return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
-                    }
-                    //子订单状态回滚
-                    $this->model
-                        ->allowField(true)
-                        ->isUpdate(true, ['id'=>$id])
-                        ->save(['distribution_status'=>$status])
-                    ;
-
-                    //记录日志
-                    DistributionLog::record($admin,$id,'当前节点：');
-
-                    //更新状态
-                    foreach($item_list as $value){
-                        //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                        if(2 == $reason){
-                            //获取true_sku
-                            $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                            //扣减虚拟仓库存
-                            $_item_platform_sku
-                                ->where(['sku'=>$true_sku,'platform_type'=>$value['site']])
-                                ->dec('stock', 1)
-                                ->update()
-                            ;
-
-                            //扣减可用库存、配货占用库存、总库存
-                            $_item
-                                ->where(['sku'=>$true_sku])
-                                ->dec('available_stock', 1)
-                                ->dec('distribution_occupy_stock', 1)
-                                ->dec('stock', 1)
-                                ->update()
-                            ;
-                        }
-
-                        //记录日志
-                        DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
-                    }
+                    $check_status = [4,5,6];
                     break;
                 case 2:
-                    $db = 'database.db_voogueme';
-                    $model = $this->voogueme;
+                    $check_status = [4,5,6];
                     break;
                 case 3:
-                    $db = 'database.db_nihao';
-                    $model = $this->nihao;
+                    $check_status = [4,5,6];
                     break;
                 case 4:
-                    $db = 'database.db_weseeoptical';
-                    $model = $this->weseeoptical;
+                    $check_status = [5,6];
                     break;
                 case 5:
-                    $db = 'database.db_meeloog';
-                    $model = $this->meeloog;
+                    $check_status = [6];
                     break;
                 case 6:
-                    $db = 'database.db_zeelool_es';
-                    $model = $this->zeelool_es;
+                    $check_status = [7];
                     break;
-                default:
-                    return $this->error('返回节点类型错误', url('index?ref=addtabs'));
             }
 
-
-
-
+            //检测状态
+            if (!in_array($item_info['distribution_status'],$check_status)) {
+                return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
+            }
 
             Db::startTrans();
             try {
+                //子订单状态回滚
+                $this->model
+                    ->allowField(true)
+                    ->isUpdate(true, ['id'=>$id])
+                    ->save(['distribution_status'=>$status])
+                ;
 
+                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                $remark = '处理异常：'.$abnormal_arr[$abnormal_info['type']].',当前节点：'.$status_arr[$item_info['distribution_status']].',返回节点：'.$status_arr[$status];
+                if(3 == $status){
+                    //获取true_sku
+                    $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    $true_sku = $_item_platform_sku->getTrueSku($item_info['sku'], $item_info['site']);
+
+                    //扣减虚拟仓库存
+                    $_item_platform_sku
+                        ->where(['sku'=>$true_sku,'platform_type'=>$item_info['site']])
+                        ->dec('stock', 1)
+                        ->update()
+                    ;
+
+                    //扣减可用库存、配货占用库存、总库存
+                    $_item = new \app\admin\model\itemmanage\Item();
+                    $_item
+                        ->where(['sku'=>$true_sku])
+                        ->dec('available_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
+                        ->update()
+                    ;
+
+                    //扣库存日志
+                    $stock_data = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $item_info['sku'],
+                        'public_id'                 => $item_info['id'],
+                        'stock_change'              => -1,
+                        'available_stock_change'    => -1,
+                        'create_person'             => $admin->nickname,
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '成检拒绝：减少总库存,减少可用库存'
+                    ];
+                    $_stock_log = new \app\admin\model\StockLog();
+                    $_stock_log->allowField(true)->save($stock_data);
+
+                    $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存数量：1';
+                }
+
+                //记录日志
+                DistributionLog::record($admin, $id, $remark);
 
                 Db::commit();
             } catch (PDOException $e) {
