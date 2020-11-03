@@ -300,7 +300,7 @@ class WorkOrderList extends Model
      * @throws \Exception
      */
     public function httpRequest($siteType, $pathinfo, $params = [], $method = 'GET')
-    {
+    {echo json_encode($params);exit;
         switch ($siteType) {
             case 1:
                 $url = config('url.zeelool_url');
