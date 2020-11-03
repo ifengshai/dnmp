@@ -1913,6 +1913,7 @@ class Scm extends Api
 
             //成功返回
             $next_step = [
+                3=>'去配镜片',
                 4=>'去加工',
                 5=>'印logo',
                 6=>'去质检',
