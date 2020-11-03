@@ -197,6 +197,8 @@ class SingleItems extends Backend
                     ->where('sku', 'like', $sku . '%')
                     ->where('b.coatiing_price', '>', 0)
                     ->whereOr('b.index_price', '>', 0)
+                    ->whereOr('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->whereOr('sku', 'like', $sku . '%')
                     ->group('order_id')
                     // ->select();
                     ->count();
@@ -212,6 +214,8 @@ class SingleItems extends Backend
                     ->where('sku', 'like', $sku . '%')
                     ->where('b.coatiing_price', '>', 0)
                     ->whereOr('b.index_price', '>', 0)
+                    ->whereOr('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->whereOr('sku', 'like', $sku . '%')
                     ->group('order_id')
                     // ->select();
                     ->count();
