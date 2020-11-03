@@ -198,10 +198,7 @@ class SingleItems extends Backend
                     ->where('b.coatiing_price', '=', 0)
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
-                    // ->select();
                     ->count();
-                // dump($pay_jingpian_glass);
-                // die;
             } else {
                 //付费镜片订单数
                 $nopay_jingpian_glass = $model
@@ -213,11 +210,9 @@ class SingleItems extends Backend
                     ->where('b.coatiing_price', '=', 0)
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
-                    // ->select();
                     ->count();
             }
             $pay_jingpian_glass = $total - $nopay_jingpian_glass;
-            // dump($pay_jingpian_glass);
 
             //付费镜片订单数占比
             $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
@@ -232,9 +227,11 @@ class SingleItems extends Backend
                 ->field('order_id,sum(qty_ordered) as all_qty_ordered')
                 ->group('a.order_id')
                 ->select();
+            dump($only_one_glass_num);
             // dump(array_column($only_one_glass_num, 'order_id','all_qty_ordered'));
             // $arr = array_count_values(array_column($only_one_glass_num, 'order_id','qty_ordered'));//统计每个订单购买的副数
             $arr = array_flip(array_column($only_one_glass_num, 'order_id', 'all_qty_ordered'));//统计每个订单购买的副数
+            dump($arr);
             // dump($arr);die;
             $only_one_glass_num = 0;
             foreach ($arr as $v) {
@@ -253,7 +250,6 @@ class SingleItems extends Backend
                 ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                // ->group('order_id')
                 ->field('base_grand_total')
                 ->sum('base_grand_total');
             // ->select();
