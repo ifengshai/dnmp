@@ -822,10 +822,12 @@ EOF;
 
             //状态
             $status_arr = [
-                1=>['status'=>4,'name'=>'质检拒绝：加工调整'],
-                2=>['status'=>2,'name'=>'质检拒绝：镜架报损'],
-                3=>['status'=>3,'name'=>'质检拒绝：镜片报损'],
-                4=>['status'=>5,'name'=>'质检拒绝：logo调整']
+                1=>'待打印标签',
+                2=>'待配货',
+                3=>'待配镜片',
+                4=>'待加工',
+                5=>'待印logo',
+                6=>'待成品质检'
             ];
 
             //根据返回节点处理相关逻辑
@@ -843,7 +845,7 @@ EOF;
                     ;
 
                     //记录日志
-                    DistributionLog::record($admin,$id,'');
+                    DistributionLog::record($admin,$id,'当前节点：');
 
                     //更新状态
                     foreach($item_list as $value){

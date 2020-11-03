@@ -1667,6 +1667,7 @@ class Scm extends Api
             2=>'待配货',
             3=>'待配镜片',
             4=>'待加工',
+            5=>'待印logo',
             6=>'待成品质检'
         ];
         $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
