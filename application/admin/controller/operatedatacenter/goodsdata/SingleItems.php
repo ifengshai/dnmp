@@ -160,28 +160,19 @@ class SingleItems extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            // $order_model->query("set time_zone='+8:00'");;
             //此sku的总订单量
             $map['sku'] = ['like', $sku . '%'];
-            // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['a.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             $map['a.order_type'] = ['=', 1];
-            // dump($map);
             $total = $model->table('sales_flat_order')
                 ->where($map)
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
                 ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                // ->fetchSql();
-                // ->select();
                 ->count();
-            // $model->table('sales_flat_order')->fetchSql();
-            // dump($total);die;
-            //整站订单量
-            // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-            // $whole_platform_order_num = $this->zeelool->where($maps)->count();
+
             //整站订单量
             $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->value('order_num');
 
@@ -194,9 +185,6 @@ class SingleItems extends Backend
                 ->where('sku', 'like', $sku . '%')
                 ->where('created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                 ->sum('qty_ordered');//sku总副数
-            // ->field('item_id,sku,created_at')
-            // ->select();
-            // dump($whole_glass);
             $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 0);
 
             if ($order_platform!=3){
@@ -208,9 +196,10 @@ class SingleItems extends Backend
                     ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                     ->where('sku', 'like', $sku . '%')
                     ->where('b.coatiing_price', '>', 0)
-                    ->group('order_id')
-                    // ->select();
-                    ->count();
+                    // ->group('order_id')
+                    ->select();
+                    // ->count();
+                dump($pay_jingpian_glass);
             }else{
                 //付费镜片订单数
                 $pay_jingpian_glass = $model
