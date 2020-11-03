@@ -195,10 +195,8 @@ class SingleItems extends Backend
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
                     ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    ->where('b.coatiing_price', '>', 0)
-                    ->whereOr('b.index_price', '>', 0)
-                    ->whereOr('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
-                    ->whereOr('sku', 'like', $sku . '%')
+                    ->where('b.coatiing_price', '=', 0)
+                    ->where('b.index_price', '=', 0)
                     ->group('order_id')
                     // ->select();
                     ->count();
@@ -212,10 +210,8 @@ class SingleItems extends Backend
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
                     ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    ->where('b.coatiing_price', '>', 0)
-                    ->whereOr('b.index_price', '>', 0)
-                    ->whereOr('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
-                    ->whereOr('sku', 'like', $sku . '%')
+                    ->where('b.coatiing_price', '=', 0)
+                    ->where('b.index_price', '=', 0)
                     ->group('order_id')
                     // ->select();
                     ->count();
@@ -224,7 +220,7 @@ class SingleItems extends Backend
             // dump($pay_jingpian_glass);
 
             //付费镜片订单数占比
-            $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
+            $pay_jingpian_glass_rate = $total == 0 ? 0 : round(($total-$pay_jingpian_glass) / $total * 100, 2) . '%';
 
             //只买一副的订单
             $only_one_glass_num = $model
