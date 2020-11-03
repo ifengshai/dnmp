@@ -541,7 +541,6 @@ class WorkOrderList extends Model
                 }
                 Db::commit();
             } catch (\Exception $e) {
-                echo 666;exit;
                 Db::rollback();
                 exception($e->getMessage());exit;
             }
