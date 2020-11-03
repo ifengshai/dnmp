@@ -1899,10 +1899,12 @@ class Scm extends Api
 
         //订单主表标记已合单
         if(9 == $save_status){
-            $_new_order
+            //主订单状态表
+            $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+            $_new_order_process
                 ->allowField(true)
-                ->isUpdate(true, ['id'=>$item_process_info['order_id']])
-                ->save(['combined_order_status'=>1])
+                ->isUpdate(true, ['order_id'=>$item_process_info['order_id']])
+                ->save(['combine_status'=>1,'combine_time'=>time()])
             ;
         }
 
