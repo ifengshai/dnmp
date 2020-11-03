@@ -71,25 +71,32 @@ class DashBoard extends Backend
         }
         // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
-        // 活跃用户数
-        $active_user_num = $this->zeeloolOperate->getActiveUser();
-        //注册用户数
-        $register_user_num = $this->zeeloolOperate->getRegisterUser();
-        $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')) . ' - ' . date('Y-m-d H:i:s', time());
-        // dump($time_arr);die;
-        //复购用户数
-        $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
-        //vip用户数
-        $vip_user_num = $this->zeeloolOperate->getVipUser();
-        //订单数
-        $order_num = $this->zeeloolOperate->getOrderNum();
-        //客单价
-        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
-        //销售额
-        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
-        //邮费
-        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num', 'magentoplatformarr'));
+        $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        if ($arr) {
+            $this->view->assign($arr);
+        }else{
+            // 活跃用户数
+            $active_user_num = $this->zeeloolOperate->getActiveUser();
+            //注册用户数
+            $register_user_num = $this->zeeloolOperate->getRegisterUser();
+            $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')) . ' - ' . date('Y-m-d H:i:s', time());
+            // dump($time_arr);die;
+            //复购用户数
+            $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
+            //vip用户数
+            $vip_user_num = $this->zeeloolOperate->getVipUser();
+            //订单数
+            $order_num = $this->zeeloolOperate->getOrderNum();
+            //客单价
+            $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
+            //销售额
+            $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
+            //邮费
+            $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
+            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num', 'magentoplatformarr');
+            Cache::set('Operatedatacenter_dataviews' . 1 . md5(serialize('index')), $data, 7200);
+            $this->view->assign($data);
+        }
         return $this->view->fetch();
     }
 
@@ -125,11 +132,11 @@ class DashBoard extends Backend
                     $model = $this->datacenterday;
                     break;
             }
-            //            $arr = Cache::get('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-            //            if ($arr) {
-            //                Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-            ////                $this->success('', '', $arr);
-            //            }
+            $arr = Cache::get('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)));
+            if ($arr) {
+                // Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
+                $this->success('', '', $arr);
+            }
             //活跃用户数
             $active_user_num = $model->getActiveUser(1, $time_str);
             //注册用户数
@@ -149,7 +156,7 @@ class DashBoard extends Backend
             $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
 
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
-            //            Cache::set('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)), $data, 7200);
+            Cache::set('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)), $data, 7200);
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
@@ -278,7 +285,7 @@ class DashBoard extends Backend
             if ($order_platform == 4) {
                 unset($where['site']);
 
-                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date','asc')->field('day_date,order_num')->select();
+                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date', 'asc')->field('day_date,order_num')->select();
 
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
@@ -304,7 +311,7 @@ class DashBoard extends Backend
                 ];
             } else {
                 // $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date','asc')->field('day_date,order_num')->select();
+                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date', 'asc')->field('day_date,order_num')->select();
                 $arr = array();
                 foreach ($sales_total as $k => $v) {
                     if ($arr[$v['day_date']]) {

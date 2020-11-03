@@ -542,7 +542,7 @@ class WorkOrderList extends Model
                 Db::commit();
             } catch (\Exception $e) {
                 Db::rollback();
-                exception($e->getMessage());
+                exception($e->getMessage());exit;
             }
         }
     }
@@ -584,7 +584,7 @@ class WorkOrderList extends Model
                 }
                 $orderChangeRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
                 if (false === $orderChangeRes) {
-                    throw new Exception("添加失败！！");
+                    throw new Exception("添加失败！！");exit;
                 } else {
                     WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 1]);
                 }
@@ -615,7 +615,7 @@ class WorkOrderList extends Model
             }
             $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
             if (false === $cancelOrderRes) {
-                throw new Exception("添加失败！！");
+                throw new Exception("添加失败！！");exit;
             } else {
                 WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
             }
