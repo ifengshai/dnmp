@@ -1027,7 +1027,7 @@ class WorkOrderList extends Backend
                 throw new Exception($sku . '库存不足！！');
             }
         }
-        return true;
+        return false;
     }
 
     /**
