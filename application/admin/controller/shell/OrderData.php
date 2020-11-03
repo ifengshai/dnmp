@@ -944,12 +944,16 @@ class OrderData extends Backend
     public function zeelool_old_order()
     {
         $site = 1;
-        $id = $this->order->where('site=1 and entity_id < 520029')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['>', $id]])->limit(3000)->select();
+        $id = $this->order->where('site=1 and entity_id < 524836')->max('entity_id');
+        $list = $this->zeelool->where(['entity_id' => ['between', [$id, 524836]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
         foreach ($list as $k => $v) {
+            $count = $this->order->where('site=1 and entity_id=' . $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
             $params['increment_id'] = $v['increment_id'];
@@ -1003,12 +1007,16 @@ class OrderData extends Backend
     public function voogueme_old_order()
     {
         $site = 2;
-        $id = $this->order->where('site=2 and entity_id < 272780')->max('entity_id');
-        $list = $this->voogueme->where(['entity_id' => ['>', $id]])->limit(3000)->select();
+        $id = $this->order->where('site=2 and entity_id < 275549')->max('entity_id');
+        $list = $this->voogueme->where(['entity_id' => ['between', [$id, 275549]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
         foreach ($list as $k => $v) {
+            $count = $this->order->where('site=2 and entity_id=' . $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
             $params['increment_id'] = $v['increment_id'];
@@ -1063,12 +1071,16 @@ class OrderData extends Backend
     public function nihao_old_order()
     {
         $site = 3;
-        $id = $this->order->where('site=3 and entity_id < 44155')->max('entity_id');
-        $list = $this->nihao->where(['entity_id' => ['>', $id]])->limit(3000)->select();
+        $id = $this->order->where('site=3 and entity_id < 44827')->max('entity_id');
+        $list = $this->nihao->where(['entity_id' => ['between', [$id, 44827]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
         foreach ($list as $k => $v) {
+            $count = $this->order->where('site=3 and entity_id=' . $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
             $params['increment_id'] = $v['increment_id'];
