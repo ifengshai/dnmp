@@ -141,7 +141,7 @@ class Scm extends Api
         if($query){
             $where['a.check_order_number|a.create_person|b.sku|c.purchase_number|c.create_person'] = ['like', '%' . $query . '%'];
         }
-        if($status){
+        if(isset($status)){
             $where['a.status'] = $status;
         }
         if($is_stock){
@@ -1105,7 +1105,7 @@ class Scm extends Api
         if($query){
             $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
         }
-        if($status){
+        if(isset($status)){
             $where['a.status'] = $status;
         }
         if($start_time && $end_time){
