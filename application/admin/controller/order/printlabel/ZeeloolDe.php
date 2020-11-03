@@ -851,7 +851,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->field($field)
             ->where($map)
             ->where($where)
-            ->order('sfoi.order_id desc')
+            ->order('sfo.created_at desc')
             ->select();
 
         $resultList = collection($resultList)->toArray();
