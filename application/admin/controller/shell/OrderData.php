@@ -156,7 +156,6 @@ class OrderData extends Backend
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
                                     $params['total_item_count'] = $v['total_qty_ordered'];
-                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
@@ -190,7 +189,6 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params['base_grand_total'] = $v['base_grand_total'];
                                     $params['total_item_count'] = $v['total_qty_ordered'];
-                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
                                     if ($v['status']) {
                                         $params['status'] = $v['status'];
@@ -961,7 +959,6 @@ class OrderData extends Backend
             $params['store_id'] = $v['store_id'];
             $params['base_grand_total'] = $v['base_grand_total'];
             $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
             $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
             $params['base_currency_code'] = $v['base_currency_code'];
@@ -994,128 +991,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    /**
-     * voogueme旧数据同步
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/29 15:59:18 
-     * @return void
-     */
-    public function voogueme_old_order()
-    {
-        $site = 2;
-        $id = $this->order->where('site=2 and entity_id < 275549')->max('entity_id');
-        $list = $this->voogueme->where(['entity_id' => ['between', [$id, 275549]]])->limit(3000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        $order_params = [];
-        foreach ($list as $k => $v) {
-            $count = $this->order->where('site=2 and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params['entity_id'] = $v['entity_id'];
-            $params['site'] = $site;
-            $params['increment_id'] = $v['increment_id'];
-            $params['status'] = $v['status'] ?: '';
-            $params['store_id'] = $v['store_id'];
-            $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['total_qty_ordered'] = $v['total_qty_ordered'];
-            $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-            $params['base_currency_code'] = $v['base_currency_code'];
-            $params['shipping_method'] = $v['shipping_method'];
-            $params['shipping_title'] = $v['shipping_description'];
-            $params['country_id'] = $v['country_id'];
-            $params['region'] = $v['region'];
-            $params['city'] = $v['city'];
-            $params['street'] = $v['street'];
-            $params['postcode'] = $v['postcode'];
-            $params['telephone'] = $v['telephone'];
-            $params['customer_email'] = $v['customer_email'];
-            $params['customer_firstname'] = $v['customer_firstname'];
-            $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
-
-            echo $v['entity_id'] . "\n";
-            usleep(2000);
-        }
-        //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
-        echo "ok";
-    }
-
-
-    /**
-     * nihao旧数据同步
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/29 15:59:18 
-     * @return void
-     */
-    public function nihao_old_order()
-    {
-        $site = 3;
-        $id = $this->order->where('site=3 and entity_id < 44827')->max('entity_id');
-        $list = $this->nihao->where(['entity_id' => ['between', [$id, 44827]]])->limit(3000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        $order_params = [];
-        foreach ($list as $k => $v) {
-            $count = $this->order->where('site=3 and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params['entity_id'] = $v['entity_id'];
-            $params['site'] = $site;
-            $params['increment_id'] = $v['increment_id'];
-            $params['status'] = $v['status'] ?: '';
-            $params['store_id'] = $v['store_id'];
-            $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['total_qty_ordered'] = $v['total_qty_ordered'];
-            $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-            $params['base_currency_code'] = $v['base_currency_code'];
-            $params['shipping_method'] = $v['shipping_method'];
-            $params['shipping_title'] = $v['shipping_description'];
-            $params['country_id'] = $v['country_id'];
-            $params['region'] = $v['region'];
-            $params['city'] = $v['city'];
-            $params['street'] = $v['street'];
-            $params['postcode'] = $v['postcode'];
-            $params['telephone'] = $v['telephone'];
-            $params['customer_email'] = $v['customer_email'];
-            $params['customer_firstname'] = $v['customer_firstname'];
-            $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
-
-            echo $v['entity_id'] . "\n";
-            usleep(2000);
-        }
-        //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
-        echo "ok";
-    }
+    
 
 
     public function order_address_data_shell()
@@ -1261,6 +1137,16 @@ class OrderData extends Backend
      */
     public function order_total_qty_ordered()
     {
-
+        $list = $this->order->where('total_qty_ordered=0')->limit(1000)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach($list as $k => $v) {
+            $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id']])->sum('qty');
+            $params[$k]['total_qty_ordered'] = $qty;
+            $params[$k]['id'] = $v['id'];
+            echo $k . "\n";
+        }
+        $this->order->saveAll($params);
+        echo 'ok';
     }
 }
