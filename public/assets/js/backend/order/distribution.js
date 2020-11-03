@@ -7,8 +7,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('#stock_house_num').parents('.form-group').hide();
         $('select[name="abnormal"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
-        $('.btn-finish-adopt').removeClass('hide');
-        $('.btn-finish-refuse').removeClass('hide');
         if(0 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
@@ -33,8 +31,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
-            $('.btn-abnormal-handle').removeClass('hide');
-            $('.btn-abnormal-sign').removeClass('hide');
+            // $('.btn-abnormal-handle').removeClass('hide');
+            // $('.btn-abnormal-sign').removeClass('hide');
         }
     }
 
