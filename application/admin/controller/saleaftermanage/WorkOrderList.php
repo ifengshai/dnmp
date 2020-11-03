@@ -850,8 +850,11 @@ class WorkOrderList extends Backend
                             
                         }
                     }
-                    
 
+                    //非草稿状态进入审核阶段
+                    if ($this->model->work_status != 1) {
+                        $this->model->checkWork($work_id);
+                    }
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
@@ -866,13 +869,7 @@ class WorkOrderList extends Backend
                         if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
                             $this->model->changeAddress($params, $work_id, 13, $res);
                         }
-
                     }
-                    //非草稿状态进入审核阶段
-                    if ($this->model->work_status != 1) {
-                        $this->model->checkWork($work_id);
-                    }
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
