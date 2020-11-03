@@ -1250,7 +1250,10 @@ class OrderData extends Backend
                 }
                 $this->orderitemprocess->insertAll($data);
             }
+            echo $v['item_id'] . "\n";
             usleep(3000);
         }
+
+        echo "ok";
     }
 }
