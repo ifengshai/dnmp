@@ -50,24 +50,12 @@ class Scm extends Api
         ],
     ];
 
-    /**
-     * 检测Token
-     *
-     * @参数 string token  加密值
-     * @author lzh
-     * @return bool
-     */
-    protected function check()
-    {
-        return $this->auth->id ? true : false;
-    }
-
     public function _initialize()
     {
         parent::_initialize();
 
         //校验Token
-        $this->auth->match(['login']) || $this->check() || $this->error(__('Token invalid, please log in again'), [], 401);
+        $this->auth->match(['login']) || $this->auth->id || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
