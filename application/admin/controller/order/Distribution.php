@@ -76,7 +76,7 @@ class Distribution extends Backend
                     $stock_house_id = $_stock_house
                         ->where($stock_house_where)
                         ->column('id');
-                    $map['a.temporary_house_id|a.abnormal_house_id|b.store_house_id'] = ['in', $stock_house_id];
+                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
@@ -87,6 +87,7 @@ class Distribution extends Backend
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -95,8 +96,9 @@ class Distribution extends Backend
             //TODO::是否有工单
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,b.store_house_id,b.order_prescription_type')
+                ->field('a.id,a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id,b.order_prescription_type')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -162,7 +164,7 @@ class Distribution extends Backend
                 } else {
                     $map['a.status'] = $label;
                 }
-                $map['a.temporary_house_id|a.abnormal_house_id|b.store_house_id'] = 0;
+                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = 0;
             }
 
             $_stock_house = new \app\admin\model\warehouse\StockHouse();
@@ -192,7 +194,7 @@ class Distribution extends Backend
                     $stock_house_id = $_stock_house
                         ->where($stock_house_where)
                         ->column('id');
-                    $map['a.temporary_house_id|a.abnormal_house_id|b.store_house_id'] = ['in', $stock_house_id];
+                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
@@ -204,8 +206,9 @@ class Distribution extends Backend
 
         $list = $this->model
             ->alias('a')
-            ->field('a.id,a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,b.store_house_id,b.order_prescription_type')
+            ->field('a.id,a.item_order_number,a.sku,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id,b.order_prescription_type')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->where($map)
             ->order($sort, $order)
@@ -573,6 +576,9 @@ EOF;
 
             Db::startTrans();
             try {
+                //主订单状态表
+                $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+
                 //更新状态
                 foreach($item_list as $value){
                     //下一步状态
@@ -622,10 +628,10 @@ EOF;
 
                     //订单主表标记已合单
                     if(9 == $save_status){
-                        $_new_order
+                        $_new_order_process
                             ->allowField(true)
-                            ->isUpdate(true, ['id'=>$value['order_id']])
-                            ->save(['combined_order_status'=>1])
+                            ->isUpdate(true, ['order_id'=>$value['order_id']])
+                            ->save(['combine_status'=>1,'combine_time'=>time()])
                         ;
                     }
 
@@ -826,7 +832,7 @@ EOF;
             $status = input('status');
             switch ($status) {
                 case 1:
-                    if (!in_array($item_info['distribution_status'],[1,2,3,4])) {
+                    if (!in_array($item_info['distribution_status'],[4,5,6])) {
                         return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
                     }
                     //子订单状态回滚
