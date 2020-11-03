@@ -3367,13 +3367,13 @@ class Scm extends Api
     {
         $item_order_number = $this->request->request('item_order_number');
         $item_order_number = $this->request->request('item_order_number');
-        var_dump($item_order_number);
-        die;
+//        var_dump($item_order_number);
+//        die;
         $this->distribution_save($item_order_number,2);
     }
 
     /**
-     * 合单扫描子单号--ok
+     * 合单扫描子单号--ok---修改合单主表结构为order_proceess表
      *
      * @参数 string item_order_number  子订单号
      * @author wgj
@@ -3393,9 +3393,9 @@ class Scm extends Api
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrder();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
+        $order_info = $_new_order_process
             ->where('id', $item_process_info['order_id'])
             ->field('id,total_qty_ordered,store_house_id')
             ->find();
@@ -3459,9 +3459,9 @@ class Scm extends Api
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrder();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
+        $order_info = $_new_order_process
             ->where('id', $item_process_info['order_id'])
             ->field('id,increment_id,total_qty_ordered,store_house_id')
             ->find();
@@ -3525,7 +3525,7 @@ class Scm extends Api
             //更新子单表
             $result = $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
             if ($result != false){
-                $res = $_new_order->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
+                $res = $_new_order_process->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
                 if ($res != false){
                     $return = $_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
                 }
@@ -3579,8 +3579,8 @@ class Scm extends Api
         empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
-        $order_info = $_new_order
+        $_new_order_process = new \app\admin\model\order\order\NewOrder();
+        $order_info = $_new_order_process
             ->where('increment_id', $order_number)
             ->field('id,total_qty_ordered,store_house_id')
             ->find();
@@ -3619,9 +3619,9 @@ class Scm extends Api
         empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrder();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
+        $order_info = $_new_order_process
             ->where('order_number', $order_number)
             ->field('id,increment_id,total_qty_ordered,store_house_id')
             ->find();
@@ -3647,7 +3647,7 @@ class Scm extends Api
 
 
         //获取库位信息，判断是否被占用
-        $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
+        $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$order_info['store_house_id'])->find();//查询合单库位--占用数量
 
 
     }
