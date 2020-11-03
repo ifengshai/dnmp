@@ -253,7 +253,7 @@ class SingleItems extends Backend
             $andWhere = "FIND_IN_SET({$sku},sku)";
             $connect_buy = $model->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('created_at', 'between', [$createat[0], $createat[3]])
+                ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->distinct('order_id')
                 ->field('order_id')
                 ->select();//包含此sku的所有订单好
