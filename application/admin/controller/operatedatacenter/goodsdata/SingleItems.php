@@ -342,8 +342,8 @@ class SingleItems extends Backend
 
             $same_where['day_date'] = ['between', [$start, $end]];
             $same_where['site'] = ['=', $site];
-            $same_where['sku'] = ['like', $sku . '%'];
-            $recent_30_day = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('order_num', 'day_date');
+            $same_where['platform_sku'] = ['like', $sku . '%'];
+            $recent_30_day = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $json['xColumnName'] = array_keys($recent_30_day);
 
             $json['columnData'] = [
