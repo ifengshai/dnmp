@@ -379,10 +379,10 @@ class WorkOrderList extends Backend
                             throw new Exception("该订单已出库，不能更换镜架");
                             exit;
                         }
-                        echo 444;
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");exit;
+                        echo 888;
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                         echo 222;exit;
