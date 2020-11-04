@@ -1267,7 +1267,7 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         foreach ($list as $v) {
             $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
-            $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id']])->select();
+            $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
             $item_params = [];
             foreach ($data as $key => $val) {
                 $item_params[$key]['id'] = $val['id'];
