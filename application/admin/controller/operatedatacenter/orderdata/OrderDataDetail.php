@@ -1031,5 +1031,6 @@ class OrderDataDetail extends Backend
             ob_flush();
             flush();
         }
+        fclose($fp);
     }
 }
