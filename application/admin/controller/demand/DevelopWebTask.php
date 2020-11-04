@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\common\model\Auth;
 
 /**
  * 开发任务管理
@@ -374,9 +375,10 @@ class DevelopWebTask extends Backend
 
             return json($result);
         }
+        $test_user_id = array_merge(Auth::getGroupUserId(config('demand.test_group_id')),Auth::getGroupUserId(config('demand.test_group_person_id')));
         $this->assignconfig('id', $ids);
         $this->assignconfig('user_id', session('admin.id'));
-        $this->assignconfig('test_user', array_keys(config('demand.test_user')));
+        $this->assignconfig('test_user', $test_user_id);
         return $this->view->fetch();
     }
 
