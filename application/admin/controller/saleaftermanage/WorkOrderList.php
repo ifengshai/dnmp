@@ -354,6 +354,7 @@ class WorkOrderList extends Backend
                         throw new Exception("Sku不能为空");
                         exit;
                     }
+                    echo 111;exit;
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     //$warehouseArr = config('workorder.warehouse_department_rule');
