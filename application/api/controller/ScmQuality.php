@@ -21,7 +21,7 @@ use app\admin\model\purchase\SampleWorkorder;
 use app\admin\model\purchase\SampleWorkorderItem;
 use app\admin\model\NewProductMapping;
 use app\admin\model\itemmanage\Item;
-use app\admin\controller\itemmanage\ItemPlatformSku;
+use app\admin\model\itemmanage\ItemPlatformSku;
 
 /**
  * 供应链质检接口类

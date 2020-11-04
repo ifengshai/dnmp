@@ -24,45 +24,47 @@ class SingleItems extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            if($filter['create_time-operate']){
+            if ($filter['create_time-operate']) {
                 unset($filter['create_time-operate']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $map['p.created_at'] = ['between', [$createat[0], $createat[3] . ' 23:59:59']];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } else{
-                if(isset($filter['time_str'])){
+            } else {
+                if (isset($filter['time_str'])) {
                     unset($filter['time_str']);
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $map['p.created_at'] = ['between', [$start,$end]];
+                $end = date('Y-m-d 23:59:59');
+                $map['p.created_at'] = ['between', [$start, $end]];
             }
 
-            if($filter['sku']){
+            if ($filter['sku']) {
                 $map['p.sku'] = $filter['sku'];
+                // $mapss['sku'] = ['like',$filter['sku'].'%'];
+                $sku = $filter['sku'];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            if($filter['order_platform']){
+            if ($filter['order_platform']) {
                 $site = $filter['order_platform'];
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            }else{
+            } else {
                 $site = 1;
             }
             $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
-            if($site == 2){
+            if ($site == 2) {
                 $order_model = Db::connect('database.db_voogueme');
 
-            }elseif($site == 3){
+            } elseif ($site == 3) {
                 $order_model = Db::connect('database.db_nihao');
                 $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
-            }else{
+            } else {
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
@@ -71,7 +73,7 @@ class SingleItems extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
-                ->join('sales_flat_order o','p.order_id=o.entity_id')
+                ->join('sales_flat_order o', 'p.order_id=o.entity_id')
                 ->field($field)
                 ->where($where)
                 ->where($map)
@@ -80,7 +82,7 @@ class SingleItems extends Backend
 
             $list = $order_model->table('sales_flat_order_item_prescription')
                 ->alias('p')
-                ->join('sales_flat_order o','p.order_id=o.entity_id')
+                ->join('sales_flat_order o', 'p.order_id=o.entity_id')
                 ->field($field)
                 ->where($where)
                 ->where($map)
@@ -105,10 +107,6 @@ class SingleItems extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            // foreach ($list as $key=>$value){
-            //     $list[$key]['number'] = $key+1;
-            //     $list[$key]['price'] = round($value['frame_price']+$value['index_price'],2);
-            // }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -116,12 +114,12 @@ class SingleItems extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign('magentoplatformarr',$magentoplatformarr);
+        $this->view->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
 
@@ -160,30 +158,21 @@ class SingleItems extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            // $order_model->query("set time_zone='+8:00'");;
             //此sku的总订单量
             $map['sku'] = ['like', $sku . '%'];
-            // $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $map['a.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['a.order_type'] = ['=', 1];
-            // dump($map);
             $total = $model->table('sales_flat_order')
                 ->where($map)
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->group('order_id')
                 ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                // ->fetchSql();
-                // ->select();
                 ->count();
-            // $model->table('sales_flat_order')->fetchSql();
-            // dump($total);die;
+
             //整站订单量
-            // $maps['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-            // $whole_platform_order_num = $this->zeelool->where($maps)->count();
-            //整站订单量
-            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->value('order_num');
+            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->sum('order_num');
 
             //订单占比
             $order_rate = $whole_platform_order_num == 0 ? 0 : round($total / $whole_platform_order_num * 100, 2) . '%';
@@ -192,65 +181,57 @@ class SingleItems extends Backend
             $whole_glass = $model
                 ->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->sum('qty_ordered');//sku总副数
-            // ->field('item_id,sku,created_at')
-            // ->select();
-            // dump($whole_glass);
             $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 0);
 
-            if ($order_platform!=3){
+            if ($order_platform != 3) {
                 //付费镜片订单数
-                $pay_jingpian_glass = $model
+                $nopay_jingpian_glass = $model
                     ->table('sales_flat_order')
                     ->alias('a')
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
-                    ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    ->where('b.coatiing_price', '>', 0)
+                    ->where('b.coatiing_price', '=', 0)
+                    ->where('b.index_price', '=', 0)
                     ->group('order_id')
-                    // ->select();
                     ->count();
-            }else{
+            } else {
                 //付费镜片订单数
-                $pay_jingpian_glass = $model
+                $nopay_jingpian_glass = $model
                     ->table('sales_flat_order')
                     ->alias('a')
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
-                    ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
-                    ->where('b.index_price', '>', 0)
+                    ->where('b.coatiing_price', '=', 0)
+                    ->where('b.index_price', '=', 0)
                     ->group('order_id')
-                    // ->select();
                     ->count();
             }
-
-            // dump($pay_jingpian_glass);
+            $pay_jingpian_glass = $total - $nopay_jingpian_glass;
 
             //付费镜片订单数占比
             $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
 
             //只买一副的订单
-            $only_one_glass_num = $model
+            $only_one_glass_order_list = $model
                 ->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('b.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                ->where('b.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
                 ->field('order_id,sum(qty_ordered) as all_qty_ordered')
                 ->group('a.order_id')
                 ->select();
-            // dump(array_column($only_one_glass_num, 'order_id','all_qty_ordered'));
-            // $arr = array_count_values(array_column($only_one_glass_num, 'order_id','qty_ordered'));//统计每个订单购买的副数
-            $arr = array_flip(array_column($only_one_glass_num, 'order_id','all_qty_ordered'));//统计每个订单购买的副数
-            // dump($arr);die;
             $only_one_glass_num = 0;
-            foreach ($arr as $v) {
-                if ($v == 1) {
+            foreach ($only_one_glass_order_list as $k=>$v) {
+                $one = $model->table('sales_flat_order_item')->where('order_id',$v['order_id'])->sum('qty_ordered');
+                if ($one == 1){
                     $only_one_glass_num += 1;
                 }
             }
-
             //只买一副的订单占比
             $only_one_glass_rate = $total == 0 ? 0 : round($only_one_glass_num / $total * 100, 2) . '%';
 
@@ -258,38 +239,30 @@ class SingleItems extends Backend
             $whole_price = $model
                 ->table('sales_flat_order')
                 ->where($map)
-                ->where('a.created_at', 'between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]])
+                ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                // ->group('order_id')
                 ->field('base_grand_total')
                 ->sum('base_grand_total');
-            // ->select();
-            // $whole_price = round(array_sum(array_map(function($val){return $val['base_grand_total'];}, $whole_price)),2);
 
             //订单客单价
             $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
-            // //关联购买
-            $andWhere = "FIND_IN_SET({$sku},sku)";
+            //关联购买
             $connect_buy = $model->table('sales_flat_order_item')
                 ->where('sku', 'like', $sku . '%')
-                ->where('created_at', 'between', [$createat[0], $createat[3]])
+                ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->distinct('order_id')
                 ->field('order_id')
                 ->select();//包含此sku的所有订单好
-            // dump($connect_buy);
             $connect_buy = array_column($connect_buy, 'order_id');
-            // dump($connect_buy);
             $skus = array();
             foreach ($connect_buy as $value) {
                 $arr = $model->table('sales_flat_order_item')
                     ->where('order_id', $value)
-                    // ->where('created_at','between', [$createat[0], $createat[3]])
                     ->field('sku')
                     ->select();//这些订单号内的所有sku
                 $skus[] = array_column($arr, 'sku');
             }
-            // dump($skus);
             $array_sku = [];
             //获取关联购买的数量
             foreach ($skus as $k => $v) {
@@ -299,7 +272,6 @@ class SingleItems extends Backend
                     }
                 }
             }
-            // dump($array_sku);
             $data = compact('sku', 'array_sku', 'total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price');
             $this->success('', '', $data);
         }
@@ -322,8 +294,8 @@ class SingleItems extends Backend
             $createat = explode(' ', $time_str);
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $site];
-            $same_where['sku'] = ['like', $sku . '%'];
-            $recent_day_num = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('order_num', 'day_date');
+            $same_where['platform_sku'] = ['like', $sku . '%'];
+            $recent_day_num = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $recent_day_now = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('now_pricce', 'day_date');
 
 
@@ -370,8 +342,8 @@ class SingleItems extends Backend
 
             $same_where['day_date'] = ['between', [$start, $end]];
             $same_where['site'] = ['=', $site];
-            $same_where['sku'] = ['like', $sku . '%'];
-            $recent_30_day = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('order_num', 'day_date');
+            $same_where['platform_sku'] = ['like', $sku . '%'];
+            $recent_30_day = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $json['xColumnName'] = array_keys($recent_30_day);
 
             $json['columnData'] = [

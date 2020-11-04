@@ -869,10 +869,7 @@ class WorkOrderList extends Backend
                         if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
                             $this->model->changeAddress($params, $work_id, 13, $res);
                         }
-
                     }
-
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();

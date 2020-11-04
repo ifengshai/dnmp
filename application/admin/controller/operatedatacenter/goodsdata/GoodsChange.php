@@ -92,7 +92,7 @@ class GoodsChange extends Backend
                 $sku_data_day[$k]['status'] = $sku_detail['outer_sku_status'];
                 $sku_data_day[$k]['stock'] = $sku_detail['stock'];
                 $sku_data_day[$k]['on_way_stock'] = $sku_detail['plat_on_way_stock'];
-                $sku_data_day[$k]['cart_change'] = $sku_data_day[$k]['cart_num'] == 0 ? 0 : round($sku_data_day[$k]['order_num'] / $sku_data_day[$k]['cart_num'] * 100, 2) . '%';
+                $sku_data_day[$k]['cart_change'] = $sku_data_day[$k]['cart_num'] == 0 ? '0%' : round($sku_data_day[$k]['order_num'] / $sku_data_day[$k]['cart_num'] * 100, 2) . '%';
             }
             $result = array("total" => $total, "rows" => $sku_data_day);
             return json($result);
