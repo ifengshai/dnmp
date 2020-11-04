@@ -395,20 +395,20 @@ class OrderData extends Backend
         }
 
 
-        if (strpos($arr['index_type'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
         //染色
-        if (strpos($arr['index_type'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -510,20 +510,20 @@ class OrderData extends Backend
         }
 
 
-        if (strpos($arr['index_type'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
         //染色
-        if (strpos($arr['index_type'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -620,20 +620,20 @@ class OrderData extends Backend
         }
 
 
-        if (strpos($arr['index_type'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
         //染色
-        if (strpos($arr['index_type'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -663,7 +663,7 @@ class OrderData extends Backend
      * @since 2020/10/28 10:16:53 
      * @return void
      */
-    protected function Meeloog_prescription_analysis($data)
+    protected function meeloog_prescription_analysis($data)
     {
         $options = unserialize($data);
         //镜片类型
@@ -733,20 +733,20 @@ class OrderData extends Backend
         }
 
 
-        if (strpos($arr['index_type'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
         //染色
-        if (strpos($arr['index_type'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -776,7 +776,7 @@ class OrderData extends Backend
      * @since 2020/10/28 10:16:53 
      * @return void
      */
-    protected function Wesee_prescription_analysis($data)
+    protected function wesee_prescription_analysis($data)
     {
         $options = unserialize($data);
         //镜片类型
@@ -834,9 +834,10 @@ class OrderData extends Backend
 
         //判断是否为成品老花镜
         if ($options['info_buyRequest']['tmplens']['degrees']) {
-            $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
-            $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
-            $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+            $arr['od_sph'] = $options['info_buyRequest']['tmplens']['degrees'];
+            $arr['os_sph'] = $options['info_buyRequest']['tmplens']['degrees'];
+            $arr['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+            $arr['index_name'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
         }
 
         /**
@@ -851,20 +852,20 @@ class OrderData extends Backend
         }
 
 
-        if (strpos($arr['index_type'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Lens with Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
         //染色
-        if (strpos($arr['index_type'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_type'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -885,6 +886,124 @@ class OrderData extends Backend
 
         return $arr;
     }
+
+
+
+    /**
+     * Voogueme 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function zeelool_es_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        //镜片类型
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //镜片名称
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //光度等参数
+        $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
+        $options_params = array();
+        foreach ($prescription_params as $key => $value) {
+            $arr_value = explode("=", $value);
+            $options_params[$arr_value[0]] = $arr_value[1];
+        }
+        //处方类型
+        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        //镀膜名称
+        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
+        //镀膜价格
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_price'];
+        //镜框价格
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
+        //镜片价格
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['index_price'];
+        //镜框原始价格
+        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
+        //镜片颜色
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
+        //镜框颜色
+        $arr['frame_color'] = $options['options'][0]['value'];
+        //镜片+镀膜价格
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        //镜框+镜片+镀膜价格
+        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        //镜片分类
+        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        //光度参数
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_axis'] = $options_params['od_axis'];
+        $arr['pd_l'] = $options_params['pd_l'];
+        $arr['pd_r'] = $options_params['pd_r'];
+        $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
+        //小语种站左右眼add是反的
+        $arr['os_add'] = $options_params['od_add'];
+        $arr['od_add'] = $options_params['os_add'];
+        $arr['od_pv'] = $options_params['od_pv'];
+        $arr['os_pv'] = $options_params['os_pv'];
+        $arr['od_pv_r'] = $options_params['od_pv_r'];
+        $arr['os_pv_r'] = $options_params['os_pv_r'];
+        $arr['od_bd'] = $options_params['od_bd'];
+        $arr['os_bd'] = $options_params['os_bd'];
+        $arr['od_bd_r'] = $options_params['od_bd_r'];
+        $arr['os_bd_r'] = $options_params['os_bd_r'];
+
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+        if ($arr['prescription_type'] == 'Progressive') {
+            $arr['is_custom_lens'] = 1;
+        }
+
+
+        if (strpos($arr['index_name'], 'Polarized') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        //染色
+        if (strpos($arr['index_name'], 'Tinted') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if (strpos($arr['index_name'], 'Color Tint') !== false) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
+            $arr['is_custom_lens'] = 1;
+        }
+        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
+            $arr['is_custom_lens'] = 1;
+        }
+
+        return $arr;
+    }
+
+
 
     /**
      * 批量生成子订单表子单号
