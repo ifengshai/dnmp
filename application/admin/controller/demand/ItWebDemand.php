@@ -109,10 +109,10 @@ class ItWebDemand extends Backend
      */
     public function index()
     {
-        $time_update['status'] = 2;
-        $time_update['demand_type'] = 1;
-        $time = date('Y-m-d H:i', time());
-        $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time], 'status' => 1, 'pm_audit_status' => 3]);
+//        $time_update['status'] = 2;
+//        $time_update['demand_type'] = 1;
+//        $time = date('Y-m-d H:i', time());
+//        $this->model->allowField(true)->save($time_update, ['start_time' => ['elt', $time], 'status' => 1, 'pm_audit_status' => 3]);
 
         //设置过滤方法
         $this->request->filter(['strip_tags']);
