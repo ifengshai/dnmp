@@ -3369,13 +3369,13 @@ class Scm extends Api
     {
         $item_order_number = $this->request->request('item_order_number');
         $item_order_number = $this->request->request('item_order_number');
-        var_dump($item_order_number);
-        die;
+//        var_dump($item_order_number);
+//        die;
         $this->distribution_save($item_order_number,2);
     }
 
     /**
-     * 合单扫描子单号--ok
+     * 合单扫描子单号--ok---修改合单主表改为order_proceess表
      *
      * @参数 string item_order_number  子订单号
      * @author wgj
@@ -3395,43 +3395,42 @@ class Scm extends Api
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
-            ->where('id', $item_process_info['order_id'])
-            ->field('id,total_qty_ordered,store_house_id')
+        $order_process_info = $_new_order_process
+            ->where('order_id', $item_process_info['order_id'])
+            ->field('order_id,store_house_id')
             ->find();
+
         //第二次扫描提示语
         if ($item_process_info['distribution_status'] == 8){
             //判断子订单类型，是否为异常库位、暂存库为、正常库位
             if ($item_process_info['abnormal_house_id']){
                 //有异常库位ID
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$item_process_info['abnormal_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['subarea'].$store_house_info['coding'].'异常库位'), [], 403);
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'异常库位'), [], 403);
             } elseif ($item_process_info['temporary_house_id']){
                 //有暂存库位ID
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$item_process_info['temporary_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['subarea'].$store_house_info['coding'].'异常库位'), [], 403);
-            }elseif ($order_info['store_house_id']){
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'异常库位'), [], 403);
+            }elseif ($order_process_info['store_house_id']){
                 //有主单合单库位
-                $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$order_info['store_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['subarea'].$store_house_info['coding'].'库位'), [], 403);
+                $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'库位'), [], 403);
             }
 
         }
 
         //未合单，首次扫描
         $info['item_order_number'] = $item_order_number;
-        if (!$order_info['store_house_id']){
+        if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
             $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['subarea'].$store_house_info['coding'];//库位编码
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
-            $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$order_info['store_house_id'])->find();
+            $store_house_info = $_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
             $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['subarea'].$store_house_info['coding'];//库位编码
         }
 
         $this->success('', ['info' => $info],200);
@@ -3439,7 +3438,7 @@ class Scm extends Api
 
 
     /**
-     * 合单--确认放入合单架
+     * 合单--确认放入合单架---最后一个子单扫描合单时，检查子单合单是否有异常，无异常且全部为已合单，则更新主单合单状态和时间
      *
      * @参数 string item_order_number  子订单号
      * @author wgj
@@ -3461,39 +3460,48 @@ class Scm extends Api
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
-            ->where('id', $item_process_info['order_id'])
-            ->field('id,increment_id,total_qty_ordered,store_house_id')
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        $order_process_info = $_new_order
+            ->alias('a')
+            ->where('a.id', $item_process_info['order_id'])
+            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
-        empty($order_info) && $this->error(__('主订单不存在'), [], 403);
+        empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息，判断是否被占用
         $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
-        if ($store_house_info['occupy'] && empty($order_info['store_house_id'])){
+        if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])){
             //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
             $new_store_house_info = $_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
             empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
             $info['store_id'] = $new_store_house_info['id'];
-            $info['coding'] = $new_store_house_info['subarea'].$store_house_info['coding'];//库位编码
-            $this->error(__('合单架'.$store_house_info['subarea'].$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['subarea'].$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+            $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
         }
 
         if ($item_process_info['distribution_status'] == 8){
             //重复扫描子单号--提示语句
-            $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['subarea'].$store_house_info['coding'].'库位'), [], 511);
+            $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'库位'), [], 511);
         }
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
-        $total_qty_ordered = $order_info['total_qty_ordered'];
+        //获取订单购买总数
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $total_qty_ordered = $_new_order
+            ->where('id', $item_process_info['order_id'])
+            ->value('total_qty_ordered')
+        ;
         $count = $_new_order_item_process->where(['distribution_status'=>8,'order_id'=>$item_process_info['order_id']])->count();
 
-        if($order_info['store_house_id']){
-            //存在合单库位ID
+        $info['order_id'] = $item_process_info['order_id'];//合单确认放入合单架提交 接口返回自带主订单号
+
+        if($order_process_info['store_house_id']){
+            //存在合单库位ID，获取合单库位号存入
             if ($total_qty_ordered > $count){
                 //不是最后一个子单
                 $num = '';
@@ -3503,17 +3511,24 @@ class Scm extends Api
                 $num = '最后一个';
                 $next = 0;//是否有下一个子单 1有，0没有
             }
+            $info['next'] = $next;
             //更新子单表
             $result = false;
             $result = $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
             if ($result != false){
                 //操作成功记录
-                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_info['increment_id'].'的'.$num.'子单合单完成');
+                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
+                if (!$next){
+                    //最后一个子单且合单完成，更新主单、子单状态为合单完成
+                    $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                    $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+                    $_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+                }
 
-                $this->success('子单号放入合单架成功', ['info'=>['next'=>$next]], 200);
+                $this->success('子单号放入合单架成功', ['info'=>$info], 200);
             } else {
                 //操作失败记录
-                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_info['increment_id'].'的'.$num.'子单合单失败');
+                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单失败');
 
                 $this->error(__('No rows were inserted'), [], 511);
             }
@@ -3527,7 +3542,7 @@ class Scm extends Api
             //更新子单表
             $result = $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
             if ($result != false){
-                $res = $_new_order->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
+                $res = $_new_order_process->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
                 if ($res != false){
                     $return = $_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
                 }
@@ -3554,13 +3569,20 @@ class Scm extends Api
                 $num = '首个';
                 $next = 1;//是否有下一个子单 1有，0没有
             }
+            if (!$next){
+                //只有一个子单且合单完成，更新主单、子单状态为合单完成
+                $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+                $_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+            }
+            $info['next'] = $next;
             //操作成功记录
-            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_info['increment_id'].'的'.$num.'子单合单完成');
+            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
 
-            $this->success('子单号放入合单架成功', ['info'=>['next'=>$next]], 200);
+            $this->success('子单号放入合单架成功', ['info'=>$info], 200);
         } else {
             //操作失败记录
-            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_info['increment_id'].'的'.$num.'子单合单失败');
+            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单失败');
 
             $this->error(__('No rows were inserted'), [], 511);
         }
@@ -3569,7 +3591,7 @@ class Scm extends Api
     }
 
     /**
-     * 合单--合单完成页面-------修改原型图待定
+     * 合单--合单完成页面-------修改原型图待定---子单合单状态、异常状态展示
      *
      * @参数 string order_number  主订单号
      * @author wgj
@@ -3581,17 +3603,20 @@ class Scm extends Api
         empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
         $_new_order = new \app\admin\model\order\order\NewOrder();
-        $order_info = $_new_order
-            ->where('increment_id', $order_number)
-            ->field('id,total_qty_ordered,store_house_id')
+        $order_process_info = $_new_order
+            ->alias('a')
+            ->where('a.increment_id', $order_number)
+            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
-        empty($order_info) && $this->error(__('订单不存在'), [], 403);
+        empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取子订单数据
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
-            ->where('order_id', $order_info['id'])
+            ->where('order_id', $order_process_info['id'])
             ->field('id,item_order_number,distribution_status,abnormal_house_id')
             ->select();
         empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
@@ -3609,7 +3634,7 @@ class Scm extends Api
 
 
     /**
-     * 合单--合单完成提交-------修改原型图待定
+     * 合单--合单完成提交-------修改原型图待定----合单完成（下一步）、失败（展示失败原因）---产品修改ing---可能删除不用，在最后一个子单合单完成时判断更改
      *
      * @参数 string order_number  主订单号
      * @author wgj
@@ -3621,18 +3646,21 @@ class Scm extends Api
         empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
-        $_new_order = new \app\admin\model\order\order\NewOrder();
         $_stock_house = new \app\admin\model\warehouse\StockHouse;
-        $order_info = $_new_order
-            ->where('order_number', $order_number)
-            ->field('id,increment_id,total_qty_ordered,store_house_id')
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+
+        $order_process_info = $_new_order
+            ->alias('a')
+            ->where('a.increment_id', $order_number)
+            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
-        empty($order_info) && $this->error(__('订单不存在'), [], 403);
+        empty($order_process_info) && $this->error(__('订单不存在'), [], 403);
 
         //获取子订单数据----验证子单状态
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $item_process_info = $_new_order_item_process
-            ->where('order_id', $order_info['id'])
+            ->where('order_id', $order_process_info['id'])
             ->field('id,item_order_number,distribution_status,abnormal_house_id')
             ->select();
         empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
@@ -3647,12 +3675,282 @@ class Scm extends Api
         foreach($item_process_info as $key => $value){
         }
 
-
         //获取库位信息，判断是否被占用
-        $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
+        $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$order_process_info['store_house_id'])->find();//查询合单库位--占用数量
 
 
     }
+
+
+    /**
+     * 合单待取列表
+     *
+     * @参数 string query  查询内容
+     * @参数 int type  待取出类型 1 合单 2异常
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  * 页码
+     * @参数 int page_size  * 每页显示数量
+     * @author wgj
+     * @return mixed
+     */
+    public function merge_out_list()
+    {
+        $query = $this->request->request('query');
+        $type = $this->request->request('type');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 520);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
+
+        $where = [];
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        if ($type == 1){
+            //合单待取出列表，主单为合单完成状态且子单都已合单
+            if($query){
+                $where['b.sku|c.coding'] = ['like', '%' . $query . '%'];
+            }
+            if($start_time && $end_time){
+                $where['a.combine_time'] = ['between', [$start_time, $end_time]];
+            }
+            $where['a.combine_status'] = 1;
+
+            $list = $_new_order_process
+                ->alias('a')
+                ->where($where)
+                ->join(['mojing_order.fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
+                ->join(['mojing.fa_store_house'=> 'c'],'a.store_house_id=c.id','left')
+                ->field('c.coding,c.subarea,a.combine_time')
+                ->limit($offset, $limit)
+                ->select();
+            empty($list) && $this->error(__('订单不存在'), [], 403);
+
+        } else {
+            //异常待处理列表
+            if($query){
+                $where['b.item_order_number|c.coding'] = ['like', '%' . $query . '%'];
+            }
+            $list = $_new_order_process
+                ->alias('a')
+                ->where($where)
+                ->join(['mojing_order.fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
+                ->join(['mojing.fa_store_house'=> 'c'],'a.store_house_id=c.id','left')
+                ->field('c.coding,a.item_order_number')
+                ->limit($offset, $limit)
+                ->select();
+            empty($list) && $this->error(__('订单不存在'), [], 403);
+        }
+
+        $info['list'] = $list;
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 扫描库位条形码
+     *
+     * @参数 string query  查询内容
+     * @参数 int type  待取出类型 1 合单 2异常
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  * 页码
+     * @参数 int page_size  * 每页显示数量
+     * @author wgj
+     * @return mixed
+     */
+    public function merge_out_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $store_house_id = $this->request->request('store_house_id');
+        empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
+        empty($store_house_id) && $this->error(__('合单库位号不能为空'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $item_process_info = $_new_order_item_process
+            ->where('item_order_number', $item_order_number)
+            ->field('id,distribution_status,order_id')
+            ->find();
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+
+        //获取订单购买总数,商品总数即为子单数量
+        $_stock_house = new \app\admin\model\warehouse\StockHouse;
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        $order_process_info = $_new_order
+            ->alias('a')
+            ->where('a.id', $item_process_info['order_id'])
+            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->field('a.id,a.increment_id,b.store_house_id')
+            ->find();
+        empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
+
+        //获取库位信息，判断是否被占用
+        $store_house_info = $_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
+        empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
+
+        if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])){
+            //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
+            $new_store_house_info = $_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
+            empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
+
+            $info['store_id'] = $new_store_house_info['id'];
+            $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+        }
+
+        if ($item_process_info['distribution_status'] == 8){
+            //重复扫描子单号--提示语句
+            $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'库位'), [], 511);
+        }
+
+        //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
+        //获取订单购买总数
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $total_qty_ordered = $_new_order
+            ->where('id', $item_process_info['order_id'])
+            ->value('total_qty_ordered')
+        ;
+        $count = $_new_order_item_process->where(['distribution_status'=>8,'order_id'=>$item_process_info['order_id']])->count();
+
+        $info['order_id'] = $item_process_info['order_id'];//合单确认放入合单架提交 接口返回自带主订单号
+
+        if($order_process_info['store_house_id']){
+            //存在合单库位ID，获取合单库位号存入
+            if ($total_qty_ordered > $count){
+                //不是最后一个子单
+                $num = '';
+                $next = 1;//是否有下一个子单 1有，0没有
+            } else {
+                //最后一个子单
+                $num = '最后一个';
+                $next = 0;//是否有下一个子单 1有，0没有
+            }
+            $info['next'] = $next;
+            //更新子单表
+            $result = false;
+            $result = $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
+            if ($result != false){
+                //操作成功记录
+                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
+                if (!$next){
+                    //最后一个子单且合单完成，更新主单、子单状态为合单完成
+                    $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                    $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+                    $_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+                }
+
+                $this->success('子单号放入合单架成功', ['info'=>$info], 200);
+            } else {
+                //操作失败记录
+                DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单失败');
+
+                $this->error(__('No rows were inserted'), [], 511);
+            }
+        }
+
+        //首个子单进入合单架START
+        $result = false;
+        $return = false;
+        Db::startTrans();
+        try {
+            //更新子单表
+            $result = $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
+            if ($result != false){
+                $res = $_new_order_process->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
+                if ($res != false){
+                    $return = $_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
+                }
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($return !== false) {
+            if ($total_qty_ordered == 1){
+                //只有一个子单
+                $num = '';
+                $next = 0;//是否有下一个子单 1有，0没有
+            } else {
+                //多个子单的首个子单
+                $num = '首个';
+                $next = 1;//是否有下一个子单 1有，0没有
+            }
+            if (!$next){
+                //只有一个子单且合单完成，更新主单、子单状态为合单完成
+                $_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+                $_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+            }
+            $info['next'] = $next;
+            //操作成功记录
+            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
+
+            $this->success('子单号放入合单架成功', ['info'=>$info], 200);
+        } else {
+            //操作失败记录
+            DistributionLog::record($this->auth,$item_process_info['id'],'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单失败');
+
+            $this->error(__('No rows were inserted'), [], 511);
+        }
+        //首个子单进入合单架END
+    }
+
+    /**
+     * 合单--合单完成页面-----修改原型图待定---子单合单状态、异常状态展示
+     *
+     * @参数 string order_number  主订单号
+     * @author wgj
+     * @return mixed
+     */
+    public function merge_out_detail()
+    {
+        $order_number = $this->request->request('order_number');
+        empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
+
+        //获取订单购买总数,商品总数即为子单数量
+        $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        $_new_order = new \app\admin\model\order\order\NewOrder();
+        $order_process_info = $_new_order
+            ->alias('a')
+            ->where('a.increment_id', $order_number)
+            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->field('a.id,a.increment_id,b.store_house_id')
+            ->find();
+        empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
+
+        //获取子订单数据
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $item_process_info = $_new_order_item_process
+            ->where('order_id', $order_process_info['id'])
+            ->field('id,item_order_number,distribution_status,abnormal_house_id')
+            ->select();
+        empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
+
+        $distribution_status = [1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
+        foreach($item_process_info as $key => $value){
+            $item_process_info[$key]['distribution_status'] = $distribution_status[$value['distribution_status']];//子单合单状态
+            $item_process_info[$key]['abnormal_house_id'] = 0 == $value['abnormal_house_id'] ? '正常' : '异常';//异常状态
+        }
+        $info['order_number'] = $order_number;
+        $info['list'] = $item_process_info;
+        $this->success('', ['info'=>$info], 200);
+
+    }
+
 
 
 
