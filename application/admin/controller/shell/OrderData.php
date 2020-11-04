@@ -128,21 +128,21 @@ class OrderData extends Backend
                                 case 'nihao':
                                     $site = 3;
                                     break;
-                                    // case 'meeloog':
-                                    //     $model = $this->meeloog;
-                                    //     break;
+                                case 'meeloog':
+                                    $site = 4;
+                                    break;
                                 case 'wesee':
                                     $site = 5;
                                     break;
-                                    // case 'zeelool_es':
-                                    //     $model = $this->zeelool_es;
-                                    //     break;
-                                    // case 'zeelool_de':
-                                    //     $model = $this->zeelool_de;
-                                    //     break;
-                                    // case 'zeelool_jp':
-                                    //     $model = $this->zeelool_jp;
-                                    //     break;
+                                case 'zeelool_es':
+                                    $site = 9;
+                                    break;
+                                case 'zeelool_de':
+                                    $site = 10;
+                                    break;
+                                case 'zeelool_jp':
+                                    $site = 11;
+                                    break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
@@ -282,6 +282,8 @@ class OrderData extends Backend
                                         $options =  $this->voogueme_prescription_analysis($v['product_options']);
                                     } elseif ($site == 3) {
                                         $options =  $this->nihao_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 4) {
+                                        $options =  $this->Meeloog_prescription_analysis($v['product_options']);
                                     } elseif ($site == 5) {
                                         $options =  $this->Wesee_prescription_analysis($v['product_options']);
                                     }
@@ -484,8 +486,9 @@ class OrderData extends Backend
         $arr['pd'] = $options_params['pd'];
         $arr['pdcheck'] = $options_params['pdcheck'];
         $arr['prismcheck'] = $options_params['prismcheck'];
-        $arr['os_add'] = $options_params['os_add'];
-        $arr['od_add'] = $options_params['od_add'];
+        //V站左右眼add是反的
+        $arr['os_add'] = $options_params['od_add'];
+        $arr['od_add'] = $options_params['os_add'];
         $arr['od_pv'] = $options_params['od_pv'];
         $arr['os_pv'] = $options_params['os_pv'];
         $arr['od_pv_r'] = $options_params['od_pv_r'];
@@ -566,7 +569,7 @@ class OrderData extends Backend
         //镀膜名称
         $arr['coating_name'] = $options['info_buyRequest']['tmplens']['four_name'] ?: '';
         //镀膜价格
-        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_base_price'];
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coating_base_price'];
         //镜框价格
         $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
         //镜片价格
@@ -679,11 +682,11 @@ class OrderData extends Backend
         //镀膜名称
         $arr['coating_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
         //镀膜价格
-        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_base_price'];
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_price'];
         //镜框价格
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
         //镜片价格
-        $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['index_price'];
         //镜框原始价格
         $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
         //镜片颜色
@@ -794,7 +797,7 @@ class OrderData extends Backend
         //镀膜价格
         $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_base_price'];
         //镜框价格
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
         //镜片价格
         $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
         //镜框原始价格
@@ -828,6 +831,13 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
+
+        //判断是否为成品老花镜
+        if ($options['info_buyRequest']['tmplens']['degrees']) {
+            $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
+            $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
+            $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
+        }
 
         /**
          * 判断定制现片逻辑
@@ -875,8 +885,6 @@ class OrderData extends Backend
 
         return $arr;
     }
-
-
 
     /**
      * 批量生成子订单表子单号
@@ -940,8 +948,8 @@ class OrderData extends Backend
      * @return void
      */
     public function zeelool_old_order()
-    {-
-        $site = 1;
+    {
+        -$site = 1;
         $id = $this->order->where('site=1 and entity_id < 524836')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['between', [$id, 524836]]])->limit(3000)->select();
         $list = collection($list)->toArray();
@@ -991,7 +999,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    
+
     public function order_address_data_shell()
     {
         $this->order_address_data(1);
@@ -1138,7 +1146,7 @@ class OrderData extends Backend
         $list = $this->order->where('total_qty_ordered=0')->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id']])->sum('qty');
             $params[$k]['total_qty_ordered'] = $qty;
             $params[$k]['id'] = $v['id'];
