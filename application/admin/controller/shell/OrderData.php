@@ -1470,7 +1470,7 @@ class OrderData extends Backend
         } elseif ($site == 4) {
             $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_wesee')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
@@ -1517,7 +1517,7 @@ class OrderData extends Backend
             $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 3949]]])->limit(3000)->select();
         } elseif ($site == 5) {
             $id = $this->orderitemoption->where('site=5 and item_id < 12263')->max('item_id');
-            $list = Db::connect('database.db_wesee')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 12263]]])->limit(3000)->select();
+            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 12263]]])->limit(3000)->select();
         } 
 
         $options = [];
