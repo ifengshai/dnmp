@@ -445,7 +445,6 @@ class Test01 extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $data = '2020-11-02';
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>1])->select();
         foreach ($z_sku_list as $k=>$v){
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
@@ -650,7 +649,6 @@ class Test01 extends Backend
         $zeelool_model = Db::connect('database.db_voogueme_online');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //统计昨天的数据
-        $data = date('Y-m-d', strtotime('-1 day'));
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>2])->select();
         foreach ($z_sku_list as $k=>$v) {
             $cart_where1 = [];
@@ -678,7 +676,6 @@ class Test01 extends Backend
         $zeelool_model = Db::connect('database.db_nihao_online');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //统计昨天的数据
-        $data = date('Y-m-d', strtotime('-1 day'));
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>3])->select();
         foreach ($z_sku_list as $k=>$v) {
             $cart_where1 = [];
