@@ -1074,17 +1074,15 @@ class ScmDistribution extends Scm
     /**
      * 合单取出---释放库位[1.正常状态取出释放合单库位，异常单则回退其主单下的所有子单为待合单状态并释放合单库位]
      *
-     * @参数 string order_number  主订单号
+     * @参数 string order_number  主订单号 取出时只需传order_number主订单号
      * @author wgj
      * @return mixed
      */
     public function merge_out_submit()
     {
-        $type = $this->request->request("type") ?? 1;
         $order_number = $this->request->request('order_number');
         empty($order_number) && $this->error(__('主订单号不能为空'), [], 403);
 
-        //取出时只需传order_number主订单号
         //获取主单库位信息
         $order_process_info = $this->_new_order
             ->alias('a')
@@ -1094,9 +1092,11 @@ class ScmDistribution extends Scm
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
-        if ($order_process_info['combine_status'] == 1 && $order_process_info['store_house_id'] != 0){
-            //合单完成释放合单库位
+        if ($order_process_info['store_house_id'] != 0){
+            //有合单库位订单——释放库位占用，解绑合单库位ID
             $result = false;
+            $return = false;
+            $res = false;
             Db::startTrans();
             try {
                 //更新订单业务处理表，解绑库位号
@@ -1104,6 +1104,18 @@ class ScmDistribution extends Scm
                 if ($result != false){
                     //释放合单库位占用数量
                     $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$order_process_info['store_house_id']])->save(['occupy'=>0]);
+                    if ($res != false){
+                        //回退带有异常子单的 合单子单状态
+                        if ($order_process_info['combine_status'] == 0){
+                            $where = [];
+                            $where['abnormal_house_id'] = 0;
+                            $where['order_id'] = $order_process_info['id'];
+                            $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where($where)->select();
+                            $ids = array_column($item_process_info,'id');
+                            $return = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['id', 'in', $ids])->save(['distribution_status'=>7]);//回退子订单合单状态至待合单7
+                        }
+
+                    }
                 }
 
                 Db::commit();
@@ -1117,23 +1129,48 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 444);
             }
-            if ($res !== false) {
-                //操作成功记录，批量日志插入
-                $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where('order_id',$order_number)->select();
-                foreach($item_process_info as $key => $value){
-                    DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出合单库完成');
-                }
+            if ($order_process_info['combine_status'] == 1){
+                //合单完成订单
+                $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where('order_id',$order_process_info['id'])->select();
+                if ($res !== false) {
+                    //操作成功记录，批量日志插入
+                    foreach($item_process_info as $key => $value){
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出合单库完成');
+                    }
 
-                $this->success('合单取出成功', [], 200);
+                    $this->success('合单取出成功', [], 200);
+                } else {
+                    //操作失败记录，批量日志插入
+                    foreach($item_process_info as $key => $value){
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出合单库失败');
+                    }
+
+                    $this->error(__('No rows were inserted'), [], 511);
+                }
             } else {
-                //操作失败记录，批量日志插入
-                $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where('order_id',$order_number)->select();
-                foreach($item_process_info as $key => $value){
-                    DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出合单库失败');
-                }
+                //异常子单订单 --已合单的子单回退到待合单状态
 
-                $this->error(__('No rows were inserted'), [], 511);
+                $where = [];
+                $where['abnormal_house_id'] = 0;
+                $where['order_id'] = $order_process_info['id'];
+                $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where($where)->select();
+                if ($res !== false) {
+                    //操作成功记录，批量日志插入
+                    foreach($item_process_info as $key => $value){
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出异常订单完成');
+                    }
+
+                    $this->success('合单取出成功', [], 200);
+                } else {
+                    //操作失败记录，批量日志插入
+                    foreach($item_process_info as $key => $value){
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'作为主单号'.$order_number.'的子单取出异常订单失败');
+                    }
+
+                    $this->error(__('No rows were inserted'), [], 511);
+                }
             }
+
         } else {
 
         }
