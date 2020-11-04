@@ -230,6 +230,8 @@ class OrderData extends Backend
                                         $options =  $this->voogueme_prescription_analysis($v['product_options']);
                                     } elseif ($site == 3) {
                                         $options =  $this->nihao_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 4) {
+                                        $options =  $this->meeloog_prescription_analysis($v['product_options']);
                                     } elseif ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($v['product_options']);
                                     }
@@ -248,13 +250,6 @@ class OrderData extends Backend
                                             $data[$i]['magento_order_id'] = $v['order_id'];
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
-                                            $str = '';
-                                            if ($i < 9) {
-                                                $str = '0' . ($i + 1);
-                                            } else {
-                                                $str = $i + 1;
-                                            }
-                                            $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
                                             $data[$i]['sku'] = $v['sku'];
                                             $data[$i]['created_at'] = strtotime($v['created_at']);
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']);
@@ -1254,6 +1249,37 @@ class OrderData extends Backend
         if ($params) $this->orderitemprocess->saveAll($params);
         echo "ok";
     }
+
+
+    /**
+     * 批量生成子订单表子单号
+     * 
+     * @Description
+     * @todo 计划任务 10分钟一次
+     * @author wpl
+     * @since 2020/10/28 17:36:27 
+     * @return void
+     */
+    public function set_order_item_number_shell()
+    {
+        //查询未生成子单号的数据
+        $list = $this->orderitemprocess->where('ISNULL(item_order_number)=1')->limit(1000)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['order_id'] = $res->id;
+            $params[$k]['item_order_number'] = $res->increment_id . $v['item_order_number'];
+            $params[$k]['updated_at'] = time();
+        }
+        //更新数据
+        if ($params) $this->orderitemprocess->saveAll($params);
+        echo "ok";
+    }
+
+
+
 
     /**
      * 批量更新order表主键
