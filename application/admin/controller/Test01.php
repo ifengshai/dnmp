@@ -482,7 +482,7 @@ class Test01 extends Backend
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
             echo $z_sku_list[$k]['sku'] . "\n";
             echo '<br>';
-            usleep(100000);
+            // usleep(100000);
         }
     }
 
