@@ -1291,9 +1291,6 @@ class OrderData extends Backend
         echo "ok";
     }
 
-
-
-
     /**
      * 批量更新order表主键
      *
@@ -1381,11 +1378,74 @@ class OrderData extends Backend
     }
 
 
+    /**
+     * wesee旧数据同步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/29 15:58:49 
+     * @return void
+     */
+    public function meeloog_old_order()
+    {
+        $site = 5;
+        $id = $this->order->where('site=4 and entity_id < 2748')->max('entity_id');
+        $list = $this->zeelool->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        $order_params = [];
+        foreach ($list as $k => $v) {
+            $count = $this->order->where('site=4 and entity_id=' . $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $params['entity_id'] = $v['entity_id'];
+            $params['site'] = $site;
+            $params['increment_id'] = $v['increment_id'];
+            $params['status'] = $v['status'] ?: '';
+            $params['store_id'] = $v['store_id'];
+            $params['base_grand_total'] = $v['base_grand_total'];
+            $params['total_item_count'] = $v['total_qty_ordered'];
+            $params['order_type'] = $v['order_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
+            $params['base_currency_code'] = $v['base_currency_code'];
+            $params['shipping_method'] = $v['shipping_method'];
+            $params['shipping_title'] = $v['shipping_description'];
+            $params['country_id'] = $v['country_id'];
+            $params['region'] = $v['region'];
+            $params['city'] = $v['city'];
+            $params['street'] = $v['street'];
+            $params['postcode'] = $v['postcode'];
+            $params['telephone'] = $v['telephone'];
+            $params['customer_email'] = $v['customer_email'];
+            $params['customer_firstname'] = $v['customer_firstname'];
+            $params['customer_lastname'] = $v['customer_lastname'];
+            $params['taxno'] = $v['taxno'];
+            $params['created_at'] = strtotime($v['created_at']);
+            $params['updated_at'] = strtotime($v['updated_at']);
+            //插入订单主表
+            $order_id = $this->order->insertGetId($params);
+            $order_params[$k]['site'] = $site;
+            $order_params[$k]['order_id'] = $order_id;
+            $order_params[$k]['entity_id'] = $v['entity_id'];
+            $order_params[$k]['increment_id'] = $v['increment_id'];
+
+            echo $v['entity_id'] . "\n";
+            usleep(3000);
+        }
+        //插入订单处理表
+        $this->orderprocess->saveAll($order_params);
+        echo "ok";
+    }
+
+
     public function order_address_data_shell()
     {
         $this->order_address_data(1);
         $this->order_address_data(2);
         $this->order_address_data(3);
+        $this->order_address_data(4);
+        $this->order_address_data(5);
     }
 
     /**
@@ -1407,6 +1467,10 @@ class OrderData extends Backend
             $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         } elseif ($site == 3) {
             $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+        } elseif ($site == 4) {
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+        } elseif ($site == 5) {
+            $res = Db::connect('database.db_wesee')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
@@ -1433,9 +1497,8 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_data(1);
-        $this->order_item_data(2);
-        $this->order_item_data(3);
+        $this->order_item_data(4);
+        $this->order_item_data(5);
     }
 
 
@@ -1449,16 +1512,13 @@ class OrderData extends Backend
      */
     protected function order_item_data($site)
     {
-        if ($site == 1) {
-            $id = $this->orderitemoption->where('site=1 and item_id < 911956')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 911956]]])->limit(3000)->select();
-        } elseif ($site == 2) {
-            $id = $this->orderitemoption->where('site=2 and item_id < 505102')->max('item_id');
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 505102]]])->limit(3000)->select();
-        } elseif ($site == 3) {
-            $id = $this->orderitemoption->where('site=3 and item_id < 72470')->max('item_id');
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 72470]]])->limit(3000)->select();
-        }
+        if ($site == 4) {
+            $id = $this->orderitemoption->where('site=4 and item_id < 3949')->max('item_id');
+            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 3949]]])->limit(3000)->select();
+        } elseif ($site == 5) {
+            $id = $this->orderitemoption->where('site=5 and item_id < 12263')->max('item_id');
+            $list = Db::connect('database.db_wesee')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 12263]]])->limit(3000)->select();
+        } 
 
         $options = [];
         foreach ($list as $k => $v) {
@@ -1475,6 +1535,8 @@ class OrderData extends Backend
                 $options =  $this->voogueme_prescription_analysis($v['product_options']);
             } elseif ($site == 3) {
                 $options =  $this->nihao_prescription_analysis($v['product_options']);
+            } elseif ($site == 4) {
+                $options =  $this->meeloog_prescription_analysis($v['product_options']);
             } elseif ($site == 5) {
                 $options =  $this->wesee_prescription_analysis($v['product_options']);
             }
@@ -1493,13 +1555,6 @@ class OrderData extends Backend
                     $data[$i]['magento_order_id'] = $v['order_id'];
                     $data[$i]['site'] = $site;
                     $data[$i]['option_id'] = $options_id;
-                    $str = '';
-                    if ($i < 9) {
-                        $str = '0' . ($i + 1);
-                    } else {
-                        $str = $i + 1;
-                    }
-                    $data[$i]['item_order_number'] = $v['order_number'] . '-' . $str;
                     $data[$i]['sku'] = $v['sku'];
                     $data[$i]['created_at'] = strtotime($v['created_at']);
                     $data[$i]['updated_at'] = strtotime($v['updated_at']);
