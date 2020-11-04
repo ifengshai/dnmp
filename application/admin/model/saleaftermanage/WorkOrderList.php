@@ -331,7 +331,6 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
-
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
@@ -356,7 +355,7 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
-    
+
     /**
      * 更改地址
      * @param $params
@@ -815,9 +814,7 @@ class WorkOrderList extends Model
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    if(24558 == $work_id){
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
-                    }
+                    //file_put_contents('/www/wwwroot/mojing/runtime/log/bufa_new.txt',json_encode($postData),FILE_APPEND);
                     if($isNewVersion == 0){
                         $url = 'magic/order/createOrder';
                     }elseif($isNewVersion == 1){

@@ -290,6 +290,9 @@ class Rufoo extends Backend
             if (false === $result) {
                 throw new Exception("操作失败！！");
             }
+
+            //sku映射表
+            $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
@@ -305,19 +308,22 @@ class Rufoo extends Backend
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
-                    if (!$v['sku']) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+
+                    //转仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
+                    if (!$trueSku) {
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['ordersn']);
                     }
 
                     $qty = $v['total'];
 
                     $map = [];
-                    $map['sku'] = $v['sku'];
+                    $map['sku'] = $trueSku;
                     $map['is_del'] = 1;
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
                     }
 
                     $number++;
@@ -362,13 +368,19 @@ class Rufoo extends Backend
                     if (!$v['sku']) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
                     }
+                    //转仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
+                    if (!$trueSku) {
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['ordersn']);
+                    }
+
                     $qty = $v['total'];
                     if ($qty == 0) {
                         continue;
                     }
 
                     //总库存
-                    $item_map['sku'] = $v['sku'];
+                    $item_map['sku'] = $trueSku;
                     $item_map['is_del'] = 1;
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();

@@ -667,8 +667,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $("#contrast").change(function () {
                 if ($("#contrast").is(':checked')) {
                     $("#two-time-node").show();
+                    $("#time_hide").remove();
                 } else {
                     $("#two-time-node").hide();
+                    $("#time_hide").remove();
                 }
             });
             //点击重置按钮

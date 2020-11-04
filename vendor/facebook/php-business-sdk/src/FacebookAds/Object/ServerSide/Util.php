@@ -25,206 +25,111 @@
 namespace FacebookAds\Object\ServerSide;
 
 /**
- * Normalizer Class
+ * Util Class
  *
  * @category    Class
  * @package     FacebookAds\Object\ServerSide
  */
-class Util
-{
-
-  /**
-   * @param string $field to be normalized.
-   * @param string $data value to be normalized
-   * @return string
-   */
-  public static function normalize($field, $data)
-  {
-    if ($data == null || strlen($data) == 0) {
-      return null;
-    }
-
-    // Check if already hashed. If yes, don't try to normalize an already hashed data.
-    if(Util::isHashed($data)){
-      return $data;
-    }
-
-    $data = trim(strtolower($data));
-    $normalized_data = $data;
-
-    switch ($field) {
-      case 'em':
-        $normalized_data = Util::normalizeEmail($data);
-        break;
-
-      case 'ph':
-        $normalized_data = Util::normalizePhone($data);
-        break;
-
-      case 'zp':
-        $normalized_data = Util::normalizeZipCode($data);
-        break;
-
-      case 'ct':
-        $normalized_data = Util::normalizeCity($data);
-        break;
-
-      case 'st':
-        $normalized_data = Util::normalizeState($data);
-        break;
-
-      case 'country':
-        $normalized_data = Util::normalizeCountry($data);
-        break;
-
-      case 'currency':
-        $normalized_data = Util::normalizeCurrency($data);
-        break;
-      default:
-    }
-
-    return $normalized_data;
-  }
-
+class Util {
   /**
    * @param string $data hash input data using SHA256 algorithm.
    * @return string
    */
-  public static function hash($data)
-  {
+  public static function hash($data) {
     if ($data == null || Util::isHashed($data)) {
       return $data;
     }
     return hash('sha256', $data, false);
   }
 
-
   /**
    * @param string $pii PII data to check if its hashed.
    * @return bool
    */
-  private static function isHashed($pii)
-  {
+  public static function isHashed($pii) {
     // it could be sha256 or md5
     return preg_match('/^[A-Fa-f0-9]{64}$/', $pii) ||
       preg_match('/^[a-f0-9]{32}$/', $pii);
   }
 
   /**
-   * @param string $email Email address to be normalized.
+   * Extracts the IP Address from the PHP Request Context.
    * @return string
    */
-  private static function normalizeEmail($email)
-  {
-    // Validates email against RFC 822
-    $result = filter_var($email, FILTER_SANITIZE_EMAIL);
+  public static function getIpAddress() {
+    $ip_address = null;
 
-    if (!filter_var($result, FILTER_VALIDATE_EMAIL))
-    {
-      throw new \InvalidArgumentException('Invalid email format for the passed email: ' . $email . 'Please check the passed email format.');
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip_address = $_SERVER['HTTP_CLIENT_IP'];
+    } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else if (!empty($_SERVER['REMOTE_ADDR'])) {
+      $ip_address = $_SERVER['REMOTE_ADDR'];
     }
 
-    return $result;
+    return $ip_address;
   }
 
   /**
-   * @param string $city city name to be normalized.
+   * Extracts the HTTP User Agent from the PHP Request Context.
    * @return string
    */
-  private static function normalizeCity($city)
-  {
-    return trim(preg_replace('/[0-9.\s\-()]/', '', $city));
-  }
+  public static function getHttpUserAgent() {
+    $user_agent = null;
 
-   /**
-   * @param string $state state name to be normalized.
-   * @return string
-   */
-  private static function normalizeState($state)
-  {
-    return preg_replace('/[^a-z]/', '', $state);
-  }
-
-  /**
-   * @param string $country country code to be normalized(ISO 3166-2).
-   * @return string
-   */
-  private static function normalizeCountry($country)
-  {
-    $result = preg_replace('/[^a-z]/i', '', $country);
-
-    if (strlen($result) != 2) {
-      throw new \InvalidArgumentException('Invalid country format passed(' . $country . '). Country Code should be a two-letter ISO Country Code');
+    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+      $user_agent = $_SERVER['HTTP_USER_AGENT'];
     }
 
-    return $result;
+    return $user_agent;
   }
 
   /**
-   * @param string $zip postal code to be normalized.
+   * Extracts the URI from the PHP Request Context.
    * @return string
    */
-  private static function normalizeZipCode($zip)
-  {
-    // Removing the spaces from the zip code. Eg:
-    $zip = preg_replace('/[ ]/', '', $zip);
+  public static function getRequestUri() {
+    $url = "http://";
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+      $url = "https://";
+    }
 
-    // If the code has more than one part, retain the first part.
-    $zip = explode('-', $zip)[0];
-    return $zip;
+    if (!empty($_SERVER['HTTP_HOST'])) {
+      $url .= $_SERVER['HTTP_HOST'];
+    }
+
+    if (!empty($_SERVER['REQUEST_URI'])) {
+      $url .= $_SERVER['REQUEST_URI'];
+    }
+
+    return $url;
   }
 
   /**
-   * @param string $phone phone number to be normalized.
+   * Extracts the FBP cookie from the PHP Request Context.
    * @return string
    */
-  private static function normalizePhone($phone)
-  {
-    $result = trim(preg_replace('/[a-z()-]/', '', $phone));
+  public static function getFbp() {
+    $fbp = null;
 
-    if(Util::isInternationalNumber($result))
-    {
-      $result = preg_replace('/[\-\s+]/', '', $result);
+    if (!empty($_COOKIE['_fbp'])) {
+      $fbp = $_COOKIE['_fbp'];
     }
 
-    return $result;
+    return $fbp;
   }
 
   /**
-   * @param string $currency currency code to be normalized(ISO 4217).
+   * Extracts the FBC cookie from the PHP Request Context.
    * @return string
    */
-  private static function normalizeCurrency($currency)
-  {
-    $result = preg_replace('/[^a-z]/i', '', $currency);
+  public static function getFbc() {
+    $fbc = null;
 
-    if (strlen($result) != 3) {
-      throw new \InvalidArgumentException('Invalid currency format passed(' . $currency . '). Currency Code should be a three-letter ISO Currency Code');
+    if (!empty($_COOKIE['_fbc'])) {
+      $fbc = $_COOKIE['_fbc'];
     }
 
-    return $result;
-  }
-
-  /**
-   * @param string $phone_number Phone number to be normalized.
-   * @return bool
-   */
-  private static function isInternationalNumber($phone_number)
-  {
-    // Remove spaces and hyphens
-    $phone_number = preg_replace('/[\-\s]/', '', $phone_number);
-
-    // Strip + and up to 2 leading 0s
-    $phone_number = preg_replace('/^\+?0{0,2}/', '', $phone_number);
-
-    if(substr($phone_number, 0, 1) === '0')
-    {
-      return false;
-    }
-
-    // Internation Phone number with country calling code.
-    $internation_number_regex = '/^\d{1,4}\(?\d{2,3}\)?\d{4,}$/';
-
-    return preg_match($internation_number_regex, $phone_number);
+    return $fbc;
   }
 }

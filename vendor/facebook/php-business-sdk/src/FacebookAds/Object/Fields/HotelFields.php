@@ -40,6 +40,8 @@ class HotelFields extends AbstractEnum {
   const ADDRESS = 'address';
   const APPLINKS = 'applinks';
   const BRAND = 'brand';
+  const CATEGORY = 'category';
+  const CATEGORY_SPECIFIC_FIELDS = 'category_specific_fields';
   const CURRENCY = 'currency';
   const DESCRIPTION = 'description';
   const GUEST_RATINGS = 'guest_ratings';
@@ -60,8 +62,10 @@ class HotelFields extends AbstractEnum {
   public function getFieldTypes() {
     return array(
       'address' => 'string',
-      'applinks' => 'AppLinks',
+      'applinks' => 'CatalogItemAppLinks',
       'brand' => 'string',
+      'category' => 'string',
+      'category_specific_fields' => 'CatalogSubVerticalList',
       'currency' => 'string',
       'description' => 'string',
       'guest_ratings' => 'string',

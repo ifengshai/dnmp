@@ -29,25 +29,18 @@ use FacebookAds\Cursor;
 use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\ProductCatalogFields;
-use FacebookAds\Object\Values\AdVideoContainerTypeValues;
-use FacebookAds\Object\Values\AdVideoContentCategoryValues;
-use FacebookAds\Object\Values\AdVideoFormattingValues;
-use FacebookAds\Object\Values\AdVideoOriginalProjectionTypeValues;
-use FacebookAds\Object\Values\AdVideoSwapModeValues;
-use FacebookAds\Object\Values\AdVideoUnpublishedContentTypeValues;
-use FacebookAds\Object\Values\AdVideoUploadPhaseValues;
 use FacebookAds\Object\Values\ProductCatalogCategoryCategorizationCriteriaValues;
+use FacebookAds\Object\Values\ProductCatalogItemSubTypeValues;
 use FacebookAds\Object\Values\ProductCatalogPermittedRolesValues;
 use FacebookAds\Object\Values\ProductCatalogPermittedTasksValues;
 use FacebookAds\Object\Values\ProductCatalogStandardValues;
 use FacebookAds\Object\Values\ProductCatalogTasksValues;
 use FacebookAds\Object\Values\ProductCatalogVerticalValues;
-use FacebookAds\Object\Values\ProductDaEventSamplesBatchAggregationTypeValues;
-use FacebookAds\Object\Values\ProductDaEventSamplesBatchEventValues;
 use FacebookAds\Object\Values\ProductEventStatBreakdownsValues;
 use FacebookAds\Object\Values\ProductFeedDelimiterValues;
 use FacebookAds\Object\Values\ProductFeedEncodingValues;
 use FacebookAds\Object\Values\ProductFeedFeedTypeValues;
+use FacebookAds\Object\Values\ProductFeedItemSubTypeValues;
 use FacebookAds\Object\Values\ProductFeedOverrideTypeValues;
 use FacebookAds\Object\Values\ProductFeedQuotedFieldsModeValues;
 use FacebookAds\Object\Values\ProductItemAvailabilityValues;
@@ -96,6 +89,7 @@ class ProductCatalog extends AbstractCrudObject {
     $ref_enums['PermittedTasks'] = ProductCatalogPermittedTasksValues::getInstance()->getValues();
     $ref_enums['Tasks'] = ProductCatalogTasksValues::getInstance()->getValues();
     $ref_enums['Standard'] = ProductCatalogStandardValues::getInstance()->getValues();
+    $ref_enums['ItemSubType'] = ProductCatalogItemSubTypeValues::getInstance()->getValues();
     return $ref_enums;
   }
 
@@ -154,6 +148,7 @@ class ProductCatalog extends AbstractCrudObject {
       'business' => 'string',
       'permitted_roles' => 'list<permitted_roles_enum>',
       'permitted_tasks' => 'list<permitted_tasks_enum>',
+      'utm_settings' => 'map',
     );
     $enums = array(
       'permitted_roles_enum' => ProductCatalogPermittedRolesValues::getInstance()->getValues(),
@@ -300,106 +295,6 @@ class ProductCatalog extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getBundleFolders(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/bundle_folders',
-      new DynamicItemDisplayBundleFolder(),
-      'EDGE',
-      DynamicItemDisplayBundleFolder::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createBundleFolder(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'bundles' => 'list<string>',
-      'name' => 'string',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/bundle_folders',
-      new DynamicItemDisplayBundleFolder(),
-      'EDGE',
-      DynamicItemDisplayBundleFolder::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function getBundles(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/bundles',
-      new DynamicItemDisplayBundle(),
-      'EDGE',
-      DynamicItemDisplayBundle::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createBundle(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'additional_urls' => 'map',
-      'description' => 'string',
-      'name' => 'string',
-      'product_set' => 'string',
-      'text_tokens' => 'map',
-      'url' => 'string',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/bundles',
-      new DynamicItemDisplayBundle(),
-      'EDGE',
-      DynamicItemDisplayBundle::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function getCategories(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -498,34 +393,6 @@ class ProductCatalog extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getDaEventSamples(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'aggregation_type' => 'aggregation_type_enum',
-      'event' => 'event_enum',
-      'source_id' => 'string',
-    );
-    $enums = array(
-      'aggregation_type_enum' => ProductDaEventSamplesBatchAggregationTypeValues::getInstance()->getValues(),
-      'event_enum' => ProductDaEventSamplesBatchEventValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/da_event_samples',
-      new ProductDaEventSamplesBatch(),
-      'EDGE',
-      ProductDaEventSamplesBatch::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function getDestinations(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -540,39 +407,6 @@ class ProductCatalog extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
-      '/destinations',
-      new Destination(),
-      'EDGE',
-      Destination::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createDestination(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'address' => 'Object',
-      'currency' => 'string',
-      'description' => 'string',
-      'destination_id' => 'string',
-      'images' => 'list<Object>',
-      'name' => 'string',
-      'price' => 'unsigned int',
-      'target_radius_in_km' => 'float',
-      'types' => 'string',
-      'url' => 'string',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
       '/destinations',
       new Destination(),
       'EDGE',
@@ -694,36 +528,6 @@ class ProductCatalog extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
-      '/flights',
-      new Flight(),
-      'EDGE',
-      Flight::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createFlight(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'currency' => 'string',
-      'description' => 'string',
-      'destination_airport' => 'string',
-      'images' => 'list<Object>',
-      'origin_airport' => 'string',
-      'price' => 'unsigned int',
-      'url' => 'string',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
       '/flights',
       new Flight(),
       'EDGE',
@@ -918,8 +722,34 @@ class ProductCatalog extends AbstractCrudObject {
 
     $param_types = array(
       'allow_upsert' => 'bool',
+      'item_sub_type' => 'item_sub_type_enum',
       'item_type' => 'string',
       'requests' => 'map',
+    );
+    $enums = array(
+      'item_sub_type_enum' => ProductCatalogItemSubTypeValues::getInstance()->getValues(),
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_POST,
+      '/items_batch',
+      new ProductCatalog(),
+      'EDGE',
+      ProductCatalog::getFieldsEnum()->getValues(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function createOnsiteCommerceMerchant(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+      'onsite_commerce_merchant' => 'Object',
     );
     $enums = array(
     );
@@ -928,7 +758,7 @@ class ProductCatalog extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_POST,
-      '/items_batch',
+      '/onsite_commerce_merchant',
       new ProductCatalog(),
       'EDGE',
       ProductCatalog::getFieldsEnum()->getValues(),
@@ -1027,17 +857,21 @@ class ProductCatalog extends AbstractCrudObject {
       'encoding' => 'encoding_enum',
       'feed_type' => 'feed_type_enum',
       'file_name' => 'string',
+      'item_sub_type' => 'item_sub_type_enum',
       'name' => 'string',
       'override_type' => 'override_type_enum',
+      'override_value' => 'string',
       'quoted_fields_mode' => 'quoted_fields_mode_enum',
       'rules' => 'list<string>',
       'schedule' => 'string',
       'update_schedule' => 'string',
+      'whitelisted_properties' => 'list<string>',
     );
     $enums = array(
       'delimiter_enum' => ProductFeedDelimiterValues::getInstance()->getValues(),
       'encoding_enum' => ProductFeedEncodingValues::getInstance()->getValues(),
       'feed_type_enum' => ProductFeedFeedTypeValues::getInstance()->getValues(),
+      'item_sub_type_enum' => ProductFeedItemSubTypeValues::getInstance()->getValues(),
       'override_type_enum' => ProductFeedOverrideTypeValues::getInstance()->getValues(),
       'quoted_fields_mode_enum' => ProductFeedQuotedFieldsModeValues::getInstance()->getValues(),
     );
@@ -1137,6 +971,7 @@ class ProductCatalog extends AbstractCrudObject {
 
     $param_types = array(
       'filter' => 'Object',
+      'metadata' => 'map',
       'name' => 'string',
     );
     $enums = array(
@@ -1174,36 +1009,6 @@ class ProductCatalog extends AbstractCrudObject {
       new ProductCatalogProductSetsBatch(),
       'EDGE',
       ProductCatalogProductSetsBatch::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createProductSetsBatch(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'file' => 'file',
-      'password' => 'string',
-      'standard' => 'standard_enum',
-      'update_only' => 'bool',
-      'url' => 'string',
-      'username' => 'string',
-    );
-    $enums = array(
-      'standard_enum' => ProductCatalogStandardValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/product_sets_batch',
-      new ProductCatalog(),
-      'EDGE',
-      ProductCatalog::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -1251,6 +1056,7 @@ class ProductCatalog extends AbstractCrudObject {
       'availability' => 'availability_enum',
       'brand' => 'string',
       'category' => 'string',
+      'category_specific_fields' => 'map',
       'checkout_url' => 'string',
       'color' => 'string',
       'commerce_tax_category' => 'commerce_tax_category_enum',
@@ -1264,6 +1070,7 @@ class ProductCatalog extends AbstractCrudObject {
       'custom_label_4' => 'string',
       'description' => 'string',
       'expiration_date' => 'string',
+      'fb_product_category' => 'string',
       'gender' => 'gender_enum',
       'gtin' => 'string',
       'image_url' => 'string',
@@ -1320,31 +1127,6 @@ class ProductCatalog extends AbstractCrudObject {
       new ProductItem(),
       'EDGE',
       ProductItem::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createStoreProductItemsBatch(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'allow_upsert' => 'bool',
-      'requests' => 'list<map>',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/store_product_items_batch',
-      new ProductCatalog(),
-      'EDGE',
-      ProductCatalog::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -1463,107 +1245,6 @@ class ProductCatalog extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function createVideo(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'adaptive_type' => 'string',
-      'animated_effect_id' => 'unsigned int',
-      'application_id' => 'string',
-      'asked_fun_fact_prompt_id' => 'unsigned int',
-      'attribution_app_id' => 'string',
-      'audio_story_wave_animation_handle' => 'string',
-      'composer_entry_picker' => 'string',
-      'composer_entry_point' => 'string',
-      'composer_entry_time' => 'unsigned int',
-      'composer_session_events_log' => 'string',
-      'composer_session_id' => 'string',
-      'composer_source_surface' => 'string',
-      'composer_type' => 'string',
-      'container_type' => 'container_type_enum',
-      'content_category' => 'content_category_enum',
-      'description' => 'string',
-      'embeddable' => 'bool',
-      'end_offset' => 'unsigned int',
-      'fbuploader_video_file_chunk' => 'string',
-      'file_size' => 'unsigned int',
-      'file_url' => 'string',
-      'fisheye_video_cropped' => 'bool',
-      'formatting' => 'formatting_enum',
-      'fov' => 'unsigned int',
-      'front_z_rotation' => 'float',
-      'fun_fact_prompt_id' => 'unsigned int',
-      'fun_fact_toastee_id' => 'unsigned int',
-      'guide' => 'list<list<unsigned int>>',
-      'guide_enabled' => 'bool',
-      'has_nickname' => 'bool',
-      'holiday_card' => 'string',
-      'initial_heading' => 'unsigned int',
-      'initial_pitch' => 'unsigned int',
-      'instant_game_entry_point_data' => 'string',
-      'is_boost_intended' => 'bool',
-      'is_explicit_share' => 'bool',
-      'is_group_linking_post' => 'bool',
-      'is_voice_clip' => 'bool',
-      'location_source_id' => 'string',
-      'manual_privacy' => 'bool',
-      'offer_like_post_id' => 'unsigned int',
-      'og_action_type_id' => 'string',
-      'og_icon_id' => 'string',
-      'og_object_id' => 'string',
-      'og_phrase' => 'string',
-      'og_suggestion_mechanism' => 'string',
-      'original_fov' => 'unsigned int',
-      'original_projection_type' => 'original_projection_type_enum',
-      'publish_event_id' => 'unsigned int',
-      'react_mode_metadata' => 'string',
-      'referenced_sticker_id' => 'string',
-      'replace_video_id' => 'string',
-      'sales_promo_id' => 'unsigned int',
-      'slideshow_spec' => 'map',
-      'source' => 'string',
-      'spherical' => 'bool',
-      'start_offset' => 'unsigned int',
-      'swap_mode' => 'swap_mode_enum',
-      'text_format_metadata' => 'string',
-      'throwback_camera_roll_media' => 'string',
-      'thumb' => 'file',
-      'time_since_original_post' => 'unsigned int',
-      'title' => 'string',
-      'transcode_setting_properties' => 'string',
-      'unpublished_content_type' => 'unpublished_content_type_enum',
-      'upload_phase' => 'upload_phase_enum',
-      'upload_session_id' => 'string',
-      'upload_setting_properties' => 'string',
-      'video_file_chunk' => 'string',
-      'video_start_time_ms' => 'unsigned int',
-      'waterfall_id' => 'string',
-    );
-    $enums = array(
-      'container_type_enum' => AdVideoContainerTypeValues::getInstance()->getValues(),
-      'content_category_enum' => AdVideoContentCategoryValues::getInstance()->getValues(),
-      'formatting_enum' => AdVideoFormattingValues::getInstance()->getValues(),
-      'original_projection_type_enum' => AdVideoOriginalProjectionTypeValues::getInstance()->getValues(),
-      'swap_mode_enum' => AdVideoSwapModeValues::getInstance()->getValues(),
-      'unpublished_content_type_enum' => AdVideoUnpublishedContentTypeValues::getInstance()->getValues(),
-      'upload_phase_enum' => AdVideoUploadPhaseValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/videos',
-      new AdVideo(),
-      'EDGE',
-      AdVideo::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function deleteSelf(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -1591,8 +1272,16 @@ class ProductCatalog extends AbstractCrudObject {
     $this->assureId();
 
     $param_types = array(
+      'segment_use_cases' => 'list<segment_use_cases_enum>',
     );
     $enums = array(
+      'segment_use_cases_enum' => array(
+        'COLLAB_ADS',
+        'COLLAB_ADS_FOR_MARKETPLACE_PARTNER',
+        'IG_SHOPPING',
+        'MARKETPLACE_SHOPS',
+        'TEST',
+      ),
     );
 
     $request = new ApiRequest(

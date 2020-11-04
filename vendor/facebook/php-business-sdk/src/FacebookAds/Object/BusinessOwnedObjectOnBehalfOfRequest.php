@@ -43,13 +43,6 @@ use FacebookAds\Object\Values\BusinessOwnedObjectOnBehalfOfRequestStatusValues;
 class BusinessOwnedObjectOnBehalfOfRequest extends AbstractCrudObject {
 
   /**
-   * @deprecated getEndpoint function is deprecated
-   */
-  protected function getEndpoint() {
-    return 'sent_inprogress_onbehalf_requests';
-  }
-
-  /**
    * @return BusinessOwnedObjectOnBehalfOfRequestFields
    */
   public static function getFieldsEnum() {
@@ -62,29 +55,6 @@ class BusinessOwnedObjectOnBehalfOfRequest extends AbstractCrudObject {
     return $ref_enums;
   }
 
-
-  public function deleteSelf(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_DELETE,
-      '/',
-      new AbstractCrudObject(),
-      'NODE',
-      array(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
 
   public function getSelf(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();

@@ -46,6 +46,8 @@ use FacebookAds\Object\Values\CampaignEffectiveStatusValues;
 use FacebookAds\Object\Values\CampaignExecutionOptionsValues;
 use FacebookAds\Object\Values\CampaignObjectiveValues;
 use FacebookAds\Object\Values\CampaignOperatorValues;
+use FacebookAds\Object\Values\CampaignSpecialAdCategoriesValues;
+use FacebookAds\Object\Values\CampaignSpecialAdCategoryCountryValues;
 use FacebookAds\Object\Values\CampaignSpecialAdCategoryValues;
 use FacebookAds\Object\Values\CampaignStatusOptionValues;
 use FacebookAds\Object\Values\CampaignStatusValues;
@@ -91,8 +93,10 @@ class Campaign extends AbstractArchivableCrudObject {
     $ref_enums['DatePreset'] = CampaignDatePresetValues::getInstance()->getValues();
     $ref_enums['ExecutionOptions'] = CampaignExecutionOptionsValues::getInstance()->getValues();
     $ref_enums['Objective'] = CampaignObjectiveValues::getInstance()->getValues();
-    $ref_enums['SpecialAdCategory'] = CampaignSpecialAdCategoryValues::getInstance()->getValues();
+    $ref_enums['SpecialAdCategories'] = CampaignSpecialAdCategoriesValues::getInstance()->getValues();
+    $ref_enums['SpecialAdCategoryCountry'] = CampaignSpecialAdCategoryCountryValues::getInstance()->getValues();
     $ref_enums['Operator'] = CampaignOperatorValues::getInstance()->getValues();
+    $ref_enums['SpecialAdCategory'] = CampaignSpecialAdCategoryValues::getInstance()->getValues();
     $ref_enums['StatusOption'] = CampaignStatusOptionValues::getInstance()->getValues();
     return $ref_enums;
   }
@@ -114,32 +118,6 @@ class Campaign extends AbstractArchivableCrudObject {
       new AdStudy(),
       'EDGE',
       AdStudy::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function deleteAdLabels(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'adlabels' => 'list<Object>',
-      'execution_options' => 'list<execution_options_enum>',
-    );
-    $enums = array(
-      'execution_options_enum' => CampaignExecutionOptionsValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_DELETE,
-      '/adlabels',
-      new AbstractCrudObject(),
-      'EDGE',
-      array(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -201,11 +179,8 @@ class Campaign extends AbstractArchivableCrudObject {
     $this->assureId();
 
     $param_types = array(
-      'ad_draft_id' => 'string',
       'date_preset' => 'date_preset_enum',
       'effective_status' => 'list<string>',
-      'include_deleted' => 'bool',
-      'include_drafts' => 'bool',
       'time_range' => 'Object',
       'updated_since' => 'int',
     );
@@ -232,10 +207,8 @@ class Campaign extends AbstractArchivableCrudObject {
     $this->assureId();
 
     $param_types = array(
-      'ad_draft_id' => 'string',
       'date_preset' => 'date_preset_enum',
       'effective_status' => 'list<effective_status_enum>',
-      'include_drafts' => 'bool',
       'is_completed' => 'bool',
       'time_range' => 'Object',
     );
@@ -264,6 +237,7 @@ class Campaign extends AbstractArchivableCrudObject {
 
     $param_types = array(
       'end_date' => 'datetime',
+      'page_id' => 'unsigned int',
       'platform' => 'platform_enum',
       'position' => 'position_enum',
       'start_date' => 'datetime',
@@ -493,6 +467,7 @@ class Campaign extends AbstractArchivableCrudObject {
         'last_week_sun_sat',
         'last_year',
         'lifetime',
+        'maximum',
         'this_month',
         'this_quarter',
         'this_week_mon_today',
@@ -535,7 +510,9 @@ class Campaign extends AbstractArchivableCrudObject {
       'objective' => 'objective_enum',
       'pacing_type' => 'list<string>',
       'promoted_object' => 'Object',
+      'special_ad_categories' => 'list<special_ad_categories_enum>',
       'special_ad_category' => 'special_ad_category_enum',
+      'special_ad_category_country' => 'list<special_ad_category_country_enum>',
       'spend_cap' => 'unsigned int',
       'status' => 'status_enum',
       'upstream_events' => 'map',
@@ -544,7 +521,9 @@ class Campaign extends AbstractArchivableCrudObject {
       'bid_strategy_enum' => CampaignBidStrategyValues::getInstance()->getValues(),
       'execution_options_enum' => CampaignExecutionOptionsValues::getInstance()->getValues(),
       'objective_enum' => CampaignObjectiveValues::getInstance()->getValues(),
+      'special_ad_categories_enum' => CampaignSpecialAdCategoriesValues::getInstance()->getValues(),
       'special_ad_category_enum' => CampaignSpecialAdCategoryValues::getInstance()->getValues(),
+      'special_ad_category_country_enum' => CampaignSpecialAdCategoryCountryValues::getInstance()->getValues(),
       'status_enum' => CampaignStatusValues::getInstance()->getValues(),
     );
 

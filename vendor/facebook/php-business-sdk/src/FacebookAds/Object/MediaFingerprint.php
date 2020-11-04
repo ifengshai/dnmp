@@ -30,7 +30,6 @@ use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\MediaFingerprintFields;
 use FacebookAds\Object\Values\MediaFingerprintFingerprintContentTypeValues;
-use FacebookAds\Object\Values\MediaFingerprintFingerprintValidityValues;
 
 /**
  * This class is auto-generated.
@@ -53,7 +52,6 @@ class MediaFingerprint extends AbstractCrudObject {
   protected static function getReferencedEnums() {
     $ref_enums = array();
     $ref_enums['FingerprintContentType'] = MediaFingerprintFingerprintContentTypeValues::getInstance()->getValues();
-    $ref_enums['FingerprintValidity'] = MediaFingerprintFingerprintValidityValues::getInstance()->getValues();
     return $ref_enums;
   }
 
@@ -93,6 +91,33 @@ class MediaFingerprint extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
+      '/',
+      new MediaFingerprint(),
+      'NODE',
+      MediaFingerprint::getFieldsEnum()->getValues(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function updateSelf(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+      'metadata' => 'list',
+      'source' => 'file',
+      'title' => 'string',
+      'universal_content_id' => 'string',
+    );
+    $enums = array(
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_POST,
       '/',
       new MediaFingerprint(),
       'NODE',

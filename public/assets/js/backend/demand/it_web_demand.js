@@ -304,8 +304,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         {
                             field: 'site',
                             title: __('项目'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other' , 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp'},
-                            custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black' , 9: 'black', 10: 'black', 11: 'black'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other' },
+                            custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'entry_user_name', title: __('提出人'), operate: 'like' },

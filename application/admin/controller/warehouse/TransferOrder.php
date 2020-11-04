@@ -53,7 +53,7 @@ class TransferOrder extends Backend
     public function index()
     {
         //当前是否为关联查询
-        // $this->relationSearch = true;
+//         $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -305,7 +305,7 @@ class TransferOrder extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
@@ -614,11 +614,6 @@ class TransferOrder extends Backend
                 $replenish_num = (int)$v[3];
                 empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 调出数量不能为空！'));
 
-                //校验调出数量是否大于当前调出仓库存
-                if ($replenish_num > $platform_arr[$sku]) {
-                    $this->model->where('id', $transfer_order_id)->delete();
-                    $this->error(__('导入失败' . $sku . ' 调出数量大于调出仓虚拟仓库存！'));
-                }
                 //校验当前sku在调出仓是否存在
                 if (!($_platform->where('platform_type', $out_label)->where('sku',$sku)->find())){
                     $this->model->where('id', $transfer_order_id)->delete();
@@ -628,6 +623,12 @@ class TransferOrder extends Backend
                 if (!($_platform->where('platform_type', $in_label)->where('sku',$sku)->find())){
                     $this->model->where('id', $transfer_order_id)->delete();
                     $this->error(__('导入失败' . $sku . '在调入仓：'.$in_plat.'站不存在映射关系'));
+                }
+
+                //校验调出数量是否大于当前调出仓库存
+                if ($replenish_num > $platform_arr[$sku]) {
+                    $this->model->where('id', $transfer_order_id)->delete();
+                    $this->error(__('导入失败' . $sku . ' 调出数量大于调出仓虚拟仓库存！'));
                 }
 
                 //拼接参数 插入调拨单子表 调拨单详情表中

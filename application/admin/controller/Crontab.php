@@ -29,7 +29,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type not in (4,5)";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
 
 
     /**
@@ -2548,7 +2548,6 @@ class Crontab extends Backend
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $map['order_type'] = ['not in',[4,5]];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
@@ -4191,27 +4190,27 @@ class Crontab extends Backend
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNum')->update($data);
 
-        //当日配镜架总数 弃用
-        // $orderFrameNum = $orderLog->getOrderFrameNum();
-        $data['value'] = 0;
+        //当日配镜架总数
+        $orderFrameNum = $orderLog->getOrderFrameNum();
+        $data['value'] = $orderFrameNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFrameNum')->update($data);
 
-        //当日配镜片总数 弃用
-        // $orderLensNum = $orderLog->getOrderLensNum();
-        $data['value'] = 0;
+        //当日配镜片总数
+        $orderLensNum = $orderLog->getOrderLensNum();
+        $data['value'] = $orderLensNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderLensNum')->update($data);
 
-        //当日加工总数 弃用
-        // $orderFactoryNum = $orderLog->getOrderFactoryNum();
-        $data['value'] = 0;
+        //当日加工总数
+        $orderFactoryNum = $orderLog->getOrderFactoryNum();
+        $data['value'] = $orderFactoryNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderFactoryNum')->update($data);
 
-        //当日质检总数 弃用
-        // $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
-        $data['value'] = 0;
+        //当日质检总数
+        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+        $data['value'] = $orderCheckNewNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'orderCheckNewNum')->update($data);
 

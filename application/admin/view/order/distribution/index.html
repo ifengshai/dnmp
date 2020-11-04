@@ -1,0 +1,111 @@
+<style>
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    body {
+        background: #f1f4f6;
+        font-size: 16px;
+    }
+</style>
+
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs">
+            {foreach name="label_list" item="value"}
+            <li class="{:$label == $key ? 'active' : ''}">
+                <a href="#t-{$key}" data-value="{$key}" data-toggle="tab">{$value}</a>
+            </li>
+            {/foreach}
+        </ul>
+    </div>
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div id="toolbar" class="toolbar">
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+
+                        <a href="javascript:;"
+                            class="btn btn-distribution btn-danger btn-batch-export-xls hide"
+                            title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
+
+                        <a href="javascript:;"
+                            class="btn btn-distribution btn-success btn-batch-printed btn-disabled disabled hide"
+                            title="{:__('打印标签')}"> {:__('批量打印')}</a>
+
+                        <a href="javascript:;" data-status="2"
+                            class="btn btn-distribution btn-success btn-product btn-set-status btn-disabled disabled hide"
+                            title="{:__('配货完成')}"> {:__('配货完成')}</a>
+
+                        <a href="javascript:;" data-status="3"
+                            class="btn btn-distribution btn-success btn-lens btn-set-status btn-disabled disabled hide"
+                            title="{:__('配镜片完成')}"> {:__('配镜片完成')}</a>
+
+                        <a href="javascript:;" data-status="4"
+                            class="btn btn-distribution btn-success btn-machining btn-set-status btn-disabled disabled hide"
+                            title="{:__('加工完成')}"> {:__('加工完成')}</a>
+
+                        <a href="javascript:;" data-status="5"
+                           class="btn btn-distribution btn-success btn-logo btn-set-status btn-disabled disabled hide"
+                           title="{:__('印logo完成')}"> {:__('印logo完成')}</a>
+
+                        <a href="javascript:;" data-status="6"
+                            class="btn btn-distribution btn-success btn-finish-adopt btn-disabled disabled hide"
+                            title="{:__('成检通过')}"> {:__('成检通过')}</a>
+
+                        <a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-finish-refuse btn-disabled disabled hide"
+                           title="{:__('成检拒绝')}"> {:__('成检拒绝')}</a>
+
+                        <!--<a href="javascript:;" data-status="8"
+                           class="btn btn-distribution btn-success btn-join-complete btn-set-status btn-disabled disabled hide"
+                           title="{:__('合单完成')}"> {:__('合单完成')}</a>-->
+
+                        <!--<a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-abnormal-handle btn-disabled disabled hide"
+                           title="{:__('处理异常')}"> {:__('处理异常')}</a>-->
+
+                        <!--<a href="javascript:;"
+                           class="btn btn-distribution btn-success btn-abnormal-sign btn-disabled disabled hide"
+                           title="{:__('标记异常')}"> {:__('标记异常')}</a>-->
+                    </div>
+                    <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

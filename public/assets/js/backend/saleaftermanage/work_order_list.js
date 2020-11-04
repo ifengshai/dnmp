@@ -2282,7 +2282,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     delOne(Config.create_user_id,appoint_users);
                                 } 
                             }
-
                             //循环根据承接人id获取对应人名称
                             var appoint_users = array_filter(appoint_users);
                             console.log(appoint_users);

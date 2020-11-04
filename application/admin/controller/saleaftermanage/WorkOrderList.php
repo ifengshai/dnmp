@@ -783,7 +783,7 @@ class WorkOrderList extends Backend
                             //$measureList['measure_content'] = config('workorder.step')[$v];
                             $measureList['measure_content'] = $workOrderConfigValue['step'][$v];
                             $measureList['create_time'] = date('Y-m-d H:i:s');
-
+                            
                             //插入措施表
                             $res = $this->step->insertGetId($measureList);
                             if (false === $res) {
@@ -1027,7 +1027,6 @@ class WorkOrderList extends Backend
             } else {
                 $stock = $res['stock'];
             }
-             
             //判断库存是否足够
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
@@ -2299,7 +2298,7 @@ class WorkOrderList extends Backend
                     if (!in_array(session('admin.id'),$receptInfoArr)) {
                         $this->error(__('您不能处理此工单'));
                     }
-                    
+
                     //当要处理成功时需要判断库存是否存在
                     if (1 == $params['success']) {
                         //判断该订单是否是vip订单
@@ -2315,7 +2314,6 @@ class WorkOrderList extends Backend
                         }
                     }
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'],$receptInfo['is_auto_complete']);
-                    
                 }
                 if ($result !== false) {
                     $this->success();
@@ -2831,8 +2829,8 @@ EOF;
     /**
      * 导出工单
      *
-     * @Description 修改排序之前
-     * @author lsw 
+     * @Description
+     * @author lsw
      * @since 2020/04/30 09:34:48 
      * @return void
      */

@@ -411,7 +411,6 @@ class Dashboard extends Backend
         $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
-        $status['order_type'] = ['not in',[4,5]];
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
         $app['store_id']   = 5;
