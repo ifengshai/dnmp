@@ -952,12 +952,12 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-        if ($arr['prescription_type'] == 'Progressive') {
+        if ($arr['prescription_type'] == 'Progresivo') {
             $arr['is_custom_lens'] = 1;
         }
 
 
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarizado') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -970,7 +970,7 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Tinte de color') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -1066,12 +1066,12 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-        if ($arr['prescription_type'] == 'Progressive') {
+        if ($arr['prescription_type'] == 'Gleitsicht') {
             $arr['is_custom_lens'] = 1;
         }
 
 
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], 'Polarisierend') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -1084,7 +1084,7 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], 'Farbtönung') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -1181,12 +1181,12 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-        if ($arr['prescription_type'] == 'Progressive') {
+        if ($arr['prescription_type'] == '累進レンズ') {
             $arr['is_custom_lens'] = 1;
         }
 
 
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
+        if (strpos($arr['index_name'], '偏光レンズ') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
@@ -1195,11 +1195,11 @@ class OrderData extends Backend
         }
 
         //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
+        if (strpos($arr['index_name'], '色付き') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
+        if (strpos($arr['index_name'], '色合い') !== false) {
             $arr['is_custom_lens'] = 1;
         }
 
