@@ -294,8 +294,8 @@ class SingleItems extends Backend
             $createat = explode(' ', $time_str);
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $site];
-            $same_where['sku'] = ['like', $sku . '%'];
-            $recent_day_num = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('order_num', 'day_date');
+            $same_where['platform_sku'] = ['like', $sku . '%'];
+            $recent_day_num = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $recent_day_now = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('now_pricce', 'day_date');
 
 
