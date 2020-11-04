@@ -1263,18 +1263,31 @@ class OrderData extends Backend
     public function set_order_item_number_shell()
     {
         //查询未生成子单号的数据
-        $list = $this->orderitemprocess->where('ISNULL(item_order_number)=1')->limit(1000)->select();
+        $list = $this->orderitemprocess->where('ISNULL(item_order_number)=1')->limit(3000)->select();
         $list = collection($list)->toArray();
-        $params = [];
-        foreach ($list as $k => $v) {
+        foreach ($list as $v) {
             $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $res->id;
-            $params[$k]['item_order_number'] = $res->increment_id . $v['item_order_number'];
-            $params[$k]['updated_at'] = time();
+            $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id']])->select();
+            $item_params = [];
+            foreach ($data as $key => $val) {
+                $item_params[$key]['id'] = $val['id'];
+                $str = '';
+                if ($key < 9) {
+                    $str = '0' . ($key + 1);
+                } else {
+                    $str = $key + 1;
+                }
+
+                $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
+                $item_params[$key]['order_id'] = $res->id;
+            }
+             //更新数据
+            if ($item_params) $this->orderitemprocess->saveAll($item_params);
+
+            echo $v['id'] . "\n";
+            usleep(10000);
         }
-        //更新数据
-        if ($params) $this->orderitemprocess->saveAll($params);
+       
         echo "ok";
     }
 
