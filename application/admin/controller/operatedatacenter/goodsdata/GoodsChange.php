@@ -65,7 +65,6 @@ class GoodsChange extends Backend
 
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-            // dump($map);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = Db::name('datacenter_sku_day')
                 ->where($where)
@@ -83,7 +82,6 @@ class GoodsChange extends Backend
                 ->order('day_date','desc')
                 ->limit($offset, $limit)
                 ->select();
-            // dump($sku_data_day);
             foreach ($sku_data_day as $k => $v) {
                 $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
@@ -106,7 +104,6 @@ class GoodsChange extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            // dump($params);
             //站点
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             //时间
@@ -123,7 +120,6 @@ class GoodsChange extends Backend
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $sku_data_day = Db::name('datacenter_sku_day')->where($where)->field('')->select();
             $sku_data_days = Db::name('datacenter_sku_day')->where('site', $order_platform)->where($where)->field('')->select();
-            // dump($sku_data_days);
 
             //各个等级产品数量
             $arr = array_column($sku_data_days, 'goods_grade');
@@ -144,9 +140,6 @@ class GoodsChange extends Backend
                 }
 
             }
-            // dump($arr);
-            // dump($arrs);die;
-            // dump($sku_data_days);
             $a_plus['a_plus_num'] = $arr['A+'];
             $a_plus['a_plus_session_num'] = $arrs['A+']['unique_pageviews'];
             $a_plus['a_plus_cart_num'] = $arrs['A+']['cart_num'];
@@ -161,7 +154,7 @@ class GoodsChange extends Backend
             $aa['a_session_change'] = $arrs['A']['unique_pageviews'] == 0 ? 0 : round($arrs['A']['cart_num'] / $arrs['A']['unique_pageviews'] * 100, 2) . '%';
             $aa['a_order_num'] = $arrs['A']['order_num'];
             $aa['a_cart_change'] = $arrs['A']['cart_num'] == 0 ? 0 : round($arrs['A']['order_num'] / $arrs['A']['cart_num'] * 100, 2) . '%';
-            $aa['a_sku_total'] = $arrs['A']['sku_grand_total'];
+            $aa['a_sku_total'] = round($arrs['A']['sku_grand_total'],2);
 
             $bb['b_num'] = $arr['B'];
             $bb['b_session_num'] = $arrs['B']['unique_pageviews'];
