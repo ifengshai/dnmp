@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     [
                         {field: 'sku_change', title: __('平台SKU'), operate: false},
                         {field: 'sku', title: __('SKU'), operate: false},
-                        {field: 'sales_num', title: __('销量'), operate: false},
+                        {field: 'glass_num', title: __('销量'), operate: false},
                         {field: 'available_stock', title: __('虚拟仓库存'), sortable: true, operate: false},
                         {field: 'grade', title: __('产品等级'), operate: false},
 
