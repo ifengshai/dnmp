@@ -940,7 +940,7 @@ class OrderData extends Backend
      * @return void
      */
     public function zeelool_old_order()
-    {
+    {-
         $site = 1;
         $id = $this->order->where('site=1 and entity_id < 524836')->max('entity_id');
         $list = $this->zeelool->where(['entity_id' => ['between', [$id, 524836]]])->limit(3000)->select();
@@ -992,8 +992,6 @@ class OrderData extends Backend
     }
 
     
-
-
     public function order_address_data_shell()
     {
         $this->order_address_data(1);
@@ -1128,7 +1126,7 @@ class OrderData extends Backend
 
 
     /**
-     * 获取订单商品总数量
+     * 更新订单商品总数量
      *
      * @Description
      * @author wpl
@@ -1137,7 +1135,7 @@ class OrderData extends Backend
      */
     public function order_total_qty_ordered()
     {
-        $list = $this->order->where('total_qty_ordered=0')->limit(1000)->select();
+        $list = $this->order->where('total_qty_ordered=0')->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         foreach($list as $k => $v) {
