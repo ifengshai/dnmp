@@ -800,111 +800,6 @@ class OrderDataDetail extends Backend
             $list = collection($list)->toArray();
             //整理数据
             foreach ( $list as &$val ) {
-                $val['base_grand_total'] = round($val['base_grand_total'],2);
-                $val['base_shipping_amount'] = round($val['base_shipping_amount'],2);
-                $order_node = Db::name('order_node')->where('order_id',$val['entity_id'])->value('node_type');
-                if($order_node == 7){
-                    $order_shipping_status = '已发货';
-                }elseif ($order_node == 8 && $order_node == 10){
-                    $order_shipping_status = '运输途中';
-                }elseif ($order_node == 30){
-                    $order_shipping_status = '到达待取';
-                }elseif ($order_node == 40){
-                    $order_shipping_status = '成功签收';
-                }elseif ($order_node == 35){
-                    $order_shipping_status = '投递失败';
-                }else{
-                    $status_arr = ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'];
-                    if(in_array($val['status'],$status_arr)){
-                        $order_shipping_status = '支付成功';
-                    }else{
-                        $order_shipping_status = '-';
-                    }
-                }
-                $val['status'] = $order_shipping_status;
-                switch ($val['store_id']){
-                    case 1:
-                        $store_id = 'PC';
-                        break;
-                    case 4:
-                        $store_id = 'M';
-                        break;
-                    case 5:
-                        $store_id = 'Ios';
-                        break;
-                    case 6:
-                        $store_id = 'Android';
-                        break;
-                }
-                $val['store_id'] = $store_id;
-                $val['address_type'] = 'shipping';
-                $val['parent_id'] = $val['entity_id'];
-                //收货信息
-                $shipping_where['address_type'] = 'shipping';
-                $shipping_where['parent_id'] = $val['entity_id'];
-                $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
-                $val['shipping_name'] = $shipping['firstname'].''.$shipping['lastname'];  //收货姓名
-                //客户信息
-                if($val['customer_id']){
-                    $customer_where['entity_id'] = $val['customer_id'];
-                    $customer = $web_model->table('customer_entity')->where($customer_where)->field('email,group_id,created_at')->find();
-                    switch ($customer['group_id']){
-                        case 1:
-                            $group = '普通';
-                            break;
-                        case 2:
-                            $group = '批发';
-                            break;
-                        case 4:
-                            $group = 'VIP';
-                            break;
-                    }
-                    $register_time = $customer['created_at'];
-                    $register_email = $customer['email'];
-                }else{
-                    $group = '游客';
-                    $register_time = '';
-                    $register_email = '';
-                }
-                $val['customer_type'] = $group;   //客户类型
-                $val['discount_rate'] = $val['base_grand_total'] ? round(($val['base_discount_amount']/$val['base_grand_total']),2).'%' : 0;  //折扣百分比
-                $val['discount_money'] = round($val['base_discount_amount'],2);  //折扣金额
-                $work_list_where['platform_order'] = $val['increment_id'];
-                $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
-                $work_list = collection($work_list)->toArray();
-                $work_list_num = count($work_list);
-                $work_list_is_refund = array_column($work_list,'is_refund');
-                if(in_array(1,$work_list_is_refund)){
-                    $is_refund = '有';
-                }else{
-                    $is_refund = '无';
-                }
-                $val['is_refund'] = $is_refund;  //是否退款
-                $val['country_id'] = $shipping['country_id'];   //收货国家
-                //支付信息
-                $payment_where['parent_id'] = $val['entity_id'];
-                $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
-                $val['payment_method'] =  $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
-                //处方信息
-                $prescription_where['order_id'] = $val['entity_id'];
-                $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
-                $val['frame_price'] = round($frame_price,2);
-                $val['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
-                if($site == 3){
-                    $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
-                }else{
-                    $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
-                }
-                $val['is_box_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
-                $lens_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('index_price');
-                $val['lens_price'] = round($lens_price,2);
-                $val['telephone'] = $shipping['telephone'];
-                $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
-                $skus = collection($skus)->toArray();
-                $val['sku'] = implode('|',$skus);
-                $val['register_time'] = $register_time;
-                $val['register_email'] = $register_email;
-                $val['work_list_num'] = $work_list_num;
                 $tmpRow = [];
                 if(in_array('increment_id',$column_name)){
                     $index = array_keys($column_name,'increment_id');
@@ -916,19 +811,52 @@ class OrderDataDetail extends Backend
                 }
                 if(in_array('base_grand_total',$column_name)){
                     $index = array_keys($column_name,'base_grand_total');
-                    $tmpRow[$index[0]] =$val['base_grand_total'];
+                    $tmpRow[$index[0]] =round($val['base_grand_total'],2);
                 }
                 if(in_array('base_shipping_amount',$column_name)){
                     $index = array_keys($column_name,'base_shipping_amount');
-                    $tmpRow[$index[0]] =$val['base_shipping_amount'];
+                    $tmpRow[$index[0]] =round($val['base_shipping_amount'],2);
                 }
                 if(in_array('status',$column_name)){
+                    $order_node = Db::name('order_node')->where('order_id',$val['entity_id'])->value('node_type');
+                    if($order_node == 7){
+                        $order_shipping_status = '已发货';
+                    }elseif ($order_node == 8 && $order_node == 10){
+                        $order_shipping_status = '运输途中';
+                    }elseif ($order_node == 30){
+                        $order_shipping_status = '到达待取';
+                    }elseif ($order_node == 40){
+                        $order_shipping_status = '成功签收';
+                    }elseif ($order_node == 35){
+                        $order_shipping_status = '投递失败';
+                    }else{
+                        $status_arr = ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'];
+                        if(in_array($val['status'],$status_arr)){
+                            $order_shipping_status = '支付成功';
+                        }else{
+                            $order_shipping_status = '-';
+                        }
+                    }
                     $index = array_keys($column_name,'status');
-                    $tmpRow[$index[0]] =$val['status'];
+                    $tmpRow[$index[0]] =$order_shipping_status;
                 }
                 if(in_array('store_id',$column_name)){
+                    switch ($val['store_id']){
+                        case 1:
+                            $store_id = 'PC';
+                            break;
+                        case 4:
+                            $store_id = 'M';
+                            break;
+                        case 5:
+                            $store_id = 'Ios';
+                            break;
+                        case 6:
+                            $store_id = 'Android';
+                            break;
+                    }
                     $index = array_keys($column_name,'store_id');
-                    $tmpRow[$index[0]] =$val['store_id'];
+                    $tmpRow[$index[0]] =$store_id;
                 }
                 if(in_array('protect_code',$column_name)){
                     $index = array_keys($column_name,'protect_code');
@@ -940,84 +868,146 @@ class OrderDataDetail extends Backend
                 }
                 if(in_array('address_type',$column_name)){
                     $index = array_keys($column_name,'address_type');
-                    $tmpRow[$index[0]] =$val['address_type'];
+                    $tmpRow[$index[0]] ='shipping';
                 }
                 if(in_array('parent_id',$column_name)){
                     $index = array_keys($column_name,'parent_id');
-                    $tmpRow[$index[0]] =$val['parent_id'];
+                    $tmpRow[$index[0]] =$val['entity_id'];
                 }
-                if(in_array('shipping_name',$column_name)){
-                    $index = array_keys($column_name,'shipping_name');
-                    $tmpRow[$index[0]] =$val['shipping_name'];
+                if(in_array('shipping_name',$column_name) || in_array('country_id',$column_name) || in_array('telephone',$column_name)){
+                    //收货信息
+                    $shipping_where['address_type'] = 'shipping';
+                    $shipping_where['parent_id'] = $val['entity_id'];
+                    $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
+                    $index1 = array_keys($column_name,'shipping_name');
+                    if($index1){
+                        $tmpRow[$index1[0]] =$shipping['firstname'].''.$shipping['lastname'];
+                    }
+                    $index2 = array_keys($column_name,'country_id');
+                    if($index2){
+                        $tmpRow[$index2[0]] =$shipping['country_id']; //收货国家
+                    }
+                    $index3 = array_keys($column_name,'telephone');
+                    if($index3){
+                        $tmpRow[$index3[0]] =$shipping['telephone'];
+                    }
                 }
                 if(in_array('customer_email',$column_name)){
                     $index = array_keys($column_name,'customer_email');
                     $tmpRow[$index[0]] =$val['customer_email'];
                 }
-                if(in_array('customer_type',$column_name)){
-                    $index = array_keys($column_name,'customer_type');
-                    $tmpRow[$index[0]] =$val['customer_type'];
+                if(in_array('customer_type',$column_name) || in_array('register_time',$column_name) || in_array('register_email',$column_name)){
+                    //客户信息
+                    if($val['customer_id']){
+                        $customer_where['entity_id'] = $val['customer_id'];
+                        $customer = $web_model->table('customer_entity')->where($customer_where)->field('email,group_id,created_at')->find();
+                        switch ($customer['group_id']){
+                            case 1:
+                                $group = '普通';
+                                break;
+                            case 2:
+                                $group = '批发';
+                                break;
+                            case 4:
+                                $group = 'VIP';
+                                break;
+                        }
+                        $register_time = $customer['created_at'];
+                        $register_email = $customer['email'];
+                    }else{
+                        $group = '游客';
+                        $register_time = '';
+                        $register_email = '';
+                    }
+                    $index1 = array_keys($column_name,'customer_type');
+                    if($index1){
+                        $tmpRow[$index1[0]] =$group;//客户类型
+                    }
+                    $index2 = array_keys($column_name,'register_time');
+                    if($index2){
+                        $tmpRow[$index2[0]] =$register_time;
+                    }
+                    $index3 = array_keys($column_name,'register_email');
+                    if($index3){
+                        $tmpRow[$index3[0]] =$register_email;
+                    }
                 }
                 if(in_array('discount_rate',$column_name)){
                     $index = array_keys($column_name,'discount_rate');
-                    $tmpRow[$index[0]] =$val['discount_rate'];
+                    $tmpRow[$index[0]] =$val['base_grand_total'] ? round(($val['base_discount_amount']/$val['base_grand_total']),2).'%' : 0;//折扣百分比
                 }
                 if(in_array('discount_money',$column_name)){
                     $index = array_keys($column_name,'discount_money');
-                    $tmpRow[$index[0]] =$val['discount_money'];
+                    $tmpRow[$index[0]] =round($val['base_discount_amount'],2);  //折扣金额
                 }
-                if(in_array('is_refund',$column_name)){
-                    $index = array_keys($column_name,'is_refund');
-                    $tmpRow[$index[0]] =$val['is_refund'];
-                }
-                if(in_array('country_id',$column_name)){
-                    $index = array_keys($column_name,'country_id');
-                    $tmpRow[$index[0]] =$val['country_id'];
+                if(in_array('is_refund',$column_name) || in_array('work_list_num',$column_name)){
+                    $work_list_where['platform_order'] = $val['increment_id'];
+                    $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
+                    $work_list = collection($work_list)->toArray();
+                    $work_list_num = count($work_list);
+                    $work_list_is_refund = array_column($work_list,'is_refund');
+                    if(in_array(1,$work_list_is_refund)){
+                        $is_refund = '有';
+                    }else{
+                        $is_refund = '无';
+                    }
+                    $index1 = array_keys($column_name,'is_refund');
+                    if($index1){
+                        $tmpRow[$index1[0]] =$is_refund;//是否退款
+                    }
+                    $index2 = array_keys($column_name,'work_list_num');
+                    if($index2){
+                        $tmpRow[$index2[0]] =$work_list_num;
+                    }
                 }
                 if(in_array('payment_method',$column_name)){
+                    //支付信息
+                    $payment_where['parent_id'] = $val['entity_id'];
+                    $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
                     $index = array_keys($column_name,'payment_method');
-                    $tmpRow[$index[0]] =$val['payment_method'];
+                    $tmpRow[$index[0]] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
                 }
-                if(in_array('frame_price',$column_name)){
-                    $index = array_keys($column_name,'frame_price');
-                    $tmpRow[$index[0]] =$val['frame_price'];
+                if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
+                    //处方信息
+                    $prescription_where['order_id'] = $val['entity_id'];
+                    $frame_info = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->field('sum(frame_price) frame_amount,count(id) count,sum(index_price) lens_amount,sku')->select();
+                    $frame_info = collection($frame_info)->toArray();
+                    $index1 = array_keys($column_name,'frame_price');
+                    if($index1){
+                        $tmpRow[$index1[0]] =round($frame_info[0]['frame_amount'],2);
+                    }
+                    $index2 = array_keys($column_name,'frame_num');
+                    if($index2){
+                        $tmpRow[$index2[0]] =$frame_info[0]['count'];
+                    }
+                    $index3 = array_keys($column_name,'lens_price');
+                    if($index3){
+                        $tmpRow[$index3[0]] =round($frame_info[0]['lens_amount'],2);
+                    }
                 }
-                if(in_array('frame_num',$column_name)){
-                    $index = array_keys($column_name,'frame_num');
-                    $tmpRow[$index[0]] =$val['frame_num'];
+                if(in_array('sku',$column_name)){
+                    $prescription_where['order_id'] = $val['entity_id'];
+                    $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
+                    $index = array_keys($column_name,'sku');
+                    $tmpRow[$index[0]] =implode('|',$skus);
+
                 }
                 if(in_array('lens_num',$column_name)){
+                    $prescription_where['order_id'] = $val['entity_id'];
+                    if($site == 3){
+                        $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
+                    }else{
+                        $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
+                    }
                     $index = array_keys($column_name,'lens_num');
                     $tmpRow[$index[0]] =$val['lens_num'];
                 }
                 if(in_array('is_box_num',$column_name)){
+                    $prescription_where['order_id'] = $val['entity_id'];
                     $index = array_keys($column_name,'is_box_num');
-                    $tmpRow[$index[0]] =$val['is_box_num'];
+                    $tmpRow[$index[0]] =$web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
                 }
-                if(in_array('lens_price',$column_name)){
-                    $index = array_keys($column_name,'lens_price');
-                    $tmpRow[$index[0]] =$val['lens_price'];
-                }
-                if(in_array('telephone',$column_name)){
-                    $index = array_keys($column_name,'telephone');
-                    $tmpRow[$index[0]] =$val['telephone'];
-                }
-                if(in_array('sku',$column_name)){
-                    $index = array_keys($column_name,'sku');
-                    $tmpRow[$index[0]] =$val['sku'];
-                }
-                if(in_array('register_time',$column_name)){
-                    $index = array_keys($column_name,'register_time');
-                    $tmpRow[$index[0]] =$val['register_time'];
-                }
-                if(in_array('register_email',$column_name)){
-                    $index = array_keys($column_name,'register_email');
-                    $tmpRow[$index[0]] =$val['register_email'];
-                }
-                if(in_array('work_list_num',$column_name)){
-                    $index = array_keys($column_name,'work_list_num');
-                    $tmpRow[$index[0]] =$val['work_list_num'];
-                }
+
                 ksort($tmpRow);
                 $rows = array();
                 foreach ( $tmpRow as $export_obj){
