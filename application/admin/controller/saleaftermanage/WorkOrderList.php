@@ -374,18 +374,18 @@ class WorkOrderList extends Backend
                     //更换镜框判断是否有库存 
                     if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
                         //添加判断订单号是否已经质检
-                        echo 999;
                         $check_info = $this->check_order_quality($params['work_platform'],$params['platform_order']);
-                        echo 222;exit;
                         if($check_info){
                             throw new Exception("该订单已出库，不能更换镜架");
                             exit;
                         }
+                        echo 444;
                         $skus = $params['change_frame']['change_sku'];
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");exit;
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
+                        echo 222;exit;
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
