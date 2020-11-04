@@ -936,7 +936,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 },
                 //开发进度点击弹窗
                 get_develop_status: function (value, row, index) {
-                    if (row.status >= 2) {
+                    // if (row.status >= 2) {
                         if (row.develop_finish_status == 1) {
                             return '<div><span class="check_develop_status status1_color">未响应</span></div>';
                         } else if (row.develop_finish_status == 2) {
@@ -948,13 +948,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
                             }
                         }
-                    } else {
-                        return '-';
-                    }
+                    // } else {
+                    //     return '-';
+                    // }
                 },
                 //测试进度点击弹窗
                 get_test_status: function (value, row, index) {
-                    if (row.status >= 2) {
+                    // if (row.status >= 2) {
                         if (row.test_status == 1) {
                             return '<div><span class="check_test_status status1_color">未确认</span></div>';
                         } else if (row.test_status == 2) {
@@ -971,9 +971,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         } else if (row.test_status == 5) {
                             return '<div><span class="check_test_status status3_color">已上线</span></div>';
                         }
-                    } else {
-                        return '-';
-                    }
+                    // } else {
+                    //     return '-';
+                    // }
                 },
                 //完成确认
                 get_user_confirm: function (value, row, index) {
