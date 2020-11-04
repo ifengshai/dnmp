@@ -349,9 +349,10 @@ class Test01 extends Backend
         set_time_limit(0);
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
+        $data = '2020-11-02';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku')
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
             ->where(['platform_type' => 1, 'outer_sku_status' => 1])
             ->select();
 
@@ -365,7 +366,11 @@ class Test01 extends Backend
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
             $sku_data[$k]['day_date'] = $data;
             $sku_data[$k]['site'] = 1;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
                 if (strpos($kk, $v['sku']) != false) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
@@ -376,7 +381,7 @@ class Test01 extends Backend
 
 
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku')
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
             ->where(['platform_type' => 2, 'outer_sku_status' => 1])
             ->select();
         //当前站点的所有sku映射关系
@@ -390,7 +395,11 @@ class Test01 extends Backend
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
             $sku_data[$k]['day_date'] = $data;
             $sku_data[$k]['site'] = 2;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
                 if (strpos($kk, $v['sku']) != false) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
@@ -400,7 +409,7 @@ class Test01 extends Backend
         }
 
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku')
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
             ->where(['platform_type' => 3, 'outer_sku_status' => 1])
             ->select();
         //当前站点的所有sku映射关系
@@ -414,7 +423,11 @@ class Test01 extends Backend
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
             $sku_data[$k]['day_date'] = $data;
             $sku_data[$k]['site'] = 3;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
                 if (strpos($kk, $v['sku']) != false) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
