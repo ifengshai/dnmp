@@ -322,37 +322,30 @@ class WorkOrderList extends Backend
                         $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
                         if ($count > 0) {
                             throw new Exception("此订单存在未处理完成的工单");
-                            exit;
                         }
                     }
 
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
-                        exit;
                     }
 
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
-                        exit;
                     }
                     if (!$params['address']['shipping_type'] && in_array(7,$params['measure_choose_id'])) {
                         throw new Exception("请先选择shipping method");
-                        exit;
                     }
                     $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
-                        exit;
                     }
                     //判断是否选择措施
                     if (!$params['problem_type_id'] && !$params['id']) {
                         throw new Exception("问题类型不能为空");
-                        exit;
                     }
 
                     if (in_array($params['problem_type_id'], [11, 13, 14, 16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
-                        exit;
                     }
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
@@ -362,12 +355,10 @@ class WorkOrderList extends Backend
                     if (!empty($checkIsWarehouse)) {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
-                            exit;
                         }
                     } else {
                         if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_status'] == 2) {
                             throw new Exception("措施不能为空");
-                            exit;
                         }
                     }
                     //判断是否选择措施
@@ -429,7 +420,6 @@ class WorkOrderList extends Backend
                     } else {
                         if (!$params['refund_money']) {
                             throw new Exception("退款金额不能为空");
-                            exit;
                         }
                     }
 
@@ -438,7 +428,7 @@ class WorkOrderList extends Backend
                         unset($params['replenish_money']);
                     } else {
                         if (!$params['replenish_money']) {
-                            throw new Exception("补差价金额不能为空");exit;
+                            throw new Exception("补差价金额不能为空");
                         }
                     }
                     //判断是否选择积分措施
@@ -446,10 +436,10 @@ class WorkOrderList extends Backend
                         unset($params['integral']);
                     } else {
                         if (!$params['integral']) {
-                            throw new Exception("积分不能为空");exit;
+                            throw new Exception("积分不能为空");
                         }
                         if(!is_numeric($params['integral'])){
-                            throw new Exception("积分只能是数字");exit;
+                            throw new Exception("积分只能是数字");
                         }
                     }
 
@@ -458,7 +448,7 @@ class WorkOrderList extends Backend
                         unset($params['refund_logistics_num']);
                     } else {
                         if (!$params['refund_logistics_num']) {
-                            throw new Exception("退回物流单号不能为空");exit;
+                            throw new Exception("退回物流单号不能为空");
                         }
                     }
 
@@ -486,7 +476,7 @@ class WorkOrderList extends Backend
 
                     //选择有优惠券时 值必须为真
                     if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
-                        throw new Exception("优惠券不能为空");exit;
+                        throw new Exception("优惠券不能为空");
                     }
 
                     //如果积分大于200需要审核
@@ -737,7 +727,7 @@ class WorkOrderList extends Backend
                         }
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
-                            throw new Exception("添加失败！！");exit;
+                            throw new Exception("添加失败！！");
                         }
                         $work_id = $this->model->id;
                     } else {
@@ -763,7 +753,7 @@ class WorkOrderList extends Backend
                         $noteData['content'] =  $content;
                         $contentResult = $this->work_order_note->allowField(true)->save($noteData);
                         if (false === $contentResult) {
-                            throw new Exception("备注添加失败！！");exit;
+                            throw new Exception("备注添加失败！！");
                         }
                     }
 
@@ -783,7 +773,7 @@ class WorkOrderList extends Backend
                             //插入措施表
                             $res = $this->step->insertGetId($measureList);
                             if (false === $res) {
-                                throw new Exception("添加失败！！");exit;
+                                throw new Exception("添加失败！！");
                             }
 
                             //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
@@ -836,7 +826,7 @@ class WorkOrderList extends Backend
                             //插入承接人表
                             $receptRes = $this->recept->saveAll($appointList);
                             if (false === $receptRes) {
-                                throw new Exception("添加失败！！");exit;
+                                throw new Exception("添加失败！！");
                             }
                             
                             //更改镜片，补发，赠品，地址
