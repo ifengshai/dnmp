@@ -9,6 +9,7 @@ use think\Exception;
 use think\Loader;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Util\SKUHelper;
 
 /**
  * 配货列表
@@ -390,7 +391,7 @@ class Distribution extends Backend
 
                 //记录配货日志
                 $admin = (object)session('admin');
-                DistributionLog::record($admin,$ids,'标记打印完成');
+                DistributionLog::record($admin,$ids,1,'标记打印完成');
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -415,27 +416,139 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
+            //获取子订单列表
             $list = $this->model
-                ->field('item_order_number')
-                ->where(['id' => ['in', $ids]])
+                ->alias('a')
+                ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coatiing_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis')
+                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+                ->where(['a.id' => ['in', $ids]])
                 ->select();
 
+            $order_ids = [];
+            $sku_arr = [];
+            foreach ($list as $processing_value) {
+                $order_ids[] = $processing_value['order_id'];
+                $sku_arr[] = $processing_value['sku'];
+            }
+
+            //获取订单数据
+            $_new_order = new \app\admin\model\order\order\NewOrder();
+            $order_list = $_new_order
+                ->field('id,total_qty_ordered,increment_id')
+                ->where(['id' => ['in', array_unique($order_ids)]])
+                ->select()
+            ;
+            $order_list = array_column($order_list,NULL,'id');
+
+            //获取sku绑定库位数据
+            $_stock_sku = new \app\admin\model\warehouse\StockSku();
+            $store_house_list = $_stock_sku
+                ->alias('a')
+                ->field('a.sku,b.coding')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where(['a.sku' => ['in', array_unique($sku_arr)],'b.type' => 1])
+                ->select()
+            ;
+            $store_house_list = array_column($store_house_list,NULL,'sku');
+
             $file_content = '';
-            foreach ($list as $value) {
-                $item_order_number = $value['item_order_number'];
+            foreach ($list as $processing_value) {
+                $item_order_number = $processing_value['item_order_number'];
                 $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
                 $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
                 if (!file_exists($dir)) {
                     mkdir($dir, 0777, true);
                 }
                 $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
+
                 //生成条形码
                 $this->generate_barcode_new($item_order_number, $fileName);
+
+                //处理ADD
+                if (strlen($processing_value['os_add']) > 0 && strlen($processing_value['od_add']) > 0) {
+                    $os_add = "<td>" . $processing_value['od_add'] . "</td> ";
+                    $od_add = "<td>" . $processing_value['os_add'] . "</td> ";
+                } else {
+                    $od_add = "<td rowspan='2'>" . $processing_value['od_add'] . "</td>";
+                    $os_add = "";
+                }
+
+                //判断双PD
+                if ('on' == $processing_value['pdcheck']) {
+                    $od_pd = "<td>" . $processing_value['pd_r'] . "</td> ";
+                    $os_pd = "<td>" . $processing_value['pd_l'] . "</td> ";
+                } else {
+                    $od_pd = "<td rowspan='2'>" . $processing_value['pd'] . "</td>";
+                    $os_pd = "";
+                }
+
+                //判断斜视值
+                if ('on' == $processing_value['prismcheck']) {
+                    $prism_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
+                    $prism_od_value = "<td>" . $processing_value['od_pv'] . "</td><td colspan=''>" . $processing_value['od_bd'] . "</td>" . "<td>" . $processing_value['od_pv_r'] . "</td><td>" . $processing_value['od_bd_r'] . "</td>";
+                    $prism_os_value = "<td>" . $processing_value['os_pv'] . "</td><td colspan=''>" . $processing_value['os_bd'] . "</td>" . "<td>" . $processing_value['os_pv_r'] . "</td><td>" . $processing_value['os_bd_r'] . "</td>";
+                    $coating_name = '';
+                } else {
+                    $prism_title = '';
+                    $prism_od_value = '';
+                    $prism_os_value = '';
+                    $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['coatiing_name'] . "</td>";
+                }
+                $serial = explode('-',$item_order_number);
+
+                if($store_house_list[$processing_value['sku']]['coding']){
+                    $coding = "<b>" . $store_house_list[$processing_value['sku']]['coding'] . "</b><br>";
+                }else{
+                    $coding = '';
+                }
+
                 $file_content .= "<div  class = 'single_box'>
-                <table width='420mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                    <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                    <tr>
+                    <td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . date("Y-m-d H:i:s", $processing_value['created_at']) . "</td>
+                    <td rowspan='5' colspan='3' style='padding:10px;'><img style='width:100%;height:80%;' src='" . $img_url . "'><br></td>
+                    </tr>                
+                    </table></div>
+                    <div  class = 'single_box'>
+                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+                <tbody cellpadding='0'>
                 <tr>
-                <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
-                </table></div>";
+                <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>
+                ".$processing_value['prescription_type']."
+                &nbsp;&nbsp;Order:" . $order_list[$processing_value['order_id']]['increment_id'] . "
+                <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
+                <span style=' margin-left:5px;'>Num:<strong>" . $serial[1] . "/" . $order_list[$processing_value['order_id']]['total_qty_ordered'] . "</strong></span>
+                </td>
+                </tr>  
+                <tr class='title'>      
+                <td></td>  
+                <td>SPH</td>
+                <td>CYL</td>
+                <td>AXI</td>
+                " . $prism_title . "
+                <td>ADD</td>
+                <td>PD</td> 
+                " . $coating_name . "
+                </tr>   
+                <tr>  
+                <td>R</td>      
+                <td>" . $processing_value['od_sph'] . "</td> 
+                <td>" . $processing_value['od_cyl'] . "</td>
+                <td>" . $processing_value['od_axis'] . "</td>    
+                " . $prism_od_value . $od_add . $od_pd .
+                    "</tr>
+                <tr>
+                <td>L</td> 
+                <td>" . $processing_value['os_sph'] . "</td>    
+                <td>" . $processing_value['os_cyl'] . "</td>  
+                <td>" . $processing_value['os_axis'] . "</td> 
+                " . $prism_os_value . $os_add . $os_pd .
+                    " </tr>
+                <tr>
+                <td colspan='2'>" . $coding . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
+                <td colspan='8' style=' text-align:center'>" . $processing_value['index_name'] . "</td>
+                </tr>  
+                </tbody></table></div>";
             }
             echo $file_header . $file_content;
         }
@@ -462,7 +575,7 @@ EOF;
         $color_white = new \BCGColor(255, 255, 255);
         $label = new \BCGLabel();
         $label->setPosition(\BCGLabel::POSITION_TOP);
-        $label->setText('Made In China');
+        $label->setText('');
         $label->setFont($font);
         $drawException = null;
         try {
@@ -472,7 +585,7 @@ EOF;
             $code->setThickness(18); // 条形码的厚度
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
-            $code->setFont($font); //设置字体
+            $code->setFont(0); //设置字体
             $code->addLabel($label); //设置字体
             $code->parse($text); // 条形码需要的数据内容
         } catch (\Exception $exception) {
@@ -642,7 +755,7 @@ EOF;
                     ;
 
                     //操作成功记录
-                    DistributionLog::record($admin,$value['id'],$status_arr[$check_status].'完成');
+                    DistributionLog::record($admin,$value['id'],$check_status,$status_arr[$check_status].'完成');
                 }
 
                 Db::commit();
@@ -761,7 +874,7 @@ EOF;
                     }
 
                     //记录日志
-                    DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
+                    DistributionLog::record($admin,$value['id'],6,$status_arr[$reason]['name']);
                 }
 
                 Db::commit();
@@ -783,14 +896,12 @@ EOF;
      * @since 2020/10/28 14:45:39
      * @return void
      */
-    public function handle_abnormal($id = null)
+    public function handle_abnormal($ids = null)
     {
-        $id = $id ?? $this->request->get('id');
-
         //检测配货状态
         $item_info = $this->model
             ->field('id,site,sku,distribution_status,abnormal_house_id')
-            ->where(['id' => $id])
+            ->where(['id' => $ids])
             ->find()
         ;
         if (empty($item_info)) {
@@ -811,101 +922,130 @@ EOF;
             return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
         }
 
-        if ($this->request->isAjax()) {
-            //库存、关系映射、库存日志表
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $_item = new \app\admin\model\itemmanage\Item();
-            $_stock_log = new \app\admin\model\StockLog();
+        //状态列表
+        $status_arr = [
+            1=>'待打印标签',
+            2=>'待配货',
+            3=>'待配镜片',
+            4=>'待加工',
+            5=>'待印logo',
+            6=>'待成品质检'
+        ];
 
+        //异常原因列表
+        $abnormal_arr = [
+            1=>'配货缺货',
+            2=>'商品条码贴错',
+            3=>'核实处方',
+            4=>'镜片缺货',
+            5=>'镜片重做',
+            6=>'定制片超时',
+            7=>'不可加工',
+            8=>'镜架加工报损',
+            9=>'镜片加工报损',
+            10=>'logo不可加工',
+            11=>'镜架印logo报损',
+            12=>'合单缺货',
+            13=>'核实地址',
+            14=>'物流退件',
+            15=>'客户退件'
+        ];
+
+        if ($this->request->isAjax()) {
             //操作人信息
             $admin = (object)session('admin');
 
-            //状态
-            $status_arr = [
-                1=>'待打印标签',
-                2=>'待配货',
-                3=>'待配镜片',
-                4=>'待加工',
-                5=>'待印logo',
-                6=>'待成品质检'
-            ];
+            //检测状态
+            $check_status = [];
 
             //根据返回节点处理相关逻辑
             $status = input('status');
             switch ($status) {
                 case 1:
-                    if (!in_array($item_info['distribution_status'],[4,5,6])) {
-                        return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
-                    }
-                    //子订单状态回滚
-                    $this->model
-                        ->allowField(true)
-                        ->isUpdate(true, ['id'=>$id])
-                        ->save(['distribution_status'=>$status])
-                    ;
-
-                    //记录日志
-                    DistributionLog::record($admin,$id,'当前节点：');
-
-                    //更新状态
-                    foreach($item_list as $value){
-                        //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                        if(2 == $reason){
-                            //获取true_sku
-                            $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                            //扣减虚拟仓库存
-                            $_item_platform_sku
-                                ->where(['sku'=>$true_sku,'platform_type'=>$value['site']])
-                                ->dec('stock', 1)
-                                ->update()
-                            ;
-
-                            //扣减可用库存、配货占用库存、总库存
-                            $_item
-                                ->where(['sku'=>$true_sku])
-                                ->dec('available_stock', 1)
-                                ->dec('distribution_occupy_stock', 1)
-                                ->dec('stock', 1)
-                                ->update()
-                            ;
-                        }
-
-                        //记录日志
-                        DistributionLog::record($admin,$value['id'],$status_arr[$reason]['name']);
-                    }
+                    $check_status = [4,5,6];
                     break;
                 case 2:
-                    $db = 'database.db_voogueme';
-                    $model = $this->voogueme;
+                    $check_status = [4,5,6];
                     break;
                 case 3:
-                    $db = 'database.db_nihao';
-                    $model = $this->nihao;
+                    $check_status = [4,5,6];
                     break;
                 case 4:
-                    $db = 'database.db_weseeoptical';
-                    $model = $this->weseeoptical;
+                    $check_status = [5,6];
                     break;
                 case 5:
-                    $db = 'database.db_meeloog';
-                    $model = $this->meeloog;
+                    $check_status = [6];
                     break;
                 case 6:
-                    $db = 'database.db_zeelool_es';
-                    $model = $this->zeelool_es;
+                    $check_status = [7];
                     break;
-                default:
-                    return $this->error('返回节点类型错误', url('index?ref=addtabs'));
             }
 
-
-
-
+            //检测状态
+            if (!in_array($item_info['distribution_status'],$check_status)) {
+                return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
+            }
 
             Db::startTrans();
             try {
+                //子订单状态回滚
+                $this->model
+                    ->allowField(true)
+                    ->isUpdate(true, ['id'=>$ids])
+                    ->save(['distribution_status'=>$status])
+                ;
 
+                //标记异常状态
+                $_distribution_abnormal
+                    ->allowField(true)
+                    ->isUpdate(true, ['id'=>$item_info['abnormal_house_id']])
+                    ->save(['status'=>2,'do_time'=>time(),'do_person'=>$admin->nickname])
+                ;
+
+                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                $remark = '处理异常：'.$abnormal_arr[$abnormal_info['type']].',当前节点：'.$status_arr[$item_info['distribution_status']].',返回节点：'.$status_arr[$status];
+                if(3 == $status){
+                    //获取true_sku
+                    $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    $true_sku = $_item_platform_sku->getTrueSku($item_info['sku'], $item_info['site']);
+
+                    //扣减虚拟仓库存
+                    $_item_platform_sku
+                        ->where(['sku'=>$true_sku,'platform_type'=>$item_info['site']])
+                        ->dec('stock', 1)
+                        ->update()
+                    ;
+
+                    //扣减可用库存、配货占用库存、总库存
+                    $_item = new \app\admin\model\itemmanage\Item();
+                    $_item
+                        ->where(['sku'=>$true_sku])
+                        ->dec('available_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
+                        ->update()
+                    ;
+
+                    //扣库存日志
+                    $stock_data = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $item_info['sku'],
+                        'public_id'                 => $item_info['id'],
+                        'stock_change'              => -1,
+                        'available_stock_change'    => -1,
+                        'create_person'             => $admin->nickname,
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '成检拒绝：减少总库存,减少可用库存'
+                    ];
+                    $_stock_log = new \app\admin\model\StockLog();
+                    $_stock_log->allowField(true)->save($stock_data);
+
+                    $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存数量：1';
+                }
+
+                //记录日志
+                DistributionLog::record($admin, $ids, 10, $remark);
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -917,7 +1057,41 @@ EOF;
             }
         }
 
+        $this->view->assign("status_arr", $status_arr);
+        $this->view->assign("abnormal_arr", $abnormal_arr);
         $this->view->assign("row", $item_info);
+        $this->view->assign("abnormal_info", $abnormal_info);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 操作记录
+     *
+     * @Description
+     * @author lzh
+     * @since 2020/10/28 14:45:39
+     * @return void
+     */
+    public function operation_log($ids = null)
+    {
+        //检测配货状态
+        $item_info = $this->model
+            ->field('id')
+            ->where(['id' => $ids])
+            ->find()
+        ;
+        if (empty($item_info)) {
+            return $this->error('子订单不存在', url('index?ref=addtabs'));
+        }
+
+        //检测异常状态
+        $list = (new DistributionLog())
+            ->where(['item_process_id'=>$ids])
+            ->select()
+        ;
+        $list = collection($list)->toArray();
+
+        $this->view->assign("list", $list);
         return $this->view->fetch();
     }
 

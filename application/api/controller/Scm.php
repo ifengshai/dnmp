@@ -171,7 +171,8 @@ class Scm extends Api
         foreach($list as $key=>$value){
             $list[$key]['status'] = $status[$value['status']];
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
-            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+            $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
         }
 
         $this->success('', ['list' => $list],200);
@@ -1141,7 +1142,7 @@ class Scm extends Api
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['detail_show'] = 1 < $value['status'] ? 1 : 0;
-            $list[$key]['examine_show'] = 1 == $value['status'] ?: 0;
+            $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
         }
 
         $this->success('', ['list' => $list],200);
@@ -1529,7 +1530,7 @@ class Scm extends Api
         empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
 
         //自动分配异常库位号
-        $_stock_house = new \app\admin\model\warehouse\StockHouse;
+        $_stock_house = new \app\admin\model\warehouse\StockHouse();
         $stock_house_info = $_stock_house
             ->field('id,coding')
             ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
@@ -1561,10 +1562,10 @@ class Scm extends Api
                 ->setInc('occupy', 1)
             ;
 
-            DistributionLog::record($this->auth,$item_process_id,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+            DistributionLog::record($this->auth,$item_process_id,9,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
             $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), [], 200);
         }else{
-            DistributionLog::record($this->auth,$item_process_id,'异常暂存架没有空余库位');
+            DistributionLog::record($this->auth,$item_process_id,0,'异常暂存架没有空余库位');
             $this->error(__('异常暂存架没有空余库位'), [], 405);
         }
     }
@@ -1724,7 +1725,7 @@ class Scm extends Api
                         ;
                         $coding = $stock_house_info['coding'];
                     }else{
-                        DistributionLog::record($this->auth,$item_process_info['id'],'定制片暂存架没有空余库位');
+                        DistributionLog::record($this->auth,$item_process_info['id'],0,'定制片暂存架没有空余库位');
                         $this->error(__('定制片暂存架没有空余库位，请及时处理'), [], 405);
                     }
                 }
@@ -1732,7 +1733,7 @@ class Scm extends Api
 
             //定制片提示库位号信息
             if($coding){
-                DistributionLog::record($this->auth,$item_process_info['id'],"子单号{$item_order_number}，定制片库位号：{$coding}");
+                DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，定制片库位号：{$coding}");
                 $this->error(__("请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位"), [], 405);
             }
         }
@@ -1819,13 +1820,13 @@ class Scm extends Api
 
         //操作失败记录
         if(empty($item_process_info)){
-            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：子订单不存在');
+            DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：子订单不存在');
             $this->error(__('子订单不存在'), [], 403);
         }
 
         //操作失败记录
         if($check_status != $item_process_info['distribution_status']){
-            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：当前状态['.$status_arr[$item_process_info['distribution_status']].']无法操作');
+            DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：当前状态['.$status_arr[$item_process_info['distribution_status']].']无法操作');
             $this->error(__('当前状态无法操作'), [], 405);
         }
 
@@ -1838,7 +1839,7 @@ class Scm extends Api
 
         //操作失败记录
         if($abnormal_id){
-            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：有异常['.$abnormal_id.']待处理不可操作');
+            DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：有异常['.$abnormal_id.']待处理不可操作');
             $this->error(__('有异常待处理无法操作'), [], 405);
         }
 
@@ -1916,7 +1917,7 @@ class Scm extends Api
         ;
         if($res){
             //操作成功记录
-            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'完成');
+            DistributionLog::record($this->auth,$item_process_info['id'],$check_status,$status_arr[$check_status].'完成');
 
             //成功返回
             $next_step = [
@@ -1930,7 +1931,7 @@ class Scm extends Api
             $this->success($next_step[$save_status], [],200);
         }else{
             //操作失败记录
-            DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$check_status].'：保存失败');
+            DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：保存失败');
 
             //失败返回
             $this->error(__($status_arr[$check_status].'失败'), [], 404);
@@ -2073,7 +2074,7 @@ class Scm extends Api
                 }
 
                 //记录日志
-                DistributionLog::record($this->auth,$item_process_info['id'],$status_arr[$reason]['name']);
+                DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
                 Db::commit();
             } catch (ValidateException $e) {

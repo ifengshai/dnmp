@@ -167,7 +167,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('处理异常'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/distribution/detail',
+                                    url: 'order/distribution/handle_abnormal',
                                     extend: 'data-area = \'["60%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -207,7 +207,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('操作记录'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/distribution/operational',
+                                    url: 'order/distribution/operation_log',
                                     extend: 'data-area = \'["60%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -271,7 +271,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/distribution/batch_print_label/ids/' + ids, '_blank');
             });
 
-            //配货完成、配镜片完成、加工完成、印logo完成、合单完成
+            //配货完成、配镜片完成、加工完成、印logo完成
             $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
@@ -348,6 +348,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     }
                 );
             });
+        },
+        handle_abnormal: function () {
+            Controller.api.bindevent();
         },
         api: {
             formatter: {
