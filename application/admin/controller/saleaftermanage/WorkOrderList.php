@@ -370,7 +370,7 @@ class WorkOrderList extends Backend
                             exit;
                         }
                     }
-                    
+                    echo 222;exit;
                     //判断是否选择措施
                     //更换镜框判断是否有库存 
                     if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
@@ -386,7 +386,6 @@ class WorkOrderList extends Backend
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
-                    echo 222;exit;
                     //判断赠品是否有库存
                     //判断补发是否有库存
                     if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
