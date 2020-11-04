@@ -172,7 +172,7 @@ class SingleItems extends Backend
                 ->count();
 
             //整站订单量
-            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->value('order_num');
+            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->sum('order_num');
 
             //订单占比
             $order_rate = $whole_platform_order_num == 0 ? 0 : round($total / $whole_platform_order_num * 100, 2) . '%';
