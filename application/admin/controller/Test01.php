@@ -344,7 +344,7 @@ class Test01 extends Backend
 
     public function sku_day_data_ga()
     {
-        Db::name('datacenter_sku_day')->delete();
+        Db::name('datacenter_sku_day')->where('id','>',0)->delete();
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
