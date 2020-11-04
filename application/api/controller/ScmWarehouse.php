@@ -522,13 +522,13 @@ class ScmWarehouse extends Scm
                 ;
 
                 //校验各站点虚拟仓库存
-                foreach ($item_data as $key => $value) {
+                foreach ($item_data as $value) {
                     $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: '.$value['sku'].' 出库数量不能大于虚拟仓库存'), [], 405);
                 }
 
                 $stock_data = [];
                 //出库扣减库存
-                foreach ($item_data as $key => $value) {
+                foreach ($item_data as $value) {
                     //扣除商品表总库存
                     $sku = $value['sku'];
                     $this->_item->where(['sku'=>$sku])->dec('stock', $value['out_stock_num'])->dec('available_stock', $value['out_stock_num'])->update();

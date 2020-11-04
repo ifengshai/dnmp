@@ -292,7 +292,7 @@ class ScmQuality extends Scm
         },['quantity_agg' => [],'unqualified_agg' => [],'sample_agg' => []]);
 
         //质检单所需数据
-        $info =[
+        $info = [
             'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
             'purchase_number'=>$purchase_data['purchase_number'],
             'supplier_name'=>$supplier_data['supplier_name'],
@@ -421,7 +421,7 @@ class ScmQuality extends Scm
         }
 
         //质检单所需数据
-        $info =[
+        $info = [
             'check_order_number'=>$check_data['check_order_number'],
             'purchase_number'=>$purchase_data['purchase_number'],
             'supplier_name'=>$supplier_data['supplier_name'],
