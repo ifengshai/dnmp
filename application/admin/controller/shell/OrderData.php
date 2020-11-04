@@ -234,6 +234,12 @@ class OrderData extends Backend
                                         $options =  $this->meeloog_prescription_analysis($v['product_options']);
                                     } elseif ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 9) {
+                                        $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 10) {
+                                        $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
+                                    }elseif ($site == 11) {
+                                        $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['item_id'] = $v['item_id'];
@@ -275,6 +281,12 @@ class OrderData extends Backend
                                         $options =  $this->meeloog_prescription_analysis($v['product_options']);
                                     } elseif ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 9) {
+                                        $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 10) {
+                                        $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
+                                    }elseif ($site == 11) {
+                                        $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['sku'] = $v['sku'];
