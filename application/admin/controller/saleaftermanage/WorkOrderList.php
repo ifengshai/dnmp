@@ -354,7 +354,6 @@ class WorkOrderList extends Backend
                         throw new Exception("Sku不能为空");
                         exit;
                     }
-                    echo 111;exit;
                     $userId = session('admin.id');
                     $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
                     //$warehouseArr = config('workorder.warehouse_department_rule');
@@ -445,7 +444,7 @@ class WorkOrderList extends Backend
                             throw new Exception("补差价金额不能为空");exit;
                         }
                     }
-
+                    echo 222;exit;
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
