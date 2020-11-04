@@ -344,7 +344,7 @@ class Test01 extends Backend
 
     public function sku_day_data_ga()
     {
-        Db::name('datacenter_sku_day')->where('id','>',0)->delete();
+        // Db::name('datacenter_sku_day')->where('id','>',0)->delete();
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
@@ -376,7 +376,7 @@ class Test01 extends Backend
 
 
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            ->field('sku,grade,platform_sku')
             ->where(['platform_type' => 2, 'outer_sku_status' => 1])
             ->select();
         //当前站点的所有sku映射关系
@@ -400,7 +400,7 @@ class Test01 extends Backend
         }
 
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            ->field('sku,grade,platform_sku')
             ->where(['platform_type' => 3, 'outer_sku_status' => 1])
             ->select();
         //当前站点的所有sku映射关系
