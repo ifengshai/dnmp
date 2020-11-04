@@ -46,28 +46,32 @@ class ItWebDemand extends Backend
     {
         $day_17 = mktime(17, 0, 0, date('m'), date('d'), date('Y')); //当天5点
         $week_17 = strtotime("+17 hour", strtotime("friday")); //本周5，下午5点
-
         $data = array();
         switch ($priority) {
             case 1:
                 $data['start_time'] = date('Y-m-d H:i', time());
-                $data['end_time'] = date('Y-m-d H:i', strtotime('+' . $node_time . 'day'));
+                $data['end_time'] = $node_time;
+//                $data['end_time'] = date('Y-m-d H:i', strtotime('+' . $node_time . 'day'));
                 break;
             case 2:
                 $data['start_time'] = date('Y-m-d H:i', $day_17);
-                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $day_17));
+                $data['end_time'] = $node_time;
+//                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $day_17));
                 break;
             case 3:
                 $data['start_time'] = date('Y-m-d H:i', $week_17);
-                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
+                $data['end_time'] = $node_time;
+//                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
                 break;
             case 4:
                 $data['start_time'] = date('Y-m-d H:i', $week_17);
-                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
+                $data['end_time'] = $node_time;
+//                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
                 break;
             case 5:
                 $data['start_time'] = date('Y-m-d H:i', $week_17);
-                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
+                $data['end_time'] = $node_time;
+//                $data['end_time'] = date('Y-m-d H:i', strtotime("+" . $node_time . " day", $week_17));
                 break;
             default:
                 $data['start_time'] = '';
@@ -75,6 +79,8 @@ class ItWebDemand extends Backend
         }
         return $data;
     }
+
+
 
     /*
      * 取出配置文件的数据，
@@ -742,7 +748,7 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
+//            dump($params);die();
             if ($params) {
 
                 if($params['pm_audit_status'] == 4){//拒绝
@@ -796,6 +802,7 @@ class ItWebDemand extends Backend
                     $add['site'] = $params['site'];
 
                     $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
+
                     $add['title'] = $params['title'];
                     $add['content'] = $params['content'];
                     $add['remark'] = $params['remark'];
@@ -804,6 +811,12 @@ class ItWebDemand extends Backend
                     if ($params['demand_type'] == 2) {
                         $add['node_time'] = $params['node_time'];
                     }
+                    $add['functional_module'] = $params['functional_module'];
+                    $add['importance'] = $params['importance'];
+                    $add['degree_of_urgency'] = $params['degree_of_urgency'];
+                    $add['development_difficulty'] = $params['development_difficulty'];
+                    $add['important_reasons'] = implode(',', $params['important_reasons']);
+
                 }
 
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
@@ -821,7 +834,8 @@ class ItWebDemand extends Backend
         $row = $row->toArray();
         $row['site_type_arr'] = explode(',', $row['site_type']);
         $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
-
+        $row['important_reasons'] = explode(',', $row['important_reasons']);
+//        dump($row);die();
         $this->view->assign('demand_type', input('demand_type'));
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row);
@@ -1045,7 +1059,29 @@ class ItWebDemand extends Backend
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
     }
-
+    /**
+     * 开发响应
+     *开发拒绝
+     */
+    public function distriRefuse(){
+        if ($this->request->isAjax()){
+            $params = input('param.');
+            $updateValue['develop_finish_status'] =4;
+            if ($params['status'] ==1){
+                $updateValue['web_remarks'] = $params['remarks'];
+            }elseif ($params['status'] ==2){
+                $updateValue['phper_remarks'] = $params['remarks'];
+            }else{
+                $updateValue['app_remarks'] = $params['remarks'];
+            }
+            $save = $this->model->where('id='.$params['ids'])->update($updateValue);
+            if ($save){
+                $info = $this->model->where('id='.$params['ids'])->find();
+                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['id'] . '+任务已被拒绝', $info['title'].'拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
+            }
+        }
+        $this->success('成功');
+    }
     /**
      * 测试确认--通过--上线
      * 测试权限
