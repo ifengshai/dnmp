@@ -499,7 +499,7 @@ class Zendesk extends Model
             $map['type'] = $platform;
         }
         //待处理
-        $wait_deal_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq',['voice','sms']]])->count();
+        $wait_deal_num = $this->where($map)->where(['status'=>['in','1,2'],'channel' => ['neq','voice']])->count();
 
         //新增
         if($platform){
