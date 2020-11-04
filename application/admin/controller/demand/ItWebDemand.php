@@ -1076,11 +1076,15 @@ class ItWebDemand extends Backend
             }
             $save = $this->model->where('id='.$params['ids'])->update($updateValue);
             if ($save){
-                $info = $this->model->where('id='.$params['ids'])->find();
+                $row = $this->model->get(['id' => $params['ids']]);
+                $info = $row->toArray();
                 Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['id'] . '+任务已被拒绝', $info['title'].'拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
+                $this->success('成功');
+            }else{
+                $this->success('失败');
             }
         }
-        $this->success('成功');
+
     }
     /**
      * 测试确认--通过--上线
