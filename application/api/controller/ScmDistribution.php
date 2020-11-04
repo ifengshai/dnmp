@@ -155,51 +155,6 @@ class ScmDistribution extends Scm
     }
 
     /**
-     * 镜片分拣（待定）
-     *
-     * @参数 string start_time  开始时间
-     * @参数 string end_time  结束时间
-     * @参数 int page  页码
-     * @参数 int page_size  每页显示数量
-     * @author lzh
-     * @return mixed
-     */
-    public function sorting()
-    {
-        $start_time = $this->request->request('start_time');
-        $end_time = $this->request->request('end_time');
-        $page = $this->request->request('page');
-        $page_size = $this->request->request('page_size');
-
-        empty($page) && $this->error(__('Page can not be empty'), [], 403);
-        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
-
-        $where = [
-            'a.status'=>3,
-            'b.index_name'=>['neq',''],
-        ];
-        if($start_time && $end_time){
-            $where['a.created_at'] = ['between', [strtotime($start_time), strtotime($end_time)]];
-        }
-
-        $offset = ($page - 1) * $page_size;
-        $limit = $page_size;
-
-        //获取出库单列表数据
-        $list = $this->_new_order_item_process
-            ->alias('a')
-            ->where($where)
-            ->field('count(*) as all_count,b.prescription_type,b.index_type,b.index_name')
-            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-            ->group('b.prescription_type,b.index_type,b.index_name')
-            ->limit($offset, $limit)
-            ->select();
-        $list = collection($list)->toArray();
-
-        $this->success('', ['list' => $list],200);
-    }
-
-    /**
      * 子单号模糊搜索（配货通用）
      *
      * @参数 string query  搜索内容
@@ -509,6 +464,80 @@ class ScmDistribution extends Scm
     }
 
     /**
+     * 配货扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author wgj
+     * @return mixed
+     */
+    public function product()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->info($item_order_number,2);
+    }
+
+    /**
+     * 配货提交
+     *
+     * @参数 string item_order_number  子订单号
+     * @author wgj
+     * @return mixed
+     */
+    public function product_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $item_order_number = $this->request->request('item_order_number');
+//        var_dump($item_order_number);
+//        die;
+        $this->save($item_order_number,2);
+    }
+
+    /**
+     * 镜片分拣（待定）
+     *
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author lzh
+     * @return mixed
+     */
+    public function sorting()
+    {
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 403);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
+
+        $where = [
+            'a.status'=>3,
+            'b.index_name'=>['neq',''],
+        ];
+        if($start_time && $end_time){
+            $where['a.created_at'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        //获取出库单列表数据
+        $list = $this->_new_order_item_process
+            ->alias('a')
+            ->where($where)
+            ->field('count(*) as all_count,b.prescription_type,b.index_type,b.index_name')
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->group('b.prescription_type,b.index_type,b.index_name')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
      * 配镜片扫码
      *
      * @参数 string item_order_number  子订单号
@@ -558,6 +587,32 @@ class ScmDistribution extends Scm
     {
         $item_order_number = $this->request->request('item_order_number');
         $this->save($item_order_number,4);
+    }
+
+    /**
+     * 印logo扫码
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function logo()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->info($item_order_number,5);
+    }
+
+    /**
+     * 印logo提交
+     *
+     * @参数 string item_order_number  子订单号
+     * @author lzh
+     * @return mixed
+     */
+    public function logo_submit()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        $this->save($item_order_number,5);
     }
 
     /**
@@ -655,61 +710,6 @@ class ScmDistribution extends Scm
                 $this->error($e->getMessage(), [], 408);
             }
         }
-    }
-
-    /**
-     * 印logo扫码
-     *
-     * @参数 string item_order_number  子订单号
-     * @author lzh
-     * @return mixed
-     */
-    public function logo()
-    {
-        $item_order_number = $this->request->request('item_order_number');
-        $this->info($item_order_number,5);
-    }
-
-    /**
-     * 印logo提交
-     *
-     * @参数 string item_order_number  子订单号
-     * @author lzh
-     * @return mixed
-     */
-    public function logo_submit()
-    {
-        $item_order_number = $this->request->request('item_order_number');
-        $this->save($item_order_number,5);
-    }
-
-    /**
-     * 配货扫码
-     *
-     * @参数 string item_order_number  子订单号
-     * @author wgj
-     * @return mixed
-     */
-    public function product()
-    {
-        $item_order_number = $this->request->request('item_order_number');
-        $this->info($item_order_number,2);
-    }
-
-    /**
-     * 配货提交
-     *
-     * @参数 string item_order_number  子订单号
-     * @author wgj
-     * @return mixed
-     */
-    public function product_submit()
-    {
-        $item_order_number = $this->request->request('item_order_number');
-        $item_order_number = $this->request->request('item_order_number');
-//        var_dump($item_order_number);
-//        die;
-        $this->save($item_order_number,2);
     }
 
     /**
