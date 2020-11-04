@@ -370,12 +370,13 @@ class WorkOrderList extends Backend
                             exit;
                         }
                     }
-                    echo 222;exit;
                     //判断是否选择措施
                     //更换镜框判断是否有库存 
                     if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
                         //添加判断订单号是否已经质检
+                        echo 999;
                         $check_info = $this->check_order_quality($params['work_platform'],$params['platform_order']);
+                        echo 222;exit;
                         if($check_info){
                             throw new Exception("该订单已出库，不能更换镜架");
                             exit;
