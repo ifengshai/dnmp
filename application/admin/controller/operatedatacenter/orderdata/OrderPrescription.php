@@ -91,7 +91,13 @@ class OrderPrescription extends Backend
             'num'=>$reading_glassesno_num,
             'rate'=>$reading_glassesno_rate
         );
-        $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str);
+        if($site == 2){
+            $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str);
+            $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str);
+            $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
+        }else{
+            $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str);
+        }
         $no_prescription_rate = $order_num ? round($no_prescription_num/$order_num*100,0).'%' : 0;
         $no_prescription_arr = array(
             'name'=>'no prescription',
