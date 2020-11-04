@@ -932,6 +932,7 @@ class Scm extends Api
      * 物流单签收
      *
      * @参数 int logistics_id  物流单ID
+     * @参数 string sign_number  签收编号
      * @author lzh
      * @return mixed
      */
@@ -939,6 +940,8 @@ class Scm extends Api
     {
         $logistics_id = $this->request->request('logistics_id');
         empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
+        $sign_number = $this->request->request('sign_number');
+        empty($sign_number) && $this->error(__('签收编号不能为空'), [], 403);
 
         //检测质检单状态
         $_logistics_info = new \app\admin\model\warehouse\LogisticsInfo();
@@ -951,7 +954,8 @@ class Scm extends Api
             $logistics_save = [
                 'sign_person'=>$this->auth->nickname,
                 'sign_time'=>date('Y-m-d H:i:s'),
-                'status'=>1
+                'status'=>1,
+                'sign_number'=>$sign_number
             ];
             $res = $_logistics_info->allowField(true)->isUpdate(true, ['id'=>$logistics_id])->save($logistics_save);
             false === $res && $this->error(__('签收失败'), [], 404);
