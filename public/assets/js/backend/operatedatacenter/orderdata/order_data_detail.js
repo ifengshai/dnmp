@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'status', title: __('订单状态'),visible: false,operate:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'store_id', title: __('设备类型'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange'}, searchList: { 1: 'PC', 4: 'M', 5: 'IOS', 6: 'Android'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
-                        {field: 'protect_code',title: __('使用的code码'),visible: false,operate:false},
+                        {field: 'coupon_code',title: __('使用的code码'),visible: false,operate:false},
                         {field: 'shipping_method', title: __('快递类别'), custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '平邮', 2: '商业快递'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
                         {field: 'shipping_name',title: __('收货姓名'),visible: false,operate:false},
                         {field: 'customer_email',title: __('支付邮箱'),visible: false,operate:false},
