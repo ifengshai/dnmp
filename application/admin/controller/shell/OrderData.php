@@ -1263,7 +1263,7 @@ class OrderData extends Backend
     public function set_order_item_number_shell()
     {
         //查询未生成子单号的数据
-        $list = $this->orderitemprocess->where('ISNULL(item_order_number)=0')->limit(3000)->select();
+        $list = $this->orderitemprocess->where('LENGTH(trim(item_order_number))=0')->limit(3000)->select();
         $list = collection($list)->toArray();
         foreach ($list as $v) {
             $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
