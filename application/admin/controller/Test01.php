@@ -196,7 +196,7 @@ class Test01 extends Backend
         dump($arr);
     }
 
-    public function sku_day_data_ga()
+    public function sku_day_data_ga1()
     {
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
@@ -206,15 +206,33 @@ class Test01 extends Backend
         // $data = '2020-10-23';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            ->field('sku,grade,platform_sku')
             // ->where(['platform_type' => 1])
             ->where(['platform_type' => 1, 'outer_sku_status' => 1])
             ->select();
+
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
+
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(1, $data);
+        // dump($ga_skus);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+        // dump($ga_skus);
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 1;
+            unset($sku_data[$k]['grade']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+        dump($sku_data);die;
 
         //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
         $arr = [];
@@ -324,11 +342,148 @@ class Test01 extends Backend
         // dump($arr);
     }
 
+    public function sku_day_data_ga()
+    {
+        Db::name('datacenter_sku_day')->delete();
+        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
+        set_time_limit(0);
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku')
+            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
+            ->select();
+
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(1, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 1;
+            unset($sku_data[$k]['grade']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            ->where(['platform_type' => 2, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(2, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 2;
+            unset($sku_data[$k]['grade']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,outer_sku_status,stock,plat_on_way_stock')
+            ->where(['platform_type' => 3, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(3, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 3;
+            unset($sku_data[$k]['grade']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+    }
+
     public function sku_day_data_order()
     {
-        $this->sku_day_data_order_z();
-        $this->sku_day_data_order_v();
-        $this->sku_day_data_order_n();
+        set_time_limit(0);
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>1])->select();
+        foreach ($z_sku_list as $k=>$v){
+            $map['sku'] = ['like', $v['platform_sku'] . '%'];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.order_type'] = ['=', 1];
+            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
+            //某个sku当天的订单数
+            $z_sku_list[$k]['order_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order')
+                ->where($map)
+                ->where($time_where)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->group('order_id')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+                ->count();
+            //sku销售总副数
+            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order_item')
+                ->where('sku', 'like', $v['platform_sku'] . '%')
+                ->where($time_where1)
+                ->sum('qty_ordered');
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem1 = " o.order_type = 1";
+            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
+            //求出眼镜的销售额 base_price  base_discount_amount
+            $frame_money_price = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where($whereItem)
+                ->where($whereItem1)
+                ->where($itemMap)
+                ->where('p.sku','like', $v['platform_sku'] . '%')
+                ->sum('m.base_price');
+            //眼镜的折扣价格
+            $frame_money_discount = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where($whereItem)
+                ->where($whereItem1)
+                ->where($itemMap)
+                ->where('p.sku','like', $v['platform_sku'] . '%')
+                ->sum('m.base_discount_amount');
+            //眼镜的实际销售额
+            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
+            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
+            $z_sku_list[$k]['sku_row_total'] = $frame_money;
+            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            echo $z_sku_list[$k]['sku'] . "\n";
+            echo '<br>';
+            usleep(100000);
+        }
     }
 
     public function sku_day_data_other()
