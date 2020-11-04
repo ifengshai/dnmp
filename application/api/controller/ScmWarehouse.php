@@ -17,7 +17,7 @@ use app\admin\model\purchase\PurchaseOrderItem;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\NewProductMapping;
 use app\admin\model\itemmanage\Item;
-use app\admin\controller\itemmanage\ItemPlatformSku;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\StockLog;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\itemmanage\GoodsStockAllocated;
