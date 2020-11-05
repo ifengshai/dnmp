@@ -1341,7 +1341,7 @@ class OrderData extends Backend
     {
         $site = 5;
         $id = $this->order->where('site=5 and entity_id < 1216')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['between', [$id, 1216]]])->limit(3000)->select();
+        $list = $this->wesee->where(['entity_id' => ['between', [$id, 1216]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
@@ -1402,7 +1402,7 @@ class OrderData extends Backend
     {
         $site = 4;
         $id = $this->order->where('site=4 and entity_id < 2748')->max('entity_id');
-        $list = $this->zeelool->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
+        $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
