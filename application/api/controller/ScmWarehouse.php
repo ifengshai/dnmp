@@ -269,31 +269,10 @@ class ScmWarehouse extends Scm
     public function out_stock_add()
     {
         $out_stock_id = $this->request->request('out_stock_id');
-
-        //获取出库分类数据
-        $type_list = $this->_out_stock_type
-            ->field('id,name')
-            ->where('is_del', 1)
-            ->select()
-        ;
-
-        //站点列表
-        $site_list = [
-            ['id'=>1,'title'=>'zeelool'],
-            ['id'=>2,'title'=>'voogueme'],
-            ['id'=>3,'title'=>'nihao'],
-            ['id'=>4,'title'=>'meeloog'],
-            ['id'=>5,'title'=>'wesee'],
-            ['id'=>8,'title'=>'amazon'],
-            ['id'=>9,'title'=>'zeelool_es'],
-            ['id'=>10,'title'=>'zeelool_de'],
-            ['id'=>11,'title'=>'zeelool_jp']
-        ];
-
         if($out_stock_id){
             $info = $this->_out_stock
                 ->field('out_stock_number,type_id,platform_id,status')
-                ->where('is_del', 1)
+                ->where('id', $out_stock_id)
                 ->find()
             ;
             0 != $info['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
@@ -342,6 +321,26 @@ class ScmWarehouse extends Scm
                 'item_data'=>[]
             ];
         }
+
+        //获取出库分类数据
+        $type_list = $this->_out_stock_type
+            ->field('id,name')
+            ->where('is_del', 1)
+            ->select()
+        ;
+
+        //站点列表
+        $site_list = [
+            ['id'=>1,'title'=>'zeelool'],
+            ['id'=>2,'title'=>'voogueme'],
+            ['id'=>3,'title'=>'nihao'],
+            ['id'=>4,'title'=>'meeloog'],
+            ['id'=>5,'title'=>'wesee'],
+            ['id'=>8,'title'=>'amazon'],
+            ['id'=>9,'title'=>'zeelool_es'],
+            ['id'=>10,'title'=>'zeelool_de'],
+            ['id'=>11,'title'=>'zeelool_jp']
+        ];
 
         $this->success('', ['type_list' => $type_list,'site_list' => $site_list,'info' => $info],200);
     }

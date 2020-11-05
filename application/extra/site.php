@@ -3,7 +3,7 @@
 return array (
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.25',
+  'version' => '1.0.27',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 
@@ -36,4 +36,6 @@ return array (
   'mail_from' => '10000@qq.com',
   'operation_authority' => '1',
   'authority_content' => '',
+  'pda_version' => '1.0.0',
+  'pda_download' => 'xxxxxxxx',
 );
