@@ -238,7 +238,7 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
                                     } elseif ($site == 10) {
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
-                                    }elseif ($site == 11) {
+                                    } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
                                     }
 
@@ -285,7 +285,7 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
                                     } elseif ($site == 10) {
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
-                                    }elseif ($site == 11) {
+                                    } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
                                     }
 
@@ -1293,13 +1293,13 @@ class OrderData extends Backend
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
                 $item_params[$key]['order_id'] = $res->id;
             }
-             //更新数据
+            //更新数据
             if ($item_params) $this->orderitemprocess->saveAll($item_params);
 
             echo $v['id'] . "\n";
             usleep(10000);
         }
-       
+
         echo "ok";
     }
 
@@ -1516,6 +1516,9 @@ class OrderData extends Backend
         $this->order_address_data(3);
         $this->order_address_data(4);
         $this->order_address_data(5);
+        $this->order_address_data(9);
+        $this->order_address_data(10);
+        $this->order_address_data(11);
     }
 
     /**
@@ -1541,6 +1544,12 @@ class OrderData extends Backend
             $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         } elseif ($site == 5) {
             $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+        } elseif ($site == 9) {
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+        } elseif ($site == 10) {
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
+        } elseif ($site == 11) {
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('country_id,region,city,street,postcode,telephone', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
@@ -1567,8 +1576,9 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_data(4);
-        $this->order_item_data(5);
+        $this->order_item_data(9);
+        $this->order_item_data(10);
+        $this->order_item_data(11);
     }
 
 
@@ -1582,13 +1592,16 @@ class OrderData extends Backend
      */
     protected function order_item_data($site)
     {
-        if ($site == 4) {
-            $id = $this->orderitemoption->where('site=4 and item_id < 3949')->max('item_id');
-            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 3949]]])->limit(3000)->select();
-        } elseif ($site == 5) {
-            $id = $this->orderitemoption->where('site=5 and item_id < 12263')->max('item_id');
-            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 12263]]])->limit(3000)->select();
-        } 
+        if ($site == 9) {
+            $id = $this->orderitemoption->where('site=9')->max('item_id');
+            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where('item_id > ' . $id)->limit(3000)->select();
+        } elseif ($site == 10) {
+            $id = $this->orderitemoption->where('site=10 and item_id < 866')->max('item_id');
+            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 866]]])->limit(3000)->select();
+        }  elseif ($site == 11) {
+            $id = $this->orderitemoption->where('site=11')->max('item_id');
+            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where('item_id > ' . $id)->limit(3000)->select();
+        }
 
         $options = [];
         foreach ($list as $k => $v) {
@@ -1609,6 +1622,12 @@ class OrderData extends Backend
                 $options =  $this->meeloog_prescription_analysis($v['product_options']);
             } elseif ($site == 5) {
                 $options =  $this->wesee_prescription_analysis($v['product_options']);
+            } elseif ($site == 9) {
+                $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
+            } elseif ($site == 10) {
+                $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
+            } elseif ($site == 11) {
+                $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
