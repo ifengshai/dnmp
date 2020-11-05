@@ -98,30 +98,31 @@
             </div>
             <div class="item_button">
                 {if $row['test_status'] == 1}
-                    {if $row['web_designer_group'] == 0}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                            <button  onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                        {if $row['web_designer_group'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                                <button  onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                            {/if}
                         {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {/if}
                         {/if}
                     {else}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        {if $row['web_designer_is_finish'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                            {else}
+                                <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                            {/if}
                         {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
                         {/if}
-                    {/if}
-                {else}
-                    {if $row['web_designer_is_finish'] == 0}
-                        {if $distribution_status}
-                            <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
-                        {else}
-                            <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
-                        {/if}
-                    {else}
-                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
-                    {/if}
                 {/if}
             </div>
 
@@ -306,11 +307,11 @@
             data:{ids:ids,status:status,remarks:remarks}
         }, function(data, ret){
             //成功的回调
-            alert(ret.msg);
+            layer.msg(ret.msg);
             return false;
         }, function(data, ret){
             //失败的回调
-            alert(ret.msg);
+            layer.msg(ret.msg);
             return false;
         });
     }
