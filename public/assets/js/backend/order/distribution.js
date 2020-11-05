@@ -99,8 +99,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         },
                         {
                             field: 'order_prescription_type', title: __('加工类型'), addClass: 'selectpicker', data: 'multiple',
-                            custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green' },
-                            searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片'},
+                            custom: { 0: 'gray',1: 'green', 2: 'green', 3: 'green', 4: 'green' },
+                            searchList: { 0: '待处理',1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '其他'},
                             formatter: Table.api.formatter.status
                         },
                         {
