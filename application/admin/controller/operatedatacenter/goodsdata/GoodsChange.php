@@ -86,7 +86,7 @@ class GoodsChange extends Backend
                 $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
                 $sku_data_day[$k]['sku_change'] = $sku_detail['platform_sku'];
-                $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? $sku_data_day[$k]['sku_grand_total'] / $sku_data_day[$k]['glass_num'] : 0;
+                $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? round($sku_data_day[$k]['sku_grand_total'] / $sku_data_day[$k]['glass_num'],2) : 0;
                 //上下架状态
                 $sku_data_day[$k]['status'] = $sku_detail['outer_sku_status'];
                 $sku_data_day[$k]['stock'] = $sku_detail['stock'];
