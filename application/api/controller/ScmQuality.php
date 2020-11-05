@@ -581,7 +581,7 @@ class ScmQuality extends Scm
                 }else{
                     $error_type = 0;
                 }
-                $quantity_rate = round(($value['quantity_num'] / $value['arrivals_num'] * 100),2);
+                $quantity_rate = $value['quantity_num'] && $value['arrivals_num'] ? round(($value['quantity_num'] / $value['arrivals_num'] * 100),2) : 0;
 
                 $item_save = [
                     'arrivals_num'=>$value['arrivals_num'],
