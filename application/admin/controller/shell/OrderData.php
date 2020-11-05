@@ -1556,6 +1556,7 @@ class OrderData extends Backend
            $order_prescription_type = $this->prescription_analysis($v);
            $params[$k]['id'] = $v['p_id'];
            $params[$k]['order_prescription_type'] = $order_prescription_type;
+           echo $v['p_id'] . "\n";
         }
         $this->orderitemprocess->saveAll($params);
         echo 'ok';
