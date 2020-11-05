@@ -752,7 +752,7 @@ class GoodsSaleDetail extends Backend
 
         //新品眼镜数量
         $frame_new_num = $this->item->getDifferenceNewSkuNum(1);
-
+        dump($frame_new_num);
         //新品眼镜动销数
         $whole_frame_new_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
@@ -774,6 +774,7 @@ class GoodsSaleDetail extends Backend
             ->count('distinct m.sku');
         dump($frame_new_in_print_num);
         $frame_new_num = round($frame_new_num * ($frame_new_in_print_num / $whole_frame_new_in_print_num),0);
+        dump($frame_new_num);die;
         //新品眼镜动销率
         if (0 < $frame_new_num) {
             $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);
