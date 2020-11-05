@@ -104,6 +104,7 @@ class SingleItems extends Backend
                 ->join(['sales_flat_order_item' => 'p'], 'o.entity_id=p.order_id')
                 ->group('o.entity_id')
                 // ->order($order)
+                ->order('o.created_at','desc')
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
