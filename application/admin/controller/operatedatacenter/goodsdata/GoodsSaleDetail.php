@@ -761,6 +761,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->count('distinct m.sku');
+        dump($whole_frame_new_in_print_num);
 
         //新品眼镜动销数
         $frame_new_in_print_num = $model->table('sales_flat_order_item m')
@@ -771,6 +772,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->count('distinct m.sku');
+        dump($frame_new_in_print_num);
         $frame_new_num = round($frame_new_num * ($frame_new_in_print_num / $whole_frame_new_in_print_num),0);
         //新品眼镜动销率
         if (0 < $frame_new_num) {
