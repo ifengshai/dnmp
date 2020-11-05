@@ -15,17 +15,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     table: 'it_web_demand',
                 }
             });
-
             //绑定事件
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var panel = $($(this).attr("href"));
                 if (panel.size() > 0) {
+                    console.log(111);
                     Controller.table[panel.attr("id")].call(this);
                     $(this).on('click', function (e) {
                         $($(this).attr("href")).find(".btn-refresh").trigger("click");
                     });
                 }
-
+                // $(this).unbind('shown.bs.tab');
             });
 
            // 必须默认触发shown.bs.tab事件
