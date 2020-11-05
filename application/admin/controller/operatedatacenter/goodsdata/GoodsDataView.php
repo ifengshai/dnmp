@@ -21,7 +21,6 @@ class GoodsDataView extends Backend
     /**
      * 商品数据-数据概览
      *
-     * @return \think\Response
      */
     public function index()
     {
@@ -50,10 +49,6 @@ class GoodsDataView extends Backend
     /**
      * 镜框销量/幅单价趋势
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:02 
-     * @return void
      */
     //old
     public function goods_sales_data_line1()
@@ -199,10 +194,6 @@ class GoodsDataView extends Backend
     /**
      * 各品类商品销量趋势
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:23 
-     * @return void
      */
     //old
     public function goods_type_data_line1()
@@ -827,7 +818,7 @@ class GoodsDataView extends Backend
                 ->where(['site' => $params['order_platform']])
                 ->where($map)
                 ->group('goods_grade')
-                ->field('site,sum(order_num) as total_order_num,goods_type,goods_grade,count(site) as goods_num,sum(sales_num) as total_sales_num')
+                ->field('site,sum(order_num) as total_order_num,goods_type,goods_grade,count(goods_type) as goods_num,sum(glass_num) as total_sales_num')
                 ->select();
             $skus = Db::name('datacenter_sku_day')
                 ->where(['site' => $params['order_platform']])
