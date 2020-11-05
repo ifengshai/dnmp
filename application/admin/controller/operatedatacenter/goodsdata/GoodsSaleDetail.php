@@ -689,7 +689,6 @@ class GoodsSaleDetail extends Backend
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
             ->where('p.goods_type', '=', $goods_type)
             ->where($whereItem)
-            ->where($itemMap)
             ->count('distinct m.sku');
 
         //眼镜动销数
@@ -756,7 +755,6 @@ class GoodsSaleDetail extends Backend
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
             ->where('p.goods_type', '=', $goods_type)
             ->where($whereItem)
-            ->where($itemMap)
             ->count('distinct m.sku');
 
         //新品眼镜动销数
