@@ -460,12 +460,12 @@ class Test01 extends Backend
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->join(['sales_flat_order_item_prescription' => 'c'], 'a.entity_id=c.order_id')
                 ->select();
-            dump($sku_order_data);
-            // Db::name('datacenter_sku_day')
-            //     ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
-            //     ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
+            dump($sku_order_data);die;
+            Db::name('datacenter_sku_day')
+                ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
+                ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
         }
-        die;
+
 
 
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
