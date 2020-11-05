@@ -460,20 +460,11 @@ class Test01 extends Backend
                 ->field('c.sku,a.created_at,c.goods_type')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->join(['sales_flat_order_item_prescription' => 'c'], 'a.entity_id=c.order_id')
-                ->select();
-            $arr = [];
-            foreach ($sku_order_data as $kk =>$vv){
-                if ($arr[$v['platform_sku']][$vv['goods_type']]){
-                    $arr[$v['platform_sku']][$vv['goods_type']] +=1;
-                }else{
-                    $arr[$v['platform_sku']][$vv['goods_type']] =0;
-                }
-            }
-            dump($arr);
-            // dump($sku_order_data);
-            // Db::name('datacenter_sku_day')
-            //     ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
-            //     ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
+                ->find();
+
+            Db::name('datacenter_sku_day')
+                ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
+                ->update(['goods_type'=>$sku_order_data['goods_type']]);
         }
 
         die;
