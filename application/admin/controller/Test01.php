@@ -449,6 +449,7 @@ class Test01 extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>1])->field('sku,site')->select();
         $itemMap[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         foreach ($z_sku_list as $k =>$v){
+            dump($v);
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')->table('sales_flat_order')
                 ->where('c.sku','like',$v['platform_sku'] . '%')
