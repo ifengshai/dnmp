@@ -248,6 +248,8 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    $order_prescription_type = $options['order_prescription_type'];
+                                    unset($options['order_prescription_type']);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -257,6 +259,7 @@ class OrderData extends Backend
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
+                                            $data[$i]['order_prescription_type'] = $order_prescription_type;
                                             $data[$i]['created_at'] = strtotime($v['created_at']);
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']);
                                         }
@@ -292,6 +295,7 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    unset($options['order_prescription_type']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
                                     }
@@ -385,12 +389,23 @@ class OrderData extends Backend
         $arr['os_bd_r'] = $options_params['os_bd_r'];
 
         /**
+         * 仅镜架逻辑
+         * 镜片名称为空 或者 Plastic Lenses 或者 Frame Only
+         * 
+         * 现货处方镜逻辑
+         * 
+         * 
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
          * 2、偏光镜 镜片类型包含Polarized
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'Frame Only') {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progressive') {
             $arr['is_custom_lens'] = 1;
         }
@@ -428,6 +443,15 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
+        }
         return $arr;
     }
 
@@ -506,6 +530,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'FRAME ONLY (Plastic Lenses)' ||  $arr['index_name'] == 'Frame Only') {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progressive') {
             $arr['is_custom_lens'] = 1;
         }
@@ -541,6 +570,16 @@ class OrderData extends Backend
 
         if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
             $arr['is_custom_lens'] = 1;
+        }
+
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
         }
 
         return $arr;
@@ -616,6 +655,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY') {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progressive') {
             $arr['is_custom_lens'] = 1;
         }
@@ -651,6 +695,16 @@ class OrderData extends Backend
 
         if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
             $arr['is_custom_lens'] = 1;
+        }
+
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
         }
 
         return $arr;
@@ -729,6 +783,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY' || $arr['index_name'] == 'FRAME ONLY (Plastic lenses)') {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progressive') {
             $arr['is_custom_lens'] = 1;
         }
@@ -766,6 +825,15 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
+        }
         return $arr;
     }
 
@@ -848,6 +916,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if (($arr['index_name'] == '' || !$arr['index_name']) && !$options['info_buyRequest']['tmplens']['degrees']) {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progressive') {
             $arr['is_custom_lens'] = 1;
         }
@@ -885,6 +958,15 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
+        }
         return $arr;
     }
 
@@ -964,6 +1046,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'Lentes Plásticas' || $arr['index_name'] == 'SOLO MONTURA' ||  $arr['index_name'] == 'SÓLO MONTURA' ) {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Progresivo') {
             $arr['is_custom_lens'] = 1;
         }
@@ -999,6 +1086,16 @@ class OrderData extends Backend
 
         if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
             $arr['is_custom_lens'] = 1;
+        }
+
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
         }
 
         return $arr;
@@ -1078,6 +1175,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'Kunststoffgläser' || $arr['index_name'] == 'NUR RAHMEN' ) {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == 'Gleitsicht') {
             $arr['is_custom_lens'] = 1;
         }
@@ -1113,6 +1215,16 @@ class OrderData extends Backend
 
         if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
             $arr['is_custom_lens'] = 1;
+        }
+
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
         }
 
         return $arr;
@@ -1193,6 +1305,11 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'プラスチックレンズ' || $arr['index_name'] == 'フレームのみ' ) {
+            $arr['order_prescription_type'] = 1;
+        }
+
         if ($arr['prescription_type'] == '累進レンズ') {
             $arr['is_custom_lens'] = 1;
         }
@@ -1230,6 +1347,15 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
+        //定制处方镜
+        if ($arr['is_custom_lens'] == 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
+            $arr['order_prescription_type'] = 2;
+        }
         return $arr;
     }
 
@@ -1329,186 +1455,6 @@ class OrderData extends Backend
     }
 
 
-    /**
-     * wesee旧数据同步
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/29 15:58:49 
-     * @return void
-     */
-    public function zeelool_es_old_order()
-    {
-        $site = 9;
-        $list = $this->zeelool_es->limit(3000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        $order_params = [];
-        foreach ($list as $k => $v) {
-            $count = $this->order->where('site=9 and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params['entity_id'] = $v['entity_id'];
-            $params['site'] = $site;
-            $params['increment_id'] = $v['increment_id'];
-            $params['status'] = $v['status'] ?: '';
-            $params['store_id'] = $v['store_id'];
-            $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-            $params['base_currency_code'] = $v['base_currency_code'];
-            $params['shipping_method'] = $v['shipping_method'];
-            $params['shipping_title'] = $v['shipping_description'];
-            $params['country_id'] = $v['country_id'];
-            $params['region'] = $v['region'];
-            $params['city'] = $v['city'];
-            $params['street'] = $v['street'];
-            $params['postcode'] = $v['postcode'];
-            $params['telephone'] = $v['telephone'];
-            $params['customer_email'] = $v['customer_email'];
-            $params['customer_firstname'] = $v['customer_firstname'];
-            $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
-
-            echo $v['entity_id'] . "\n";
-            usleep(3000);
-        }
-        //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
-        echo "ok";
-    }
-
-
-    /**
-     * wesee旧数据同步
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/29 15:58:49 
-     * @return void
-     */
-    public function zeelool_de_old_order()
-    {
-        $site = 10;
-        $id = $this->order->where('site=10 and entity_id < 561')->max('entity_id');
-        $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 561]]])->limit(3000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        $order_params = [];
-        foreach ($list as $k => $v) {
-            $count = $this->order->where('site=10 and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params['entity_id'] = $v['entity_id'];
-            $params['site'] = $site;
-            $params['increment_id'] = $v['increment_id'];
-            $params['status'] = $v['status'] ?: '';
-            $params['store_id'] = $v['store_id'];
-            $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-            $params['base_currency_code'] = $v['base_currency_code'];
-            $params['shipping_method'] = $v['shipping_method'];
-            $params['shipping_title'] = $v['shipping_description'];
-            $params['country_id'] = $v['country_id'];
-            $params['region'] = $v['region'];
-            $params['city'] = $v['city'];
-            $params['street'] = $v['street'];
-            $params['postcode'] = $v['postcode'];
-            $params['telephone'] = $v['telephone'];
-            $params['customer_email'] = $v['customer_email'];
-            $params['customer_firstname'] = $v['customer_firstname'];
-            $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
-
-            echo $v['entity_id'] . "\n";
-            usleep(3000);
-        }
-        //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
-        echo "ok";
-    }
-
-    /**
-     * wesee旧数据同步
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/29 15:58:49 
-     * @return void
-     */
-    public function zeelool_jp_old_order()
-    {
-        $site = 11;
-        $list = $this->zeelool_jp->limit(3000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        $order_params = [];
-        foreach ($list as $k => $v) {
-            $count = $this->order->where('site=11 and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params['entity_id'] = $v['entity_id'];
-            $params['site'] = $site;
-            $params['increment_id'] = $v['increment_id'];
-            $params['status'] = $v['status'] ?: '';
-            $params['store_id'] = $v['store_id'];
-            $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
-            $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-            $params['base_currency_code'] = $v['base_currency_code'];
-            $params['shipping_method'] = $v['shipping_method'];
-            $params['shipping_title'] = $v['shipping_description'];
-            $params['country_id'] = $v['country_id'];
-            $params['region'] = $v['region'];
-            $params['city'] = $v['city'];
-            $params['street'] = $v['street'];
-            $params['postcode'] = $v['postcode'];
-            $params['telephone'] = $v['telephone'];
-            $params['customer_email'] = $v['customer_email'];
-            $params['customer_firstname'] = $v['customer_firstname'];
-            $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
-
-            echo $v['entity_id'] . "\n";
-            usleep(3000);
-        }
-        //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
-        echo "ok";
-    }
-
-
     public function order_address_data_shell()
     {
         $this->order_address_data(1);
@@ -1564,99 +1510,6 @@ class OrderData extends Backend
         $this->order->saveAll($params);
         echo $site . 'ok';
     }
-
-
-    /**
-     * 处理子表旧数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/03 09:55:26 
-     * @return void
-     */
-    public function order_item_data_shell()
-    {
-        $this->order_item_data(9);
-        $this->order_item_data(10);
-        $this->order_item_data(11);
-    }
-
-
-    /**
-     * 处理子表旧数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/03 09:44:24 
-     * @return void
-     */
-    protected function order_item_data($site)
-    {
-        if ($site == 9) {
-            $id = $this->orderitemoption->where('site=9')->max('item_id');
-            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where('item_id > ' . $id)->limit(3000)->select();
-        } elseif ($site == 10) {
-            $id = $this->orderitemoption->where('site=10 and item_id < 866')->max('item_id');
-            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 866]]])->limit(3000)->select();
-        }  elseif ($site == 11) {
-            $id = $this->orderitemoption->where('site=11')->max('item_id');
-            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where('item_id > ' . $id)->limit(3000)->select();
-        }
-
-        $options = [];
-        foreach ($list as $k => $v) {
-
-            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
-
-            //处方解析 不同站不同字段
-            if ($site == 1) {
-                $options =  $this->zeelool_prescription_analysis($v['product_options']);
-            } elseif ($site == 2) {
-                $options =  $this->voogueme_prescription_analysis($v['product_options']);
-            } elseif ($site == 3) {
-                $options =  $this->nihao_prescription_analysis($v['product_options']);
-            } elseif ($site == 4) {
-                $options =  $this->meeloog_prescription_analysis($v['product_options']);
-            } elseif ($site == 5) {
-                $options =  $this->wesee_prescription_analysis($v['product_options']);
-            } elseif ($site == 9) {
-                $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
-            } elseif ($site == 10) {
-                $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
-            } elseif ($site == 11) {
-                $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
-            }
-
-            $options['item_id'] = $v['item_id'];
-            $options['site'] = $site;
-            $options['magento_order_id'] = $v['order_id'];
-            $options['sku'] = $v['sku'];
-            $options['qty'] = $v['qty_ordered'];
-            $options['base_row_total'] = $v['base_row_total'];
-            if ($options) {
-                $options_id = $this->orderitemoption->insertGetId($options);
-                $data = []; //子订单表数据
-                for ($i = 0; $i < $v['qty_ordered']; $i++) {
-                    $data[$i]['item_id'] = $v['item_id'];
-                    $data[$i]['magento_order_id'] = $v['order_id'];
-                    $data[$i]['site'] = $site;
-                    $data[$i]['option_id'] = $options_id;
-                    $data[$i]['sku'] = $v['sku'];
-                    $data[$i]['created_at'] = strtotime($v['created_at']);
-                    $data[$i]['updated_at'] = strtotime($v['updated_at']);
-                    $data[$i]['distribution_status'] = 9;
-                }
-                $this->orderitemprocess->insertAll($data);
-            }
-            echo $v['item_id'] . "\n";
-            usleep(10000);
-        }
-        echo "ok";
-    }
-
 
     /**
      * 更新订单商品总数量
