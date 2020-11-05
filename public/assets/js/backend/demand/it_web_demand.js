@@ -23,12 +23,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     Controller.table[panel.attr("id")].call(this);
                     $(this).on('click', function (e) {
                         $($(this).attr("href")).find(".btn-refresh").trigger("click");
+
                     });
                 }
                 // $(this).unbind('shown.bs.tab');
             });
 
-           // 必须默认触发shown.bs.tab事件
+            // 必须默认触发shown.bs.tab事件
             $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
 
         },
@@ -78,7 +79,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
 
                             { field: 'create_time', title: __('创建时间'), operate: false },
                             // { field: 'remark', title: __('备注'), operate: false },
-                            { field: 'remark', title: __('备注'),
+                            {
+                                field: 'remark', title: __('备注'),
                                 events: Controller.api.events.getcontent,
                                 cellStyle: formatTableUnit,
                                 formatter: Controller.api.formatter.getcontent,
@@ -255,28 +257,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         ]
                     ]
                 });
-                $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                    var field = $(this).data("field");
-                    var value = $(this).data("value");
-                    var options = table1.bootstrapTable('getOptions');
-                    options.pageNumber = 1;
-                    var queryParams = options.queryParams;
-                    options.queryParams = function (params) {
-                        var params = queryParams(params);
-                        var filter = params.filter ? JSON.parse(params.filter) : {};
-                        var op = params.op ? JSON.parse(params.op) : {};
-                        if (field == '') {
-                            delete filter.label;
-                        } else {
-                            filter[field] = value;
-                        }
-                        params.filter = JSON.stringify(filter);
-                        params.op = JSON.stringify(op);
-                        return params;
-                    };
-                    table1.bootstrapTable('refresh', {});
-                    return false;
-                });
+
+                // 为表格1绑定事件
+                Table.api.bindevent(table1);
+
                 $(document).on('click', ".problem_desc_info", function () {
                     var problem_desc = $(this).attr('data');
                     Layer.open({
@@ -287,8 +271,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     });
                     return false;
                 });
-                // 为表格1绑定事件
-                Table.api.bindevent(table1);
+
             },
             second: function () {
                 // 表格2
@@ -325,26 +308,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'degree_of_urgency',
                                 title: __('重要程度'),
-                                searchList: { 1: 'S0', 2: 'S1', 3: 'S2', 4: 'S3'},
+                                searchList: { 1: 'S0', 2: 'S1', 3: 'S2', 4: 'S3' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'importance',
                                 title: __('紧急程度'),
-                                searchList: { 1: 'P1', 2: 'P2', 3: 'P3'},
+                                searchList: { 1: 'P1', 2: 'P2', 3: 'P3' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'development_difficulty',
                                 title: __('开发难度'),
-                                searchList: { 1: 'D1', 2: 'D2', 3: 'D3'},
+                                searchList: { 1: 'D1', 2: 'D2', 3: 'D3' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'site',
                                 title: __('项目'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other' , 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp'},
-                                custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black' , 9: 'black', 10: 'black', 11: 'black'},
+                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' },
+                                custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                                 formatter: Table.api.formatter.status
                             },
                             {
@@ -354,34 +337,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 custom: { 1: 'red', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'green' },
                                 formatter: Table.api.formatter.status
                             },
-                            { field: 'entry_user_name', title: __('提出人'), operate: false},
+                            { field: 'entry_user_name', title: __('提出人'), operate: false },
                             { field: 'node_time', title: __('预计时间'), operate: false },
                             { field: 'create_time', title: __('创建时间'), operate: false },
                         ]
                     ]
                 });
-                $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                    var field = $(this).data("field");
-                    var value = $(this).data("value");
-                    var options = table2.bootstrapTable('getOptions');
-                    options.pageNumber = 1;
-                    var queryParams = options.queryParams;
-                    options.queryParams = function (params) {
-                        var params = queryParams(params);
-                        var filter = params.filter ? JSON.parse(params.filter) : {};
-                        var op = params.op ? JSON.parse(params.op) : {};
-                        if (field == '') {
-                            delete filter.label;
-                        } else {
-                            filter[field] = value;
-                        }
-                        params.filter = JSON.stringify(filter);
-                        params.op = JSON.stringify(op);
-                        return params;
-                    };
-                    table2.bootstrapTable('refresh', {});
-                    return false;
-                });
+
                 // 为表格2绑定事件
                 Table.api.bindevent(table2);
                 $(document).on('click', ".problem_desc_info", function () {
@@ -396,8 +358,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 });
             },
         },
-
-
         rdc_demand_list: function () {
             // 初始化表格参数配置
             Table.api.init({
@@ -412,18 +372,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     table: 'it_web_demand',
                 }
             });
-            //绑定事件
-            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+
+              //绑定事件
+              $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var panel = $($(this).attr("href"));
+               
                 if (panel.size() > 0) {
                     Controller.table[panel.attr("id")].call(this);
-                    $(this).on('click', function (e) {
-                        $($(this).attr("href")).find(".btn-refresh").trigger("click");
-                    });
                 }
                 //移除绑定的事件
                 $(this).unbind('shown.bs.tab');
+
             });
+          
+            $('.panel-heading .nav-tabs li a').on('click', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+
+                if ($(this).attr("href") == '#first') {
+                    var table = $('#table1');
+                } else {
+                    var table = $('#table2');
+                }
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == '') {
+                        delete filter.label;
+                    } else {
+                        filter[field] = value;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+            });
+            
             // 必须默认触发shown.bs.tab事件
             $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
 
@@ -645,7 +634,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
 
 
 
-        
+
         distribution: function () {
             Controller.api.bindevent();
 
@@ -869,19 +858,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 //开发进度点击弹窗
                 get_develop_status: function (value, row, index) {
                     // if (row.status >= 2) {
-                        if (row.develop_finish_status == 1) {
-                            return '<div><span class="check_develop_status status1_color">未响应</span></div>';
-                        } else if (row.develop_finish_status == 2) {
-                            return '<div><span class="check_develop_status status1_color">开发中</span></div>';
-                        } else if (row.develop_finish_status == 3) {
-                            if (row.status == 5) {
-                                return '<div><span class="check_develop_status status4_color">开发完成</span></div>';
-                            } else {
-                                return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
-                            }
-                        }else {
-                            return '<div><span class="check_develop_status status3_color">拒绝</span></div>';
+                    if (row.develop_finish_status == 1) {
+                        return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                    } else if (row.develop_finish_status == 2) {
+                        return '<div><span class="check_develop_status status1_color">开发中</span></div>';
+                    } else if (row.develop_finish_status == 3) {
+                        if (row.status == 5) {
+                            return '<div><span class="check_develop_status status4_color">开发完成</span></div>';
+                        } else {
+                            return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
                         }
+                    } else {
+                        return '<div><span class="check_develop_status status3_color">拒绝</span></div>';
+                    }
                     // } else {
                     //     return '-';
                     // }
@@ -889,22 +878,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 //测试进度点击弹窗
                 get_test_status: function (value, row, index) {
                     // if (row.status >= 2) {
-                        if (row.test_status == 1) {
-                            return '<div><span class="check_test_status status1_color">未确认</span></div>';
-                        } else if (row.test_status == 2) {
-                            if (row.test_group == 1) {
-                                return '<div><span class="check_test_status status3_color">待测试</span></div>';
-                            } else {
-                                return '<div><span class="check_test_status status3_color">无需测试</span></div>';
-                            }
-
-                        } else if (row.test_status == 3) {
-                            return '<div><span class="check_test_status status1_color">待通过</span></div>';
-                        } else if (row.test_status == 4) {
-                            return '<div><span class="check_test_status status1_color">待上线</span></div>';
-                        } else if (row.test_status == 5) {
-                            return '<div><span class="check_test_status status3_color">已上线</span></div>';
+                    if (row.test_status == 1) {
+                        return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                    } else if (row.test_status == 2) {
+                        if (row.test_group == 1) {
+                            return '<div><span class="check_test_status status3_color">待测试</span></div>';
+                        } else {
+                            return '<div><span class="check_test_status status3_color">无需测试</span></div>';
                         }
+
+                    } else if (row.test_status == 3) {
+                        return '<div><span class="check_test_status status1_color">待通过</span></div>';
+                    } else if (row.test_status == 4) {
+                        return '<div><span class="check_test_status status1_color">待上线</span></div>';
+                    } else if (row.test_status == 5) {
+                        return '<div><span class="check_test_status status3_color">已上线</span></div>';
+                    }
                     // } else {
                     //     return '-';
                     // }
@@ -1008,7 +997,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 //RDC点击评审，弹出窗口
                 ge_rdcpm_status: {
                     'click .check_rdcpm_status': function (e, value, row, index) {
-                        if(row.pm_audit_status == 1){
+                        if (row.pm_audit_status == 1) {
                             Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
                         }
                         /*Backend.api.ajax({
