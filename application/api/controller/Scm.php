@@ -11,9 +11,26 @@ use app\common\controller\Api;
  */
 class Scm extends Api
 {
+    /**
+     * 无需登录验证
+     * @var array|string
+     * @access protected
+     */
     protected $noNeedLogin = '*';
+
+    /**
+     * 无需权限验证
+     * @var array|string
+     * @access protected
+     */
     protected $noNeedRight = '*';
-    protected $menu = [//PDA菜单
+
+    /**
+     * PDA菜单
+     * @var array
+     * @access protected
+     */
+    protected $menu = [
         [
             'title'=>'配货管理',
             'menu'=>[
@@ -50,7 +67,7 @@ class Scm extends Api
         parent::_initialize();
 
         //校验Token
-        $this->auth->match(['login']) || $this->auth->id || $this->error(__('Token invalid, please log in again'), [], 401);
+        $this->auth->match(['login','version']) || $this->auth->id || $this->error(__('Token invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
@@ -78,6 +95,25 @@ class Scm extends Api
         } else {
             $this->error($this->auth->getError(), [], 404);
         }
+    }
+
+    /**
+     * PDA版本
+     *
+     * @author lzh
+     * @return mixed
+     */
+    public function version()
+    {
+        $pda_version = model('Config')->get(['name'=>'pda_version']);
+        $pda_download = model('Config')->get(['name'=>'pda_download']);
+
+        $data = [
+            'version'=>$pda_version['value'],
+            'download'=>$pda_download['value']
+        ];
+
+        $this->success('', $data,200);
     }
 
     /**
