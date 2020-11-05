@@ -602,9 +602,8 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 待入库列表
-     *
-     * 需求不明确，暂时滞留，等待原型图
+     * 待入库列表--ok
+     * 质检单审核时间examine_time即为完成时间
      *
      * @参数 string query  查询内容
      * @参数 int status  状态
@@ -892,7 +891,7 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 新建入库单页面
+     * 新建入库单页面--ok
      *
      * @参数 int type  新建入口 1.质检单，2.入库单
      * @参数 int check_id  质检单ID（type为1时必填，为2时不填）
@@ -903,7 +902,10 @@ class ScmWarehouse extends Scm
     {
         //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
         $type = $this->request->request("type");
+        empty($type) && $this->error(__('入口类型不能为空'), [], 513);
         $info = [];
+        //入库单所需数据
+        $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         if ($type == 1){
             //质检单页面进入创建入库单
             $check_id = $this->request->request("check_id");
@@ -911,11 +913,11 @@ class ScmWarehouse extends Scm
             $check_info = $this->_check->get($check_id);
             //入库单所需数据
             $info['check_id'] = $check_id;
-            $info['order_number'] = $check_info['order_number'];
+            $info['check_order_number'] = $check_info['check_order_number'];
 
         } else {
             //入库单直接添加，查询站点数据
-            $platform_list = $this->_magento_platform->field('id, name')->where('is_del=>1, status=>1')->select();
+            $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1,'status' => 1])->select();
             $info['platform_list'] = $platform_list;
 
         }
@@ -923,8 +925,6 @@ class ScmWarehouse extends Scm
         //查询入库分类
         $in_stock_type = $this->_in_stock_type->field('id, name')->where('is_del', 1)->select();
 
-        //入库单所需数据
-        $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $info['in_stock_type'] = $in_stock_type;
 
         $this->success('', ['info' => $info],200);
