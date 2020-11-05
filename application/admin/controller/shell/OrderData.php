@@ -1340,8 +1340,8 @@ class OrderData extends Backend
     public function wesee_old_order()
     {
         $site = 5;
-        $id = $this->order->where('site=5 and entity_id < 1216')->max('entity_id');
-        $list = $this->wesee->where(['entity_id' => ['between', [$id, 1216]]])->limit(3000)->select();
+        $id = $this->order->where('site=5 and entity_id < 1239')->max('entity_id');
+        $list = $this->wesee->where(['entity_id' => ['between', [$id, 1239]]])->limit(3000)->select();
         $list = collection($list)->toArray();
         $params = [];
         $order_params = [];
