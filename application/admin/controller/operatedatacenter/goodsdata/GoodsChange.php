@@ -30,8 +30,8 @@ class GoodsChange extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -49,17 +49,17 @@ class GoodsChange extends Backend
                 $createat = explode(' ', $filter['time_str']);
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } else{
+            } else {
                 $createat = explode(' ', $seven_days);
             }
-            if($filter['create_time-operate']){
+            if ($filter['create_time-operate']) {
                 unset($filter['create_time-operate']);
             }
-            if($filter['order_platform']){
+            if ($filter['order_platform']) {
                 $order_platform = $filter['order_platform'];
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            }else{
+            } else {
                 $order_platform = 1;
             }
 
@@ -71,7 +71,7 @@ class GoodsChange extends Backend
                 ->where($map)
                 ->group('sku')
                 // ->order($sort, $order)
-                ->order('day_date','desc')
+                ->order('day_date', 'desc')
                 ->count();
             $sku_data_day = Db::name('datacenter_sku_day')
                 ->where($where)
@@ -79,13 +79,14 @@ class GoodsChange extends Backend
                 ->group('sku')
                 ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
                 // ->order($sort, $order)
-                ->order('day_date','desc')
+                ->order('day_date', 'desc')
                 ->limit($offset, $limit)
                 ->select();
             foreach ($sku_data_day as $k => $v) {
                 $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
                 $sku_data_day[$k]['sku_change'] = $sku_detail['platform_sku'];
+                $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? $sku_data_day[$k]['sku_grand_total'] / $sku_data_day[$k]['glass_num'] : 0;
                 //上下架状态
                 $sku_data_day[$k]['status'] = $sku_detail['outer_sku_status'];
                 $sku_data_day[$k]['stock'] = $sku_detail['stock'];
@@ -146,7 +147,7 @@ class GoodsChange extends Backend
             $a_plus['a_plus_session_change'] = $arrs['A+']['unique_pageviews'] == 0 ? 0 : round($arrs['A+']['cart_num'] / $arrs['A+']['unique_pageviews'] * 100, 2) . '%';
             $a_plus['a_plus_order_num'] = $arrs['A+']['order_num'];
             $a_plus['a_plus_cart_change'] = $arrs['A+']['cart_num'] == 0 ? 0 : round($arrs['A+']['order_num'] / $arrs['A+']['cart_num'] * 100, 2) . '%';
-            $a_plus['a_plus_sku_total'] = round($arrs['A+']['sku_grand_total'],2);
+            $a_plus['a_plus_sku_total'] = round($arrs['A+']['sku_grand_total'], 2);
 
             $aa['a_num'] = $arr['A'];
             $aa['a_session_num'] = $arrs['A']['unique_pageviews'];
@@ -154,7 +155,7 @@ class GoodsChange extends Backend
             $aa['a_session_change'] = $arrs['A']['unique_pageviews'] == 0 ? 0 : round($arrs['A']['cart_num'] / $arrs['A']['unique_pageviews'] * 100, 2) . '%';
             $aa['a_order_num'] = $arrs['A']['order_num'];
             $aa['a_cart_change'] = $arrs['A']['cart_num'] == 0 ? 0 : round($arrs['A']['order_num'] / $arrs['A']['cart_num'] * 100, 2) . '%';
-            $aa['a_sku_total'] = round($arrs['A']['sku_grand_total'],2);
+            $aa['a_sku_total'] = round($arrs['A']['sku_grand_total'], 2);
 
             $bb['b_num'] = $arr['B'];
             $bb['b_session_num'] = $arrs['B']['unique_pageviews'];
@@ -162,7 +163,7 @@ class GoodsChange extends Backend
             $bb['b_session_change'] = $arrs['B']['unique_pageviews'] == 0 ? 0 : round($arrs['B']['cart_num'] / $arrs['B']['unique_pageviews'] * 100, 2) . '%';
             $bb['b_order_num'] = $arrs['B']['order_num'];
             $bb['b_cart_change'] = $arrs['B']['cart_num'] == 0 ? 0 : round($arrs['B']['order_num'] / $arrs['B']['cart_num'] * 100, 2) . '%';
-            $bb['b_sku_total'] = round($arrs['B']['sku_grand_total'],2);
+            $bb['b_sku_total'] = round($arrs['B']['sku_grand_total'], 2);
 
             $cc['c_num'] = $arr['C'];
             $cc['c_session_num'] = $arrs['C']['unique_pageviews'];
@@ -170,7 +171,7 @@ class GoodsChange extends Backend
             $cc['c_session_change'] = $arrs['C']['unique_pageviews'] == 0 ? 0 : round($arrs['C']['cart_num'] / $arrs['C']['unique_pageviews'] * 100, 2) . '%';
             $cc['c_order_num'] = $arrs['C']['order_num'];
             $cc['c_cart_change'] = $arrs['C']['cart_num'] == 0 ? 0 : round($arrs['C']['order_num'] / $arrs['C']['cart_num'] * 100, 2) . '%';
-            $cc['c_sku_total'] = round($arrs['C']['sku_grand_total'],2);
+            $cc['c_sku_total'] = round($arrs['C']['sku_grand_total'], 2);
 
             $c_plus['c_plus_num'] = $arr['C+'];
             $c_plus['c_plus_session_num'] = $arrs['C+']['unique_pageviews'];
@@ -178,23 +179,23 @@ class GoodsChange extends Backend
             $c_plus['c_plus_session_change'] = $arrs['C+']['unique_pageviews'] == 0 ? 0 : round($arrs['C+']['cart_num'] / $arrs['C+']['unique_pageviews'] * 100, 2) . '%';
             $c_plus['c_plus_order_num'] = $arrs['C+']['order_num'];
             $c_plus['c_plus_cart_change'] = $arrs['C+']['cart_num'] == 0 ? 0 : round($arrs['C+']['order_num'] / $arrs['C+']['cart_num'] * 100, 2) . '%';
-            $c_plus['c_plus_sku_total'] = round($arrs['C+']['sku_grand_total'],2);
+            $c_plus['c_plus_sku_total'] = round($arrs['C+']['sku_grand_total'], 2);
 
-            $ddd['d_num'] = $arr['D'];
-            $ddd['d_session_num'] = $arrs['D']['unique_pageviews'];
-            $ddd['d_cart_num'] = $arrs['D']['cart_num'];
+            $ddd['d_num'] = $arr['D'] ? $arrs['D'] : 0;
+            $ddd['d_session_num'] = $arrs['D']['unique_pageviews'] ? $arrs['D']['unique_pageviews'] : 0;
+            $ddd['d_cart_num'] = $arrs['D']['cart_num'] ? $arrs['D']['cart_num'] : 0;
             $ddd['d_session_change'] = $arrs['D']['unique_pageviews'] == 0 ? 0 : round($arrs['D']['cart_num'] / $arrs['D']['unique_pageviews'] * 100, 2);
-            $ddd['d_order_num'] = $arrs['D']['order_num'];
+            $ddd['d_order_num'] = $arrs['D']['order_num'] ? $arrs['D']['order_num'] : 0;
             $ddd['d_cart_change'] = $arrs['D']['cart_num'] == 0 ? 0 : round($arrs['D']['order_num'] / $arrs['D']['cart_num'] * 100, 2);
-            $ddd['d_sku_total'] = round($arrs['D']['sku_grand_total'],2);
+            $ddd['d_sku_total'] = round($arrs['D']['sku_grand_total'], 2);
 
-            $ee['e_num'] = $arr['E'];
-            $ee['e_session_num'] = $arrs['E']['unique_pageviews'];
-            $ee['e_cart_num'] = $arrs['E']['cart_num'];
+            $ee['e_num'] = $arr['E'] ? $arrs['E'] : 0;
+            $ee['e_session_num'] = $arrs['E']['unique_pageviews'] ? $arrs['E']['unique_pageviews'] : 0;
+            $ee['e_cart_num'] = $arrs['E']['cart_num'] ? $arrs['E']['cart_num'] : 0;
             $ee['e_session_change'] = $arrs['E']['unique_pageviews'] == 0 ? 0 : round($arrs['E']['cart_num'] / $arrs['E']['unique_pageviews'] * 100, 2) . '%';
-            $ee['e_order_num'] = $arrs['E']['order_num'];
+            $ee['e_order_num'] = $arrs['E']['order_num'] ? $arrs['E']['order_num'] : 0;
             $ee['e_cart_change'] = $arrs['E']['cart_num'] == 0 ? 0 : round($arrs['E']['order_num'] / $arrs['E']['cart_num'] * 100, 2) . '%';
-            $ee['e_sku_total'] = round($arrs['E']['sku_grand_total'],2);
+            $ee['e_sku_total'] = round($arrs['E']['sku_grand_total'], 2);
             $data = compact('a_plus', 'aa', 'bb', 'cc', 'c_plus', 'ddd', 'ee');
 
             $this->success('', '', $data);
@@ -215,7 +216,7 @@ class GoodsChange extends Backend
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
         //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $this->zeeloolOperate->google_sku_detail(1,$data);
+        $ga_skus = $this->zeeloolOperate->google_sku_detail(1, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
 
         //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
@@ -259,23 +260,23 @@ class GoodsChange extends Backend
                 ->select();
             // dump($sku_order_data);
             //统计某个sku某一天的销售额 实际支付的金额
-            foreach ($sku_order_data as $kk=>$vv){
-                if ($arr[$key]['sku_grand_total']){
+            foreach ($sku_order_data as $kk => $vv) {
+                if ($arr[$key]['sku_grand_total']) {
                     $arr[$key]['sku_grand_total'] += $vv['grand_total'];
-                }else{
+                } else {
                     $arr[$key]['sku_grand_total'] = $vv['grand_total'];
                 }
-                if ($arr[$key]['sku_row_total']){
+                if ($arr[$key]['sku_row_total']) {
                     $arr[$key]['sku_row_total'] += $vv['row_total'];
-                }else{
+                } else {
                     $arr[$key]['sku_row_total'] += $vv['row_total'];
                 }
                 //找到商品的现价
-                if (!$arr[$key]['now_pricce']){
-                    $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool')->table('catalog_product_index_price')->where('entity_id',$vv['entity_id'])->value('final_price');
+                if (!$arr[$key]['now_pricce']) {
+                    $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool')->table('catalog_product_index_price')->where('entity_id', $vv['entity_id'])->value('final_price');
                 }
                 //商品的类型
-                if (!$arr[$key]['goods_type']){
+                if (!$arr[$key]['goods_type']) {
                     $arr[$key]['goods_type'] = $vv['goods_type'];
                 }
             }
@@ -285,7 +286,7 @@ class GoodsChange extends Backend
                 // ->where($time_where)
                 ->count();
             //副单价
-            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total']/$arr[$key]['glass_num'],0);
+            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ? 0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 0);
             // dump($sku_order_data);
             //日期
             $arr[$key]['day_date'] = $data;
@@ -301,7 +302,7 @@ class GoodsChange extends Backend
                 ->alias('a')
                 ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
                 ->where($cart_where1)
-                ->where('base_grand_total','gt',0)
+                ->where('base_grand_total', 'gt', 0)
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             //插入数据
@@ -312,6 +313,7 @@ class GoodsChange extends Backend
         // die;
         // dump($arr);
     }
+
     public function sku_day_data_ga()
     {
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
@@ -327,7 +329,7 @@ class GoodsChange extends Backend
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
         //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(1,$data);
+        $ga_skus = $zeeloolOperate->google_sku_detail(1, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
 
         //匹配sku映射关系 和ga的唯一身份浏览量的数据 循环嵌套
@@ -349,7 +351,7 @@ class GoodsChange extends Backend
                 }
             }
             // dump($arr[$v['sku']]);
-            if (!empty($arr[$v['sku']])){
+            if (!empty($arr[$v['sku']])) {
                 Db::name('datacenter_sku_day')->insert($arr[$v['sku']]);
                 echo $v['sku'] . "\n";
                 echo '<br>';
@@ -358,6 +360,7 @@ class GoodsChange extends Backend
         }
         // dump($arr);
     }
+
     //sku某一天的订单数量 销售额 实际支付的金额 现价 商品类型
     public function sku_day_data_order()
     {
@@ -368,7 +371,7 @@ class GoodsChange extends Backend
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
             // ->where(['platform_type' => 1])
-            ->where(['platform_type' => 1,'outer_sku_status'=>1])
+            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
             // ->limit(10)
             ->select();
         //当前站点的所有sku映射关系
@@ -400,27 +403,27 @@ class GoodsChange extends Backend
                 ->select();
             // dump($sku_order_data);
             //统计某个sku某一天的销售额 实际支付的金额
-            foreach ($sku_order_data as $kk=>$vv){
-                if ($arr[$key]['sku_grand_total']){
+            foreach ($sku_order_data as $kk => $vv) {
+                if ($arr[$key]['sku_grand_total']) {
                     $arr[$key]['sku_grand_total'] += $vv['base_grand_total'];
-                }else{
+                } else {
                     $arr[$key]['sku_grand_total'] = $vv['base_grand_total'];
                 }
-                if ($arr[$key]['sku_row_total']){
+                if ($arr[$key]['sku_row_total']) {
                     $arr[$key]['sku_row_total'] += $vv['base_row_total'];
-                }else{
+                } else {
                     $arr[$key]['sku_row_total'] += $vv['base_row_total'];
                 }
                 //找到商品的现价
-                if (!$arr[$key]['now_pricce']){
+                if (!$arr[$key]['now_pricce']) {
                     // $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool_online')
                     $arr[$key]['now_pricce'] = Db::connect('database.db_zeelool')
                         ->table('catalog_product_index_price')
-                        ->where('entity_id',$vv['entity_id'])
+                        ->where('entity_id', $vv['entity_id'])
                         ->value('final_price');
                 }
                 //商品的类型
-                if (!$arr[$key]['goods_type']){
+                if (!$arr[$key]['goods_type']) {
                     $arr[$key]['goods_type'] = $vv['goods_type'];
                 }
             }
@@ -429,23 +432,23 @@ class GoodsChange extends Backend
             //站点
             $arr[$key]['site'] = 1;
             $arr[$key]['sku'] = $value['sku'];
-            if (!$arr[$key]['sku_grand_total']){
+            if (!$arr[$key]['sku_grand_total']) {
                 $arr[$key]['sku_grand_total'] = 0;
             }
-            if (!$arr[$key]['sku_row_total']){
+            if (!$arr[$key]['sku_row_total']) {
                 $arr[$key]['sku_row_total'] = 0;
             }
-            if (!$arr[$key]['now_pricce']){
+            if (!$arr[$key]['now_pricce']) {
                 $arr[$key]['now_pricce'] = 0;
             }
-            if (!$arr[$key]['goods_type']){
+            if (!$arr[$key]['goods_type']) {
                 $arr[$key]['goods_type'] = 1;
             }
-            if (!empty($arr[$key])){
+            if (!empty($arr[$key])) {
                 //更新数据
                 Db::name('datacenter_sku_day')
-                    ->where(['sku'=>$arr[$key]['sku'],'day_date'=>$arr[$key]['day_date'],'site'=>$arr[$key]['site']])
-                    ->update(['order_num'=>$arr[$key]['order_num'],'sku_grand_total'=>$arr[$key]['sku_grand_total'],'sku_row_total'=>$arr[$key]['sku_row_total'],'now_pricce'=>$arr[$key]['now_pricce'],'goods_type'=>$arr[$key]['goods_type']]);
+                    ->where(['sku' => $arr[$key]['sku'], 'day_date' => $arr[$key]['day_date'], 'site' => $arr[$key]['site']])
+                    ->update(['order_num' => $arr[$key]['order_num'], 'sku_grand_total' => $arr[$key]['sku_grand_total'], 'sku_row_total' => $arr[$key]['sku_row_total'], 'now_pricce' => $arr[$key]['now_pricce'], 'goods_type' => $arr[$key]['goods_type']]);
                 echo $arr[$key]['sku'] . "\n";
                 usleep(100000);
             }
@@ -453,6 +456,7 @@ class GoodsChange extends Backend
         }
         dump($arr);
     }
+
     //销售副数 副单价 购物车数量
     public function sku_day_data_other()
     {
@@ -462,7 +466,7 @@ class GoodsChange extends Backend
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
-            ->where(['platform_type' => 1,'outer_sku_status'=>1])
+            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
             ->select();
 
         //当前站点的所有sku映射关系
@@ -477,7 +481,7 @@ class GoodsChange extends Backend
                 ->where($time_where)
                 ->count();
             //副单价
-            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ?  0 : round($arr[$key]['sku_row_total']/$arr[$key]['glass_num'],0);
+            $arr[$key]['single_price'] = $arr[$key]['glass_num'] == 0 ? 0 : round($arr[$key]['sku_row_total'] / $arr[$key]['glass_num'], 0);
             //日期
             $arr[$key]['day_date'] = $data;
             //站点
@@ -492,27 +496,27 @@ class GoodsChange extends Backend
                 ->alias('a')
                 ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
                 ->where($cart_where1)
-                ->where('base_grand_total','gt',0)
+                ->where('base_grand_total', 'gt', 0)
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $arr[$key]['sku'] = $value['sku'];
-            if (!$arr[$key]['sku_grand_total']){
+            if (!$arr[$key]['sku_grand_total']) {
                 $arr[$key]['sku_grand_total'] = 0;
             }
-            if (!$arr[$key]['sku_row_total']){
+            if (!$arr[$key]['sku_row_total']) {
                 $arr[$key]['sku_row_total'] = 0;
             }
-            if (!$arr[$key]['now_pricce']){
+            if (!$arr[$key]['now_pricce']) {
                 $arr[$key]['now_pricce'] = 0;
             }
-            if (!$arr[$key]['goods_type']){
+            if (!$arr[$key]['goods_type']) {
                 $arr[$key]['goods_type'] = 1;
             }
-            if (!empty($arr[$key])){
+            if (!empty($arr[$key])) {
                 //更新数据
                 Db::name('datacenter_sku_day')
-                    ->where(['sku'=>$arr[$key]['sku'],'day_date'=>$arr[$key]['day_date'],'site'=>$arr[$key]['site']])
-                    ->update(['glass_num'=>$arr[$key]['glass_num'],'single_price'=>$arr[$key]['single_price'],'cart_num'=>$arr[$key]['cart_num']]);
+                    ->where(['sku' => $arr[$key]['sku'], 'day_date' => $arr[$key]['day_date'], 'site' => $arr[$key]['site']])
+                    ->update(['glass_num' => $arr[$key]['glass_num'], 'single_price' => $arr[$key]['single_price'], 'cart_num' => $arr[$key]['cart_num']]);
                 echo $arr[$key]['sku'] . "\n";
                 usleep(100000);
             }
