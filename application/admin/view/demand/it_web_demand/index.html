@@ -94,8 +94,8 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs" >
-            <li  ><a href="#second" data-value="6" data-field="label" data-toggle="tab">需求排期表</a></li>
-            <li class="active"><a href="#first" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li>
+            <li><a href="#second" data-value="6" data-field="label" data-toggle="tab">需求排期表</a></li>
+            <li class="active"><a href="#first" data-value="0" data-field="label" data-toggle="tab">{:__('All')}</a></li>
             {foreach name="getTabList" item="vo"}
             <li><a href="#first" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
 <!--            <li><a href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>-->

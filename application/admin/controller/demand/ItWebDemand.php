@@ -253,7 +253,7 @@ class ItWebDemand extends Backend
             } elseif ($filter['label'] == 5) { //其他任务
                 $map['type'] = ['in', [2, 3, 4]];
             } elseif ($filter['label'] == 6) { //需求排期表
-                
+                $val = 'priority';
             }
             unset($filter['label']);
             $map['demand_type'] = 1; //默认任务列表
@@ -268,15 +268,26 @@ class ItWebDemand extends Backend
                 ->where($task_map)
                 ->order($sort, $order)
                 ->count();
+            if ($val =='priority'){
+                $list = $this->model
+                    ->where($where)
+                    ->where($meWhere)
+                    ->where($map)
+                    ->where($task_map)
+                    ->order('priority', 'desc')
+                    ->limit($offset, $limit)
+                    ->select();
+            }else{
+                $list = $this->model
+                    ->where($where)
+                    ->where($meWhere)
+                    ->where($map)
+                    ->where($task_map)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+            }
 
-            $list = $this->model
-                ->where($where)
-                ->where($meWhere)
-                ->where($map)
-                ->where($task_map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
-                ->select();
 
             $list = collection($list)->toArray();
             //检查有没有权限
@@ -364,10 +375,6 @@ class ItWebDemand extends Backend
     }
 
 
-    public function demand_scheduling()
-    {
-        return $this->view->fetch();
-    }
 
     /**
      * RDC列表
@@ -546,7 +553,8 @@ class ItWebDemand extends Backend
                 $list[$k]['develop_finish_time'] = $v['develop_finish_time'] ? date('m-d H:i', strtotime($v['develop_finish_time'])) : '';
                 $list[$k]['test_finish_time'] = $v['test_finish_time'] ? date('m-d H:i', strtotime($v['test_finish_time'])) : '';
                 $list[$k]['all_finish_time'] = $v['all_finish_time'] ? date('m-d H:i', strtotime($v['all_finish_time'])) : '';
-                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] . 'Day' : '-'; //预计时间
+//                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] . 'Day' : '-'; //预计时间
+                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time']  : '-'; //预计时间
                 //检查权限
                 $list[$k]['demand_pm_status'] = $permissions['demand_pm_status']; //产品确认权限
                 $list[$k]['demand_add'] = $permissions['demand_add']; //新增权限
