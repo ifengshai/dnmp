@@ -515,6 +515,8 @@ class ItWebDemand extends Backend
                 $map['type'] = 5;
             } elseif ($filter['label'] == 5) { //其他任务
                 $map['type'] = ['in', [2, 3, 4]];
+            }elseif ($filter['label'] == 6){
+                $val = 'priority';
             }
             unset($filter['label']);
             $map['demand_type'] = 2; //默认任务列表
@@ -527,13 +529,24 @@ class ItWebDemand extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->model
-                ->where($where)
-                ->where($meWhere)
-                ->where($map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
-                ->select();
+            if ($val == 'priority'){
+                $list = $this->model
+                    ->where($where)
+                    ->where($meWhere)
+                    ->where($map)
+                    ->order($val, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+            }else{
+                $list = $this->model
+                    ->where($where)
+                    ->where($meWhere)
+                    ->where($map)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+            }
+
             $list = collection($list)->toArray();
 
             //检查有没有权限

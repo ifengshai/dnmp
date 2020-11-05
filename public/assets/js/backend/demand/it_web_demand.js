@@ -21,13 +21,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 if (panel.size() > 0) {
                     console.log(111);
                     Controller.table[panel.attr("id")].call(this);
-                    $(this).on('click', function (e) {
-                        $($(this).attr("href")).find(".btn-refresh").trigger("click");
-
-                    });
+                    //导致多次请求
+                    // $(this).on('click', function (e) {
+                    //     $($(this).attr("href")).find(".btn-refresh").trigger("click");
+                    //
+                    // });
                 }
-                // $(this).unbind('shown.bs.tab');
+                $(this).unbind('shown.bs.tab');
             });
+            $('.panel-heading .nav-tabs li a').on('click', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+
+                if ($(this).attr("href") == '#first') {
+                    var table = $('#table1');
+                } else {
+                    var table = $('#table2');
+                }
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == '') {
+                        delete filter.label;
+                    } else {
+                        filter[field] = value;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+            });
+
 
             // 必须默认触发shown.bs.tab事件
             $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
@@ -280,7 +309,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     url: $.fn.bootstrapTable.defaults.extend.index_url,
                     pk: 'id',
                     toolbar: '#toolbar2',
-                    sortName: 'id',
+                    sortName: 'priority',
                     columns: [
                         [
                             { field: 'id', title: __('Id'), operate: '=' },
@@ -384,7 +413,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 $(this).unbind('shown.bs.tab');
 
             });
-          
+
             $('.panel-heading .nav-tabs li a').on('click', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
