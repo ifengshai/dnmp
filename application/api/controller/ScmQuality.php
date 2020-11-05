@@ -384,7 +384,7 @@ class ScmQuality extends Scm
                 foreach($quantity_list as $val){
                     if($value['sku'] == $val['sku']){
                         $quantity_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
@@ -396,7 +396,7 @@ class ScmQuality extends Scm
                 foreach($unqualified_list as $val){
                     if($value['sku'] == $val['sku']){
                         $unqualified_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
@@ -408,7 +408,7 @@ class ScmQuality extends Scm
                 foreach($sample_list as $val){
                     if($value['sku'] == $val['sku']){
                         $sample_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
