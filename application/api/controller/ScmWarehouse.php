@@ -367,8 +367,9 @@ class ScmWarehouse extends Scm
         empty($platform_id) && $this->error(__('平台ID不能为空'), [], 403);
 
         $item_data = $this->request->request('item_data');
-        $item_data = array_filter(json_decode($item_data,true));
+        $item_data = json_decode(htmlspecialchars_decode($item_data),true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
+        $item_data = array_filter($item_data);
 
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
