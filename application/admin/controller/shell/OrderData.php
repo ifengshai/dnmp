@@ -1544,7 +1544,7 @@ class OrderData extends Backend
      */
     public function order_prescription_type_shell()
     {
-        $list = $this->orderitemprocess
+        $list = $this->orderitemprocess->alias('a')
             ->field('a.id as p_id,b.*')
             ->where('a.order_prescription_type=0')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
