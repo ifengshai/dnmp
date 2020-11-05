@@ -1448,6 +1448,7 @@ class OrderData extends Backend
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
             $params[$k]['order_id'] = $order_id;
+            echo $v['id'] . "\n";
         }
         //更新数据
         if ($params) $this->orderitemoption->saveAll($params);
