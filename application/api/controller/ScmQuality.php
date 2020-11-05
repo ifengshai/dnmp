@@ -384,7 +384,7 @@ class ScmQuality extends Scm
                 foreach($quantity_list as $val){
                     if($value['sku'] == $val['sku']){
                         $quantity_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
@@ -396,7 +396,7 @@ class ScmQuality extends Scm
                 foreach($unqualified_list as $val){
                     if($value['sku'] == $val['sku']){
                         $unqualified_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
@@ -408,7 +408,7 @@ class ScmQuality extends Scm
                 foreach($sample_list as $val){
                     if($value['sku'] == $val['sku']){
                         $sample_agg[] = [
-                            'code'=>$val['sku'],
+                            'code'=>$val['code'],
                             'is_new'=>0
                         ];
                     }
@@ -452,8 +452,9 @@ class ScmQuality extends Scm
     public function submit()
     {
         $item_data = $this->request->request('item_data');
-        $item_data = array_filter(json_decode($item_data,true));
+        $item_data = json_decode(htmlspecialchars_decode($item_data),true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
+        $item_data = array_filter($item_data);
 
         $do_type = $this->request->request('do_type');
         $is_error = $this->request->request('is_error');
@@ -490,6 +491,12 @@ class ScmQuality extends Scm
 
             $replenish_id = $this->request->request('replenish_id');
             empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
+
+            $existence = $this->_check
+                ->where(['logistics_id'=>$logistics_id])
+                ->value('id')
+            ;
+            !empty($existence) && $this->error(__('质检单已创建，请勿重复操作'), [], 405);
 
             //创建质检单
             $check_data = [
@@ -574,7 +581,7 @@ class ScmQuality extends Scm
                 }else{
                     $error_type = 0;
                 }
-                $quantity_rate = round(($value['quantity_num'] / $value['arrivals_num'] * 100),2);
+                $quantity_rate = $value['quantity_num'] && $value['arrivals_num'] ? round(($value['quantity_num'] / $value['arrivals_num'] * 100),2) : 0;
 
                 $item_save = [
                     'arrivals_num'=>$value['arrivals_num'],
