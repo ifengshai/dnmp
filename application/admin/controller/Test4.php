@@ -431,7 +431,7 @@ class Test4 extends Controller
     public function zeelool_operate_data_center_update()
     {
         $model = Db::connect('database.db_zeelool_online');
-        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site',1)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
@@ -474,7 +474,7 @@ class Test4 extends Controller
     public function nihao_operate_data_center_update()
     {
         $model = Db::connect('database.db_nihao_online');
-        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site',3)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
